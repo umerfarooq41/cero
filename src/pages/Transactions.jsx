@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Plus, Search, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionRow from '@/components/transactions/TransactionRow';
@@ -13,6 +13,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import { useTransactions, useCategories, useAccounts } from '@/hooks/useBudgetData';
 
 export default function Transactions() {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -41,9 +42,15 @@ export default function Transactions() {
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   const handleDelete = async (id) => {
-    await base44.entities.Transaction.delete(id);
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    toast.success('Transaction deleted');
+    try {
+      await transactionsApi.delete(id);
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      toast.success('Transaction deleted');
+    } catch (error) {
+      console.error('Transaction delete failed:', error);
+      toast.error(error.message || 'Could not delete transaction');
+    }
   };
 
   const filterButtons = [
@@ -115,7 +122,9 @@ export default function Transactions() {
                     transaction={t}
                     category={categories.find(c => c.id === t.category_id)}
                     account={accounts.find(a => a.id === t.account_id)}
+                    toAccount={accounts.find(a => a.id === t.to_account_id)}
                     onDelete={() => handleDelete(t.id)}
+                    onClick={() => navigate(`/transactions/${t.id}/edit`)}
                   />
                 ))}
               </div>

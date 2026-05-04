@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowLeft, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
-import { useCategories, useAccounts } from '@/hooks/useBudgetData';
+import { useCategories, useAccounts, useAllTransactions } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
-import CategoryIcon from '@/components/shared/CategoryIcon';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const typeOptions = [
   { value: 'expense', label: 'Expense', icon: ArrowUpRight, color: 'border-destructive bg-destructive/10 text-destructive' },
@@ -19,11 +19,42 @@ const typeOptions = [
   { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight, color: 'border-primary bg-primary/10 text-primary' },
 ];
 
+function addDelta(deltas, accountId, amount) {
+  if (!accountId || !amount) return;
+  deltas[accountId] = (deltas[accountId] || 0) + amount;
+}
+
+function getTransactionDeltas(transaction, accounts) {
+  const deltas = {};
+  const amount = Number(transaction.amount) || 0;
+  const source = accounts.find(a => a.id === transaction.account_id);
+  const destination = accounts.find(a => a.id === transaction.to_account_id);
+
+  if (source) {
+    const sourceDelta = transaction.type === 'income'
+      ? source.category === 'liability' ? -amount : amount
+      : source.category === 'liability' ? amount : -amount;
+    addDelta(deltas, source.id, sourceDelta);
+  }
+
+  if (transaction.type === 'transfer' && destination) {
+    const destinationDelta = destination.category === 'liability' ? -amount : amount;
+    addDelta(deltas, destination.id, destinationDelta);
+  }
+
+  return deltas;
+}
+
 export default function AddTransaction() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditing = Boolean(id);
   const queryClient = useQueryClient();
   const { data: categories } = useCategories();
   const { data: accounts } = useAccounts();
+  const { data: allTransactions } = useAllTransactions();
+  const existingTransaction = allTransactions.find(t => t.id === id);
+  const currency = useCurrency();
 
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
@@ -33,6 +64,17 @@ export default function AddTransaction() {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!existingTransaction) return;
+    setAmount(String(existingTransaction.amount ?? ''));
+    setType(existingTransaction.type || 'expense');
+    setCategoryId(existingTransaction.category_id || '');
+    setAccountId(existingTransaction.account_id || '');
+    setToAccountId(existingTransaction.to_account_id || '');
+    setDate(existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
+    setNote(existingTransaction.note || '');
+  }, [existingTransaction]);
 
   const filteredCategories = categories.filter(c => {
     if (type === 'expense') return c.type === 'expense' || c.type === 'savings' || c.type === 'debt';
@@ -45,40 +87,75 @@ export default function AddTransaction() {
       toast.error('Enter a valid amount');
       return;
     }
+    if (!accountId) {
+      toast.error(type === 'transfer' ? 'Select a source account' : 'Select an account');
+      return;
+    }
+    if (type !== 'transfer' && !categoryId) {
+      toast.error('Select a category');
+      return;
+    }
+    if (type === 'transfer' && !toAccountId) {
+      toast.error('Select a destination account');
+      return;
+    }
+    if (type === 'transfer' && accountId === toAccountId) {
+      toast.error('Choose two different accounts for a transfer');
+      return;
+    }
     setSaving(true);
-    
-    const data = {
-      amount: parseFloat(amount),
-      type,
-      date,
-      note: note || undefined,
-      category_id: type !== 'transfer' ? categoryId || undefined : undefined,
-      account_id: accountId || undefined,
-      to_account_id: type === 'transfer' ? toAccountId || undefined : undefined,
-    };
 
-    await base44.entities.Transaction.create(data);
-
-    // Update account balances
-    if (accountId) {
-      const acc = accounts.find(a => a.id === accountId);
-      if (acc) {
-        const delta = type === 'income' ? parseFloat(amount) : -parseFloat(amount);
-        await base44.entities.Account.update(accountId, { balance: (acc.balance || 0) + delta });
+    try {
+      const parsedAmount = parseFloat(amount);
+      if (isEditing && !existingTransaction) {
+        toast.error('Transaction not found');
+        return;
       }
-    }
-    if (type === 'transfer' && toAccountId) {
-      const acc = accounts.find(a => a.id === toAccountId);
-      if (acc) {
-        await base44.entities.Account.update(toAccountId, { balance: (acc.balance || 0) + parseFloat(amount) });
-      }
-    }
 
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['accounts'] });
-    setSaving(false);
-    toast.success('Transaction added');
-    navigate('/transactions');
+      const data = {
+        amount: parsedAmount,
+        type,
+        date,
+        note: note || null,
+        category_id: type !== 'transfer' ? categoryId || null : null,
+        account_id: accountId || null,
+        to_account_id: type === 'transfer' ? toAccountId || null : null,
+      };
+
+      if (isEditing) {
+        await transactionsApi.update(id, data);
+      } else {
+        await transactionsApi.create(data);
+      }
+
+      const newDeltas = getTransactionDeltas(data, accounts);
+      const oldDeltas = isEditing && existingTransaction
+        ? getTransactionDeltas(existingTransaction, accounts)
+        : {};
+
+      const allAccountIds = new Set([...Object.keys(newDeltas), ...Object.keys(oldDeltas)]);
+      const balanceUpdates = [...allAccountIds].map((changedAccountId) => {
+        const account = accounts.find(a => a.id === changedAccountId);
+        if (!account) return Promise.resolve();
+        const delta = (newDeltas[changedAccountId] || 0) - (oldDeltas[changedAccountId] || 0);
+        return accountsApi.update(changedAccountId, {
+          balance: (account.balance || 0) + delta,
+        });
+      });
+
+      await Promise.all(balanceUpdates);
+
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
+      navigate('/transactions');
+    } catch (error) {
+      console.error('Transaction save failed:', error);
+      toast.error(error.message || 'Could not save transaction');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -87,14 +164,14 @@ export default function AddTransaction() {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-xl font-bold tracking-tight">Add Transaction</h1>
+        <h1 className="text-xl font-bold tracking-tight">{isEditing ? 'Edit Transaction' : 'Add Transaction'}</h1>
       </div>
 
       {/* Amount Input */}
       <div className="bg-card rounded-2xl border border-border p-8 mb-6 text-center">
         <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Amount</div>
         <div className="flex items-center justify-center gap-1">
-          <span className="text-3xl font-light text-muted-foreground">$</span>
+          <span className="text-3xl font-light text-muted-foreground">{currency}</span>
           <input
             type="number"
             value={amount}
@@ -198,7 +275,7 @@ export default function AddTransaction() {
         disabled={saving || !amount}
         className="w-full h-12 mt-6 text-sm font-semibold"
       >
-        {saving ? 'Saving...' : 'Add Transaction'}
+        {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
       </Button>
     </div>
   );

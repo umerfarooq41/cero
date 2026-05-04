@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { format, subMonths } from 'date-fns';
 import { PencilLine, Copy, X, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import SummaryCards from '@/components/plan/SummaryCards';
@@ -52,25 +51,31 @@ export default function Plan() {
 
   const handleSave = async () => {
     setSaving(true);
-    const existing = {};
-    allocations.forEach(a => { existing[a.category_id] = a; });
+    try {
+      const existing = {};
+      allocations.forEach(a => { existing[a.category_id] = a; });
 
-    const promises = Object.entries(editValues).map(([catId, amount]) => {
-      if (existing[catId]) {
-        return base44.entities.BudgetAllocation.update(existing[catId].id, { planned_amount: amount });
-      }
-      if (amount > 0) {
-        return base44.entities.BudgetAllocation.create({ category_id: catId, month: currentMonth, planned_amount: amount });
-      }
-      return Promise.resolve();
-    });
+      const promises = Object.entries(editValues)
+        .filter(([, amount]) => amount > 0)
+        .map(([catId, amount]) => budgetPlansApi.upsert({
+          id: existing[catId]?.id,
+          category_id: catId,
+          month: currentMonth,
+          planned_amount: amount,
+        }));
 
-    await Promise.all(promises);
-    queryClient.invalidateQueries({ queryKey: ['allocations'] });
-    setSaving(false);
-    setIsEditMode(false);
-    setEditValues({});
-    toast.success('Plan saved');
+      await Promise.all(promises);
+      queryClient.invalidateQueries({ queryKey: ['allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      setIsEditMode(false);
+      setEditValues({});
+      toast.success('Plan saved');
+    } catch (error) {
+      console.error('Plan save failed:', error);
+      toast.error(error.message || 'Could not save plan');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const copyFromPrev = () => {

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { categoriesApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -46,27 +46,42 @@ export default function Categories() {
   };
 
   const handleSave = async (data, existingId) => {
-    if (existingId) {
-      await base44.entities.Category.update(existingId, data);
-      toast.success('Category updated');
-    } else {
-      await base44.entities.Category.create(data);
-      toast.success('Category created');
+    try {
+      if (existingId) {
+        await categoriesApi.update(existingId, data);
+        toast.success('Category updated');
+      } else {
+        await categoriesApi.create(data);
+        toast.success('Category created');
+      }
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    } catch (error) {
+      console.error('Category save failed:', error);
+      toast.error(error.message || 'Could not save category');
     }
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
 
   const handleArchive = async (cat) => {
-    await base44.entities.Category.update(cat.id, { is_archived: !cat.is_archived });
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
-    toast.success(cat.is_archived ? 'Category restored' : 'Category archived');
+    try {
+      await categoriesApi.update(cat.id, { is_archived: !cat.is_archived });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast.success(cat.is_archived ? 'Category restored' : 'Category archived');
+    } catch (error) {
+      console.error('Category archive failed:', error);
+      toast.error(error.message || 'Could not update category');
+    }
   };
 
   const handleDelete = async (cat) => {
-    await base44.entities.Category.delete(cat.id);
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
-    setDeleteTarget(null);
-    toast.success('Category deleted');
+    try {
+      await categoriesApi.delete(cat.id);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setDeleteTarget(null);
+      toast.success('Category deleted');
+    } catch (error) {
+      console.error('Category delete failed:', error);
+      toast.error(error.message || 'Could not delete category');
+    }
   };
 
   const activeCategories = categories.filter(c => !c.is_archived);

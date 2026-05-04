@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, subMonths } from 'date-fns';
 import { Check, AlertTriangle, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import MonthSelector from '@/components/shared/MonthSelector';
 import AllocationRow from '@/components/editplan/AllocationRow';
@@ -77,25 +77,28 @@ export default function EditPlan() {
 
   const handleSave = async () => {
     setSaving(true);
-    const existing = {};
-    allocations.forEach(a => { existing[a.category_id] = a; });
+    try {
+      const existing = {};
+      allocations.forEach(a => { existing[a.category_id] = a; });
 
-    const promises = Object.entries(values).map(([catId, amount]) => {
-      if (existing[catId]) {
-        return base44.entities.BudgetAllocation.update(existing[catId].id, { planned_amount: amount });
-      }
-      return base44.entities.BudgetAllocation.create({ 
-        category_id: catId, 
-        month: currentMonth, 
-        planned_amount: amount 
-      });
-    });
-    
-    await Promise.all(promises);
-    queryClient.invalidateQueries({ queryKey: ['allocations'] });
-    setSaving(false);
-    toast.success('Plan saved');
-    navigate('/');
+      const promises = Object.entries(values).map(([catId, amount]) => budgetPlansApi.upsert({
+        id: existing[catId]?.id,
+        category_id: catId,
+        month: currentMonth,
+        planned_amount: amount,
+      }));
+
+      await Promise.all(promises);
+      queryClient.invalidateQueries({ queryKey: ['allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      toast.success('Plan saved');
+      navigate('/');
+    } catch (error) {
+      console.error('Plan save failed:', error);
+      toast.error(error.message || 'Could not save plan');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getHint = (catId) => {

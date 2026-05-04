@@ -1,12 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Moon, Sun, Globe, Calculator, Shield, Download, Trash2, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Moon, Sun, Globe, Calculator, Download, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { base44 } from '@/api/base44Client';
+import { getUserSettings, saveUserSettings } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+
+const SettingRow = ({ icon: Icon, label, description, children }) => (
+  <div className="flex items-center gap-4 py-4 px-1">
+    <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+      <Icon className="w-4 h-4 text-muted-foreground" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="text-sm font-medium">{label}</div>
+      {description && <div className="text-xs text-muted-foreground mt-0.5">{description}</div>}
+    </div>
+    <div className="shrink-0">{children}</div>
+  </div>
+);
 
 export default function Settings() {
   const [settings, setSettings] = useState({
@@ -24,9 +37,23 @@ export default function Settings() {
 
   useEffect(() => {
     const loadSettings = async () => {
-      const user = await base44.auth.me();
-      if (user?.app_settings) {
-        setSettings(prev => ({ ...prev, ...user.app_settings }));
+      try {
+        const saved = await getUserSettings();
+        if (saved) {
+          setSettings(prev => ({
+            ...prev,
+            theme: saved.theme ?? prev.theme,
+            currency: saved.currency ?? prev.currency,
+            currencyPlacement: saved.currency_placement ?? prev.currencyPlacement,
+            numberFormat: saved.number_format ?? prev.numberFormat,
+            dateFormat: saved.date_format ?? prev.dateFormat,
+            shift25th: saved.shift25th ?? prev.shift25th,
+            autoSweep: saved.auto_sweep ?? prev.autoSweep,
+          }));
+        }
+      } catch (error) {
+        console.error('Settings load failed:', error);
+        toast.error('Could not load settings');
       }
     };
     loadSettings();
@@ -35,29 +62,32 @@ export default function Settings() {
   const updateSetting = async (key, value) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    await base44.auth.updateMe({ app_settings: newSettings });
+    try {
+      await saveUserSettings({
+        currency: newSettings.currency,
+        currency_placement: newSettings.currencyPlacement,
+        number_format: newSettings.numberFormat,
+        date_format: newSettings.dateFormat,
+        theme: newSettings.theme,
+        shift25th: newSettings.shift25th,
+        auto_sweep: newSettings.autoSweep,
+      });
 
-    if (key === 'currency') {
-      queryClient.invalidateQueries({ queryKey: ['currency-symbol'] });
-    }
+      if (key === 'currency') {
+        queryClient.invalidateQueries({ queryKey: ['currency-symbol'] });
+      }
 
-    if (key === 'theme') {
-      document.documentElement.classList.toggle('dark', value === 'dark');
+      if (key === 'theme') {
+        document.documentElement.classList.toggle('dark', value === 'dark');
+      }
+
+      toast.success('Setting saved');
+    } catch (error) {
+      console.error('Settings save failed:', error);
+      setSettings(settings);
+      toast.error(error.message || 'Could not save setting');
     }
   };
-
-  const SettingRow = ({ icon: Icon, label, description, children }) => (
-    <div className="flex items-center gap-4 py-4 px-1">
-      <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-muted-foreground" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium">{label}</div>
-        {description && <div className="text-xs text-muted-foreground mt-0.5">{description}</div>}
-      </div>
-      <div className="shrink-0">{children}</div>
-    </div>
-  );
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24 lg:py-10">

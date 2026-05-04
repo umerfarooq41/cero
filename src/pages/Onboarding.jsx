@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Wallet, FolderOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { accountsApi, categoriesApi, saveUserSettings } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -43,28 +43,34 @@ export default function Onboarding() {
   const handleFinish = async () => {
     setLoading(true);
 
-    // Create account
-    await base44.entities.Account.create({
-      name: accountName,
-      type: 'checking',
-      category: 'asset',
-      balance: parseFloat(accountBalance) || 0,
-      color: '#0078D4',
-    });
+    try {
+      await accountsApi.create({
+        name: accountName,
+        type: 'checking',
+        category: 'asset',
+        balance: parseFloat(accountBalance) || 0,
+        color: '#0078D4',
+      });
 
-    // Create default categories
-    await base44.entities.Category.bulkCreate(defaultCategories);
+      await categoriesApi.bulkCreate(defaultCategories);
 
-    // Mark onboarding complete
-    await base44.auth.updateMe({ 
-      onboarding_complete: true,
-      app_settings: { currency, theme: 'light', numberFormat: 'comma', dateFormat: 'MM/DD/YYYY' }
-    });
+      await saveUserSettings({
+        onboarding_complete: true,
+        currency,
+        theme: 'light',
+        number_format: 'comma',
+        date_format: 'MM/DD/YYYY',
+      });
 
-    queryClient.invalidateQueries();
-    setLoading(false);
-    toast.success('Welcome to Cero!');
-    navigate('/');
+      queryClient.invalidateQueries();
+      toast.success('Welcome to Cero!');
+      navigate('/');
+    } catch (error) {
+      console.error('Onboarding failed:', error);
+      toast.error(error.message || 'Could not finish setup');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const StepIcon = steps[step].icon;

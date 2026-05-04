@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { accountsApi } from '@/lib/budgetData';
+import { useAccounts } from '@/hooks/useBudgetData';
 import { toast } from 'sonner';
 
 const accountTypes = [
@@ -22,7 +23,11 @@ const colors = ['#0078D4', '#107C10', '#C50F1F', '#8764B8', '#CA5010', '#008272'
 
 export default function AddAccount() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditing = Boolean(id);
   const queryClient = useQueryClient();
+  const { data: accounts } = useAccounts();
+  const existingAccount = accounts.find(a => a.id === id);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [category, setCategory] = useState('asset');
@@ -30,21 +35,43 @@ export default function AddAccount() {
   const [color, setColor] = useState(colors[0]);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (!existingAccount) return;
+    setName(existingAccount.name || '');
+    setType(existingAccount.type || '');
+    setCategory(existingAccount.category || 'asset');
+    setBalance(String(existingAccount.balance ?? ''));
+    setColor(existingAccount.color || colors[0]);
+  }, [existingAccount]);
+
   const handleSave = async () => {
     if (!name || !type) {
       toast.error('Name and type are required');
       return;
     }
     setSaving(true);
-    await base44.entities.Account.create({
-      name, type, category,
-      balance: parseFloat(balance) || 0,
-      color,
-    });
-    queryClient.invalidateQueries({ queryKey: ['accounts'] });
-    setSaving(false);
-    toast.success('Account created');
-    navigate('/accounts');
+    try {
+      const payload = {
+        name, type, category,
+        balance: parseFloat(balance) || 0,
+        color,
+      };
+
+      if (isEditing) {
+        await accountsApi.update(id, payload);
+      } else {
+        await accountsApi.create(payload);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      toast.success(isEditing ? 'Account updated' : 'Account created');
+      navigate(isEditing ? `/accounts/${id}` : '/accounts');
+    } catch (error) {
+      console.error('Account save failed:', error);
+      toast.error(error.message || 'Could not save account');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -53,7 +80,7 @@ export default function AddAccount() {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-xl font-bold tracking-tight">Add Account</h1>
+        <h1 className="text-xl font-bold tracking-tight">{isEditing ? 'Edit Account' : 'Add Account'}</h1>
       </div>
 
       <div className="space-y-5 bg-card rounded-xl border border-border p-5">
@@ -86,7 +113,7 @@ export default function AddAccount() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Starting Balance</label>
+          <label className="text-xs font-medium text-muted-foreground">{isEditing ? 'Current Balance' : 'Starting Balance'}</label>
           <Input 
             type="number" 
             value={balance} 
@@ -118,7 +145,7 @@ export default function AddAccount() {
         disabled={saving}
         className="w-full h-12 mt-6 text-sm font-semibold"
       >
-        {saving ? 'Saving...' : 'Create Account'}
+        {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Account'}
       </Button>
     </div>
   );

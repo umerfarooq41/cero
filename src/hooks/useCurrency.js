@@ -1,14 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { getUserSettings } from '@/lib/budgetData';
+import { useAuth } from '@/lib/AuthContext';
 
 export function useCurrency() {
+  const { session } = useAuth();
   const { data: symbol = '$' } = useQuery({
-    queryKey: ['currency-symbol'],
+    queryKey: ['currency-symbol', session?.user?.id],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return user?.app_settings?.currency || '$';
+      const settings = await getUserSettings();
+      return settings?.currency || '$';
     },
-    staleTime: 0,
+    enabled: Boolean(session?.user?.id),
+    staleTime: Infinity,
   });
   return symbol;
 }

@@ -1,20 +1,17 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, PencilLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAccounts, useAllTransactions, useCategories, formatCurrency } from '@/hooks/useBudgetData';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export default function AccountDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const urlParams = new URLSearchParams(window.location.search);
   const accountId = window.location.pathname.split('/').pop();
 
   const { data: accounts } = useAccounts();
@@ -27,9 +24,15 @@ export default function AccountDetail() {
     .slice(0, 50);
 
   const handleDelete = async (id) => {
-    await base44.entities.Transaction.delete(id);
-    queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-    toast.success('Transaction deleted');
+    try {
+      await transactionsApi.delete(id);
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      toast.success('Transaction deleted');
+    } catch (error) {
+      console.error('Transaction delete failed:', error);
+      toast.error(error.message || 'Could not delete transaction');
+    }
   };
 
   if (!account) {
@@ -53,6 +56,9 @@ export default function AccountDetail() {
           <h1 className="text-xl font-bold tracking-tight">{account.name}</h1>
           <p className="text-xs text-muted-foreground capitalize">{account.type?.replace('_', ' ')}</p>
         </div>
+        <Button variant="ghost" size="icon" onClick={() => navigate(`/accounts/${accountId}/edit`)}>
+          <PencilLine className="w-4 h-4" />
+        </Button>
       </div>
 
       <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center">
@@ -81,8 +87,10 @@ export default function AccountDetail() {
               key={t.id}
               transaction={t}
               category={categories.find(c => c.id === t.category_id)}
-              account={account}
+              account={accounts.find(a => a.id === t.account_id)}
+              toAccount={accounts.find(a => a.id === t.to_account_id)}
               onDelete={() => handleDelete(t.id)}
+              onClick={() => navigate(`/transactions/${t.id}/edit`)}
             />
           ))}
         </div>

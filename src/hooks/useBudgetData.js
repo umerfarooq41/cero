@@ -1,47 +1,63 @@
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { format } from 'date-fns';
+import { accountsApi, budgetPlansApi, categoriesApi, transactionsApi } from '@/lib/budgetData';
+import { useAuth } from '@/lib/AuthContext';
 
 export function useCategories() {
+  const { session } = useAuth();
   return useQuery({
-    queryKey: ['categories'],
-    queryFn: () => base44.entities.Category.filter({ is_archived: false }),
+    queryKey: ['categories', session?.user?.id],
+    queryFn: async () => {
+      const categories = await categoriesApi.list();
+      return categories.filter(c => !c.is_archived);
+    },
+    enabled: Boolean(session?.user?.id),
     initialData: [],
   });
 }
 
 export function useAccounts() {
+  const { session } = useAuth();
   return useQuery({
-    queryKey: ['accounts'],
-    queryFn: () => base44.entities.Account.filter({ is_archived: false }),
+    queryKey: ['accounts', session?.user?.id],
+    queryFn: async () => {
+      const accounts = await accountsApi.list();
+      return accounts.filter(a => !a.is_archived);
+    },
+    enabled: Boolean(session?.user?.id),
     initialData: [],
   });
 }
 
 export function useTransactions(month) {
+  const { session } = useAuth();
   return useQuery({
-    queryKey: ['transactions', month],
+    queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
-      const all = await base44.entities.Transaction.list('-date', 500);
+      const all = await transactionsApi.list();
       if (!month) return all;
       return all.filter(t => t.date?.startsWith(month));
     },
+    enabled: Boolean(session?.user?.id),
     initialData: [],
   });
 }
 
 export function useAllTransactions() {
+  const { session } = useAuth();
   return useQuery({
-    queryKey: ['all-transactions'],
-    queryFn: () => base44.entities.Transaction.list('-date', 1000),
+    queryKey: ['all-transactions', session?.user?.id],
+    queryFn: () => transactionsApi.list(),
+    enabled: Boolean(session?.user?.id),
     initialData: [],
   });
 }
 
 export function useAllocations(month) {
+  const { session } = useAuth();
   return useQuery({
-    queryKey: ['allocations', month],
-    queryFn: () => base44.entities.BudgetAllocation.filter({ month }),
+    queryKey: ['allocations', session?.user?.id, month],
+    queryFn: () => budgetPlansApi.list(month),
+    enabled: Boolean(session?.user?.id && month),
     initialData: [],
   });
 }

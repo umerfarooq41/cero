@@ -4,7 +4,7 @@ import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/hooks/useBudgetData';
 
-export default function TransactionRow({ transaction, category, account, onDelete, onClick }) {
+export default function TransactionRow({ transaction, category, account, toAccount, onDelete, onClick }) {
   const typeConfig = {
     income: { icon: ArrowDownLeft, color: 'text-[hsl(var(--success))]', sign: '+' },
     expense: { icon: ArrowUpRight, color: 'text-destructive', sign: '-' },
@@ -12,30 +12,41 @@ export default function TransactionRow({ transaction, category, account, onDelet
   };
 
   const config = typeConfig[transaction.type] || typeConfig.expense;
+  const Icon = transaction.type === 'transfer' ? ArrowLeftRight : null;
+  const title = transaction.type === 'transfer' ? 'Transfer' : category?.name || 'Uncategorized';
+  const subtitle = transaction.type === 'transfer'
+    ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
+    : transaction.note;
 
   return (
     <div 
       onClick={onClick}
       className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer group"
     >
-      <CategoryIcon 
-        icon={category?.icon || 'tag'} 
-        color={category?.color} 
-        size="sm" 
-      />
+      {transaction.type === 'transfer' ? (
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
+          <Icon className="w-4 h-4" />
+        </div>
+      ) : (
+        <CategoryIcon
+          icon={category?.icon || 'tag'}
+          color={category?.color}
+          size="sm"
+        />
+      )}
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium truncate">
-          {category?.name || 'Uncategorized'}
+          {title}
         </div>
-        {transaction.note && (
-          <div className="text-xs text-muted-foreground truncate">{transaction.note}</div>
+        {subtitle && (
+          <div className="text-xs text-muted-foreground truncate">{subtitle}</div>
         )}
       </div>
       <div className="text-right shrink-0">
         <div className={cn("text-sm font-semibold tabular-nums", config.color)}>
           {config.sign}{formatCurrency(transaction.amount)}
         </div>
-        {account && (
+        {transaction.type !== 'transfer' && account && (
           <div className="text-[11px] text-muted-foreground">{account.name}</div>
         )}
       </div>
