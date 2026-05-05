@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { accountsApi, budgetPlansApi, categoriesApi, transactionsApi } from '@/lib/budgetData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 
 export function useCategories() {
   const { session } = useAuth();

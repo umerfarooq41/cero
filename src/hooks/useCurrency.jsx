@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getUserSettings } from '@/lib/budgetData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 
 export function useCurrency() {
   const { session } = useAuth();

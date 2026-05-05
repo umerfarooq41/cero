@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { getUserSettings, saveUserSettings } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 
 const SettingRow = ({ icon: Icon, label, description, children }) => (
   <div className="flex items-center gap-4 py-4 px-1">
