@@ -3,6 +3,24 @@ import { ArrowUpRight, ArrowDownLeft, ArrowLeftRight, Trash2 } from 'lucide-reac
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
 
+function CurrencyAmount({ value, formatCurrency }) {
+  if (formatCurrency) {
+    return <>{formatCurrency(value)}</>;
+  }
+
+  return (
+    <>
+      <img src="/sar.svg" alt="SAR" className="w-3.5 h-3.5 inline-block" />
+      <span>
+        {Number(Math.abs(value || 0)).toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </span>
+    </>
+  );
+}
+
 export default function TransactionRow({
   transaction,
   category,
@@ -27,12 +45,7 @@ export default function TransactionRow({
       ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
       : transaction.note;
 
-  const amount = formatCurrency
-    ? formatCurrency(transaction.amount)
-    : Number(Math.abs(transaction.amount || 0)).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+  const amountValue = Math.abs(Number(transaction.amount || 0));
 
   return (
     <div
@@ -59,9 +72,14 @@ export default function TransactionRow({
       </div>
 
       <div className="text-right shrink-0">
-        <div className={cn("text-sm font-semibold tabular-nums inline-flex items-center gap-1", config.color)}>
+        <div
+          className={cn(
+            'text-sm font-semibold tabular-nums inline-flex items-center gap-1',
+            config.color
+          )}
+        >
           {config.sign}
-          {amount}
+          <CurrencyAmount value={amountValue} formatCurrency={formatCurrency} />
         </div>
 
         {transaction.type !== 'transfer' && account && (
@@ -70,9 +88,10 @@ export default function TransactionRow({
       </div>
 
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
-          onDelete();
+          onDelete?.();
         }}
         className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 rounded-md transition-all"
       >
