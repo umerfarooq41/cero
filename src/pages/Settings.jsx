@@ -51,7 +51,7 @@ export default function Settings() {
           setSettings(prev => ({
             ...prev,
             theme: saved.theme ?? prev.theme,
-            currency: saved.currency || 'SAR', // ❌ no ﷼ anymore
+            currency: saved.currency || 'SAR',
             currencyPlacement: 'before',
             numberFormat: saved.number_format ?? prev.numberFormat,
             dateFormat: saved.date_format ?? prev.dateFormat,

@@ -68,68 +68,47 @@ export function useAllocations(month) {
 }
 
 export function useBudgetSummary(month) {
-  const { data: categories } = useCategories();
-  const { data: transactions } = useTransactions(month);
-  const { data: allocations } = useAllocations(month);
+  const { data: categories = [] } = useCategories();
+  const { data: transactions = [] } = useTransactions(month);
+  const { data: allocations = [] } = useAllocations(month);
 
   const getCategorySpent = (categoryId) => {
     return transactions
       .filter(t => t.category_id === categoryId)
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
   };
 
   const getCategoryPlanned = (categoryId) => {
     const alloc = allocations.find(a => a.category_id === categoryId);
-    return alloc?.planned_amount || 0;
+    return Number(alloc?.planned_amount) || 0;
   };
 
   const totalIncome = transactions
     .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
   const totalExpenses = transactions
     .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-  const totalPlannedIncome = categories
-    .filter(c => c.type === 'income' && !c.parent_id)
-    .reduce((sum, c) => {
-      const subs = categories.filter(s => s.parent_id === c.id);
-      if (subs.length > 0) {
-        return sum + subs.reduce((s, sub) => s + getCategoryPlanned(sub.id), 0);
-      }
-      return sum + getCategoryPlanned(c.id);
-    }, 0);
+  const sumPlannedByType = (type) => {
+    return categories
+      .filter(c => c.type === type && !c.parent_id)
+      .reduce((sum, c) => {
+        const subs = categories.filter(s => s.parent_id === c.id);
 
-  const totalPlannedExpenses = categories
-    .filter(c => c.type === 'expense' && !c.parent_id)
-    .reduce((sum, c) => {
-      const subs = categories.filter(s => s.parent_id === c.id);
-      if (subs.length > 0) {
-        return sum + subs.reduce((s, sub) => s + getCategoryPlanned(sub.id), 0);
-      }
-      return sum + getCategoryPlanned(c.id);
-    }, 0);
+        if (subs.length > 0) {
+          return sum + subs.reduce((s, sub) => s + getCategoryPlanned(sub.id), 0);
+        }
 
-  const totalPlannedSavings = categories
-    .filter(c => c.type === 'savings' && !c.parent_id)
-    .reduce((sum, c) => {
-      const subs = categories.filter(s => s.parent_id === c.id);
-      if (subs.length > 0) {
-        return sum + subs.reduce((s, sub) => s + getCategoryPlanned(sub.id), 0);
-      }
-      return sum + getCategoryPlanned(c.id);
-    }, 0);
+        return sum + getCategoryPlanned(c.id);
+      }, 0);
+  };
 
-  const totalPlannedDebt = categories
-    .filter(c => c.type === 'debt' && !c.parent_id)
-    .reduce((sum, c) => {
-      const subs = categories.filter(s => s.parent_id === c.id);
-      if (subs.length > 0) {
-        return sum + subs.reduce((s, sub) => s + getCategoryPlanned(sub.id), 0);
-      }
-      return sum + getCategoryPlanned(c.id);
-    }, 0);
+  const totalPlannedIncome = sumPlannedByType('income');
+  const totalPlannedExpenses = sumPlannedByType('expense');
+  const totalPlannedSavings = sumPlannedByType('savings');
+  const totalPlannedDebt = sumPlannedByType('debt');
 
   const leftToAllocate =
     totalPlannedIncome -
@@ -153,22 +132,4 @@ export function useBudgetSummary(month) {
   };
 }
 
-export function formatCurrency(amount, symbol = 'SAR') {
-  const value = Math.abs(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-  if (symbol === 'SAR') {
-    return (
-      <span className="inline-flex items-center gap-1">
-        <img src="/sar.svg" alt="SAR" className="w-4 h-4 shrink-0" />
-        <span>{value}</span>
-      </span>
-    );
-  }
-
-  return `${symbol}${value}`;
-}
-
-export { useCurrencyFormatter } from '@/hooks/useCurrency';
+export { useCurrencyFormatter, formatCurrency } from '@/hooks/useCurrency';

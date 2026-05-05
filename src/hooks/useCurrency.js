@@ -12,7 +12,7 @@ export function useCurrency() {
       return settings?.currency || 'SAR'; // ✅ default SAR
     },
     enabled: Boolean(session?.user?.id),
-    staleTime: Infinity,
+    staleTime: 0,
   });
 
   return symbol;
