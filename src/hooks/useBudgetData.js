@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { accountsApi, budgetPlansApi, categoriesApi, transactionsApi } from '@/lib/budgetData';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useCategories() {
   const { session } = useAuth();
+
   return useQuery({
     queryKey: ['categories', session?.user?.id],
     queryFn: async () => {
@@ -17,6 +18,7 @@ export function useCategories() {
 
 export function useAccounts() {
   const { session } = useAuth();
+
   return useQuery({
     queryKey: ['accounts', session?.user?.id],
     queryFn: async () => {
@@ -30,6 +32,7 @@ export function useAccounts() {
 
 export function useTransactions(month) {
   const { session } = useAuth();
+
   return useQuery({
     queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
@@ -44,6 +47,7 @@ export function useTransactions(month) {
 
 export function useAllTransactions() {
   const { session } = useAuth();
+
   return useQuery({
     queryKey: ['all-transactions', session?.user?.id],
     queryFn: () => transactionsApi.list(),
@@ -54,6 +58,7 @@ export function useAllTransactions() {
 
 export function useAllocations(month) {
   const { session } = useAuth();
+
   return useQuery({
     queryKey: ['allocations', session?.user?.id, month],
     queryFn: () => budgetPlansApi.list(month),
@@ -70,10 +75,7 @@ export function useBudgetSummary(month) {
   const getCategorySpent = (categoryId) => {
     return transactions
       .filter(t => t.category_id === categoryId)
-      .reduce((sum, t) => {
-        if (t.type === 'income') return sum + (t.amount || 0);
-        return sum + (t.amount || 0);
-      }, 0);
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
   };
 
   const getCategoryPlanned = (categoryId) => {
@@ -129,7 +131,11 @@ export function useBudgetSummary(month) {
       return sum + getCategoryPlanned(c.id);
     }, 0);
 
-  const leftToAllocate = totalPlannedIncome - totalPlannedExpenses - totalPlannedSavings - totalPlannedDebt;
+  const leftToAllocate =
+    totalPlannedIncome -
+    totalPlannedExpenses -
+    totalPlannedSavings -
+    totalPlannedDebt;
 
   return {
     categories,
@@ -148,10 +154,23 @@ export function useBudgetSummary(month) {
 }
 
 export function formatCurrency(amount, symbol = '$') {
-  return symbol + Math.abs(amount || 0).toLocaleString('en-US', {
+  const safeSymbol = symbol === '﷼' ? 'SAR' : symbol;
+
+  const value = Math.abs(amount || 0).toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+
+  if (safeSymbol === 'SAR') {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <img src="/sar.svg" alt="SAR" className="w-4 h-4 shrink-0" />
+        <span>{value}</span>
+      </span>
+    );
+  }
+
+  return `${safeSymbol}${value}`;
 }
 
 export { useCurrencyFormatter } from '@/hooks/useCurrency';
