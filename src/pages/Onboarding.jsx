@@ -125,7 +125,7 @@ export default function Onboarding() {
                     <SelectItem value="$">$ — US Dollar</SelectItem>
                     <SelectItem value="€">€ — Euro</SelectItem>
                     <SelectItem value="£">£ — British Pound</SelectItem>
-                    <SelectItem value="﷼">﷼ — Saudi Riyal</SelectItem>
+                    <SelectItem value="SAR">SAR — Saudi Riyal</SelectItem>
                     <SelectItem value="₨">₨ — Pakistani Rupee</SelectItem>
                   </SelectContent>
                 </Select>

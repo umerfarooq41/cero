@@ -153,7 +153,7 @@ export function useBudgetSummary(month) {
   };
 }
 
-export function formatCurrency(amount, symbol = '$') {
+export function formatCurrency(amount, symbol = 'SAR') {
   const value = Math.abs(amount || 0).toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
