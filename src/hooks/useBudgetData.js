@@ -154,14 +154,12 @@ export function useBudgetSummary(month) {
 }
 
 export function formatCurrency(amount, symbol = '$') {
-  const safeSymbol = symbol === '﷼' ? 'SAR' : symbol;
-
   const value = Math.abs(amount || 0).toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-  if (safeSymbol === 'SAR') {
+  if (symbol === 'SAR') {
     return (
       <span className="inline-flex items-center gap-1">
         <img src="/sar.svg" alt="SAR" className="w-4 h-4 shrink-0" />
@@ -170,7 +168,7 @@ export function formatCurrency(amount, symbol = '$') {
     );
   }
 
-  return `${safeSymbol}${value}`;
+  return `${symbol}${value}`;
 }
 
 export { useCurrencyFormatter } from '@/hooks/useCurrency';

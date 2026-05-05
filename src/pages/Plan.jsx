@@ -15,7 +15,7 @@ import {
   useAllocations,
   useCategories,
 } from '@/hooks/useBudgetData';
-import { useCurrency } from '@/hooks/useCurrency';
+import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 
 export default function Plan() {
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -25,21 +25,25 @@ export default function Plan() {
 
   const queryClient = useQueryClient();
   const currency = useCurrency();
+  const formatCurrency = useCurrencyFormatter();
+
   const budget = useBudgetSummary(currentMonth);
-  const { data: categories } = useCategories();
-  const { data: allocations } = useAllocations(currentMonth);
+  const { data: categories = [] } = useCategories();
+  const { data: allocations = [] } = useAllocations(currentMonth);
 
   const prevMonth = format(subMonths(new Date(currentMonth + '-01'), 1), 'yyyy-MM');
-  const { data: prevAllocations } = useAllocations(prevMonth);
+  const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
-  // Seed editValues from current allocations when entering edit mode
   const enterEditMode = useCallback(() => {
     const initial = {};
-    allocations.forEach(a => { initial[a.category_id] = a.planned_amount || 0; });
-    // also seed zeros for categories not yet allocated
+    allocations.forEach(a => {
+      initial[a.category_id] = a.planned_amount || 0;
+    });
+
     categories.forEach(c => {
       if (!(c.id in initial)) initial[c.id] = 0;
     });
+
     setEditValues(initial);
     setIsEditMode(true);
   }, [allocations, categories]);
@@ -51,22 +55,27 @@ export default function Plan() {
 
   const handleSave = async () => {
     setSaving(true);
+
     try {
       const existing = {};
-      allocations.forEach(a => { existing[a.category_id] = a; });
+      allocations.forEach(a => {
+        existing[a.category_id] = a;
+      });
 
       const promises = Object.entries(editValues)
         .filter(([, amount]) => amount > 0)
-        .map(([catId, amount]) => budgetPlansApi.upsert({
-          id: existing[catId]?.id,
-          category_id: catId,
-          month: currentMonth,
-          planned_amount: amount,
-        }));
+        .map(([catId, amount]) =>
+          budgetPlansApi.upsert({
+            id: existing[catId]?.id,
+            category_id: catId,
+            month: currentMonth,
+            planned_amount: amount,
+          })
+        );
 
       await Promise.all(promises);
-      queryClient.invalidateQueries({ queryKey: ['allocations'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+
+      queryClient.invalidateQueries();
       setIsEditMode(false);
       setEditValues({});
       toast.success('Plan saved');
@@ -80,7 +89,9 @@ export default function Plan() {
 
   const copyFromPrev = () => {
     const newValues = { ...editValues };
-    prevAllocations.forEach(a => { newValues[a.category_id] = a.planned_amount || 0; });
+    prevAllocations.forEach(a => {
+      newValues[a.category_id] = a.planned_amount || 0;
+    });
     setEditValues(newValues);
     toast.success('Copied from last month');
   };
@@ -89,7 +100,6 @@ export default function Plan() {
     setEditValues(prev => ({ ...prev, [catId]: value }));
   }, []);
 
-  // Live "left to allocate" in edit mode
   const sumEditType = (type) => {
     return categories
       .filter(c => c.type === type)
@@ -104,15 +114,17 @@ export default function Plan() {
   const editTotalExpenses = isEditMode ? sumEditType('expense') : 0;
   const editTotalSavings = isEditMode ? sumEditType('savings') : 0;
   const editTotalDebt = isEditMode ? sumEditType('debt') : 0;
+
   const leftToAllocate = isEditMode
     ? editTotalIncome - editTotalExpenses - editTotalSavings - editTotalDebt
     : budget.leftToAllocate;
 
   const totalIncomeDisplay = isEditMode ? editTotalIncome : budget.totalIncome;
 
-  // prev values map for hints
   const prevValuesMap = {};
-  prevAllocations.forEach(a => { prevValuesMap[a.category_id] = a.planned_amount || 0; });
+  prevAllocations.forEach(a => {
+    prevValuesMap[a.category_id] = a.planned_amount || 0;
+  });
 
   const allSubs = categories.filter(c => c.parent_id);
   const incomeCategories = categories.filter(c => c.type === 'income' && !c.parent_id);
@@ -121,15 +133,21 @@ export default function Plan() {
   const debtCategories = categories.filter(c => c.type === 'debt' && !c.parent_id);
 
   const savingsSpent = budget.transactions
-    .filter(t => { const cat = categories.find(c => c.id === t.category_id); return cat?.type === 'savings'; })
+    .filter(t => {
+      const cat = categories.find(c => c.id === t.category_id);
+      return cat?.type === 'savings';
+    })
     .reduce((s, t) => s + (t.amount || 0), 0);
+
   const debtSpent = budget.transactions
-    .filter(t => { const cat = categories.find(c => c.id === t.category_id); return cat?.type === 'debt'; })
+    .filter(t => {
+      const cat = categories.find(c => c.id === t.category_id);
+      return cat?.type === 'debt';
+    })
     .reduce((s, t) => s + (t.amount || 0), 0);
 
   return (
     <div className="max-w-3xl mx-auto px-4 pb-28">
-      {/* ── HEADER ── */}
       <div className="sticky top-0 z-30 pt-6 pb-2 bg-background/95 backdrop-blur-sm">
         <AnimatePresence mode="wait">
           {isEditMode ? (
@@ -175,21 +193,15 @@ export default function Plan() {
         </AnimatePresence>
       </div>
 
-      {/* ── BODY ── */}
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18 }}
-        className="space-y-4 pt-4"
-      >
-        {/* Left to Allocate Banner */}
+      <motion.div animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="space-y-4 pt-4">
         <LeftToAllocateBanner
           leftToAllocate={leftToAllocate}
           totalIncome={totalIncomeDisplay}
           isEditMode={isEditMode}
           currency={currency}
+          formatCurrency={formatCurrency}
         />
 
-        {/* Edit mode controls */}
         <AnimatePresence>
           {isEditMode && (
             <motion.div
@@ -207,67 +219,38 @@ export default function Plan() {
           )}
         </AnimatePresence>
 
-        {/* Summary Cards — visible in both modes, faded in edit */}
         <SummaryCards
           budget={budget}
           savingsSpent={savingsSpent}
           debtSpent={debtSpent}
           isEditMode={isEditMode}
           currency={currency}
+          formatCurrency={formatCurrency}
         />
 
-        {/* Category Sections */}
-        <UnifiedCategorySection
-          title="Income"
-          categories={incomeCategories}
-          subcategories={allSubs}
-          isEditMode={isEditMode}
-          getCategorySpent={budget.getCategorySpent}
-          getCategoryPlanned={budget.getCategoryPlanned}
-          editValues={editValues}
-          onEditChange={onEditChange}
-          prevValues={prevValuesMap}
-          currency={currency}
-        />
-        <UnifiedCategorySection
-          title="Expenses"
-          categories={expenseCategories}
-          subcategories={allSubs}
-          isEditMode={isEditMode}
-          getCategorySpent={budget.getCategorySpent}
-          getCategoryPlanned={budget.getCategoryPlanned}
-          editValues={editValues}
-          onEditChange={onEditChange}
-          prevValues={prevValuesMap}
-          currency={currency}
-        />
-        <UnifiedCategorySection
-          title="Savings"
-          categories={savingsCategories}
-          subcategories={allSubs}
-          isEditMode={isEditMode}
-          getCategorySpent={budget.getCategorySpent}
-          getCategoryPlanned={budget.getCategoryPlanned}
-          editValues={editValues}
-          onEditChange={onEditChange}
-          prevValues={prevValuesMap}
-          currency={currency}
-        />
-        <UnifiedCategorySection
-          title="Debt"
-          categories={debtCategories}
-          subcategories={allSubs}
-          isEditMode={isEditMode}
-          getCategorySpent={budget.getCategorySpent}
-          getCategoryPlanned={budget.getCategoryPlanned}
-          editValues={editValues}
-          onEditChange={onEditChange}
-          prevValues={prevValuesMap}
-          currency={currency}
-        />
+        {[
+          ['Income', incomeCategories],
+          ['Expenses', expenseCategories],
+          ['Savings', savingsCategories],
+          ['Debt', debtCategories],
+        ].map(([title, sectionCategories]) => (
+          <UnifiedCategorySection
+            key={title}
+            title={title}
+            categories={sectionCategories}
+            subcategories={allSubs}
+            isEditMode={isEditMode}
+            getCategorySpent={budget.getCategorySpent}
+            getCategoryPlanned={budget.getCategoryPlanned}
+            editValues={editValues}
+            onEditChange={onEditChange}
+            prevValues={prevValuesMap}
+            currency={currency}
+            formatCurrency={formatCurrency}
+          />
+        ))}
       </motion.div>
 
-      {/* ── BOTTOM CTA (read mode) ── */}
       <AnimatePresence>
         {!isEditMode && (
           <motion.div
@@ -277,10 +260,7 @@ export default function Plan() {
             transition={{ duration: 0.18 }}
             className="fixed bottom-6 left-0 right-0 px-4 z-40 max-w-3xl mx-auto"
           >
-            <Button
-              onClick={enterEditMode}
-              className="w-full h-12 text-sm font-semibold gap-2 shadow-lg"
-            >
+            <Button onClick={enterEditMode} className="w-full h-12 text-sm font-semibold gap-2 shadow-lg">
               <PencilLine className="w-4 h-4" />
               Edit Plan
             </Button>
@@ -288,7 +268,6 @@ export default function Plan() {
         )}
       </AnimatePresence>
 
-      {/* ── BOTTOM SAVE (edit mode) ── */}
       <AnimatePresence>
         {isEditMode && (
           <motion.div
@@ -298,11 +277,7 @@ export default function Plan() {
             transition={{ duration: 0.18 }}
             className="fixed bottom-6 left-0 right-0 px-4 z-40 max-w-3xl mx-auto"
           >
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full h-12 text-sm font-semibold gap-2 shadow-lg"
-            >
+            <Button onClick={handleSave} disabled={saving} className="w-full h-12 text-sm font-semibold gap-2 shadow-lg">
               <Save className="w-4 h-4" />
               {saving ? 'Saving…' : 'Save Plan'}
             </Button>

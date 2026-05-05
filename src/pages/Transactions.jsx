@@ -11,6 +11,7 @@ import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 import { useTransactions, useCategories, useAccounts } from '@/hooks/useBudgetData';
+import { useCurrencyFormatter } from '@/hooks/useCurrency';
 
 export default function Transactions() {
   const navigate = useNavigate();
@@ -19,16 +20,21 @@ export default function Transactions() {
   const [filterType, setFilterType] = useState('all');
   const queryClient = useQueryClient();
 
+  const formatCurrency = useCurrencyFormatter(); // ✅ important
+
   const { data: transactions } = useTransactions(currentMonth);
   const { data: categories } = useCategories();
   const { data: accounts } = useAccounts();
 
   const filtered = transactions.filter(t => {
     const cat = categories.find(c => c.id === t.category_id);
-    const matchSearch = !search || 
+    const matchSearch =
+      !search ||
       cat?.name?.toLowerCase().includes(search.toLowerCase()) ||
       t.note?.toLowerCase().includes(search.toLowerCase());
+
     const matchType = filterType === 'all' || t.type === filterType;
+
     return matchSearch && matchType;
   });
 
@@ -44,8 +50,7 @@ export default function Transactions() {
   const handleDelete = async (id) => {
     try {
       await transactionsApi.delete(id);
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries();
       toast.success('Transaction deleted');
     } catch (error) {
       console.error('Transaction delete failed:', error);
@@ -65,7 +70,9 @@ export default function Transactions() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{filtered.length} transactions</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {filtered.length} transactions
+          </p>
         </div>
         <MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />
       </div>
@@ -112,9 +119,12 @@ export default function Transactions() {
             <div key={date} className="bg-card rounded-xl border border-border overflow-hidden">
               <div className="px-4 py-2.5 border-b border-border bg-accent/30">
                 <span className="text-xs font-semibold text-muted-foreground">
-                  {date !== 'No Date' ? format(new Date(date), 'EEEE, MMM d') : 'No Date'}
+                  {date !== 'No Date'
+                    ? format(new Date(date), 'EEEE, MMM d')
+                    : 'No Date'}
                 </span>
               </div>
+
               <div className="divide-y divide-border/50">
                 {grouped[date].map(t => (
                   <TransactionRow
@@ -123,6 +133,7 @@ export default function Transactions() {
                     category={categories.find(c => c.id === t.category_id)}
                     account={accounts.find(a => a.id === t.account_id)}
                     toAccount={accounts.find(a => a.id === t.to_account_id)}
+                    formatCurrency={formatCurrency} // ✅ pass formatter
                     onDelete={() => handleDelete(t.id)}
                     onClick={() => navigate(`/transactions/${t.id}/edit`)}
                   />
@@ -134,10 +145,7 @@ export default function Transactions() {
       )}
 
       <Link to="/add-transaction">
-        <Button 
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0"
-          size="icon"
-        >
+        <Button className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0">
           <Plus className="w-6 h-6" />
         </Button>
       </Link>

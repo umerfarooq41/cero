@@ -8,20 +8,25 @@ import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import MonthSelector from '@/components/shared/MonthSelector';
 import AllocationRow from '@/components/editplan/AllocationRow';
-import { useCategories, useAllocations, formatCurrency } from '@/hooks/useBudgetData';
+import { useCategories, useAllocations } from '@/hooks/useBudgetData';
+import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 
 export default function EditPlan() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
-  const { data: categories } = useCategories();
-  const { data: allocations } = useAllocations(currentMonth);
-  const prevMonth = format(subMonths(new Date(currentMonth + '-01'), 1), 'yyyy-MM');
-  const { data: prevAllocations } = useAllocations(prevMonth);
-  
   const [values, setValues] = useState({});
   const [saving, setSaving] = useState(false);
+
+  const formatCurrency = useCurrencyFormatter();
+
+  const { data: categories = [] } = useCategories();
+  const { data: allocations = [] } = useAllocations(currentMonth);
+
+  const prevMonth = format(subMonths(new Date(currentMonth + '-01'), 1), 'yyyy-MM');
+  const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
   useEffect(() => {
     const initial = {};
@@ -38,8 +43,10 @@ export default function EditPlan() {
   const getLeafCategories = (type) => {
     const parents = categories.filter(c => c.type === type && !c.parent_id);
     const result = [];
+
     parents.forEach(p => {
       const subs = categories.filter(c => c.parent_id === p.id);
+
       if (subs.length > 0) {
         result.push({ ...p, isSectionHeader: true });
         subs.forEach(s => result.push({ ...s, isSubcategory: true }));
@@ -47,6 +54,7 @@ export default function EditPlan() {
         result.push(p);
       }
     });
+
     return result;
   };
 
@@ -77,20 +85,25 @@ export default function EditPlan() {
 
   const handleSave = async () => {
     setSaving(true);
+
     try {
       const existing = {};
-      allocations.forEach(a => { existing[a.category_id] = a; });
+      allocations.forEach(a => {
+        existing[a.category_id] = a;
+      });
 
-      const promises = Object.entries(values).map(([catId, amount]) => budgetPlansApi.upsert({
-        id: existing[catId]?.id,
-        category_id: catId,
-        month: currentMonth,
-        planned_amount: amount,
-      }));
+      const promises = Object.entries(values).map(([catId, amount]) =>
+        budgetPlansApi.upsert({
+          id: existing[catId]?.id,
+          category_id: catId,
+          month: currentMonth,
+          planned_amount: amount,
+        })
+      );
 
       await Promise.all(promises);
-      queryClient.invalidateQueries({ queryKey: ['allocations'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+
+      queryClient.invalidateQueries();
       toast.success('Plan saved');
       navigate('/');
     } catch (error) {
@@ -113,17 +126,23 @@ export default function EditPlan() {
     return (
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {title}
+          </h3>
         </div>
+
         <div className="divide-y divide-border/50">
           {items.map(cat => {
             if (cat.isSectionHeader) {
               return (
                 <div key={cat.id} className="flex items-center gap-3 py-2.5 px-4 bg-accent/30">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase">{cat.name}</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase">
+                    {cat.name}
+                  </span>
                 </div>
               );
             }
+
             return (
               <AllocationRow
                 key={cat.id}
@@ -132,6 +151,7 @@ export default function EditPlan() {
                 lastMonthHint={getHint(cat.id)}
                 onChange={(v) => setValue(cat.id, v)}
                 isSubcategory={cat.isSubcategory}
+                formatCurrency={formatCurrency}
               />
             );
           })}
@@ -145,25 +165,31 @@ export default function EditPlan() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Edit Plan</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Allocate every dollar</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Allocate every amount</p>
         </div>
+
         <MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />
       </div>
 
-      {/* Sticky Math Banner */}
       <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-xl border border-border rounded-xl p-4 mb-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="text-xs text-muted-foreground">Total Income</div>
             <div className="text-lg font-bold">{formatCurrency(totalIncome)}</div>
           </div>
+
           <div className="text-right space-y-1">
             <div className="text-xs text-muted-foreground">Left to Allocate</div>
-            <div className={cn(
-              "text-lg font-bold flex items-center gap-1.5 justify-end",
-              leftToAllocate === 0 ? "text-[hsl(var(--success))]" : 
-              leftToAllocate < 0 ? "text-destructive" : "text-foreground"
-            )}>
+            <div
+              className={cn(
+                'text-lg font-bold flex items-center gap-1.5 justify-end',
+                leftToAllocate === 0
+                  ? 'text-[hsl(var(--success))]'
+                  : leftToAllocate < 0
+                    ? 'text-destructive'
+                    : 'text-foreground'
+              )}
+            >
               {leftToAllocate === 0 && <Check className="w-5 h-5" />}
               {leftToAllocate < 0 && <AlertTriangle className="w-4 h-4" />}
               {formatCurrency(leftToAllocate)}
@@ -186,11 +212,7 @@ export default function EditPlan() {
         {renderSection('Debt', 'debt')}
       </div>
 
-      <Button 
-        onClick={handleSave} 
-        disabled={saving}
-        className="w-full h-12 text-sm font-semibold"
-      >
+      <Button onClick={handleSave} disabled={saving} className="w-full h-12 text-sm font-semibold">
         {saving ? 'Saving...' : 'Save Plan'}
       </Button>
     </div>
