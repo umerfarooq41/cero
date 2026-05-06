@@ -1,15 +1,24 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownLeft, ArrowLeftRight, Trash2 } from 'lucide-react';
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  ArrowLeftRight,
+  Trash2,
+} from 'lucide-react';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
 
 function CurrencyAmount({ value, formatCurrency }) {
   if (formatCurrency) {
-    return <>{formatCurrency(value)}</>;
+    return (
+      <span className="inline-flex items-center align-middle whitespace-nowrap">
+        {formatCurrency(value)}
+      </span>
+    );
   }
 
   return (
-    <>
+    <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap">
       <img src="/sar.svg" alt="SAR" className="w-3.5 h-3.5 inline-block" />
       <span>
         {Number(Math.abs(value || 0)).toLocaleString('en-US', {
@@ -17,7 +26,7 @@ function CurrencyAmount({ value, formatCurrency }) {
           maximumFractionDigits: 2,
         })}
       </span>
-    </>
+    </span>
   );
 }
 
@@ -53,59 +62,36 @@ export default function TransactionRow({
 }) {
   const typeConfig = {
     income: {
-      icon: ArrowDownLeft,
       color: 'text-[hsl(var(--success))]',
       sign: '+',
     },
     expense: {
-      icon: ArrowUpRight,
       color: 'text-destructive',
       sign: '-',
     },
     transfer: {
-      icon: ArrowLeftRight,
       color: 'text-primary',
       sign: '',
     },
   };
 
-  const config =
-    typeConfig[transaction.type] || typeConfig.expense;
+  const config = typeConfig[transaction.type] || typeConfig.expense;
+  const isTransfer = transaction.type === 'transfer';
 
-  const Icon =
-    transaction.type === 'transfer'
-      ? ArrowLeftRight
-      : null;
-
-  const isTransfer =
-    transaction.type === 'transfer';
-
-  const accountName =
-    account?.name || 'Account';
-
-  const transactionTypeLabel =
-    formatTransactionType(transaction.type);
-
-  const transferTypeLabel =
-    getTransferType(account, toAccount);
+  const accountName = account?.name || 'Account';
+  const transactionTypeLabel = formatTransactionType(transaction.type);
+  const transferTypeLabel = getTransferType(account, toAccount);
 
   const title = isTransfer
-    ? [account?.name, toAccount?.name]
-        .filter(Boolean)
-        .join(' → ')
+    ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
     : category?.name || 'Uncategorized';
 
   const primarySubtitle = isTransfer
     ? `Transfer - ${transferTypeLabel}`
     : `${transactionTypeLabel} - ${accountName}`;
 
-  const secondarySubtitle = !isTransfer
-    ? transaction.note
-    : null;
-
-  const amountValue = Math.abs(
-    Number(transaction.amount || 0)
-  );
+  const secondarySubtitle = !isTransfer ? transaction.note : null;
+  const amountValue = Math.abs(Number(transaction.amount || 0));
 
   return (
     <div
@@ -114,7 +100,7 @@ export default function TransactionRow({
     >
       {isTransfer ? (
         <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
-          <Icon className="w-4 h-4" />
+          <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2]" />
         </div>
       ) : (
         <CategoryIcon
@@ -125,9 +111,7 @@ export default function TransactionRow({
       )}
 
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">
-          {title}
-        </div>
+        <div className="text-sm font-medium truncate">{title}</div>
 
         {primarySubtitle && (
           <div className="text-xs text-muted-foreground truncate">
@@ -145,11 +129,11 @@ export default function TransactionRow({
       <div className="text-right shrink-0">
         <div
           className={cn(
-            'text-sm font-semibold tabular-nums inline-flex items-center gap-1',
+            'text-sm font-semibold tabular-nums inline-flex items-center gap-1 whitespace-nowrap',
             config.color
           )}
         >
-          {config.sign}
+          {config.sign && <span>{config.sign}</span>}
 
           <CurrencyAmount
             value={amountValue}
