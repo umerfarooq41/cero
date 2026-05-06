@@ -42,7 +42,7 @@ export default function Sidebar({ isOpen, onClose }) {
             {/* ✅ LOGO (fixed) */}
             <div className="w-9 h-9 rounded-xl overflow-hidden bg-white dark:bg-neutral-900 shadow-sm ring-1 ring-border">
               <img
-                src="/pwa-192.png"
+                src="/icon-192.png"
                 alt="Cero"
                 className="w-full h-full object-contain p-1"
               />
