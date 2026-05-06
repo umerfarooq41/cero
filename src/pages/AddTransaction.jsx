@@ -109,10 +109,7 @@ function isDebtAccount(account) {
 function isSavingsAccount(account) {
   const accountType = getAccountType(account);
 
-  return (
-    accountType === 'savings' ||
-    accountType === 'investment'
-  );
+  return accountType === 'savings' || accountType === 'investment';
 }
 
 export default function AddTransaction() {
@@ -176,11 +173,7 @@ export default function AddTransaction() {
 
   const filteredCategories = categories.filter((c) => {
     if (type === 'expense') {
-      return (
-        c.type === 'expense' ||
-        c.type === 'savings' ||
-        c.type === 'debt'
-      );
+      return c.type === 'expense';
     }
 
     if (type === 'income') {
@@ -279,51 +272,32 @@ export default function AddTransaction() {
         ...Object.keys(oldDeltas),
       ]);
 
-      const balanceUpdates = [...allAccountIds].map(
-        (changedAccountId) => {
-          const account = accounts.find(
-            (a) => a.id === changedAccountId
-          );
+      const balanceUpdates = [...allAccountIds].map((changedAccountId) => {
+        const account = accounts.find((a) => a.id === changedAccountId);
 
-          if (!account) return Promise.resolve();
+        if (!account) return Promise.resolve();
 
-          const delta =
-            (newDeltas[changedAccountId] || 0) -
-            (oldDeltas[changedAccountId] || 0);
+        const delta =
+          (newDeltas[changedAccountId] || 0) -
+          (oldDeltas[changedAccountId] || 0);
 
-          return accountsApi.update(changedAccountId, {
-            balance: (Number(account.balance) || 0) + delta,
-          });
-        }
-      );
+        return accountsApi.update(changedAccountId, {
+          balance: (Number(account.balance) || 0) + delta,
+        });
+      });
 
       await Promise.all(balanceUpdates);
 
-      queryClient.invalidateQueries({
-        queryKey: ['transactions'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
 
-      queryClient.invalidateQueries({
-        queryKey: ['all-transactions'],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ['accounts'],
-      });
-
-      toast.success(
-        isEditing
-          ? 'Transaction updated'
-          : 'Transaction added'
-      );
+      toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
 
       navigate('/transactions');
     } catch (error) {
       console.error('Transaction save failed:', error);
-
-      toast.error(
-        error.message || 'Could not save transaction'
-      );
+      toast.error(error.message || 'Could not save transaction');
     } finally {
       setSaving(false);
     }
@@ -342,9 +316,7 @@ export default function AddTransaction() {
         </Button>
 
         <h1 className="text-xl font-bold tracking-tight">
-          {isEditing
-            ? 'Edit Transaction'
-            : 'Add Transaction'}
+          {isEditing ? 'Edit Transaction' : 'Add Transaction'}
         </h1>
       </div>
 
@@ -401,9 +373,7 @@ export default function AddTransaction() {
       <div className="space-y-4 bg-card rounded-xl border border-border p-5">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">
-            {type === 'transfer'
-              ? 'From Account'
-              : 'Account'}
+            {type === 'transfer' ? 'From Account' : 'Account'}
           </label>
 
           <Select
@@ -426,10 +396,7 @@ export default function AddTransaction() {
 
             <SelectContent>
               {accounts.map((a) => (
-                <SelectItem
-                  key={a.id}
-                  value={a.id}
-                >
+                <SelectItem key={a.id} value={a.id}>
                   {a.name}
                 </SelectItem>
               ))}
@@ -458,10 +425,7 @@ export default function AddTransaction() {
                 {accounts
                   .filter((a) => a.id !== accountId)
                   .map((a) => (
-                    <SelectItem
-                      key={a.id}
-                      value={a.id}
-                    >
+                    <SelectItem key={a.id} value={a.id}>
                       {a.name}
                     </SelectItem>
                   ))}
@@ -487,19 +451,12 @@ export default function AddTransaction() {
 
               <SelectContent>
                 {filteredCategories.map((c) => (
-                  <SelectItem
-                    key={c.id}
-                    value={c.id}
-                  >
+                  <SelectItem key={c.id} value={c.id}>
                     <div className="flex items-center gap-2">
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{
-                          backgroundColor:
-                            c.color || '#0078D4',
-                        }}
+                        style={{ backgroundColor: c.color || '#0078D4' }}
                       />
-
                       {c.name}
                     </div>
                   </SelectItem>
@@ -507,11 +464,13 @@ export default function AddTransaction() {
               </SelectContent>
             </Select>
 
-            {type === 'transfer' && transferCategoryType && filteredCategories.length === 0 && (
-              <p className="text-[11px] text-muted-foreground">
-                No matching {transferCategoryType} categories found.
-              </p>
-            )}
+            {type === 'transfer' &&
+              transferCategoryType &&
+              filteredCategories.length === 0 && (
+                <p className="text-[11px] text-muted-foreground">
+                  No matching {transferCategoryType} categories found.
+                </p>
+              )}
           </div>
         )}
 
@@ -546,11 +505,7 @@ export default function AddTransaction() {
         disabled={saving || !amount}
         className="w-full h-12 mt-6 text-sm font-semibold"
       >
-        {saving
-          ? 'Saving...'
-          : isEditing
-            ? 'Save Changes'
-            : 'Add Transaction'}
+        {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
       </Button>
     </div>
   );
