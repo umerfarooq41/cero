@@ -21,6 +21,27 @@ function CurrencyAmount({ value, formatCurrency }) {
   );
 }
 
+function formatTransactionType(type) {
+  if (!type) return 'Transaction';
+
+  return type
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function getTransferType(account, toAccount) {
+  const target = toAccount || account;
+  const category = target?.category || target?.type;
+
+  if (!category) return 'Transfer';
+
+  if (category === 'asset') return 'Saving';
+  if (category === 'liability') return 'Debt';
+
+  return formatTransactionType(category);
+}
+
 export default function TransactionRow({
   transaction,
   category,
@@ -31,28 +52,67 @@ export default function TransactionRow({
   onClick,
 }) {
   const typeConfig = {
-    income: { icon: ArrowDownLeft, color: 'text-[hsl(var(--success))]', sign: '+' },
-    expense: { icon: ArrowUpRight, color: 'text-destructive', sign: '-' },
-    transfer: { icon: ArrowLeftRight, color: 'text-primary', sign: '' },
+    income: {
+      icon: ArrowDownLeft,
+      color: 'text-[hsl(var(--success))]',
+      sign: '+',
+    },
+    expense: {
+      icon: ArrowUpRight,
+      color: 'text-destructive',
+      sign: '-',
+    },
+    transfer: {
+      icon: ArrowLeftRight,
+      color: 'text-primary',
+      sign: '',
+    },
   };
 
-  const config = typeConfig[transaction.type] || typeConfig.expense;
-  const Icon = transaction.type === 'transfer' ? ArrowLeftRight : null;
-  const title = transaction.type === 'transfer' ? 'Transfer' : category?.name || 'Uncategorized';
+  const config =
+    typeConfig[transaction.type] || typeConfig.expense;
 
-  const subtitle =
+  const Icon =
     transaction.type === 'transfer'
-      ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
-      : transaction.note;
+      ? ArrowLeftRight
+      : null;
 
-  const amountValue = Math.abs(Number(transaction.amount || 0));
+  const isTransfer =
+    transaction.type === 'transfer';
+
+  const accountName =
+    account?.name || 'Account';
+
+  const transactionTypeLabel =
+    formatTransactionType(transaction.type);
+
+  const transferTypeLabel =
+    getTransferType(account, toAccount);
+
+  const title = isTransfer
+    ? [account?.name, toAccount?.name]
+        .filter(Boolean)
+        .join(' → ')
+    : category?.name || 'Uncategorized';
+
+  const primarySubtitle = isTransfer
+    ? `Transfer - ${transferTypeLabel}`
+    : `${transactionTypeLabel} - ${accountName}`;
+
+  const secondarySubtitle = !isTransfer
+    ? transaction.note
+    : null;
+
+  const amountValue = Math.abs(
+    Number(transaction.amount || 0)
+  );
 
   return (
     <div
       onClick={onClick}
       className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer group"
     >
-      {transaction.type === 'transfer' ? (
+      {isTransfer ? (
         <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
           <Icon className="w-4 h-4" />
         </div>
@@ -65,9 +125,20 @@ export default function TransactionRow({
       )}
 
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{title}</div>
-        {subtitle && (
-          <div className="text-xs text-muted-foreground truncate">{subtitle}</div>
+        <div className="text-sm font-medium truncate">
+          {title}
+        </div>
+
+        {primarySubtitle && (
+          <div className="text-xs text-muted-foreground truncate">
+            {primarySubtitle}
+          </div>
+        )}
+
+        {secondarySubtitle && (
+          <div className="text-[11px] text-muted-foreground/80 truncate">
+            {secondarySubtitle}
+          </div>
         )}
       </div>
 
@@ -79,12 +150,12 @@ export default function TransactionRow({
           )}
         >
           {config.sign}
-          <CurrencyAmount value={amountValue} formatCurrency={formatCurrency} />
-        </div>
 
-        {transaction.type !== 'transfer' && account && (
-          <div className="text-[11px] text-muted-foreground">{account.name}</div>
-        )}
+          <CurrencyAmount
+            value={amountValue}
+            formatCurrency={formatCurrency}
+          />
+        </div>
       </div>
 
       <button

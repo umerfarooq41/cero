@@ -37,16 +37,11 @@ export default function LeftToAllocateBanner({
     : isOver
       ? (
           <span className="inline-flex items-center gap-1">
-            <span>Over-allocated by</span>
+            <span>Over by</span>
             {money(Math.abs(leftToAllocate))}
           </span>
         )
-      : (
-          <span className="inline-flex items-center gap-1">
-            {money(leftToAllocate)}
-            <span>left to allocate</span>
-          </span>
-        );
+      : 'Unassigned money remaining';
 
   return (
     <div
@@ -60,6 +55,7 @@ export default function LeftToAllocateBanner({
           <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
             Income
           </div>
+
           <div className="text-base font-bold tabular-nums inline-flex items-center gap-1">
             {money(totalIncome)}
           </div>

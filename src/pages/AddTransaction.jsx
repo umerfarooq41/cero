@@ -91,6 +91,30 @@ function getTransactionDeltas(transaction, accounts) {
   return deltas;
 }
 
+function getAccountType(account) {
+  return account?.type || account?.account_type || '';
+}
+
+function isDebtAccount(account) {
+  const accountType = getAccountType(account);
+
+  return (
+    account?.category === 'liability' ||
+    accountType === 'credit_card' ||
+    accountType === 'loan' ||
+    accountType === 'debt'
+  );
+}
+
+function isSavingsAccount(account) {
+  const accountType = getAccountType(account);
+
+  return (
+    accountType === 'savings' ||
+    accountType === 'investment'
+  );
+}
+
 export default function AddTransaction() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -127,6 +151,29 @@ export default function AddTransaction() {
     setNote(existingTransaction.note || '');
   }, [existingTransaction]);
 
+  const selectedFromAccount = accounts.find((a) => a.id === accountId);
+  const selectedToAccount = accounts.find((a) => a.id === toAccountId);
+
+  const getTransferCategoryType = () => {
+    if (type !== 'transfer') return null;
+
+    const involvesDebt =
+      isDebtAccount(selectedFromAccount) ||
+      isDebtAccount(selectedToAccount);
+
+    if (involvesDebt) return 'debt';
+
+    const involvesSavings =
+      isSavingsAccount(selectedFromAccount) ||
+      isSavingsAccount(selectedToAccount);
+
+    if (involvesSavings) return 'savings';
+
+    return null;
+  };
+
+  const transferCategoryType = getTransferCategoryType();
+
   const filteredCategories = categories.filter((c) => {
     if (type === 'expense') {
       return (
@@ -140,8 +187,21 @@ export default function AddTransaction() {
       return c.type === 'income';
     }
 
+    if (type === 'transfer') {
+      if (!transferCategoryType) return false;
+      return c.type === transferCategoryType;
+    }
+
     return false;
   });
+
+  const shouldShowCategory =
+    type !== 'transfer' || Boolean(transferCategoryType);
+
+  const categoryPlaceholder =
+    type === 'transfer' && !transferCategoryType
+      ? 'No category needed'
+      : 'Select category';
 
   const handleSubmit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -158,11 +218,6 @@ export default function AddTransaction() {
       return;
     }
 
-    if (type !== 'transfer' && !categoryId) {
-      toast.error('Select a category');
-      return;
-    }
-
     if (type === 'transfer' && !toAccountId) {
       toast.error('Select a destination account');
       return;
@@ -170,6 +225,16 @@ export default function AddTransaction() {
 
     if (type === 'transfer' && accountId === toAccountId) {
       toast.error('Choose two different accounts for a transfer');
+      return;
+    }
+
+    if (type !== 'transfer' && !categoryId) {
+      toast.error('Select a category');
+      return;
+    }
+
+    if (type === 'transfer' && transferCategoryType && !categoryId) {
+      toast.error('Select a category');
       return;
     }
 
@@ -188,10 +253,7 @@ export default function AddTransaction() {
         type,
         date,
         note: note || null,
-        category_id:
-          type !== 'transfer'
-            ? categoryId || null
-            : null,
+        category_id: categoryId || null,
         account_id: accountId || null,
         to_account_id:
           type === 'transfer'
@@ -337,44 +399,6 @@ export default function AddTransaction() {
       </div>
 
       <div className="space-y-4 bg-card rounded-xl border border-border p-5">
-        {type !== 'transfer' && (
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Category
-            </label>
-
-            <Select
-              value={categoryId}
-              onValueChange={setCategoryId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-
-              <SelectContent>
-                {filteredCategories.map((c) => (
-                  <SelectItem
-                    key={c.id}
-                    value={c.id}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{
-                          backgroundColor:
-                            c.color || '#0078D4',
-                        }}
-                      />
-
-                      {c.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">
             {type === 'transfer'
@@ -384,7 +408,17 @@ export default function AddTransaction() {
 
           <Select
             value={accountId}
-            onValueChange={setAccountId}
+            onValueChange={(value) => {
+              setAccountId(value);
+
+              if (type === 'transfer') {
+                setCategoryId('');
+
+                if (value === toAccountId) {
+                  setToAccountId('');
+                }
+              }
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select account" />
@@ -411,7 +445,10 @@ export default function AddTransaction() {
 
             <Select
               value={toAccountId}
-              onValueChange={setToAccountId}
+              onValueChange={(value) => {
+                setToAccountId(value);
+                setCategoryId('');
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select destination" />
@@ -430,6 +467,51 @@ export default function AddTransaction() {
                   ))}
               </SelectContent>
             </Select>
+          </div>
+        )}
+
+        {shouldShowCategory && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Category
+            </label>
+
+            <Select
+              value={categoryId}
+              onValueChange={setCategoryId}
+              disabled={type === 'transfer' && !transferCategoryType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={categoryPlaceholder} />
+              </SelectTrigger>
+
+              <SelectContent>
+                {filteredCategories.map((c) => (
+                  <SelectItem
+                    key={c.id}
+                    value={c.id}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            c.color || '#0078D4',
+                        }}
+                      />
+
+                      {c.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {type === 'transfer' && transferCategoryType && filteredCategories.length === 0 && (
+              <p className="text-[11px] text-muted-foreground">
+                No matching {transferCategoryType} categories found.
+              </p>
+            )}
           </div>
         )}
 
