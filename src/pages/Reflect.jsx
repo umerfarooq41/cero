@@ -99,6 +99,7 @@ function MonthYearToggle({ currentMonth, onChange }) {
           type="button"
           onClick={() => updateYear(year - 1)}
           className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition"
+          aria-label="Previous year"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
@@ -112,6 +113,7 @@ function MonthYearToggle({ currentMonth, onChange }) {
           type="button"
           onClick={() => updateYear(year + 1)}
           className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition"
+          aria-label="Next year"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -142,6 +144,19 @@ function MonthYearToggle({ currentMonth, onChange }) {
   );
 }
 
+function InlineMoney({ children, className }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center align-middle whitespace-nowrap leading-none [&_svg]:shrink-0 [&_img]:shrink-0',
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 function SummaryCard({ title, value, subtitle, icon: Icon, tone = 'default' }) {
   const toneClass =
     tone === 'good'
@@ -168,7 +183,7 @@ function SummaryCard({ title, value, subtitle, icon: Icon, tone = 'default' }) {
   return (
     <Card
       className={cn(
-        'p-4 overflow-hidden relative',
+        'p-4 overflow-hidden relative min-h-[112px]',
         tone === 'good' &&
           'bg-gradient-to-br from-emerald-50 via-card to-card dark:from-emerald-950/30',
         tone === 'bad' &&
@@ -181,16 +196,25 @@ function SummaryCard({ title, value, subtitle, icon: Icon, tone = 'default' }) {
     >
       <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/35 dark:bg-white/5" />
 
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="space-y-1 min-w-0">
-          <p className="text-xs text-muted-foreground">{title}</p>
-          <p className={cn('text-xl font-bold tabular-nums', toneClass)}>
-            {value}
+      <div className="relative flex h-full items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground mb-2 leading-none">
+            {title}
           </p>
+
+          <div
+            className={cn(
+              'text-xl font-bold tabular-nums leading-none flex items-center min-h-[24px]',
+              toneClass
+            )}
+          >
+            <InlineMoney>{value}</InlineMoney>
+          </div>
+
           {subtitle && (
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
+            <div className="mt-2 text-[11px] text-muted-foreground leading-snug flex items-center gap-x-1 gap-y-1 flex-wrap">
               {subtitle}
-            </p>
+            </div>
           )}
         </div>
 
@@ -367,12 +391,15 @@ export default function Reflect() {
       text:
         netCashFlow >= 0 ? (
           <>
-            You kept {formatCurrency(netCashFlow)} after expenses this month.
+            You kept{' '}
+            <InlineMoney>{formatCurrency(netCashFlow)}</InlineMoney> after
+            expenses this month.
           </>
         ) : (
           <>
-            You spent {formatCurrency(Math.abs(netCashFlow))} more than your
-            income this month.
+            You spent{' '}
+            <InlineMoney>{formatCurrency(Math.abs(netCashFlow))}</InlineMoney>{' '}
+            more than your income this month.
           </>
         ),
       tone: netCashFlow >= 0 ? 'good' : 'bad',
@@ -393,7 +420,9 @@ export default function Reflect() {
       title: topCategory ? `Largest spend: ${topCategory.name}` : 'No spending yet',
       text: topCategory ? (
         <>
-          {topCategory.name} used {formatCurrency(topCategory.value)} this month.
+          {topCategory.name} used{' '}
+          <InlineMoney>{formatCurrency(topCategory.value)}</InlineMoney> this
+          month.
         </>
       ) : (
         'Once you add expenses, your top spending categories will appear here.'
@@ -428,7 +457,10 @@ export default function Reflect() {
           value={formatCurrency(income)}
           subtitle={
             plannedIncome > 0 ? (
-              <>{formatCurrency(plannedIncome)} planned</>
+              <>
+                <InlineMoney>{formatCurrency(plannedIncome)}</InlineMoney>
+                <span>planned</span>
+              </>
             ) : (
               'No planned income'
             )
@@ -442,7 +474,10 @@ export default function Reflect() {
           value={formatCurrency(expenses)}
           subtitle={
             plannedExpenses > 0 ? (
-              <>{formatCurrency(plannedExpenses)} planned</>
+              <>
+                <InlineMoney>{formatCurrency(plannedExpenses)}</InlineMoney>
+                <span>planned</span>
+              </>
             ) : (
               'No planned expenses'
             )
@@ -464,7 +499,10 @@ export default function Reflect() {
           value={formatCurrency(netWorth)}
           subtitle={
             <>
-              {formatCurrency(totalAssets)} assets • {formatCurrency(totalLiabilities)} debt
+              <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
+              <span>assets •</span>
+              <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+              <span>debt</span>
             </>
           }
           icon={TrendingUp}
@@ -569,16 +607,18 @@ export default function Reflect() {
             </div>
           </div>
 
-          <div className="text-center text-sm font-medium">
+          <div className="text-center text-sm font-medium flex justify-center flex-wrap gap-x-1 gap-y-1">
             {leftToAllocate === 0 ? (
               'Every planned amount is allocated.'
             ) : leftToAllocate > 0 ? (
               <>
-                {formatCurrency(leftToAllocate)} still left to allocate.
+                <InlineMoney>{formatCurrency(leftToAllocate)}</InlineMoney>
+                <span>still left to allocate.</span>
               </>
             ) : (
               <>
-                {formatCurrency(Math.abs(leftToAllocate))} over-allocated.
+                <InlineMoney>{formatCurrency(Math.abs(leftToAllocate))}</InlineMoney>
+                <span>over-allocated.</span>
               </>
             )}
           </div>
@@ -630,7 +670,7 @@ export default function Reflect() {
                     />
                     <span className="text-sm flex-1 truncate">{category.name}</span>
                     <span className="text-sm font-medium tabular-nums">
-                      {formatCurrency(category.value)}
+                      <InlineMoney>{formatCurrency(category.value)}</InlineMoney>
                     </span>
                   </div>
                 ))}
