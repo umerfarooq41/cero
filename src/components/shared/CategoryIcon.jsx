@@ -81,7 +81,6 @@ import {
   Wrench,
   Hammer,
   Paintbrush,
-  Mosque,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -192,7 +191,6 @@ const iconMap = {
   tools: Wrench,
   repair: Hammer,
   paint: Paintbrush,
-  mosque: Mosque,
 };
 
 export const iconNames = Object.keys(iconMap);
