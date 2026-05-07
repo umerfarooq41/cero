@@ -1,16 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, PencilLine, Trash2, AlertTriangle } from 'lucide-react';
+import {
+  ArrowLeft,
+  PencilLine,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription,
 } from '@/components/ui/dialog';
+
 import {
   Select,
   SelectContent,
@@ -28,6 +34,7 @@ import {
 
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
@@ -64,27 +71,42 @@ export default function AccountDetail() {
 
   const transactions = accountTransactions.slice(0, 50);
 
-  const replacementAccounts = accounts.filter((a) => a.id !== accountId);
+  const replacementAccounts = accounts.filter(
+    (a) => a.id !== accountId
+  );
 
   const handleDeleteTransaction = async (id) => {
     try {
       await transactionsApi.delete(id);
 
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({
+        queryKey: ['all-transactions'],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['transactions'],
+      });
 
       toast.success('Transaction deleted');
     } catch (error) {
       console.error('Transaction delete failed:', error);
-      toast.error(error.message || 'Could not delete transaction');
+
+      toast.error(
+        error.message || 'Could not delete transaction'
+      );
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!account) return;
 
-    if (accountTransactions.length > 0 && !replacementAccountId) {
-      toast.error('Select another account for existing transactions');
+    if (
+      accountTransactions.length > 0 &&
+      !replacementAccountId
+    ) {
+      toast.error(
+        'Select another account for existing transactions'
+      );
       return;
     }
 
@@ -104,22 +126,37 @@ export default function AccountDetail() {
               payload.to_account_id = replacementAccountId;
             }
 
-            return transactionsApi.update(transaction.id, payload);
+            return transactionsApi.update(
+              transaction.id,
+              payload
+            );
           })
         );
       }
 
       await accountsApi.delete(accountId);
 
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({
+        queryKey: ['accounts'],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['transactions'],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['all-transactions'],
+      });
 
       toast.success('Account deleted');
+
       navigate('/accounts');
     } catch (error) {
       console.error('Account delete failed:', error);
-      toast.error(error.message || 'Could not delete account');
+
+      toast.error(
+        error.message || 'Could not delete account'
+      );
     } finally {
       setDeleting(false);
       setDeleteOpen(false);
@@ -129,7 +166,10 @@ export default function AccountDetail() {
   if (!account) {
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
-        <p className="text-muted-foreground">Account not found</p>
+        <p className="text-muted-foreground">
+          Account not found
+        </p>
+
         <Button
           variant="ghost"
           onClick={() => navigate('/accounts')}
@@ -157,6 +197,7 @@ export default function AccountDetail() {
           <h1 className="text-xl font-bold tracking-tight truncate">
             {account.name}
           </h1>
+
           <p className="text-xs text-muted-foreground capitalize">
             {account.type?.replace('_', ' ') || 'Account'}
           </p>
@@ -165,7 +206,9 @@ export default function AccountDetail() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(`/accounts/${accountId}/edit`)}
+          onClick={() =>
+            navigate(`/accounts/${accountId}/edit`)
+          }
         >
           <PencilLine className="w-4 h-4" />
         </Button>
@@ -193,9 +236,14 @@ export default function AccountDetail() {
               : 'text-foreground'
           )}
         >
-          {account.category === 'liability' && <span>-</span>}
+          {account.category === 'liability' && (
+            <span>-</span>
+          )}
+
           <InlineMoney>
-            {formatCurrency(Math.abs(Number(account.balance) || 0))}
+            {formatCurrency(
+              Math.abs(Number(account.balance) || 0)
+            )}
           </InlineMoney>
         </div>
       </div>
@@ -215,18 +263,33 @@ export default function AccountDetail() {
             <TransactionRow
               key={transaction.id}
               transaction={transaction}
-              category={categories.find((c) => c.id === transaction.category_id)}
-              account={accounts.find((a) => a.id === transaction.account_id)}
-              toAccount={accounts.find((a) => a.id === transaction.to_account_id)}
+              category={categories.find(
+                (c) => c.id === transaction.category_id
+              )}
+              account={accounts.find(
+                (a) => a.id === transaction.account_id
+              )}
+              toAccount={accounts.find(
+                (a) => a.id === transaction.to_account_id
+              )}
               formatCurrency={formatCurrency}
-              onDelete={() => handleDeleteTransaction(transaction.id)}
-              onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
+              onDelete={() =>
+                handleDeleteTransaction(transaction.id)
+              }
+              onClick={() =>
+                navigate(
+                  `/transactions/${transaction.id}/edit`
+                )
+              }
             />
           ))}
         </div>
       )}
 
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <Dialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -234,11 +297,11 @@ export default function AccountDetail() {
               Delete Account
             </DialogTitle>
 
-            <DialogDescription>
+            <p className="text-sm text-muted-foreground">
               {accountTransactions.length > 0
                 ? 'This account has transactions. Choose another account to move them before deleting.'
                 : 'This account has no transactions and can be deleted safely.'}
-            </DialogDescription>
+            </p>
           </DialogHeader>
 
           {accountTransactions.length > 0 && (
@@ -257,7 +320,10 @@ export default function AccountDetail() {
 
                 <SelectContent>
                   {replacementAccounts.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
+                    <SelectItem
+                      key={item.id}
+                      value={item.id}
+                    >
                       {item.name}
                     </SelectItem>
                   ))}
@@ -266,13 +332,19 @@ export default function AccountDetail() {
 
               <p className="text-[11px] text-muted-foreground">
                 {accountTransactions.length} transaction
-                {accountTransactions.length > 1 ? 's' : ''} will be reassigned.
+                {accountTransactions.length > 1
+                  ? 's'
+                  : ''}{' '}
+                will be reassigned.
               </p>
             </div>
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+            >
               Cancel
             </Button>
 
@@ -281,10 +353,13 @@ export default function AccountDetail() {
               onClick={handleDeleteAccount}
               disabled={
                 deleting ||
-                (accountTransactions.length > 0 && !replacementAccountId)
+                (accountTransactions.length > 0 &&
+                  !replacementAccountId)
               }
             >
-              {deleting ? 'Deleting...' : 'Delete Account'}
+              {deleting
+                ? 'Deleting...'
+                : 'Delete Account'}
             </Button>
           </DialogFooter>
         </DialogContent>
