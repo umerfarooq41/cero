@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  ArrowUpRight,
-  ArrowDownLeft,
   ArrowLeftRight,
   Trash2,
 } from 'lucide-react';
@@ -99,8 +97,8 @@ export default function TransactionRow({
       className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer group"
     >
       {isTransfer ? (
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
-          <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2]" />
+        <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
+          <ArrowLeftRight className="w-3 h-3 stroke-[2.2]" />
         </div>
       ) : (
         <CategoryIcon

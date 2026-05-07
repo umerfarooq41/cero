@@ -1,18 +1,68 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { iconNames } from '@/components/shared/CategoryIcon';
 import CategoryIcon from '@/components/shared/CategoryIcon';
+import { cn } from '@/lib/utils';
 
 const colors = [
-  '#0078D4', '#107C10', '#C50F1F', '#8764B8', '#CA5010', 
-  '#008272', '#4F6BED', '#69797E', '#D83B01', '#E3008C',
-  '#00B294', '#4A154B', '#FFB900', '#744DA9', '#038387'
+  '#0078D4',
+  '#107C10',
+  '#C50F1F',
+  '#8764B8',
+  '#CA5010',
+  '#008272',
+  '#4F6BED',
+  '#69797E',
+  '#D83B01',
+  '#E3008C',
+  '#00B294',
+  '#4A154B',
+  '#FFB900',
+  '#744DA9',
+  '#038387',
+  '#E83E8C',
+  '#00B7C3',
+  '#5C2D91',
+  '#498205',
+  '#A80000',
+  '#2D7D9A',
+  '#6B7280',
+  '#111827',
+  '#16A34A',
+  '#EA580C',
+  '#9333EA',
+  '#DB2777',
+  '#0891B2',
+  '#65A30D',
+  '#F59E0B',
 ];
 
-export default function CategoryCreatorModal({ open, onClose, onSave, parentCategories, initialType }) {
+const randomColor = () => colors[Math.floor(Math.random() * colors.length)];
+
+export default function CategoryCreatorModal({
+  open,
+  onClose,
+  onSave,
+  parentCategories = [],
+  initialType,
+}) {
+  const nameRef = useRef(null);
+
   const [name, setName] = useState('');
   const [type, setType] = useState(initialType || 'expense');
   const [icon, setIcon] = useState('tag');
@@ -20,51 +70,123 @@ export default function CategoryCreatorModal({ open, onClose, onSave, parentCate
   const [parentId, setParentId] = useState('');
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+
+    setName('');
+    setType(initialType || 'expense');
+    setIcon('tag');
+    setColor(randomColor());
+    setParentId('');
+
+    setTimeout(() => nameRef.current?.focus(), 80);
+  }, [open, initialType]);
+
   const handleSave = async () => {
-    if (!name) return;
+    if (!name.trim()) return;
+
     setSaving(true);
-    await onSave({ name, type, icon, color, parent_id: parentId || undefined });
-    setSaving(false);
-    setName(''); setIcon('tag'); setColor(colors[0]); setParentId('');
-    onClose();
+
+    try {
+      await onSave({
+        name: name.trim(),
+        type,
+        icon,
+        color,
+        parent_id: parentId && parentId !== 'none' ? parentId : undefined,
+      });
+
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const filteredParents = parentCategories.filter(c => c.type === type && !c.parent_id);
+  const filteredParents = parentCategories.filter(
+    (c) => c.type === type && !c.parent_id
+  );
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New Category</DialogTitle>
         </DialogHeader>
+
+        <div className="flex items-center gap-3 p-3 rounded-2xl border border-border bg-secondary/40">
+          <CategoryIcon icon={icon} color={color} size="lg" />
+          <div className="min-w-0">
+            <div className="text-sm font-semibold truncate">
+              {name.trim() || 'Category Name'}
+            </div>
+            <div className="text-xs text-muted-foreground capitalize">
+              {type}
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Name</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Category name" />
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Name
+            </label>
+            <Input
+              ref={nameRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Groceries"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSave();
+              }}
+            />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Type</label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="income">Income</SelectItem>
-                <SelectItem value="expense">Expense</SelectItem>
-                <SelectItem value="savings">Savings</SelectItem>
-                <SelectItem value="debt">Debt</SelectItem>
-              </SelectContent>
-            </Select>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Type
+            </label>
+            <div className="grid grid-cols-4 gap-1.5">
+              {['income', 'expense', 'savings', 'debt'].map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    setType(item);
+                    setParentId('');
+                  }}
+                  className={cn(
+                    'py-2 px-2 rounded-lg text-xs font-medium transition-all capitalize',
+                    type === item
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-secondary text-muted-foreground hover:bg-accent'
+                  )}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
           </div>
 
           {filteredParents.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Parent (optional)</label>
-              <Select value={parentId} onValueChange={setParentId}>
-                <SelectTrigger><SelectValue placeholder="None (top-level)" /></SelectTrigger>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Parent optional
+              </label>
+              <Select
+                value={parentId || 'none'}
+                onValueChange={(value) =>
+                  setParentId(value === 'none' ? '' : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="None top-level" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None (top-level)</SelectItem>
-                  {filteredParents.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  <SelectItem value="none">None top-level</SelectItem>
+                  {filteredParents.map((parent) => (
+                    <SelectItem key={parent.id} value={parent.id}>
+                      {parent.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -72,42 +194,64 @@ export default function CategoryCreatorModal({ open, onClose, onSave, parentCate
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Icon</label>
-            <div className="grid grid-cols-8 gap-1.5 max-h-40 overflow-y-auto p-1">
-              {iconNames.map(name => (
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Color
+            </label>
+
+            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border bg-secondary/20 p-2">
+              {colors.map((item) => (
                 <button
-                  key={name}
-                  onClick={() => setIcon(name)}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    icon === name ? 'bg-primary/10 ring-2 ring-primary' : 'hover:bg-accent'
-                  }`}
-                >
-                  <CategoryIcon icon={name} color={icon === name ? color : '#888'} size="sm" />
-                </button>
+                  key={item}
+                  type="button"
+                  onClick={() => setColor(item)}
+                  className={cn(
+                    'w-7 h-7 rounded-lg border border-border transition-all',
+                    color === item
+                      ? 'ring-2 ring-offset-2 ring-primary scale-110'
+                      : 'hover:scale-105'
+                  )}
+                  style={{ backgroundColor: item }}
+                />
               ))}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Color</label>
-            <div className="flex flex-wrap gap-2">
-              {colors.map(c => (
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Icon
+            </label>
+
+            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-border bg-secondary/20">
+              {iconNames.map((item) => (
                 <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  className={`w-7 h-7 rounded-lg transition-all ${
-                    color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
+                  key={item}
+                  type="button"
+                  onClick={() => setIcon(item)}
+                  className={cn(
+                    'h-10 rounded-xl transition-all flex items-center justify-center border',
+                    icon === item
+                      ? 'bg-primary/10 border-primary ring-1 ring-primary scale-105'
+                      : 'border-transparent hover:bg-accent hover:border-border'
+                  )}
+                  title={item}
+                >
+                  <CategoryIcon
+                    icon={item}
+                    color={icon === item ? color : '#888'}
+                    size="sm"
+                  />
+                </button>
               ))}
             </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !name}>
-            {saving ? 'Saving...' : 'Save'}
+
+        <DialogFooter className="mt-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving || !name.trim()}>
+            {saving ? 'Saving...' : 'Create Category'}
           </Button>
         </DialogFooter>
       </DialogContent>

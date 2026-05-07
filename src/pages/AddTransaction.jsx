@@ -54,6 +54,15 @@ function CurrencyPrefix({ currency }) {
   return <span>{currencyCode}</span>;
 }
 
+function normalizeCategoryType(value) {
+  const normalized = String(value || '').toLowerCase().trim();
+
+  if (normalized === 'saving') return 'savings';
+  if (normalized === 'liability') return 'debt';
+
+  return normalized;
+}
+
 function addDelta(deltas, accountId, amount) {
   if (!accountId || !amount) return;
   deltas[accountId] = (deltas[accountId] || 0) + amount;
@@ -81,9 +90,7 @@ function getTransactionDeltas(transaction, accounts) {
 
   if (transaction.type === 'transfer' && destination) {
     const destinationDelta =
-      destination.category === 'liability'
-        ? -amount
-        : amount;
+      destination.category === 'liability' ? -amount : amount;
 
     addDelta(deltas, destination.id, destinationDelta);
   }
@@ -116,7 +123,6 @@ export default function AddTransaction() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
-
   const queryClient = useQueryClient();
 
   const { data: categories = [] } = useCategories();
@@ -124,7 +130,6 @@ export default function AddTransaction() {
   const { data: allTransactions = [] } = useAllTransactions();
 
   const existingTransaction = allTransactions.find((t) => t.id === id);
-
   const currency = useCurrency();
 
   const [amount, setAmount] = useState('');
@@ -155,8 +160,7 @@ export default function AddTransaction() {
     if (type !== 'transfer') return null;
 
     const involvesDebt =
-      isDebtAccount(selectedFromAccount) ||
-      isDebtAccount(selectedToAccount);
+      isDebtAccount(selectedFromAccount) || isDebtAccount(selectedToAccount);
 
     if (involvesDebt) return 'debt';
 
@@ -171,22 +175,46 @@ export default function AddTransaction() {
 
   const transferCategoryType = getTransferCategoryType();
 
-  const filteredCategories = categories.filter((c) => {
-    if (type === 'expense') {
-      return c.type === 'expense';
-    }
+  const filteredCategories = categories.filter((category) => {
+    const categoryType = normalizeCategoryType(category.type);
 
-    if (type === 'income') {
-      return c.type === 'income';
-    }
+    if (type === 'expense') return categoryType === 'expense';
+    if (type === 'income') return categoryType === 'income';
 
     if (type === 'transfer') {
       if (!transferCategoryType) return false;
-      return c.type === transferCategoryType;
+      return categoryType === transferCategoryType;
     }
 
     return false;
   });
+
+  useEffect(() => {
+    if (!categoryId) return;
+
+    const selectedCategory = categories.find((c) => c.id === categoryId);
+    const selectedCategoryType = normalizeCategoryType(selectedCategory?.type);
+
+    if (type === 'expense' && selectedCategoryType !== 'expense') {
+      setCategoryId('');
+    }
+
+    if (type === 'income' && selectedCategoryType !== 'income') {
+      setCategoryId('');
+    }
+
+    if (
+      type === 'transfer' &&
+      transferCategoryType &&
+      selectedCategoryType !== transferCategoryType
+    ) {
+      setCategoryId('');
+    }
+
+    if (type === 'transfer' && !transferCategoryType) {
+      setCategoryId('');
+    }
+  }, [type, transferCategoryType, categoryId, categories]);
 
   const shouldShowCategory =
     type !== 'transfer' || Boolean(transferCategoryType);
@@ -203,11 +231,7 @@ export default function AddTransaction() {
     }
 
     if (!accountId) {
-      toast.error(
-        type === 'transfer'
-          ? 'Select a source account'
-          : 'Select an account'
-      );
+      toast.error(type === 'transfer' ? 'Select a source account' : 'Select an account');
       return;
     }
 
@@ -248,10 +272,7 @@ export default function AddTransaction() {
         note: note || null,
         category_id: categoryId || null,
         account_id: accountId || null,
-        to_account_id:
-          type === 'transfer'
-            ? toAccountId || null
-            : null,
+        to_account_id: type === 'transfer' ? toAccountId || null : null,
       };
 
       if (isEditing) {
@@ -293,7 +314,6 @@ export default function AddTransaction() {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
 
       toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
-
       navigate('/transactions');
     } catch (error) {
       console.error('Transaction save failed:', error);

@@ -1,27 +1,69 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { iconNames } from '@/components/shared/CategoryIcon';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
 
 const COLORS = [
-  '#0078D4', '#107C10', '#C50F1F', '#8764B8', '#CA5010',
-  '#008272', '#4F6BED', '#69797E', '#D83B01', '#E3008C',
-  '#00B294', '#FFB900', '#744DA9', '#038387', '#0099BC',
+  '#0078D4',
+  '#107C10',
+  '#C50F1F',
+  '#8764B8',
+  '#CA5010',
+  '#008272',
+  '#4F6BED',
+  '#69797E',
+  '#D83B01',
+  '#E3008C',
+  '#00B294',
+  '#FFB900',
+  '#744DA9',
+  '#038387',
+  '#0099BC',
+  '#E83E8C',
+  '#00B7C3',
+  '#5C2D91',
+  '#498205',
+  '#A80000',
+  '#2D7D9A',
+  '#6B7280',
+  '#111827',
+  '#16A34A',
+  '#EA580C',
+  '#9333EA',
+  '#DB2777',
+  '#0891B2',
+  '#65A30D',
+  '#F59E0B',
 ];
 
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
 export default function CategoryEditorModal({
-  open, onClose, onSave,
-  parentCategories,
+  open,
+  onClose,
+  onSave,
+  parentCategories = [],
   initialType = 'expense',
   editingCategory = null,
 }) {
   const nameRef = useRef(null);
+
   const [name, setName] = useState('');
   const [type, setType] = useState(initialType);
   const [icon, setIcon] = useState('tag');
@@ -31,143 +73,195 @@ export default function CategoryEditorModal({
 
   const isEditing = !!editingCategory;
 
-  // Seed form when editing
   useEffect(() => {
-    if (open) {
-      if (editingCategory) {
-        setName(editingCategory.name || '');
-        setType(editingCategory.type || initialType);
-        setIcon(editingCategory.icon || 'tag');
-        setColor(editingCategory.color || COLORS[0]);
-        setParentId(editingCategory.parent_id || '');
-      } else {
-        setName('');
-        setType(initialType);
-        setIcon('tag');
-        setColor(randomColor());
-        setParentId('');
-      }
-      // Auto-focus name
-      setTimeout(() => nameRef.current?.focus(), 80);
+    if (!open) return;
+
+    if (editingCategory) {
+      setName(editingCategory.name || '');
+      setType(editingCategory.type || initialType);
+      setIcon(editingCategory.icon || 'tag');
+      setColor(editingCategory.color || COLORS[0]);
+      setParentId(editingCategory.parent_id || '');
+    } else {
+      setName('');
+      setType(initialType);
+      setIcon('tag');
+      setColor(randomColor());
+      setParentId('');
     }
+
+    setTimeout(() => nameRef.current?.focus(), 80);
   }, [open, editingCategory, initialType]);
 
   const handleSave = async () => {
     if (!name.trim()) return;
+
     setSaving(true);
-    await onSave({
-      name: name.trim(),
-      type,
-      icon,
-      color,
-      parent_id: parentId || undefined,
-    }, editingCategory?.id);
-    setSaving(false);
-    onClose();
+
+    try {
+      await onSave(
+        {
+          name: name.trim(),
+          type,
+          icon,
+          color,
+          parent_id: parentId && parentId !== 'none' ? parentId : undefined,
+        },
+        editingCategory?.id
+      );
+
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const filteredParents = parentCategories.filter(c => c.type === type && !c.parent_id && c.id !== editingCategory?.id);
+  const filteredParents = parentCategories.filter(
+    (category) =>
+      category.type === type &&
+      !category.parent_id &&
+      category.id !== editingCategory?.id
+  );
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Category' : 'New Category'}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Edit Category' : 'New Category'}
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Live Preview */}
-        <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl mb-1">
+        <div className="flex items-center gap-3 p-3 rounded-2xl border border-border bg-secondary/40">
           <CategoryIcon icon={icon} color={color} size="lg" />
-          <div>
-            <div className="text-sm font-semibold">{name || 'Category Name'}</div>
-            <div className="text-xs text-muted-foreground capitalize">{type}</div>
+
+          <div className="min-w-0">
+            <div className="text-sm font-semibold truncate">
+              {name.trim() || 'Category Name'}
+            </div>
+            <div className="text-xs text-muted-foreground capitalize">
+              {type}
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4 py-1">
-          {/* Name */}
+        <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Name</label>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Name
+            </label>
             <Input
               ref={nameRef}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Groceries"
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSave();
+              }}
             />
           </div>
 
-          {/* Type */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Type</label>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Type
+            </label>
+
             <div className="grid grid-cols-4 gap-1.5">
-              {['income', 'expense', 'savings', 'debt'].map(t => (
+              {['income', 'expense', 'savings', 'debt'].map((item) => (
                 <button
-                  key={t}
-                  onClick={() => { setType(t); setParentId(''); }}
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    setType(item);
+                    setParentId('');
+                  }}
                   className={cn(
-                    "py-2 px-2 rounded-lg text-xs font-medium transition-all capitalize",
-                    type === t
-                      ? 'bg-primary text-primary-foreground'
+                    'py-2 px-2 rounded-lg text-xs font-medium transition-all capitalize',
+                    type === item
+                      ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'bg-secondary text-muted-foreground hover:bg-accent'
                   )}
                 >
-                  {t}
+                  {item}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Parent */}
           {filteredParents.length > 0 && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Parent (optional)
+                Parent optional
               </label>
-              <Select value={parentId || 'none'} onValueChange={v => setParentId(v === 'none' ? '' : v)}>
-                <SelectTrigger><SelectValue placeholder="None (top-level)" /></SelectTrigger>
+
+              <Select
+                value={parentId || 'none'}
+                onValueChange={(value) =>
+                  setParentId(value === 'none' ? '' : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="None top-level" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None (top-level)</SelectItem>
-                  {filteredParents.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  <SelectItem value="none">None top-level</SelectItem>
+                  {filteredParents.map((parent) => (
+                    <SelectItem key={parent.id} value={parent.id}>
+                      {parent.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          {/* Color */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Color</label>
-            <div className="flex flex-wrap gap-2">
-              {COLORS.map(c => (
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Color
+            </label>
+
+            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border bg-secondary/20 p-2">
+              {COLORS.map((item) => (
                 <button
-                  key={c}
-                  onClick={() => setColor(c)}
+                  key={item}
+                  type="button"
+                  onClick={() => setColor(item)}
                   className={cn(
-                    "w-7 h-7 rounded-lg transition-all",
-                    color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'
+                    'w-7 h-7 rounded-lg border border-border transition-all',
+                    color === item
+                      ? 'ring-2 ring-offset-2 ring-primary scale-110'
+                      : 'hover:scale-105'
                   )}
-                  style={{ backgroundColor: c }}
+                  style={{ backgroundColor: item }}
                 />
               ))}
             </div>
           </div>
 
-          {/* Icon */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Icon</label>
-            <div className="grid grid-cols-8 gap-1 max-h-36 overflow-y-auto p-1 rounded-lg border border-border">
-              {iconNames.map(n => (
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Icon
+            </label>
+
+            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-border bg-secondary/20">
+              {iconNames.map((item) => (
                 <button
-                  key={n}
-                  onClick={() => setIcon(n)}
+                  key={item}
+                  type="button"
+                  onClick={() => setIcon(item)}
                   className={cn(
-                    "p-1 rounded-lg transition-all flex items-center justify-center",
-                    icon === n ? 'bg-primary/10 ring-1 ring-primary' : 'hover:bg-accent'
+                    'h-10 rounded-xl transition-all flex items-center justify-center border',
+                    icon === item
+                      ? 'bg-primary/10 border-primary ring-1 ring-primary scale-105'
+                      : 'border-transparent hover:bg-accent hover:border-border'
                   )}
+                  title={item}
                 >
-                  <CategoryIcon icon={n} color={icon === n ? color : '#999'} size="sm" />
+                  <CategoryIcon
+                    icon={item}
+                    color={icon === item ? color : '#888'}
+                    size="sm"
+                  />
                 </button>
               ))}
             </div>
@@ -175,7 +269,9 @@ export default function CategoryEditorModal({
         </div>
 
         <DialogFooter className="mt-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
           <Button onClick={handleSave} disabled={saving || !name.trim()}>
             {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Category'}
           </Button>
