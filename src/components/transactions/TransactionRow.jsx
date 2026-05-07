@@ -17,7 +17,11 @@ function CurrencyAmount({ value, formatCurrency }) {
 
   return (
     <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap">
-      <img src="/sar.svg" alt="SAR" className="w-3.5 h-3.5 inline-block" />
+      <img
+      src="/sar.svg"
+      alt="SAR"
+      className="w-3.5 h-3.5 inline-block dark:invert"
+      />
       <span>
         {Number(Math.abs(value || 0)).toLocaleString('en-US', {
           minimumFractionDigits: 2,

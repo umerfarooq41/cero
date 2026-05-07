@@ -30,7 +30,11 @@ const SettingRow = ({ icon: Icon, label, description, children }) => (
 );
 
 const SarIcon = () => (
-  <img src="/sar.svg" alt="SAR" className="inline-block w-4 h-4" />
+  <img
+    src="/sar.svg"
+    alt="SAR"
+    className="inline-block w-4 h-4 dark:invert"
+  />
 );
 
 const applyTheme = (theme) => {

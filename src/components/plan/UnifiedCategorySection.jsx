@@ -11,7 +11,11 @@ function Money({ amount, formatCurrency }) {
 
   return (
     <span className="inline-flex items-center gap-1">
-      <img src="/sar.svg" alt="SAR" className="w-3.5 h-3.5" />
+      <img
+      src="/sar.svg"
+      alt="SAR"
+      className="w-3.5 h-3.5 dark:invert"
+      />
       {Number(amount || 0).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,

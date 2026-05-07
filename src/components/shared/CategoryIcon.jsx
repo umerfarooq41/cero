@@ -1,14 +1,12 @@
 import React from 'react';
 import {
   Home,
-  House,
   Car,
   Bus,
   Train,
   Bike,
   Plane,
   Fuel,
-  Route,
   MapPin,
   Hotel,
   Utensils,
@@ -19,7 +17,6 @@ import {
   Pizza,
   Cake,
   Apple,
-  Beef,
   Heart,
   HeartPulse,
   Stethoscope,
@@ -29,7 +26,6 @@ import {
   Dumbbell,
   GraduationCap,
   BookOpen,
-  Library,
   School,
   Wifi,
   Smartphone,
@@ -53,7 +49,6 @@ import {
   PiggyBank,
   Wallet,
   Coins,
-  DollarSign,
   BadgeDollarSign,
   TrendingUp,
   Receipt,
@@ -81,30 +76,28 @@ import {
   Wrench,
   Hammer,
   Paintbrush,
+  Package,
+  Truck,
+  Sofa,
+  Bed,
+  HeartHandshake,
+  LandmarkIcon,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
 const iconMap = {
   home: Home,
-  house: House,
-  rent: Home,
-  housing: House,
-
   car: Car,
   bus: Bus,
   train: Train,
   bike: Bike,
   plane: Plane,
-  travel: Plane,
   fuel: Fuel,
-  route: Route,
   location: MapPin,
   hotel: Hotel,
 
   utensils: Utensils,
-  food: Utensils,
-  dining: Utensils,
   shopping: ShoppingBag,
   groceries: ShoppingCart,
   store: Store,
@@ -112,7 +105,6 @@ const iconMap = {
   pizza: Pizza,
   cake: Cake,
   apple: Apple,
-  beef: Beef,
 
   heart: Heart,
   health: Stethoscope,
@@ -124,7 +116,6 @@ const iconMap = {
 
   education: GraduationCap,
   book: BookOpen,
-  library: Library,
   school: School,
 
   wifi: Wifi,
@@ -144,25 +135,17 @@ const iconMap = {
   jewelry: Gem,
 
   briefcase: Briefcase,
-  work: Briefcase,
-  business: Briefcase,
   building: Building,
 
   bank: Landmark,
   credit: CreditCard,
-  credit_card: CreditCard,
   cash: Banknote,
   wallet: Wallet,
   piggy: PiggyBank,
-  savings: PiggyBank,
   coins: Coins,
-  dollar: DollarSign,
   income: BadgeDollarSign,
-  salary: BadgeDollarSign,
   trending: TrendingUp,
-  investment: TrendingUp,
   receipt: Receipt,
-  bills: Receipt,
   debt: CircleDollarSign,
   loan: HandCoins,
   target: Target,
@@ -191,12 +174,44 @@ const iconMap = {
   tools: Wrench,
   repair: Hammer,
   paint: Paintbrush,
+  package: Package,
+  delivery: Truck,
+  furniture: Sofa,
+  bed: Bed,
+  charity: HeartHandshake,
+  government: LandmarkIcon,
+};
+
+const iconAliases = {
+  house: 'home',
+  rent: 'home',
+  housing: 'home',
+
+  travel: 'plane',
+  route: 'location',
+
+  food: 'utensils',
+  dining: 'utensils',
+  beef: 'apple',
+
+  library: 'book',
+
+  work: 'briefcase',
+  business: 'briefcase',
+
+  credit_card: 'credit',
+  savings: 'piggy',
+  dollar: 'income',
+  salary: 'income',
+  investment: 'trending',
+  bills: 'receipt',
 };
 
 export const iconNames = Object.keys(iconMap);
 
 export default function CategoryIcon({ icon, color, size = 'md', className }) {
-  const IconComponent = iconMap[icon] || Tag;
+  const normalizedIcon = iconAliases[icon] || icon;
+  const IconComponent = iconMap[normalizedIcon] || Tag;
 
   const sizes = {
     xs: 'w-6 h-6',

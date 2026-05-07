@@ -48,7 +48,11 @@ function CurrencyPrefix({ currency }) {
       : currency?.code || currency?.currency || 'SAR';
 
   if (currencyCode === 'SAR') {
-    return <img src="/sar.svg" alt="SAR" className="w-8 h-8 opacity-70" />;
+    return <img
+            src="/sar.svg"
+            alt="SAR"
+            className="w-8 h-8 opacity-70 dark:invert"
+            />;
   }
 
   return <span>{currencyCode}</span>;

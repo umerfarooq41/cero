@@ -32,7 +32,11 @@ export function formatCurrency(amount, symbol = 'SAR') {
   if (symbol === 'SAR') {
     return (
       <span className="inline-flex items-center gap-1">
-        <img src="/sar.svg" alt="SAR" className="w-4 h-4 shrink-0" />
+        <img
+        src="/sar.svg"
+        alt="SAR"
+        className="w-4 h-4 shrink-0 dark:invert"
+        />
         <span>{value}</span>
       </span>
     );
