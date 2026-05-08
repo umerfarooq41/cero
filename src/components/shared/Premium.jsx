@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import AppHeader from '@/components/shared/AppHeader';
 import { cn } from '@/lib/utils';
 
 const toneStyles = {
@@ -105,35 +106,18 @@ export function PageHeader({
   className,
 }) {
   return (
-    <div className={cn('flex items-start justify-between gap-4', className)}>
-      <div className="min-w-0">
-        {eyebrow && (
-          <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            {eyebrow}
-          </div>
-        )}
-        <div className="flex items-center gap-3">
-          {Icon && (
-            <div className="flex h-10 w-10 items-center justify-center rounded-[1.1rem] bg-primary/10 text-primary">
-              <Icon className="h-5 w-5" />
-            </div>
-          )}
-          <div className="min-w-0">
-            <h1 className="truncate text-[1.65rem] font-semibold leading-tight tracking-[-0.01em] sm:text-[2rem]">
-              {title}
-            </h1>
-            {description && (
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-                {description}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-      {actions && <div className="shrink-0">{actions}</div>}
-    </div>
+    <AppHeader
+      title={title}
+      description={description}
+      eyebrow={eyebrow}
+      icon={Icon}
+      actions={actions}
+      className={className}
+    />
   );
 }
+
+export { AppHeader };
 
 export function MetricCard({
   label,

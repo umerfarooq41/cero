@@ -5,6 +5,7 @@ import {
   PencilLine,
   Trash2,
   AlertTriangle,
+  Wallet,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import AppHeader from '@/components/shared/AppHeader';
 
 function InlineMoney({ children }) {
   return (
@@ -182,47 +184,43 @@ export default function AccountDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <div className="mb-5 flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/accounts')}
-          className="shrink-0 rounded-2xl"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-
-        <div className="flex-1 min-w-0">
-          <h1 className="truncate text-xl font-semibold tracking-[-0.01em]">
-            {account.name}
-          </h1>
-
-          <p className="text-xs text-muted-foreground capitalize">
-            {account.type?.replace('_', ' ') || 'Account'}
-          </p>
-        </div>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            navigate(`/accounts/${accountId}/edit`)
-          }
-          className="rounded-2xl"
-        >
-          <PencilLine className="w-4 h-4" />
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setDeleteOpen(true)}
-          className="rounded-2xl text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
+    <div className="mx-auto max-w-3xl px-4 pt-4 pb-nav sm:px-6 sm:pt-5 lg:pt-6">
+      <AppHeader
+        title={account.name}
+        description={account.type?.replace('_', ' ') || 'Account'}
+        icon={Wallet}
+        className="mb-4"
+        actions={
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/accounts')}
+              className="h-10 w-10 shrink-0 rounded-2xl"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                navigate(`/accounts/${accountId}/edit`)
+              }
+              className="h-10 w-10 rounded-2xl"
+            >
+              <PencilLine className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteOpen(true)}
+              className="h-10 w-10 rounded-2xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        }
+      />
 
       <div className="material-card mb-6 rounded-[1.25rem] bg-card p-5 text-center sm:p-6">
         <div className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">

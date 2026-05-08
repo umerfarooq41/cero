@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, subMonths } from 'date-fns';
-import { Check, AlertTriangle, Copy } from 'lucide-react';
+import { Check, AlertTriangle, Copy, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { budgetPlansApi } from '@/lib/budgetData';
@@ -11,6 +11,7 @@ import AllocationRow from '@/components/editplan/AllocationRow';
 import { useCategories, useAllocations } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
+import AppHeader from '@/components/shared/AppHeader';
 
 export default function EditPlan() {
   const navigate = useNavigate();
@@ -161,17 +162,14 @@ export default function EditPlan() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[1.65rem] font-semibold leading-tight tracking-[-0.01em]">
-            Edit Budget
-          </h1>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">Allocate every amount</p>
-        </div>
-
-        <MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />
-      </div>
+    <div className="mx-auto max-w-3xl px-4 pt-4 pb-nav sm:px-6 sm:pt-5 lg:pt-6">
+      <AppHeader
+        title="Edit Budget"
+        description="Allocate every amount."
+        icon={Target}
+        actions={<MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />}
+        className="mb-4"
+      />
 
       <div className="material-card sticky top-3 z-10 mb-5 rounded-[1.25rem] bg-card p-4">
         <div className="flex items-center justify-between">
