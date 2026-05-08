@@ -20,12 +20,7 @@ export default function LeftToAllocateBanner({
   const isOver = leftToAllocate < 0;
   const isUnder = leftToAllocate > 0;
 
-  const tone = isZero ? 'income' : isOver ? 'debt' : 'analytics';
-  const stateColor = isZero
-    ? 'text-emerald-700 dark:text-emerald-300'
-    : isOver
-      ? 'text-red-700 dark:text-red-300'
-      : 'text-violet-700 dark:text-violet-300';
+  const stateColor = 'text-foreground';
 
   const label = isZero ? 'Every amount is assigned' : isOver ? 'Over allocated' : 'Left to allocate';
   const helper = isEditMode
@@ -37,7 +32,7 @@ export default function LeftToAllocateBanner({
     : 'Income minus planned expenses, savings, and debt.';
 
   return (
-    <GlassCard tone={tone} className="p-5 sm:p-6">
+    <GlassCard className="p-5 sm:p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -53,12 +48,7 @@ export default function LeftToAllocateBanner({
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <div
-              className={cn(
-                'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl',
-                isZero && 'bg-emerald-500/12',
-                isOver && 'bg-red-500/12',
-                isUnder && 'bg-violet-500/12'
-              )}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-muted-foreground"
             >
               {isZero && <Check className={cn('h-5 w-5', stateColor)} />}
               {isOver && <AlertTriangle className={cn('h-5 w-5', stateColor)} />}

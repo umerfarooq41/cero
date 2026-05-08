@@ -44,10 +44,9 @@ function AccountRow({ account, isLiability, formatCurrency }) {
       className="group flex items-center gap-3 rounded-[1.1rem] px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70"
     >
       <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: `${account.color || '#0078D4'}1F` }}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary text-muted-foreground"
       >
-        <Icon className="h-5 w-5" style={{ color: account.color || '#0078D4' }} />
+        <Icon className="h-5 w-5" />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -63,10 +62,7 @@ function AccountRow({ account, isLiability, formatCurrency }) {
       </div>
 
       <div
-        className={cn(
-          'shrink-0 text-right text-sm font-bold tabular-nums',
-          isLiability ? 'text-red-600 dark:text-red-300' : 'text-emerald-700 dark:text-emerald-300'
-        )}
+        className="shrink-0 text-right text-sm font-bold tabular-nums text-foreground"
       >
         <MoneyAmount>
           {isLiability && <span>-</span>}
@@ -174,20 +170,17 @@ export default function Accounts() {
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <TonePill tone="analytics">
+              <TonePill>
                 Net worth
               </TonePill>
-              <TonePill tone={netWorth >= 0 ? 'income' : 'debt'}>
+              <TonePill>
                 <BadgeCheck className="h-3.5 w-3.5" />
                 {netWorth >= 0 ? 'Positive' : 'Recovery mode'}
               </TonePill>
             </div>
 
             <div
-              className={cn(
-                'flex items-center gap-1 text-[2rem] font-semibold leading-tight tracking-[-0.02em] sm:text-[2.5rem]',
-                netWorth >= 0 ? 'text-violet-700 dark:text-violet-200' : 'text-red-700 dark:text-red-300'
-              )}
+              className="flex items-center gap-1 text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-foreground sm:text-[2.5rem]"
             >
               <MoneyAmount>
                 {netWorth < 0 && <span>-</span>}
@@ -201,8 +194,8 @@ export default function Accounts() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-[1.25rem] border border-emerald-500/15 bg-emerald-500/10 p-3">
-              <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+            <div className="rounded-[1.25rem] border border-border/70 bg-secondary/45 p-3">
+              <p className="text-xs font-semibold text-muted-foreground">
                 Assets
               </p>
               <div className="mt-2 text-lg font-semibold">
@@ -213,8 +206,8 @@ export default function Accounts() {
               </p>
             </div>
 
-            <div className="rounded-[1.25rem] border border-red-500/15 bg-red-500/10 p-3">
-              <p className="text-xs font-semibold text-red-700 dark:text-red-300">
+            <div className="rounded-[1.25rem] border border-border/70 bg-secondary/45 p-3">
+              <p className="text-xs font-semibold text-muted-foreground">
                 Liabilities
               </p>
               <div className="mt-2 text-lg font-semibold">
@@ -230,11 +223,11 @@ export default function Accounts() {
         <div className="mt-6 overflow-hidden rounded-full bg-secondary/70 p-1">
           <div className="flex h-3 overflow-hidden rounded-full">
             <div
-              className="bg-emerald-500 transition-all duration-700"
+              className="bg-primary transition-all duration-700"
               style={{ width: `${assetShare}%` }}
             />
             <div
-              className="bg-red-500 transition-all duration-700"
+              className="bg-muted-foreground transition-all duration-700"
               style={{ width: `${liabilityShare}%` }}
             />
           </div>

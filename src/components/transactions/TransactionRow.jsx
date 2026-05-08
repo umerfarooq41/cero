@@ -58,28 +58,28 @@ export default function TransactionRow({
 }) {
   const typeConfig = {
     income: {
-      color: 'text-emerald-700 dark:text-emerald-300',
+      color: 'text-foreground',
       sign: '+',
-      bg: 'bg-emerald-500/[0.08] hover:bg-emerald-500/[0.12]',
-      border: 'border-emerald-500/15',
+      bg: 'bg-card hover:bg-secondary/45',
+      border: 'border-border/70',
       icon: ArrowDownLeft,
-      iconBg: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300',
+      iconBg: 'bg-secondary text-muted-foreground',
     },
     expense: {
-      color: 'text-red-700 dark:text-red-300',
+      color: 'text-foreground',
       sign: '-',
-      bg: 'bg-blue-500/[0.07] hover:bg-blue-500/[0.11]',
-      border: 'border-blue-500/15',
+      bg: 'bg-card hover:bg-secondary/45',
+      border: 'border-border/70',
       icon: ArrowUpRight,
-      iconBg: 'bg-blue-500/12 text-blue-700 dark:text-blue-300',
+      iconBg: 'bg-secondary text-muted-foreground',
     },
     transfer: {
-      color: 'text-cyan-700 dark:text-cyan-300',
+      color: 'text-foreground',
       sign: '',
-      bg: 'bg-cyan-500/[0.08] hover:bg-cyan-500/[0.12]',
-      border: 'border-cyan-500/15',
+      bg: 'bg-card hover:bg-secondary/45',
+      border: 'border-border/70',
       icon: ArrowLeftRight,
-      iconBg: 'bg-cyan-500/12 text-cyan-700 dark:text-cyan-300',
+      iconBg: 'bg-secondary text-muted-foreground',
     },
   };
 

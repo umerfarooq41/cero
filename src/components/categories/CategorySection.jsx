@@ -6,10 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard, TonePill } from '@/components/shared/Premium';
 
 const TYPE_ACCENT = {
-  income: 'text-emerald-700 dark:text-emerald-300',
-  expense: 'text-blue-700 dark:text-blue-300',
-  savings: 'text-teal-700 dark:text-teal-300',
-  debt: 'text-red-700 dark:text-red-300',
+  income: 'text-foreground',
+  expense: 'text-foreground',
+  savings: 'text-foreground',
+  debt: 'text-foreground',
 };
 
 const TYPE_TONE = {
@@ -123,7 +123,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
           <h3 className={cn("truncate text-sm font-bold", TYPE_ACCENT[type])}>{label}</h3>
         </button>
         <div className="flex items-center gap-3">
-          <TonePill tone={TYPE_TONE[type]} className="px-2 py-0.5">
+          <TonePill className="px-2 py-0.5">
             {totalCount}
           </TonePill>
           <button

@@ -54,14 +54,10 @@ import {
 } from '@/components/shared/Premium';
 
 const CHART_COLORS = [
-  '#2563EB',
-  '#10B981',
-  '#EF4444',
-  '#8B5CF6',
-  '#14B8A6',
-  '#F59E0B',
-  '#06B6D4',
-  '#EC4899',
+  'hsl(var(--primary))',
+  'hsl(var(--muted-foreground))',
+  'hsl(var(--secondary-foreground))',
+  'hsl(var(--border))',
 ];
 
 const MONTHS = [
@@ -166,7 +162,6 @@ function PeriodFilter({ mode, setMode, selectedMonth, setSelectedMonth, selected
 
 function EfficiencyGauge({ value }) {
   const score = Math.max(0, Math.min(100, Number(value) || 0));
-  const color = score >= 75 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
 
   return (
     <div className="flex items-center justify-center py-3">
@@ -181,7 +176,7 @@ function EfficiencyGauge({ value }) {
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke={color}
+            stroke="hsl(var(--primary))"
             strokeDasharray={`${score}, 100`}
             strokeLinecap="round"
             strokeWidth="3"
@@ -422,7 +417,7 @@ export default function Reflect() {
         title="Reflect"
         description="A calm analytics cockpit for cash flow, budget health, and net worth."
         icon={BarChart3}
-        actions={<TonePill tone="analytics">{periodLabel}</TonePill>}
+        actions={<TonePill>{periodLabel}</TonePill>}
       />
 
       <PeriodFilter
@@ -435,10 +430,10 @@ export default function Reflect() {
         years={years}
       />
 
-      <GlassCard tone={netCashFlow >= 0 ? 'analytics' : 'debt'} className="p-5 sm:p-6">
+      <GlassCard className="p-5 sm:p-6">
         <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div>
-            <TonePill tone={netCashFlow >= 0 ? 'income' : 'debt'}>
+            <TonePill>
               {netCashFlow >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
               {netCashFlow >= 0 ? 'Cash positive' : 'Cash negative'}
             </TonePill>
@@ -451,14 +446,14 @@ export default function Reflect() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-[1.25rem] border border-violet-500/15 bg-violet-500/10 p-3">
-              <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">Net worth</p>
+            <div className="rounded-[1.25rem] border border-border/70 bg-secondary/45 p-3">
+              <p className="text-xs font-semibold text-muted-foreground">Net worth</p>
               <div className="mt-2 text-xl font-semibold">
                 {moneyWithSign(netWorth, formatCurrency)}
               </div>
             </div>
-            <div className="rounded-[1.25rem] border border-teal-500/15 bg-teal-500/10 p-3">
-              <p className="text-xs font-semibold text-teal-700 dark:text-teal-300">Savings rate</p>
+            <div className="rounded-[1.25rem] border border-border/70 bg-secondary/45 p-3">
+              <p className="text-xs font-semibold text-muted-foreground">Savings rate</p>
               <div className="mt-2 text-xl font-semibold">{savingsRate}%</div>
             </div>
           </div>
@@ -472,21 +467,18 @@ export default function Reflect() {
           value={formatCurrency(income)}
           detail={plannedIncome > 0 && mode === 'month' ? <>{formatCurrency(plannedIncome)} planned</> : periodLabel}
           icon={ArrowDownRight}
-          tone="income"
         />
         <MetricCard
           label="Expenses"
           value={formatCurrency(expenses)}
           detail={plannedExpenses > 0 && mode === 'month' ? <>{formatCurrency(plannedExpenses)} planned</> : periodLabel}
           icon={ArrowUpRight}
-          tone={expenses > plannedExpenses && plannedExpenses > 0 && mode === 'month' ? 'debt' : 'expense'}
         />
         <MetricCard
           label="Net Cash Flow"
           value={moneyWithSign(netCashFlow, formatCurrency)}
           detail={income > 0 ? `${savingsRate}% savings rate` : 'Waiting for income'}
           icon={Wallet}
-          tone={netCashFlow >= 0 ? 'savings' : 'debt'}
         />
         <MetricCard
           label="Net Worth"
@@ -498,7 +490,6 @@ export default function Reflect() {
             </span>
           }
           icon={TrendingUp}
-          tone={netWorth >= 0 ? 'analytics' : 'debt'}
         />
       </div>
 
@@ -507,7 +498,6 @@ export default function Reflect() {
           title="Cash Flow Trend"
           subtitle={mode === 'year' ? 'Full year by month' : 'Last 6 months'}
           icon={BarChart3}
-          tone="analytics"
         >
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -516,8 +506,8 @@ export default function Reflect() {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip {...chartTooltip(formatCurrency)} />
-                <Bar dataKey="income" fill="#10B981" radius={[8, 8, 0, 0]} animationDuration={900} />
-                <Bar dataKey="expenses" fill="#3B82F6" radius={[8, 8, 0, 0]} animationDuration={900} />
+                <Bar dataKey="income" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} animationDuration={900} />
+                <Bar dataKey="expenses" fill="hsl(var(--muted-foreground))" radius={[8, 8, 0, 0]} animationDuration={900} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -527,7 +517,6 @@ export default function Reflect() {
           title={mode === 'month' ? 'Budget Efficiency' : 'Cash Control'}
           subtitle={mode === 'month' ? 'Actual expenses against plan' : 'Net cash retained from income'}
           icon={Target}
-          tone={efficiency >= 75 ? 'income' : efficiency >= 50 ? 'warning' : 'debt'}
         >
           <EfficiencyGauge value={efficiency} />
           <div className="text-center text-sm font-medium text-muted-foreground">
@@ -551,7 +540,7 @@ export default function Reflect() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <ChartCard title="Top Spending" subtitle="Largest expense categories" icon={PieChartIcon} tone="expense">
+        <ChartCard title="Top Spending" subtitle="Largest expense categories" icon={PieChartIcon}>
           {spendingBreakdown.length > 0 ? (
             <div className="flex flex-col items-center gap-5 xl:flex-row">
               <div className="h-48 w-48 shrink-0">
@@ -600,7 +589,6 @@ export default function Reflect() {
           title={mode === 'month' ? 'Daily Spending' : 'Monthly Spending'}
           subtitle={mode === 'month' ? 'Expense rhythm this month' : 'Expense rhythm this year'}
           icon={TrendingDown}
-          tone="expense"
         >
           {spendingTimeline.length > 0 ? (
             <div className="h-64">
@@ -608,8 +596,8 @@ export default function Reflect() {
                 <AreaChart data={spendingTimeline}>
                   <defs>
                     <linearGradient id="spendingFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.28} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.02} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -619,7 +607,7 @@ export default function Reflect() {
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="#3B82F6"
+                    stroke="hsl(var(--primary))"
                     fill="url(#spendingFill)"
                     strokeWidth={2.5}
                     animationDuration={900}
@@ -644,7 +632,7 @@ export default function Reflect() {
 
         <div className="grid gap-3 md:grid-cols-2">
           {insights.map((insight) => (
-            <InsightCard key={insight.title} icon={insight.icon} title={insight.title} tone={insight.tone}>
+            <InsightCard key={insight.title} icon={insight.icon} title={insight.title}>
               {insight.text}
             </InsightCard>
           ))}
