@@ -125,14 +125,14 @@ export default function CategoryEditorModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Category' : 'New Category'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-secondary/50 p-3">
+        <div className="flex items-center gap-3 rounded-3xl border border-border/70 bg-secondary/50 p-3">
           <CategoryIcon icon={icon} color={color} size="lg" />
 
           <div className="min-w-0">
@@ -221,7 +221,7 @@ export default function CategoryEditorModal({
               Color
             </label>
 
-            <div className="grid grid-cols-10 gap-2 rounded-2xl border border-border/70 bg-secondary/40 p-2">
+            <div className="grid grid-cols-10 gap-2 rounded-3xl border border-border/70 bg-secondary/40 p-2">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -244,7 +244,7 @@ export default function CategoryEditorModal({
               Icon
             </label>
 
-            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-2xl border border-border/70 bg-secondary/40 p-2 sm:grid-cols-7 md:grid-cols-8">
+            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-3xl border border-border/70 bg-secondary/40 p-2 sm:grid-cols-7 md:grid-cols-8">
               {iconNames.map((item) => (
                 <button
                   key={item}

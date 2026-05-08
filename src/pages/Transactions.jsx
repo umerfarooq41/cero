@@ -180,7 +180,7 @@ export default function Transactions() {
                 className={cn(
                   'shrink-0 rounded-2xl px-3.5 py-2 text-xs font-semibold transition-all',
                   filterType === filter.value
-                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    ? 'bg-foreground text-background shadow-sm dark:bg-white dark:text-background'
                     : 'bg-secondary/70 text-muted-foreground hover:text-foreground'
                 )}
               >
@@ -194,7 +194,7 @@ export default function Transactions() {
       {isLoading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((item) => (
-            <div key={item} className="h-20 animate-pulse rounded-[1.25rem] bg-muted/70" />
+            <div key={item} className="h-20 animate-pulse rounded-3xl bg-muted/70" />
           ))}
         </div>
       ) : !hasTransactions ? (
@@ -245,9 +245,9 @@ export default function Transactions() {
         </div>
       )}
 
-      <Link to={ADD_TRANSACTION_ROUTE} className="fixed bottom-24 right-5 z-40 sm:bottom-28 sm:right-8">
+      <Link to={ADD_TRANSACTION_ROUTE} className="fixed bottom-28 right-5 z-40 sm:right-8">
         <Button
-          className="h-14 w-14 rounded-2xl p-0 shadow-md"
+          className="h-14 w-14 rounded-[1.35rem] p-0 shadow-[0_18px_40px_rgba(37,99,235,0.28)]"
           size="icon"
           aria-label="Add transaction"
         >

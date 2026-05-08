@@ -48,13 +48,13 @@ const SettingRow = ({ icon: Icon, label, description, children, tone = 'default'
         : 'bg-secondary/80 text-muted-foreground';
 
   return (
-    <div className="flex items-center gap-4 py-3.5">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}>
+    <div className="flex items-center gap-4 py-4">
+      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold">{label}</div>
-        {description && <div className="mt-0.5 text-xs leading-5 text-muted-foreground">{description}</div>}
+        {description && <div className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</div>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -154,20 +154,17 @@ export default function Settings() {
         icon={SlidersHorizontal}
       />
 
-      <SectionCard title="Account" icon={User} tone="default" bodyClassName="p-4">
+      <SectionCard title="Account" icon={User} tone="default" bodyClassName="px-4 py-0">
         {isAuthenticated && user ? (
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/[0.14] text-base font-semibold text-primary">
-              {(user.user_metadata?.full_name || user.email || 'C').slice(0, 1).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold">{user.user_metadata?.full_name || user.email}</div>
-              <div className="mt-0.5 truncate text-xs text-muted-foreground">{user.email}</div>
-            </div>
+          <SettingRow
+            icon={User}
+            label={user.user_metadata?.full_name || user.email}
+            description={user.email}
+          >
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full"
+              className="rounded-2xl"
               onClick={async () => {
                 await signOut();
                 window.location.href = '/login';
@@ -176,24 +173,24 @@ export default function Settings() {
               <LogOut className="h-4 w-4" />
               Sign out
             </Button>
-          </div>
+          </SettingRow>
         ) : (
           <SettingRow icon={User} label="Not signed in" description="Sign in to sync your data">
-            <Button size="sm" className="rounded-full" onClick={() => (window.location.href = '/login')}>
+            <Button size="sm" className="rounded-2xl" onClick={() => (window.location.href = '/login')}>
               Sign in
             </Button>
           </SettingRow>
         )}
       </SectionCard>
 
-      <SectionCard title="Budget Structure" icon={FolderOpen} tone="default" bodyClassName="px-4 py-0">
+      <SectionCard title="Budget Structure" icon={FolderOpen} tone="analytics" bodyClassName="px-4 py-0">
         <SettingRow
           icon={FolderOpen}
           label="Categories"
           description="Manage income, expenses, savings, and debt groups."
           tone="categories"
         >
-          <Button asChild variant="outline" size="sm" className="rounded-full">
+          <Button asChild variant="outline" size="sm" className="rounded-2xl">
             <Link to="/settings/categories">
               Open
               <ChevronRight className="h-4 w-4" />
@@ -215,7 +212,7 @@ export default function Settings() {
         </SettingRow>
       </SectionCard>
 
-      <SectionCard title="Regional & Format" icon={Globe} tone="default" bodyClassName="divide-y divide-border/50 px-4 py-0">
+      <SectionCard title="Regional & Format" icon={Globe} tone="transfer" bodyClassName="divide-y divide-border/50 px-4 py-0">
         <SettingRow icon={Globe} label="Currency" description="Select your display currency">
           <Select value={settings.currency} onValueChange={(value) => updateSetting('currency', value)}>
             <SelectTrigger className="h-10 w-32 rounded-2xl bg-secondary/60">
@@ -283,7 +280,7 @@ export default function Settings() {
         </SettingRow>
       </SectionCard>
 
-      <SectionCard title="Budget Logic" icon={Calculator} tone="default" bodyClassName="divide-y divide-border/50 px-4 py-0">
+      <SectionCard title="Budget Logic" icon={Calculator} tone="warning" bodyClassName="divide-y divide-border/50 px-4 py-0">
         <SettingRow
           icon={Calculator}
           label="25th Rule"
@@ -309,26 +306,26 @@ export default function Settings() {
 
       <SectionCard title="Data & Privacy" icon={ShieldAlert} tone="default" bodyClassName="divide-y divide-border/50 px-4 py-0">
         <SettingRow icon={Download} label="Export CSV" description="Download all your data">
-          <Button variant="outline" size="sm" className="rounded-full" onClick={() => toast.info('Export coming soon')}>
+          <Button variant="outline" size="sm" className="rounded-2xl" onClick={() => toast.info('Export coming soon')}>
             Export
           </Button>
         </SettingRow>
 
         <SettingRow icon={Trash2} label="Reset Database" description="Permanently delete all your data" tone="danger">
-          <Button variant="destructive" size="sm" className="rounded-full" onClick={() => setShowResetDialog(true)}>
+          <Button variant="destructive" size="sm" className="rounded-2xl" onClick={() => setShowResetDialog(true)}>
             Reset
           </Button>
         </SettingRow>
       </SectionCard>
 
-      <GlassCard tone="default" className="p-4">
+      <GlassCard tone="debt" className="p-4">
         <p className="text-xs leading-relaxed text-muted-foreground">
           Reset actions are intentionally isolated here. Export first when you need a backup.
         </p>
       </GlassCard>
 
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <DialogContent className="rounded-2xl">
+        <DialogContent className="rounded-3xl">
           <DialogHeader>
             <DialogTitle>Reset All Data?</DialogTitle>
             <DialogDescription>

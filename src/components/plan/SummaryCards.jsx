@@ -48,32 +48,32 @@ function SummaryCard({
   return (
     <GlassCard
       tone={toneMap[type] || 'default'}
-      className={cn('p-3.5 transition-all duration-300 sm:p-4', faded && 'opacity-55')}
+      className={cn('p-4 transition-all duration-300', faded && 'opacity-55')}
     >
-      <div className="flex min-h-[6.75rem] flex-col justify-between gap-3">
+      <div className="flex min-h-[8.5rem] flex-col justify-between">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             {label}
           </span>
-          <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-secondary/80 text-muted-foreground">
             <Icon className="h-4 w-4" />
           </div>
         </div>
 
         <div>
-          <div className={cn('text-xl font-semibold tabular-nums tracking-[-0.01em] sm:text-2xl', textColorMap[type])}>
+          <div className={cn('text-2xl font-bold tabular-nums tracking-tight', textColorMap[type])}>
             <MoneyAmount>{money(safeAmount)}</MoneyAmount>
           </div>
 
           {safePlanned > 0 ? (
             <div className="mt-3">
-              <div className="h-2 overflow-hidden rounded-full bg-secondary">
+              <div className="h-2 overflow-hidden rounded-full bg-secondary/80">
                 <div
                   className={cn('h-full rounded-full transition-all duration-700', barColorMap[type])}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-1 text-[11px] leading-4 text-muted-foreground">
+              <div className="mt-2 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
                 {safeAmount === 0 ? (
                   type === 'income' ? (
                     'Waiting for income'

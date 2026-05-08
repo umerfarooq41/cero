@@ -8,6 +8,7 @@ import {
   CreditCard,
   Landmark,
   Plus,
+  Sparkles,
   TrendingUp,
   Wallet,
   PiggyBank,
@@ -41,10 +42,10 @@ function AccountRow({ account, isLiability, formatCurrency }) {
   return (
     <Link
       to={`/accounts/${account.id}`}
-      className="group flex items-center gap-3 rounded-[1.1rem] px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70"
+      className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition-all hover:bg-foreground/[0.04] dark:hover:bg-white/[0.06]"
     >
       <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl shadow-sm ring-1 ring-white/50 dark:ring-white/10"
         style={{ backgroundColor: `${account.color || '#0078D4'}1F` }}
       >
         <Icon className="h-5 w-5" style={{ color: account.color || '#0078D4' }} />
@@ -53,7 +54,7 @@ function AccountRow({ account, isLiability, formatCurrency }) {
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold">{account.name}</div>
         <div className="mt-1 flex items-center gap-2">
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
+          <span className="rounded-full bg-secondary/80 px-2 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
             {account.type?.replace('_', ' ') || 'Account'}
           </span>
           <span className="text-[11px] text-muted-foreground">
@@ -99,7 +100,7 @@ function AccountSection({
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition hover:text-foreground"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl bg-secondary/80 text-muted-foreground transition hover:text-foreground"
           aria-label={`Toggle ${title}`}
         >
           <ChevronDown className={cn('h-4 w-4 transition-transform', !open && '-rotate-90')} />
@@ -158,11 +159,11 @@ export default function Accounts() {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
       <PageHeader
         title="Accounts"
-        description="Assets, liabilities, and net worth in one clean view."
+        description="Your balance sheet, softened into something you can actually read."
         icon={Wallet}
         actions={
           <Link to="/add-account">
-            <Button size="sm" className="h-10 rounded-full px-4 shadow-sm">
+            <Button size="sm" className="h-10 rounded-2xl px-3 shadow-lg shadow-primary/20">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add</span>
             </Button>
@@ -170,11 +171,12 @@ export default function Accounts() {
         }
       />
 
-      <GlassCard tone="default" className="p-4 sm:p-5">
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
+      <GlassCard tone={netWorth >= 0 ? 'analytics' : 'debt'} className="p-5 sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <TonePill tone="analytics">
+                <Sparkles className="h-3.5 w-3.5" />
                 Net worth
               </TonePill>
               <TonePill tone={netWorth >= 0 ? 'income' : 'debt'}>
@@ -185,7 +187,7 @@ export default function Accounts() {
 
             <div
               className={cn(
-                'flex items-center gap-1 text-[2rem] font-semibold leading-tight tracking-[-0.02em] sm:text-[2.5rem]',
+                'flex items-center gap-1 text-4xl font-extrabold tracking-tight sm:text-5xl',
                 netWorth >= 0 ? 'text-violet-700 dark:text-violet-200' : 'text-red-700 dark:text-red-300'
               )}
             >
@@ -195,17 +197,17 @@ export default function Accounts() {
               </MoneyAmount>
             </div>
 
-            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
               {healthText}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-[1.25rem] border border-emerald-500/15 bg-emerald-500/10 p-3">
+          <div className="grid min-w-[16rem] grid-cols-2 gap-3">
+            <div className="rounded-3xl border border-emerald-500/15 bg-emerald-500/10 p-3">
               <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                 Assets
               </p>
-              <div className="mt-2 text-lg font-semibold">
+              <div className="mt-2 text-lg font-bold">
                 <MoneyAmount>{formatCurrency(totalAssets)}</MoneyAmount>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
@@ -213,11 +215,11 @@ export default function Accounts() {
               </p>
             </div>
 
-            <div className="rounded-[1.25rem] border border-red-500/15 bg-red-500/10 p-3">
+            <div className="rounded-3xl border border-red-500/15 bg-red-500/10 p-3">
               <p className="text-xs font-semibold text-red-700 dark:text-red-300">
                 Liabilities
               </p>
-              <div className="mt-2 text-lg font-semibold">
+              <div className="mt-2 text-lg font-bold">
                 <MoneyAmount>{formatCurrency(totalLiabilities)}</MoneyAmount>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
@@ -230,11 +232,11 @@ export default function Accounts() {
         <div className="mt-6 overflow-hidden rounded-full bg-secondary/70 p-1">
           <div className="flex h-3 overflow-hidden rounded-full">
             <div
-              className="bg-emerald-500 transition-all duration-700"
+              className="bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-700"
               style={{ width: `${assetShare}%` }}
             />
             <div
-              className="bg-red-500 transition-all duration-700"
+              className="bg-gradient-to-r from-red-400 to-rose-500 transition-all duration-700"
               style={{ width: `${liabilityShare}%` }}
             />
           </div>
@@ -266,7 +268,7 @@ export default function Accounts() {
 
       {accounts.length === 0 && (
         <GlassCard className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-primary/10 text-primary">
             <Wallet className="h-6 w-6" />
           </div>
           <h2 className="text-lg font-semibold">Start with one account</h2>
@@ -279,9 +281,9 @@ export default function Accounts() {
         </GlassCard>
       )}
 
-      <Link to="/add-account" className="fixed bottom-24 right-5 z-40 sm:bottom-28 sm:right-8">
+      <Link to="/add-account" className="fixed bottom-28 right-5 z-40 sm:right-8">
         <Button
-          className="h-14 w-14 rounded-2xl p-0 shadow-md"
+          className="h-14 w-14 rounded-[1.35rem] p-0 shadow-[0_18px_40px_rgba(37,99,235,0.28)]"
           size="icon"
           aria-label="Add account"
         >

@@ -124,9 +124,9 @@ export default function EditPlan() {
     if (items.length === 0) return null;
 
     return (
-      <div className="material-card overflow-hidden rounded-[1.25rem] bg-card">
-        <div className="border-b border-border/70 px-4 py-3 sm:px-5">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-border">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {title}
           </h3>
         </div>
@@ -161,30 +161,28 @@ export default function EditPlan() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <div className="mb-5 flex items-center justify-between gap-3">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-32 lg:py-10">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[1.65rem] font-semibold leading-tight tracking-[-0.01em]">
-            Edit Budget
-          </h1>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">Allocate every amount</p>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Plan</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Allocate every amount</p>
         </div>
 
         <MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />
       </div>
 
-      <div className="material-card sticky top-3 z-10 mb-5 rounded-[1.25rem] bg-card p-4">
+      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-xl border border-border rounded-xl p-4 mb-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="text-xs text-muted-foreground">Total Income</div>
-            <div className="text-lg font-semibold">{formatCurrency(totalIncome)}</div>
+            <div className="text-lg font-bold">{formatCurrency(totalIncome)}</div>
           </div>
 
           <div className="text-right space-y-1">
             <div className="text-xs text-muted-foreground">Left to Allocate</div>
             <div
               className={cn(
-                'flex items-center justify-end gap-1.5 text-lg font-semibold',
+                'text-lg font-bold flex items-center gap-1.5 justify-end',
                 leftToAllocate === 0
                   ? 'text-[hsl(var(--success))]'
                   : leftToAllocate < 0
@@ -200,8 +198,8 @@ export default function EditPlan() {
         </div>
       </div>
 
-      <div className="mb-4 flex justify-end">
-        <Button variant="outline" size="sm" onClick={copyFromPrev} className="gap-2 rounded-full text-xs">
+      <div className="flex justify-end mb-4">
+        <Button variant="outline" size="sm" onClick={copyFromPrev} className="gap-2 text-xs">
           <Copy className="w-3.5 h-3.5" />
           Copy from last month
         </Button>
@@ -214,7 +212,7 @@ export default function EditPlan() {
         {renderSection('Debt', 'debt')}
       </div>
 
-      <Button onClick={handleSave} disabled={saving} className="h-12 w-full rounded-full text-sm font-semibold">
+      <Button onClick={handleSave} disabled={saving} className="w-full h-12 text-sm font-semibold">
         {saving ? 'Saving...' : 'Save Plan'}
       </Button>
     </div>

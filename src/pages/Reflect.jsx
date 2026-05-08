@@ -102,7 +102,7 @@ function chartTooltip(formatCurrency) {
       border: '1px solid hsl(var(--border))',
       borderRadius: '16px',
       fontSize: '12px',
-      boxShadow: '0 4px 14px rgba(15, 23, 42, 0.10)',
+      boxShadow: '0 18px 45px rgba(15, 23, 42, 0.12)',
     },
     formatter: (value) => formatCurrency(value),
   };
@@ -442,24 +442,24 @@ export default function Reflect() {
               {netCashFlow >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
               {netCashFlow >= 0 ? 'Cash positive' : 'Cash negative'}
             </TonePill>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
+            <h2 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
               {moneyWithSign(netCashFlow, formatCurrency, true)}
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               Income and expenses across {periodLabel}, with the budget signal kept close enough to guide your next move.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-[1.25rem] border border-violet-500/15 bg-violet-500/10 p-3">
+            <div className="rounded-3xl border border-violet-500/15 bg-violet-500/10 p-3">
               <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">Net worth</p>
-              <div className="mt-2 text-xl font-semibold">
+              <div className="mt-2 text-xl font-bold">
                 {moneyWithSign(netWorth, formatCurrency)}
               </div>
             </div>
-            <div className="rounded-[1.25rem] border border-teal-500/15 bg-teal-500/10 p-3">
+            <div className="rounded-3xl border border-teal-500/15 bg-teal-500/10 p-3">
               <p className="text-xs font-semibold text-teal-700 dark:text-teal-300">Savings rate</p>
-              <div className="mt-2 text-xl font-semibold">{savingsRate}%</div>
+              <div className="mt-2 text-xl font-bold">{savingsRate}%</div>
             </div>
           </div>
         </div>
