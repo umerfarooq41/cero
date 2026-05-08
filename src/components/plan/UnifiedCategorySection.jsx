@@ -30,8 +30,11 @@ function getTone(type, isOver) {
 }
 
 function getBarClass(type, isOver) {
-  if (isOver) return 'bg-destructive';
-  return 'bg-primary';
+  if (isOver) return 'bg-red-500';
+  if (type === 'income') return 'bg-emerald-500';
+  if (type === 'savings') return 'bg-teal-500';
+  if (type === 'debt') return 'bg-red-500';
+  return 'bg-blue-500';
 }
 
 function ReadRow({ category, spent, planned, isSubcategory, formatCurrency }) {
@@ -67,7 +70,7 @@ function ReadRow({ category, spent, planned, isSubcategory, formatCurrency }) {
             <span
               className={cn(
                 'shrink-0 text-xs font-semibold tabular-nums',
-                'text-muted-foreground'
+                isOver ? 'text-red-700 dark:text-red-300' : 'text-muted-foreground'
               )}
             >
               {remaining >= 0 ? (
@@ -97,7 +100,7 @@ function ReadRow({ category, spent, planned, isSubcategory, formatCurrency }) {
             <Money amount={planned} formatCurrency={formatCurrency} />
             <span>planned</span>
             {isOver && (
-              <span className="inline-flex items-center gap-1 text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-red-700 dark:text-red-300">
                 <AlertTriangle className="h-3 w-3" />
                 over budget
               </span>

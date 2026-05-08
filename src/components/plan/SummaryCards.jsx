@@ -32,17 +32,17 @@ function SummaryCard({
   };
 
   const barColorMap = {
-    income: 'bg-primary',
-    expense: isOver ? 'bg-destructive' : 'bg-primary',
-    savings: 'bg-primary',
-    debt: 'bg-primary',
+    income: 'bg-emerald-500',
+    expense: isOver ? 'bg-red-500' : 'bg-blue-500',
+    savings: 'bg-teal-500',
+    debt: 'bg-red-500',
   };
 
   const textColorMap = {
-    income: 'text-foreground',
-    expense: isOver ? 'text-destructive' : 'text-foreground',
-    savings: 'text-foreground',
-    debt: 'text-foreground',
+    income: 'text-emerald-700 dark:text-emerald-300',
+    expense: isOver ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300',
+    savings: 'text-teal-700 dark:text-teal-300',
+    debt: 'text-red-700 dark:text-red-300',
   };
 
   return (
