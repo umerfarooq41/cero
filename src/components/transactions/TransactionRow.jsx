@@ -110,7 +110,7 @@ export default function TransactionRow({
       transition={{ duration: 0.18 }}
       onClick={onClick}
       className={cn(
-        'group flex cursor-pointer items-center gap-3 rounded-3xl border px-3 py-3 shadow-sm backdrop-blur-xl transition-all',
+        'group flex cursor-pointer items-center gap-3 rounded-[1.25rem] border px-3 py-3 shadow-sm transition-all',
         config.bg,
         config.border
       )}

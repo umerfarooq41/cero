@@ -158,7 +158,7 @@ export default function Plan() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <div className="sticky top-0 z-30 -mx-4 bg-background/74 px-4 py-3 backdrop-blur-2xl sm:-mx-6 sm:px-6 lg:rounded-b-[2rem]">
+      <div className="sticky top-0 z-30 -mx-4 border-b border-border/60 bg-background px-4 py-3 sm:-mx-6 sm:px-6 lg:rounded-b-[1.5rem]">
         <AnimatePresence mode="wait">
           {isEditMode ? (
             <motion.div
@@ -296,32 +296,15 @@ export default function Plan() {
       </div>
 
       <AnimatePresence>
-        {!isEditMode && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.18 }}
-            className="fixed bottom-28 left-0 right-0 z-40 mx-auto max-w-3xl px-4"
-          >
-            <Button onClick={enterEditMode} className="h-12 w-full rounded-2xl text-sm font-semibold shadow-[0_18px_40px_rgba(37,99,235,0.24)]">
-              <PencilLine className="h-4 w-4" />
-              Edit Budget
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
         {isEditMode && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.18 }}
-            className="fixed bottom-28 left-0 right-0 z-40 mx-auto max-w-3xl px-4"
+            className="fixed bottom-24 left-0 right-0 z-40 mx-auto max-w-3xl px-4 sm:bottom-28"
           >
-            <Button onClick={handleSave} disabled={saving} className="h-12 w-full rounded-2xl text-sm font-semibold shadow-[0_18px_40px_rgba(37,99,235,0.24)]">
+            <Button onClick={handleSave} disabled={saving} className="h-12 w-full rounded-full text-sm font-semibold shadow-md">
               <Save className="h-4 w-4" />
               {saving ? 'Saving...' : 'Save Budget'}
             </Button>
