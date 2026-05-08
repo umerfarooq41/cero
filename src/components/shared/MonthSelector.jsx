@@ -16,11 +16,8 @@ export default function MonthSelector({ currentMonth, onChange }) {
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
-      <span className="hidden min-w-[7.25rem] text-center text-sm font-semibold sm:inline">
+      <span className="min-w-[7.25rem] text-center text-sm font-bold">
         {format(date, 'MMMM yyyy')}
-      </span>
-      <span className="min-w-[4.9rem] text-center text-xs font-semibold sm:hidden">
-        {format(date, 'MMM yyyy')}
       </span>
       <Button 
         variant="ghost" 

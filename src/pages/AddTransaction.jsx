@@ -329,7 +329,7 @@ export default function AddTransaction() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pt-4 pb-nav sm:px-6 sm:pt-5 lg:pt-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
       <PageHeader
         title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
         description="Record money moving in, out, or between accounts."
