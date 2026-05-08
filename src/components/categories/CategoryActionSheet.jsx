@@ -12,7 +12,7 @@ export default function CategoryActionSheet({ category, open, onClose, onEdit, o
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="rounded-3xl sm:max-w-xs">
+      <DialogContent className="rounded-2xl sm:max-w-xs">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <CategoryIcon icon={category.icon} color={category.color} size="md" />

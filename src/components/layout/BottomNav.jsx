@@ -57,7 +57,7 @@ export default function BottomNav() {
                   <span
                     className={cn(
                       'relative flex h-8 min-w-12 items-center justify-center rounded-full px-4 transition-colors',
-                      active && 'bg-primary/14 text-primary dark:bg-primary/22',
+                      active && 'bg-primary/[0.14] text-primary dark:bg-primary/[0.22]',
                       active && isCenter && 'bg-primary text-primary-foreground shadow-sm',
                       !active && isCenter && 'bg-secondary text-secondary-foreground'
                     )}
@@ -67,7 +67,7 @@ export default function BottomNav() {
                         layoutId="m3-nav-indicator"
                         className={cn(
                           'absolute inset-0 rounded-full',
-                          isCenter ? 'bg-primary' : 'bg-primary/14 dark:bg-primary/22'
+                          isCenter ? 'bg-primary' : 'bg-primary/[0.14] dark:bg-primary/[0.22]'
                         )}
                         transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                       />

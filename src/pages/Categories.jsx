@@ -177,7 +177,7 @@ export default function Categories() {
           <SectionCard title="Archived" icon={Archive} tone="default" bodyClassName="p-2">
             <div className="space-y-1">
               {archivedCategories.map((category) => (
-                <div key={category.id} className="group flex items-center gap-3 rounded-2xl px-3 py-3 opacity-80 transition hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]">
+                <div key={category.id} className="group flex items-center gap-3 rounded-2xl px-3 py-3 opacity-80 transition hover:bg-foreground/[0.04] dark:hover:bg-secondary/70">
                   <div
                     className="flex h-9 w-9 items-center justify-center rounded-2xl"
                     style={{ backgroundColor: `${category.color || '#888'}18` }}
@@ -210,7 +210,7 @@ export default function Categories() {
 
       <Button
         onClick={() => openNew('expense')}
-        className="fixed bottom-28 right-5 z-40 h-14 w-14 rounded-[1.35rem] p-0 shadow-[0_18px_40px_rgba(37,99,235,0.28)] sm:right-8"
+        className="fixed bottom-24 right-5 z-40 h-14 w-14 rounded-2xl p-0 shadow-md sm:bottom-28 sm:right-8"
         size="icon"
         aria-label="Add category"
       >
@@ -247,7 +247,7 @@ export default function Categories() {
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-        <AlertDialogContent className="rounded-3xl">
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>

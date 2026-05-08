@@ -14,12 +14,12 @@ export default function AllocationRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 py-2.5 px-4',
+        'flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70 sm:px-4',
         isSubcategory && 'pl-14'
       )}
     >
       {!isSubcategory && (
-        <CategoryIcon icon={category.icon} color={category.color} size="sm" />
+        <CategoryIcon icon={category.icon} color={category.color} size="sm" className="rounded-2xl" />
       )}
 
       {isSubcategory && (
@@ -29,15 +29,15 @@ export default function AllocationRow({
       <div className="flex-1 min-w-0">
         <span
           className={cn(
-            'text-sm truncate block',
-            isSubcategory ? 'text-muted-foreground' : 'font-medium'
+            'block truncate text-sm',
+            isSubcategory ? 'text-muted-foreground' : 'font-semibold'
           )}
         >
           {category.name}
         </span>
 
         {lastMonthHint > 0 && (
-          <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             Last month:
             {formatCurrency
               ? formatCurrency(lastMonthHint)
@@ -57,7 +57,7 @@ export default function AllocationRow({
           value={value || ''}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           placeholder="0.00"
-          className="h-8 text-right text-sm tabular-nums"
+          className="h-10 rounded-2xl bg-secondary/60 text-right text-sm font-semibold tabular-nums shadow-none"
         />
       </div>
     </div>

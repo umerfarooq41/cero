@@ -45,7 +45,7 @@ function ReadRow({ category, spent, planned, isSubcategory, formatCurrency }) {
   return (
     <div
       className={cn(
-        'rounded-2xl px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]',
+        'rounded-[1.1rem] px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70',
         isSubcategory && 'ml-8'
       )}
     >
@@ -87,7 +87,7 @@ function ReadRow({ category, spent, planned, isSubcategory, formatCurrency }) {
             </span>
           </div>
 
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary/80">
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
             <div
               className={cn('h-full rounded-full transition-all duration-700', getBarClass(category.type, isOver))}
               style={{ width: `${percentage}%` }}
@@ -123,7 +123,7 @@ function EditRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]',
+        'flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70',
         isSubcategory && 'ml-8'
       )}
     >
@@ -230,10 +230,10 @@ export default function UnifiedCategorySection({
       <button
         type="button"
         onClick={() => setIsCollapsed((value) => !value)}
-        className="flex w-full items-center justify-between gap-3 border-b border-border/55 px-4 py-3.5 text-left sm:px-5"
+        className="flex w-full items-center justify-between gap-3 border-b border-border/70 px-4 py-3 text-left sm:px-5"
       >
         <div>
-          <h3 className="text-sm font-bold">{title}</h3>
+          <h3 className="text-sm font-semibold">{title}</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {parentCategories.length} parent categor{parentCategories.length === 1 ? 'y' : 'ies'}
           </p>
@@ -286,7 +286,7 @@ export default function UnifiedCategorySection({
                   <button
                     type="button"
                     onClick={() => toggleParent(category.id)}
-                    className="w-full rounded-2xl text-left transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]"
+                    className="w-full rounded-2xl text-left transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70"
                   >
                     <div className="flex items-center gap-2">
                       <div className="min-w-0 flex-1">

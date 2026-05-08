@@ -167,13 +167,13 @@ export default function AddAccount() {
       <GlassCard tone={category === 'liability' ? 'debt' : 'income'} className="p-5">
         <div className="flex items-center gap-4">
           <div
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.35rem] ring-1 ring-white/50 dark:ring-white/10"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
             style={{ backgroundColor: `${color || '#0078D4'}20` }}
           >
-            <Landmark className="h-7 w-7" style={{ color }} />
+            <Landmark className="h-6 w-6" style={{ color }} />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-xl font-bold">{name || 'New Account'}</p>
+            <p className="truncate text-xl font-semibold">{name || 'New Account'}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               <TonePill tone={category === 'liability' ? 'debt' : 'income'}>
                 {category === 'liability' ? 'Liability' : 'Asset'}
@@ -226,7 +226,7 @@ export default function AddAccount() {
             Category
           </label>
 
-          <div className="grid grid-cols-2 gap-2 rounded-3xl bg-secondary/60 p-1">
+          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-secondary p-1">
             {[
               ['asset', 'Asset'],
               ['liability', 'Liability'],
@@ -277,7 +277,7 @@ export default function AddAccount() {
             Color
           </label>
 
-          <div className="grid grid-cols-8 gap-2 rounded-3xl border border-border/70 bg-secondary/40 p-3 sm:grid-cols-10">
+          <div className="grid grid-cols-8 gap-2 rounded-2xl border border-border/70 bg-secondary/40 p-3 sm:grid-cols-10">
             {colors.map((item) => (
               <button
                 key={item}
@@ -301,7 +301,7 @@ export default function AddAccount() {
       <Button
         onClick={handleSave}
         disabled={saving}
-        className="fixed bottom-28 left-0 right-0 z-40 mx-auto h-12 w-[calc(100%-2rem)] max-w-2xl rounded-2xl text-sm font-semibold shadow-[0_18px_40px_rgba(37,99,235,0.24)]"
+        className="fixed bottom-24 left-0 right-0 z-40 mx-auto h-12 w-[calc(100%-2rem)] max-w-2xl rounded-full text-sm font-semibold shadow-md sm:bottom-28"
       >
         {saving
           ? 'Saving...'

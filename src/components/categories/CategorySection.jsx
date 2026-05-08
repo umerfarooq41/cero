@@ -26,7 +26,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
   return (
     <div>
       <div
-        className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]"
+        className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70"
       >
         <CategoryIcon icon={cat.icon} color={cat.color} size="sm" className="rounded-2xl" />
         <div className="flex-1 min-w-0">
@@ -85,7 +85,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
 
 function SubRow({ sub, onAction }) {
   return (
-    <div className="group ml-8 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]">
+    <div className="group ml-8 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-secondary/70">
       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sub.color || '#888' }} />
       <span className="text-sm text-muted-foreground flex-1 truncate">{sub.name}</span>
       <button
@@ -110,7 +110,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
   return (
     <GlassCard tone={TYPE_TONE[type]} className="p-0">
       {/* Section header */}
-      <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 py-3.5 transition-colors hover:bg-foreground/[0.03] dark:hover:bg-white/[0.04] sm:px-5">
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 py-3.5 transition-colors hover:bg-foreground/[0.03] dark:hover:bg-secondary/70 sm:px-5">
         <button
           type="button"
           onClick={() => setIsOpen(p => !p)}

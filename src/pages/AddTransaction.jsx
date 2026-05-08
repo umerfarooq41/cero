@@ -343,14 +343,14 @@ export default function AddTransaction() {
 
       <GlassCard
         tone={type === 'income' ? 'income' : type === 'transfer' ? 'transfer' : 'expense'}
-        className="p-8 text-center"
+        className="p-5 text-center sm:p-6"
       >
-        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
           Amount
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          <div className="text-3xl font-light text-muted-foreground flex items-center">
+          <div className="flex items-center text-2xl font-light text-muted-foreground">
             <CurrencyPrefix currency={currency} />
           </div>
 
@@ -359,7 +359,7 @@ export default function AddTransaction() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            className="w-52 border-none bg-transparent text-center text-5xl font-extrabold tabular-nums outline-none placeholder:text-muted-foreground/35"
+            className="w-48 border-none bg-transparent text-center text-4xl font-semibold tabular-nums outline-none placeholder:text-muted-foreground/35 sm:text-5xl"
             step="0.01"
             min="0"
             autoFocus
@@ -382,10 +382,10 @@ export default function AddTransaction() {
                 setToAccountId('');
               }}
               className={cn(
-                'flex flex-col items-center gap-1.5 rounded-3xl border py-3 text-sm font-semibold transition-all',
+                'flex flex-col items-center gap-1.5 rounded-2xl border py-3 text-sm font-semibold transition-all',
                 isActive
                   ? `${opt.color} shadow-sm`
-                  : 'border-border/70 bg-card/55 text-muted-foreground hover:border-muted-foreground/30 dark:bg-white/[0.04]'
+                  : 'border-border/70 bg-card/55 text-muted-foreground hover:border-muted-foreground/30 dark:bg-secondary/40'
               )}
             >
               <Icon className="h-5 w-5" />
@@ -533,7 +533,7 @@ export default function AddTransaction() {
       <Button
         onClick={handleSubmit}
         disabled={saving || !amount}
-        className="fixed bottom-28 left-0 right-0 z-40 mx-auto h-12 w-[calc(100%-2rem)] max-w-2xl rounded-2xl text-sm font-semibold shadow-[0_18px_40px_rgba(37,99,235,0.24)]"
+        className="fixed bottom-24 left-0 right-0 z-40 mx-auto h-12 w-[calc(100%-2rem)] max-w-2xl rounded-full text-sm font-semibold shadow-md sm:bottom-28"
       >
         {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
       </Button>

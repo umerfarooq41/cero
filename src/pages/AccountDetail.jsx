@@ -165,7 +165,7 @@ export default function AccountDetail() {
 
   if (!account) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-10 text-center">
+      <div className="mx-auto max-w-lg px-4 py-10 text-center">
         <p className="text-muted-foreground">
           Account not found
         </p>
@@ -182,19 +182,19 @@ export default function AccountDetail() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 lg:py-10">
-      <div className="flex items-center gap-3 mb-8">
+    <div className="mx-auto max-w-3xl px-4 py-6 pb-nav sm:px-6 lg:py-10">
+      <div className="mb-5 flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate('/accounts')}
-          className="shrink-0"
+          className="shrink-0 rounded-2xl"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
 
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold tracking-tight truncate">
+          <h1 className="truncate text-xl font-semibold tracking-[-0.01em]">
             {account.name}
           </h1>
 
@@ -209,6 +209,7 @@ export default function AccountDetail() {
           onClick={() =>
             navigate(`/accounts/${accountId}/edit`)
           }
+          className="rounded-2xl"
         >
           <PencilLine className="w-4 h-4" />
         </Button>
@@ -217,20 +218,20 @@ export default function AccountDetail() {
           variant="ghost"
           size="icon"
           onClick={() => setDeleteOpen(true)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="rounded-2xl text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center">
-        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+      <div className="material-card mb-6 rounded-[1.25rem] bg-card p-5 text-center sm:p-6">
+        <div className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
           Balance
         </div>
 
         <div
           className={cn(
-            'text-4xl font-bold tracking-tight tabular-nums flex items-center justify-center gap-1',
+            'flex items-center justify-center gap-1 text-[2rem] font-semibold tracking-[-0.01em] tabular-nums sm:text-4xl',
             account.category === 'liability'
               ? 'text-destructive'
               : 'text-foreground'
@@ -248,7 +249,7 @@ export default function AccountDetail() {
         </div>
       </div>
 
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+      <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
         Recent Transactions
       </h2>
 
@@ -258,7 +259,7 @@ export default function AccountDetail() {
           description="No transactions for this account yet."
         />
       ) : (
-        <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border/50">
+        <div className="space-y-2">
           {transactions.map((transaction) => (
             <TransactionRow
               key={transaction.id}
@@ -290,7 +291,7 @@ export default function AccountDetail() {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="rounded-2xl sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-destructive" />

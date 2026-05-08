@@ -54,7 +54,7 @@ export default function LeftToAllocateBanner({
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                'flex h-12 w-12 shrink-0 items-center justify-center rounded-3xl',
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl',
                 isZero && 'bg-emerald-500/12',
                 isOver && 'bg-red-500/12',
                 isUnder && 'bg-violet-500/12'
