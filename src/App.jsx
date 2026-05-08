@@ -37,7 +37,7 @@ const AuthenticatedApp = () => {
         <>
       <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Plan />} />
+        <Route path="/" element={<Reflect />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/add-transaction" element={<AddTransaction />} />
         <Route path="/transactions/:id/edit" element={<AddTransaction />} />
@@ -47,7 +47,10 @@ const AuthenticatedApp = () => {
         <Route path="/accounts/:id/edit" element={<AddAccount />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/categories" element={<Categories />} />
         <Route path="/reflect" element={<Reflect />} />
+        <Route path="/budget" element={<Plan />} />
+        <Route path="/plan" element={<Plan />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
         </>

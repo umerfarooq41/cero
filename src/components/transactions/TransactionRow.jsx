@@ -1,34 +1,29 @@
-import React from 'react';
 import {
+  ArrowDownLeft,
   ArrowLeftRight,
+  ArrowUpRight,
   Trash2,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import CategoryIcon from '@/components/shared/CategoryIcon';
+import { MoneyAmount } from '@/components/shared/Premium';
 import { cn } from '@/lib/utils';
 
 function CurrencyAmount({ value, formatCurrency }) {
   if (formatCurrency) {
-    return (
-      <span className="inline-flex items-center align-middle whitespace-nowrap">
-        {formatCurrency(value)}
-      </span>
-    );
+    return <MoneyAmount>{formatCurrency(value)}</MoneyAmount>;
   }
 
   return (
-    <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap">
-      <img
-      src="/sar.svg"
-      alt="SAR"
-      className="w-3.5 h-3.5 inline-block dark:invert"
-      />
+    <MoneyAmount className="gap-1">
+      <img src="/sar.svg" alt="SAR" className="h-3.5 w-3.5 dark:invert" />
       <span>
         {Number(Math.abs(value || 0)).toLocaleString('en-US', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}
       </span>
-    </span>
+    </MoneyAmount>
   );
 }
 
@@ -46,7 +41,6 @@ function getTransferType(account, toAccount) {
   const category = target?.category || target?.type;
 
   if (!category) return 'Transfer';
-
   if (category === 'asset') return 'Saving';
   if (category === 'liability') return 'Debt';
 
@@ -64,28 +58,41 @@ export default function TransactionRow({
 }) {
   const typeConfig = {
     income: {
-      color: 'text-[hsl(var(--success))]',
+      color: 'text-emerald-700 dark:text-emerald-300',
       sign: '+',
+      bg: 'bg-emerald-500/[0.08] hover:bg-emerald-500/[0.12]',
+      border: 'border-emerald-500/15',
+      icon: ArrowDownLeft,
+      iconBg: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300',
     },
     expense: {
-      color: 'text-destructive',
+      color: 'text-red-700 dark:text-red-300',
       sign: '-',
+      bg: 'bg-blue-500/[0.07] hover:bg-blue-500/[0.11]',
+      border: 'border-blue-500/15',
+      icon: ArrowUpRight,
+      iconBg: 'bg-blue-500/12 text-blue-700 dark:text-blue-300',
     },
     transfer: {
-      color: 'text-primary',
+      color: 'text-cyan-700 dark:text-cyan-300',
       sign: '',
+      bg: 'bg-cyan-500/[0.08] hover:bg-cyan-500/[0.12]',
+      border: 'border-cyan-500/15',
+      icon: ArrowLeftRight,
+      iconBg: 'bg-cyan-500/12 text-cyan-700 dark:text-cyan-300',
     },
   };
 
   const config = typeConfig[transaction.type] || typeConfig.expense;
   const isTransfer = transaction.type === 'transfer';
+  const TypeIcon = config.icon;
 
   const accountName = account?.name || 'Account';
   const transactionTypeLabel = formatTransactionType(transaction.type);
   const transferTypeLabel = getTransferType(account, toAccount);
 
   const title = isTransfer
-    ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
+    ? [account?.name, toAccount?.name].filter(Boolean).join(' to ')
     : category?.name || 'Uncategorized';
 
   const primarySubtitle = isTransfer
@@ -96,64 +103,70 @@ export default function TransactionRow({
   const amountValue = Math.abs(Number(transaction.amount || 0));
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18 }}
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer group"
+      className={cn(
+        'group flex cursor-pointer items-center gap-3 rounded-3xl border px-3 py-3 shadow-sm backdrop-blur-xl transition-all',
+        config.bg,
+        config.border
+      )}
     >
       {isTransfer ? (
-        <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
-          <ArrowLeftRight className="w-3 h-3 stroke-[2.2]" />
+        <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl', config.iconBg)}>
+          <ArrowLeftRight className="h-4 w-4 stroke-[2.2]" />
         </div>
       ) : (
-        <CategoryIcon
-          icon={category?.icon || 'tag'}
-          color={category?.color}
-          size="sm"
-        />
+        <div className="relative">
+          <CategoryIcon
+            icon={category?.icon || 'tag'}
+            color={category?.color}
+            size="md"
+            className="rounded-2xl"
+          />
+          <span className={cn('absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-background', config.iconBg)}>
+            <TypeIcon className="h-3 w-3" />
+          </span>
+        </div>
       )}
 
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{title}</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-semibold">{title}</div>
 
         {primarySubtitle && (
-          <div className="text-xs text-muted-foreground truncate">
+          <div className="mt-1 truncate text-xs text-muted-foreground">
             {primarySubtitle}
           </div>
         )}
 
         {secondarySubtitle && (
-          <div className="text-[11px] text-muted-foreground/80 truncate">
+          <div className="mt-0.5 truncate text-[11px] text-muted-foreground/80">
             {secondarySubtitle}
           </div>
         )}
       </div>
 
-      <div className="text-right shrink-0">
-        <div
-          className={cn(
-            'text-sm font-semibold tabular-nums inline-flex items-center gap-1 whitespace-nowrap',
-            config.color
-          )}
-        >
+      <div className="shrink-0 text-right">
+        <div className={cn('inline-flex items-center gap-1 whitespace-nowrap text-sm font-bold tabular-nums', config.color)}>
           {config.sign && <span>{config.sign}</span>}
-
-          <CurrencyAmount
-            value={amountValue}
-            formatCurrency={formatCurrency}
-          />
+          <CurrencyAmount value={amountValue} formatCurrency={formatCurrency} />
         </div>
       </div>
 
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={(event) => {
+          event.stopPropagation();
           onDelete?.();
         }}
-        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 rounded-md transition-all"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-muted-foreground opacity-100 transition-all hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100"
+        aria-label="Delete transaction"
       >
-        <Trash2 className="w-3.5 h-3.5 text-destructive" />
+        <Trash2 className="h-4 w-4" />
       </button>
-    </div>
+    </motion.div>
   );
 }

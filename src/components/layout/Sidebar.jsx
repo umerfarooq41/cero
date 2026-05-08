@@ -1,17 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, ArrowLeftRight, Wallet, PieChart, 
-  Settings, FolderOpen, X
+  ArrowLeftRight, Wallet, BarChart3, 
+  Settings, Target, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Plan' },
-  { path: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
   { path: '/accounts', icon: Wallet, label: 'Accounts' },
-  { path: '/categories', icon: FolderOpen, label: 'Categories' },
-  { path: '/reflect', icon: PieChart, label: 'Reflect' },
+  { path: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
+  { path: '/reflect', icon: BarChart3, label: 'Reflect' },
+  { path: '/budget', icon: Target, label: 'Budget' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 

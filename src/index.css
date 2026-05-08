@@ -1,179 +1,220 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============================= */
-/* 🌍 DESIGN TOKENS */
-/* ============================= */
-
 @layer base {
   :root {
     --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
 
-    /* 🎨 Base Colors */
-    --background: 220 15% 97%;
-    --foreground: 0 0% 8%;
+    --background: 220 24% 96%;
+    --foreground: 224 30% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card-foreground: 224 30% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 224 30% 9%;
 
-    --primary: 206 100% 42%;
+    --primary: 208 92% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 94%;
-    --secondary-foreground: 0 0% 15%;
+    --secondary: 216 28% 92%;
+    --secondary-foreground: 224 25% 16%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 218 24% 92%;
+    --muted-foreground: 222 12% 43%;
 
-    --accent: 220 10% 92%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 217 28% 90%;
+    --accent-foreground: 224 25% 15%;
 
-    --destructive: 354 90% 41%;
+    --destructive: 356 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 80% 28%;
+    --success: 151 72% 33%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
-    --ring: 206 100% 42%;
+    --warning: 39 92% 50%;
+    --warning-foreground: 35 95% 12%;
 
-    /* 📊 Charts */
-    --chart-1: 206 100% 42%;
-    --chart-2: 120 80% 28%;
-    --chart-3: 354 90% 41%;
-    --chart-4: 43 74% 52%;
-    --chart-5: 270 60% 55%;
+    --border: 218 22% 86%;
+    --input: 218 22% 86%;
+    --ring: 208 92% 45%;
 
-    --radius: 0.75rem;
+    --chart-1: 208 92% 45%;
+    --chart-2: 151 72% 33%;
+    --chart-3: 356 72% 50%;
+    --chart-4: 178 68% 34%;
+    --chart-5: 265 72% 58%;
 
-    /* 📱 Sidebar */
+    --radius: 1rem;
+
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 25%;
-    --sidebar-primary: 206 100% 42%;
+    --sidebar-foreground: 224 20% 24%;
+    --sidebar-primary: 208 92% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 10% 95%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 220 10% 92%;
-    --sidebar-ring: 206 100% 42%;
+    --sidebar-accent: 218 24% 92%;
+    --sidebar-accent-foreground: 224 25% 15%;
+    --sidebar-border: 218 22% 86%;
+    --sidebar-ring: 208 92% 45%;
 
-    /* 💰 Financial Mood */
-    --mood-positive: 120 70% 35%;
-    --mood-negative: 354 80% 50%;
-    --mood-neutral: 220 10% 50%;
+    --finance-income: 151 72% 33%;
+    --finance-expense: 211 86% 47%;
+    --finance-savings: 170 78% 34%;
+    --finance-debt: 356 72% 50%;
+    --finance-transfer: 190 85% 42%;
+    --finance-analytics: 265 72% 58%;
   }
 
   .dark {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 95%;
+    --background: 222 22% 8%;
+    --foreground: 218 28% 94%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 222 20% 12%;
+    --card-foreground: 218 28% 94%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 222 20% 12%;
+    --popover-foreground: 218 28% 94%;
 
-    --primary: 206 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 205 92% 58%;
+    --primary-foreground: 222 28% 7%;
 
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 222 16% 17%;
+    --secondary-foreground: 218 25% 91%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 222 16% 17%;
+    --muted-foreground: 218 12% 65%;
 
-    --accent: 0 0% 16%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 222 15% 20%;
+    --accent-foreground: 218 25% 93%;
 
-    --destructive: 354 80% 48%;
+    --destructive: 356 76% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 70% 38%;
-    --success-foreground: 0 0% 100%;
+    --success: 151 68% 46%;
+    --success-foreground: 222 28% 7%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 206 100% 50%;
+    --warning: 39 92% 58%;
+    --warning-foreground: 35 95% 12%;
 
-    --chart-1: 206 100% 50%;
-    --chart-2: 120 70% 38%;
-    --chart-3: 354 80% 48%;
-    --chart-4: 43 74% 58%;
-    --chart-5: 270 60% 60%;
+    --border: 222 14% 22%;
+    --input: 222 14% 22%;
+    --ring: 205 92% 58%;
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 206 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 206 100% 50%;
+    --chart-1: 205 92% 58%;
+    --chart-2: 151 68% 46%;
+    --chart-3: 356 76% 58%;
+    --chart-4: 178 66% 44%;
+    --chart-5: 265 78% 68%;
 
-    /* 💰 Mood (dark tuned) */
-    --mood-positive: 120 60% 45%;
-    --mood-negative: 354 70% 55%;
-    --mood-neutral: 220 10% 65%;
+    --sidebar-background: 222 20% 10%;
+    --sidebar-foreground: 218 25% 90%;
+    --sidebar-primary: 205 92% 58%;
+    --sidebar-primary-foreground: 222 28% 7%;
+    --sidebar-accent: 222 16% 17%;
+    --sidebar-accent-foreground: 218 25% 93%;
+    --sidebar-border: 222 14% 22%;
+    --sidebar-ring: 205 92% 58%;
+
+    --finance-income: 151 68% 46%;
+    --finance-expense: 205 92% 58%;
+    --finance-savings: 170 70% 44%;
+    --finance-debt: 356 76% 58%;
+    --finance-transfer: 190 82% 52%;
+    --finance-analytics: 265 78% 68%;
   }
-}
 
-/* ============================= */
-/* 🧠 BASE STYLES */
-/* ============================= */
-
-@layer base {
   * {
     @apply border-border outline-ring/50;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
+    min-height: 100vh;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
   }
 }
 
-/* ============================= */
-/* ✨ SMOOTH TRANSITIONS */
-/* ============================= */
+@layer components {
+  .app-canvas {
+    background:
+      radial-gradient(circle at top left, hsl(var(--finance-analytics) / 0.16), transparent 30rem),
+      radial-gradient(circle at top right, hsl(var(--finance-transfer) / 0.14), transparent 24rem),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+  }
+
+  .dark .app-canvas {
+    background:
+      radial-gradient(circle at top left, hsl(var(--finance-analytics) / 0.18), transparent 28rem),
+      radial-gradient(circle at top right, hsl(var(--finance-transfer) / 0.12), transparent 24rem),
+      linear-gradient(180deg, hsl(var(--background)), hsl(224 22% 7%));
+  }
+
+  .premium-card {
+    @apply border border-white/70 bg-white/[0.78] shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl;
+  }
+
+  .dark .premium-card {
+    @apply border-white/10 bg-white/[0.065] shadow-[0_18px_70px_rgba(0,0,0,0.35)];
+  }
+
+  .mica {
+    @apply border border-white/60 bg-white/[0.62] shadow-[0_16px_50px_rgba(15,23,42,0.08)] backdrop-blur-2xl;
+  }
+
+  .dark .mica {
+    @apply border-white/10 bg-white/[0.07] shadow-[0_16px_60px_rgba(0,0,0,0.34)];
+  }
+
+  .field-surface {
+    @apply rounded-2xl border border-border/70 bg-white/70 shadow-sm backdrop-blur-xl dark:bg-white/[0.05];
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .pb-nav {
+    padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-touch-callout {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 * {
   transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    border-color 0.25s ease,
-    fill 0.25s ease,
-    stroke 0.25s ease;
-}
-
-/* ============================= */
-/* 🧊 GLASS / MODERN UI */
-/* ============================= */
-
-@layer utilities {
-  .glass {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border));
-  }
-
-  .dark .glass {
-    background: rgba(20, 20, 20, 0.6);
-  }
-
-  .card-elevated {
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 4px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  .dark .card-elevated {
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.4),
-      0 4px 16px rgba(0, 0, 0, 0.5);
-  }
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
 }

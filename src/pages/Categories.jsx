@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Archive } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Archive, ArrowLeft, FolderOpen, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { categoriesApi } from '@/lib/budgetData';
@@ -14,14 +15,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useCategories } from '@/hooks/useBudgetData';
+import { useAllCategories } from '@/hooks/useBudgetData';
 import CategorySection from '@/components/categories/CategorySection';
 import CategoryEditorModal from '@/components/categories/CategoryEditorModal';
 import CategoryActionSheet from '@/components/categories/CategoryActionSheet';
+import { GlassCard, PageHeader, SectionCard, TonePill } from '@/components/shared/Premium';
 
 export default function Categories() {
   const queryClient = useQueryClient();
-  const { data: categories } = useCategories();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { data: categories = [] } = useAllCategories();
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -31,18 +35,23 @@ export default function Categories() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Open creator for a specific type
+  const isSettingsRoute = location.pathname.startsWith('/settings');
+
   const openNew = (type) => {
     setEditingCategory(null);
     setDefaultType(type);
     setEditorOpen(true);
   };
 
-  // Open creator pre-set with a parent
   const openAddSub = (parent) => {
     setEditingCategory({ type: parent.type, parent_id: parent.id, _preseed: true });
     setDefaultType(parent.type);
     setEditorOpen(true);
+  };
+
+  const refreshCategories = () => {
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
+    queryClient.invalidateQueries({ queryKey: ['all-categories'] });
   };
 
   const handleSave = async (data, existingId) => {
@@ -54,28 +63,28 @@ export default function Categories() {
         await categoriesApi.create(data);
         toast.success('Category created');
       }
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      refreshCategories();
     } catch (error) {
       console.error('Category save failed:', error);
       toast.error(error.message || 'Could not save category');
     }
   };
 
-  const handleArchive = async (cat) => {
+  const handleArchive = async (category) => {
     try {
-      await categoriesApi.update(cat.id, { is_archived: !cat.is_archived });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success(cat.is_archived ? 'Category restored' : 'Category archived');
+      await categoriesApi.update(category.id, { is_archived: !category.is_archived });
+      refreshCategories();
+      toast.success(category.is_archived ? 'Category restored' : 'Category archived');
     } catch (error) {
       console.error('Category archive failed:', error);
       toast.error(error.message || 'Could not update category');
     }
   };
 
-  const handleDelete = async (cat) => {
+  const handleDelete = async (category) => {
     try {
-      await categoriesApi.delete(cat.id);
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      await categoriesApi.delete(category.id);
+      refreshCategories();
       setDeleteTarget(null);
       toast.success('Category deleted');
     } catch (error) {
@@ -84,135 +93,161 @@ export default function Categories() {
     }
   };
 
-  const activeCategories = categories.filter(c => !c.is_archived);
-  const archivedCategories = categories.filter(c => c.is_archived);
+  const activeCategories = categories.filter((category) => !category.is_archived);
+  const archivedCategories = categories.filter((category) => category.is_archived);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-28 lg:py-10">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Build your budget structure</p>
-        </div>
-        {archivedCategories.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowArchived(p => !p)}
-            className="gap-1.5 text-muted-foreground text-xs"
-          >
-            <Archive className="w-3.5 h-3.5" />
-            {showArchived ? 'Hide archived' : `Archived (${archivedCategories.length})`}
-          </Button>
-        )}
-      </div>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
+      <PageHeader
+        title="Categories"
+        description="Group your money by Income, Expenses, Savings, and Debt."
+        icon={FolderOpen}
+        actions={
+          <div className="flex items-center gap-2">
+            {isSettingsRoute && (
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl" onClick={() => navigate('/settings')}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            {archivedCategories.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowArchived((value) => !value)}
+                className="rounded-2xl"
+              >
+                <Archive className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{showArchived ? 'Hide archived' : 'Archived'}</span>
+                <span>{archivedCategories.length}</span>
+              </Button>
+            )}
+          </div>
+        }
+      />
 
-      {/* Sections */}
+      <GlassCard tone="analytics" className="p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <TonePill tone="income">Income</TonePill>
+          <TonePill tone="expense">Expenses</TonePill>
+          <TonePill tone="savings">Savings</TonePill>
+          <TonePill tone="debt">Debt</TonePill>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          Categories stay connected to transactions and budget allocations, so archiving is usually safer than deleting.
+        </p>
+      </GlassCard>
+
       <div className="space-y-4">
         <CategorySection
-          type="income" label="Income"
+          type="income"
+          label="Income"
           categories={activeCategories}
-          defaultExpanded={true}
+          defaultExpanded
           onAction={setActionTarget}
           onAddSub={openAddSub}
           onAddNew={openNew}
         />
         <CategorySection
-          type="expense" label="Expenses"
+          type="expense"
+          label="Expenses"
           categories={activeCategories}
-          defaultExpanded={true}
+          defaultExpanded
           onAction={setActionTarget}
           onAddSub={openAddSub}
           onAddNew={openNew}
         />
         <CategorySection
-          type="savings" label="Savings"
+          type="savings"
+          label="Savings"
           categories={activeCategories}
-          defaultExpanded={false}
           onAction={setActionTarget}
           onAddSub={openAddSub}
           onAddNew={openNew}
         />
         <CategorySection
-          type="debt" label="Debt"
+          type="debt"
+          label="Debt"
           categories={activeCategories}
-          defaultExpanded={false}
           onAction={setActionTarget}
           onAddSub={openAddSub}
           onAddNew={openNew}
         />
 
-        {/* Archived section */}
         {showArchived && archivedCategories.length > 0 && (
-          <div className="bg-card rounded-xl border border-border overflow-hidden opacity-75">
-            <div className="px-5 py-3.5 border-b border-border flex items-center gap-2">
-              <Archive className="w-3.5 h-3.5 text-muted-foreground" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Archived</h3>
-            </div>
-            <div className="divide-y divide-border/50">
-              {archivedCategories.map(cat => (
-                <div key={cat.id} className="flex items-center gap-3 px-4 py-3 group">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center opacity-50"
-                    style={{ backgroundColor: (cat.color || '#888') + '18' }}>
-                    <span className="text-xs text-muted-foreground">{cat.name?.[0]}</span>
+          <SectionCard title="Archived" icon={Archive} tone="default" bodyClassName="p-2">
+            <div className="space-y-1">
+              {archivedCategories.map((category) => (
+                <div key={category.id} className="group flex items-center gap-3 rounded-2xl px-3 py-3 opacity-80 transition hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]">
+                  <div
+                    className="flex h-9 w-9 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: `${category.color || '#888'}18` }}
+                  >
+                    <span className="text-xs font-semibold text-muted-foreground">{category.name?.[0]}</span>
                   </div>
-                  <span className="text-sm text-muted-foreground flex-1 line-through">{cat.name}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground line-through">
+                    {category.name}
+                  </span>
                   <button
-                    onClick={() => handleArchive(cat)}
-                    className="opacity-0 group-hover:opacity-100 text-xs text-primary font-medium px-2 py-1 rounded hover:bg-primary/10 transition-all"
+                    type="button"
+                    onClick={() => handleArchive(category)}
+                    className="rounded-xl px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/10"
                   >
                     Restore
                   </button>
                   <button
-                    onClick={() => setDeleteTarget(cat)}
-                    className="opacity-0 group-hover:opacity-100 text-xs text-destructive font-medium px-2 py-1 rounded hover:bg-destructive/10 transition-all"
+                    type="button"
+                    onClick={() => setDeleteTarget(category)}
+                    className="rounded-xl px-2 py-1 text-xs font-semibold text-destructive transition hover:bg-destructive/10"
                   >
                     Delete
                   </button>
                 </div>
               ))}
             </div>
-          </div>
+          </SectionCard>
         )}
       </div>
 
-      {/* FAB */}
       <Button
         onClick={() => openNew('expense')}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0"
+        className="fixed bottom-28 right-5 z-40 h-14 w-14 rounded-[1.35rem] p-0 shadow-[0_18px_40px_rgba(37,99,235,0.28)] sm:right-8"
         size="icon"
+        aria-label="Add category"
       >
-        <Plus className="w-6 h-6" />
+        <Plus className="h-6 w-6" />
       </Button>
 
-      {/* Editor Modal */}
       <CategoryEditorModal
         open={editorOpen}
-        onClose={() => { setEditorOpen(false); setEditingCategory(null); }}
+        onClose={() => {
+          setEditorOpen(false);
+          setEditingCategory(null);
+        }}
         onSave={handleSave}
         parentCategories={activeCategories}
         initialType={editingCategory?._preseed ? editingCategory.type : defaultType}
-        editingCategory={editingCategory?._preseed ? { ...editingCategory, name: '', icon: 'tag', color: '#0078D4' } : editingCategory}
+        editingCategory={
+          editingCategory?._preseed
+            ? { ...editingCategory, name: '', icon: 'tag', color: '#0078D4' }
+            : editingCategory
+        }
       />
 
-      {/* Action Sheet */}
       <CategoryActionSheet
         category={actionTarget}
         open={!!actionTarget}
         onClose={() => setActionTarget(null)}
-        onEdit={(cat) => {
-          setEditingCategory(cat);
-          setDefaultType(cat.type);
+        onEdit={(category) => {
+          setEditingCategory(category);
+          setDefaultType(category.type);
           setEditorOpen(true);
         }}
         onArchive={handleArchive}
-        onDelete={(cat) => setDeleteTarget(cat)}
+        onDelete={(category) => setDeleteTarget(category)}
       />
 
-      {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -221,18 +256,21 @@ export default function Categories() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
             <Button
               variant="outline"
-              onClick={() => { handleArchive(deleteTarget); setDeleteTarget(null); }}
-              className="gap-1.5"
+              onClick={() => {
+                handleArchive(deleteTarget);
+                setDeleteTarget(null);
+              }}
+              className="rounded-2xl"
             >
-              <Archive className="w-3.5 h-3.5" />
+              <Archive className="h-3.5 w-3.5" />
               Archive Instead
             </Button>
             <AlertDialogAction
               onClick={() => handleDelete(deleteTarget)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>

@@ -16,6 +16,17 @@ export function useCategories() {
   });
 }
 
+export function useAllCategories() {
+  const { session } = useAuth();
+
+  return useQuery({
+    queryKey: ['all-categories', session?.user?.id],
+    queryFn: () => categoriesApi.list(),
+    enabled: Boolean(session?.user?.id),
+    initialData: [],
+  });
+}
+
 export function useAccounts() {
   const { session } = useAuth();
 

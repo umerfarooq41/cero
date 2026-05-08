@@ -1,6 +1,6 @@
-import React from 'react';
-import { Check, AlertTriangle, CircleDollarSign } from 'lucide-react';
+import { AlertTriangle, Check, CircleDollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GlassCard, MoneyAmount } from '@/components/shared/Premium';
 
 const fallbackFormatCurrency = (amount) =>
   Math.abs(amount || 0).toLocaleString('en-US', {
@@ -20,86 +20,64 @@ export default function LeftToAllocateBanner({
   const isOver = leftToAllocate < 0;
   const isUnder = leftToAllocate > 0;
 
+  const tone = isZero ? 'income' : isOver ? 'debt' : 'analytics';
   const stateColor = isZero
-    ? 'text-[hsl(var(--success))]'
+    ? 'text-emerald-700 dark:text-emerald-300'
     : isOver
-      ? 'text-destructive'
-      : 'text-primary';
+      ? 'text-red-700 dark:text-red-300'
+      : 'text-violet-700 dark:text-violet-300';
 
-  const bgColor = isZero
-    ? 'bg-[hsl(var(--success)/0.08)] border-[hsl(var(--success)/0.2)]'
-    : isOver
-      ? 'bg-destructive/5 border-destructive/20'
-      : 'bg-primary/5 border-primary/20';
-
-  const feedbackText = isZero
-    ? 'All money assigned ✓'
-    : isOver
-      ? (
-          <span className="inline-flex items-center gap-1">
-            <span>Over by</span>
-            {money(Math.abs(leftToAllocate))}
-          </span>
-        )
-      : 'Unassigned money remaining';
+  const label = isZero ? 'Every amount is assigned' : isOver ? 'Over allocated' : 'Left to allocate';
+  const helper = isEditMode
+    ? isZero
+      ? 'You are ready to save this budget.'
+      : isOver
+        ? 'Reduce planned spending, savings, or debt payments.'
+        : 'Give this remaining money a clear category.'
+    : 'Income minus planned expenses, savings, and debt.';
 
   return (
-    <div
-      className={cn(
-        'sticky top-0 z-20 bg-card/95 backdrop-blur-xl border rounded-xl p-4 shadow-sm transition-all duration-300',
-        isEditMode ? bgColor : 'border-border'
-      )}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-0.5 min-w-0">
-          <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
-            Income
-          </div>
-
-          <div className="text-base font-bold tabular-nums inline-flex items-center gap-1">
-            {money(totalIncome)}
+    <GlassCard tone={tone} className="p-5 sm:p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Monthly income
+          </p>
+          <div className="mt-2 text-2xl font-bold tracking-tight">
+            <MoneyAmount>{money(totalIncome)}</MoneyAmount>
           </div>
         </div>
 
-        <div className="h-8 w-px bg-border" />
+        <div className="hidden h-16 w-px bg-border/70 lg:block" />
 
-        <div className="flex-1 flex flex-col items-center">
-          <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide mb-0.5">
-            Left to Allocate
-          </div>
-
-          <div
-            className={cn(
-              'text-2xl font-bold tabular-nums tracking-tight inline-flex items-center gap-1',
-              stateColor
-            )}
-          >
-            {isOver && <span>-</span>}
-            {money(Math.abs(leftToAllocate))}
-          </div>
-
-          {isEditMode && (
-            <div className={cn('text-[11px] font-medium mt-0.5', stateColor)}>
-              {feedbackText}
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-3xl',
+                isZero && 'bg-emerald-500/12',
+                isOver && 'bg-red-500/12',
+                isUnder && 'bg-violet-500/12'
+              )}
+            >
+              {isZero && <Check className={cn('h-5 w-5', stateColor)} />}
+              {isOver && <AlertTriangle className={cn('h-5 w-5', stateColor)} />}
+              {isUnder && <CircleDollarSign className={cn('h-5 w-5', stateColor)} />}
             </div>
-          )}
-        </div>
 
-        <div
-          className={cn(
-            'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
-            isZero
-              ? 'bg-[hsl(var(--success)/0.15)]'
-              : isOver
-                ? 'bg-destructive/10'
-                : 'bg-primary/10'
-          )}
-        >
-          {isZero && <Check className={cn('w-4 h-4', stateColor)} />}
-          {isOver && <AlertTriangle className={cn('w-4 h-4', stateColor)} />}
-          {isUnder && <CircleDollarSign className={cn('w-4 h-4', stateColor)} />}
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-muted-foreground">{label}</p>
+              <div className={cn('mt-1 flex items-center gap-1 text-4xl font-extrabold tracking-tight', stateColor)}>
+                <MoneyAmount>
+                  {isOver && <span>-</span>}
+                  {money(Math.abs(leftToAllocate))}
+                </MoneyAmount>
+              </div>
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">{helper}</p>
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }

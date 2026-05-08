@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronRight, MoreHorizontal, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GlassCard, TonePill } from '@/components/shared/Premium';
 
 const TYPE_ACCENT = {
-  income: 'text-[hsl(var(--success))]',
-  expense: 'text-primary',
-  savings: 'text-chart-4',
-  debt: 'text-destructive',
+  income: 'text-emerald-700 dark:text-emerald-300',
+  expense: 'text-blue-700 dark:text-blue-300',
+  savings: 'text-teal-700 dark:text-teal-300',
+  debt: 'text-red-700 dark:text-red-300',
+};
+
+const TYPE_TONE = {
+  income: 'income',
+  expense: 'expense',
+  savings: 'savings',
+  debt: 'debt',
 };
 
 function CategoryRow({ cat, subs, onAction, onAddSub }) {
@@ -18,9 +26,9 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
   return (
     <div>
       <div
-        className="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition-colors group"
+        className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]"
       >
-        <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
+        <CategoryIcon icon={cat.icon} color={cat.color} size="sm" className="rounded-2xl" />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium leading-tight">{cat.name}</div>
           {hasSubs && (
@@ -29,17 +37,17 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <button
             onClick={() => onAddSub(cat)}
-            className="p-1.5 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            className="rounded-xl p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
             title="Add subcategory"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onAction(cat)}
-            className="p-1.5 rounded-md hover:bg-accent text-muted-foreground transition-colors"
+            className="rounded-xl p-1.5 text-muted-foreground transition-colors hover:bg-accent"
           >
             <MoreHorizontal className="w-3.5 h-3.5" />
           </button>
@@ -48,7 +56,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
         {hasSubs && (
           <button
             onClick={() => setSubOpen(p => !p)}
-            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="rounded-xl p-1 text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronRight className={cn("w-4 h-4 transition-transform duration-200", subOpen && "rotate-90")} />
           </button>
@@ -77,12 +85,12 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
 
 function SubRow({ sub, onAction }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-2.5 pl-[3.5rem] hover:bg-accent/30 transition-colors group border-t border-border/30">
+    <div className="group ml-8 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/[0.04] dark:hover:bg-white/[0.05]">
       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sub.color || '#888' }} />
       <span className="text-sm text-muted-foreground flex-1 truncate">{sub.name}</span>
       <button
         onClick={() => onAction(sub)}
-        className="p-1.5 rounded-md hover:bg-accent opacity-0 group-hover:opacity-100 text-muted-foreground transition-all"
+        className="rounded-xl p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent sm:opacity-0 sm:group-hover:opacity-100"
       >
         <MoreHorizontal className="w-3.5 h-3.5" />
       </button>
@@ -100,32 +108,34 @@ export default function CategorySection({ type, label, categories, defaultExpand
   }, 0);
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <GlassCard tone={TYPE_TONE[type]} className="p-0">
       {/* Section header */}
-      <button
-        onClick={() => setIsOpen(p => !p)}
-        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-accent/30 transition-colors"
-      >
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 py-3.5 transition-colors hover:bg-foreground/[0.03] dark:hover:bg-white/[0.04] sm:px-5">
+        <button
+          type="button"
+          onClick={() => setIsOpen(p => !p)}
+          className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+        >
           <ChevronDown className={cn(
-            "w-4 h-4 text-muted-foreground transition-transform duration-200",
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
             !isOpen && "-rotate-90"
           )} />
-          <h3 className={cn("text-sm font-semibold", TYPE_ACCENT[type])}>{label}</h3>
-        </div>
+          <h3 className={cn("truncate text-sm font-bold", TYPE_ACCENT[type])}>{label}</h3>
+        </button>
         <div className="flex items-center gap-3">
-          <span className="text-xs font-medium bg-secondary px-2 py-0.5 rounded-full text-muted-foreground tabular-nums">
+          <TonePill tone={TYPE_TONE[type]} className="px-2 py-0.5">
             {totalCount}
-          </span>
+          </TonePill>
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); onAddNew(type); }}
-            className="p-1 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            className="rounded-xl p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
             title="Add category"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
-      </button>
+      </div>
 
       {/* Category rows */}
       <AnimatePresence initial={false}>
@@ -138,7 +148,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
             className="overflow-hidden"
           >
             {parents.length === 0 ? (
-              <div className="px-5 py-6 text-center border-t border-border/50">
+              <div className="px-5 py-6 text-center">
                 <p className="text-xs text-muted-foreground">No {label.toLowerCase()} categories yet.</p>
                 <button
                   onClick={() => onAddNew(type)}
@@ -148,7 +158,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
                 </button>
               </div>
             ) : (
-              <div className="divide-y divide-border/50 border-t border-border/50">
+              <div className="space-y-1 p-2">
                 {parents.map(cat => {
                   const subs = allSubs.filter(s => s.parent_id === cat.id);
                   return (
@@ -166,6 +176,6 @@ export default function CategorySection({ type, label, categories, defaultExpand
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </GlassCard>
   );
 }

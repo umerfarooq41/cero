@@ -1,6 +1,6 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, PiggyBank, CreditCard } from 'lucide-react';
+import { CreditCard, PiggyBank, TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GlassCard, MoneyAmount } from '@/components/shared/Premium';
 
 const fallbackFormatCurrency = (amount) =>
   Math.abs(amount || 0).toLocaleString('en-US', {
@@ -21,94 +21,87 @@ function SummaryCard({
   const safePlanned = Number(planned) || 0;
   const money = formatCurrency || fallbackFormatCurrency;
 
-  const percentage =
-    safePlanned > 0
-      ? Math.min((safeAmount / safePlanned) * 100, 100)
-      : 0;
+  const percentage = safePlanned > 0 ? Math.min((safeAmount / safePlanned) * 100, 100) : 0;
+  const isOver = type !== 'income' && safeAmount > safePlanned && safePlanned > 0;
 
-  const isOver =
-    type !== 'income' &&
-    safeAmount > safePlanned &&
-    safePlanned > 0;
-
-  const colorMap = {
-    income: {
-      bar: 'bg-[hsl(var(--success))]',
-      text: 'text-[hsl(var(--success))]',
-    },
-    expense: {
-      bar: isOver ? 'bg-destructive' : 'bg-primary',
-      text: isOver ? 'text-destructive' : 'text-primary',
-    },
-    savings: {
-      bar: 'bg-chart-4',
-      text: 'text-chart-4',
-    },
-    debt: {
-      bar: 'bg-chart-3',
-      text: 'text-chart-3',
-    },
+  const toneMap = {
+    income: 'income',
+    expense: isOver ? 'debt' : 'expense',
+    savings: 'savings',
+    debt: 'debt',
   };
 
-  const colors = colorMap[type] || colorMap.expense;
+  const barColorMap = {
+    income: 'bg-emerald-500',
+    expense: isOver ? 'bg-red-500' : 'bg-blue-500',
+    savings: 'bg-teal-500',
+    debt: 'bg-red-500',
+  };
+
+  const textColorMap = {
+    income: 'text-emerald-700 dark:text-emerald-300',
+    expense: isOver ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300',
+    savings: 'text-teal-700 dark:text-teal-300',
+    debt: 'text-red-700 dark:text-red-300',
+  };
 
   return (
-    <div
-      className={cn(
-        'bg-card rounded-xl border border-border p-4 transition-all duration-300',
-        faded && 'opacity-50 scale-[0.98]'
-      )}
+    <GlassCard
+      tone={toneMap[type] || 'default'}
+      className={cn('p-4 transition-all duration-300', faded && 'opacity-55')}
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {label}
-        </span>
-        <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+      <div className="flex min-h-[8.5rem] flex-col justify-between">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            {label}
+          </span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-secondary/80 text-muted-foreground">
+            <Icon className="h-4 w-4" />
+          </div>
+        </div>
+
+        <div>
+          <div className={cn('text-2xl font-bold tabular-nums tracking-tight', textColorMap[type])}>
+            <MoneyAmount>{money(safeAmount)}</MoneyAmount>
+          </div>
+
+          {safePlanned > 0 ? (
+            <div className="mt-3">
+              <div className="h-2 overflow-hidden rounded-full bg-secondary/80">
+                <div
+                  className={cn('h-full rounded-full transition-all duration-700', barColorMap[type])}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
+                {safeAmount === 0 ? (
+                  type === 'income' ? (
+                    'Waiting for income'
+                  ) : (
+                    <>
+                      <span>0% of</span>
+                      <MoneyAmount>{money(safePlanned)}</MoneyAmount>
+                    </>
+                  )
+                ) : isOver ? (
+                  <>
+                    <MoneyAmount>{money(safeAmount - safePlanned)}</MoneyAmount>
+                    <span>over planned</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{Math.round(percentage)}% of</span>
+                    <MoneyAmount>{money(safePlanned)}</MoneyAmount>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-2 text-[11px] text-muted-foreground">No planned amount</p>
+          )}
         </div>
       </div>
-
-      <div className={cn('text-xl font-bold tabular-nums mb-2 inline-flex items-center gap-1', colors.text)}>
-        {money(safeAmount)}
-      </div>
-
-      {safePlanned > 0 && (
-        <>
-          <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-1.5">
-            <div
-              className={cn('h-full rounded-full transition-all duration-500', colors.bar)}
-              style={{
-                width: `${percentage}%`,
-                transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-            />
-          </div>
-
-          <div className="text-[11px] text-muted-foreground tabular-nums inline-flex items-center gap-1 flex-wrap">
-            {safeAmount === 0 ? (
-              type === 'income' ? (
-                'Waiting for income'
-              ) : (
-                <>
-                  <span>0% of</span>
-                  {money(safePlanned)}
-                </>
-              )
-            ) : isOver ? (
-              <>
-                {money(safeAmount - safePlanned)}
-                <span>over</span>
-              </>
-            ) : (
-              <>
-                <span>{Math.round(percentage)}% of</span>
-                {money(safePlanned)}
-              </>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+    </GlassCard>
   );
 }
 
@@ -122,8 +115,8 @@ export default function SummaryCards({
   return (
     <div
       className={cn(
-        'grid grid-cols-2 lg:grid-cols-4 gap-3 transition-all duration-300',
-        isEditMode && 'mb-2'
+        'grid grid-cols-2 gap-3 transition-all duration-300 lg:grid-cols-4',
+        isEditMode && 'mb-1'
       )}
     >
       <SummaryCard
