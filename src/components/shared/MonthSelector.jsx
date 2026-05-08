@@ -7,22 +7,22 @@ export default function MonthSelector({ currentMonth, onChange }) {
   const date = new Date(currentMonth + '-01');
 
   return (
-    <div className="flex items-center gap-1 rounded-2xl bg-secondary/70 p-1">
+    <div className="flex items-center gap-2">
       <Button 
         variant="ghost" 
         size="icon" 
-        className="h-8 w-8 rounded-xl"
+        className="h-8 w-8"
         onClick={() => onChange(format(subMonths(date, 1), 'yyyy-MM'))}
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
-      <span className="min-w-[7.25rem] text-center text-sm font-bold">
+      <span className="text-sm font-semibold min-w-[120px] text-center">
         {format(date, 'MMMM yyyy')}
       </span>
       <Button 
         variant="ghost" 
         size="icon" 
-        className="h-8 w-8 rounded-xl"
+        className="h-8 w-8"
         onClick={() => onChange(format(addMonths(date, 1), 'yyyy-MM'))}
       >
         <ChevronRight className="w-4 h-4" />

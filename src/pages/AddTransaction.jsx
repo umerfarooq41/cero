@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ReceiptText } from 'lucide-react';
+import { ArrowLeft, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,7 +18,6 @@ import { toast } from 'sonner';
 import { useCategories, useAccounts, useAllTransactions } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
-import { GlassCard, PageHeader, TonePill } from '@/components/shared/Premium';
 
 const typeOptions = [
   {
@@ -329,23 +328,24 @@ export default function AddTransaction() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <PageHeader
-        title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
-        description="Record money moving in, out, or between accounts."
-        icon={ReceiptText}
-        actions={
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 rounded-2xl">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        }
-      />
+    <div className="max-w-lg mx-auto px-4 py-6 lg:py-10">
+      <div className="flex items-center gap-3 mb-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(-1)}
+          className="shrink-0"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
 
-      <GlassCard
-        tone={type === 'income' ? 'income' : type === 'transfer' ? 'transfer' : 'expense'}
-        className="p-8 text-center"
-      >
-        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <h1 className="text-xl font-bold tracking-tight">
+          {isEditing ? 'Edit Transaction' : 'Add Transaction'}
+        </h1>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-8 mb-6 text-center">
+        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
           Amount
         </div>
 
@@ -359,18 +359,17 @@ export default function AddTransaction() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            className="w-52 border-none bg-transparent text-center text-5xl font-extrabold tabular-nums outline-none placeholder:text-muted-foreground/35"
+            className="text-5xl font-bold bg-transparent border-none outline-none text-center w-48 tabular-nums"
             step="0.01"
             min="0"
             autoFocus
           />
         </div>
-      </GlassCard>
+      </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 mb-6">
         {typeOptions.map((opt) => {
           const isActive = type === opt.value;
-          const Icon = opt.icon;
 
           return (
             <button
@@ -382,22 +381,22 @@ export default function AddTransaction() {
                 setToAccountId('');
               }}
               className={cn(
-                'flex flex-col items-center gap-1.5 rounded-3xl border py-3 text-sm font-semibold transition-all',
+                'flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 transition-all text-sm font-medium',
                 isActive
-                  ? `${opt.color} shadow-sm`
-                  : 'border-border/70 bg-card/55 text-muted-foreground hover:border-muted-foreground/30 dark:bg-white/[0.04]'
+                  ? opt.color
+                  : 'border-border text-muted-foreground hover:border-muted-foreground/30'
               )}
             >
-              <Icon className="h-5 w-5" />
+              <opt.icon className="w-5 h-5" />
               {opt.label}
             </button>
           );
         })}
       </div>
 
-      <GlassCard className="space-y-5 p-5">
+      <div className="space-y-4 bg-card rounded-xl border border-border p-5">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground">
             {type === 'transfer' ? 'From Account' : 'Account'}
           </label>
 
@@ -415,7 +414,7 @@ export default function AddTransaction() {
               }
             }}
           >
-            <SelectTrigger className="h-11 rounded-2xl bg-secondary/60">
+            <SelectTrigger>
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
 
@@ -431,7 +430,7 @@ export default function AddTransaction() {
 
         {type === 'transfer' && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <label className="text-xs font-medium text-muted-foreground">
               To Account
             </label>
 
@@ -442,7 +441,7 @@ export default function AddTransaction() {
                 setCategoryId('');
               }}
             >
-              <SelectTrigger className="h-11 rounded-2xl bg-secondary/60">
+              <SelectTrigger>
                 <SelectValue placeholder="Select destination" />
               </SelectTrigger>
 
@@ -461,7 +460,7 @@ export default function AddTransaction() {
 
         {shouldShowCategory && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <label className="text-xs font-medium text-muted-foreground">
               Category
             </label>
 
@@ -470,7 +469,7 @@ export default function AddTransaction() {
               onValueChange={setCategoryId}
               disabled={type === 'transfer' && !transferCategoryType}
             >
-              <SelectTrigger className="h-11 rounded-2xl bg-secondary/60">
+              <SelectTrigger>
                 <SelectValue placeholder={categoryPlaceholder} />
               </SelectTrigger>
 
@@ -500,7 +499,7 @@ export default function AddTransaction() {
         )}
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground">
             Date
           </label>
 
@@ -508,12 +507,11 @@ export default function AddTransaction() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="h-11 rounded-2xl bg-secondary/60"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground">
             Note
           </label>
 
@@ -521,19 +519,15 @@ export default function AddTransaction() {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Add a note..."
-            className="h-24 resize-none rounded-2xl bg-secondary/60"
+            className="h-20 resize-none"
           />
         </div>
-      </GlassCard>
-
-      <TonePill tone={type === 'income' ? 'income' : type === 'transfer' ? 'transfer' : 'expense'} className="self-start">
-        {type === 'transfer' ? 'Between accounts' : type === 'income' ? 'Money in' : 'Money out'}
-      </TonePill>
+      </div>
 
       <Button
         onClick={handleSubmit}
         disabled={saving || !amount}
-        className="fixed bottom-28 left-0 right-0 z-40 mx-auto h-12 w-[calc(100%-2rem)] max-w-2xl rounded-2xl text-sm font-semibold shadow-[0_18px_40px_rgba(37,99,235,0.24)]"
+        className="w-full h-12 mt-6 text-sm font-semibold"
       >
         {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
       </Button>

@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { format, subMonths } from 'date-fns';
 import {
   ArrowDownRight,
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   BarChart3,
   Brain,
   CreditCard,
-  PieChart as PieChartIcon,
   PiggyBank,
   Target,
   TrendingDown,
@@ -27,14 +28,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { motion } from 'framer-motion';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   useAccounts,
   useAllTransactions,
@@ -43,201 +38,257 @@ import {
   useCurrencyFormatter,
 } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
-import {
-  ChartCard,
-  GlassCard,
-  InsightCard,
-  MetricCard,
-  MoneyAmount,
-  PageHeader,
-  TonePill,
-} from '@/components/shared/Premium';
 
 const CHART_COLORS = [
-  '#2563EB',
-  '#10B981',
-  '#EF4444',
-  '#8B5CF6',
-  '#14B8A6',
-  '#F59E0B',
-  '#06B6D4',
-  '#EC4899',
+  '#0078D4',
+  '#107C10',
+  '#C50F1F',
+  '#8764B8',
+  '#CA5010',
+  '#008272',
+  '#4F6BED',
+  '#FFB900',
 ];
 
 const MONTHS = [
-  { value: '01', label: 'January', short: 'Jan' },
-  { value: '02', label: 'February', short: 'Feb' },
-  { value: '03', label: 'March', short: 'Mar' },
-  { value: '04', label: 'April', short: 'Apr' },
-  { value: '05', label: 'May', short: 'May' },
-  { value: '06', label: 'June', short: 'Jun' },
-  { value: '07', label: 'July', short: 'Jul' },
-  { value: '08', label: 'August', short: 'Aug' },
-  { value: '09', label: 'September', short: 'Sep' },
-  { value: '10', label: 'October', short: 'Oct' },
-  { value: '11', label: 'November', short: 'Nov' },
-  { value: '12', label: 'December', short: 'Dec' },
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
-const INITIAL_MONTH = format(new Date(), 'MM');
-const INITIAL_YEAR = format(new Date(), 'yyyy');
-
-function moneyWithSign(value, formatCurrency, showPlus = false) {
-  const amount = Number(value) || 0;
-
+function Card({ children, className }) {
   return (
-    <MoneyAmount>
-      {amount < 0 && <span>-</span>}
-      {amount > 0 && showPlus && <span>+</span>}
-      {formatCurrency(Math.abs(amount))}
-    </MoneyAmount>
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className={cn(
+        'rounded-2xl border border-border bg-card shadow-sm',
+        className
+      )}
+    >
+      {children}
+    </motion.div>
   );
 }
 
-function chartTooltip(formatCurrency) {
-  return {
-    cursor: { fill: 'hsl(var(--muted) / 0.55)' },
-    contentStyle: {
-      backgroundColor: 'hsl(var(--card))',
-      border: '1px solid hsl(var(--border))',
-      borderRadius: '16px',
-      fontSize: '12px',
-      boxShadow: '0 18px 45px rgba(15, 23, 42, 0.12)',
-    },
-    formatter: (value) => formatCurrency(value),
-  };
-}
+function MonthYearToggle({ currentMonth, onChange }) {
+  const [year, month] = currentMonth.split('-').map(Number);
 
-function PeriodFilter({ mode, setMode, selectedMonth, setSelectedMonth, selectedYear, setSelectedYear, years }) {
+  const updateYear = (nextYear) => {
+    onChange(`${nextYear}-${String(month).padStart(2, '0')}`);
+  };
+
+  const selectMonth = (monthIndex) => {
+    onChange(`${year}-${String(monthIndex + 1).padStart(2, '0')}`);
+  };
+
   return (
-    <GlassCard className="p-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="grid grid-cols-2 rounded-2xl bg-secondary/75 p-1">
-          {['month', 'year'].map((item) => (
+    <Card className="p-4 mb-4 bg-gradient-to-br from-background via-card to-muted/40">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <button
+          type="button"
+          onClick={() => updateYear(year - 1)}
+          className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition"
+          aria-label="Previous year"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">Selected Year</p>
+          <p className="text-lg font-bold tabular-nums">{year}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => updateYear(year + 1)}
+          className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition"
+          aria-label="Next year"
+        >
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+        {MONTHS.map((label, index) => {
+          const active = index + 1 === month;
+
+          return (
             <button
-              key={item}
+              key={label}
               type="button"
-              onClick={() => setMode(item)}
+              onClick={() => selectMonth(index)}
               className={cn(
-                'rounded-xl px-4 py-2 text-xs font-bold capitalize transition-all',
-                mode === item
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                'h-9 rounded-xl text-xs font-semibold transition shadow-sm',
+                active
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted/70 text-muted-foreground hover:bg-muted'
               )}
             >
-              {item}
+              {label}
             </button>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          {mode === 'month' && (
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="h-10 w-[8.5rem] rounded-2xl bg-secondary/60">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTHS.map((month) => (
-                  <SelectItem key={month.value} value={month.value}>
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="h-10 w-[7rem] rounded-2xl bg-secondary/60">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((year) => (
-                <SelectItem key={year} value={year}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          );
+        })}
       </div>
-    </GlassCard>
+    </Card>
   );
 }
 
-function EfficiencyGauge({ value }) {
-  const score = Math.max(0, Math.min(100, Number(value) || 0));
-  const color = score >= 75 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
+function InlineMoney({ children, className }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center align-middle whitespace-nowrap leading-none [&_svg]:shrink-0 [&_img]:shrink-0',
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SummaryCard({ title, value, subtitle, icon: Icon, tone = 'default' }) {
+  const toneClass =
+    tone === 'good'
+      ? 'text-emerald-700 dark:text-emerald-300'
+      : tone === 'bad'
+        ? 'text-red-700 dark:text-red-300'
+        : tone === 'blue'
+          ? 'text-blue-700 dark:text-blue-300'
+          : tone === 'purple'
+            ? 'text-violet-700 dark:text-violet-300'
+            : 'text-foreground';
+
+  const iconClass =
+    tone === 'good'
+      ? 'text-emerald-700 dark:text-emerald-300'
+      : tone === 'bad'
+        ? 'text-red-700 dark:text-red-300'
+        : tone === 'blue'
+          ? 'text-blue-700 dark:text-blue-300'
+          : tone === 'purple'
+            ? 'text-violet-700 dark:text-violet-300'
+            : 'text-muted-foreground';
 
   return (
-    <div className="flex items-center justify-center py-3">
-      <div className="relative h-44 w-44">
-        <svg viewBox="0 0 36 36" className="h-44 w-44 -rotate-90">
-          <path
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke="hsl(var(--secondary))"
-            strokeWidth="3"
-          />
-          <path
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke={color}
-            strokeDasharray={`${score}, 100`}
-            strokeLinecap="round"
-            strokeWidth="3"
-            className="transition-all duration-700"
-          />
-        </svg>
+    <Card
+      className={cn(
+        'p-4 overflow-hidden relative min-h-[112px]',
+        tone === 'good' &&
+          'bg-gradient-to-br from-emerald-50 via-card to-card dark:from-emerald-950/30',
+        tone === 'bad' &&
+          'bg-gradient-to-br from-red-50 via-card to-card dark:from-red-950/30',
+        tone === 'blue' &&
+          'bg-gradient-to-br from-blue-50 via-card to-card dark:from-blue-950/30',
+        tone === 'purple' &&
+          'bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30'
+      )}
+    >
+      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/35 dark:bg-white/5" />
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-extrabold tracking-tight">{score}%</span>
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            score
-          </span>
+      <div className="relative flex h-full items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground mb-2 leading-none">
+            {title}
+          </p>
+
+          <div
+            className={cn(
+              'text-xl font-bold tabular-nums leading-none flex items-center min-h-[24px]',
+              toneClass
+            )}
+          >
+            <InlineMoney>{value}</InlineMoney>
+          </div>
+
+          {subtitle && (
+            <div className="mt-2 text-[11px] text-muted-foreground leading-snug flex items-center gap-x-1 gap-y-1 flex-wrap">
+              {subtitle}
+            </div>
+          )}
+        </div>
+
+        <div
+          className={cn(
+            'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm',
+            tone === 'good' && 'bg-emerald-100 dark:bg-emerald-900/40',
+            tone === 'bad' && 'bg-red-100 dark:bg-red-900/40',
+            tone === 'blue' && 'bg-blue-100 dark:bg-blue-900/40',
+            tone === 'purple' && 'bg-violet-100 dark:bg-violet-900/40',
+            tone === 'default' && 'bg-muted'
+          )}
+        >
+          <Icon className={cn('w-4 h-4', iconClass)} />
         </div>
       </div>
-    </div>
+    </Card>
+  );
+}
+
+function InsightCard({ icon: Icon, title, text, tone = 'default' }) {
+  const iconClass =
+    tone === 'good'
+      ? 'text-[hsl(var(--success))]'
+      : tone === 'bad'
+        ? 'text-destructive'
+        : tone === 'warning'
+          ? 'text-amber-500'
+          : 'text-primary';
+
+  return (
+    <Card className="p-4">
+      <div className="flex gap-3">
+        <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+          <Icon className={cn('w-4 h-4', iconClass)} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">{title}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+            {text}
+          </p>
+        </div>
+      </div>
+    </Card>
   );
 }
 
 export default function Reflect() {
-  const [mode, setMode] = useState('month');
-  const [selectedMonth, setSelectedMonth] = useState(INITIAL_MONTH);
-  const [selectedYear, setSelectedYear] = useState(INITIAL_YEAR);
+  const [currentMonth, setCurrentMonth] = useState(
+    format(new Date(), 'yyyy-MM')
+  );
 
   const formatCurrency = useCurrencyFormatter();
 
-  const currentMonth = `${selectedYear}-${selectedMonth}`;
   const { data: categories = [] } = useCategories();
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: accounts = [] } = useAccounts();
   const budget = useBudgetSummary(currentMonth);
 
-  const years = useMemo(() => {
-    const fromTransactions = allTransactions
-      .map((transaction) => transaction.date?.slice(0, 4))
-      .filter(Boolean);
-    return [...new Set([selectedYear, INITIAL_YEAR, ...fromTransactions])]
-      .sort((a, b) => Number(b) - Number(a));
-  }, [allTransactions, selectedYear]);
+  const monthTransactions = budget.transactions || [];
 
-  const periodTransactions = useMemo(() => {
-    if (mode === 'month') return budget.transactions || [];
-    return allTransactions.filter((transaction) => transaction.date?.startsWith(selectedYear));
-  }, [mode, budget.transactions, allTransactions, selectedYear]);
-
-  const income = periodTransactions
-    .filter((transaction) => transaction.type === 'income')
-    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-
-  const expenses = periodTransactions
-    .filter((transaction) => transaction.type === 'expense')
-    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-
+  const income = Number(budget.totalIncome) || 0;
+  const expenses = Number(budget.totalExpenses) || 0;
   const plannedExpenses = Number(budget.totalPlannedExpenses) || 0;
   const plannedIncome = Number(budget.totalPlannedIncome) || 0;
   const leftToAllocate = Number(budget.leftToAllocate) || 0;
   const netCashFlow = income - expenses;
+
+  const netWorth = useMemo(() => {
+    return accounts.reduce((sum, account) => {
+      const balance = Number(account.balance) || 0;
+      return sum + (account.category === 'asset' ? balance : -Math.abs(balance));
+    }, 0);
+  }, [accounts]);
 
   const totalAssets = useMemo(() => {
     return accounts
@@ -251,79 +302,59 @@ export default function Reflect() {
       .reduce((sum, account) => sum + Math.abs(Number(account.balance) || 0), 0);
   }, [accounts]);
 
-  const netWorth = totalAssets - totalLiabilities;
   const savingsRate = income > 0 ? Math.round((netCashFlow / income) * 100) : 0;
 
   const efficiency = useMemo(() => {
-    if (mode === 'year') {
-      if (income <= 0) return 0;
-      return Math.max(0, Math.min(100, Math.round((netCashFlow / income) * 100)));
-    }
-
     if (plannedExpenses === 0) return 0;
 
     const ratio = expenses / plannedExpenses;
-    if (ratio <= 1) return Math.round((1 - Math.abs(1 - ratio)) * 100);
+
+    if (ratio <= 1) {
+      return Math.round((1 - Math.abs(1 - ratio)) * 100);
+    }
+
     return Math.max(0, Math.round((1 - (ratio - 1)) * 100));
-  }, [mode, income, netCashFlow, plannedExpenses, expenses]);
+  }, [expenses, plannedExpenses]);
 
   const spendingBreakdown = useMemo(() => {
     const categorySpending = {};
 
-    periodTransactions
-      .filter((transaction) => transaction.type === 'expense')
-      .forEach((transaction) => {
-        const category = categories.find((item) => item.id === transaction.category_id);
+    monthTransactions
+      .filter((t) => t.type === 'expense')
+      .forEach((t) => {
+        const category = categories.find((c) => c.id === t.category_id);
         const name = category?.name || 'Uncategorized';
-        categorySpending[name] = (categorySpending[name] || 0) + (Number(transaction.amount) || 0);
+        categorySpending[name] =
+          (categorySpending[name] || 0) + (Number(t.amount) || 0);
       });
 
     return Object.entries(categorySpending)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 7)
-      .map(([name, value], index) => ({
+      .map(([name, value], i) => ({
         name,
         value,
-        color: CHART_COLORS[index % CHART_COLORS.length],
+        color: CHART_COLORS[i % CHART_COLORS.length],
       }));
-  }, [periodTransactions, categories]);
+  }, [monthTransactions, categories]);
 
   const cashFlow = useMemo(() => {
-    if (mode === 'year') {
-      return MONTHS.map((month) => {
-        const monthKey = `${selectedYear}-${month.value}`;
-        const transactions = allTransactions.filter((transaction) => transaction.date?.startsWith(monthKey));
-        const monthIncome = transactions
-          .filter((transaction) => transaction.type === 'income')
-          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-        const monthExpenses = transactions
-          .filter((transaction) => transaction.type === 'expense')
-          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-
-        return {
-          month: month.short,
-          income: monthIncome,
-          expenses: monthExpenses,
-          net: monthIncome - monthExpenses,
-        };
-      });
-    }
-
     const months = [];
 
-    for (let index = 5; index >= 0; index -= 1) {
-      const monthDate = subMonths(new Date(`${currentMonth}-01`), index);
-      const monthKey = format(monthDate, 'yyyy-MM');
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = subMonths(new Date(`${currentMonth}-01`), i);
+      const month = format(monthDate, 'yyyy-MM');
       const label = format(monthDate, 'MMM');
-      const transactions = allTransactions.filter((transaction) => transaction.date?.startsWith(monthKey));
 
-      const monthIncome = transactions
-        .filter((transaction) => transaction.type === 'income')
-        .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+      const txns = allTransactions.filter((t) => t.date?.startsWith(month));
 
-      const monthExpenses = transactions
-        .filter((transaction) => transaction.type === 'expense')
-        .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+      const monthIncome = txns
+        .filter((t) => t.type === 'income')
+        .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+
+      const monthExpenses = txns
+        .filter((t) => t.type === 'expense')
+        .reduce((s, t) => s + (Number(t.amount) || 0), 0);
 
       months.push({
         month: label,
@@ -334,235 +365,281 @@ export default function Reflect() {
     }
 
     return months;
-  }, [mode, selectedYear, currentMonth, allTransactions]);
+  }, [currentMonth, allTransactions]);
 
-  const spendingTimeline = useMemo(() => {
-    if (mode === 'year') {
-      return MONTHS.map((month) => {
-        const monthKey = `${selectedYear}-${month.value}`;
-        const amount = allTransactions
-          .filter((transaction) => transaction.type === 'expense' && transaction.date?.startsWith(monthKey))
-          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-        return { label: month.short, amount };
-      });
-    }
-
+  const dailySpending = useMemo(() => {
     const days = {};
-    periodTransactions
-      .filter((transaction) => transaction.type === 'expense')
-      .forEach((transaction) => {
-        const day = transaction.date?.slice(8, 10) || '01';
-        days[day] = (days[day] || 0) + (Number(transaction.amount) || 0);
+
+    monthTransactions
+      .filter((t) => t.type === 'expense')
+      .forEach((t) => {
+        const day = t.date?.slice(8, 10) || '01';
+        days[day] = (days[day] || 0) + (Number(t.amount) || 0);
       });
 
     return Object.entries(days)
       .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([day, amount]) => ({ label: day, amount }));
-  }, [mode, periodTransactions, allTransactions, selectedYear]);
+      .map(([day, amount]) => ({ day, amount }));
+  }, [monthTransactions]);
 
   const topCategory = spendingBreakdown[0];
-  const periodLabel =
-    mode === 'month'
-      ? `${MONTHS.find((month) => month.value === selectedMonth)?.label} ${selectedYear}`
-      : selectedYear;
 
   const insights = [
     {
       icon: netCashFlow >= 0 ? TrendingUp : TrendingDown,
       title: netCashFlow >= 0 ? 'Positive cash flow' : 'Negative cash flow',
-      tone: netCashFlow >= 0 ? 'income' : 'debt',
       text:
         netCashFlow >= 0 ? (
           <>
-            You kept {moneyWithSign(netCashFlow, formatCurrency)} after expenses in {periodLabel}.
+            You kept{' '}
+            <InlineMoney>{formatCurrency(netCashFlow)}</InlineMoney> after
+            expenses this month.
           </>
         ) : (
           <>
-            Spending exceeded income by {moneyWithSign(Math.abs(netCashFlow), formatCurrency)} in {periodLabel}.
+            You spent{' '}
+            <InlineMoney>{formatCurrency(Math.abs(netCashFlow))}</InlineMoney>{' '}
+            more than your income this month.
           </>
         ),
+      tone: netCashFlow >= 0 ? 'good' : 'bad',
     },
     {
       icon: Target,
-      title: mode === 'month' ? 'Budget efficiency' : 'Year cash control',
-      tone: efficiency >= 75 ? 'income' : efficiency >= 50 ? 'warning' : 'debt',
+      title: 'Budget efficiency',
       text:
-        efficiency >= 75
-          ? 'Strong control. Your spending pattern is staying healthy.'
+        efficiency >= 80
+          ? 'Strong control. Your spending is close to your planned budget.'
           : efficiency >= 50
-            ? 'A few categories deserve attention before the pattern hardens.'
-            : 'The period is drifting. Review the largest spend areas first.',
+            ? 'Some categories may need review before month end.'
+            : 'Spending is far from plan. Review your largest categories.',
+      tone: efficiency >= 80 ? 'good' : efficiency >= 50 ? 'warning' : 'bad',
     },
     {
       icon: topCategory ? CreditCard : Brain,
       title: topCategory ? `Largest spend: ${topCategory.name}` : 'No spending yet',
-      tone: topCategory ? 'expense' : 'income',
       text: topCategory ? (
         <>
-          {topCategory.name} used {formatCurrency(topCategory.value)} during this period.
+          {topCategory.name} used{' '}
+          <InlineMoney>{formatCurrency(topCategory.value)}</InlineMoney> this
+          month.
         </>
       ) : (
         'Once you add expenses, your top spending categories will appear here.'
       ),
+      tone: topCategory ? 'default' : 'good',
     },
     {
       icon: PiggyBank,
       title: 'Savings rate',
-      tone: savingsRate >= 20 ? 'savings' : savingsRate < 0 ? 'debt' : 'warning',
       text:
         income > 0
-          ? `Estimated savings rate is ${savingsRate}% for ${periodLabel}.`
+          ? `Your estimated savings rate is ${savingsRate}%.`
           : 'Add income transactions to calculate your savings rate.',
+      tone: savingsRate >= 20 ? 'good' : savingsRate < 0 ? 'bad' : 'warning',
     },
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <PageHeader
-        title="Reflect"
-        description="A calm analytics cockpit for cash flow, budget health, and net worth."
-        icon={BarChart3}
-        actions={<TonePill tone="analytics">{periodLabel}</TonePill>}
-      />
+    <div className="max-w-5xl mx-auto px-4 py-6 pb-24 lg:py-10">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">Reflect</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Summary, trends, and useful insights
+        </p>
+      </div>
 
-      <PeriodFilter
-        mode={mode}
-        setMode={setMode}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        selectedYear={selectedYear}
-        setSelectedYear={setSelectedYear}
-        years={years}
-      />
+      <MonthYearToggle currentMonth={currentMonth} onChange={setCurrentMonth} />
 
-      <GlassCard tone={netCashFlow >= 0 ? 'analytics' : 'debt'} className="p-5 sm:p-6">
-        <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div>
-            <TonePill tone={netCashFlow >= 0 ? 'income' : 'debt'}>
-              {netCashFlow >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-              {netCashFlow >= 0 ? 'Cash positive' : 'Cash negative'}
-            </TonePill>
-            <h2 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-              {moneyWithSign(netCashFlow, formatCurrency, true)}
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Income and expenses across {periodLabel}, with the budget signal kept close enough to guide your next move.
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <SummaryCard
+          title="Income"
+          value={formatCurrency(income)}
+          subtitle={
+            plannedIncome > 0 ? (
+              <>
+                <InlineMoney>{formatCurrency(plannedIncome)}</InlineMoney>
+                <span>planned</span>
+              </>
+            ) : (
+              'No planned income'
+            )
+          }
+          icon={ArrowUpRight}
+          tone="good"
+        />
+
+        <SummaryCard
+          title="Expenses"
+          value={formatCurrency(expenses)}
+          subtitle={
+            plannedExpenses > 0 ? (
+              <>
+                <InlineMoney>{formatCurrency(plannedExpenses)}</InlineMoney>
+                <span>planned</span>
+              </>
+            ) : (
+              'No planned expenses'
+            )
+          }
+          icon={ArrowDownRight}
+          tone={expenses > plannedExpenses && plannedExpenses > 0 ? 'bad' : 'blue'}
+        />
+
+        <SummaryCard
+          title="Net Cash Flow"
+          value={formatCurrency(netCashFlow)}
+          subtitle={savingsRate ? `${savingsRate}% savings rate` : 'This month'}
+          icon={Wallet}
+          tone={netCashFlow >= 0 ? 'good' : 'bad'}
+        />
+
+        <SummaryCard
+          title="Net Worth"
+          value={formatCurrency(netWorth)}
+          subtitle={
+            <>
+              <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
+              <span>assets •</span>
+              <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+              <span>debt</span>
+            </>
+          }
+          icon={TrendingUp}
+          tone={netWorth >= 0 ? 'purple' : 'bad'}
+        />
+      </div>
+
+      <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-4 mb-4">
+        <Card className="p-5">
+          <div className="mb-5">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-muted-foreground" />
+              Cash Flow — Last 6 Months
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Income, expenses, and monthly net
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-3xl border border-violet-500/15 bg-violet-500/10 p-3">
-              <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">Net worth</p>
-              <div className="mt-2 text-xl font-bold">
-                {moneyWithSign(netWorth, formatCurrency)}
-              </div>
-            </div>
-            <div className="rounded-3xl border border-teal-500/15 bg-teal-500/10 p-3">
-              <p className="text-xs font-semibold text-teal-700 dark:text-teal-300">Savings rate</p>
-              <div className="mt-2 text-xl font-bold">{savingsRate}%</div>
-            </div>
-          </div>
-        </div>
-      </GlassCard>
-
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard
-          title="Income"
-          label="Income"
-          value={formatCurrency(income)}
-          detail={plannedIncome > 0 && mode === 'month' ? <>{formatCurrency(plannedIncome)} planned</> : periodLabel}
-          icon={ArrowDownRight}
-          tone="income"
-        />
-        <MetricCard
-          label="Expenses"
-          value={formatCurrency(expenses)}
-          detail={plannedExpenses > 0 && mode === 'month' ? <>{formatCurrency(plannedExpenses)} planned</> : periodLabel}
-          icon={ArrowUpRight}
-          tone={expenses > plannedExpenses && plannedExpenses > 0 && mode === 'month' ? 'debt' : 'expense'}
-        />
-        <MetricCard
-          label="Net Cash Flow"
-          value={moneyWithSign(netCashFlow, formatCurrency)}
-          detail={income > 0 ? `${savingsRate}% savings rate` : 'Waiting for income'}
-          icon={Wallet}
-          tone={netCashFlow >= 0 ? 'savings' : 'debt'}
-        />
-        <MetricCard
-          label="Net Worth"
-          value={moneyWithSign(netWorth, formatCurrency)}
-          detail={
-            <span className="flex flex-wrap gap-x-1 gap-y-1">
-              <span>{formatCurrency(totalAssets)} assets</span>
-              <span>{formatCurrency(totalLiabilities)} debt</span>
-            </span>
-          }
-          icon={TrendingUp}
-          tone={netWorth >= 0 ? 'analytics' : 'debt'}
-        />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-        <ChartCard
-          title="Cash Flow Trend"
-          subtitle={mode === 'year' ? 'Full year by month' : 'Last 6 months'}
-          icon={BarChart3}
-          tone="analytics"
-        >
-          <div className="h-72">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cashFlow} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip {...chartTooltip(formatCurrency)} />
-                <Bar dataKey="income" fill="#10B981" radius={[8, 8, 0, 0]} animationDuration={900} />
-                <Bar dataKey="expenses" fill="#3B82F6" radius={[8, 8, 0, 0]} animationDuration={900} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11 }}
+                  stroke="hsl(var(--muted-foreground))"
+                />
+                <YAxis
+                  tick={{ fontSize: 11 }}
+                  stroke="hsl(var(--muted-foreground))"
+                />
+                <Tooltip
+                  cursor={{ fill: 'hsl(var(--muted))' }}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value) => formatCurrency(value)}
+                />
+                <Bar
+                  dataKey="income"
+                  fill="#107C10"
+                  radius={[6, 6, 0, 0]}
+                  animationDuration={900}
+                />
+                <Bar
+                  dataKey="expenses"
+                  fill="#C50F1F"
+                  radius={[6, 6, 0, 0]}
+                  animationDuration={900}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </ChartCard>
+        </Card>
 
-        <ChartCard
-          title={mode === 'month' ? 'Budget Efficiency' : 'Cash Control'}
-          subtitle={mode === 'month' ? 'Actual expenses against plan' : 'Net cash retained from income'}
-          icon={Target}
-          tone={efficiency >= 75 ? 'income' : efficiency >= 50 ? 'warning' : 'debt'}
-        >
-          <EfficiencyGauge value={efficiency} />
-          <div className="text-center text-sm font-medium text-muted-foreground">
-            {mode === 'month' ? (
-              Math.abs(leftToAllocate) < 0.01 ? (
-                'Every planned amount is allocated.'
-              ) : leftToAllocate > 0 ? (
-                <span className="inline-flex flex-wrap justify-center gap-1">
-                  {formatCurrency(leftToAllocate)} still left to allocate.
-                </span>
-              ) : (
-                <span className="inline-flex flex-wrap justify-center gap-1">
-                  {formatCurrency(Math.abs(leftToAllocate))} over-allocated.
-                </span>
-              )
+        <Card className="p-5">
+          <div className="mb-5">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <Target className="w-4 h-4 text-muted-foreground" />
+              Budget Efficiency
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              How closely spending follows your plan
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center py-3">
+            <div className="relative w-40 h-40">
+              <svg viewBox="0 0 36 36" className="w-40 h-40 -rotate-90">
+                <path
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="hsl(var(--secondary))"
+                  strokeWidth="3"
+                />
+                <motion.path
+                  initial={{ strokeDasharray: '0, 100' }}
+                  animate={{ strokeDasharray: `${efficiency}, 100` }}
+                  transition={{ duration: 1 }}
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke={
+                    efficiency >= 70
+                      ? '#107C10'
+                      : efficiency >= 40
+                        ? '#FFB900'
+                        : '#C50F1F'
+                  }
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-bold">{efficiency}%</span>
+                <span className="text-xs text-muted-foreground">score</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center text-sm font-medium flex justify-center flex-wrap gap-x-1 gap-y-1">
+            {leftToAllocate === 0 ? (
+              'Every planned amount is allocated.'
+            ) : leftToAllocate > 0 ? (
+              <>
+                <InlineMoney>{formatCurrency(leftToAllocate)}</InlineMoney>
+                <span>still left to allocate.</span>
+              </>
             ) : (
-              `${savingsRate}% estimated savings rate this year.`
+              <>
+                <InlineMoney>{formatCurrency(Math.abs(leftToAllocate))}</InlineMoney>
+                <span>over-allocated.</span>
+              </>
             )}
           </div>
-        </ChartCard>
+        </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <ChartCard title="Top Spending" subtitle="Largest expense categories" icon={PieChartIcon} tone="expense">
+      <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-4 mb-4">
+        <Card className="p-5">
+          <h3 className="text-sm font-semibold mb-4">Top Spending Categories</h3>
+
           {spendingBreakdown.length > 0 ? (
-            <div className="flex flex-col items-center gap-5 xl:flex-row">
-              <div className="h-48 w-48 shrink-0">
+            <div className="flex flex-col md:flex-row lg:flex-col xl:flex-row items-center gap-6">
+              <div className="w-44 h-44 shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={spendingBreakdown}
                       cx="50%"
                       cy="50%"
-                      innerRadius={52}
-                      outerRadius={78}
+                      innerRadius={45}
+                      outerRadius={72}
                       paddingAngle={3}
                       dataKey="value"
                       animationDuration={900}
@@ -571,18 +648,29 @@ export default function Reflect() {
                         <Cell key={entry.name} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip {...chartTooltip(formatCurrency)} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value) => formatCurrency(value)}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="w-full flex-1 space-y-3">
+              <div className="flex-1 space-y-3 w-full">
                 {spendingBreakdown.map((category) => (
                   <div key={category.name} className="flex items-center gap-3">
-                    <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: category.color }} />
-                    <span className="flex-1 truncate text-sm">{category.name}</span>
-                    <span className="text-sm font-semibold tabular-nums">
-                      <MoneyAmount>{formatCurrency(category.value)}</MoneyAmount>
+                    <div
+                      className="w-2.5 h-2.5 rounded-sm shrink-0"
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <span className="text-sm flex-1 truncate">{category.name}</span>
+                    <span className="text-sm font-medium tabular-nums">
+                      <InlineMoney>{formatCurrency(category.value)}</InlineMoney>
                     </span>
                   </div>
                 ))}
@@ -590,38 +678,48 @@ export default function Reflect() {
             </div>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-sm font-semibold">No expense data yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">Add expenses to see category breakdown.</p>
+              <p className="text-sm font-medium">No expense data yet</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add expenses to see category breakdown.
+              </p>
             </div>
           )}
-        </ChartCard>
+        </Card>
 
-        <ChartCard
-          title={mode === 'month' ? 'Daily Spending' : 'Monthly Spending'}
-          subtitle={mode === 'month' ? 'Expense rhythm this month' : 'Expense rhythm this year'}
-          icon={TrendingDown}
-          tone="expense"
-        >
-          {spendingTimeline.length > 0 ? (
-            <div className="h-64">
+        <Card className="p-5">
+          <h3 className="text-sm font-semibold mb-4">Daily Spending This Month</h3>
+
+          {dailySpending.length > 0 ? (
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spendingTimeline}>
-                  <defs>
-                    <linearGradient id="spendingFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.28} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip {...chartTooltip(formatCurrency)} labelFormatter={(label) => (mode === 'month' ? `Day ${label}` : label)} />
+                <AreaChart data={dailySpending}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fontSize: 11 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value) => formatCurrency(value)}
+                    labelFormatter={(label) => `Day ${label}`}
+                  />
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="#3B82F6"
-                    fill="url(#spendingFill)"
-                    strokeWidth={2.5}
+                    stroke="#0078D4"
+                    fill="#0078D4"
+                    fillOpacity={0.14}
+                    strokeWidth={2}
                     animationDuration={900}
                   />
                 </AreaChart>
@@ -629,24 +727,30 @@ export default function Reflect() {
             </div>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-sm font-semibold">No spending timeline yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">Expense transactions will appear here.</p>
+              <p className="text-sm font-medium">No daily spending yet</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Expense transactions will appear here.
+              </p>
             </div>
           )}
-        </ChartCard>
+        </Card>
       </div>
 
       <div>
-        <div className="mb-3 flex items-center gap-2">
-          <Brain className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-sm font-bold">Smart Insights</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <Brain className="w-4 h-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold">Smart Insights</h3>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid md:grid-cols-2 gap-3">
           {insights.map((insight) => (
-            <InsightCard key={insight.title} icon={insight.icon} title={insight.title} tone={insight.tone}>
-              {insight.text}
-            </InsightCard>
+            <InsightCard
+              key={insight.title}
+              icon={insight.icon}
+              title={insight.title}
+              text={insight.text}
+              tone={insight.tone}
+            />
           ))}
         </div>
       </div>

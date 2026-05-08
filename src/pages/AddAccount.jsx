@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Landmark, WalletCards } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +18,6 @@ import { accountsApi } from '@/lib/budgetData';
 import { useAccounts } from '@/hooks/useBudgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useCurrency } from '@/hooks/useCurrency';
-import { GlassCard, PageHeader, TonePill } from '@/components/shared/Premium';
 
 const accountTypes = [
   { value: 'checking', label: 'Checking' },
@@ -64,14 +62,6 @@ const colors = [
   '#F59E0B',
 ];
 
-function CurrencyPrefix({ currency }) {
-  if (currency === 'SAR') {
-    return <img src="/sar.svg" alt="SAR" className="h-4 w-4 opacity-70 dark:invert" />;
-  }
-
-  return <span className="text-xs font-semibold text-muted-foreground">{currency}</span>;
-}
-
 export default function AddAccount() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -79,7 +69,6 @@ export default function AddAccount() {
   const isEditing = Boolean(id);
 
   const queryClient = useQueryClient();
-  const currency = useCurrency();
 
   const { data: accounts = [] } = useAccounts();
 
@@ -152,41 +141,24 @@ export default function AddAccount() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6 pb-nav sm:px-6 lg:py-10">
-      <PageHeader
-        title={isEditing ? 'Edit Account' : 'Add Account'}
-        description="Create the accounts that power your net worth view."
-        icon={WalletCards}
-        actions={
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 rounded-2xl">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        }
-      />
+    <div className="max-w-lg mx-auto px-4 py-6 lg:py-10">
+      <div className="flex items-center gap-3 mb-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
 
-      <GlassCard tone={category === 'liability' ? 'debt' : 'income'} className="p-5">
-        <div className="flex items-center gap-4">
-          <div
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.35rem] ring-1 ring-white/50 dark:ring-white/10"
-            style={{ backgroundColor: `${color || '#0078D4'}20` }}
-          >
-            <Landmark className="h-7 w-7" style={{ color }} />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-xl font-bold">{name || 'New Account'}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <TonePill tone={category === 'liability' ? 'debt' : 'income'}>
-                {category === 'liability' ? 'Liability' : 'Asset'}
-              </TonePill>
-              {type && <TonePill>{type.replace('_', ' ')}</TonePill>}
-            </div>
-          </div>
-        </div>
-      </GlassCard>
+        <h1 className="text-xl font-bold tracking-tight">
+          {isEditing ? 'Edit Account' : 'Add Account'}
+        </h1>
+      </div>
 
-      <GlassCard className="space-y-5 p-5">
+      <div className="space-y-5 bg-card rounded-2xl border border-border p-5 shadow-sm">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Account Name
           </label>
 
@@ -194,17 +166,16 @@ export default function AddAccount() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Main Checking"
-            className="h-11 rounded-2xl bg-secondary/60"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Type
           </label>
 
           <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="h-11 rounded-2xl bg-secondary/60">
+            <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
 
@@ -222,62 +193,52 @@ export default function AddAccount() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Category
           </label>
 
-          <div className="grid grid-cols-2 gap-2 rounded-3xl bg-secondary/60 p-1">
-            {[
-              ['asset', 'Asset'],
-              ['liability', 'Liability'],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setCategory(value)}
-                className={cn(
-                  'rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all',
-                  category === value
-                    ? value === 'asset'
-                      ? 'bg-emerald-500/12 text-emerald-700 shadow-sm dark:text-emerald-300'
-                      : 'bg-red-500/12 text-red-700 shadow-sm dark:text-red-300'
-                    : 'text-muted-foreground'
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <Select
+            value={category}
+            onValueChange={setCategory}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="asset">
+                Asset
+              </SelectItem>
+
+              <SelectItem value="liability">
+                Liability
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             {isEditing
               ? 'Current Balance'
               : 'Starting Balance'}
           </label>
 
-          <div className="relative">
-            <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
-              <CurrencyPrefix currency={currency} />
-            </div>
-            <Input
-              type="number"
-              value={balance}
-              onChange={(e) => setBalance(e.target.value)}
-              placeholder="0.00"
-              step="0.01"
-              className="h-11 rounded-2xl bg-secondary/60 pl-11"
-            />
-          </div>
+          <Input
+            type="number"
+            value={balance}
+            onChange={(e) => setBalance(e.target.value)}
+            placeholder="0.00"
+            step="0.01"
+          />
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Color
           </label>
 
-          <div className="grid grid-cols-8 gap-2 rounded-3xl border border-border/70 bg-secondary/40 p-3 sm:grid-cols-10">
+          <div className="grid grid-cols-8 gap-2 rounded-xl border border-border bg-secondary/20 p-3">
             {colors.map((item) => (
               <button
                 key={item}
@@ -296,12 +257,12 @@ export default function AddAccount() {
             ))}
           </div>
         </div>
-      </GlassCard>
+      </div>
 
       <Button
         onClick={handleSave}
         disabled={saving}
-        className="fixed bottom-28 left-0 right-0 z-40 mx-auto h-12 w-[calc(100%-2rem)] max-w-2xl rounded-2xl text-sm font-semibold shadow-[0_18px_40px_rgba(37,99,235,0.24)]"
+        className="w-full h-12 mt-6 text-sm font-semibold rounded-xl"
       >
         {saving
           ? 'Saving...'

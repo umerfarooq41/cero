@@ -1,3 +1,4 @@
+import React from 'react';
 import { Pencil, Archive, Trash2, ArchiveRestore } from 'lucide-react';
 import {
   Dialog,
@@ -5,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 
 export default function CategoryActionSheet({ category, open, onClose, onEdit, onArchive, onDelete }) {
@@ -12,7 +14,7 @@ export default function CategoryActionSheet({ category, open, onClose, onEdit, o
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="rounded-3xl sm:max-w-xs">
+      <DialogContent className="sm:max-w-xs">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <CategoryIcon icon={category.icon} color={category.color} size="md" />
@@ -28,7 +30,7 @@ export default function CategoryActionSheet({ category, open, onClose, onEdit, o
         <div className="space-y-1 py-1">
           <button
             onClick={() => { onEdit(category); onClose(); }}
-            className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-accent"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors text-left"
           >
             <Pencil className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium">Edit Category</span>
@@ -36,7 +38,7 @@ export default function CategoryActionSheet({ category, open, onClose, onEdit, o
 
           <button
             onClick={() => { onArchive(category); onClose(); }}
-            className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-accent"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors text-left"
           >
             {category.is_archived
               ? <ArchiveRestore className="w-4 h-4 text-muted-foreground" />
@@ -49,7 +51,7 @@ export default function CategoryActionSheet({ category, open, onClose, onEdit, o
 
           <button
             onClick={() => { onDelete(category); onClose(); }}
-            className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-destructive/10"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-left"
           >
             <Trash2 className="w-4 h-4 text-destructive" />
             <span className="text-sm font-medium text-destructive">Delete Category</span>

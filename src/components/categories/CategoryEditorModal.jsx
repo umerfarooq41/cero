@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -125,14 +125,14 @@ export default function CategoryEditorModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Category' : 'New Category'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 rounded-3xl border border-border/70 bg-secondary/50 p-3">
+        <div className="flex items-center gap-3 p-3 rounded-2xl border border-border bg-secondary/40">
           <CategoryIcon icon={icon} color={color} size="lg" />
 
           <div className="min-w-0">
@@ -147,7 +147,7 @@ export default function CategoryEditorModal({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Name
             </label>
             <Input
@@ -155,7 +155,6 @@ export default function CategoryEditorModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Groceries"
-              className="h-11 rounded-2xl bg-secondary/60"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSave();
               }}
@@ -163,7 +162,7 @@ export default function CategoryEditorModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Type
             </label>
 
@@ -177,10 +176,10 @@ export default function CategoryEditorModal({
                     setParentId('');
                   }}
                   className={cn(
-                    'rounded-2xl px-2 py-2.5 text-xs font-semibold capitalize transition-all',
+                    'py-2 px-2 rounded-lg text-xs font-medium transition-all capitalize',
                     type === item
                       ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-secondary/70 text-muted-foreground hover:bg-accent'
+                      : 'bg-secondary text-muted-foreground hover:bg-accent'
                   )}
                 >
                   {item}
@@ -191,7 +190,7 @@ export default function CategoryEditorModal({
 
           {filteredParents.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Parent optional
               </label>
 
@@ -201,7 +200,7 @@ export default function CategoryEditorModal({
                   setParentId(value === 'none' ? '' : value)
                 }
               >
-                <SelectTrigger className="h-11 rounded-2xl bg-secondary/60">
+                <SelectTrigger>
                   <SelectValue placeholder="None top-level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -217,20 +216,20 @@ export default function CategoryEditorModal({
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Color
             </label>
 
-            <div className="grid grid-cols-10 gap-2 rounded-3xl border border-border/70 bg-secondary/40 p-2">
+            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border bg-secondary/20 p-2">
               {COLORS.map((item) => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => setColor(item)}
                   className={cn(
-                    'h-7 w-7 rounded-xl border border-border transition-all',
+                    'w-7 h-7 rounded-lg border border-border transition-all',
                     color === item
-                      ? 'scale-110 ring-2 ring-primary ring-offset-2 ring-offset-background'
+                      ? 'ring-2 ring-offset-2 ring-primary scale-110'
                       : 'hover:scale-105'
                   )}
                   style={{ backgroundColor: item }}
@@ -240,18 +239,18 @@ export default function CategoryEditorModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Icon
             </label>
 
-            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-3xl border border-border/70 bg-secondary/40 p-2 sm:grid-cols-7 md:grid-cols-8">
+            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-border bg-secondary/20">
               {iconNames.map((item) => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => setIcon(item)}
                   className={cn(
-                    'flex h-10 items-center justify-center rounded-2xl border transition-all',
+                    'h-10 rounded-xl transition-all flex items-center justify-center border',
                     icon === item
                       ? 'bg-primary/10 border-primary ring-1 ring-primary scale-105'
                       : 'border-transparent hover:bg-accent hover:border-border'
@@ -270,11 +269,11 @@ export default function CategoryEditorModal({
         </div>
 
         <DialogFooter className="mt-2">
-          <Button variant="outline" onClick={onClose} className="rounded-2xl">
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saving || !name.trim()} className="rounded-2xl">
-            {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Category'}
+          <Button onClick={handleSave} disabled={saving || !name.trim()}>
+            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Category'}
           </Button>
         </DialogFooter>
       </DialogContent>
