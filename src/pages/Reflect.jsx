@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { format, subMonths } from 'date-fns';
 import {
   ArrowDownRight,
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   BarChart3,
   Brain,
@@ -29,13 +31,6 @@ import {
 import { motion } from 'framer-motion';
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   useAccounts,
   useAllTransactions,
   useBudgetSummary,
@@ -55,7 +50,7 @@ const CHART_COLORS = [
   '#FFB900',
 ];
 
-const MONTH_LABELS = [
+const MONTHS = [
   'Jan',
   'Feb',
   'Mar',
@@ -68,21 +63,6 @@ const MONTH_LABELS = [
   'Oct',
   'Nov',
   'Dec',
-];
-
-const MONTH_OPTIONS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
 ];
 
 function Card({ children, className }) {
@@ -101,90 +81,64 @@ function Card({ children, className }) {
   );
 }
 
-function ReflectPeriodControl({
-  currentMonth,
-  mode,
-  onModeChange,
-  onChange,
-  years,
-}) {
+function MonthYearToggle({ currentMonth, onChange }) {
   const [year, month] = currentMonth.split('-').map(Number);
 
-  const updateYear = (nextYearValue) => {
-    const nextYear = Number(nextYearValue);
+  const updateYear = (nextYear) => {
     onChange(`${nextYear}-${String(month).padStart(2, '0')}`);
   };
 
-  const updateMonth = (monthValue) => {
-    onChange(`${year}-${String(Number(monthValue)).padStart(2, '0')}`);
+  const selectMonth = (monthIndex) => {
+    onChange(`${year}-${String(monthIndex + 1).padStart(2, '0')}`);
   };
 
   return (
     <Card className="p-4 mb-4 bg-gradient-to-br from-background via-card to-muted/40">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="grid grid-cols-2 rounded-lg bg-muted p-1 sm:w-auto">
-          {['month', 'year'].map((option) => {
-            const active = mode === option;
-
-            return (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={active}
-                onClick={() => onModeChange(option)}
-                className={cn(
-                  'h-9 rounded-md px-4 text-sm font-semibold capitalize transition',
-                  active
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {option}
-              </button>
-            );
-          })}
-        </div>
-
-        <div
-          className={cn(
-            'grid gap-2 sm:flex sm:justify-end',
-            mode === 'month' ? 'grid-cols-2' : 'grid-cols-1'
-          )}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <button
+          type="button"
+          onClick={() => updateYear(year - 1)}
+          className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition"
+          aria-label="Previous year"
         >
-          {mode === 'month' && (
-            <Select value={String(month)} onValueChange={updateMonth}>
-              <SelectTrigger
-                aria-label="Month"
-                className="h-10 min-w-[120px] bg-background"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTH_OPTIONS.map((label, index) => (
-                  <SelectItem key={label} value={String(index + 1)}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <ArrowLeft className="w-4 h-4" />
+        </button>
 
-          <Select value={String(year)} onValueChange={updateYear}>
-            <SelectTrigger
-              aria-label="Year"
-              className="h-10 min-w-[104px] bg-background"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((option) => (
-                <SelectItem key={option} value={String(option)}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">Selected Year</p>
+          <p className="text-lg font-bold tabular-nums">{year}</p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => updateYear(year + 1)}
+          className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition"
+          aria-label="Next year"
+        >
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+        {MONTHS.map((label, index) => {
+          const active = index + 1 === month;
+
+          return (
+            <button
+              key={label}
+              type="button"
+              onClick={() => selectMonth(index)}
+              className={cn(
+                'h-9 rounded-xl text-xs font-semibold transition shadow-sm',
+                active
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted/70 text-muted-foreground hover:bg-muted'
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
     </Card>
   );
@@ -312,7 +266,6 @@ export default function Reflect() {
   const [currentMonth, setCurrentMonth] = useState(
     format(new Date(), 'yyyy-MM')
   );
-  const [viewMode, setViewMode] = useState('month');
 
   const formatCurrency = useCurrencyFormatter();
 
@@ -321,76 +274,13 @@ export default function Reflect() {
   const { data: accounts = [] } = useAccounts();
   const budget = useBudgetSummary(currentMonth);
 
-  const selectedYear = Number(currentMonth.slice(0, 4));
-  const isYearMode = viewMode === 'year';
-  const monthTransactions = useMemo(
-    () => budget.transactions || [],
-    [budget.transactions]
-  );
+  const monthTransactions = budget.transactions || [];
 
-  const yearOptions = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    const minYear = Math.min(currentYear, selectedYear) - 5;
-    const maxYear = Math.max(currentYear, selectedYear) + 2;
-    const options = new Set();
-
-    for (let option = maxYear; option >= minYear; option -= 1) {
-      options.add(option);
-    }
-
-    allTransactions.forEach((transaction) => {
-      const transactionYear = Number(transaction.date?.slice(0, 4));
-
-      if (Number.isFinite(transactionYear)) {
-        options.add(transactionYear);
-      }
-    });
-
-    return Array.from(options).sort((a, b) => b - a);
-  }, [allTransactions, selectedYear]);
-
-  const periodTransactions = useMemo(() => {
-    if (!isYearMode) {
-      return monthTransactions;
-    }
-
-    return allTransactions.filter((transaction) =>
-      transaction.date?.startsWith(`${selectedYear}-`)
-    );
-  }, [allTransactions, isYearMode, monthTransactions, selectedYear]);
-
-  const periodTotals = useMemo(() => {
-    return periodTransactions.reduce(
-      (totals, transaction) => {
-        const amount = Number(transaction.amount) || 0;
-
-        if (transaction.type === 'income') {
-          totals.income += amount;
-        }
-
-        if (transaction.type === 'expense') {
-          totals.expenses += amount;
-        }
-
-        return totals;
-      },
-      { income: 0, expenses: 0 }
-    );
-  }, [periodTransactions]);
-
-  const periodLabel = isYearMode
-    ? String(selectedYear)
-    : format(new Date(`${currentMonth}-01T00:00:00`), 'MMMM yyyy');
-  const periodNoun = isYearMode ? 'year' : 'month';
-  const periodDescriptor = isYearMode ? 'selected year' : 'selected month';
-
-  const income = periodTotals.income;
-  const expenses = periodTotals.expenses;
-  const plannedExpenses = isYearMode
-    ? 0
-    : Number(budget.totalPlannedExpenses) || 0;
-  const plannedIncome = isYearMode ? 0 : Number(budget.totalPlannedIncome) || 0;
-  const leftToAllocate = isYearMode ? 0 : Number(budget.leftToAllocate) || 0;
+  const income = Number(budget.totalIncome) || 0;
+  const expenses = Number(budget.totalExpenses) || 0;
+  const plannedExpenses = Number(budget.totalPlannedExpenses) || 0;
+  const plannedIncome = Number(budget.totalPlannedIncome) || 0;
+  const leftToAllocate = Number(budget.leftToAllocate) || 0;
   const netCashFlow = income - expenses;
 
   const netWorth = useMemo(() => {
@@ -426,27 +316,10 @@ export default function Reflect() {
     return Math.max(0, Math.round((1 - (ratio - 1)) * 100));
   }, [expenses, plannedExpenses]);
 
-  const performanceScore = isYearMode
-    ? Math.max(0, Math.min(100, savingsRate))
-    : efficiency;
-  const performanceValue = isYearMode && income > 0 ? savingsRate : efficiency;
-  const performanceColor = isYearMode
-    ? savingsRate >= 20
-      ? '#107C10'
-      : savingsRate >= 0
-        ? '#FFB900'
-        : '#C50F1F'
-    : efficiency >= 70
-      ? '#107C10'
-      : efficiency >= 40
-        ? '#FFB900'
-        : '#C50F1F';
-  const spendingShare = income > 0 ? Math.round((expenses / income) * 100) : 0;
-
   const spendingBreakdown = useMemo(() => {
     const categorySpending = {};
 
-    periodTransactions
+    monthTransactions
       .filter((t) => t.type === 'expense')
       .forEach((t) => {
         const category = categories.find((c) => c.id === t.category_id);
@@ -463,35 +336,13 @@ export default function Reflect() {
         value,
         color: CHART_COLORS[i % CHART_COLORS.length],
       }));
-  }, [periodTransactions, categories]);
+  }, [monthTransactions, categories]);
 
   const cashFlow = useMemo(() => {
-    if (isYearMode) {
-      return MONTH_LABELS.map((label, index) => {
-        const month = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
-        const txns = allTransactions.filter((t) => t.date?.startsWith(month));
-
-        const monthIncome = txns
-          .filter((t) => t.type === 'income')
-          .reduce((s, t) => s + (Number(t.amount) || 0), 0);
-
-        const monthExpenses = txns
-          .filter((t) => t.type === 'expense')
-          .reduce((s, t) => s + (Number(t.amount) || 0), 0);
-
-        return {
-          month: label,
-          income: monthIncome,
-          expenses: monthExpenses,
-          net: monthIncome - monthExpenses,
-        };
-      });
-    }
-
     const months = [];
 
     for (let i = 5; i >= 0; i--) {
-      const monthDate = subMonths(new Date(`${currentMonth}-01T00:00:00`), i);
+      const monthDate = subMonths(new Date(`${currentMonth}-01`), i);
       const month = format(monthDate, 'yyyy-MM');
       const label = format(monthDate, 'MMM');
 
@@ -514,25 +365,12 @@ export default function Reflect() {
     }
 
     return months;
-  }, [allTransactions, currentMonth, isYearMode, selectedYear]);
+  }, [currentMonth, allTransactions]);
 
-  const spendingTrend = useMemo(() => {
-    if (isYearMode) {
-      return MONTH_LABELS.map((label, index) => {
-        const month = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
-        const amount = allTransactions
-          .filter(
-            (t) => t.type === 'expense' && t.date?.startsWith(month)
-          )
-          .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-        return { label, amount };
-      });
-    }
-
+  const dailySpending = useMemo(() => {
     const days = {};
 
-    periodTransactions
+    monthTransactions
       .filter((t) => t.type === 'expense')
       .forEach((t) => {
         const day = t.date?.slice(8, 10) || '01';
@@ -541,11 +379,10 @@ export default function Reflect() {
 
     return Object.entries(days)
       .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([day, amount]) => ({ label: day, amount }));
-  }, [allTransactions, isYearMode, periodTransactions, selectedYear]);
+      .map(([day, amount]) => ({ day, amount }));
+  }, [monthTransactions]);
 
   const topCategory = spendingBreakdown[0];
-  const hasSpendingTrend = spendingTrend.some((point) => point.amount > 0);
 
   const insights = [
     {
@@ -556,53 +393,36 @@ export default function Reflect() {
           <>
             You kept{' '}
             <InlineMoney>{formatCurrency(netCashFlow)}</InlineMoney> after
-            expenses for the {periodDescriptor}.
+            expenses this month.
           </>
         ) : (
           <>
             You spent{' '}
             <InlineMoney>{formatCurrency(Math.abs(netCashFlow))}</InlineMoney>{' '}
-            more than your income for the {periodDescriptor}.
+            more than your income this month.
           </>
         ),
       tone: netCashFlow >= 0 ? 'good' : 'bad',
     },
-    isYearMode
-      ? {
-          icon: Target,
-          title: 'Yearly spending pace',
-          text:
-            income > 0
-              ? `Expenses used ${spendingShare}% of income in ${selectedYear}.`
-              : 'Add income transactions to compare yearly spending with income.',
-          tone:
-            income === 0
-              ? 'warning'
-              : spendingShare <= 80
-                ? 'good'
-                : spendingShare <= 100
-                  ? 'warning'
-                  : 'bad',
-        }
-      : {
-          icon: Target,
-          title: 'Budget efficiency',
-          text:
-            efficiency >= 80
-              ? 'Strong control. Your spending is close to your planned budget.'
-              : efficiency >= 50
-                ? 'Some categories may need review before month end.'
-                : 'Spending is far from plan. Review your largest categories.',
-          tone: efficiency >= 80 ? 'good' : efficiency >= 50 ? 'warning' : 'bad',
-        },
+    {
+      icon: Target,
+      title: 'Budget efficiency',
+      text:
+        efficiency >= 80
+          ? 'Strong control. Your spending is close to your planned budget.'
+          : efficiency >= 50
+            ? 'Some categories may need review before month end.'
+            : 'Spending is far from plan. Review your largest categories.',
+      tone: efficiency >= 80 ? 'good' : efficiency >= 50 ? 'warning' : 'bad',
+    },
     {
       icon: topCategory ? CreditCard : Brain,
       title: topCategory ? `Largest spend: ${topCategory.name}` : 'No spending yet',
       text: topCategory ? (
         <>
           {topCategory.name} used{' '}
-          <InlineMoney>{formatCurrency(topCategory.value)}</InlineMoney> in the{' '}
-          {periodDescriptor}.
+          <InlineMoney>{formatCurrency(topCategory.value)}</InlineMoney> this
+          month.
         </>
       ) : (
         'Once you add expenses, your top spending categories will appear here.'
@@ -629,13 +449,7 @@ export default function Reflect() {
         </p>
       </div>
 
-      <ReflectPeriodControl
-        currentMonth={currentMonth}
-        mode={viewMode}
-        onModeChange={setViewMode}
-        onChange={setCurrentMonth}
-        years={yearOptions}
-      />
+      <MonthYearToggle currentMonth={currentMonth} onChange={setCurrentMonth} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <SummaryCard
@@ -648,7 +462,7 @@ export default function Reflect() {
                 <span>planned</span>
               </>
             ) : (
-              `${periodLabel} actual`
+              'No planned income'
             )
           }
           icon={ArrowUpRight}
@@ -665,7 +479,7 @@ export default function Reflect() {
                 <span>planned</span>
               </>
             ) : (
-              `${periodLabel} actual`
+              'No planned expenses'
             )
           }
           icon={ArrowDownRight}
@@ -675,9 +489,7 @@ export default function Reflect() {
         <SummaryCard
           title="Net Cash Flow"
           value={formatCurrency(netCashFlow)}
-          subtitle={
-            income > 0 ? `${savingsRate}% savings rate` : `This ${periodNoun}`
-          }
+          subtitle={savingsRate ? `${savingsRate}% savings rate` : 'This month'}
           icon={Wallet}
           tone={netCashFlow >= 0 ? 'good' : 'bad'}
         />
@@ -703,9 +515,7 @@ export default function Reflect() {
           <div className="mb-5">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-muted-foreground" />
-              {isYearMode
-                ? `Cash Flow - ${selectedYear}`
-                : 'Cash Flow - Last 6 Months'}
+              Cash Flow — Last 6 Months
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
               Income, expenses, and monthly net
@@ -756,12 +566,10 @@ export default function Reflect() {
           <div className="mb-5">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <Target className="w-4 h-4 text-muted-foreground" />
-              {isYearMode ? 'Savings Rate' : 'Budget Efficiency'}
+              Budget Efficiency
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {isYearMode
-                ? `Full-year cash flow for ${selectedYear}`
-                : 'How closely spending follows your plan'}
+              How closely spending follows your plan
             </p>
           </div>
 
@@ -776,43 +584,31 @@ export default function Reflect() {
                 />
                 <motion.path
                   initial={{ strokeDasharray: '0, 100' }}
-                  animate={{ strokeDasharray: `${performanceScore}, 100` }}
+                  animate={{ strokeDasharray: `${efficiency}, 100` }}
                   transition={{ duration: 1 }}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
-                  stroke={performanceColor}
+                  stroke={
+                    efficiency >= 70
+                      ? '#107C10'
+                      : efficiency >= 40
+                        ? '#FFB900'
+                        : '#C50F1F'
+                  }
                   strokeWidth="3"
                   strokeLinecap="round"
                 />
               </svg>
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold">{performanceValue}%</span>
-                <span className="text-xs text-muted-foreground">
-                  {isYearMode ? 'rate' : 'score'}
-                </span>
+                <span className="text-3xl font-bold">{efficiency}%</span>
+                <span className="text-xs text-muted-foreground">score</span>
               </div>
             </div>
           </div>
 
           <div className="text-center text-sm font-medium flex justify-center flex-wrap gap-x-1 gap-y-1">
-            {isYearMode ? (
-              income > 0 ? (
-                netCashFlow >= 0 ? (
-                  <>
-                    <InlineMoney>{formatCurrency(netCashFlow)}</InlineMoney>
-                    <span>kept after yearly expenses.</span>
-                  </>
-                ) : (
-                  <>
-                    <InlineMoney>{formatCurrency(Math.abs(netCashFlow))}</InlineMoney>
-                    <span>shortfall for the selected year.</span>
-                  </>
-                )
-              ) : (
-                'Add income transactions to calculate yearly savings.'
-              )
-            ) : leftToAllocate === 0 ? (
+            {leftToAllocate === 0 ? (
               'Every planned amount is allocated.'
             ) : leftToAllocate > 0 ? (
               <>
@@ -891,19 +687,15 @@ export default function Reflect() {
         </Card>
 
         <Card className="p-5">
-          <h3 className="text-sm font-semibold mb-4">
-            {isYearMode
-              ? 'Monthly Spending in Selected Year'
-              : 'Daily Spending in Selected Month'}
-          </h3>
+          <h3 className="text-sm font-semibold mb-4">Daily Spending This Month</h3>
 
-          {hasSpendingTrend ? (
+          {dailySpending.length > 0 ? (
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spendingTrend}>
+                <AreaChart data={dailySpending}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
-                    dataKey="label"
+                    dataKey="day"
                     tick={{ fontSize: 11 }}
                     stroke="hsl(var(--muted-foreground))"
                   />
@@ -919,9 +711,7 @@ export default function Reflect() {
                       fontSize: '12px',
                     }}
                     formatter={(value) => formatCurrency(value)}
-                    labelFormatter={(label) =>
-                      isYearMode ? label : `Day ${label}`
-                    }
+                    labelFormatter={(label) => `Day ${label}`}
                   />
                   <Area
                     type="monotone"
@@ -937,7 +727,7 @@ export default function Reflect() {
             </div>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-sm font-medium">No spending data yet</p>
+              <p className="text-sm font-medium">No daily spending yet</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Expense transactions will appear here.
               </p>
