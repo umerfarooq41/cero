@@ -15,6 +15,7 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
+  Tooltip,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,32 +41,44 @@ const TABS = [
     title: 'Income',
     label: 'received',
     color: '#16A34A',
-    softBg: '#DCFCE7',
+    bg: 'bg-green-50',
+    text: 'text-green-700',
+    ring: 'ring-green-200',
     icon: ArrowUpRight,
+    shades: ['#15803D', '#16A34A', '#22C55E', '#4ADE80', '#86EFAC'],
   },
   {
     key: 'expense',
     title: 'Expenses',
     label: 'spent',
     color: '#DC2626',
-    softBg: '#FEE2E2',
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    ring: 'ring-red-200',
     icon: ArrowDownRight,
+    shades: ['#991B1B', '#B91C1C', '#DC2626', '#EF4444', '#F87171'],
   },
   {
     key: 'savings',
     title: 'Savings',
     label: 'saved',
     color: '#2563EB',
-    softBg: '#DBEAFE',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    ring: 'ring-blue-200',
     icon: PiggyBank,
+    shades: ['#1E3A8A', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA'],
   },
   {
     key: 'debt',
     title: 'Debt',
     label: 'paid',
     color: '#7C3AED',
-    softBg: '#EDE9FE',
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    ring: 'ring-purple-200',
     icon: CreditCard,
+    shades: ['#581C87', '#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA'],
   },
 ];
 
@@ -117,24 +130,51 @@ function Money({ amount, currency, compact = false, className = '' }) {
           className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'}
         />
       ) : (
-        <span>{symbol}</span>
+        <span className="text-current">{symbol}</span>
       )}
       <span>{formatNumber(amount)}</span>
     </span>
   );
 }
 
-function CategoryGlyph({ icon, color }) {
-  if (!icon) {
-    return <span className="text-base">•</span>;
+function CategoryIcon({ category, color }) {
+  const icon = category?.icon || category?.icon_name || category?.iconName;
+
+  if (!icon) return <span className="text-sm">•</span>;
+
+  if (typeof icon === 'function') {
+    const Icon = icon;
+    return <Icon className="h-4 w-4" style={{ color }} />;
   }
 
-  if (typeof icon === 'string') {
-    return <span className="text-base leading-none">{icon}</span>;
+  if (typeof icon === 'object' && icon?.render) {
+    const Icon = icon;
+    return <Icon className="h-4 w-4" style={{ color }} />;
   }
 
-  const Icon = icon;
-  return <Icon className="h-4 w-4" style={{ color }} />;
+  return <span className="text-base leading-none">{icon}</span>;
+}
+
+function DonutTooltip({ active, payload, currency, tab }) {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0]?.payload;
+  const tracked = Number(item?.tracked || 0);
+  const planned = Number(item?.planned || 0);
+  const percent = planned > 0 ? Math.round((tracked / planned) * 100) : 0;
+
+  return (
+    <div className="rounded-2xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur-sm">
+      <p className="text-sm font-semibold">{item?.name}</p>
+      <div className="mt-1 flex items-center justify-between gap-5 text-xs text-muted-foreground">
+        <span>{tab.label}</span>
+        <Money amount={tracked} currency={currency} compact />
+      </div>
+      <p className="mt-1 text-xs font-medium" style={{ color: item?.color }}>
+        {percent}% tracked
+      </p>
+    </div>
+  );
 }
 
 function PlanOverview({
@@ -152,7 +192,7 @@ function PlanOverview({
   );
 
   const chartData = sectionCategories
-    .map((category) => {
+    .map((category, index) => {
       const childCategories = subcategories.filter(
         (s) => s.parent_id === category.id
       );
@@ -178,31 +218,21 @@ function PlanOverview({
       return {
         id: category.id,
         name: category.name,
-        icon: category.icon,
+        category,
         planned,
         tracked,
         remaining: planned - tracked,
-        color: tab.color,
+        color: tab.shades[index % tab.shades.length],
       };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
 
-  const totalTracked = chartData.reduce(
-    (sum, item) => sum + item.tracked,
-    0
-  );
-
-  const totalPlanned = chartData.reduce(
-    (sum, item) => sum + item.planned,
-    0
-  );
-
+  const totalTracked = chartData.reduce((sum, item) => sum + item.tracked, 0);
+  const totalPlanned = chartData.reduce((sum, item) => sum + item.planned, 0);
   const totalRemaining = totalPlanned - totalTracked;
 
   const progress =
-    totalPlanned > 0
-      ? Math.min((totalTracked / totalPlanned) * 100, 100)
-      : 0;
+    totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
 
   const pieData =
     chartData.length > 0
@@ -232,14 +262,11 @@ function PlanOverview({
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key)}
-              className="flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-[1.25rem] px-1.5 text-[11px] font-semibold transition"
-              style={{
-                backgroundColor: active ? item.softBg : 'transparent',
-                color: active ? item.color : undefined,
-                boxShadow: active
-                  ? '0 1px 3px rgba(15, 23, 42, 0.08)'
-                  : 'none',
-              }}
+              className={`flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-[1.25rem] px-1.5 text-[11px] font-semibold transition ${
+                active
+                  ? `${item.bg} ${item.text} shadow-sm ring-1 ${item.ring}`
+                  : 'text-muted-foreground hover:bg-background/70'
+              }`}
             >
               <TabIcon className="h-3.5 w-3.5" />
               <span className="leading-none">{item.title}</span>
@@ -251,21 +278,11 @@ function PlanOverview({
       <div className="rounded-[2rem] border bg-card p-4 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-              style={{
-                backgroundColor: tab.softBg,
-                color: tab.color,
-              }}
-            >
-              {tab.title}
-            </div>
-
-            <h2 className="mt-3 text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight">
               <Money amount={totalTracked} currency={currency} />
             </h2>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               {tab.label} of{' '}
               <Money amount={totalPlanned} currency={currency} compact />
             </p>
@@ -275,12 +292,10 @@ function PlanOverview({
             <p className="text-xs text-muted-foreground">
               {totalRemaining >= 0 ? 'Left' : 'Over'}
             </p>
-
             <p
-              className="text-sm font-bold"
-              style={{
-                color: totalRemaining < 0 ? '#DC2626' : undefined,
-              }}
+              className={`text-sm font-bold ${
+                totalRemaining < 0 ? 'text-red-600' : 'text-foreground'
+              }`}
             >
               <Money
                 amount={Math.abs(totalRemaining)}
@@ -300,17 +315,27 @@ function PlanOverview({
                 nameKey="name"
                 innerRadius={66}
                 outerRadius={92}
-                paddingAngle={0}
+                paddingAngle={chartData.length > 1 ? 3 : 0}
                 stroke="none"
                 isAnimationActive
               >
                 {pieData.map((entry, index) => (
                   <Cell
                     key={`${entry.name}-${index}`}
-                    fill={chartData.length > 0 ? tab.color : '#E5E7EB'}
+                    fill={chartData.length > 0 ? entry.color : '#E5E7EB'}
                   />
                 ))}
               </Pie>
+
+              <Tooltip
+                content={
+                  <DonutTooltip
+                    currency={currency}
+                    tab={tab}
+                  />
+                }
+                cursor={false}
+              />
             </PieChart>
           </ResponsiveContainer>
 
@@ -318,11 +343,9 @@ function PlanOverview({
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {tab.label}
             </p>
-
             <p className="mt-1 text-xl font-bold">
               <Money amount={totalTracked} currency={currency} compact />
             </p>
-
             <p className="text-xs text-muted-foreground">
               {Math.round(progress)}%
             </p>
@@ -355,11 +378,11 @@ function PlanOverview({
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
                       style={{
-                        backgroundColor: `${tab.color}14`,
-                        color: tab.color,
+                        backgroundColor: `${item.color}18`,
+                        color: item.color,
                       }}
                     >
-                      <CategoryGlyph icon={item.icon} color={tab.color} />
+                      <CategoryIcon category={item.category} color={item.color} />
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -383,7 +406,7 @@ function PlanOverview({
                           style={{
                             width: `${percent}%`,
                             backgroundColor:
-                              item.remaining < 0 ? '#DC2626' : tab.color,
+                              item.remaining < 0 ? '#DC2626' : item.color,
                           }}
                         />
                       </div>
@@ -419,9 +442,7 @@ function PlanOverview({
 }
 
 export default function Plan() {
-  const [currentMonth, setCurrentMonth] = useState(
-    format(new Date(), 'yyyy-MM')
-  );
+  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [isEditMode, setIsEditMode] = useState(false);
   const [editValues, setEditValues] = useState({});
   const [saving, setSaving] = useState(false);
@@ -531,28 +552,15 @@ export default function Plan() {
     ? sumEditType('income')
     : budget.totalPlannedIncome;
 
-  const editTotalExpenses = isEditMode
-    ? sumEditType('expense')
-    : 0;
-
-  const editTotalSavings = isEditMode
-    ? sumEditType('savings')
-    : 0;
-
-  const editTotalDebt = isEditMode
-    ? sumEditType('debt')
-    : 0;
+  const editTotalExpenses = isEditMode ? sumEditType('expense') : 0;
+  const editTotalSavings = isEditMode ? sumEditType('savings') : 0;
+  const editTotalDebt = isEditMode ? sumEditType('debt') : 0;
 
   const leftToAllocate = isEditMode
-    ? editTotalIncome -
-      editTotalExpenses -
-      editTotalSavings -
-      editTotalDebt
+    ? editTotalIncome - editTotalExpenses - editTotalSavings - editTotalDebt
     : budget.leftToAllocate;
 
-  const totalIncomeDisplay = isEditMode
-    ? editTotalIncome
-    : budget.totalIncome;
+  const totalIncomeDisplay = isEditMode ? editTotalIncome : budget.totalIncome;
 
   const prevValuesMap = {};
 
