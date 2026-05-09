@@ -5,17 +5,11 @@ import {
   Copy,
   X,
   Save,
-  Wallet,
-  Receipt,
+  ArrowUpRight,
+  ArrowDownRight,
   PiggyBank,
   CreditCard,
-  CircleDollarSign,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useQueryClient } from '@tanstack/react-query';
-import { budgetPlansApi } from '@/lib/budgetData';
-import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   PieChart,
   Pie,
@@ -23,9 +17,15 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
+import { budgetPlansApi } from '@/lib/budgetData';
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
+import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
 
 import {
   useBudgetSummary,
@@ -33,250 +33,397 @@ import {
   useCategories,
 } from '@/hooks/useBudgetData';
 
-import { useCurrency } from '@/hooks/useCurrency';
-
-const COLORS = {
-  income: ['#22C55E', '#86EFAC', '#16A34A', '#BBF7D0'],
-  expense: ['#E11D48', '#FB7185', '#FDA4AF', '#FFE4E6'],
-  savings: ['#2563EB', '#60A5FA', '#93C5FD', '#DBEAFE'],
-  debt: ['#6366F1', '#818CF8', '#A5B4FC', '#E0E7FF'],
-};
+import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 
 const TABS = [
-  { key: 'income', label: 'Income', icon: Wallet },
-  { key: 'expense', label: 'Expenses', icon: Receipt },
-  { key: 'savings', label: 'Savings', icon: PiggyBank },
-  { key: 'debt', label: 'Debt', icon: CreditCard },
+  {
+    key: 'income',
+    title: 'Income',
+    label: 'received',
+    plannedLabel: 'planned',
+    color: '#16A34A',
+    soft: 'bg-green-50 text-green-700',
+    icon: ArrowUpRight,
+  },
+  {
+    key: 'expense',
+    title: 'Expenses',
+    label: 'spent',
+    plannedLabel: 'planned',
+    color: '#0EA5E9',
+    soft: 'bg-sky-50 text-sky-700',
+    icon: ArrowDownRight,
+  },
+  {
+    key: 'savings',
+    title: 'Savings',
+    label: 'saved',
+    plannedLabel: 'goal',
+    color: '#DB2777',
+    soft: 'bg-pink-50 text-pink-700',
+    icon: PiggyBank,
+  },
+  {
+    key: 'debt',
+    title: 'Debt',
+    label: 'paid',
+    plannedLabel: 'planned',
+    color: '#DC2626',
+    soft: 'bg-red-50 text-red-700',
+    icon: CreditCard,
+  },
 ];
 
-const formatPlanAmount = (value = 0) => {
+const COLORS = [
+  '#0078D4',
+  '#107C10',
+  '#C50F1F',
+  '#8764B8',
+  '#CA5010',
+  '#008272',
+  '#4F6BED',
+  '#E3008C',
+  '#00B294',
+  '#FFB900',
+];
+
+const formatNumber = (value = 0) => {
   const number = Number(value || 0);
 
   return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: number % 1 === 0 ? 0 : 2,
     minimumFractionDigits: 0,
+    maximumFractionDigits: number % 1 === 0 ? 0 : 2,
   }).format(number);
 };
 
-const getCategoryIcon = (category) => {
-  return category?.icon || category?.emoji || null;
+const getCurrencyCode = (currency) => {
+  if (typeof currency === 'string') return currency;
+  return currency?.code || currency?.currency || 'SAR';
 };
 
-function CategoryIcon({ category, color }) {
-  const icon = getCategoryIcon(category);
+const getCurrencySymbol = (currency) => {
+  const code = getCurrencyCode(currency);
+
+  if (code === 'SAR') return 'SAR';
+
+  const map = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    INR: '₹',
+    PKR: 'Rs',
+    AED: 'د.إ',
+    QAR: 'ر.ق',
+    KWD: 'د.ك',
+    BHD: '.د.ب',
+    OMR: 'ر.ع.',
+  };
+
+  return currency?.symbol || map[code] || code;
+};
+
+function Money({ amount, currency, compact = false, className = '' }) {
+  const code = getCurrencyCode(currency);
+  const symbol = getCurrencySymbol(currency);
 
   return (
-    <div
-      className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-      style={{ backgroundColor: `${color}18`, color }}
-    >
-      {icon ? (
-        <span className="text-base leading-none">{icon}</span>
+    <span className={`inline-flex items-center gap-1 ${className}`}>
+      {code === 'SAR' ? (
+        <img
+          src="/sar.svg"
+          alt="SAR"
+          className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'}
+        />
       ) : (
-        <CircleDollarSign className="w-4 h-4" />
+        <span className="text-current">{symbol}</span>
       )}
-    </div>
+      <span>{formatNumber(amount)}</span>
+    </span>
   );
 }
 
-function AllocationTabs({ activeTab, onChange }) {
+function CustomTooltip({ active, payload, currency, tab }) {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0]?.payload;
+  const planned = Number(item?.planned || 0);
+  const tracked = Number(item?.tracked || 0);
+  const remaining = planned - tracked;
+  const percent = planned > 0 ? Math.round((tracked / planned) * 100) : 0;
+
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {TABS.map((tab) => {
-        const Icon = tab.icon;
-        const active = activeTab === tab.key;
+    <div className="rounded-2xl border bg-background/95 px-3 py-2 shadow-xl backdrop-blur-sm min-w-[180px]">
+      <p className="text-sm font-semibold">{item?.name}</p>
 
-        return (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => onChange(tab.key)}
-            className={[
-              'h-11 rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5',
-              active
-                ? 'bg-foreground text-background shadow-sm'
-                : 'bg-card border text-muted-foreground hover:text-foreground',
-            ].join(' ')}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {tab.label}
-          </button>
-        );
-      })}
+      <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+        <div className="flex justify-between gap-4">
+          <span>{tab.label}</span>
+          <Money amount={tracked} currency={currency} compact />
+        </div>
+
+        <div className="flex justify-between gap-4">
+          <span>{tab.plannedLabel}</span>
+          <Money amount={planned} currency={currency} compact />
+        </div>
+
+        <div className="flex justify-between gap-4">
+          <span>{remaining >= 0 ? 'left' : 'over'}</span>
+          <Money amount={Math.abs(remaining)} currency={currency} compact />
+        </div>
+
+        <div className="pt-1 text-[11px] font-medium text-foreground">
+          {percent}% tracked
+        </div>
+      </div>
     </div>
   );
 }
 
-function DonutAllocationCard({
+function PlanOverview({
   activeTab,
-  rows,
-  total,
+  setActiveTab,
+  categories,
+  subcategories,
+  budget,
   currency,
-  formatCurrency,
 }) {
-  const activeLabel = TABS.find((t) => t.key === activeTab)?.label || 'Budget';
-  const palette = COLORS[activeTab] || COLORS.expense;
+  const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
+  const Icon = tab.icon;
 
-  const chartData =
-    rows.length > 0
-      ? rows.map((row, index) => ({
-          ...row,
-          fill: palette[index % palette.length],
+  const sectionCategories = categories.filter(
+    (c) => c.type === activeTab && !c.parent_id
+  );
+
+  const chartData = sectionCategories
+    .map((category, index) => {
+      const childCategories = subcategories.filter(
+        (s) => s.parent_id === category.id
+      );
+
+      const planned =
+        childCategories.length > 0
+          ? childCategories.reduce(
+              (sum, child) => sum + Number(budget.getCategoryPlanned(child.id) || 0),
+              0
+            )
+          : Number(budget.getCategoryPlanned(category.id) || 0);
+
+      const tracked =
+        childCategories.length > 0
+          ? childCategories.reduce(
+              (sum, child) => sum + Number(budget.getCategorySpent(child.id) || 0),
+              0
+            )
+          : Number(budget.getCategorySpent(category.id) || 0);
+
+      return {
+        id: category.id,
+        name: category.name,
+        icon: category.icon,
+        planned,
+        tracked,
+        remaining: planned - tracked,
+        color: COLORS[index % COLORS.length],
+      };
+    })
+    .filter((item) => item.planned > 0 || item.tracked > 0);
+
+  const totalTracked = chartData.reduce((sum, item) => sum + item.tracked, 0);
+  const totalPlanned = chartData.reduce((sum, item) => sum + item.planned, 0);
+  const totalRemaining = totalPlanned - totalTracked;
+  const progress = totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
+
+  const pieData =
+    chartData.length > 0
+      ? chartData.map((item) => ({
+          ...item,
+          value: Math.max(item.tracked, 0.01),
         }))
-      : [{ name: 'No allocation', value: 1, fill: '#E5E7EB' }];
+      : [{ name: 'No data', value: 1, tracked: 0, planned: 0, color: '#E5E7EB' }];
 
   return (
-    <div className="rounded-3xl border bg-card p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <p className="text-sm font-semibold">{activeLabel} Allocation</p>
-          <p className="text-xs text-muted-foreground">
-            {currency?.code || 'SAR'} {formatCurrency(total)}
-          </p>
-        </div>
-      </div>
+    <div className="space-y-4">
+      <div className="grid grid-cols-4 gap-2 rounded-3xl bg-muted/60 p-1.5">
+        {TABS.map((item) => {
+          const TabIcon = item.icon;
+          const active = item.key === activeTab;
 
-      <div className="h-56 relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Tooltip
-              formatter={(value, name) => [
-                `${currency?.code || 'SAR'} ${formatCurrency(value)}`,
-                name,
-              ]}
-            />
-            <Pie
-              data={chartData}
-              innerRadius={62}
-              outerRadius={88}
-              paddingAngle={rows.length > 1 ? 3 : 0}
-              dataKey="value"
-              nameKey="name"
-              stroke="none"
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setActiveTab(item.key)}
+              className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition ${
+                active
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-background/60'
+              }`}
             >
-              {chartData.map((entry, index) => (
-                <Cell key={index} fill={entry.fill} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <p className="text-xs text-muted-foreground">{activeLabel}</p>
-          <p className="text-xl font-bold">
-            {currency?.code || 'SAR'} {formatCurrency(total)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CategoryBreakdown({
-  activeTab,
-  rows,
-  total,
-  isEditMode,
-  editValues,
-  onEditChange,
-  currency,
-  formatCurrency,
-}) {
-  const palette = COLORS[activeTab] || COLORS.expense;
-
-  return (
-    <div className="rounded-3xl border bg-card overflow-hidden shadow-sm">
-      <div className="px-4 py-3 border-b">
-        <h2 className="text-sm font-semibold">Category Breakdown</h2>
+              <TabIcon className="h-4 w-4" />
+              {item.title}
+            </button>
+          );
+        })}
       </div>
 
-      {rows.length === 0 ? (
-        <div className="p-6 text-center">
-          <p className="text-sm font-medium">No categories yet</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Add allocations in edit mode.
-          </p>
+      <div className="rounded-[2rem] border bg-card p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${tab.soft}`}>
+              <Icon className="h-3.5 w-3.5" />
+              {tab.title}
+            </div>
+
+            <h2 className="mt-3 text-2xl font-bold tracking-tight">
+              <Money amount={totalTracked} currency={currency} />
+            </h2>
+
+            <p className="text-sm text-muted-foreground">
+              {tab.label} of <Money amount={totalPlanned} currency={currency} compact />
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">
+              {totalRemaining >= 0 ? 'Left' : 'Over'}
+            </p>
+            <p className={`text-sm font-semibold ${totalRemaining < 0 ? 'text-red-600' : 'text-foreground'}`}>
+              <Money amount={Math.abs(totalRemaining)} currency={currency} compact />
+            </p>
+          </div>
         </div>
-      ) : (
+
+        <div className="relative mt-4 h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={68}
+                outerRadius={94}
+                paddingAngle={3}
+                stroke="none"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`${entry.name}-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+
+              <Tooltip
+                content={<CustomTooltip currency={currency} tab={tab} />}
+                cursor={false}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              {tab.label}
+            </p>
+            <p className="mt-1 text-xl font-bold">
+              <Money amount={totalTracked} currency={currency} compact />
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {Math.round(progress)}%
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl bg-muted/50 p-3">
+            <p className="text-xs text-muted-foreground capitalize">
+              {tab.plannedLabel}
+            </p>
+            <p className="mt-1 text-sm font-semibold">
+              <Money amount={totalPlanned} currency={currency} compact />
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-muted/50 p-3">
+            <p className="text-xs text-muted-foreground">
+              {totalRemaining >= 0 ? 'Remaining' : 'Over'}
+            </p>
+            <p className={`mt-1 text-sm font-semibold ${totalRemaining < 0 ? 'text-red-600' : ''}`}>
+              <Money amount={Math.abs(totalRemaining)} currency={currency} compact />
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[2rem] border bg-card overflow-hidden shadow-sm">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <div>
+            <h3 className="text-sm font-bold tracking-wide uppercase">
+              {tab.title} Breakdown
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Actual {tab.label} vs {tab.plannedLabel}
+            </p>
+          </div>
+        </div>
+
         <div className="divide-y">
-          {rows.map((row, index) => {
-            const color = palette[index % palette.length];
-            const percent = total > 0 ? Math.round((row.value / total) * 100) : 0;
+          {chartData.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No {tab.title.toLowerCase()} data yet
+            </div>
+          ) : (
+            chartData.map((item) => {
+              const percent =
+                item.planned > 0
+                  ? Math.min((item.tracked / item.planned) * 100, 100)
+                  : 0;
 
-            return (
-              <div key={row.id} className="p-4">
-                <div className="flex items-center gap-3">
-                  <CategoryIcon category={row.category} color={color} />
+              return (
+                <div key={item.id} className="px-4 py-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm"
+                      style={{ backgroundColor: `${item.color}18`, color: item.color }}
+                    >
+                      {item.icon || '•'}
+                    </div>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold truncate">
-                        {row.name}
-                      </p>
-
-                      {isEditMode ? (
-                        <input
-                          type="number"
-                          value={editValues[row.id] ?? ''}
-                          onChange={(e) => onEditChange(row.id, e.target.value)}
-                          className="w-24 h-8 rounded-xl border bg-background px-2 text-right text-sm font-semibold"
-                        />
-                      ) : (
-                        <p className="text-sm font-bold whitespace-nowrap">
-                          {formatCurrency(row.value)}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="truncate text-sm font-semibold">
+                          {item.name}
                         </p>
-                      )}
-                    </div>
 
-                    <div className="mt-1 flex items-center justify-between gap-3">
-                      <p className="text-xs text-muted-foreground">
-                        {currency?.code || 'SAR'} {formatCurrency(row.spent)} used
-                      </p>
-                      <p className="text-xs text-muted-foreground">{percent}%</p>
-                    </div>
+                        <p className="shrink-0 text-sm font-semibold">
+                          <Money amount={item.tracked} currency={currency} compact />
+                        </p>
+                      </div>
 
-                    <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${Math.min(percent, 100)}%`,
-                          backgroundColor: color,
-                        }}
-                      />
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${percent}%`,
+                            backgroundColor: item.remaining < 0 ? '#DC2626' : item.color,
+                          }}
+                        />
+                      </div>
+
+                      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+                        <span>
+                          {formatNumber(item.tracked)} / {formatNumber(item.planned)}
+                        </span>
+                        <span className={item.remaining < 0 ? 'text-red-600 font-medium' : ''}>
+                          {item.remaining >= 0
+                            ? `${formatNumber(item.remaining)} left`
+                            : `${formatNumber(Math.abs(item.remaining))} over`}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {row.children.length > 0 && (
-                  <div className="mt-3 ml-12 space-y-2">
-                    {row.children.map((child) => {
-                      const childValue = child.value;
-                      const childPercent =
-                        row.value > 0
-                          ? Math.round((childValue / row.value) * 100)
-                          : 0;
-
-                      return (
-                        <div
-                          key={child.id}
-                          className="flex items-center justify-between gap-3 text-xs"
-                        >
-                          <span className="text-muted-foreground truncate">
-                            {child.name}
-                          </span>
-                          <span className="font-medium whitespace-nowrap">
-                            {formatCurrency(childValue)} · {childPercent}%
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -286,21 +433,17 @@ export default function Plan() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editValues, setEditValues] = useState({});
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('income');
+  const [activeTab, setActiveTab] = useState('expense');
 
   const queryClient = useQueryClient();
   const currency = useCurrency();
+  const formatCurrency = useCurrencyFormatter();
 
   const budget = useBudgetSummary(currentMonth);
-
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
-  const prevMonth = format(
-    subMonths(new Date(currentMonth + '-01'), 1),
-    'yyyy-MM'
-  );
-
+  const prevMonth = format(subMonths(new Date(currentMonth + '-01'), 1), 'yyyy-MM');
   const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
   const enterEditMode = useCallback(() => {
@@ -311,9 +454,7 @@ export default function Plan() {
     });
 
     categories.forEach((c) => {
-      if (!(c.id in initial)) {
-        initial[c.id] = 0;
-      }
+      if (!(c.id in initial)) initial[c.id] = 0;
     });
 
     setEditValues(initial);
@@ -349,10 +490,8 @@ export default function Plan() {
       await Promise.all(promises);
 
       queryClient.invalidateQueries();
-
       setIsEditMode(false);
       setEditValues({});
-
       toast.success('Plan saved');
     } catch (error) {
       console.error('Plan save failed:', error);
@@ -374,10 +513,7 @@ export default function Plan() {
   };
 
   const onEditChange = useCallback((catId, value) => {
-    setEditValues((prev) => ({
-      ...prev,
-      [catId]: Number(value || 0),
-    }));
+    setEditValues((prev) => ({ ...prev, [catId]: Number(value || 0) }));
   }, []);
 
   const sumEditType = (type) => {
@@ -386,18 +522,13 @@ export default function Plan() {
       .reduce((sum, c) => {
         const subs = categories.filter((s) => s.parent_id === c.id);
 
-        if (subs.length > 0 && !c.parent_id) {
-          return sum;
-        }
+        if (subs.length > 0 && !c.parent_id) return sum;
 
         return sum + Number(editValues[c.id] || 0);
       }, 0);
   };
 
-  const editTotalIncome = isEditMode
-    ? sumEditType('income')
-    : budget.totalPlannedIncome;
-
+  const editTotalIncome = isEditMode ? sumEditType('income') : budget.totalPlannedIncome;
   const editTotalExpenses = isEditMode ? sumEditType('expense') : 0;
   const editTotalSavings = isEditMode ? sumEditType('savings') : 0;
   const editTotalDebt = isEditMode ? sumEditType('debt') : 0;
@@ -408,64 +539,37 @@ export default function Plan() {
 
   const totalIncomeDisplay = isEditMode ? editTotalIncome : budget.totalIncome;
 
-  const activeRows = useMemo(() => {
-    const parents = categories.filter(
-      (c) => c.type === activeTab && !c.parent_id
-    );
+  const prevValuesMap = {};
 
-    return parents
-      .map((category) => {
-        const children = categories
-          .filter((c) => c.parent_id === category.id)
-          .map((child) => {
-            const planned = isEditMode
-              ? Number(editValues[child.id] || 0)
-              : Number(budget.getCategoryPlanned(child.id) || 0);
+  prevAllocations.forEach((a) => {
+    prevValuesMap[a.category_id] = a.planned_amount || 0;
+  });
 
-            const spent = Number(budget.getCategorySpent(child.id) || 0);
+  const allSubs = useMemo(() => categories.filter((c) => c.parent_id), [categories]);
 
-            return {
-              id: child.id,
-              name: child.name,
-              category: child,
-              value: planned,
-              spent,
-            };
-          });
+  const incomeCategories = useMemo(
+    () => categories.filter((c) => c.type === 'income' && !c.parent_id),
+    [categories]
+  );
 
-        const childTotal = children.reduce(
-          (sum, child) => sum + Number(child.value || 0),
-          0
-        );
+  const expenseCategories = useMemo(
+    () => categories.filter((c) => c.type === 'expense' && !c.parent_id),
+    [categories]
+  );
 
-        const ownPlanned = isEditMode
-          ? Number(editValues[category.id] || 0)
-          : Number(budget.getCategoryPlanned(category.id) || 0);
+  const savingsCategories = useMemo(
+    () => categories.filter((c) => c.type === 'savings' && !c.parent_id),
+    [categories]
+  );
 
-        const value = children.length > 0 ? childTotal : ownPlanned;
-
-        const spent = Number(budget.getCategorySpent(category.id) || 0);
-
-        return {
-          id: category.id,
-          name: category.name,
-          category,
-          value,
-          spent,
-          children: children.filter((child) => child.value > 0),
-        };
-      })
-      .filter((row) => row.value > 0 || isEditMode);
-  }, [activeTab, categories, isEditMode, editValues, budget]);
-
-  const activeTotal = activeRows.reduce(
-    (sum, row) => sum + Number(row.value || 0),
-    0
+  const debtCategories = useMemo(
+    () => categories.filter((c) => c.type === 'debt' && !c.parent_id),
+    [categories]
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-24">
-      <div className="sticky top-0 z-30 pt-6 pb-3 bg-background/95 backdrop-blur-sm">
+    <div className="max-w-3xl mx-auto px-4 pb-28">
+      <div className="sticky top-0 z-30 pt-6 pb-2 bg-background/95 backdrop-blur-sm">
         <AnimatePresence mode="wait">
           {isEditMode ? (
             <motion.div
@@ -486,13 +590,7 @@ export default function Plan() {
                 Cancel
               </Button>
 
-              <div className="text-center">
-                <h1 className="text-base font-semibold">Edit Plan</h1>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(currentMonth + '-01'), 'MMMM yyyy')} ·{' '}
-                  {currency?.code || 'SAR'}
-                </p>
-              </div>
+              <h1 className="text-base font-semibold">Edit Plan</h1>
 
               <Button
                 size="sm"
@@ -511,20 +609,17 @@ export default function Plan() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center justify-between gap-3"
+              className="flex items-center justify-between"
             >
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Plan</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Monthly budget · {currency?.code || 'SAR'}
+                  Monthly budget · {getCurrencyCode(currency)}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                <MonthSelector
-                  currentMonth={currentMonth}
-                  onChange={setCurrentMonth}
-                />
+                <MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />
 
                 <Button
                   variant="ghost"
@@ -550,7 +645,7 @@ export default function Plan() {
           totalIncome={totalIncomeDisplay}
           isEditMode={isEditMode}
           currency={currency}
-          formatCurrency={formatPlanAmount}
+          formatCurrency={formatCurrency}
         />
 
         <AnimatePresence>
@@ -575,37 +670,40 @@ export default function Plan() {
           )}
         </AnimatePresence>
 
-        <AllocationTabs activeTab={activeTab} onChange={setActiveTab} />
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="space-y-4"
-          >
-            <DonutAllocationCard
-              activeTab={activeTab}
-              rows={activeRows}
-              total={activeTotal}
-              currency={currency}
-              formatCurrency={formatPlanAmount}
-            />
-
-            <CategoryBreakdown
-              activeTab={activeTab}
-              rows={activeRows}
-              total={activeTotal}
-              isEditMode={isEditMode}
-              editValues={editValues}
-              onEditChange={onEditChange}
-              currency={currency}
-              formatCurrency={formatPlanAmount}
-            />
-          </motion.div>
-        </AnimatePresence>
+        {isEditMode ? (
+          <>
+            {[
+              ['Income', incomeCategories],
+              ['Expenses', expenseCategories],
+              ['Savings', savingsCategories],
+              ['Debt', debtCategories],
+            ].map(([title, sectionCategories]) => (
+              <UnifiedCategorySection
+                key={title}
+                title={title}
+                categories={sectionCategories}
+                subcategories={allSubs}
+                isEditMode={isEditMode}
+                getCategorySpent={budget.getCategorySpent}
+                getCategoryPlanned={budget.getCategoryPlanned}
+                editValues={editValues}
+                onEditChange={onEditChange}
+                prevValues={prevValuesMap}
+                currency={currency}
+                formatCurrency={formatCurrency}
+              />
+            ))}
+          </>
+        ) : (
+          <PlanOverview
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            categories={categories}
+            subcategories={allSubs}
+            budget={budget}
+            currency={currency}
+          />
+        )}
       </motion.div>
 
       <AnimatePresence>
