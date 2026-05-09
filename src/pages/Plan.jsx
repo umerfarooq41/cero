@@ -45,7 +45,7 @@ const TABS = [
     text: 'text-green-700',
     ring: 'ring-green-200',
     icon: ArrowUpRight,
-    shades: ['#15803D', '#16A34A', '#22C55E', '#4ADE80', '#86EFAC'],
+    shades: ['#14532D', '#15803D', '#16A34A', '#22C55E', '#4ADE80', '#86EFAC'],
   },
   {
     key: 'expense',
@@ -56,7 +56,7 @@ const TABS = [
     text: 'text-red-700',
     ring: 'ring-red-200',
     icon: ArrowDownRight,
-    shades: ['#991B1B', '#B91C1C', '#DC2626', '#EF4444', '#F87171'],
+    shades: ['#7F1D1D', '#991B1B', '#B91C1C', '#DC2626', '#EF4444', '#F87171'],
   },
   {
     key: 'savings',
@@ -67,7 +67,7 @@ const TABS = [
     text: 'text-blue-700',
     ring: 'ring-blue-200',
     icon: PiggyBank,
-    shades: ['#1E3A8A', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA'],
+    shades: ['#1E3A8A', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
   },
   {
     key: 'debt',
@@ -78,7 +78,7 @@ const TABS = [
     text: 'text-purple-700',
     ring: 'ring-purple-200',
     icon: CreditCard,
-    shades: ['#581C87', '#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA'],
+    shades: ['#581C87', '#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD'],
   },
 ];
 
@@ -138,21 +138,21 @@ function Money({ amount, currency, compact = false, className = '' }) {
 }
 
 function CategoryIcon({ category, color }) {
-  const icon = category?.icon || category?.icon_name || category?.iconName;
+  const icon = category?.icon;
 
-  if (!icon) return <span className="text-sm">•</span>;
-
-  if (typeof icon === 'function') {
-    const Icon = icon;
-    return <Icon className="h-4 w-4" style={{ color }} />;
+  if (!icon) {
+    return (
+      <span className="text-xs font-bold" style={{ color }}>
+        {category?.name?.charAt(0) || '•'}
+      </span>
+    );
   }
 
-  if (typeof icon === 'object' && icon?.render) {
-    const Icon = icon;
-    return <Icon className="h-4 w-4" style={{ color }} />;
-  }
-
-  return <span className="text-base leading-none">{icon}</span>;
+  return (
+    <span className="text-base leading-none" style={{ color }}>
+      {icon}
+    </span>
+  );
 }
 
 function DonutTooltip({ active, payload, currency, tab }) {
@@ -164,13 +164,15 @@ function DonutTooltip({ active, payload, currency, tab }) {
   const percent = planned > 0 ? Math.round((tracked / planned) * 100) : 0;
 
   return (
-    <div className="rounded-2xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur-sm">
-      <p className="text-sm font-semibold">{item?.name}</p>
-      <div className="mt-1 flex items-center justify-between gap-5 text-xs text-muted-foreground">
+    <div className="rounded-xl border bg-popover px-3 py-2 shadow-lg">
+      <p className="text-xs font-bold">{item?.name}</p>
+
+      <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
         <span>{tab.label}</span>
         <Money amount={tracked} currency={currency} compact />
       </div>
-      <p className="mt-1 text-xs font-medium" style={{ color: item?.color }}>
+
+      <p className="mt-1 text-[11px] font-semibold" style={{ color: item?.color }}>
         {percent}% tracked
       </p>
     </div>
@@ -222,7 +224,7 @@ function PlanOverview({
         planned,
         tracked,
         remaining: planned - tracked,
-        color: tab.shades[index % tab.shades.length],
+        color: category.color || tab.shades[index % tab.shades.length],
       };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
@@ -306,7 +308,7 @@ function PlanOverview({
           </div>
         </div>
 
-        <div className="relative mx-auto mt-4 h-52 max-w-[280px]">
+        <div className="relative mx-auto mt-4 h-52 max-w-[280px] [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -323,18 +325,24 @@ function PlanOverview({
                   <Cell
                     key={`${entry.name}-${index}`}
                     fill={chartData.length > 0 ? entry.color : '#E5E7EB'}
+                    stroke="none"
+                    tabIndex={-1}
+                    focusable="false"
+                    style={{ outline: 'none' }}
                   />
                 ))}
               </Pie>
 
               <Tooltip
-                content={
-                  <DonutTooltip
-                    currency={currency}
-                    tab={tab}
-                  />
-                }
+                content={<DonutTooltip currency={currency} tab={tab} />}
                 cursor={false}
+                offset={12}
+                wrapperStyle={{
+                  outline: 'none',
+                  zIndex: 30,
+                  pointerEvents: 'none',
+                }}
+                allowEscapeViewBox={{ x: false, y: false }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -343,9 +351,11 @@ function PlanOverview({
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {tab.label}
             </p>
+
             <p className="mt-1 text-xl font-bold">
               <Money amount={totalTracked} currency={currency} compact />
             </p>
+
             <p className="text-xs text-muted-foreground">
               {Math.round(progress)}%
             </p>
