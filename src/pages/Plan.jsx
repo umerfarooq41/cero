@@ -15,7 +15,6 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  Tooltip,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,51 +39,34 @@ const TABS = [
     key: 'income',
     title: 'Income',
     label: 'received',
-    plannedLabel: 'planned',
     color: '#16A34A',
-    soft: 'bg-green-50 text-green-700',
+    softBg: '#DCFCE7',
     icon: ArrowUpRight,
   },
   {
     key: 'expense',
     title: 'Expenses',
     label: 'spent',
-    plannedLabel: 'planned',
-    color: '#0EA5E9',
-    soft: 'bg-sky-50 text-sky-700',
+    color: '#DC2626',
+    softBg: '#FEE2E2',
     icon: ArrowDownRight,
   },
   {
     key: 'savings',
     title: 'Savings',
     label: 'saved',
-    plannedLabel: 'goal',
-    color: '#DB2777',
-    soft: 'bg-pink-50 text-pink-700',
+    color: '#2563EB',
+    softBg: '#DBEAFE',
     icon: PiggyBank,
   },
   {
     key: 'debt',
     title: 'Debt',
     label: 'paid',
-    plannedLabel: 'planned',
-    color: '#DC2626',
-    soft: 'bg-red-50 text-red-700',
+    color: '#7C3AED',
+    softBg: '#EDE9FE',
     icon: CreditCard,
   },
-];
-
-const COLORS = [
-  '#0078D4',
-  '#107C10',
-  '#C50F1F',
-  '#8764B8',
-  '#CA5010',
-  '#008272',
-  '#4F6BED',
-  '#E3008C',
-  '#00B294',
-  '#FFB900',
 ];
 
 const formatNumber = (value = 0) => {
@@ -135,48 +117,24 @@ function Money({ amount, currency, compact = false, className = '' }) {
           className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'}
         />
       ) : (
-        <span className="text-current">{symbol}</span>
+        <span>{symbol}</span>
       )}
       <span>{formatNumber(amount)}</span>
     </span>
   );
 }
 
-function CustomTooltip({ active, payload, currency, tab }) {
-  if (!active || !payload?.length) return null;
+function CategoryGlyph({ icon, color }) {
+  if (!icon) {
+    return <span className="text-base">•</span>;
+  }
 
-  const item = payload[0]?.payload;
-  const planned = Number(item?.planned || 0);
-  const tracked = Number(item?.tracked || 0);
-  const remaining = planned - tracked;
-  const percent = planned > 0 ? Math.round((tracked / planned) * 100) : 0;
+  if (typeof icon === 'string') {
+    return <span className="text-base leading-none">{icon}</span>;
+  }
 
-  return (
-    <div className="rounded-2xl border bg-background/95 px-3 py-2 shadow-xl backdrop-blur-sm min-w-[180px]">
-      <p className="text-sm font-semibold">{item?.name}</p>
-
-      <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-        <div className="flex justify-between gap-4">
-          <span>{tab.label}</span>
-          <Money amount={tracked} currency={currency} compact />
-        </div>
-
-        <div className="flex justify-between gap-4">
-          <span>{tab.plannedLabel}</span>
-          <Money amount={planned} currency={currency} compact />
-        </div>
-
-        <div className="flex justify-between gap-4">
-          <span>{remaining >= 0 ? 'left' : 'over'}</span>
-          <Money amount={Math.abs(remaining)} currency={currency} compact />
-        </div>
-
-        <div className="pt-1 text-[11px] font-medium text-foreground">
-          {percent}% tracked
-        </div>
-      </div>
-    </div>
-  );
+  const Icon = icon;
+  return <Icon className="h-4 w-4" style={{ color }} />;
 }
 
 function PlanOverview({
@@ -188,14 +146,13 @@ function PlanOverview({
   currency,
 }) {
   const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
-  const Icon = tab.icon;
 
   const sectionCategories = categories.filter(
     (c) => c.type === activeTab && !c.parent_id
   );
 
   const chartData = sectionCategories
-    .map((category, index) => {
+    .map((category) => {
       const childCategories = subcategories.filter(
         (s) => s.parent_id === category.id
       );
@@ -203,7 +160,8 @@ function PlanOverview({
       const planned =
         childCategories.length > 0
           ? childCategories.reduce(
-              (sum, child) => sum + Number(budget.getCategoryPlanned(child.id) || 0),
+              (sum, child) =>
+                sum + Number(budget.getCategoryPlanned(child.id) || 0),
               0
             )
           : Number(budget.getCategoryPlanned(category.id) || 0);
@@ -211,7 +169,8 @@ function PlanOverview({
       const tracked =
         childCategories.length > 0
           ? childCategories.reduce(
-              (sum, child) => sum + Number(budget.getCategorySpent(child.id) || 0),
+              (sum, child) =>
+                sum + Number(budget.getCategorySpent(child.id) || 0),
               0
             )
           : Number(budget.getCategorySpent(category.id) || 0);
@@ -223,15 +182,27 @@ function PlanOverview({
         planned,
         tracked,
         remaining: planned - tracked,
-        color: COLORS[index % COLORS.length],
+        color: tab.color,
       };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
 
-  const totalTracked = chartData.reduce((sum, item) => sum + item.tracked, 0);
-  const totalPlanned = chartData.reduce((sum, item) => sum + item.planned, 0);
+  const totalTracked = chartData.reduce(
+    (sum, item) => sum + item.tracked,
+    0
+  );
+
+  const totalPlanned = chartData.reduce(
+    (sum, item) => sum + item.planned,
+    0
+  );
+
   const totalRemaining = totalPlanned - totalTracked;
-  const progress = totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
+
+  const progress =
+    totalPlanned > 0
+      ? Math.min((totalTracked / totalPlanned) * 100, 100)
+      : 0;
 
   const pieData =
     chartData.length > 0
@@ -239,11 +210,19 @@ function PlanOverview({
           ...item,
           value: Math.max(item.tracked, 0.01),
         }))
-      : [{ name: 'No data', value: 1, tracked: 0, planned: 0, color: '#E5E7EB' }];
+      : [
+          {
+            name: 'No data',
+            value: 1,
+            tracked: 0,
+            planned: 0,
+            color: '#E5E7EB',
+          },
+        ];
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-2 rounded-3xl bg-muted/60 p-1.5">
+      <div className="grid grid-cols-4 gap-1 rounded-[1.75rem] bg-muted/60 p-1.5">
         {TABS.map((item) => {
           const TabIcon = item.icon;
           const active = item.key === activeTab;
@@ -253,24 +232,32 @@ function PlanOverview({
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key)}
-              className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition ${
-                active
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-background/60'
-              }`}
+              className="flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-[1.25rem] px-1.5 text-[11px] font-semibold transition"
+              style={{
+                backgroundColor: active ? item.softBg : 'transparent',
+                color: active ? item.color : undefined,
+                boxShadow: active
+                  ? '0 1px 3px rgba(15, 23, 42, 0.08)'
+                  : 'none',
+              }}
             >
-              <TabIcon className="h-4 w-4" />
-              {item.title}
+              <TabIcon className="h-3.5 w-3.5" />
+              <span className="leading-none">{item.title}</span>
             </button>
           );
         })}
       </div>
 
       <div className="rounded-[2rem] border bg-card p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${tab.soft}`}>
-              <Icon className="h-3.5 w-3.5" />
+            <div
+              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: tab.softBg,
+                color: tab.color,
+              }}
+            >
               {tab.title}
             </div>
 
@@ -279,7 +266,8 @@ function PlanOverview({
             </h2>
 
             <p className="text-sm text-muted-foreground">
-              {tab.label} of <Money amount={totalPlanned} currency={currency} compact />
+              {tab.label} of{' '}
+              <Money amount={totalPlanned} currency={currency} compact />
             </p>
           </div>
 
@@ -287,80 +275,66 @@ function PlanOverview({
             <p className="text-xs text-muted-foreground">
               {totalRemaining >= 0 ? 'Left' : 'Over'}
             </p>
-            <p className={`text-sm font-semibold ${totalRemaining < 0 ? 'text-red-600' : 'text-foreground'}`}>
-              <Money amount={Math.abs(totalRemaining)} currency={currency} compact />
+
+            <p
+              className="text-sm font-bold"
+              style={{
+                color: totalRemaining < 0 ? '#DC2626' : undefined,
+              }}
+            >
+              <Money
+                amount={Math.abs(totalRemaining)}
+                currency={currency}
+                compact
+              />
             </p>
           </div>
         </div>
 
-        <div className="relative mt-4 h-56">
+        <div className="relative mx-auto mt-4 h-52 max-w-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={pieData}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={68}
-                outerRadius={94}
-                paddingAngle={3}
+                innerRadius={66}
+                outerRadius={92}
+                paddingAngle={0}
                 stroke="none"
+                isAnimationActive
               >
                 {pieData.map((entry, index) => (
-                  <Cell key={`${entry.name}-${index}`} fill={entry.color} />
+                  <Cell
+                    key={`${entry.name}-${index}`}
+                    fill={chartData.length > 0 ? tab.color : '#E5E7EB'}
+                  />
                 ))}
               </Pie>
-
-              <Tooltip
-                content={<CustomTooltip currency={currency} tab={tab} />}
-                cursor={false}
-              />
             </PieChart>
           </ResponsiveContainer>
 
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {tab.label}
             </p>
+
             <p className="mt-1 text-xl font-bold">
               <Money amount={totalTracked} currency={currency} compact />
             </p>
+
             <p className="text-xs text-muted-foreground">
               {Math.round(progress)}%
             </p>
           </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-muted/50 p-3">
-            <p className="text-xs text-muted-foreground capitalize">
-              {tab.plannedLabel}
-            </p>
-            <p className="mt-1 text-sm font-semibold">
-              <Money amount={totalPlanned} currency={currency} compact />
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-muted/50 p-3">
-            <p className="text-xs text-muted-foreground">
-              {totalRemaining >= 0 ? 'Remaining' : 'Over'}
-            </p>
-            <p className={`mt-1 text-sm font-semibold ${totalRemaining < 0 ? 'text-red-600' : ''}`}>
-              <Money amount={Math.abs(totalRemaining)} currency={currency} compact />
-            </p>
-          </div>
-        </div>
       </div>
 
-      <div className="rounded-[2rem] border bg-card overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <div>
-            <h3 className="text-sm font-bold tracking-wide uppercase">
-              {tab.title} Breakdown
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Actual {tab.label} vs {tab.plannedLabel}
-            </p>
-          </div>
+      <div className="overflow-hidden rounded-[2rem] border bg-card shadow-sm">
+        <div className="border-b px-4 py-3">
+          <h3 className="text-sm font-bold uppercase tracking-wide">
+            {tab.title} Breakdown
+          </h3>
         </div>
 
         <div className="divide-y">
@@ -379,10 +353,13 @@ function PlanOverview({
                 <div key={item.id} className="px-4 py-4">
                   <div className="flex items-center gap-3">
                     <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm"
-                      style={{ backgroundColor: `${item.color}18`, color: item.color }}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor: `${tab.color}14`,
+                        color: tab.color,
+                      }}
                     >
-                      {item.icon || '•'}
+                      <CategoryGlyph icon={item.icon} color={tab.color} />
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -391,26 +368,39 @@ function PlanOverview({
                           {item.name}
                         </p>
 
-                        <p className="shrink-0 text-sm font-semibold">
-                          <Money amount={item.tracked} currency={currency} compact />
+                        <p className="shrink-0 text-sm font-bold">
+                          <Money
+                            amount={item.tracked}
+                            currency={currency}
+                            compact
+                          />
                         </p>
                       </div>
 
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full"
+                          className="h-full rounded-full transition-all"
                           style={{
                             width: `${percent}%`,
-                            backgroundColor: item.remaining < 0 ? '#DC2626' : item.color,
+                            backgroundColor:
+                              item.remaining < 0 ? '#DC2626' : tab.color,
                           }}
                         />
                       </div>
 
-                      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+                      <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
                         <span>
-                          {formatNumber(item.tracked)} / {formatNumber(item.planned)}
+                          {formatNumber(item.tracked)} /{' '}
+                          {formatNumber(item.planned)}
                         </span>
-                        <span className={item.remaining < 0 ? 'text-red-600 font-medium' : ''}>
+
+                        <span
+                          className={
+                            item.remaining < 0
+                              ? 'font-medium text-red-600'
+                              : ''
+                          }
+                        >
                           {item.remaining >= 0
                             ? `${formatNumber(item.remaining)} left`
                             : `${formatNumber(Math.abs(item.remaining))} over`}
@@ -429,7 +419,9 @@ function PlanOverview({
 }
 
 export default function Plan() {
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [currentMonth, setCurrentMonth] = useState(
+    format(new Date(), 'yyyy-MM')
+  );
   const [isEditMode, setIsEditMode] = useState(false);
   const [editValues, setEditValues] = useState({});
   const [saving, setSaving] = useState(false);
@@ -443,7 +435,11 @@ export default function Plan() {
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
-  const prevMonth = format(subMonths(new Date(currentMonth + '-01'), 1), 'yyyy-MM');
+  const prevMonth = format(
+    subMonths(new Date(currentMonth + '-01'), 1),
+    'yyyy-MM'
+  );
+
   const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
   const enterEditMode = useCallback(() => {
@@ -513,7 +509,10 @@ export default function Plan() {
   };
 
   const onEditChange = useCallback((catId, value) => {
-    setEditValues((prev) => ({ ...prev, [catId]: Number(value || 0) }));
+    setEditValues((prev) => ({
+      ...prev,
+      [catId]: Number(value || 0),
+    }));
   }, []);
 
   const sumEditType = (type) => {
@@ -528,16 +527,32 @@ export default function Plan() {
       }, 0);
   };
 
-  const editTotalIncome = isEditMode ? sumEditType('income') : budget.totalPlannedIncome;
-  const editTotalExpenses = isEditMode ? sumEditType('expense') : 0;
-  const editTotalSavings = isEditMode ? sumEditType('savings') : 0;
-  const editTotalDebt = isEditMode ? sumEditType('debt') : 0;
+  const editTotalIncome = isEditMode
+    ? sumEditType('income')
+    : budget.totalPlannedIncome;
+
+  const editTotalExpenses = isEditMode
+    ? sumEditType('expense')
+    : 0;
+
+  const editTotalSavings = isEditMode
+    ? sumEditType('savings')
+    : 0;
+
+  const editTotalDebt = isEditMode
+    ? sumEditType('debt')
+    : 0;
 
   const leftToAllocate = isEditMode
-    ? editTotalIncome - editTotalExpenses - editTotalSavings - editTotalDebt
+    ? editTotalIncome -
+      editTotalExpenses -
+      editTotalSavings -
+      editTotalDebt
     : budget.leftToAllocate;
 
-  const totalIncomeDisplay = isEditMode ? editTotalIncome : budget.totalIncome;
+  const totalIncomeDisplay = isEditMode
+    ? editTotalIncome
+    : budget.totalIncome;
 
   const prevValuesMap = {};
 
@@ -545,7 +560,10 @@ export default function Plan() {
     prevValuesMap[a.category_id] = a.planned_amount || 0;
   });
 
-  const allSubs = useMemo(() => categories.filter((c) => c.parent_id), [categories]);
+  const allSubs = useMemo(
+    () => categories.filter((c) => c.parent_id),
+    [categories]
+  );
 
   const incomeCategories = useMemo(
     () => categories.filter((c) => c.type === 'income' && !c.parent_id),
@@ -619,7 +637,10 @@ export default function Plan() {
               </div>
 
               <div className="flex items-center gap-2">
-                <MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} />
+                <MonthSelector
+                  currentMonth={currentMonth}
+                  onChange={setCurrentMonth}
+                />
 
                 <Button
                   variant="ghost"
