@@ -371,7 +371,7 @@ function PlanOverview({
                   <div className="flex items-center gap-3">
                     <CategoryIconBadge
   icon={item.category?.icon}
-  color={item.color}
+  color={item.categoryColor || item.color}
   size="md"
 />
 
