@@ -18,38 +18,37 @@ import {
   useCategories,
 } from '@/hooks/useBudgetData';
 
-import {
-  useCurrency,
-  useCurrencyFormatter,
-} from '@/hooks/useCurrency';
+import { useCurrency } from '@/hooks/useCurrency';
+
+const formatPlanAmount = (value = 0) => {
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: number % 1 === 0 ? 0 : 2,
+    minimumFractionDigits: 0,
+  }).format(number);
+};
 
 export default function Plan() {
-  const [currentMonth, setCurrentMonth] = useState(
-    format(new Date(), 'yyyy-MM')
-  );
-
+  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [isEditMode, setIsEditMode] = useState(false);
   const [editValues, setEditValues] = useState({});
   const [saving, setSaving] = useState(false);
 
   const queryClient = useQueryClient();
-
   const currency = useCurrency();
-  const formatCurrency = useCurrencyFormatter();
 
   const budget = useBudgetSummary(currentMonth);
 
   const { data: categories = [] } = useCategories();
-  const { data: allocations = [] } =
-    useAllocations(currentMonth);
+  const { data: allocations = [] } = useAllocations(currentMonth);
 
   const prevMonth = format(
     subMonths(new Date(currentMonth + '-01'), 1),
     'yyyy-MM'
   );
 
-  const { data: prevAllocations = [] } =
-    useAllocations(prevMonth);
+  const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
   const enterEditMode = useCallback(() => {
     const initial = {};
@@ -84,13 +83,13 @@ export default function Plan() {
       });
 
       const promises = Object.entries(editValues)
-        .filter(([, amount]) => amount > 0)
+        .filter(([, amount]) => Number(amount) > 0)
         .map(([catId, amount]) =>
           budgetPlansApi.upsert({
             id: existing[catId]?.id,
             category_id: catId,
             month: currentMonth,
-            planned_amount: amount,
+            planned_amount: Number(amount),
           })
         );
 
@@ -104,10 +103,7 @@ export default function Plan() {
       toast.success('Plan saved');
     } catch (error) {
       console.error('Plan save failed:', error);
-
-      toast.error(
-        error.message || 'Could not save plan'
-      );
+      toast.error(error.message || 'Could not save plan');
     } finally {
       setSaving(false);
     }
@@ -117,19 +113,17 @@ export default function Plan() {
     const newValues = { ...editValues };
 
     prevAllocations.forEach((a) => {
-      newValues[a.category_id] =
-        a.planned_amount || 0;
+      newValues[a.category_id] = a.planned_amount || 0;
     });
 
     setEditValues(newValues);
-
     toast.success('Copied from last month');
   };
 
   const onEditChange = useCallback((catId, value) => {
     setEditValues((prev) => ({
       ...prev,
-      [catId]: value,
+      [catId]: Number(value || 0),
     }));
   }, []);
 
@@ -137,15 +131,13 @@ export default function Plan() {
     return categories
       .filter((c) => c.type === type)
       .reduce((sum, c) => {
-        const subs = categories.filter(
-          (s) => s.parent_id === c.id
-        );
+        const subs = categories.filter((s) => s.parent_id === c.id);
 
         if (subs.length > 0 && !c.parent_id) {
           return sum;
         }
 
-        return sum + (editValues[c.id] || 0);
+        return sum + Number(editValues[c.id] || 0);
       }, 0);
   };
 
@@ -153,89 +145,57 @@ export default function Plan() {
     ? sumEditType('income')
     : budget.totalPlannedIncome;
 
-  const editTotalExpenses = isEditMode
-    ? sumEditType('expense')
-    : 0;
-
-  const editTotalSavings = isEditMode
-    ? sumEditType('savings')
-    : 0;
-
-  const editTotalDebt = isEditMode
-    ? sumEditType('debt')
-    : 0;
+  const editTotalExpenses = isEditMode ? sumEditType('expense') : 0;
+  const editTotalSavings = isEditMode ? sumEditType('savings') : 0;
+  const editTotalDebt = isEditMode ? sumEditType('debt') : 0;
 
   const leftToAllocate = isEditMode
-    ? editTotalIncome -
-      editTotalExpenses -
-      editTotalSavings -
-      editTotalDebt
+    ? editTotalIncome - editTotalExpenses - editTotalSavings - editTotalDebt
     : budget.leftToAllocate;
 
-  const totalIncomeDisplay = isEditMode
-    ? editTotalIncome
-    : budget.totalIncome;
+  const totalIncomeDisplay = isEditMode ? editTotalIncome : budget.totalIncome;
 
   const prevValuesMap = {};
 
   prevAllocations.forEach((a) => {
-    prevValuesMap[a.category_id] =
-      a.planned_amount || 0;
+    prevValuesMap[a.category_id] = a.planned_amount || 0;
   });
 
-  const allSubs = categories.filter(
-    (c) => c.parent_id
-  );
+  const allSubs = categories.filter((c) => c.parent_id);
 
   const incomeCategories = categories.filter(
-    (c) =>
-      c.type === 'income' && !c.parent_id
+    (c) => c.type === 'income' && !c.parent_id
   );
 
   const expenseCategories = categories.filter(
-    (c) =>
-      c.type === 'expense' && !c.parent_id
+    (c) => c.type === 'expense' && !c.parent_id
   );
 
   const savingsCategories = categories.filter(
-    (c) =>
-      c.type === 'savings' && !c.parent_id
+    (c) => c.type === 'savings' && !c.parent_id
   );
 
   const debtCategories = categories.filter(
-    (c) =>
-      c.type === 'debt' && !c.parent_id
+    (c) => c.type === 'debt' && !c.parent_id
   );
 
   const savingsSpent = budget.transactions
     .filter((t) => {
-      const cat = categories.find(
-        (c) => c.id === t.category_id
-      );
-
+      const cat = categories.find((c) => c.id === t.category_id);
       return cat?.type === 'savings';
     })
-    .reduce(
-      (s, t) => s + (t.amount || 0),
-      0
-    );
+    .reduce((s, t) => s + Number(t.amount || 0), 0);
 
   const debtSpent = budget.transactions
     .filter((t) => {
-      const cat = categories.find(
-        (c) => c.id === t.category_id
-      );
-
+      const cat = categories.find((c) => c.id === t.category_id);
       return cat?.type === 'debt';
     })
-    .reduce(
-      (s, t) => s + (t.amount || 0),
-      0
-    );
+    .reduce((s, t) => s + Number(t.amount || 0), 0);
 
   return (
     <div className="max-w-3xl mx-auto px-4 pb-24">
-      <div className="sticky top-0 z-30 pt-6 pb-2 bg-background/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-30 pt-6 pb-3 bg-background/95 backdrop-blur-sm">
         <AnimatePresence mode="wait">
           {isEditMode ? (
             <motion.div
@@ -256,9 +216,12 @@ export default function Plan() {
                 Cancel
               </Button>
 
-              <h1 className="text-base font-semibold">
-                Edit Plan
-              </h1>
+              <div className="text-center">
+                <h1 className="text-base font-semibold">Edit Plan</h1>
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(currentMonth + '-01'), 'MMMM yyyy')} · {currency?.code || 'SAR'}
+                </p>
+              </div>
 
               <Button
                 size="sm"
@@ -267,10 +230,7 @@ export default function Plan() {
                 className="gap-1.5"
               >
                 <Save className="w-4 h-4" />
-
-                {saving
-                  ? 'Saving…'
-                  : 'Save'}
+                {saving ? 'Saving…' : 'Save'}
               </Button>
             </motion.div>
           ) : (
@@ -280,15 +240,12 @@ export default function Plan() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center justify-between"
+              className="flex items-center justify-between gap-3"
             >
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  Plan
-                </h1>
-
+                <h1 className="text-2xl font-bold tracking-tight">Plan</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Your monthly budget
+                  Monthly budget · {currency?.code || 'SAR'}
                 </p>
               </div>
 
@@ -322,24 +279,15 @@ export default function Plan() {
           totalIncome={totalIncomeDisplay}
           isEditMode={isEditMode}
           currency={currency}
-          formatCurrency={formatCurrency}
+          formatCurrency={formatPlanAmount}
         />
 
         <AnimatePresence>
           {isEditMode && (
             <motion.div
-              initial={{
-                opacity: 0,
-                height: 0,
-              }}
-              animate={{
-                opacity: 1,
-                height: 'auto',
-              }}
-              exit={{
-                opacity: 0,
-                height: 0,
-              }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.15 }}
               className="flex justify-end overflow-hidden"
             >
@@ -362,7 +310,7 @@ export default function Plan() {
           debtSpent={debtSpent}
           isEditMode={isEditMode}
           currency={currency}
-          formatCurrency={formatCurrency}
+          formatCurrency={formatPlanAmount}
         />
 
         {[
@@ -377,17 +325,13 @@ export default function Plan() {
             categories={sectionCategories}
             subcategories={allSubs}
             isEditMode={isEditMode}
-            getCategorySpent={
-              budget.getCategorySpent
-            }
-            getCategoryPlanned={
-              budget.getCategoryPlanned
-            }
+            getCategorySpent={budget.getCategorySpent}
+            getCategoryPlanned={budget.getCategoryPlanned}
             editValues={editValues}
             onEditChange={onEditChange}
             prevValues={prevValuesMap}
             currency={currency}
-            formatCurrency={formatCurrency}
+            formatCurrency={formatPlanAmount}
           />
         ))}
       </motion.div>
@@ -395,18 +339,9 @@ export default function Plan() {
       <AnimatePresence>
         {isEditMode && (
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 16,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            exit={{
-              opacity: 0,
-              y: 16,
-            }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.18 }}
             className="fixed bottom-6 left-0 right-0 px-4 z-40 max-w-3xl mx-auto"
           >
@@ -416,10 +351,7 @@ export default function Plan() {
               className="w-full h-12 text-sm font-semibold gap-2 shadow-lg"
             >
               <Save className="w-4 h-4" />
-
-              {saving
-                ? 'Saving…'
-                : 'Save Plan'}
+              {saving ? 'Saving…' : 'Save Plan'}
             </Button>
           </motion.div>
         )}

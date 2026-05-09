@@ -20,36 +20,53 @@ import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
 
 const COLORS = [
-  '#0078D4',
-  '#107C10',
-  '#C50F1F',
-  '#8764B8',
-  '#CA5010',
-  '#008272',
-  '#4F6BED',
-  '#69797E',
-  '#D83B01',
-  '#E3008C',
-  '#00B294',
-  '#FFB900',
-  '#744DA9',
-  '#038387',
-  '#0099BC',
-  '#E83E8C',
-  '#00B7C3',
-  '#5C2D91',
-  '#498205',
-  '#A80000',
-  '#2D7D9A',
-  '#6B7280',
-  '#111827',
-  '#16A34A',
-  '#EA580C',
-  '#9333EA',
-  '#DB2777',
-  '#0891B2',
-  '#65A30D',
-  '#F59E0B',
+  // Blues / Teals
+  '#276FE4',
+  '#16AAFE',
+  '#5FCEF3',
+  '#18D1C8',
+  '#1B8989',
+  '#2898BB',
+
+  // Soft neutrals
+  '#8CBC95',
+  '#9CB3C7',
+  '#6F979F',
+  '#54887C',
+
+  // Greens
+  '#72AA00',
+  '#38C17D',
+  '#3BA40E',
+
+  // Browns / Earth
+  '#634E4A',
+  '#A85539',
+  '#A58F85',
+
+  // Yellow / Orange
+  '#EEB82D',
+  '#FFB800',
+  '#FF8B00',
+  '#FF6D10',
+  '#F84C00',
+
+  // Reds
+  '#FB2C2C',
+  '#E40335',
+  '#B1003B',
+
+  // Pinks
+  '#E98ABE',
+  '#F39AB5',
+  '#FA5C8C',
+  '#E33BA3',
+
+  // Purples
+  '#B393EA',
+  '#8C7EF0',
+  '#6970ED',
+  '#8845F5',
 ];
 
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
