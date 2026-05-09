@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
+import { getCategoryIcon } from '@/components/categories/CategoryIcons';
 
 import {
   useBudgetSummary,
@@ -138,9 +139,10 @@ function Money({ amount, currency, compact = false, className = '' }) {
 }
 
 function CategoryIcon({ category, color }) {
-  const icon = category?.icon;
+  const iconKey = category?.icon || 'tag';
+  const Icon = getCategoryIcon(iconKey);
 
-  if (!icon) {
+  if (!Icon) {
     return (
       <span className="text-xs font-bold" style={{ color }}>
         {category?.name?.charAt(0) || '•'}
@@ -148,11 +150,15 @@ function CategoryIcon({ category, color }) {
     );
   }
 
-  return (
-    <span className="text-base leading-none" style={{ color }}>
-      {icon}
-    </span>
-  );
+  if (typeof Icon === 'string') {
+    return (
+      <span className="text-base leading-none" style={{ color }}>
+        {Icon}
+      </span>
+    );
+  }
+
+  return <Icon className="h-4 w-4" style={{ color }} />;
 }
 
 function DonutTooltip({ active, payload, currency, tab }) {
