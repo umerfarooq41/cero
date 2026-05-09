@@ -202,14 +202,15 @@ function PlanOverview({
           : Number(budget.getCategorySpent(category.id) || 0);
 
       return {
-        id: category.id,
-        name: category.name,
-        category,
-        planned,
-        tracked,
-        remaining: planned - tracked,
-        color: category.color || tab.shades[index % tab.shades.length],
-      };
+  id: category.id,
+  name: category.name,
+  category,
+  planned,
+  tracked,
+  remaining: planned - tracked,
+  color: tab.shades[index % tab.shades.length],
+  categoryColor: category.color,
+};
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
 
