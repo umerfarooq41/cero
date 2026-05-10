@@ -5,10 +5,10 @@ import CategoryIcon from '@/components/shared/CategoryIcon';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TYPE_ACCENT = {
-  income: 'text-[hsl(var(--success))]',
-  expense: 'text-primary',
-  savings: 'text-chart-4',
-  debt: 'text-destructive',
+  income: 'text-green-700',
+  expense: 'text-red-700',
+  savings: 'text-blue-700',
+  debt: 'text-purple-700',
 };
 
 function CategoryRow({ cat, subs, onAction, onAddSub }) {
