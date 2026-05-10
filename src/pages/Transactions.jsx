@@ -4,9 +4,6 @@ import { format } from 'date-fns';
 import { Plus, Search, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useQueryClient } from '@tanstack/react-query';
-import { transactionsApi } from '@/lib/budgetData';
-import { toast } from 'sonner';
 import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
@@ -17,7 +14,6 @@ const ADD_TRANSACTION_ROUTE = '/add-transaction';
 
 export default function Transactions() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [search, setSearch] = useState('');
@@ -31,12 +27,17 @@ export default function Transactions() {
 
   const filtered = transactions.filter((t) => {
     const cat = categories.find((c) => c.id === t.category_id);
+    const fromAccount = accounts.find((a) => a.id === t.account_id);
+    const toAccount = accounts.find((a) => a.id === t.to_account_id);
+
+    const searchValue = search.toLowerCase();
 
     const matchSearch =
       !search ||
-      cat?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      t.note?.toLowerCase().includes(search.toLowerCase()) ||
-      accounts.find((a) => a.id === t.account_id)?.name?.toLowerCase().includes(search.toLowerCase());
+      cat?.name?.toLowerCase().includes(searchValue) ||
+      t.note?.toLowerCase().includes(searchValue) ||
+      fromAccount?.name?.toLowerCase().includes(searchValue) ||
+      toAccount?.name?.toLowerCase().includes(searchValue);
 
     const matchType = filterType === 'all' || t.type === filterType;
 
@@ -45,24 +46,16 @@ export default function Transactions() {
 
   const grouped = filtered.reduce((groups, t) => {
     const txDate = t.date || 'No Date';
+
     if (!groups[txDate]) groups[txDate] = [];
+
     groups[txDate].push(t);
+
     return groups;
   }, {});
 
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
   const hasTransactions = sortedDates.length > 0;
-
-  const handleDelete = async (id) => {
-    try {
-      await transactionsApi.delete(id);
-      queryClient.invalidateQueries();
-      toast.success('Transaction deleted');
-    } catch (error) {
-      console.error('Transaction delete failed:', error);
-      toast.error(error.message || 'Could not delete transaction');
-    }
-  };
 
   const filterButtons = [
     { value: 'all', label: 'All' },
@@ -76,6 +69,7 @@ export default function Transactions() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
+
           <p className="text-sm text-muted-foreground mt-0.5">
             {filtered.length} transactions
           </p>
@@ -87,6 +81,7 @@ export default function Transactions() {
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+
           <Input
             placeholder="Search transactions..."
             value={search}
@@ -130,7 +125,9 @@ export default function Transactions() {
             >
               <div className="px-4 py-2.5 border-b border-border bg-accent/30">
                 <span className="text-xs font-semibold text-muted-foreground">
-                  {date !== 'No Date' ? format(new Date(date), 'EEEE, MMM d') : 'No Date'}
+                  {date !== 'No Date'
+                    ? format(new Date(date), 'EEEE, MMM d')
+                    : 'No Date'}
                 </span>
               </div>
 
@@ -143,7 +140,6 @@ export default function Transactions() {
                     account={accounts.find((a) => a.id === t.account_id)}
                     toAccount={accounts.find((a) => a.id === t.to_account_id)}
                     formatCurrency={formatCurrency}
-                    onDelete={() => handleDelete(t.id)}
                     onClick={() => navigate(`/transactions/${t.id}/edit`)}
                   />
                 ))}
