@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  ArrowLeftRight,
-  Trash2,
-} from 'lucide-react';
+import { ArrowLeftRight } from 'lucide-react';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
 
@@ -18,9 +15,9 @@ function CurrencyAmount({ value, formatCurrency }) {
   return (
     <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap">
       <img
-      src="/sar.svg"
-      alt="SAR"
-      className="w-3.5 h-3.5 inline-block dark:invert"
+        src="/sar.svg"
+        alt="SAR"
+        className="w-3.5 h-3.5 inline-block dark:invert"
       />
       <span>
         {Number(Math.abs(value || 0)).toLocaleString('en-US', {
@@ -59,7 +56,6 @@ export default function TransactionRow({
   account,
   toAccount,
   formatCurrency,
-  onDelete,
   onClick,
 }) {
   const typeConfig = {
@@ -98,7 +94,7 @@ export default function TransactionRow({
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer group"
+      className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer"
     >
       {isTransfer ? (
         <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
@@ -143,17 +139,6 @@ export default function TransactionRow({
           />
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete?.();
-        }}
-        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 rounded-md transition-all"
-      >
-        <Trash2 className="w-3.5 h-3.5 text-destructive" />
-      </button>
     </div>
   );
 }
