@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowDownLeft,
+  ArrowUpRight,
+  ArrowLeftRight,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
@@ -48,11 +65,13 @@ function CurrencyPrefix({ currency }) {
       : currency?.code || currency?.currency || 'SAR';
 
   if (currencyCode === 'SAR') {
-    return <img
-            src="/sar.svg"
-            alt="SAR"
-            className="w-8 h-8 opacity-70 dark:invert"
-            />;
+    return (
+      <img
+        src="/sar.svg"
+        alt="SAR"
+        className="w-8 h-8 opacity-70 dark:invert"
+      />
+    );
   }
 
   return <span>{currencyCode}</span>;
@@ -228,6 +247,12 @@ export default function AddTransaction() {
       ? 'No category needed'
       : 'Select category';
 
+  const refreshData = () => {
+    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['accounts'] });
+  };
+
   const handleSubmit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       toast.error('Enter a valid amount');
@@ -313,15 +338,52 @@ export default function AddTransaction() {
 
       await Promise.all(balanceUpdates);
 
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      refreshData();
 
       toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
       navigate('/transactions');
     } catch (error) {
       console.error('Transaction save failed:', error);
       toast.error(error.message || 'Could not save transaction');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isEditing || !id) return;
+
+    if (!existingTransaction) {
+      toast.error('Transaction not found');
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const oldDeltas = getTransactionDeltas(existingTransaction, accounts);
+
+      const balanceUpdates = Object.keys(oldDeltas).map((changedAccountId) => {
+        const account = accounts.find((a) => a.id === changedAccountId);
+
+        if (!account) return Promise.resolve();
+
+        return accountsApi.update(changedAccountId, {
+          balance: (Number(account.balance) || 0) - oldDeltas[changedAccountId],
+        });
+      });
+
+      await Promise.all(balanceUpdates);
+
+      await transactionsApi.delete(id);
+
+      refreshData();
+
+      toast.success('Transaction deleted');
+      navigate('/transactions');
+    } catch (error) {
+      console.error('Transaction delete failed:', error);
+      toast.error(error.message || 'Could not delete transaction');
     } finally {
       setSaving(false);
     }
@@ -531,6 +593,45 @@ export default function AddTransaction() {
       >
         {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
       </Button>
+
+      {isEditing && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={saving}
+              className="w-full h-12 mt-3 text-sm font-semibold border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Transaction
+            </Button>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. The transaction will be permanently deleted and the account balance will be adjusted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={saving}>
+                Cancel
+              </AlertDialogCancel>
+
+              <AlertDialogAction
+                disabled={saving}
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
