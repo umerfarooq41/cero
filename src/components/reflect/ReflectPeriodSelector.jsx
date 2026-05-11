@@ -40,8 +40,9 @@ export default function ReflectPeriodSelector({
   );
 
   const moveYear = (direction) => {
-    onYearChange(String(Number(year) + direction));
-  };
+  const nextYear = String(Number(year || currentYear) + direction);
+  onYearChange(nextYear);
+};
 
   const selectedMonthLabel =
     MONTHS.find((item) => item.value === month)?.label || 'Month';
@@ -58,7 +59,7 @@ export default function ReflectPeriodSelector({
         </h2>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-[40px_1fr_1fr_40px] items-center gap-2">
         <Button
           type="button"
           variant="secondary"
