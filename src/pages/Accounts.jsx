@@ -69,9 +69,7 @@ export default function Accounts() {
         <div
           className={cn(
             'flex items-center justify-between gap-3 border-b px-5 py-4',
-            isLiability
-              ? 'border-red-200/60 bg-red-500/5 dark:border-red-950/60'
-              : 'border-emerald-200/60 bg-emerald-500/5 dark:border-emerald-950/60'
+            'border-border bg-background/40'
           )}
         >
           <div>
@@ -155,63 +153,72 @@ export default function Accounts() {
         subtitle="Assets, savings, and debt overview"
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
-        <section className="mb-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Net Worth
-                </div>
+      <section className="mb-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+  <div className="p-6">
+    <div className="mb-5 flex items-start justify-between gap-3">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Net Worth
+        </div>
 
-                <div
-                  className={cn(
-                    'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums',
-                    netWorth >= 0 ? 'text-foreground' : 'text-red-600 dark:text-red-400'
-                  )}
-                >
-                  {netWorth < 0 && <span>-</span>}
-                  <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
-                </div>
-              </div>
+        <div
+          className={cn(
+            'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums',
+            netWorth >= 0
+              ? 'text-foreground'
+              : 'text-red-600 dark:text-red-400'
+          )}
+        >
+          {netWorth < 0 && <span>-</span>}
 
-              <div
-                className={cn(
-                  'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl',
-                  netWorth >= 0
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-red-500/10 text-red-600 dark:text-red-400'
-                )}
-              >
-                <Scale className="h-6 w-6" />
-              </div>
-            </div>
+          <InlineMoney>
+            {formatCurrency(Math.abs(netWorth))}
+          </InlineMoney>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-emerald-200/60 bg-emerald-500/10 p-4 dark:border-emerald-950/60">
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                  <ArrowUpRight className="h-4 w-4" />
-                  Assets
-                </div>
+      <div
+        className={cn(
+          'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
+          netWorth >= 0
+            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+            : 'bg-red-500/10 text-red-600 dark:text-red-400'
+        )}
+      >
+        <Scale className="h-5 w-5" />
+      </div>
+    </div>
 
-                <div className="text-base font-bold tabular-nums text-foreground">
-                  <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
-                </div>
-              </div>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="rounded-2xl border border-border bg-background/60 p-4">
+        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <ArrowUpRight className="h-4 w-4" />
+          Assets
+        </div>
 
-              <div className="rounded-2xl border border-red-200/60 bg-red-500/10 p-4 dark:border-red-950/60">
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-red-700 dark:text-red-400">
-                  <ArrowDownRight className="h-4 w-4" />
-                  Liabilities
-                </div>
+        <div className="text-base font-bold tabular-nums text-foreground">
+          <InlineMoney>
+            {formatCurrency(totalAssets)}
+          </InlineMoney>
+        </div>
+      </div>
 
-                <div className="text-base font-bold tabular-nums text-red-600 dark:text-red-400">
-                  <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      <div className="rounded-2xl border border-border bg-background/60 p-4">
+        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-red-600 dark:text-red-400">
+          <ArrowDownRight className="h-4 w-4" />
+          Liabilities
+        </div>
+
+        <div className="text-base font-bold tabular-nums text-foreground">
+          -
+          <InlineMoney>
+            {formatCurrency(totalLiabilities)}
+          </InlineMoney>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         <div className="space-y-4">
           {renderGroup('Assets', assets, false)}
