@@ -5,8 +5,16 @@ import {
   PencilLine,
   Trash2,
   AlertTriangle,
+  Wallet,
+  Landmark,
+  PiggyBank,
+  CreditCard,
+  Banknote,
+  TrendingUp,
+  Building,
 } from 'lucide-react';
 
+import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 
 import {
@@ -40,6 +48,16 @@ import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+const typeIcons = {
+  checking: Landmark,
+  savings: PiggyBank,
+  credit_card: CreditCard,
+  cash: Banknote,
+  investment: TrendingUp,
+  loan: Building,
+  other: Wallet,
+};
+
 function InlineMoney({ children }) {
   return (
     <span className="inline-flex items-center align-middle whitespace-nowrap">
@@ -71,42 +89,27 @@ export default function AccountDetail() {
 
   const transactions = accountTransactions.slice(0, 50);
 
-  const replacementAccounts = accounts.filter(
-    (a) => a.id !== accountId
-  );
+  const replacementAccounts = accounts.filter((a) => a.id !== accountId);
 
   const handleDeleteTransaction = async (id) => {
     try {
       await transactionsApi.delete(id);
 
-      queryClient.invalidateQueries({
-        queryKey: ['all-transactions'],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ['transactions'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
 
       toast.success('Transaction deleted');
     } catch (error) {
       console.error('Transaction delete failed:', error);
-
-      toast.error(
-        error.message || 'Could not delete transaction'
-      );
+      toast.error(error.message || 'Could not delete transaction');
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!account) return;
 
-    if (
-      accountTransactions.length > 0 &&
-      !replacementAccountId
-    ) {
-      toast.error(
-        'Select another account for existing transactions'
-      );
+    if (accountTransactions.length > 0 && !replacementAccountId) {
+      toast.error('Select another account for existing transactions');
       return;
     }
 
@@ -126,37 +129,22 @@ export default function AccountDetail() {
               payload.to_account_id = replacementAccountId;
             }
 
-            return transactionsApi.update(
-              transaction.id,
-              payload
-            );
+            return transactionsApi.update(transaction.id, payload);
           })
         );
       }
 
       await accountsApi.delete(accountId);
 
-      queryClient.invalidateQueries({
-        queryKey: ['accounts'],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ['transactions'],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ['all-transactions'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
 
       toast.success('Account deleted');
-
       navigate('/accounts');
     } catch (error) {
       console.error('Account delete failed:', error);
-
-      toast.error(
-        error.message || 'Could not delete account'
-      );
+      toast.error(error.message || 'Could not delete account');
     } finally {
       setDeleting(false);
       setDeleteOpen(false);
@@ -165,205 +153,245 @@ export default function AccountDetail() {
 
   if (!account) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-10 text-center">
-        <p className="text-muted-foreground">
-          Account not found
-        </p>
+      <div className="min-h-screen bg-background">
+        <PageHeader
+          title="Account"
+          subtitle="Account details and activity"
+        />
 
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts')}
-          className="mt-4"
-        >
-          Back to Accounts
-        </Button>
+        <main className="mx-auto w-full max-w-lg px-4 py-10 text-center">
+          <p className="text-muted-foreground">Account not found</p>
+
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/accounts')}
+            className="mt-4"
+          >
+            Back to Accounts
+          </Button>
+        </main>
       </div>
     );
   }
 
+  const Icon = typeIcons[account.type] || Wallet;
+  const isLiability = account.category === 'liability';
+  const color = account.color || (isLiability ? '#DC2626' : '#059669');
+  const balance = Math.abs(Number(account.balance) || 0);
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 lg:py-10">
-      <div className="flex items-center gap-3 mb-8">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/accounts')}
-          className="shrink-0"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title={account.name}
+        subtitle={`${account.type?.replace('_', ' ') || 'Account'} details and activity`}
+      />
 
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold tracking-tight truncate">
-            {account.name}
-          </h1>
+      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/accounts')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Accounts
+          </Button>
 
-          <p className="text-xs text-muted-foreground capitalize">
-            {account.type?.replace('_', ' ') || 'Account'}
-          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/accounts/${accountId}/edit`)}
+            >
+              <PencilLine className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteOpen(true)}
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            navigate(`/accounts/${accountId}/edit`)
-          }
-        >
-          <PencilLine className="w-4 h-4" />
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setDeleteOpen(true)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
-
-      <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center">
-        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-          Balance
-        </div>
-
-        <div
-          className={cn(
-            'text-4xl font-bold tracking-tight tabular-nums flex items-center justify-center gap-1',
-            account.category === 'liability'
-              ? 'text-destructive'
-              : 'text-foreground'
-          )}
-        >
-          {account.category === 'liability' && (
-            <span>-</span>
-          )}
-
-          <InlineMoney>
-            {formatCurrency(
-              Math.abs(Number(account.balance) || 0)
+        <section className="mb-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+          <div
+            className={cn(
+              'p-6',
+              isLiability
+                ? 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent'
+                : 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent'
             )}
-          </InlineMoney>
-        </div>
-      </div>
+          >
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Balance
+                </div>
 
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-        Recent Transactions
-      </h2>
+                <div
+                  className={cn(
+                    'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums',
+                    isLiability
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-foreground'
+                  )}
+                >
+                  {isLiability && <span>-</span>}
+                  <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                </div>
+              </div>
 
-      {transactions.length === 0 ? (
-        <EmptyState
-          title="No transactions"
-          description="No transactions for this account yet."
-        />
-      ) : (
-        <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border/50">
-          {transactions.map((transaction) => (
-            <TransactionRow
-              key={transaction.id}
-              transaction={transaction}
-              category={categories.find(
-                (c) => c.id === transaction.category_id
-              )}
-              account={accounts.find(
-                (a) => a.id === transaction.account_id
-              )}
-              toAccount={accounts.find(
-                (a) => a.id === transaction.to_account_id
-              )}
-              formatCurrency={formatCurrency}
-              onDelete={() =>
-                handleDeleteTransaction(transaction.id)
-              }
-              onClick={() =>
-                navigate(
-                  `/transactions/${transaction.id}/edit`
-                )
-              }
-            />
-          ))}
-        </div>
-      )}
-
-      <Dialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-              Delete Account
-            </DialogTitle>
-
-            <p className="text-sm text-muted-foreground">
-              {accountTransactions.length > 0
-                ? 'This account has transactions. Choose another account to move them before deleting.'
-                : 'This account has no transactions and can be deleted safely.'}
-            </p>
-          </DialogHeader>
-
-          {accountTransactions.length > 0 && (
-            <div className="space-y-2 py-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Move transactions to
-              </label>
-
-              <Select
-                value={replacementAccountId}
-                onValueChange={setReplacementAccountId}
+              <div
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: `${color}18` }}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select another account" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {replacementAccounts.map((item) => (
-                    <SelectItem
-                      key={item.id}
-                      value={item.id}
-                    >
-                      {item.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <p className="text-[11px] text-muted-foreground">
-                {accountTransactions.length} transaction
-                {accountTransactions.length > 1
-                  ? 's'
-                  : ''}{' '}
-                will be reassigned.
-              </p>
+                <Icon className="h-7 w-7" style={{ color }} />
+              </div>
             </div>
-          )}
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteOpen(false)}
-            >
-              Cancel
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                <div className="text-xs text-muted-foreground">
+                  Type
+                </div>
+                <div className="mt-1 text-sm font-semibold capitalize">
+                  {account.type?.replace('_', ' ') || 'Account'}
+                </div>
+              </div>
 
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={
-                deleting ||
-                (accountTransactions.length > 0 &&
-                  !replacementAccountId)
-              }
-            >
-              {deleting
-                ? 'Deleting...'
-                : 'Delete Account'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                <div className="text-xs text-muted-foreground">
+                  Category
+                </div>
+                <div
+                  className={cn(
+                    'mt-1 text-sm font-semibold capitalize',
+                    isLiability
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
+                  )}
+                >
+                  {account.category || 'asset'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Recent Transactions
+          </h2>
+
+          <span className="text-xs text-muted-foreground">
+            {transactions.length} shown
+          </span>
+        </div>
+
+        {transactions.length === 0 ? (
+          <EmptyState
+            title="No transactions"
+            description="No transactions for this account yet."
+          />
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="divide-y divide-border/50">
+              {transactions.map((transaction) => (
+                <TransactionRow
+                  key={transaction.id}
+                  transaction={transaction}
+                  category={categories.find(
+                    (c) => c.id === transaction.category_id
+                  )}
+                  account={accounts.find(
+                    (a) => a.id === transaction.account_id
+                  )}
+                  toAccount={accounts.find(
+                    (a) => a.id === transaction.to_account_id
+                  )}
+                  formatCurrency={formatCurrency}
+                  onDelete={() => handleDeleteTransaction(transaction.id)}
+                  onClick={() =>
+                    navigate(`/transactions/${transaction.id}/edit`)
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Delete Account
+              </DialogTitle>
+
+              <p className="text-sm text-muted-foreground">
+                {accountTransactions.length > 0
+                  ? 'This account has transactions. Choose another account to move them before deleting.'
+                  : 'This account has no transactions and can be deleted safely.'}
+              </p>
+            </DialogHeader>
+
+            {accountTransactions.length > 0 && (
+              <div className="space-y-2 py-2">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Move transactions to
+                </label>
+
+                <Select
+                  value={replacementAccountId}
+                  onValueChange={setReplacementAccountId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select another account" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {replacementAccounts.map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <p className="text-[11px] text-muted-foreground">
+                  {accountTransactions.length} transaction
+                  {accountTransactions.length > 1 ? 's' : ''} will be reassigned.
+                </p>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteOpen(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={
+                  deleting ||
+                  (accountTransactions.length > 0 && !replacementAccountId)
+                }
+              >
+                {deleting ? 'Deleting...' : 'Delete Account'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </main>
     </div>
   );
 }
