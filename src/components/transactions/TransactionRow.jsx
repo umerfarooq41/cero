@@ -84,8 +84,11 @@ export default function TransactionRow({
     ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
     : category?.name || 'Uncategorized';
 
+  const transferCategoryName =
+  category?.name || transferTypeLabel || 'Transfer';
+
   const primarySubtitle = isTransfer
-    ? `Transfer - ${transferTypeLabel}`
+    ? `Transfer - ${transferCategoryName}`
     : `${transactionTypeLabel} - ${accountName}`;
 
   const secondarySubtitle = !isTransfer ? transaction.note : null;

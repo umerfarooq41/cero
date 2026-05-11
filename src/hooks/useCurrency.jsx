@@ -9,7 +9,7 @@ export function useCurrency() {
     queryKey: ['currency-symbol', session?.user?.id],
     queryFn: async () => {
       const settings = await getUserSettings();
-      return settings?.currency || 'SAR'; // ✅ default SAR
+      return settings?.currency || 'SAR';
     },
     enabled: Boolean(session?.user?.id),
     staleTime: 0,
@@ -20,6 +20,7 @@ export function useCurrency() {
 
 export function useCurrencyFormatter() {
   const symbol = useCurrency();
+
   return (amount) => formatCurrency(amount, symbol);
 }
 
@@ -31,16 +32,33 @@ export function formatCurrency(amount, symbol = 'SAR') {
 
   if (symbol === 'SAR') {
     return (
-      <span className="inline-flex items-center gap-1">
-        <img
-        src="/sar.svg"
-        alt="SAR"
-        className="w-4 h-4 shrink-0 dark:invert"
+      <span className="inline-flex items-center gap-1 align-middle text-inherit">
+        <span
+          className="
+            inline-block
+            h-[1em]
+            w-[1em]
+            shrink-0
+            bg-current
+            align-middle
+          "
+          style={{
+            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+            mask: 'url(/sar.svg) center / contain no-repeat',
+          }}
         />
-        <span>{value}</span>
+
+        <span className="leading-none">
+          {value}
+        </span>
       </span>
     );
   }
 
-  return `${symbol}${value}`;
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      <span>{symbol}</span>
+      <span>{value}</span>
+    </span>
+  );
 }

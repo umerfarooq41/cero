@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { Plus, Search, ArrowLeftRight, X } from 'lucide-react';
+import { format, addMonths, subMonths } from 'date-fns';
+import {
+  Plus,
+  Search,
+  ArrowLeftRight,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+} from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 
@@ -39,14 +46,8 @@ export default function Transactions() {
 
   const filtered = transactions.filter((t) => {
     const cat = categories.find((c) => c.id === t.category_id);
-
-    const fromAccount = accounts.find(
-      (a) => a.id === t.account_id
-    );
-
-    const toAccount = accounts.find(
-      (a) => a.id === t.to_account_id
-    );
+    const fromAccount = accounts.find((a) => a.id === t.account_id);
+    const toAccount = accounts.find((a) => a.id === t.to_account_id);
 
     const searchValue = search.toLowerCase();
 
@@ -57,11 +58,8 @@ export default function Transactions() {
       fromAccount?.name?.toLowerCase().includes(searchValue) ||
       toAccount?.name?.toLowerCase().includes(searchValue);
 
-    const matchType =
-      filterType === 'all' || t.type === filterType;
-
-    const matchDate =
-      !selectedDate || t.date === selectedDate;
+    const matchType = filterType === 'all' || t.type === filterType;
+    const matchDate = !selectedDate || t.date === selectedDate;
 
     return matchSearch && matchType && matchDate;
   });
@@ -89,6 +87,30 @@ export default function Transactions() {
     { value: 'transfer', label: 'Transfer' },
   ];
 
+  const goToPreviousMonth = () => {
+    setCurrentMonth((prev) =>
+      format(subMonths(new Date(`${prev}-01`), 1), 'yyyy-MM')
+    );
+    setSelectedDate('');
+  };
+
+  const goToNextMonth = () => {
+    setCurrentMonth((prev) =>
+      format(addMonths(new Date(`${prev}-01`), 1), 'yyyy-MM')
+    );
+    setSelectedDate('');
+  };
+
+  const openDatePicker = () => {
+    const picker = document.getElementById('transaction-date-picker');
+
+    if (picker?.showPicker) {
+      picker.showPicker();
+    } else {
+      picker?.click();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <PageHeader
@@ -98,29 +120,78 @@ export default function Transactions() {
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
         {/* Month + Date */}
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <MonthSelector
-            currentMonth={currentMonth}
-            onChange={(month) => {
-              setCurrentMonth(month);
-              setSelectedDate('');
-            }}
-          />
+        <div className="mb-4 flex justify-center">
+          <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 rounded-xl"
+              onClick={goToPreviousMonth}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
 
-          <div className="flex gap-2">
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="h-10"
-            />
+            <button
+              type="button"
+              onClick={openDatePicker}
+              className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 text-center transition-colors hover:bg-secondary/70"
+            >
+              <span className="text-sm font-semibold text-foreground">
+                {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
+              </span>
 
-            {selectedDate && (
+              {selectedDate && (
+                <span className="mt-0.5 text-xs text-muted-foreground">
+                  {format(new Date(selectedDate), 'MMM d, yyyy')}
+                </span>
+              )}
+            </button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 rounded-xl"
+              onClick={goToNextMonth}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <div className="relative">
               <Button
                 type="button"
                 variant="secondary"
                 size="icon"
-                className="h-10 w-10 shrink-0"
+                className="h-9 w-9 shrink-0 rounded-xl"
+                onClick={openDatePicker}
+              >
+                <CalendarDays className="h-4 w-4" />
+              </Button>
+
+              <Input
+                id="transaction-date-picker"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  const date = e.target.value;
+
+                  setSelectedDate(date);
+
+                  if (date) {
+                    setCurrentMonth(format(new Date(date), 'yyyy-MM'));
+                  }
+                }}
+                className="absolute inset-0 h-9 w-9 cursor-pointer opacity-0"
+              />
+            </div>
+
+            {selectedDate && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
                 onClick={() => setSelectedDate('')}
               >
                 <X className="h-4 w-4" />
@@ -185,9 +256,7 @@ export default function Transactions() {
             title="No transactions yet"
             description="Add your first transaction to start tracking your spending."
             actionLabel="Add Transaction"
-            onAction={() =>
-              navigate(ADD_TRANSACTION_ROUTE)
-            }
+            onAction={() => navigate(ADD_TRANSACTION_ROUTE)}
           />
         ) : (
           <div className="space-y-4">
@@ -199,10 +268,7 @@ export default function Transactions() {
                 <div className="border-b border-border bg-accent/30 px-4 py-2.5">
                   <span className="text-xs font-semibold text-muted-foreground">
                     {date !== 'No Date'
-                      ? format(
-                          new Date(date),
-                          'EEEE, MMM d'
-                        )
+                      ? format(new Date(date), 'EEEE, MMM d')
                       : 'No Date'}
                   </span>
                 </div>
@@ -223,9 +289,7 @@ export default function Transactions() {
                       )}
                       formatCurrency={formatCurrency}
                       onClick={() =>
-                        navigate(
-                          `/transactions/${t.id}/edit`
-                        )
+                        navigate(`/transactions/${t.id}/edit`)
                       }
                     />
                   ))}
