@@ -11,6 +11,7 @@ export default function ReflectInsightCard({
     tone === 'good'
       ? 'text-emerald-600 dark:text-emerald-400'
       : tone === 'bad'
+      
         ? 'text-destructive'
         : tone === 'warning'
           ? 'text-amber-500'
