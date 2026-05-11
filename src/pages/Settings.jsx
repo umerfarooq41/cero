@@ -15,6 +15,9 @@ import { getUserSettings, saveUserSettings } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
+import { Link } from 'react-router-dom';
+import { FolderOpen, ChevronRight } from 'lucide-react';
+
 
 const SettingRow = ({ icon: Icon, label, description, children }) => (
   <div className="flex items-center gap-4 py-4 px-1">
@@ -170,6 +173,37 @@ export default function Settings() {
               </Button>
             </SettingRow>
           )}
+        </div>
+      </div>
+
+      {/* App Management */}
+      <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
+        <div className="px-5 py-3 border-b border-border">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            App Management
+          </h3>
+        </div>
+
+        <div className="px-4">
+          <Link
+            to="/categories"
+            className="flex items-center justify-between py-4 px-1 hover:bg-accent/50 transition-colors rounded-lg"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                <FolderOpen className="w-4 h-4 text-muted-foreground" />
+              </div>
+
+              <div>
+                <div className="text-sm font-medium">Categories</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  Manage income, expense, savings, and debt categories
+                </div>
+              </div>
+            </div>
+
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
         </div>
       </div>
 
