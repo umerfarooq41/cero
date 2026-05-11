@@ -158,33 +158,26 @@ export default function Transactions() {
               <ChevronRight className="h-4 w-4" />
             </Button>
 
-            <div className="relative">
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="h-9 w-9 shrink-0 rounded-xl"
-                onClick={openDatePicker}
-              >
-                <CalendarDays className="h-4 w-4" />
-              </Button>
+            <label className="relative h-9 w-9 shrink-0 cursor-pointer">
+  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80">
+    <CalendarDays className="h-4 w-4" />
+  </span>
 
-              <Input
-                id="transaction-date-picker"
-                type="date"
-                value={selectedDate}
-                onChange={(e) => {
-                  const date = e.target.value;
+  <Input
+    id="transaction-date-picker"
+    type="date"
+    value={selectedDate}
+    onChange={(e) => {
+      const date = e.target.value;
+      setSelectedDate(date);
 
-                  setSelectedDate(date);
-
-                  if (date) {
-                    setCurrentMonth(format(new Date(date), 'yyyy-MM'));
-                  }
-                }}
-                className="absolute inset-0 h-9 w-9 cursor-pointer opacity-0"
-              />
-            </div>
+      if (date) {
+        setCurrentMonth(format(new Date(date), 'yyyy-MM'));
+      }
+    }}
+    className="absolute inset-0 h-9 w-9 cursor-pointer opacity-0"
+  />
+</label>
 
             {selectedDate && (
               <Button

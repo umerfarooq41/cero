@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { format, subMonths } from 'date-fns';
+import { format, subMonths, addMonths } from 'date-fns';
 import {
   PencilLine,
   Copy,
@@ -9,6 +9,8 @@ import {
   ArrowDownRight,
   PiggyBank,
   CreditCard,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   PieChart,
@@ -648,29 +650,72 @@ export default function Plan() {
               </motion.div>
             ) : (
               <motion.div
-                key="read-header"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.15 }}
-                className="flex items-center gap-2"
-              >
-                <div className="flex-1">
-                  <MonthSelector
-                    currentMonth={currentMonth}
-                    onChange={setCurrentMonth}
-                  />
-                </div>
+  key="read-header"
+  initial={{ opacity: 0, y: -8 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -8 }}
+  transition={{ duration: 0.15 }}
+>
+  <div className="flex items-center justify-center">
+    <div className="flex w-full max-w-md items-center rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 shrink-0 rounded-xl"
+        onClick={() =>
+          setCurrentMonth(
+            format(
+              subMonths(new Date(`${currentMonth}-01`), 1),
+              'yyyy-MM'
+            )
+          )
+        }
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 shrink-0 rounded-xl"
-                  onClick={enterEditMode}
-                >
-                  <PencilLine className="w-4 h-4" />
-                </Button>
-              </motion.div>
+      <button
+        type="button"
+        className="flex flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 hover:bg-secondary/60"
+      >
+        <span className="text-sm font-semibold text-foreground">
+          {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
+        </span>
+
+        <span className="text-[11px] text-muted-foreground">
+          Budget period
+        </span>
+      </button>
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 shrink-0 rounded-xl"
+        onClick={() =>
+          setCurrentMonth(
+            format(
+              addMonths(new Date(`${currentMonth}-01`), 1),
+              'yyyy-MM'
+            )
+          )
+        }
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+
+      <Button
+        variant="secondary"
+        size="icon"
+        className="ml-1 h-9 w-9 shrink-0 rounded-xl"
+        onClick={enterEditMode}
+      >
+        <PencilLine className="w-4 h-4" />
+      </Button>
+    </div>
+  </div>
+</motion.div>
             )}
           </AnimatePresence>
         </div>
