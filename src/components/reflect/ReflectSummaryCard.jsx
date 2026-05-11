@@ -73,7 +73,7 @@ export function CurrencyAmount({
       )}
     >
       {code === 'SAR' ? (
-        <RiyalIcon className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
+        <RiyalIcon className={compact ? 'h-[0.82em] w-[0.82em]' : 'h-[0.9em] w-[0.9em]'} />
       ) : (
         <span>{symbol}</span>
       )}
@@ -105,32 +105,29 @@ export default function ReflectSummaryCard({
 }) {
   const toneClass =
     tone === 'good'
-      ? 'text-emerald-700 dark:text-emerald-300'
+      ? 'text-emerald-500'
       : tone === 'bad'
-        ? 'text-red-700 dark:text-red-300'
+        ? 'text-destructive'
         : tone === 'blue'
-          ? 'text-blue-700 dark:text-blue-300'
+          ? 'text-blue-500'
           : tone === 'purple'
-            ? 'text-violet-700 dark:text-violet-300'
-            : 'text-foreground';
+            ? 'text-violet-500'
+            : 'text-primary';
+
+  const iconBg =
+    tone === 'good'
+      ? 'bg-emerald-500/10'
+      : tone === 'bad'
+        ? 'bg-destructive/10'
+        : tone === 'blue'
+          ? 'bg-blue-500/10'
+          : tone === 'purple'
+            ? 'bg-violet-500/10'
+            : 'bg-primary/10';
 
   return (
-    <ReflectCard
-      className={cn(
-        'relative min-h-[112px] overflow-hidden p-4',
-        tone === 'good' &&
-          'bg-gradient-to-br from-emerald-50 via-card to-card dark:from-emerald-950/30',
-        tone === 'bad' &&
-          'bg-gradient-to-br from-red-50 via-card to-card dark:from-red-950/30',
-        tone === 'blue' &&
-          'bg-gradient-to-br from-blue-50 via-card to-card dark:from-blue-950/30',
-        tone === 'purple' &&
-          'bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30'
-      )}
-    >
-      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/35 dark:bg-white/5" />
-
-      <div className="relative flex h-full items-start justify-between gap-3">
+    <ReflectCard className="min-h-[112px] p-4">
+      <div className="flex h-full items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="mb-2 text-xs leading-none text-muted-foreground">
             {title}
@@ -138,7 +135,7 @@ export default function ReflectSummaryCard({
 
           <div
             className={cn(
-              'flex min-h-[24px] items-center text-xl font-bold leading-none tabular-nums',
+              'min-h-[28px] text-2xl font-bold leading-none tabular-nums',
               toneClass
             )}
           >
@@ -146,13 +143,18 @@ export default function ReflectSummaryCard({
           </div>
 
           {subtitle && (
-            <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-1 text-[11px] leading-snug text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] leading-snug text-muted-foreground">
               {subtitle}
             </div>
           )}
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-background/70 shadow-sm">
+        <div
+          className={cn(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl',
+            iconBg
+          )}
+        >
           <Icon className={cn('h-4 w-4', toneClass)} />
         </div>
       </div>

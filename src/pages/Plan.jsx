@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
@@ -147,14 +148,14 @@ function Money({ amount, currency, compact = false, className = '' }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 align-middle whitespace-nowrap',
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
         className
       )}
     >
       {code === 'SAR' ? (
         <span
           className={cn(
-            'inline-block shrink-0 bg-current',
+            'inline-block shrink-0 bg-current align-middle',
             compact ? 'h-[0.8em] w-[0.8em]' : 'h-[0.9em] w-[0.9em]'
           )}
           style={{

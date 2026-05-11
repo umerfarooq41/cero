@@ -47,6 +47,18 @@ import {
 import { useCurrency } from '@/hooks/useCurrency';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
 
+const CHART_WRAP_CLASS =
+  'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_*]:focus:outline-none';
+
+const tooltipStyle = {
+  backgroundColor: 'hsl(var(--popover))',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '14px',
+  boxShadow: '0 14px 40px rgb(0 0 0 / 0.18)',
+  color: 'hsl(var(--popover-foreground))',
+  fontSize: '12px',
+};
+
 export default function Reflect() {
   const today = new Date();
 
@@ -126,7 +138,7 @@ export default function Reflect() {
       icon: Target,
       title: 'Budget efficiency',
       text: isYear
-        ? 'Year view summarizes actual transactions. Monthly budget efficiency appears when a single month is selected.'
+        ? 'Select a month to review how closely spending follows your plan.'
         : efficiency >= 80
           ? 'Strong control. Your spending is close to your planned budget.'
           : efficiency >= 50
@@ -270,52 +282,52 @@ export default function Reflect() {
               </h3>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                Income, expenses, and monthly net
+                Income and expenses by month
               </p>
             </div>
 
-            <div className="h-64">
+            <div className={`${CHART_WRAP_CLASS} h-64 min-h-[256px]`}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={cashFlow} barGap={4}>
+                <BarChart data={cashFlow} barGap={6} barCategoryGap="28%">
                   <CartesianGrid
+                    vertical={false}
                     strokeDasharray="3 3"
                     stroke="hsl(var(--border))"
+                    opacity={0.55}
                   />
 
                   <XAxis
                     dataKey="month"
-                    tick={{ fontSize: 11 }}
-                    stroke="hsl(var(--muted-foreground))"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                   />
 
                   <YAxis
-                    tick={{ fontSize: 11 }}
-                    stroke="hsl(var(--muted-foreground))"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    width={42}
                   />
 
                   <Tooltip
-                    cursor={{ fill: 'hsl(var(--muted))' }}
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                    }}
+                    cursor={false}
+                    contentStyle={tooltipStyle}
                     formatter={(value) => formatCurrencyText(value, currency)}
                   />
 
                   <Bar
                     dataKey="income"
-                    fill="#107C10"
-                    radius={[6, 6, 0, 0]}
-                    animationDuration={900}
+                    fill="#16A34A"
+                    radius={[8, 8, 0, 0]}
+                    isAnimationActive={false}
                   />
 
                   <Bar
                     dataKey="expenses"
-                    fill="#C50F1F"
-                    radius={[6, 6, 0, 0]}
-                    animationDuration={900}
+                    fill="#EF4444"
+                    radius={[8, 8, 0, 0]}
+                    isAnimationActive={false}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -351,17 +363,17 @@ export default function Reflect() {
                     animate={{
                       strokeDasharray: `${isYear ? 0 : efficiency || 0}, 100`,
                     }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 0.8 }}
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
                     stroke={
                       isYear
                         ? '#69797E'
                         : efficiency >= 70
-                          ? '#107C10'
+                          ? '#16A34A'
                           : efficiency >= 40
-                            ? '#FFB900'
-                            : '#C50F1F'
+                            ? '#F59E0B'
+                            : '#EF4444'
                     }
                     strokeWidth="3"
                     strokeLinecap="round"
@@ -415,7 +427,7 @@ export default function Reflect() {
 
             {spendingBreakdown.length > 0 ? (
               <div className="flex flex-col items-center gap-6 md:flex-row lg:flex-col xl:flex-row">
-                <div className="h-44 w-44 shrink-0">
+                <div className={`${CHART_WRAP_CLASS} h-44 w-44 shrink-0`}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -426,20 +438,24 @@ export default function Reflect() {
                         outerRadius={72}
                         paddingAngle={3}
                         dataKey="value"
-                        animationDuration={900}
+                        isAnimationActive={false}
+                        stroke="hsl(var(--card))"
+                        strokeWidth={2}
                       >
                         {spendingBreakdown.map((entry) => (
-                          <Cell key={entry.name} fill={entry.color} />
+                          <Cell
+                            key={entry.name}
+                            fill={entry.color}
+                            tabIndex={-1}
+                            focusable="false"
+                            style={{ outline: 'none' }}
+                          />
                         ))}
                       </Pie>
 
                       <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                        }}
+                        cursor={false}
+                        contentStyle={tooltipStyle}
                         formatter={(value) => formatCurrencyText(value, currency)}
                       />
                     </PieChart>
@@ -450,7 +466,7 @@ export default function Reflect() {
                   {spendingBreakdown.map((category) => (
                     <div key={category.name} className="flex items-center gap-3">
                       <div
-                        className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: category.color }}
                       />
 
@@ -485,32 +501,33 @@ export default function Reflect() {
             </h3>
 
             {spendingTrend.length > 0 ? (
-              <div className="h-56">
+              <div className={`${CHART_WRAP_CLASS} h-56 min-h-[224px]`}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={spendingTrend}>
                     <CartesianGrid
+                      vertical={false}
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
+                      opacity={0.55}
                     />
 
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11 }}
-                      stroke="hsl(var(--muted-foreground))"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                     />
 
                     <YAxis
-                      tick={{ fontSize: 11 }}
-                      stroke="hsl(var(--muted-foreground))"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      width={38}
                     />
 
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                      }}
+                      cursor={false}
+                      contentStyle={tooltipStyle}
                       formatter={(value) => formatCurrencyText(value, currency)}
                       labelFormatter={(label) =>
                         isYear ? label : `Day ${label}`
@@ -522,9 +539,10 @@ export default function Reflect() {
                       dataKey="amount"
                       stroke="#0078D4"
                       fill="#0078D4"
-                      fillOpacity={0.14}
-                      strokeWidth={2}
-                      animationDuration={900}
+                      fillOpacity={0.12}
+                      strokeWidth={2.5}
+                      isAnimationActive={false}
+                      activeDot={{ r: 4, strokeWidth: 0 }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
