@@ -150,11 +150,11 @@ export default function Transactions() {
       )}
 
       {hasTransactions && (
-        <Link to={ADD_TRANSACTION_ROUTE}>
-          <Button className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0">
-            <Plus className="w-6 h-6" />
-          </Button>
-        </Link>
+      <Link to={ADD_TRANSACTION_ROUTE}>
+        <Button className="fixed bottom-24 right-5 z-50 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0 lg:bottom-6">
+          <Plus className="w-6 h-6" />
+        </Button>
+      </Link>
       )}
     </div>
   );

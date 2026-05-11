@@ -20,41 +20,39 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden pointer-events-none">
-      <div className="px-3 pb-[calc(env(safe-area-inset-bottom)+10px)]">
-        <div className="pointer-events-auto grid grid-cols-5 h-16 rounded-3xl border border-border bg-background/95 shadow-lg backdrop-blur-xl">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+      <div className="grid grid-cols-5 h-16 pb-[env(safe-area-inset-bottom)]">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
 
-            return (
+          return (
             <Link
-            key={item.path}
-            to={item.path}
-            className="flex items-center justify-center"
+              key={item.path}
+              to={item.path}
+              className="flex items-center justify-center"
             >
-            <div
+              <div
                 className={cn(
-                'flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 transition-all duration-200',
-                isActive
-                    ? 'bg-primary/10 text-primary scale-105'
-                    : 'text-muted-foreground'
+                  'flex flex-col items-center justify-center gap-1 px-3 py-2 transition-all duration-200',
+                  isActive
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
-            >
+              >
                 <item.icon
-                className={cn(
-                    'w-5 h-5 transition-all',
+                  className={cn(
+                    'w-5 h-5 transition-all duration-200',
                     isActive && 'scale-110'
-                )}
+                  )}
                 />
 
                 <span className="text-[11px] font-medium">
-                {item.label}
+                  {item.label}
                 </span>
-            </div>
+              </div>
             </Link>
-            );
-          })}
-        </div>
+          );
+        })}
       </div>
     </nav>
   );
