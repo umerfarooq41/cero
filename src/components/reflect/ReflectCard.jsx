@@ -4,11 +4,12 @@ import { cn } from '@/lib/utils';
 export default function ReflectCard({ children, className }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.24, ease: 'easeOut' }}
       className={cn(
-        'rounded-2xl border border-border bg-card shadow-sm',
+        'rounded-2xl border border-border bg-card shadow-sm overflow-hidden',
+        'focus:outline-none focus-visible:outline-none',
         className
       )}
     >
