@@ -23,6 +23,7 @@ import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import PageHeader from '@/components/layout/PageHeader';
 import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
@@ -94,6 +95,26 @@ const formatNumber = (value = 0) => {
 const getCurrencyCode = (currency) => {
   if (typeof currency === 'string') return currency;
   return currency?.code || currency?.currency || 'SAR';
+};
+
+const getCurrencyName = (currency) => {
+  const code = getCurrencyCode(currency);
+
+  const map = {
+    SAR: 'riyal',
+    USD: 'dollar',
+    EUR: 'euro',
+    GBP: 'pound',
+    INR: 'rupee',
+    PKR: 'rupee',
+    AED: 'dirham',
+    QAR: 'riyal',
+    KWD: 'dinar',
+    BHD: 'dinar',
+    OMR: 'rial',
+  };
+
+  return map[code] || 'currency';
 };
 
 const getCurrencySymbol = (currency) => {
@@ -585,75 +606,74 @@ export default function Plan() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-28">
-      <div className="sticky top-0 z-30 pt-6 pb-2 bg-background/95 backdrop-blur-sm">
-        <AnimatePresence mode="wait">
-          {isEditMode ? (
-            <motion.div
-              key="edit-header"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center justify-between"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={cancelEdit}
-                className="gap-1.5 text-muted-foreground"
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title="Plan"
+        subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
+      />
+
+      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
+        <div className="mb-4">
+          <AnimatePresence mode="wait">
+            {isEditMode ? (
+              <motion.div
+                key="edit-header"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center justify-between rounded-2xl border border-border bg-card p-2 shadow-sm"
               >
-                <X className="w-4 h-4" />
-                Cancel
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={cancelEdit}
+                  className="gap-1.5 text-muted-foreground"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </Button>
 
-              <h1 className="text-base font-semibold">Edit Plan</h1>
+                <span className="text-sm font-semibold">Edit Plan</span>
 
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={saving}
-                className="gap-1.5"
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  {saving ? 'Saving…' : 'Save'}
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="read-header"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2"
               >
-                <Save className="w-4 h-4" />
-                {saving ? 'Saving…' : 'Save'}
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="read-header"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center justify-between"
-            >
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Plan</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Monthly budget · {getCurrencyCode(currency)}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <MonthSelector
-                  currentMonth={currentMonth}
-                  onChange={setCurrentMonth}
-                />
+                <div className="flex-1">
+                  <MonthSelector
+                    currentMonth={currentMonth}
+                    onChange={setCurrentMonth}
+                  />
+                </div>
 
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-10 w-10 shrink-0 rounded-xl"
                   onClick={enterEditMode}
                 >
                   <PencilLine className="w-4 h-4" />
                 </Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
       <motion.div
         animate={{ opacity: 1, y: 0 }}
@@ -746,6 +766,7 @@ export default function Plan() {
           </motion.div>
         )}
       </AnimatePresence>
+      </main>
     </div>
   );
 }
