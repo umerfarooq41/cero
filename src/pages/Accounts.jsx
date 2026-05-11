@@ -66,12 +66,7 @@ export default function Accounts() {
 
     return (
       <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <div
-          className={cn(
-            'flex items-center justify-between gap-3 border-b px-5 py-4',
-            'border-border bg-background/40'
-          )}
-        >
+        <div className="flex items-center justify-between gap-3 border-b border-border bg-background/40 px-5 py-4">
           <div>
             <h3
               className={cn(
@@ -89,13 +84,8 @@ export default function Accounts() {
             </p>
           </div>
 
-          <span
-            className={cn(
-              'text-sm font-bold tabular-nums',
-              isLiability ? 'text-red-600 dark:text-red-400' : 'text-foreground'
-            )}
-          >
-            {isLiability && '-'}
+          <span className="inline-flex items-center gap-0.5 text-sm font-bold tabular-nums text-foreground">
+            {isLiability && <span className="text-red-600 dark:text-red-400">-</span>}
             <InlineMoney>{formatCurrency(total)}</InlineMoney>
           </span>
         </div>
@@ -114,13 +104,13 @@ export default function Accounts() {
               >
                 <div
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: `${color}18` }}
+                  style={{ backgroundColor: `${color}14` }}
                 >
                   <Icon className="h-5 w-5" style={{ color }} />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">
+                  <div className="truncate text-sm font-semibold text-foreground">
                     {acc.name}
                   </div>
 
@@ -129,13 +119,8 @@ export default function Accounts() {
                   </div>
                 </div>
 
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-bold tabular-nums',
-                    isLiability ? 'text-red-600 dark:text-red-400' : 'text-foreground'
-                  )}
-                >
-                  {isLiability && <span>-</span>}
+                <span className="inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-bold tabular-nums text-foreground">
+                  {isLiability && <span className="text-red-600 dark:text-red-400">-</span>}
                   <InlineMoney>{formatCurrency(balance)}</InlineMoney>
                 </span>
               </Link>
@@ -153,72 +138,66 @@ export default function Accounts() {
         subtitle="Assets, savings, and debt overview"
       />
 
-      <section className="mb-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-  <div className="p-6">
-    <div className="mb-5 flex items-start justify-between gap-3">
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Net Worth
-        </div>
+      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
+        <section className="mb-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+          <div className="p-6">
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Net Worth
+                </div>
 
-        <div
-          className={cn(
-            'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums',
-            netWorth >= 0
-              ? 'text-foreground'
-              : 'text-red-600 dark:text-red-400'
-          )}
-        >
-          {netWorth < 0 && <span>-</span>}
+                <div
+                  className={cn(
+                    'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums',
+                    netWorth >= 0
+                      ? 'text-foreground'
+                      : 'text-red-600 dark:text-red-400'
+                  )}
+                >
+                  {netWorth < 0 && <span>-</span>}
+                  <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
+                </div>
+              </div>
 
-          <InlineMoney>
-            {formatCurrency(Math.abs(netWorth))}
-          </InlineMoney>
-        </div>
-      </div>
+              <div
+                className={cn(
+                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
+                  netWorth >= 0
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                )}
+              >
+                <Scale className="h-5 w-5" />
+              </div>
+            </div>
 
-      <div
-        className={cn(
-          'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
-          netWorth >= 0
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-            : 'bg-red-500/10 text-red-600 dark:text-red-400'
-        )}
-      >
-        <Scale className="h-5 w-5" />
-      </div>
-    </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-border bg-background/60 p-4">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <ArrowUpRight className="h-4 w-4" />
+                  Assets
+                </div>
 
-    <div className="grid grid-cols-2 gap-3">
-      <div className="rounded-2xl border border-border bg-background/60 p-4">
-        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-          <ArrowUpRight className="h-4 w-4" />
-          Assets
-        </div>
+                <div className="text-base font-bold tabular-nums text-foreground">
+                  <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
+                </div>
+              </div>
 
-        <div className="text-base font-bold tabular-nums text-foreground">
-          <InlineMoney>
-            {formatCurrency(totalAssets)}
-          </InlineMoney>
-        </div>
-      </div>
+              <div className="rounded-2xl border border-border bg-background/60 p-4">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-red-600 dark:text-red-400">
+                  <ArrowDownRight className="h-4 w-4" />
+                  Liabilities
+                </div>
 
-      <div className="rounded-2xl border border-border bg-background/60 p-4">
-        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-red-600 dark:text-red-400">
-          <ArrowDownRight className="h-4 w-4" />
-          Liabilities
-        </div>
-
-        <div className="text-base font-bold tabular-nums text-foreground">
-          -
-          <InlineMoney>
-            {formatCurrency(totalLiabilities)}
-          </InlineMoney>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+                <div className="inline-flex items-center gap-0.5 text-base font-bold tabular-nums text-foreground">
+                  <span className="text-red-600 dark:text-red-400">-</span>
+                  <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="space-y-4">
           {renderGroup('Assets', assets, false)}

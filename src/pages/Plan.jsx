@@ -145,21 +145,33 @@ function Money({ amount, currency, compact = false, className = '' }) {
   const symbol = getCurrencySymbol(currency);
 
   return (
-    <span className={`inline-flex items-center gap-1 ${className}`}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap',
+        className
+      )}
+    >
       {code === 'SAR' ? (
-        <img
-          src="/sar.svg"
-          alt="SAR"
-          className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'}
+        <span
+          className={cn(
+            'inline-block shrink-0 bg-current',
+            compact ? 'h-[0.8em] w-[0.8em]' : 'h-[0.9em] w-[0.9em]'
+          )}
+          style={{
+            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+            mask: 'url(/sar.svg) center / contain no-repeat',
+          }}
         />
       ) : (
-        <span className="text-current">{symbol}</span>
+        <span className="text-current">
+          {symbol}
+        </span>
       )}
+
       <span>{formatNumber(amount)}</span>
     </span>
   );
 }
-
 
 
 function DonutTooltip({ active, payload, currency, tab }) {
