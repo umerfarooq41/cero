@@ -316,7 +316,7 @@ function PlanOverview({
           </div>
         </div>
 
-        <div className="relative mx-auto mt-4 h-52 max-w-[280px] [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none">
+        <div className="relative mx-auto mt-4 flex h-52 w-full max-w-[280px] items-center justify-center [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -355,7 +355,7 @@ function PlanOverview({
             </PieChart>
           </ResponsiveContainer>
 
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {tab.label}
             </p>
