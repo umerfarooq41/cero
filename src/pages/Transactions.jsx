@@ -9,7 +9,13 @@ import { Input } from '@/components/ui/input';
 import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
-import { useTransactions, useCategories, useAccounts } from '@/hooks/useBudgetData';
+
+import {
+  useTransactions,
+  useCategories,
+  useAccounts,
+} from '@/hooks/useBudgetData';
+
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 
 const ADD_TRANSACTION_ROUTE = '/add-transaction';
@@ -17,7 +23,10 @@ const ADD_TRANSACTION_ROUTE = '/add-transaction';
 export default function Transactions() {
   const navigate = useNavigate();
 
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [currentMonth, setCurrentMonth] = useState(
+    format(new Date(), 'yyyy-MM')
+  );
+
   const [selectedDate, setSelectedDate] = useState('');
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -30,8 +39,14 @@ export default function Transactions() {
 
   const filtered = transactions.filter((t) => {
     const cat = categories.find((c) => c.id === t.category_id);
-    const fromAccount = accounts.find((a) => a.id === t.account_id);
-    const toAccount = accounts.find((a) => a.id === t.to_account_id);
+
+    const fromAccount = accounts.find(
+      (a) => a.id === t.account_id
+    );
+
+    const toAccount = accounts.find(
+      (a) => a.id === t.to_account_id
+    );
 
     const searchValue = search.toLowerCase();
 
@@ -42,21 +57,29 @@ export default function Transactions() {
       fromAccount?.name?.toLowerCase().includes(searchValue) ||
       toAccount?.name?.toLowerCase().includes(searchValue);
 
-    const matchType = filterType === 'all' || t.type === filterType;
+    const matchType =
+      filterType === 'all' || t.type === filterType;
 
-    const matchDate = !selectedDate || t.date === selectedDate;
+    const matchDate =
+      !selectedDate || t.date === selectedDate;
 
     return matchSearch && matchType && matchDate;
   });
 
   const grouped = filtered.reduce((groups, t) => {
     const txDate = t.date || 'No Date';
+
     if (!groups[txDate]) groups[txDate] = [];
+
     groups[txDate].push(t);
+
     return groups;
   }, {});
 
-  const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+  const sortedDates = Object.keys(grouped).sort((a, b) =>
+    b.localeCompare(a)
+  );
+
   const hasTransactions = sortedDates.length > 0;
 
   const filterButtons = [
@@ -74,6 +97,7 @@ export default function Transactions() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
+        {/* Month + Date */}
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <MonthSelector
             currentMonth={currentMonth}
@@ -105,6 +129,7 @@ export default function Transactions() {
           </div>
         </div>
 
+        {/* Search */}
         <div className="mb-4 flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -118,30 +143,51 @@ export default function Transactions() {
           </div>
         </div>
 
-        <div className="mb-6 flex gap-1.5 overflow-x-auto">
-          {filterButtons.map((f) => (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => setFilterType(f.value)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                filterType === f.value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Filters */}
+        <div className="mb-6 overflow-x-auto">
+          <div className="inline-flex w-full rounded-2xl bg-secondary/80 p-1">
+            {filterButtons.map((f) => {
+              const active = filterType === f.value;
+
+              return (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => setFilterType(f.value)}
+                  className={`
+                    flex-1
+                    whitespace-nowrap
+                    rounded-xl
+                    px-4
+                    py-2
+                    text-sm
+                    font-medium
+                    transition-all
+                    duration-200
+                    ${
+                      active
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }
+                  `}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Empty */}
         {!hasTransactions ? (
           <EmptyState
             icon={ArrowLeftRight}
             title="No transactions yet"
             description="Add your first transaction to start tracking your spending."
             actionLabel="Add Transaction"
-            onAction={() => navigate(ADD_TRANSACTION_ROUTE)}
+            onAction={() =>
+              navigate(ADD_TRANSACTION_ROUTE)
+            }
           />
         ) : (
           <div className="space-y-4">
@@ -153,7 +199,10 @@ export default function Transactions() {
                 <div className="border-b border-border bg-accent/30 px-4 py-2.5">
                   <span className="text-xs font-semibold text-muted-foreground">
                     {date !== 'No Date'
-                      ? format(new Date(date), 'EEEE, MMM d')
+                      ? format(
+                          new Date(date),
+                          'EEEE, MMM d'
+                        )
                       : 'No Date'}
                   </span>
                 </div>
@@ -163,11 +212,21 @@ export default function Transactions() {
                     <TransactionRow
                       key={t.id}
                       transaction={t}
-                      category={categories.find((c) => c.id === t.category_id)}
-                      account={accounts.find((a) => a.id === t.account_id)}
-                      toAccount={accounts.find((a) => a.id === t.to_account_id)}
+                      category={categories.find(
+                        (c) => c.id === t.category_id
+                      )}
+                      account={accounts.find(
+                        (a) => a.id === t.account_id
+                      )}
+                      toAccount={accounts.find(
+                        (a) => a.id === t.to_account_id
+                      )}
                       formatCurrency={formatCurrency}
-                      onClick={() => navigate(`/transactions/${t.id}/edit`)}
+                      onClick={() =>
+                        navigate(
+                          `/transactions/${t.id}/edit`
+                        )
+                      }
                     />
                   ))}
                 </div>
@@ -176,6 +235,7 @@ export default function Transactions() {
           </div>
         )}
 
+        {/* Floating Add Button */}
         {hasTransactions && (
           <Link to={ADD_TRANSACTION_ROUTE}>
             <Button className="fixed bottom-24 right-5 z-50 h-14 w-14 rounded-2xl p-0 shadow-lg shadow-primary/25 lg:bottom-6">
