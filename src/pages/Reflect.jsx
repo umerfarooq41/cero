@@ -36,7 +36,7 @@ import ReflectSummaryCard, {
   InlineMoney,
   formatCurrencyText,
 } from '@/components/reflect/ReflectSummaryCard';
-import ReflectInsightCard from '@/components/reflect/ReflectInsightCard';
+import ReflectInsightCard from '@/components/reflect/ReflectInsightCard.jsx';
 
 import {
   useAccounts,
