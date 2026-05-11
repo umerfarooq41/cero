@@ -78,7 +78,7 @@ function CurrencyPrefix({ currency }) {
   if (currencyCode === 'SAR') {
     return (
       <span
-        className="inline-block h-[1em] w-[1em] shrink-0 bg-current align-middle opacity-80"
+        className="inline-block h-[0.72em] w-[0.72em] shrink-0 bg-current opacity-80"
         style={{
           WebkitMask: 'url(/sar.svg) center / contain no-repeat',
           mask: 'url(/sar.svg) center / contain no-repeat',
@@ -87,7 +87,7 @@ function CurrencyPrefix({ currency }) {
     );
   }
 
-  return <span className="leading-none text-inherit">{currencyCode}</span>;
+  return <span className="text-[0.75em] leading-none">{currencyCode}</span>;
 }
 
 function normalizeCategoryType(value) {
@@ -430,46 +430,48 @@ export default function AddTransaction() {
         </Button>
 
         <div className="mb-6 rounded-3xl border border-border bg-card p-8 shadow-sm">
-          <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Amount
-          </div>
+  <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    Amount
+  </div>
 
-          <div className="flex justify-center overflow-hidden">
-            <div className="inline-flex max-w-full items-baseline gap-2">
-              <div className="flex items-center text-5xl font-bold leading-none text-foreground">
-                <CurrencyPrefix currency={currency} />
-              </div>
+  <div className="flex justify-center overflow-hidden">
+    <div className="inline-flex max-w-full items-center gap-3 text-5xl font-bold leading-none text-foreground">
+      <CurrencyPrefix currency={currency} />
 
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-                autoFocus
-                inputMode="decimal"
-                className="
-                  w-auto
-                  min-w-[4ch]
-                  max-w-[260px]
-                  border-none
-                  bg-transparent
-                  p-0
-                  text-left
-                  text-5xl
-                  font-bold
-                  leading-none
-                  tabular-nums
-                  text-foreground
-                  outline-none
-                  placeholder:text-muted-foreground/30
-                "
-                style={{ width: amountWidth }}
-              />
-            </div>
-          </div>
-        </div>
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="0.00"
+        step="0.01"
+        min="0"
+        autoFocus
+        inputMode="decimal"
+        className="
+          min-w-[4ch]
+          max-w-[8ch]
+          border-none
+          bg-transparent
+          p-0
+          text-left
+          text-5xl
+          font-bold
+          leading-none
+          tabular-nums
+          text-foreground
+          outline-none
+          placeholder:text-muted-foreground/30
+        "
+        style={{
+          width: `${Math.min(
+            8,
+            Math.max(4, String(amount || '0.00').length)
+          )}ch`,
+        }}
+      />
+    </div>
+  </div>
+</div>
 
         <div className="mb-6 grid grid-cols-3 gap-2 rounded-2xl bg-secondary/80 p-1">
           {typeOptions.map((opt) => {
