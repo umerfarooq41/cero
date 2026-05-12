@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Target,
+  calendarDays,
 } from 'lucide-react';
 
 import {
@@ -67,17 +67,17 @@ export default function ReflectPeriodSelector({
 
   return (
     <ReflectCard className="mb-4 p-4">
-      <div className="mb-5">
+      <div className="mb-4 flex items-center justify-between">
   <div className="flex items-center gap-2">
-    <Target className="h-5 w-5 text-muted-foreground" />
+    <CalendarDays className="h-4 w-4 text-muted-foreground" />
 
-    <h3 className="text-2xl font-bold tracking-tight text-foreground">
-      Budget Efficiency
-    </h3>
+    <p className="text-sm font-bold tracking-[0.04em] text-muted-foreground">
+      Reporting Period
+    </p>
   </div>
 
-  <p className="mt-2 text-base text-muted-foreground">
-    How closely spending follows your plan
+  <p className="text-sm font-bold tracking-[0.04em] text-foreground">
+    {heading}
   </p>
 </div>
 
