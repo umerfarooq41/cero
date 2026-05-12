@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  CalendarDays,
-} from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 
 import {
   Select,
@@ -34,7 +32,9 @@ export default function ReflectPeriodSelector({
   onYearChange,
   onMonthChange,
 }) {
-  const [periodMode, setPeriodMode] = useState(month === 'all' ? 'year' : 'month');
+  const [periodMode, setPeriodMode] = useState(
+    month === 'all' ? 'year' : 'month'
+  );
 
   const currentYear = new Date().getFullYear();
 
@@ -58,7 +58,8 @@ export default function ReflectPeriodSelector({
   }, [periodMode, month, onMonthChange]);
 
   const selectedMonth =
-    MONTHS.find((item) => item.value === month) || MONTHS[new Date().getMonth()];
+    MONTHS.find((item) => item.value === month) ||
+    MONTHS[new Date().getMonth()];
 
   const heading =
     periodMode === 'year'
@@ -67,24 +68,19 @@ export default function ReflectPeriodSelector({
 
   return (
     <ReflectCard className="mb-4 p-4">
-      <div className="mb-4 flex items-center justify-between">
-  <div className="flex items-center gap-2">
-    <CalendarDays className="h-5 w-5 text-foreground" />
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <CalendarDays className="h-5 w-5 shrink-0 text-foreground" />
 
-    <p className="text-xl font-bold text-foreground">
-      Reporting Period
-    </p>
-  </div>
+          <p className="text-lg font-bold text-foreground sm:text-xl">
+            Reporting Period
+          </p>
+        </div>
 
-  <p className="text-xl font-bold text-foreground">
-    {heading}
-  </p>
-</div>
-
-  <p className="text-sm font-bold tracking-[0.04em] text-foreground">
-    {heading}
-  </p>
-</div>
+        <p className="shrink-0 text-lg font-bold text-foreground sm:text-xl">
+          {heading}
+        </p>
+      </div>
 
       <div className="mb-3 grid grid-cols-2 rounded-2xl bg-muted p-1">
         <button
@@ -134,7 +130,10 @@ export default function ReflectPeriodSelector({
         </Select>
 
         {periodMode === 'month' && (
-          <Select value={month === 'all' ? selectedMonth.value : month} onValueChange={onMonthChange}>
+          <Select
+            value={month === 'all' ? selectedMonth.value : month}
+            onValueChange={onMonthChange}
+          >
             <SelectTrigger className="h-11 rounded-2xl bg-background">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
