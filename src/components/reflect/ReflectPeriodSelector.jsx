@@ -69,12 +69,17 @@ export default function ReflectPeriodSelector({
     <ReflectCard className="mb-4 p-4">
       <div className="mb-4 flex items-center justify-between">
   <div className="flex items-center gap-2">
-    <CalendarDays className="h-4 w-4 text-muted-foreground" />
+    <CalendarDays className="h-5 w-5 text-foreground" />
 
-    <p className="text-sm font-bold tracking-[0.04em] text-muted-foreground">
+    <p className="text-xl font-bold text-foreground">
       Reporting Period
     </p>
   </div>
+
+  <p className="text-xl font-bold text-foreground">
+    {heading}
+  </p>
+</div>
 
   <p className="text-sm font-bold tracking-[0.04em] text-foreground">
     {heading}
