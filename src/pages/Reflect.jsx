@@ -71,21 +71,22 @@ export default function Reflect() {
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: accounts = [] } = useAccounts();
 
-  const currentMonthKey =
-    selectedMonth === 'all'
-      ? `${selectedYear}-01`
-      : `${selectedYear}-${selectedMonth}`;
+ const isYearView = selectedMonth === 'all';
 
-  const budget = useBudgetSummary(currentMonthKey);
+const currentMonthKey = isYearView
+  ? null
+  : `${selectedYear}-${selectedMonth}`;
 
-  const analysis = useReflectAnalysis({
-    selectedYear,
-    selectedMonth,
-    allTransactions,
-    accounts,
-    categories,
-    budget,
-  });
+const budget = useBudgetSummary(currentMonthKey);
+
+const analysis = useReflectAnalysis({
+  selectedYear,
+  selectedMonth,
+  allTransactions,
+  accounts,
+  categories,
+  budget: isYearView ? null : budget,
+});
 
   const {
     isYear,
