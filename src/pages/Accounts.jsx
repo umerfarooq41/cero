@@ -168,7 +168,7 @@ export default function Accounts() {
             </div>
 
             <p className="mt-2 text-xs text-muted-foreground">
-              Assets minus liabilities
+              Your progress, measured in value.
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 text-left">
