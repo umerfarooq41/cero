@@ -64,12 +64,12 @@ export default function ReflectPeriodSelector({
 
   return (
     <ReflectCard className="mb-4 p-4">
-      <div className="mb-4 flex items-center justify-between gap-3">
-  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="mb-4 flex w-full items-center justify-between gap-3">
+  <p className="shrink-0 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:text-xs sm:tracking-[0.18em]">
     Reporting Period
   </p>
 
-  <h2 className="text-lg font-bold tracking-tight text-foreground">
+  <h2 className="min-w-0 flex-1 truncate text-right text-base font-bold tracking-tight text-foreground sm:text-lg">
     {heading}
   </h2>
 </div>
