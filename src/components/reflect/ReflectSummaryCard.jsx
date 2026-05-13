@@ -110,19 +110,11 @@ function MoneyRow({ label, amount, currency, tone }) {
   );
 }
 
-function PercentRow({ label, value, tone }) {
-  return (
-    <div className="flex items-center justify-between gap-3 text-sm">
-      <span className="text-muted-foreground">{label}</span>
-
-      <span className={cn('font-semibold tabular-nums', tone)}>
-        {Math.round(Number(value || 0))}%
-      </span>
-    </div>
-  );
-}
-
-function AnimatedBar({ value, className, delay = 'delay-150' }) {
+function AnimatedBar({
+  value,
+  className,
+  delay = 'delay-150',
+}) {
   const safeValue = Math.max(0, Math.min(Number(value || 0), 100));
 
   return (
@@ -173,9 +165,11 @@ function HeroCashFlowCard({
       <div className="relative flex h-full flex-col justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-semibold text-foreground">
-              {isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-            </p>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
+              </p>
+            </div>
 
             <span
               className={cn(
@@ -300,22 +294,6 @@ export default function ReflectSummaryCard({
   savingsRate,
   currency,
 }) {
-  const now = new Date();
-
-  const daysInMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0
-  ).getDate();
-
-  const currentDay = now.getDate();
-  const daysLeft = Math.max(daysInMonth - currentDay, 1);
-  const monthsPassed = now.getMonth() + 1;
-
-  const timeElapsedPercent = isYear
-    ? (monthsPassed / 12) * 100
-    : (currentDay / daysInMonth) * 100;
-
   const netWorthHealth =
     totalAssets > 0
       ? Math.max(
@@ -324,6 +302,9 @@ export default function ReflectSummaryCard({
         )
       : 0;
 
+  const expenseRatio =
+    income > 0 ? Math.min((expenses / income) * 100, 100) : 0;
+
   const budgetDifference = plannedExpenses - expenses;
 
   const budgetUsed =
@@ -331,40 +312,16 @@ export default function ReflectSummaryCard({
       ? Math.min((expenses / plannedExpenses) * 100, 100)
       : 0;
 
-  const monthlyBudgetStatus =
-    plannedExpenses === 0
-      ? 'Tracked'
-      : budgetUsed <= timeElapsedPercent
-        ? 'Excellent'
-        : budgetUsed <= timeElapsedPercent + 10
-          ? 'On Track'
-          : 'Warning';
+  const periodSummary =
+    netCashFlow >= 0
+      ? isYear
+        ? 'Year Saved'
+        : 'Month Saved'
+      : isYear
+        ? 'Year Deficit'
+        : 'Month Deficit';
 
-  const monthlyBudgetTone =
-    plannedExpenses === 0
-      ? 'info'
-      : budgetUsed <= timeElapsedPercent
-        ? 'good'
-        : budgetUsed <= timeElapsedPercent + 10
-          ? 'warning'
-          : 'bad';
-
-  const yearlyBudgetStatus = 'Spending Burn Rate';
-
-  const yearlyBudgetTone =
-    plannedExpenses === 0
-      ? 'info'
-      : budgetUsed <= timeElapsedPercent
-        ? 'good'
-        : budgetUsed <= timeElapsedPercent + 10
-          ? 'warning'
-          : 'bad';
-
-  const dailyLimit = budgetDifference > 0 ? budgetDifference / daysLeft : 0;
-
-  const monthlyAverage = monthsPassed > 0 ? expenses / monthsPassed : 0;
-
-  const annualCap = plannedExpenses;
+  const periodTone = netCashFlow >= 0 ? 'good' : 'bad';
 
   return (
     <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -411,134 +368,90 @@ export default function ReflectSummaryCard({
       </SecondaryCard>
 
       <SecondaryCard
-        title={isYear ? 'Yearly Performance' : 'Budget Health'}
-        value={isYear ? yearlyBudgetStatus : monthlyBudgetStatus}
-        tone={isYear ? yearlyBudgetTone : monthlyBudgetTone}
+        title={isYear ? 'Year Performance' : 'Budget Health'}
+        value={isYear ? periodSummary : plannedExpenses > 0 ? (expenses <= plannedExpenses ? 'Excellent' : 'Warning') : 'Tracked'}
+        tone={isYear ? periodTone : plannedExpenses > 0 ? (expenses <= plannedExpenses ? 'good' : 'warning') : 'info'}
       >
         <div className="space-y-3">
           {isYear ? (
             <>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Total YTD
-                </p>
+              <MoneyRow
+                label="Saved"
+                amount={netCashFlow}
+                currency={currency}
+                tone={
+                  netCashFlow >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-red-600 dark:text-red-400'
+                }
+              />
 
-                <div className="mt-1 text-xl font-bold tracking-tight tabular-nums text-foreground">
-                  <CurrencyAmount amount={expenses} currency={currency} />
-                </div>
-              </div>
+              <MoneyRow
+                label="Expense ratio"
+                amount={expenseRatio}
+                currency={{ code: '%' }}
+                tone="text-muted-foreground"
+              />
 
-              <div className="space-y-2">
-                <MoneyRow
-                  label="Monthly avg"
-                  amount={monthlyAverage}
-                  currency={currency}
-                  tone="text-muted-foreground"
-                />
+              <AnimatedBar
+                value={100 - expenseRatio}
+                className={
+                  netCashFlow >= 0 ? 'bg-emerald-400' : 'bg-red-400'
+                }
+                delay="delay-500"
+              />
 
-                <MoneyRow
-                  label="Annual cap"
-                  amount={annualCap}
-                  currency={currency}
-                  tone="text-muted-foreground"
-                />
-              </div>
-
-              {plannedExpenses > 0 && (
-                <>
-                  <AnimatedBar
-                    value={budgetUsed}
-                    className={
-                      budgetUsed <= timeElapsedPercent
-                        ? 'bg-emerald-400'
-                        : budgetUsed <= timeElapsedPercent + 10
-                          ? 'bg-amber-400'
-                          : 'bg-red-400'
-                    }
-                    delay="delay-500"
-                  />
-
-                  <p className="text-xs leading-snug text-muted-foreground">
-                    {Math.round(timeElapsedPercent)}% of year passed |{' '}
-                    {Math.round(budgetUsed)}% of budget used
-                  </p>
-                </>
-              )}
-
-              {plannedExpenses === 0 && (
-                <p className="text-xs leading-snug text-muted-foreground">
-                  Add a yearly planned budget to compare spending burn rate.
-                </p>
-              )}
+              <p className="text-xs leading-snug text-muted-foreground">
+                {Math.round(100 - expenseRatio)}% of yearly income remained after expenses.
+              </p>
             </>
           ) : (
             <>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Budget left
-                </p>
+              <MoneyRow
+                label="Planned"
+                amount={plannedExpenses}
+                currency={currency}
+                tone="text-muted-foreground"
+              />
 
-                <div
-                  className={cn(
-                    'mt-1 text-xl font-bold tracking-tight tabular-nums',
-                    budgetDifference >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
-                  )}
-                >
-                  <CurrencyAmount
-                    amount={Math.abs(budgetDifference)}
-                    currency={currency}
-                  />{' '}
-                  {budgetDifference >= 0 ? 'Left' : 'Over'}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <MoneyRow
-                  label="Planned"
-                  amount={plannedExpenses}
-                  currency={currency}
-                  tone="text-muted-foreground"
-                />
-
-                <MoneyRow
-                  label="Tracked"
-                  amount={expenses}
-                  currency={currency}
-                  tone={
-                    expenses <= plannedExpenses || plannedExpenses === 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
-                  }
-                />
-              </div>
+              <MoneyRow
+                label="Tracked"
+                amount={expenses}
+                currency={currency}
+                tone={
+                  expenses <= plannedExpenses || plannedExpenses === 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-red-600 dark:text-red-400'
+                }
+              />
 
               {plannedExpenses > 0 && (
                 <>
                   <AnimatedBar
                     value={budgetUsed}
                     className={
-                      budgetUsed <= timeElapsedPercent
+                      expenses <= plannedExpenses
                         ? 'bg-emerald-400'
-                        : budgetUsed <= timeElapsedPercent + 10
-                          ? 'bg-amber-400'
-                          : 'bg-red-400'
+                        : 'bg-amber-400'
                     }
                     delay="delay-500"
                   />
 
-                  <p className="text-xs leading-snug text-muted-foreground">
-                    Daily limit:{' '}
-                    <span className="font-semibold text-foreground">
-                      <CurrencyAmount
-                        amount={dailyLimit}
-                        currency={currency}
-                        compact
-                      />{' '}
-                      / day
-                    </span>
-                  </p>
+                  <div
+                    className={cn(
+                      'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
+                      budgetDifference >= 0
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    )}
+                  >
+                    {budgetDifference >= 0 ? 'Under by ' : 'Over by '}
+                    <CurrencyAmount
+                      amount={Math.abs(budgetDifference)}
+                      currency={currency}
+                      compact
+                    />
+                  </div>
                 </>
               )}
 
