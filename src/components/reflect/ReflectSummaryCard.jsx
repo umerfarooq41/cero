@@ -110,11 +110,7 @@ function MoneyRow({ label, amount, currency, tone }) {
   );
 }
 
-function AnimatedBar({
-  value,
-  className,
-  delay = 'delay-150',
-}) {
+function AnimatedBar({ value, className, delay = 'delay-150' }) {
   const safeValue = Math.max(0, Math.min(Number(value || 0), 100));
 
   return (
@@ -127,6 +123,21 @@ function AnimatedBar({
         )}
         style={{ width: `${safeValue}%` }}
       />
+    </div>
+  );
+}
+
+function PercentBar({ label, value, className, delay }) {
+  const safeValue = Math.max(0, Math.min(Number(value || 0), 100));
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-3 text-xs font-medium">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="tabular-nums text-foreground">{Math.round(safeValue)}%</span>
+      </div>
+
+      <AnimatedBar value={safeValue} className={className} delay={delay} />
     </div>
   );
 }
@@ -165,11 +176,9 @@ function HeroCashFlowCard({
       <div className="relative flex h-full flex-col justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-              </p>
-            </div>
+            <p className="text-sm font-semibold text-foreground">
+              {isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
+            </p>
 
             <span
               className={cn(
@@ -285,8 +294,14 @@ export default function ReflectSummaryCard({
   isYear,
   income,
   expenses,
+  trackedSavings = 0,
+  trackedDebt = 0,
   plannedIncome,
   plannedExpenses,
+  plannedSavings = 0,
+  plannedDebt = 0,
+  totalPlannedOutflow,
+  totalTrackedOutflow,
   netCashFlow,
   netWorth,
   totalAssets,
@@ -294,6 +309,13 @@ export default function ReflectSummaryCard({
   savingsRate,
   currency,
 }) {
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const currentDay = now.getDate();
+  const daysLeft = Math.max(daysInMonth - currentDay, 1);
+  const monthElapsedPercent = (currentDay / daysInMonth) * 100;
+  const yearElapsedPercent = ((now.getMonth() + 1) / 12) * 100;
+
   const netWorthHealth =
     totalAssets > 0
       ? Math.max(
@@ -302,26 +324,56 @@ export default function ReflectSummaryCard({
         )
       : 0;
 
-  const expenseRatio =
-    income > 0 ? Math.min((expenses / income) * 100, 100) : 0;
+  const monthlyBudgetDifference = plannedExpenses - expenses;
+  const monthlyBudgetUsed =
+    plannedExpenses > 0 ? Math.min((expenses / plannedExpenses) * 100, 100) : 0;
 
-  const budgetDifference = plannedExpenses - expenses;
+  const dailyLimit = monthlyBudgetDifference > 0 ? monthlyBudgetDifference / daysLeft : 0;
 
-  const budgetUsed =
-    plannedExpenses > 0
-      ? Math.min((expenses / plannedExpenses) * 100, 100)
-      : 0;
+  const monthlyStatus =
+    plannedExpenses === 0
+      ? 'Tracked'
+      : monthlyBudgetUsed <= monthElapsedPercent
+        ? 'Excellent'
+        : monthlyBudgetUsed <= monthElapsedPercent + 10
+          ? 'On Track'
+          : 'Warning';
 
-  const periodSummary =
-    netCashFlow >= 0
-      ? isYear
-        ? 'Year Saved'
-        : 'Month Saved'
-      : isYear
-        ? 'Year Deficit'
-        : 'Month Deficit';
+  const monthlyTone =
+    plannedExpenses === 0
+      ? 'info'
+      : monthlyBudgetUsed <= monthElapsedPercent
+        ? 'good'
+        : monthlyBudgetUsed <= monthElapsedPercent + 10
+          ? 'warning'
+          : 'bad';
 
-  const periodTone = netCashFlow >= 0 ? 'good' : 'bad';
+  const yearlyPlanCap = Number(totalPlannedOutflow ?? plannedExpenses + plannedSavings + plannedDebt) || 0;
+  const yearlyTotalYtd = Number(totalTrackedOutflow ?? expenses + trackedSavings + trackedDebt) || 0;
+  const yearlyPlanUsedPercent =
+    yearlyPlanCap > 0 ? Math.min((yearlyTotalYtd / yearlyPlanCap) * 100, 100) : 0;
+
+  const monthsPassed = Math.max(now.getMonth() + 1, 1);
+  const monthlyAverage = yearlyTotalYtd / monthsPassed;
+  const paceDifference = yearElapsedPercent - yearlyPlanUsedPercent;
+
+  const yearlyStatus =
+    yearlyPlanCap === 0
+      ? 'No Plan Yet'
+      : yearlyPlanUsedPercent <= yearElapsedPercent
+        ? 'Ahead of Plan'
+        : yearlyPlanUsedPercent <= yearElapsedPercent + 10
+          ? 'On Track'
+          : 'Behind Plan';
+
+  const yearlyTone =
+    yearlyPlanCap === 0
+      ? 'info'
+      : yearlyPlanUsedPercent <= yearElapsedPercent
+        ? 'good'
+        : yearlyPlanUsedPercent <= yearElapsedPercent + 10
+          ? 'warning'
+          : 'bad';
 
   return (
     <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -368,90 +420,131 @@ export default function ReflectSummaryCard({
       </SecondaryCard>
 
       <SecondaryCard
-        title={isYear ? 'Year Performance' : 'Budget Health'}
-        value={isYear ? periodSummary : plannedExpenses > 0 ? (expenses <= plannedExpenses ? 'Excellent' : 'Warning') : 'Tracked'}
-        tone={isYear ? periodTone : plannedExpenses > 0 ? (expenses <= plannedExpenses ? 'good' : 'warning') : 'info'}
+        title={isYear ? 'Yearly Performance' : 'Budget Health'}
+        value={isYear ? yearlyStatus : monthlyStatus}
+        tone={isYear ? yearlyTone : monthlyTone}
       >
         <div className="space-y-3">
           {isYear ? (
             <>
-              <MoneyRow
-                label="Saved"
-                amount={netCashFlow}
-                currency={currency}
-                tone={
-                  netCashFlow >= 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-red-600 dark:text-red-400'
-                }
-              />
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Total YTD</p>
+                <div className="mt-1 text-xl font-bold tracking-tight tabular-nums text-foreground">
+                  <CurrencyAmount amount={yearlyTotalYtd} currency={currency} />
+                </div>
+              </div>
 
-              <MoneyRow
-                label="Expense ratio"
-                amount={expenseRatio}
-                currency={{ code: '%' }}
-                tone="text-muted-foreground"
-              />
+              <div className="space-y-2">
+                <MoneyRow
+                  label="Monthly Avg"
+                  amount={monthlyAverage}
+                  currency={currency}
+                  tone="text-muted-foreground"
+                />
 
-              <AnimatedBar
-                value={100 - expenseRatio}
-                className={
-                  netCashFlow >= 0 ? 'bg-emerald-400' : 'bg-red-400'
-                }
-                delay="delay-500"
-              />
+                <MoneyRow
+                  label="Annual Cap"
+                  amount={yearlyPlanCap}
+                  currency={currency}
+                  tone="text-muted-foreground"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <PercentBar
+                  label="Year Passed"
+                  value={yearElapsedPercent}
+                  className="bg-cyan-400"
+                  delay="delay-300"
+                />
+
+                <PercentBar
+                  label="Plan Used"
+                  value={yearlyPlanUsedPercent}
+                  className={
+                    yearlyTone === 'good'
+                      ? 'bg-emerald-400'
+                      : yearlyTone === 'warning'
+                        ? 'bg-amber-400'
+                        : yearlyTone === 'bad'
+                          ? 'bg-red-400'
+                          : 'bg-cyan-400'
+                  }
+                  delay="delay-500"
+                />
+              </div>
 
               <p className="text-xs leading-snug text-muted-foreground">
-                {Math.round(100 - expenseRatio)}% of yearly income remained after expenses.
+                {yearlyPlanCap === 0
+                  ? 'Add yearly or monthly plans to compare usage against the year.'
+                  : paceDifference >= 0
+                    ? `${Math.round(paceDifference)}% ahead of yearly pace.`
+                    : `${Math.abs(Math.round(paceDifference))}% behind yearly pace.`}
               </p>
             </>
           ) : (
             <>
-              <MoneyRow
-                label="Planned"
-                amount={plannedExpenses}
-                currency={currency}
-                tone="text-muted-foreground"
-              />
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Budget left
+                </p>
 
-              <MoneyRow
-                label="Tracked"
-                amount={expenses}
-                currency={currency}
-                tone={
-                  expenses <= plannedExpenses || plannedExpenses === 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-red-600 dark:text-red-400'
-                }
-              />
+                <div
+                  className={cn(
+                    'mt-1 text-xl font-bold tracking-tight tabular-nums',
+                    monthlyBudgetDifference >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-red-600 dark:text-red-400'
+                  )}
+                >
+                  <CurrencyAmount
+                    amount={Math.abs(monthlyBudgetDifference)}
+                    currency={currency}
+                  />{' '}
+                  {monthlyBudgetDifference >= 0 ? 'Left' : 'Over'}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <MoneyRow
+                  label="Planned"
+                  amount={plannedExpenses}
+                  currency={currency}
+                  tone="text-muted-foreground"
+                />
+
+                <MoneyRow
+                  label="Tracked"
+                  amount={expenses}
+                  currency={currency}
+                  tone={
+                    monthlyBudgetDifference >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }
+                />
+              </div>
 
               {plannedExpenses > 0 && (
                 <>
                   <AnimatedBar
-                    value={budgetUsed}
+                    value={monthlyBudgetUsed}
                     className={
-                      expenses <= plannedExpenses
+                      monthlyTone === 'good'
                         ? 'bg-emerald-400'
-                        : 'bg-amber-400'
+                        : monthlyTone === 'warning'
+                          ? 'bg-amber-400'
+                          : 'bg-red-400'
                     }
                     delay="delay-500"
                   />
 
-                  <div
-                    className={cn(
-                      'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
-                      budgetDifference >= 0
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
-                    )}
-                  >
-                    {budgetDifference >= 0 ? 'Under by ' : 'Over by '}
-                    <CurrencyAmount
-                      amount={Math.abs(budgetDifference)}
-                      currency={currency}
-                      compact
-                    />
-                  </div>
+                  <p className="text-xs leading-snug text-muted-foreground">
+                    Daily Limit:{' '}
+                    <span className="font-semibold text-foreground">
+                      <CurrencyAmount amount={dailyLimit} currency={currency} compact /> / day
+                    </span>
+                  </p>
                 </>
               )}
 

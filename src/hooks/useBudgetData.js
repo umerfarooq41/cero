@@ -67,11 +67,18 @@ export function useAllocations(month) {
   });
 }
 
-export function useBudgetSummary(month) {
-  const { data: categories = [] } = useCategories();
-  const { data: transactions = [] } = useTransactions(month);
-  const { data: allocations = [] } = useAllocations(month);
+export function useAllAllocations() {
+  const { session } = useAuth();
 
+  return useQuery({
+    queryKey: ['all-allocations', session?.user?.id],
+    queryFn: () => budgetPlansApi.list(),
+    enabled: Boolean(session?.user?.id),
+    initialData: [],
+  });
+}
+
+function buildBudgetSummary({ categories = [], transactions = [], allocations = [] }) {
   const getCategorySpent = (categoryId) => {
     return transactions
       .filter(t => t.category_id === categoryId)
@@ -79,17 +86,26 @@ export function useBudgetSummary(month) {
   };
 
   const getCategoryPlanned = (categoryId) => {
-    const alloc = allocations.find(a => a.category_id === categoryId);
-    return Number(alloc?.planned_amount) || 0;
+    return allocations
+      .filter(a => a.category_id === categoryId)
+      .reduce((sum, a) => sum + (Number(a.planned_amount) || 0), 0);
   };
 
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const getCategoryType = (categoryId) => {
+    const category = categories.find(c => c.id === categoryId);
+    if (!category) return null;
 
-  const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    if (category.type) return category.type;
+
+    const parent = categories.find(c => c.id === category.parent_id);
+    return parent?.type || null;
+  };
+
+  const sumTrackedByType = (type) => {
+    return transactions
+      .filter(t => getCategoryType(t.category_id) === type)
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  };
 
   const sumPlannedByType = (type) => {
     return categories
@@ -104,6 +120,17 @@ export function useBudgetSummary(month) {
         return sum + getCategoryPlanned(c.id);
       }, 0);
   };
+
+  const totalIncome = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const totalExpenses = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const totalTrackedSavings = sumTrackedByType('savings');
+  const totalTrackedDebt = sumTrackedByType('debt');
 
   const totalPlannedIncome = sumPlannedByType('income');
   const totalPlannedExpenses = sumPlannedByType('expense');
@@ -124,12 +151,37 @@ export function useBudgetSummary(month) {
     getCategoryPlanned,
     totalIncome,
     totalExpenses,
+    totalTrackedSavings,
+    totalTrackedDebt,
     totalPlannedIncome,
     totalPlannedExpenses,
     totalPlannedSavings,
     totalPlannedDebt,
     leftToAllocate,
   };
+}
+
+export function useBudgetSummary(month) {
+  const { data: categories = [] } = useCategories();
+  const { data: transactions = [] } = useTransactions(month);
+  const { data: allocations = [] } = useAllocations(month);
+
+  return buildBudgetSummary({ categories, transactions, allocations });
+}
+
+export function useYearBudgetSummary(year) {
+  const { data: categories = [] } = useCategories();
+  const { data: transactions = [] } = useAllTransactions();
+  const { data: allocations = [] } = useAllAllocations();
+
+  const yearTransactions = transactions.filter(t => t.date?.startsWith(`${year}-`));
+  const yearAllocations = allocations.filter(a => a.month?.startsWith(`${year}-`));
+
+  return buildBudgetSummary({
+    categories,
+    transactions: yearTransactions,
+    allocations: yearAllocations,
+  });
 }
 
 export { useCurrencyFormatter, formatCurrency } from '@/hooks/useCurrency';

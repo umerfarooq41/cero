@@ -23,6 +23,7 @@ import {
   useAllTransactions,
   useBudgetSummary,
   useCategories,
+  useYearBudgetSummary,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
@@ -54,7 +55,8 @@ export default function Reflect() {
     ? null
     : `${selectedYear}-${selectedMonth}`;
 
-  const budget = useBudgetSummary(currentMonthKey);
+  const monthBudget = useBudgetSummary(currentMonthKey);
+  const yearBudget = useYearBudgetSummary(selectedYear);
 
   const analysis = useReflectAnalysis({
     selectedYear,
@@ -62,15 +64,21 @@ export default function Reflect() {
     allTransactions,
     accounts,
     categories,
-    budget: isYearView ? null : budget,
+    budget: isYearView ? yearBudget : monthBudget,
   });
 
   const {
     isYear,
     income,
     expenses,
+    trackedSavings,
+    trackedDebt,
     plannedIncome,
     plannedExpenses,
+    plannedSavings,
+    plannedDebt,
+    totalPlannedOutflow,
+    totalTrackedOutflow,
     leftToAllocate,
     netCashFlow,
     netWorth,
@@ -116,7 +124,7 @@ export default function Reflect() {
       icon: Target,
       title: 'Budget efficiency',
       text: isYear
-        ? 'Select a month to review how closely spending follows your plan.'
+        ? 'Yearly performance now compares year progress against expenses, savings, and debt allocations.'
         : efficiency >= 80
           ? 'Strong control. Your spending is close to your planned budget.'
           : efficiency >= 50
@@ -179,17 +187,23 @@ export default function Reflect() {
         />
 
         <ReflectSummaryCards
-        isYear={isYear}
-        income={income}
-        expenses={expenses}
-        plannedIncome={plannedIncome}
-        plannedExpenses={plannedExpenses}
-        netCashFlow={netCashFlow}
-        netWorth={netWorth}
-        totalAssets={totalAssets}
-        totalLiabilities={totalLiabilities}
-        savingsRate={savingsRate}
-        currency={currency}
+          isYear={isYear}
+          income={income}
+          expenses={expenses}
+          trackedSavings={trackedSavings}
+          trackedDebt={trackedDebt}
+          plannedIncome={plannedIncome}
+          plannedExpenses={plannedExpenses}
+          plannedSavings={plannedSavings}
+          plannedDebt={plannedDebt}
+          totalPlannedOutflow={totalPlannedOutflow}
+          totalTrackedOutflow={totalTrackedOutflow}
+          netCashFlow={netCashFlow}
+          netWorth={netWorth}
+          totalAssets={totalAssets}
+          totalLiabilities={totalLiabilities}
+          savingsRate={savingsRate}
+          currency={currency}
         />
 
         <ReflectCharts

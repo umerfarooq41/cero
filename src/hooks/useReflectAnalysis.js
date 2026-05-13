@@ -45,6 +45,16 @@ export function getPeriodRange(year, month) {
   };
 }
 
+function getCategoryType(categories, categoryId) {
+  const category = categories.find((item) => item.id === categoryId);
+  if (!category) return null;
+
+  if (category.type) return category.type;
+
+  const parent = categories.find((item) => item.id === category.parent_id);
+  return parent?.type || null;
+}
+
 export default function useReflectAnalysis({
   selectedYear,
   selectedMonth,
@@ -77,9 +87,33 @@ export default function useReflectAnalysis({
       .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
   }, [periodTransactions]);
 
-  const plannedExpenses = isYear ? 0 : Number(budget?.totalPlannedExpenses) || 0;
-  const plannedIncome = isYear ? 0 : Number(budget?.totalPlannedIncome) || 0;
+  const trackedSavings = useMemo(() => {
+    return periodTransactions
+      .filter(
+        (transaction) =>
+          getCategoryType(categories, transaction.category_id) === 'savings'
+      )
+      .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+  }, [periodTransactions, categories]);
+
+  const trackedDebt = useMemo(() => {
+    return periodTransactions
+      .filter(
+        (transaction) =>
+          getCategoryType(categories, transaction.category_id) === 'debt'
+      )
+      .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+  }, [periodTransactions, categories]);
+
+  const plannedExpenses = Number(budget?.totalPlannedExpenses) || 0;
+  const plannedIncome = Number(budget?.totalPlannedIncome) || 0;
+  const plannedSavings = Number(budget?.totalPlannedSavings) || 0;
+  const plannedDebt = Number(budget?.totalPlannedDebt) || 0;
   const leftToAllocate = isYear ? 0 : Number(budget?.leftToAllocate) || 0;
+
+  const totalPlannedOutflow = plannedExpenses + plannedSavings + plannedDebt;
+  const totalTrackedOutflow = expenses + trackedSavings + trackedDebt;
+
   const netCashFlow = income - expenses;
 
   const netWorth = useMemo(() => {
@@ -253,8 +287,14 @@ export default function useReflectAnalysis({
     periodTransactions,
     income,
     expenses,
+    trackedSavings,
+    trackedDebt,
     plannedExpenses,
     plannedIncome,
+    plannedSavings,
+    plannedDebt,
+    totalPlannedOutflow,
+    totalTrackedOutflow,
     leftToAllocate,
     netCashFlow,
     netWorth,
