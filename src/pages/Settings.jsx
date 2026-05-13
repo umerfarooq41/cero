@@ -250,10 +250,17 @@ export default function Settings() {
                       SAR
                     </span>
                   </SelectItem>
-                  <SelectItem value="$">$ USD</SelectItem>
-                  <SelectItem value="€">€ EUR</SelectItem>
-                  <SelectItem value="£">£ GBP</SelectItem>
-                  <SelectItem value="₨">₨ PKR</SelectItem>
+
+                  <SelectItem value="USD">$ USD</SelectItem>
+                  <SelectItem value="EUR">€ EUR</SelectItem>
+                  <SelectItem value="GBP">£ GBP</SelectItem>
+                  <SelectItem value="PKR">₨ PKR</SelectItem>
+                  <SelectItem value="INR">₹ INR</SelectItem>
+                  <SelectItem value="AED">د.إ AED</SelectItem>
+                  <SelectItem value="QAR">ر.ق QAR</SelectItem>
+                  <SelectItem value="KWD">د.ك KWD</SelectItem>
+                  <SelectItem value="BHD">.د.ب BHD</SelectItem>
+                  <SelectItem value="OMR">ر.ع. OMR</SelectItem>
                 </SelectContent>
               </Select>
             </SettingRow>

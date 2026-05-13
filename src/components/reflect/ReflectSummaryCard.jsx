@@ -110,14 +110,32 @@ function MoneyRow({ label, amount, currency, tone }) {
   );
 }
 
+function AnimatedBar({
+  value,
+  className,
+  delay = 'delay-150',
+}) {
+  const safeValue = Math.max(0, Math.min(Number(value || 0), 100));
+
+  return (
+    <div className="h-2 overflow-hidden rounded-full bg-muted">
+      <div
+        className={cn(
+          'h-full rounded-full transition-all duration-700 ease-out',
+          delay,
+          className
+        )}
+        style={{ width: `${safeValue}%` }}
+      />
+    </div>
+  );
+}
+
 function HeroCashFlowCard({
   isYear,
   income,
   expenses,
-  plannedIncome,
-  plannedExpenses,
   netCashFlow,
-  savingsRate,
   currency,
 }) {
   const positive = netCashFlow >= 0;
@@ -139,13 +157,6 @@ function HeroCashFlowCard({
     >
       <div
         className={cn(
-          'absolute inset-x-0 top-0 h-1',
-          positive ? 'bg-emerald-400/70' : 'bg-red-400/70'
-        )}
-      />
-
-      <div
-        className={cn(
           'pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full blur-3xl',
           positive ? 'bg-emerald-500/15' : 'bg-red-500/15'
         )}
@@ -157,12 +168,6 @@ function HeroCashFlowCard({
             <div>
               <p className="text-sm font-semibold text-foreground">
                 {isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-              </p>
-
-              <p className="mt-1 text-xs text-muted-foreground">
-                {isYear
-                  ? 'Full-year income, expenses, and saved amount'
-                  : 'Income, expenses, and saved amount'}
               </p>
             </div>
 
@@ -188,60 +193,33 @@ function HeroCashFlowCard({
           >
             <CurrencyAmount amount={netCashFlow} currency={currency} />
           </div>
-
-          <p className="text-xs font-medium text-muted-foreground">
-            {savingsRate ? `${savingsRate}% savings rate` : 'This period'}
-          </p>
         </div>
 
         <div className="space-y-4">
           <div className="grid gap-2">
             <MoneyRow
-              label={isYear ? 'Year income tracked' : 'Income tracked'}
+              label="Income"
               amount={income}
               currency={currency}
               tone="text-emerald-600 dark:text-emerald-400"
             />
 
-            {!isYear && plannedIncome > 0 && (
-              <MoneyRow
-                label="Income planned"
-                amount={plannedIncome}
-                currency={currency}
-                tone="text-muted-foreground"
-              />
-            )}
-
             <MoneyRow
-              label={isYear ? 'Year expenses tracked' : 'Expenses tracked'}
+              label="Expenses"
               amount={expenses}
               currency={currency}
               tone="text-red-600 dark:text-red-400"
             />
-
-            {!isYear && plannedExpenses > 0 && (
-              <MoneyRow
-                label="Expenses planned"
-                amount={plannedExpenses}
-                currency={currency}
-                tone="text-muted-foreground"
-              />
-            )}
           </div>
 
           <div className="space-y-2">
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all',
-                  positive ? 'bg-emerald-400' : 'bg-red-400'
-                )}
-                style={{ width: `${savedProgress}%` }}
-              />
-            </div>
+            <AnimatedBar
+              value={savedProgress}
+              className={positive ? 'bg-emerald-400' : 'bg-red-400'}
+            />
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{Math.round(savedProgress)}% saved from income</span>
+              <span>{Math.round(savedProgress)}% saved</span>
               <span>{Math.round(expenseProgress)}% spent</span>
             </div>
           </div>
@@ -259,16 +237,9 @@ function SecondaryCard({ title, value, children, tone = 'default' }) {
         ? 'text-red-500 dark:text-red-400'
         : tone === 'info'
           ? 'text-cyan-500 dark:text-cyan-400'
-          : 'text-foreground';
-
-  const accentClass =
-    tone === 'good'
-      ? 'bg-emerald-400/70'
-      : tone === 'bad'
-        ? 'bg-red-400/70'
-        : tone === 'info'
-          ? 'bg-cyan-400/70'
-          : 'bg-muted-foreground/50';
+          : tone === 'warning'
+            ? 'text-amber-500 dark:text-amber-400'
+            : 'text-foreground';
 
   const glowClass =
     tone === 'good'
@@ -277,12 +248,12 @@ function SecondaryCard({ title, value, children, tone = 'default' }) {
         ? 'bg-red-500/10'
         : tone === 'info'
           ? 'bg-cyan-500/10'
-          : 'bg-muted/40';
+          : tone === 'warning'
+            ? 'bg-amber-500/10'
+            : 'bg-muted/40';
 
   return (
-    <ReflectCard className="relative min-h-[160px] overflow-hidden rounded-3xl border border-white/5 bg-card p-4">
-      <div className={cn('absolute inset-x-0 top-0 h-1', accentClass)} />
-
+    <ReflectCard className="relative min-h-[160px] overflow-hidden rounded-3xl border border-border bg-card p-4">
       <div
         className={cn(
           'pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl',
@@ -331,21 +302,26 @@ export default function ReflectSummaryCard({
         )
       : 0;
 
+  const expenseRatio =
+    income > 0 ? Math.min((expenses / income) * 100, 100) : 0;
+
   const budgetDifference = plannedExpenses - expenses;
 
-  const budgetHealth =
-    isYear || plannedExpenses === 0
-      ? 'Tracked'
-      : expenses <= plannedExpenses
-        ? 'Excellent'
-        : 'Warning';
+  const budgetUsed =
+    plannedExpenses > 0
+      ? Math.min((expenses / plannedExpenses) * 100, 100)
+      : 0;
 
-  const budgetTone =
-    isYear || plannedExpenses === 0
-      ? 'info'
-      : expenses <= plannedExpenses
-        ? 'good'
-        : 'bad';
+  const periodSummary =
+    netCashFlow >= 0
+      ? isYear
+        ? 'Year Saved'
+        : 'Month Saved'
+      : isYear
+        ? 'Year Deficit'
+        : 'Month Deficit';
+
+  const periodTone = netCashFlow >= 0 ? 'good' : 'bad';
 
   return (
     <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -353,10 +329,7 @@ export default function ReflectSummaryCard({
         isYear={isYear}
         income={income}
         expenses={expenses}
-        plannedIncome={plannedIncome}
-        plannedExpenses={plannedExpenses}
         netCashFlow={netCashFlow}
-        savingsRate={savingsRate}
         currency={currency}
       />
 
@@ -381,37 +354,68 @@ export default function ReflectSummaryCard({
           />
 
           <div className="space-y-1.5">
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-cyan-400 transition-all"
-                style={{ width: `${netWorthHealth}%` }}
-              />
-            </div>
+            <AnimatedBar
+              value={netWorthHealth}
+              className="bg-cyan-400"
+              delay="delay-300"
+            />
 
             <p className="text-xs text-muted-foreground">
-              {Math.round(netWorthHealth)}% asset-backed position
+              {Math.round(netWorthHealth)}% asset-backed
             </p>
           </div>
         </div>
       </SecondaryCard>
 
       <SecondaryCard
-        title={isYear ? 'Year Summary' : 'Budget Health'}
-        value={budgetHealth}
-        tone={budgetTone}
+        title={isYear ? 'Year Performance' : 'Budget Health'}
+        value={isYear ? periodSummary : plannedExpenses > 0 ? (expenses <= plannedExpenses ? 'Excellent' : 'Warning') : 'Tracked'}
+        tone={isYear ? periodTone : plannedExpenses > 0 ? (expenses <= plannedExpenses ? 'good' : 'warning') : 'info'}
       >
         <div className="space-y-3">
-          <div className="space-y-2">
-            <MoneyRow
-              label={isYear ? 'Year expenses tracked' : 'Planned expenses'}
-              amount={isYear ? expenses : plannedExpenses}
-              currency={currency}
-              tone="text-muted-foreground"
-            />
-
-            {!isYear && (
+          {isYear ? (
+            <>
               <MoneyRow
-                label="Tracked expenses"
+                label="Saved"
+                amount={netCashFlow}
+                currency={currency}
+                tone={
+                  netCashFlow >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-red-600 dark:text-red-400'
+                }
+              />
+
+              <MoneyRow
+                label="Expense ratio"
+                amount={expenseRatio}
+                currency={{ code: '%' }}
+                tone="text-muted-foreground"
+              />
+
+              <AnimatedBar
+                value={100 - expenseRatio}
+                className={
+                  netCashFlow >= 0 ? 'bg-emerald-400' : 'bg-red-400'
+                }
+                delay="delay-500"
+              />
+
+              <p className="text-xs leading-snug text-muted-foreground">
+                {Math.round(100 - expenseRatio)}% of yearly income remained after expenses.
+              </p>
+            </>
+          ) : (
+            <>
+              <MoneyRow
+                label="Planned"
+                amount={plannedExpenses}
+                currency={currency}
+                tone="text-muted-foreground"
+              />
+
+              <MoneyRow
+                label="Tracked"
                 amount={expenses}
                 currency={currency}
                 tone={
@@ -420,35 +424,43 @@ export default function ReflectSummaryCard({
                     : 'text-red-600 dark:text-red-400'
                 }
               />
-            )}
-          </div>
 
-          <p className="text-xs leading-snug text-muted-foreground">
-            {isYear
-              ? 'Full-year spending summary based on tracked transactions.'
-              : plannedExpenses === 0
-                ? 'No planned expense budget for this period.'
-                : budgetDifference >= 0
-                  ? 'Spending remains under planned budget.'
-                  : 'Spending exceeded planned budget.'}
-          </p>
+              {plannedExpenses > 0 && (
+                <>
+                  <AnimatedBar
+                    value={budgetUsed}
+                    className={
+                      expenses <= plannedExpenses
+                        ? 'bg-emerald-400'
+                        : 'bg-amber-400'
+                    }
+                    delay="delay-500"
+                  />
 
-          {!isYear && plannedExpenses > 0 && (
-            <div
-              className={cn(
-                'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
-                budgetDifference >= 0
-                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                  <div
+                    className={cn(
+                      'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
+                      budgetDifference >= 0
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    )}
+                  >
+                    {budgetDifference >= 0 ? 'Under by ' : 'Over by '}
+                    <CurrencyAmount
+                      amount={Math.abs(budgetDifference)}
+                      currency={currency}
+                      compact
+                    />
+                  </div>
+                </>
               )}
-            >
-              {budgetDifference >= 0 ? 'Under by ' : 'Over by '}
-              <CurrencyAmount
-                amount={Math.abs(budgetDifference)}
-                currency={currency}
-                compact
-              />
-            </div>
+
+              {plannedExpenses === 0 && (
+                <p className="text-xs leading-snug text-muted-foreground">
+                  No planned expense budget for this month.
+                </p>
+              )}
+            </>
           )}
         </div>
       </SecondaryCard>
