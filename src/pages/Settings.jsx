@@ -19,8 +19,14 @@ import { Link } from 'react-router-dom';
 import { FolderOpen, ChevronRight } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 
-const SettingRow = ({ icon: Icon, label, description, children }) => (
-  <div className="flex flex-col gap-3 py-4 px-1 sm:flex-row sm:items-center sm:gap-4">
+const SettingRow = ({ icon: Icon, label, description, children, stackOnMobile = false }) => (
+  <div
+    className={
+      stackOnMobile
+        ? 'flex flex-col gap-3 py-4 px-1 sm:flex-row sm:items-center sm:gap-4'
+        : 'flex items-center gap-4 py-4 px-1'
+    }
+  >
     <div className="flex min-w-0 flex-1 items-center gap-4">
       <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
         <Icon className="w-4 h-4 text-muted-foreground" />
@@ -36,9 +42,7 @@ const SettingRow = ({ icon: Icon, label, description, children }) => (
       </div>
     </div>
 
-    <div className="shrink-0 self-start sm:self-center sm:ml-4">
-      {children}
-    </div>
+    <div className="shrink-0 self-start sm:self-center">{children}</div>
   </div>
 );
 
@@ -224,6 +228,7 @@ export default function Settings() {
                 icon={User}
                 label={user.user_metadata?.full_name || user.email}
                 description={user.email}
+                stackOnMobile
               >
                 <Button
                   variant="outline"
@@ -334,21 +339,6 @@ export default function Settings() {
                   <SelectItem value="KWD">د.ك KWD</SelectItem>
                   <SelectItem value="BHD">.د.ب BHD</SelectItem>
                   <SelectItem value="OMR">ر.ع. OMR</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingRow>
-
-            <SettingRow
-              icon={Globe}
-              label="Currency Placement"
-              description="Currency symbol appears before amount"
-            >
-              <Select value="before" disabled>
-                <SelectTrigger className="w-36 h-8">
-                  <SelectValue placeholder="Before" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="before">Before</SelectItem>
                 </SelectContent>
               </Select>
             </SettingRow>
