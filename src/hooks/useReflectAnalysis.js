@@ -1,5 +1,9 @@
 import { useMemo } from 'react';
 import { format, subMonths } from 'date-fns';
+import {
+  filterTransactionsByBudgetMonth,
+  filterTransactionsByBudgetYear,
+} from '@/lib/budgetLogic';
 
 export const CHART_COLORS = [
   '#0078D4',
@@ -62,6 +66,7 @@ export default function useReflectAnalysis({
   accounts = [],
   categories = [],
   budget,
+  settings = {},
 }) {
   const { start, end, monthKey, isYear } = useMemo(
     () => getPeriodRange(selectedYear, selectedMonth),
@@ -69,11 +74,20 @@ export default function useReflectAnalysis({
   );
 
   const periodTransactions = useMemo(() => {
-    return allTransactions.filter((transaction) => {
-      if (!transaction.date) return false;
-      return transaction.date >= start && transaction.date <= end;
-    });
-  }, [allTransactions, start, end]);
+    if (isYear) {
+      return filterTransactionsByBudgetYear(
+        allTransactions,
+        selectedYear,
+        settings
+      );
+    }
+
+    return filterTransactionsByBudgetMonth(
+      allTransactions,
+      monthKey,
+      settings
+    );
+  }, [allTransactions, isYear, selectedYear, monthKey, settings]);
 
   const income = useMemo(() => {
     return periodTransactions
@@ -182,8 +196,10 @@ export default function useReflectAnalysis({
       for (let index = 0; index < 12; index += 1) {
         const month = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
 
-        const txns = allTransactions.filter((transaction) =>
-          transaction.date?.startsWith(month)
+        const txns = filterTransactionsByBudgetMonth(
+          allTransactions,
+          month,
+          settings
         );
 
         const monthIncome = txns
@@ -216,8 +232,10 @@ export default function useReflectAnalysis({
       const month = format(monthDate, 'yyyy-MM');
       const label = format(monthDate, 'MMM');
 
-      const txns = allTransactions.filter((transaction) =>
-        transaction.date?.startsWith(month)
+      const txns = filterTransactionsByBudgetMonth(
+        allTransactions,
+        month,
+        settings
       );
 
       const monthIncome = txns
@@ -243,7 +261,7 @@ export default function useReflectAnalysis({
     }
 
     return months;
-  }, [isYear, selectedYear, monthKey, allTransactions]);
+  }, [isYear, selectedYear, monthKey, allTransactions, settings]);
 
   const spendingTrend = useMemo(() => {
     if (isYear) {
@@ -253,8 +271,14 @@ export default function useReflectAnalysis({
         const amount = allTransactions
           .filter(
             (transaction) =>
-              transaction.type === 'expense' &&
-              transaction.date?.startsWith(month)
+              transaction.type === 'expense'
+          )
+          .filter((transaction) =>
+            filterTransactionsByBudgetMonth(
+              [transaction],
+              month,
+              settings
+            ).length > 0
           )
           .reduce(
             (sum, transaction) => sum + (Number(transaction.amount) || 0),
@@ -277,7 +301,7 @@ export default function useReflectAnalysis({
     return Object.entries(days)
       .sort(([a], [b]) => Number(a) - Number(b))
       .map(([day, amount]) => ({ label: day, amount }));
-  }, [isYear, selectedYear, allTransactions, periodTransactions]);
+  }, [isYear, selectedYear, allTransactions, periodTransactions, settings]);
 
   return {
     start,

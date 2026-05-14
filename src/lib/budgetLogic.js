@@ -1,3 +1,12 @@
+export function isTwentyFifthRuleEnabled(settings = {}) {
+  return (
+    settings?.shift25th === true ||
+    settings?.twentyFifthRule === true ||
+    settings?.budgetLogic?.twentyFifthRule === true ||
+    settings?.budget_logic?.twenty_fifth_rule === true
+  );
+}
+
 export function getBudgetMonth(date, settings = {}) {
   if (!date) return null;
 
@@ -7,14 +16,11 @@ export function getBudgetMonth(date, settings = {}) {
     return null;
   }
 
-  const use25thRule =
-    settings?.budgetLogic?.twentyFifthRule === true;
-
   const budgetDate = new Date(parsedDate);
 
-  // If transaction happens on/after 25th,
-  // assign it to next budget month
-  if (use25thRule && budgetDate.getDate() >= 25) {
+  // 25th Rule:
+  // transactions dated on/after the 25th are assigned to next budget month.
+  if (isTwentyFifthRuleEnabled(settings) && budgetDate.getDate() >= 25) {
     budgetDate.setMonth(budgetDate.getMonth() + 1);
   }
 
@@ -29,9 +35,7 @@ export function isTransactionInBudgetMonth(
   month,
   settings = {}
 ) {
-  return (
-    getBudgetMonth(transaction?.date, settings) === month
-  );
+  return getBudgetMonth(transaction?.date, settings) === month;
 }
 
 export function filterTransactionsByBudgetMonth(
@@ -39,14 +43,29 @@ export function filterTransactionsByBudgetMonth(
   month,
   settings = {}
 ) {
+  if (!month) return transactions;
+
   return transactions.filter((transaction) =>
     isTransactionInBudgetMonth(transaction, month, settings)
   );
 }
 
-export function getNextBudgetMonth(month) {
-  const [year, monthNumber] = month.split('-').map(Number);
+export function filterTransactionsByBudgetYear(
+  transactions = [],
+  year,
+  settings = {}
+) {
+  if (!year) return transactions;
 
+  return transactions.filter((transaction) =>
+    getBudgetMonth(transaction?.date, settings)?.startsWith(`${year}-`)
+  );
+}
+
+export function getNextBudgetMonth(month) {
+  if (!month) return null;
+
+  const [year, monthNumber] = month.split('-').map(Number);
   const date = new Date(year, monthNumber - 1);
 
   date.setMonth(date.getMonth() + 1);
@@ -57,8 +76,9 @@ export function getNextBudgetMonth(month) {
 }
 
 export function getPreviousBudgetMonth(month) {
-  const [year, monthNumber] = month.split('-').map(Number);
+  if (!month) return null;
 
+  const [year, monthNumber] = month.split('-').map(Number);
   const date = new Date(year, monthNumber - 1);
 
   date.setMonth(date.getMonth() - 1);

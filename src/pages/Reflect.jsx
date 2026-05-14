@@ -23,6 +23,7 @@ import {
   useAllTransactions,
   useBudgetSummary,
   useCategories,
+  useUserSettings,
   useYearBudgetSummary,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -48,6 +49,7 @@ export default function Reflect() {
   const { data: categories = [] } = useCategories();
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: accounts = [] } = useAccounts();
+  const { data: settings = {} } = useUserSettings();
 
   const isYearView = selectedMonth === 'all';
 
@@ -65,6 +67,7 @@ export default function Reflect() {
     accounts,
     categories,
     budget: isYearView ? yearBudget : monthBudget,
+    settings,
   });
 
   const {

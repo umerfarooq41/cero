@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { accountsApi, budgetPlansApi, categoriesApi, transactionsApi } from '@/lib/budgetData';
+import { accountsApi, budgetPlansApi, categoriesApi, transactionsApi, getUserSettings } from '@/lib/budgetData';
+import {
+  filterTransactionsByBudgetMonth,
+  filterTransactionsByBudgetYear,
+} from '@/lib/budgetLogic';
 import { useAuth } from '@/lib/AuthContext';
 
 export function useCategories() {
@@ -30,15 +34,32 @@ export function useAccounts() {
   });
 }
 
+export function useUserSettings() {
+  const { session } = useAuth();
+
+  return useQuery({
+    queryKey: ['user-settings', session?.user?.id],
+    queryFn: async () => {
+      const settings = await getUserSettings();
+      return settings || {};
+    },
+    enabled: Boolean(session?.user?.id),
+    initialData: {},
+  });
+}
+
 export function useTransactions(month) {
   const { session } = useAuth();
 
   return useQuery({
     queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
-      const all = await transactionsApi.list();
-      if (!month) return all;
-      return all.filter(t => t.date?.startsWith(month));
+      const [all, settings] = await Promise.all([
+        transactionsApi.list(),
+        getUserSettings(),
+      ]);
+
+      return filterTransactionsByBudgetMonth(all, month, settings || {});
     },
     enabled: Boolean(session?.user?.id),
     initialData: [],
@@ -174,7 +195,13 @@ export function useYearBudgetSummary(year) {
   const { data: transactions = [] } = useAllTransactions();
   const { data: allocations = [] } = useAllAllocations();
 
-  const yearTransactions = transactions.filter(t => t.date?.startsWith(`${year}-`));
+  const { data: settings = {} } = useUserSettings();
+
+  const yearTransactions = filterTransactionsByBudgetYear(
+    transactions,
+    year,
+    settings
+  );
   const yearAllocations = allocations.filter(a => a.month?.startsWith(`${year}-`));
 
   return buildBudgetSummary({
