@@ -34,6 +34,26 @@ export function useAccounts() {
   });
 }
 
+function normalizeUserSettings(settings = {}) {
+  return {
+    ...settings,
+    budgetLogic: {
+      twentyFifthRule:
+        settings?.budgetLogic?.twentyFifthRule ??
+        settings?.budget_logic?.twenty_fifth_rule ??
+        settings?.twentyFifthRule ??
+        settings?.shift25th ??
+        false,
+      autoSweepSurplus:
+        settings?.budgetLogic?.autoSweepSurplus ??
+        settings?.budget_logic?.auto_sweep_surplus ??
+        settings?.autoSweepSurplus ??
+        settings?.auto_sweep ??
+        false,
+    },
+  };
+}
+
 export function useUserSettings() {
   const { session } = useAuth();
 
@@ -41,10 +61,10 @@ export function useUserSettings() {
     queryKey: ['user-settings', session?.user?.id],
     queryFn: async () => {
       const settings = await getUserSettings();
-      return settings || {};
+      return normalizeUserSettings(settings || {});
     },
     enabled: Boolean(session?.user?.id),
-    initialData: {},
+    initialData: normalizeUserSettings(),
   });
 }
 

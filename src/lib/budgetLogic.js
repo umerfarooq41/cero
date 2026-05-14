@@ -7,6 +7,16 @@ export function isTwentyFifthRuleEnabled(settings = {}) {
   );
 }
 
+
+export function isAutoSweepSurplusEnabled(settings = {}) {
+  return (
+    settings?.autoSweepSurplus === true ||
+    settings?.auto_sweep === true ||
+    settings?.budgetLogic?.autoSweepSurplus === true ||
+    settings?.budget_logic?.auto_sweep_surplus === true
+  );
+}
+
 export function getBudgetMonth(date, settings = {}) {
   if (!date) return null;
 

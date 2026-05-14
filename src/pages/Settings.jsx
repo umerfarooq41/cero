@@ -48,6 +48,26 @@ const applyTheme = (theme) => {
   }
 };
 
+const getSavedTwentyFifthRule = (saved = {}, fallback = false) => {
+  return (
+    saved?.budgetLogic?.twentyFifthRule ??
+    saved?.budget_logic?.twenty_fifth_rule ??
+    saved?.twentyFifthRule ??
+    saved?.shift25th ??
+    fallback
+  );
+};
+
+const getSavedAutoSweepSurplus = (saved = {}, fallback = false) => {
+  return (
+    saved?.budgetLogic?.autoSweepSurplus ??
+    saved?.budget_logic?.auto_sweep_surplus ??
+    saved?.autoSweepSurplus ??
+    saved?.auto_sweep ??
+    fallback
+  );
+};
+
 export default function Settings() {
   const [settings, setSettings] = useState({
     theme: 'light',
@@ -55,8 +75,10 @@ export default function Settings() {
     currencyPlacement: 'before',
     numberFormat: 'comma',
     dateFormat: 'MM/DD/YYYY',
-    shift25th: false,
-    autoSweep: false,
+    budgetLogic: {
+      twentyFifthRule: false,
+      autoSweepSurplus: false,
+    },
   });
 
   const queryClient = useQueryClient();
@@ -80,8 +102,17 @@ export default function Settings() {
             currencyPlacement: saved.currency_placement || 'before',
             numberFormat: saved.number_format ?? prev.numberFormat,
             dateFormat: saved.date_format ?? prev.dateFormat,
-            shift25th: saved.shift25th ?? prev.shift25th,
-            autoSweep: saved.auto_sweep ?? prev.autoSweep,
+            budgetLogic: {
+              ...prev.budgetLogic,
+              twentyFifthRule: getSavedTwentyFifthRule(
+                saved,
+                prev.budgetLogic.twentyFifthRule
+              ),
+              autoSweepSurplus: getSavedAutoSweepSurplus(
+                saved,
+                prev.budgetLogic.autoSweepSurplus
+              ),
+            },
           }));
 
           applyTheme(loadedTheme);
@@ -111,8 +142,8 @@ export default function Settings() {
         number_format: newSettings.numberFormat,
         date_format: newSettings.dateFormat,
         theme: newSettings.theme,
-        shift25th: newSettings.shift25th,
-        auto_sweep: newSettings.autoSweep,
+        shift25th: newSettings.budgetLogic.twentyFifthRule,
+        auto_sweep: newSettings.budgetLogic.autoSweepSurplus,
       });
 
       queryClient.invalidateQueries();
@@ -126,6 +157,38 @@ export default function Settings() {
       console.error('Settings save failed:', error);
       setSettings(settings);
       toast.error(error.message || 'Could not save setting');
+    }
+  };
+
+  const updateBudgetLogicSetting = async (key, value) => {
+    const newSettings = {
+      ...settings,
+      currencyPlacement: 'before',
+      budgetLogic: {
+        ...settings.budgetLogic,
+        [key]: value,
+      },
+    };
+
+    setSettings(newSettings);
+
+    try {
+      await saveUserSettings({
+        currency: newSettings.currency,
+        currency_placement: 'before',
+        number_format: newSettings.numberFormat,
+        date_format: newSettings.dateFormat,
+        theme: newSettings.theme,
+        shift25th: newSettings.budgetLogic.twentyFifthRule,
+        auto_sweep: newSettings.budgetLogic.autoSweepSurplus,
+      });
+
+      queryClient.invalidateQueries();
+      toast.success('Setting saved');
+    } catch (error) {
+      console.error('Budget logic save failed:', error);
+      setSettings(settings);
+      toast.error(error.message || 'Could not save budget logic setting');
     }
   };
 
@@ -327,8 +390,10 @@ export default function Settings() {
               description="Income on/after 25th moves to next month's pool"
             >
               <Switch
-                checked={settings.shift25th}
-                onCheckedChange={(v) => updateSetting('shift25th', v)}
+                checked={settings.budgetLogic.twentyFifthRule}
+                onCheckedChange={(v) =>
+                  updateBudgetLogicSetting('twentyFifthRule', v)
+                }
               />
             </SettingRow>
 
@@ -338,8 +403,10 @@ export default function Settings() {
               description="Unspent balances become savings automatically"
             >
               <Switch
-                checked={settings.autoSweep}
-                onCheckedChange={(v) => updateSetting('autoSweep', v)}
+                checked={settings.budgetLogic.autoSweepSurplus}
+                onCheckedChange={(v) =>
+                  updateBudgetLogicSetting('autoSweepSurplus', v)
+                }
               />
             </SettingRow>
           </div>
