@@ -20,15 +20,25 @@ import { FolderOpen, ChevronRight } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 
 const SettingRow = ({ icon: Icon, label, description, children }) => (
-  <div className="flex items-center gap-4 py-4 px-1">
-    <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-      <Icon className="w-4 h-4 text-muted-foreground" />
+  <div className="flex flex-col gap-3 py-4 px-1 sm:flex-row sm:items-center sm:gap-4">
+    <div className="flex min-w-0 flex-1 items-center gap-4">
+      <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-muted-foreground" />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium truncate">{label}</div>
+        {description && (
+          <div className="text-xs text-muted-foreground mt-0.5 break-words">
+            {description}
+          </div>
+        )}
+      </div>
     </div>
-    <div className="flex-1 min-w-0">
-      <div className="text-sm font-medium">{label}</div>
-      {description && <div className="text-xs text-muted-foreground mt-0.5">{description}</div>}
+
+    <div className="shrink-0 self-start sm:self-center sm:ml-4">
+      {children}
     </div>
-    <div className="shrink-0">{children}</div>
   </div>
 );
 
