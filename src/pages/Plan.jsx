@@ -804,26 +804,6 @@ export default function Plan() {
         )}
       </motion.div>
 
-      <AnimatePresence>
-        {isEditMode && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.18 }}
-            className="fixed bottom-6 left-0 right-0 px-4 z-40 max-w-3xl mx-auto"
-          >
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full h-12 text-sm font-semibold gap-2 shadow-lg"
-            >
-              <Save className="w-4 h-4" />
-              {saving ? 'Saving…' : 'Save Plan'}
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
       </main>
     </div>
   );

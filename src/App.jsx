@@ -16,9 +16,12 @@ import Settings from '@/pages/Settings';
 import Reflect from '@/pages/Reflect';
 import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
+import { useAutoSweepSurplus } from '@/hooks/useBudgetData';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated } = useAuth();
+
+  useAutoSweepSurplus();
 
   if (isLoadingAuth) {
     return (
