@@ -18,3 +18,13 @@ This zip applies a global visual consistency pass without changing budget/busine
 
 ## Build warning
 Vite still shows the existing large chunk warning. This is not caused by the typography changes; it means the app bundle could later benefit from route-level code splitting.
+
+
+## Additional Pass - Plan Glass + Desktop Consistency
+
+- Updated Plan month/edit header from `surface-card card-elevated` to the same glass card style used elsewhere.
+- Updated Plan overview tabs, donut card, and breakdown card to `border-border/60 bg-card/70 backdrop-blur-xl shadow-sm`.
+- Fixed typo `shadow-sms` to `shadow-sm` in `SummaryCards.jsx`.
+- Widened desktop content containers from `max-w-3xl` / `lg:max-w-4xl` to `max-w-6xl` where appropriate.
+- Widened Settings desktop content from `max-w-2xl` to `max-w-4xl`.
+- Verified with `npm run build`.

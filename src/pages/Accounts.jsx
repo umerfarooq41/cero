@@ -154,7 +154,7 @@ export default function Accounts() {
         subtitle="Your financial overview"
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 md:px-6 md:py-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 md:py-6">
         
         {/* Net Worth Card */}
         <section className="mb-6 rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl p-5 shadow-md md:p-6">

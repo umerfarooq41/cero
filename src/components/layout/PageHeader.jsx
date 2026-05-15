@@ -22,7 +22,7 @@ export default function PageHeader({
         className="
           mx-auto
           w-full
-          max-w-6xl lg:max-w-4xl
+          max-w-6xl
           px-4
           pt-5
           pb-4

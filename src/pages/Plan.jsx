@@ -317,7 +317,7 @@ function PlanOverview({
 
   return (
     <div className="space-y-4">
-      <div className="grid w-full grid-cols-4 gap-1 rounded-2xl border border-white/40 bg-white/35 p-1.5 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="grid w-full grid-cols-4 gap-1 rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
         {TABS.map((item) => {
           const TabIcon = item.icon;
           const active = item.key === activeTab;
@@ -339,7 +339,7 @@ function PlanOverview({
         })}
       </div>
 
-      <div className="rounded-[2rem] border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-4">
+      <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
@@ -425,7 +425,7 @@ function PlanOverview({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[2rem] border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+      <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <div className="border-b px-4 py-3">
           <h3 className="text-sm font-bold uppercase tracking-wide">
             {tab.title} Breakdown
@@ -675,7 +675,7 @@ export default function Plan() {
         subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 lg:py-8">
         <div className="mb-4">
           <AnimatePresence mode="wait">
             {isEditMode ? (
@@ -685,7 +685,7 @@ export default function Plan() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="flex items-center justify-between rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-2"
+                className="flex items-center justify-between rounded-2xl border border-border/60 bg-card/70 p-2 shadow-sm backdrop-blur-xl"
               >
                 <Button
                   variant="ghost"
@@ -718,7 +718,7 @@ export default function Plan() {
                 transition={{ duration: 0.15 }}
               >
                 <div className="flex items-center justify-center">
-                  <div className="flex w-full max-w-md items-center rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
+                  <div className="flex w-full max-w-md items-center rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
                     <Button
                       type="button"
                       variant="ghost"

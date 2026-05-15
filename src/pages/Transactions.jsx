@@ -182,7 +182,7 @@ export default function Transactions() {
         subtitle={`${filtered.length} transactions this month`}
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         {/* Month + Date */}
         <div className="mb-4 flex justify-center">
           <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">

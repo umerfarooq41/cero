@@ -273,7 +273,7 @@ export default function Settings() {
         subtitle="Preferences, categories, and app settings"
       />
 
-      <main className="mx-auto w-full max-w-2xl px-4 py-3 pb-24 lg:py-8">
+      <main className="mx-auto w-full max-w-4xl px-4 py-3 pb-24 lg:py-8">
         <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

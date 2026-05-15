@@ -110,7 +110,7 @@ export default function Categories() {
         subtitle="Organize income, expenses, savings, and debt"
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
         {archivedCategories.length > 0 && (
           <div className="mb-4 flex justify-end">
             <Button

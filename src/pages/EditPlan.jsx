@@ -331,7 +331,7 @@ className={cn(
         )} budget plan`}
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
         <div className="mb-4">
           <div className="flex items-center justify-center">
             <div className="flex w-full max-w-md items-center rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
