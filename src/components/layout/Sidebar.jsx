@@ -24,7 +24,7 @@ export default function Sidebar() {
     <aside
       className="
         hidden lg:flex lg:static
-        h-full w-64 flex-col
+        h-full w-64 lg:w-72 flex-col
         app-fixed-surface
         border-0
         shadow-none
@@ -56,7 +56,7 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
+                'flex items-center gap-3 px-3 py-2.5 lg:px-4 lg:py-3 rounded-xl text-sm lg:text-[15px] font-medium transition-all duration-150',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -64,7 +64,7 @@ export default function Sidebar() {
             >
               <item.icon
                 className={cn(
-                  'w-[18px] h-[18px] transition-all duration-150',
+                  'w-[18px] h-[18px] lg:w-5 lg:h-5 transition-all duration-150',
                   isActive && 'stroke-[2.5]'
                 )}
               />
