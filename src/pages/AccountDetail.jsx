@@ -37,7 +37,6 @@ import {
   useAccounts,
   useAllTransactions,
   useCategories,
-  useCurrencyFormatter,
 } from '@/hooks/useBudgetData';
 
 import TransactionRow from '@/components/transactions/TransactionRow';
@@ -47,6 +46,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const typeIcons = {
   checking: Landmark,
@@ -58,18 +58,79 @@ const typeIcons = {
   other: Wallet,
 };
 
-function InlineMoney({ children }) {
+
+const getCurrencyCode = (currency) => {
+  if (typeof currency === 'string') return currency;
+  return currency?.code || currency?.currency || 'SAR';
+};
+
+const getCurrencySymbol = (currency) => {
+  const code = getCurrencyCode(currency);
+
+  const map = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    JPY: '¥',
+    CNY: '¥',
+    INR: '₹',
+    PKR: 'Rs',
+    AED: 'د.إ',
+    TRY: '₺',
+    RUB: '₽',
+  };
+
+  return currency?.symbol || map[code] || code;
+};
+
+function formatNumber(value = 0) {
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(number);
+}
+
+function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
+  const code = getCurrencyCode(currency);
+  const symbol = getCurrencySymbol(currency);
+
   return (
-    <span className="inline-flex items-center align-middle whitespace-nowrap">
-      {children}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
+        className
+      )}
+    >
+      {code === 'SAR' ? (
+        <span
+          className={cn(
+            'inline-block shrink-0 bg-current align-middle',
+            compact ? 'h-[0.8em] w-[0.8em]' : 'h-[0.9em] w-[0.9em]'
+          )}
+          style={{
+            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+            mask: 'url(/sar.svg) center / contain no-repeat',
+          }}
+        />
+      ) : (
+        <span className="text-current">{symbol}</span>
+      )}
+
+      <span>{formatNumber(amount)}</span>
     </span>
   );
 }
 
+
 export default function AccountDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const formatCurrency = useCurrencyFormatter();
+  const currency = useCurrency();
+  const formatCurrency = (amount) => (
+    <CurrencyAmount amount={amount} currency={currency} compact />
+  );
 
   const accountId = window.location.pathname.split('/').pop();
 
@@ -242,7 +303,7 @@ export default function AccountDetail() {
                   )}
                 >
                   {isLiability && <span>-</span>}
-                  <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                  {formatCurrency(balance)}
                 </div>
               </div>
 

@@ -23,12 +23,79 @@ import {
   useAccounts,
 } from '@/hooks/useBudgetData';
 
-import { useCurrencyFormatter } from '@/hooks/useCurrency';
+import { useCurrency } from '@/hooks/useCurrency';
+import { cn } from '@/lib/utils';
+
+
+const getCurrencyCode = (currency) => {
+  if (typeof currency === 'string') return currency;
+  return currency?.code || currency?.currency || 'SAR';
+};
+
+const getCurrencySymbol = (currency) => {
+  const code = getCurrencyCode(currency);
+
+  const map = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    JPY: '¥',
+    CNY: '¥',
+    INR: '₹',
+    PKR: 'Rs',
+    AED: 'د.إ',
+    TRY: '₺',
+    RUB: '₽',
+  };
+
+  return currency?.symbol || map[code] || code;
+};
+
+function formatNumber(value = 0) {
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(number);
+}
+
+function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
+  const code = getCurrencyCode(currency);
+  const symbol = getCurrencySymbol(currency);
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
+        className
+      )}
+    >
+      {code === 'SAR' ? (
+        <span
+          className={cn(
+            'inline-block shrink-0 bg-current align-middle',
+            compact ? 'h-[0.8em] w-[0.8em]' : 'h-[0.9em] w-[0.9em]'
+          )}
+          style={{
+            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+            mask: 'url(/sar.svg) center / contain no-repeat',
+          }}
+        />
+      ) : (
+        <span className="text-current">{symbol}</span>
+      )}
+
+      <span>{formatNumber(amount)}</span>
+    </span>
+  );
+}
 
 const ADD_TRANSACTION_ROUTE = '/add-transaction';
 
 export default function Transactions() {
   const navigate = useNavigate();
+  const currency = useCurrency();
 
   const [currentMonth, setCurrentMonth] = useState(
     format(new Date(), 'yyyy-MM')
@@ -38,7 +105,9 @@ export default function Transactions() {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
 
-  const formatCurrency = useCurrencyFormatter();
+  const formatCurrency = (amount) => (
+    <CurrencyAmount amount={amount} currency={currency} compact />
+  );
 
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: categories = [] } = useCategories();

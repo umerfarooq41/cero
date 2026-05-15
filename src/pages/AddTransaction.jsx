@@ -69,11 +69,32 @@ const typeOptions = [
   },
 ];
 
+const getCurrencyCode = (currency) => {
+  if (typeof currency === 'string') return currency;
+  return currency?.code || currency?.currency || 'SAR';
+};
+
+const getCurrencySymbol = (currency) => {
+  const code = getCurrencyCode(currency);
+
+  const map = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    JPY: '¥',
+    CNY: '¥',
+    INR: '₹',
+    PKR: 'Rs',
+    AED: 'د.إ',
+    TRY: '₺',
+    RUB: '₽',
+  };
+
+  return currency?.symbol || map[code] || code;
+};
+
 function CurrencyPrefix({ currency }) {
-  const currencyCode =
-    typeof currency === 'string'
-      ? currency
-      : currency?.code || currency?.currency || 'SAR';
+  const currencyCode = getCurrencyCode(currency);
 
   if (currencyCode === 'SAR') {
     return (
@@ -87,7 +108,7 @@ function CurrencyPrefix({ currency }) {
     );
   }
 
-  return <span className="text-[0.75em] leading-none">{currencyCode}</span>;
+  return <span className="text-[0.75em] leading-none">{getCurrencySymbol(currency)}</span>;
 }
 
 function normalizeCategoryType(value) {
