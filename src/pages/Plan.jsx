@@ -790,7 +790,7 @@ export default function Plan() {
             leftToAllocate={leftToAllocate}
             totalIncome={totalIncomeDisplay}
             isEditMode={isEditMode}
-            formatC0urrency={formatCurrency}
+            formatCurrency={formatCurrency}
             />
 
           <AnimatePresence>
