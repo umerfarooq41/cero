@@ -5,7 +5,7 @@ This zip applies a global visual consistency pass without changing budget/busine
 ## Main changes
 - Standardized page title scale through `PageHeader.jsx`.
 - Standardized shared buttons, inputs, selects, tabs, and cards through UI primitives.
-- Standardized cards to `rounded-2xl border border-border bg-card shadow-sm`.
+- Standardized cards to `rounded-2xl border border-border/60 bg-card/70 backdrop-blur-lg shadow-sm`.
 - Standardized hero cards to `rounded-3xl` with medium shadow.
 - Reduced oversized Accounts typography and spacing.
 - Normalized Plan summary cards and Left To Allocate banner text sizing/depth.

@@ -55,7 +55,7 @@ function SummaryCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-300',
+        'rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sms transition-all duration-300',
         faded && 'opacity-50 scale-[0.98]'
       )}
     >
