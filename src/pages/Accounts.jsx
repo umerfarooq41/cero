@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Plus,
   Scale,
   ArrowUpRight,
   ArrowDownRight,
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
-import { Button } from '@/components/ui/button';
+import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
 
@@ -195,14 +194,10 @@ export default function Accounts() {
           {renderGroup('Liabilities', liabilities, true)}
         </div>
 
-        <Link to="/add-account">
-          <Button
-            className="fixed bottom-24 right-5 z-50 h-16 w-16 rounded-[1.65rem] p-0 shadow-2xl shadow-primary/30 transition-transform hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8"
-            size="icon"
-          >
-            <Plus className="h-7 w-7" />
-          </Button>
-        </Link>
+        <FloatingActionButton
+          to="/add-account"
+          ariaLabel="Add account"
+        />
       </main>
     </div>
   );

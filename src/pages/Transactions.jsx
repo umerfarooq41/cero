@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { format, addMonths, subMonths } from 'date-fns';
 import {
-  Plus,
   Search,
   ArrowLeftRight,
   X,
@@ -16,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
+import FloatingActionButton from '@/components/shared/FloatingActionButton';
 
 import {
   useTransactions,
@@ -363,11 +363,10 @@ export default function Transactions() {
 
         {/* Floating Add Button */}
         {hasTransactions && (
-          <Link to={ADD_TRANSACTION_ROUTE}>
-            <Button className="fixed bottom-24 right-5 z-50 h-16 w-16 rounded-[1.65rem] p-0 shadow-2xl shadow-primary/30 transition-transform hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8">
-              <Plus className="h-7 w-7" />
-            </Button>
-          </Link>
+          <FloatingActionButton
+            to={ADD_TRANSACTION_ROUTE}
+            ariaLabel="Add transaction"
+          />
         )}
       </main>
     </div>
