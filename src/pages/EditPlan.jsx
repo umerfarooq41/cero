@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import AllocationRow from '@/components/editplan/AllocationRow';
+import CategoryIcon from '@/components/shared/CategoryIcon';
 import { useCategories, useAllocations } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
@@ -99,6 +100,11 @@ export default function EditPlan() {
         result.push({
           ...parent,
           isSectionHeader: true,
+          subCount: subs.length,
+          sectionTotal: subs.reduce(
+            (sum, sub) => sum + Number(values[sub.id] || 0),
+            0
+          ),
         });
 
         subs.forEach((sub) =>
@@ -280,11 +286,19 @@ export default function EditPlan() {
                 return (
                   <div
                     key={cat.id}
-                    className="flex items-center gap-3 bg-white/20 px-4 py-2.5 dark:bg-white/[0.02]"
+                    className="flex items-center gap-3 bg-white/20 px-4 py-3 dark:bg-white/[0.02]"
                   >
-                    <span className="text-xs font-semibold uppercase text-muted-foreground">
-                      {cat.name}
-                    </span>
+                    <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-foreground">
+                        {cat.name}
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-right text-sm font-bold tracking-tight text-foreground tabular-nums">
+                      {formatCurrency(cat.sectionTotal || 0)}
+                    </div>
                   </div>
                 );
               }
