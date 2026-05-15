@@ -20,8 +20,24 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90 lg:hidden">
-      <div className="grid grid-cols-5 h-16 pb-[env(safe-area-inset-bottom)]">
+    <nav
+      className="
+        fixed bottom-0 left-0 right-0 z-50
+        app-fixed-surface
+        backdrop-blur-xl
+        supports-[backdrop-filter]:backdrop-blur-xl
+        lg:hidden
+      "
+    >
+      <div
+        className="
+          mx-auto
+          max-w-3xl
+          grid grid-cols-5
+          h-16
+          pb-[env(safe-area-inset-bottom)]
+        "
+      >
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
 
@@ -33,20 +49,47 @@ export default function BottomNav() {
             >
               <div
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 px-3 py-2 transition-all duration-200',
+                  `
+                  relative
+                  flex flex-col items-center justify-center
+                  gap-1
+                  px-3 py-2
+                  rounded-2xl
+                  transition-all duration-200
+                  `,
                   isActive
                     ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
+                {isActive && (
+                  <div
+                    className="
+                      absolute inset-0
+                      rounded-2xl
+                      bg-primary/10
+                    "
+                  />
+                )}
+
                 <item.icon
                   className={cn(
-                    'w-5 h-5 transition-all duration-200',
+                    `
+                    relative z-10
+                    w-5 h-5
+                    transition-all duration-200
+                    `,
                     isActive && 'scale-110'
                   )}
                 />
 
-                <span className="text-[11px] font-medium">
+                <span
+                  className="
+                    relative z-10
+                    text-[11px]
+                    font-medium
+                  "
+                >
                   {item.label}
                 </span>
               </div>
