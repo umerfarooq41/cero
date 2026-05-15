@@ -364,8 +364,8 @@ export default function Transactions() {
         {/* Floating Add Button */}
         {hasTransactions && (
           <Link to={ADD_TRANSACTION_ROUTE}>
-            <Button className="fixed bottom-24 right-5 z-50 h-14 w-14 rounded-2xl p-0 shadow-lg shadow-primary/25 lg:bottom-6">
-              <Plus className="h-6 w-6" />
+            <Button className="fixed bottom-24 right-5 z-50 h-16 w-16 rounded-[1.65rem] p-0 shadow-2xl shadow-primary/30 transition-transform hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8">
+              <Plus className="h-7 w-7" />
             </Button>
           </Link>
         )}

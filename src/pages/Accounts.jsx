@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus,
+  Scale,
+  ArrowUpRight,
+  ArrowDownRight,
   TrendingUp,
   Building,
   Landmark,
@@ -64,7 +67,12 @@ export default function Accounts() {
     return (
       <div className="surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <h3
+            className={cn(
+              'text-xs font-bold uppercase tracking-wider',
+              isLiability ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'
+            )}
+          >
             {title}
           </h3>
 
@@ -126,14 +134,18 @@ export default function Accounts() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
-        <div className="surface-card card-elevated rounded-2xl border border-white/40 dark:border-white/[0.05] p-6 mb-8 text-center">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
+        <section className="surface-card card-elevated mb-8 rounded-[2rem] border border-white/40 p-7 text-center dark:border-white/[0.05] sm:p-8">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+            <Scale className="h-7 w-7" />
+          </div>
+
+          <div className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
             Net Worth
           </div>
 
           <div
             className={cn(
-              'text-4xl font-bold tracking-tight mb-4 tabular-nums flex items-center justify-center gap-1',
+              'mb-3 flex items-center justify-center gap-1 text-4xl font-black tracking-tight tabular-nums sm:text-5xl',
               netWorth >= 0 ? 'text-foreground' : 'text-destructive'
             )}
           >
@@ -141,14 +153,42 @@ export default function Accounts() {
             <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
           </div>
 
-          <div className="text-xs text-muted-foreground flex items-center justify-center gap-x-1.5 gap-y-1 flex-wrap">
-            <span>Assets</span>
-            <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
-            <span>−</span>
-            <span>Liabilities</span>
-            <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+          <p className="mb-8 text-sm font-medium text-muted-foreground sm:text-base">
+            Assets minus liabilities
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="rounded-[1.35rem] border border-white/45 bg-white/45 p-4 text-left shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-5">
+              <div className="mb-4 flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 sm:text-base">
+                <ArrowUpRight className="h-5 w-5" />
+                <span>Assets</span>
+              </div>
+
+              <div className="text-xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-2xl">
+                <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
+              </div>
+
+              <div className="mt-2 text-xs font-medium text-muted-foreground sm:text-sm">
+                {assets.length} {assets.length === 1 ? 'account' : 'accounts'}
+              </div>
+            </div>
+
+            <div className="rounded-[1.35rem] border border-white/45 bg-white/45 p-4 text-left shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-5">
+              <div className="mb-4 flex items-center gap-2 text-sm font-bold text-destructive sm:text-base">
+                <ArrowDownRight className="h-5 w-5" />
+                <span>Liabilities</span>
+              </div>
+
+              <div className="text-xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-2xl">
+                <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+              </div>
+
+              <div className="mt-2 text-xs font-medium text-muted-foreground sm:text-sm">
+                {liabilities.length} {liabilities.length === 1 ? 'account' : 'accounts'}
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
         <div className="space-y-4">
           {renderGroup('Assets', assets, false)}
@@ -157,10 +197,10 @@ export default function Accounts() {
 
         <Link to="/add-account">
           <Button
-            className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0 lg:bottom-6"
+            className="fixed bottom-24 right-5 z-50 h-16 w-16 rounded-[1.65rem] p-0 shadow-2xl shadow-primary/30 transition-transform hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8"
             size="icon"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="h-7 w-7" />
           </Button>
         </Link>
       </main>
