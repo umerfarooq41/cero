@@ -24,11 +24,9 @@ export default function BottomNav() {
       className="
         fixed bottom-0 left-0 right-0 z-50
         app-fixed-surface
-        border-0 border-t-0
+        border-0
         shadow-none
         ring-0
-        backdrop-blur-xl
-        supports-[backdrop-filter]:backdrop-blur-xl
         lg:hidden
       "
     >
@@ -53,11 +51,9 @@ export default function BottomNav() {
               <div
                 className={cn(
                   `
-                  relative
                   flex flex-col items-center justify-center
                   gap-1
-                  px-3 py-2
-                  rounded-2xl
+                  px-2 py-2
                   transition-all duration-200
                   `,
                   isActive
@@ -65,33 +61,24 @@ export default function BottomNav() {
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {isActive && (
-                  <div
-                    className="
-                      absolute inset-0
-                      rounded-2xl
-                      bg-primary/10
-                    "
-                  />
-                )}
-
                 <item.icon
                   className={cn(
                     `
-                    relative z-10
                     w-5 h-5
                     transition-all duration-200
                     `,
-                    isActive && 'scale-110'
+                    isActive && 'scale-110 stroke-[2.5]'
                   )}
                 />
 
                 <span
-                  className="
-                    relative z-10
+                  className={cn(
+                    `
                     text-[11px]
-                    font-medium
-                  "
+                    transition-all duration-200
+                    `,
+                    isActive ? 'font-semibold' : 'font-medium'
+                  )}
                 >
                   {item.label}
                 </span>

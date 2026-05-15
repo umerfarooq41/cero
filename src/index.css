@@ -303,30 +303,28 @@
 @layer utilities {
   .app-gradient-surface {
     background:
-      radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 28%),
-      radial-gradient(circle at top right, rgba(168,85,247,0.06), transparent 24%),
-      radial-gradient(circle at bottom, rgba(16,185,129,0.05), transparent 30%),
-      hsl(var(--background));
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.18), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%);
     background-attachment: fixed;
   }
 
   .dark .app-gradient-surface {
     background:
-      radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 25%),
-      radial-gradient(circle at top right, rgba(168,85,247,0.10), transparent 22%),
-      radial-gradient(circle at bottom, rgba(16,185,129,0.08), transparent 28%),
-      hsl(var(--background));
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%),
+      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%);
     background-attachment: fixed;
   }
 
-.app-fixed-surface {
-  @apply app-gradient-surface backdrop-blur-xl;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-.app-fixed-surface::before,
-.app-fixed-surface::after {
-  display: none !important;
-}
+  .app-fixed-surface {
+    @apply app-gradient-surface;
+    border: 0;
+    box-shadow: none;
+    outline: 0;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
 }

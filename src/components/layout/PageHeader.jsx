@@ -6,20 +6,18 @@ export default function PageHeader({
   className,
 }) {
   return (
-      <header
-        className={cn(
-          `
-          sticky top-0 z-40
-          app-fixed-surface
-          border-0 border-b-0
-          shadow-none
-          ring-0
-          backdrop-blur-xl
-          supports-[backdrop-filter]:backdrop-blur-xl
-          `,
-          className
-        )}
-      >
+    <header
+      className={cn(
+        `
+        sticky top-0 z-40
+        app-fixed-surface
+        border-0
+        shadow-none
+        ring-0
+        `,
+        className
+      )}
+    >
       <div
         className="
           mx-auto

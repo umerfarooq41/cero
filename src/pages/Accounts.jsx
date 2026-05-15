@@ -119,14 +119,13 @@ export default function Accounts() {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Accounts"
         subtitle="Your financial overview"
-        className="pb-6"
       />
 
-      <main className="max-w-3xl mx-auto px-4 pt-6 pb-28">
+      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
         <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center shadow-sm">
           <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
             Net Worth
@@ -165,6 +164,6 @@ export default function Accounts() {
           </Button>
         </Link>
       </main>
-    </>
+    </div>
   );
 }
