@@ -325,21 +325,60 @@ function PlanOverview({
   const progress =
     totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
 
-  const pieData =
-    chartData.length > 0
-      ? chartData.map((item) => ({
-          ...item,
-          value: Math.max(item.tracked, 0.01),
-        }))
-      : [
-          {
-            name: 'No data',
-            value: 1,
-            tracked: 0,
-            planned: 0,
-            color: '#E5E7EB',
-          },
-        ];
+  const donutChartData = useMemo(() => {
+    if (chartData.length === 0) {
+      return [
+        {
+          name: 'No data',
+          value: 1,
+          tracked: 0,
+          planned: 0,
+          remaining: 0,
+          color: '#E5E7EB',
+        },
+      ];
+    }
+
+    const sorted = [...chartData].sort((a, b) => {
+      const aValue = Number(a.tracked || 0) || Number(a.planned || 0);
+      const bValue = Number(b.tracked || 0) || Number(b.planned || 0);
+
+      return bValue - aValue;
+    });
+
+    const topFive = sorted.slice(0, 5).map((item, index) => ({
+      ...item,
+      color: tab.shades[index],
+      value: Math.max(Number(item.tracked || 0) || Number(item.planned || 0), 0.01),
+    }));
+
+    const others = sorted.slice(5);
+
+    if (others.length === 0) return topFive;
+
+    const othersTracked = others.reduce(
+      (sum, item) => sum + Number(item.tracked || 0),
+      0
+    );
+    const othersPlanned = others.reduce(
+      (sum, item) => sum + Number(item.planned || 0),
+      0
+    );
+
+    return [
+      ...topFive,
+      {
+        id: `${activeTab}-others`,
+        name: 'Others',
+        planned: othersPlanned,
+        tracked: othersTracked,
+        remaining: othersPlanned - othersTracked,
+        color: tab.shades[5] || tab.color,
+        value: Math.max(othersTracked || othersPlanned, 0.01),
+        isOthers: true,
+      },
+    ];
+  }, [activeTab, chartData, tab]);
 
   return (
     <div className="space-y-4">
@@ -401,16 +440,16 @@ function PlanOverview({
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={pieData}
+                data={donutChartData}
                 dataKey="value"
                 nameKey="name"
                 innerRadius={66}
                 outerRadius={92}
-                paddingAngle={chartData.length > 1 ? 3 : 0}
+                paddingAngle={donutChartData.length > 1 ? 3 : 0}
                 stroke="none"
                 isAnimationActive
               >
-                {pieData.map((entry, index) => (
+                {donutChartData.map((entry, index) => (
                   <Cell
                     key={`${entry.name}-${index}`}
                     fill={chartData.length > 0 ? entry.color : '#E5E7EB'}
