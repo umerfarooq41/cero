@@ -197,7 +197,7 @@ export default function Accounts() {
                 <span>Assets</span>
               </div>
 
-              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
+              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums">
                 <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
               </div>
 
@@ -214,7 +214,7 @@ export default function Accounts() {
                 <span>Liabilities</span>
               </div>
 
-              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
+              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums">
                 <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
               </div>
 
