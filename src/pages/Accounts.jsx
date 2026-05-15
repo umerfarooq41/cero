@@ -159,35 +159,36 @@ export default function Accounts() {
         {/* Net Worth Card */}
         <section className="surface-card card-elevated mb-8 rounded-[2rem] border border-white/40 p-5 dark:border-white/[0.05] sm:p-6">
           
-          <div className="grid grid-cols-[auto_1fr] items-center gap-4 sm:grid-cols-[auto_1fr_auto]">
+          <div className="flex flex-col items-center justify-center text-center">
             
-            {/* Left */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
-                <Scale className="h-5 w-5" />
-              </div>
+            {/* Title */}
+            <div className="flex items-center gap-2">
+              <Scale className="h-4 w-4 text-muted-foreground" />
 
-              <div>
-                <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                  Net Worth
-                </div>
+              <div className="text-sm font-semibold tracking-wide text-muted-foreground">
+                Net Worth
               </div>
             </div>
 
             {/* Amount */}
             <div
               className={cn(
-                'col-span-2 mt-4 flex items-center justify-center gap-1 text-4xl font-black tracking-tight tabular-nums sm:col-span-1 sm:mt-0 sm:text-5xl',
+                'mt-4 flex items-center justify-center gap-1 text-4xl font-black tracking-tight tabular-nums sm:text-5xl',
                 netWorth >= 0 ? 'text-foreground' : 'text-destructive'
               )}
             >
               {netWorth < 0 && <span>-</span>}
               <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
             </div>
+
+            {/* Subtext */}
+            <p className="mt-3 text-sm font-medium text-muted-foreground">
+              The current equilibrium of your efforts
+            </p>
           </div>
 
           {/* Bottom Cards */}
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
             
             {/* Assets */}
             <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
