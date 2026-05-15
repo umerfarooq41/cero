@@ -11,6 +11,7 @@ import {
   Wallet,
 } from 'lucide-react';
 
+import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
@@ -118,51 +119,48 @@ export default function Accounts() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-24">
-      <div className="sticky top-0 z-30 -mx-4 mb-6 bg-background/95 px-4 py-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90">
-        <h1 className="text-2xl font-bold tracking-tight">Accounts</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Your financial overview
-        </p>
-      </div>
+    <>
+      <PageHeader title="Accounts" subtitle="Your financial overview" />
 
-      <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center shadow-sm">
-        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
-          Net Worth
+      <main className="max-w-3xl mx-auto px-4 pb-24 pt-6">
+        <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center shadow-sm">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
+            Net Worth
+          </div>
+
+          <div
+            className={cn(
+              'text-4xl font-bold tracking-tight mb-4 tabular-nums flex items-center justify-center gap-1',
+              netWorth >= 0 ? 'text-foreground' : 'text-destructive'
+            )}
+          >
+            {netWorth < 0 && <span>-</span>}
+            <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
+          </div>
+
+          <div className="text-xs text-muted-foreground flex items-center justify-center gap-x-1.5 gap-y-1 flex-wrap">
+            <span>Assets</span>
+            <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
+            <span>−</span>
+            <span>Liabilities</span>
+            <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+          </div>
         </div>
 
-        <div
-          className={cn(
-            'text-4xl font-bold tracking-tight mb-4 tabular-nums flex items-center justify-center gap-1',
-            netWorth >= 0 ? 'text-foreground' : 'text-destructive'
-          )}
-        >
-          {netWorth < 0 && <span>-</span>}
-          <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
+        <div className="space-y-4">
+          {renderGroup('Assets', assets, false)}
+          {renderGroup('Liabilities', liabilities, true)}
         </div>
 
-        <div className="text-xs text-muted-foreground flex items-center justify-center gap-x-1.5 gap-y-1 flex-wrap">
-          <span>Assets</span>
-          <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
-          <span>−</span>
-          <span>Liabilities</span>
-          <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {renderGroup('Assets', assets, false)}
-        {renderGroup('Liabilities', liabilities, true)}
-      </div>
-
-      <Link to="/add-account">
-        <Button
-          className="fixed bottom-24 right-6 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0 lg:bottom-6"
-          size="icon"
-        >
-          <Plus className="w-6 h-6" />
-        </Button>
-      </Link>
-    </div>
+        <Link to="/add-account">
+          <Button
+            className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-2xl shadow-lg shadow-primary/25 p-0 lg:bottom-6"
+            size="icon"
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
+        </Link>
+      </main>
+    </>
   );
 }
