@@ -8,6 +8,7 @@ import {
   Save,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   X,
 } from 'lucide-react';
 
@@ -35,6 +36,7 @@ export default function EditPlan() {
 
   const [values, setValues] = useState({});
   const [saving, setSaving] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState({});
 
   const formatCurrency = useCurrencyFormatter();
 
@@ -186,46 +188,121 @@ export default function EditPlan() {
     return prev?.planned_amount || 0;
   };
 
+  const sectionStyles = {
+    income: {
+      text: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-500/10 dark:bg-emerald-400/10',
+    },
+    expense: {
+      text: 'text-red-600 dark:text-red-400',
+      bg: 'bg-red-500/10 dark:bg-red-400/10',
+    },
+    savings: {
+      text: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-500/10 dark:bg-blue-400/10',
+    },
+    debt: {
+      text: 'text-purple-600 dark:text-purple-400',
+      bg: 'bg-purple-500/10 dark:bg-purple-400/10',
+    },
+  };
+
+  const toggleSection = (type) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+
   const renderSection = (title, type) => {
     const items = getLeafCategories(type);
     if (items.length === 0) return null;
 
+    const isCollapsed = collapsedSections[type];
+    const style = sectionStyles[type] || sectionStyles.expense;
+    const total = sumType(type);
+
     return (
-      <div className="overflow-hidden rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
-        <div className="border-b border-border px-4 py-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {title}
-          </h3>
-        </div>
+      <div className="surface-card card-elevated overflow-hidden rounded-2xl border border-white/40 dark:border-white/[0.05]">
+        <button
+          type="button"
+          onClick={() => toggleSection(type)}
+          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+                style.bg,
+                style.text
+              )}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </span>
 
-        <div className="divide-y divide-border/50">
-          {items.map((cat) => {
-            if (cat.isSectionHeader) {
+            <div className="min-w-0">
+              <h3
+                className={cn(
+                  'text-sm font-bold tracking-wide',
+                  style.text
+                )}
+              >
+                {title}
+              </h3>
+
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {items.filter((item) => !item.isSectionHeader).length}{' '}
+                {items.filter((item) => !item.isSectionHeader).length === 1
+                  ? 'category'
+                  : 'categories'}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              'shrink-0 text-right text-base font-black tracking-tight tabular-nums sm:text-lg',
+              style.text
+            )}
+          >
+            {formatCurrency(total)}
+          </div>
+        </button>
+
+        {!isCollapsed && (
+          <div className="divide-y divide-border/50">
+            {items.map((cat) => {
+              if (cat.isSectionHeader) {
+                return (
+                  <div
+                    key={cat.id}
+                    className="flex items-center gap-3 bg-white/20 px-4 py-2.5 dark:bg-white/[0.02]"
+                  >
+                    <span className="text-xs font-semibold uppercase text-muted-foreground">
+                      {cat.name}
+                    </span>
+                  </div>
+                );
+              }
+
               return (
-                <div
+                <AllocationRow
                   key={cat.id}
-                  className="flex items-center gap-3 bg-accent/30 px-4 py-2.5"
-                >
-                  <span className="text-xs font-semibold uppercase text-muted-foreground">
-                    {cat.name}
-                  </span>
-                </div>
+                  category={cat}
+                  value={values[cat.id]}
+                  lastMonthHint={getHint(cat.id)}
+                  onChange={(value) => setValue(cat.id, value)}
+                  isSubcategory={cat.isSubcategory}
+                  formatCurrency={formatCurrency}
+                />
               );
-            }
-
-            return (
-              <AllocationRow
-                key={cat.id}
-                category={cat}
-                value={values[cat.id]}
-                lastMonthHint={getHint(cat.id)}
-                onChange={(value) => setValue(cat.id, value)}
-                isSubcategory={cat.isSubcategory}
-                formatCurrency={formatCurrency}
-              />
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     );
   };

@@ -382,7 +382,7 @@ function PlanOverview({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-1 rounded-[1.75rem] bg-muted/60 p-1.5">
+      <div className="surface-card card-elevated grid grid-cols-4 gap-1 rounded-[1.75rem] border border-white/40 p-1.5 backdrop-blur-xl dark:border-white/[0.05]">
         {TABS.map((item) => {
           const TabIcon = item.icon;
           const active = item.key === activeTab;
@@ -392,13 +392,15 @@ function PlanOverview({
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key)}
-              className={`flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-[1.25rem] px-1.5 text-[11px] font-semibold transition ${
+              className={cn(
+                'flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-[1.25rem] px-1.5 text-[11px] font-semibold transition-all duration-200',
                 active
-                  ? `${item.bg} ${item.text} shadow-sm ring-1 ${item.ring}`
-                  : 'text-muted-foreground hover:bg-background/70'
-              }`}
+                  ? 'bg-white/45 shadow-sm ring-1 ring-white/55 dark:bg-white/[0.04] dark:ring-white/[0.07]'
+                  : 'text-muted-foreground hover:bg-white/25 dark:hover:bg-white/[0.03]'
+              )}
+              style={active ? { color: item.color } : undefined}
             >
-              <TabIcon className="h-3.5 w-3.5" />
+              <TabIcon className="h-3.5 w-3.5 stroke-[2.4]" />
               <span className="leading-none">{item.title}</span>
             </button>
           );
