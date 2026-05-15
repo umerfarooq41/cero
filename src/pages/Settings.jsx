@@ -82,11 +82,10 @@ const SarIcon = () => (
 );
 
 const applyTheme = (theme) => {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
+  const safeTheme = theme === 'dark' ? 'dark' : 'light';
+
+  document.documentElement.classList.toggle('dark', safeTheme === 'dark');
+  localStorage.setItem('cero-theme', safeTheme);
 };
 
 const getSavedTwentyFifthRule = (saved = {}, fallback = false) => {
@@ -119,6 +118,8 @@ export default function Settings() {
     },
   });
 
+  const [hydrated, setHydrated] = useState(false);
+
   const queryClient = useQueryClient();
   const { user, isAuthenticated, signOut } = useAuth();
 
@@ -134,7 +135,8 @@ export default function Settings() {
         const saved = await getUserSettings();
 
         if (saved) {
-          const loadedTheme = saved.theme || 'light';
+          const loadedTheme =
+            saved?.theme || localStorage.getItem('cero-theme') || 'light';
 
           setSettings((prev) => ({
             ...prev,
@@ -153,7 +155,7 @@ export default function Settings() {
             },
           }));
 
-          applyTheme(loadedTheme);
+          setHydrated(true);
         }
       } catch (error) {
         console.error('Settings load failed:', error);
@@ -163,6 +165,12 @@ export default function Settings() {
 
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    applyTheme(settings.theme);
+  }, [settings.theme, hydrated]);
 
   const saveSettings = async (newSettings) => {
     await saveUserSettings({
@@ -186,10 +194,6 @@ export default function Settings() {
 
     try {
       await saveSettings(newSettings);
-
-      if (key === 'theme') {
-        applyTheme(value);
-      }
 
       toast.success('Setting saved');
     } catch (error) {
