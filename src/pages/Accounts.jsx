@@ -16,7 +16,8 @@ import {
 
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
-import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
+import { useAccounts } from '@/hooks/useBudgetData';
+import { useCurrency } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 
 const typeIcons = {
@@ -29,16 +30,72 @@ const typeIcons = {
   other: Wallet,
 };
 
-function InlineMoney({ children }) {
+const getCurrencyCode = (currency) => {
+  if (typeof currency === 'string') return currency;
+  return currency?.code || currency?.currency || 'SAR';
+};
+
+const getCurrencySymbol = (currency) => {
+  const code = getCurrencyCode(currency);
+
+  const map = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    INR: '₹',
+    PKR: 'Rs',
+    AED: 'د.إ',
+    QAR: 'ر.ق',
+    KWD: 'د.ك',
+    BHD: '.د.ب',
+    OMR: 'ر.ع.',
+  };
+
+  return currency?.symbol || map[code] || code;
+};
+
+function formatNumber(value = 0) {
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(number);
+}
+
+function Money({ amount, currency, compact = false, className = '' }) {
+  const code = getCurrencyCode(currency);
+  const symbol = getCurrencySymbol(currency);
+
   return (
-    <span className="inline-flex items-center align-middle whitespace-nowrap">
-      {children}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
+        className
+      )}
+    >
+      {code === 'SAR' ? (
+        <span
+          className={cn(
+            'inline-block shrink-0 bg-current align-middle',
+            compact ? 'h-[0.8em] w-[0.8em]' : 'h-[0.9em] w-[0.9em]'
+          )}
+          style={{
+            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+            mask: 'url(/sar.svg) center / contain no-repeat',
+          }}
+        />
+      ) : (
+        <span className="text-current">{symbol}</span>
+      )}
+
+      <span>{formatNumber(amount)}</span>
     </span>
   );
 }
 
 export default function Accounts() {
-  const formatCurrency = useCurrencyFormatter();
+  const currency = useCurrency();
   const { data: accounts = [] } = useAccounts();
 
   const assets = accounts.filter((a) => a.category === 'asset');
@@ -86,7 +143,7 @@ export default function Accounts() {
           </div>
 
           <span className="inline-flex items-center text-sm font-bold tabular-nums text-foreground">
-            <InlineMoney>{formatCurrency(total)}</InlineMoney>
+            <Money amount={total} currency={currency} compact />
           </span>
         </div>
 
@@ -120,7 +177,7 @@ export default function Accounts() {
                 </div>
 
                 <span className="inline-flex items-center whitespace-nowrap text-sm font-bold tabular-nums text-foreground">
-                  <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                  <Money amount={balance} currency={currency} compact />
                 </span>
               </Link>
             );
@@ -164,7 +221,7 @@ export default function Accounts() {
               )}
             >
               {netWorth < 0 && <span>-</span>}
-              <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
+              <Money amount={Math.abs(netWorth)} currency={currency} />
             </div>
 
             <p className="mt-2 text-xs text-muted-foreground">
@@ -179,7 +236,7 @@ export default function Accounts() {
                 </div>
 
                 <div className="text-base font-bold tabular-nums text-foreground">
-                  <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
+                  <Money amount={totalAssets} currency={currency} compact />
                 </div>
 
                 <p className="mt-1 text-[11px] text-muted-foreground">
@@ -194,7 +251,7 @@ export default function Accounts() {
                 </div>
 
                 <div className="text-base font-bold tabular-nums text-foreground">
-                  <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
+                  <Money amount={totalLiabilities} currency={currency} compact />
                 </div>
 
                 <p className="mt-1 text-[11px] text-muted-foreground">
