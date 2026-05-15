@@ -32,16 +32,6 @@ export default function LeftToAllocateBanner({
       ? 'bg-destructive/5 border-destructive/20'
       : 'bg-primary/5 border-primary/20';
 
-  const feedbackText = isZero
-    ? 'All money assigned ✓'
-    : isOver
-      ? (
-          <span className="inline-flex items-center gap-1">
-            <span>Over by</span>
-            {money(Math.abs(leftToAllocate))}
-          </span>
-        )
-      : 'Unassigned money remaining';
 
   return (
     <div
@@ -78,11 +68,6 @@ export default function LeftToAllocateBanner({
             {money(Math.abs(leftToAllocate))}
           </div>
 
-          {isEditMode && (
-            <div className={cn('text-[11px] font-medium mt-0.5', stateColor)}>
-              {feedbackText}
-            </div>
-          )}
         </div>
 
         <div
