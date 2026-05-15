@@ -346,15 +346,15 @@ function PlanOverview({
       return bValue - aValue;
     });
 
-    const topFive = sorted.slice(0, 5).map((item, index) => ({
+    const topFour = sorted.slice(0, 4).map((item, index) => ({
       ...item,
       color: tab.shades[index],
       value: Math.max(Number(item.tracked || 0) || Number(item.planned || 0), 0.01),
     }));
 
-    const others = sorted.slice(5);
+    const others = sorted.slice(4);
 
-    if (others.length === 0) return topFive;
+    if (others.length === 0) return topFour;
 
     const othersTracked = others.reduce(
       (sum, item) => sum + Number(item.tracked || 0),
@@ -366,14 +366,14 @@ function PlanOverview({
     );
 
     return [
-      ...topFive,
+      ...topFour,
       {
         id: `${activeTab}-others`,
         name: 'Others',
         planned: othersPlanned,
         tracked: othersTracked,
         remaining: othersPlanned - othersTracked,
-        color: tab.shades[5] || tab.color,
+        color: tab.shades[4] || tab.color,
         value: Math.max(othersTracked || othersPlanned, 0.01),
         isOthers: true,
       },

@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 import Plan from '@/pages/Plan';
+import EditPlan from '@/pages/EditPlan';
 import Transactions from '@/pages/Transactions';
 import AddTransaction from '@/pages/AddTransaction';
 import Accounts from '@/pages/Accounts';
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Plan />} />
+        <Route path="/edit-plan" element={<EditPlan />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/add-transaction" element={<AddTransaction />} />
         <Route path="/transactions/:id/edit" element={<AddTransaction />} />

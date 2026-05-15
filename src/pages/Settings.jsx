@@ -1,7 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Moon, Sun, Globe, Calculator, Download, Trash2, User, LogOut } from 'lucide-react';
+import {
+  Moon,
+  Sun,
+  Globe,
+  Calculator,
+  Download,
+  Trash2,
+  User,
+  LogOut,
+  FolderOpen,
+  ChevronRight,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,27 +33,31 @@ import { getUserSettings, saveUserSettings } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
-import { Link } from 'react-router-dom';
-import { FolderOpen, ChevronRight } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 
-const SettingRow = ({ icon: Icon, label, description, children, stackOnMobile = false }) => (
+const SettingRow = ({
+  icon: Icon,
+  label,
+  description,
+  children,
+  stackOnMobile = false,
+}) => (
   <div
     className={
       stackOnMobile
-        ? 'flex flex-col gap-3 py-4 px-1 sm:flex-row sm:items-center sm:gap-4'
-        : 'flex items-center gap-4 py-4 px-1'
+        ? 'flex flex-col gap-3 px-1 py-4 sm:flex-row sm:items-center sm:gap-4'
+        : 'flex items-center gap-4 px-1 py-4'
     }
   >
     <div className="flex min-w-0 flex-1 items-center gap-4">
-      <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-muted-foreground" />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary">
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium truncate">{label}</div>
+        <div className="truncate text-sm font-medium">{label}</div>
         {description && (
-          <div className="text-xs text-muted-foreground mt-0.5 break-words">
+          <div className="mt-0.5 break-words text-xs text-muted-foreground">
             {description}
           </div>
         )}
@@ -50,7 +72,7 @@ const SarIcon = () => (
   <img
     src="/sar.svg"
     alt="SAR"
-    className="inline-block w-4 h-4 dark:invert"
+    className="inline-block h-4 w-4 dark:invert"
   />
 );
 
@@ -86,9 +108,6 @@ export default function Settings() {
   const [settings, setSettings] = useState({
     theme: 'light',
     currency: 'SAR',
-    currencyPlacement: 'before',
-    numberFormat: 'comma',
-    dateFormat: 'MM/DD/YYYY',
     budgetLogic: {
       twentyFifthRule: false,
       autoSweepSurplus: false,
@@ -113,9 +132,6 @@ export default function Settings() {
             ...prev,
             theme: loadedTheme,
             currency: saved.currency || 'SAR',
-            currencyPlacement: saved.currency_placement || 'before',
-            numberFormat: saved.number_format ?? prev.numberFormat,
-            dateFormat: saved.date_format ?? prev.dateFormat,
             budgetLogic: {
               ...prev.budgetLogic,
               twentyFifthRule: getSavedTwentyFifthRule(
@@ -140,27 +156,28 @@ export default function Settings() {
     loadSettings();
   }, []);
 
+  const saveSettings = async (newSettings) => {
+    await saveUserSettings({
+      currency: newSettings.currency,
+      currency_placement: 'before',
+      theme: newSettings.theme,
+      shift25th: newSettings.budgetLogic.twentyFifthRule,
+      auto_sweep: newSettings.budgetLogic.autoSweepSurplus,
+    });
+
+    queryClient.invalidateQueries();
+  };
+
   const updateSetting = async (key, value) => {
     const newSettings = {
       ...settings,
       [key]: value,
-      currencyPlacement: 'before',
     };
 
     setSettings(newSettings);
 
     try {
-      await saveUserSettings({
-        currency: newSettings.currency,
-        currency_placement: 'before',
-        number_format: newSettings.numberFormat,
-        date_format: newSettings.dateFormat,
-        theme: newSettings.theme,
-        shift25th: newSettings.budgetLogic.twentyFifthRule,
-        auto_sweep: newSettings.budgetLogic.autoSweepSurplus,
-      });
-
-      queryClient.invalidateQueries();
+      await saveSettings(newSettings);
 
       if (key === 'theme') {
         applyTheme(value);
@@ -177,7 +194,6 @@ export default function Settings() {
   const updateBudgetLogicSetting = async (key, value) => {
     const newSettings = {
       ...settings,
-      currencyPlacement: 'before',
       budgetLogic: {
         ...settings.budgetLogic,
         [key]: value,
@@ -187,17 +203,7 @@ export default function Settings() {
     setSettings(newSettings);
 
     try {
-      await saveUserSettings({
-        currency: newSettings.currency,
-        currency_placement: 'before',
-        number_format: newSettings.numberFormat,
-        date_format: newSettings.dateFormat,
-        theme: newSettings.theme,
-        shift25th: newSettings.budgetLogic.twentyFifthRule,
-        auto_sweep: newSettings.budgetLogic.autoSweepSurplus,
-      });
-
-      queryClient.invalidateQueries();
+      await saveSettings(newSettings);
       toast.success('Setting saved');
     } catch (error) {
       console.error('Budget logic save failed:', error);
@@ -214,9 +220,8 @@ export default function Settings() {
       />
 
       <main className="mx-auto w-full max-w-2xl px-4 py-4 pb-24 lg:py-8">
-        {/* Account */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
-          <div className="px-5 py-3 border-b border-border">
+        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Account
             </h3>
@@ -239,13 +244,22 @@ export default function Settings() {
                     window.location.href = '/login';
                   }}
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="h-4 w-4" />
                   Sign out
                 </Button>
               </SettingRow>
             ) : (
-              <SettingRow icon={User} label="Not signed in" description="Sign in to sync your data">
-                <Button size="sm" onClick={() => (window.location.href = '/login')}>
+              <SettingRow
+                icon={User}
+                label="Not signed in"
+                description="Sign in to sync your data"
+              >
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    window.location.href = '/login';
+                  }}
+                >
                   Sign in
                 </Button>
               </SettingRow>
@@ -253,9 +267,8 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* App Management */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
-          <div className="px-5 py-3 border-b border-border">
+        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               App Management
             </h3>
@@ -264,35 +277,34 @@ export default function Settings() {
           <div className="px-4">
             <Link
               to="/categories"
-              className="flex items-center justify-between py-4 px-1 hover:bg-accent/50 transition-colors rounded-lg"
+              className="flex items-center justify-between rounded-lg px-1 py-4 transition-colors hover:bg-accent/50"
             >
               <div className="flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                  <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary">
+                  <FolderOpen className="h-4 w-4 text-muted-foreground" />
                 </div>
 
                 <div>
                   <div className="text-sm font-medium">Categories</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
+                  <div className="mt-0.5 text-xs text-muted-foreground">
                     Manage income, expense, savings, and debt categories
                   </div>
                 </div>
               </div>
 
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Link>
           </div>
         </div>
 
-        {/* Appearance */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
-          <div className="px-5 py-3 border-b border-border">
+        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Appearance
             </h3>
           </div>
 
-          <div className="px-4 divide-y divide-border/50">
+          <div className="divide-y divide-border/50 px-4">
             <SettingRow
               icon={settings.theme === 'dark' ? Moon : Sun}
               label="Dark Mode"
@@ -300,39 +312,46 @@ export default function Settings() {
             >
               <Switch
                 checked={settings.theme === 'dark'}
-                onCheckedChange={(v) => updateSetting('theme', v ? 'dark' : 'light')}
+                onCheckedChange={(v) =>
+                  updateSetting('theme', v ? 'dark' : 'light')
+                }
               />
             </SettingRow>
           </div>
         </div>
 
-        {/* Regional */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
-          <div className="px-5 py-3 border-b border-border">
+        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Regional & Format
+              Regional
             </h3>
           </div>
 
-          <div className="px-4 divide-y divide-border/50">
-            <SettingRow icon={Globe} label="Currency" description="Select your currency symbol">
-              <Select value={settings.currency} onValueChange={(v) => updateSetting('currency', v)}>
-                <SelectTrigger className="w-32 h-8">
+          <div className="divide-y divide-border/50 px-4">
+            <SettingRow
+              icon={Globe}
+              label="Currency"
+              description="Select your currency symbol"
+            >
+              <Select
+                value={settings.currency}
+                onValueChange={(v) => updateSetting('currency', v)}
+              >
+                <SelectTrigger className="h-9 w-auto min-w-[92px] gap-2 rounded-xl px-3">
                   <SelectValue />
                 </SelectTrigger>
 
                 <SelectContent>
                   <SelectItem value="SAR">
-                    <span className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5">
                       <SarIcon />
                       SAR
                     </span>
                   </SelectItem>
-
                   <SelectItem value="USD">$ USD</SelectItem>
                   <SelectItem value="EUR">€ EUR</SelectItem>
                   <SelectItem value="GBP">£ GBP</SelectItem>
-                  <SelectItem value="PKR">₨ PKR</SelectItem>
+                  <SelectItem value="PKR">Rs PKR</SelectItem>
                   <SelectItem value="INR">₹ INR</SelectItem>
                   <SelectItem value="AED">د.إ AED</SelectItem>
                   <SelectItem value="QAR">ر.ق QAR</SelectItem>
@@ -342,48 +361,17 @@ export default function Settings() {
                 </SelectContent>
               </Select>
             </SettingRow>
-
-            <SettingRow icon={Globe} label="Number Format" description="How numbers are displayed">
-              <Select
-                value={settings.numberFormat}
-                onValueChange={(v) => updateSetting('numberFormat', v)}
-              >
-                <SelectTrigger className="w-28 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="comma">1,234.56</SelectItem>
-                  <SelectItem value="period">1.234,56</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingRow>
-
-            <SettingRow icon={Globe} label="Date Format">
-              <Select
-                value={settings.dateFormat}
-                onValueChange={(v) => updateSetting('dateFormat', v)}
-              >
-                <SelectTrigger className="w-32 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingRow>
           </div>
         </div>
 
-        {/* Budget Logic */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
-          <div className="px-5 py-3 border-b border-border">
+        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Budget Logic
             </h3>
           </div>
 
-          <div className="px-4 divide-y divide-border/50">
+          <div className="divide-y divide-border/50 px-4">
             <SettingRow
               icon={Calculator}
               label="25th Rule"
@@ -412,23 +400,38 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Data */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="px-5 py-3 border-b border-border">
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Data & Privacy
             </h3>
           </div>
 
-          <div className="px-4 divide-y divide-border/50">
-            <SettingRow icon={Download} label="Export CSV" description="Download all your data">
-              <Button variant="outline" size="sm" onClick={() => toast.info('Export coming soon')}>
+          <div className="divide-y divide-border/50 px-4">
+            <SettingRow
+              icon={Download}
+              label="Export CSV"
+              description="Download all your data"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.info('Export coming soon')}
+              >
                 Export
               </Button>
             </SettingRow>
 
-            <SettingRow icon={Trash2} label="Reset Database" description="Permanently delete all your data">
-              <Button variant="destructive" size="sm" onClick={() => setShowResetDialog(true)}>
+            <SettingRow
+              icon={Trash2}
+              label="Reset Database"
+              description="Permanently delete all your data"
+            >
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowResetDialog(true)}
+              >
                 Reset
               </Button>
             </SettingRow>
@@ -440,16 +443,23 @@ export default function Settings() {
             <DialogHeader>
               <DialogTitle>Reset All Data?</DialogTitle>
               <DialogDescription>
-                This will permanently delete all your transactions, accounts, categories, and budget plans. This cannot be undone.
+                This will permanently delete all your transactions, accounts,
+                categories, and budget plans. This cannot be undone.
               </DialogDescription>
             </DialogHeader>
 
             {!resetConfirm ? (
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowResetDialog(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowResetDialog(false)}
+                >
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={() => setResetConfirm(true)}>
+                <Button
+                  variant="destructive"
+                  onClick={() => setResetConfirm(true)}
+                >
                   I understand, continue
                 </Button>
               </DialogFooter>
