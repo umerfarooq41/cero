@@ -75,7 +75,12 @@ export default function Accounts() {
             {title}
           </h3>
 
-          <span className="text-sm font-semibold tabular-nums">
+          <span
+            className={cn(
+              'text-sm font-bold tabular-nums',
+              isLiability ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'
+            )}
+          >
             <InlineMoney>{formatCurrency(total)}</InlineMoney>
           </span>
         </div>
@@ -108,13 +113,7 @@ export default function Accounts() {
                   </div>
                 </div>
 
-                <span
-                  className={cn(
-                    'text-sm font-semibold tabular-nums inline-flex items-center gap-0.5 whitespace-nowrap',
-                    isLiability ? 'text-destructive' : 'text-foreground'
-                  )}
-                >
-                  {isLiability && <span>-</span>}
+                <span className="inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-semibold text-foreground tabular-nums">
                   <InlineMoney>{formatCurrency(balance)}</InlineMoney>
                 </span>
               </Link>
@@ -133,56 +132,65 @@ export default function Accounts() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
-        <section className="surface-card card-elevated mb-8 rounded-[2rem] border border-white/40 p-7 text-center dark:border-white/[0.05] sm:p-8">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
-            <Scale className="h-7 w-7" />
+        <section className="surface-card card-elevated mb-8 rounded-[2rem] border border-white/40 p-5 dark:border-white/[0.05] sm:p-6">
+          <div className="grid grid-cols-[auto_1fr] items-center gap-4 sm:grid-cols-[auto_1fr_auto]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+                <Scale className="h-5 w-5" />
+              </div>
+
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                  Net Worth
+                </div>
+                <div className="mt-1 text-xs font-medium text-muted-foreground sm:hidden">
+                  Assets minus liabilities
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                'col-span-2 mt-4 flex items-center justify-center gap-1 text-4xl font-black tracking-tight tabular-nums sm:col-span-1 sm:mt-0 sm:text-5xl',
+                netWorth >= 0 ? 'text-foreground' : 'text-destructive'
+              )}
+            >
+              {netWorth < 0 && <span>-</span>}
+              <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
+            </div>
           </div>
 
-          <div className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
-            Net Worth
-          </div>
-
-          <div
-            className={cn(
-              'mb-3 flex items-center justify-center gap-1 text-4xl font-black tracking-tight tabular-nums sm:text-5xl',
-              netWorth >= 0 ? 'text-foreground' : 'text-destructive'
-            )}
-          >
-            {netWorth < 0 && <span>-</span>}
-            <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
-          </div>
-
-          <p className="mb-8 text-sm font-medium text-muted-foreground sm:text-base">
-            Assets minus liabilities
+          <p className="mt-4 border-t border-border/50 pt-4 text-center text-sm font-medium text-muted-foreground sm:text-base">
+            The current equilibrium of your efforts
           </p>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="rounded-[1.35rem] border border-white/45 bg-white/45 p-4 text-left shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-5">
-              <div className="mb-4 flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 sm:text-base">
-                <ArrowUpRight className="h-5 w-5" />
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 sm:text-sm">
+                <ArrowUpRight className="h-4 w-4" />
                 <span>Assets</span>
               </div>
 
-              <div className="text-xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-2xl">
+              <div className="text-lg font-extrabold tracking-tight text-foreground tabular-nums sm:text-xl">
                 <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
               </div>
 
-              <div className="mt-2 text-xs font-medium text-muted-foreground sm:text-sm">
+              <div className="mt-1 text-xs font-medium text-muted-foreground">
                 {assets.length} {assets.length === 1 ? 'account' : 'accounts'}
               </div>
             </div>
 
-            <div className="rounded-[1.35rem] border border-white/45 bg-white/45 p-4 text-left shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-5">
-              <div className="mb-4 flex items-center gap-2 text-sm font-bold text-destructive sm:text-base">
-                <ArrowDownRight className="h-5 w-5" />
+            <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold text-destructive sm:text-sm">
+                <ArrowDownRight className="h-4 w-4" />
                 <span>Liabilities</span>
               </div>
 
-              <div className="text-xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-2xl">
+              <div className="text-lg font-extrabold tracking-tight text-foreground tabular-nums sm:text-xl">
                 <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
               </div>
 
-              <div className="mt-2 text-xs font-medium text-muted-foreground sm:text-sm">
+              <div className="mt-1 text-xs font-medium text-muted-foreground">
                 {liabilities.length} {liabilities.length === 1 ? 'account' : 'accounts'}
               </div>
             </div>
