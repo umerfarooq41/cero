@@ -267,7 +267,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Settings"
         subtitle="Preferences, categories, and app settings"

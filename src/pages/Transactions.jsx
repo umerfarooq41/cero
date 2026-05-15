@@ -181,7 +181,7 @@ export default function Transactions() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Transactions"
         subtitle={`${filtered.length} transactions this month`}

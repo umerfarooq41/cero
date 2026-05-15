@@ -214,7 +214,7 @@ export default function AccountDetail() {
 
   if (!account) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-transparent">
         <PageHeader
           title="Account"
           subtitle="Account details and activity"
@@ -241,7 +241,7 @@ export default function AccountDetail() {
   const balance = Math.abs(Number(account.balance) || 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title={account.name}
         subtitle={`${account.type?.replace('_', ' ') || 'Account'} details and activity`}

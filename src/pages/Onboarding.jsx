@@ -76,7 +76,7 @@ export default function Onboarding() {
   const StepIcon = steps[step].icon;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Progress */}
         <div className="flex gap-1.5 mb-10">

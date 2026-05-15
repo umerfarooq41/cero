@@ -104,7 +104,7 @@ export default function Categories() {
   const archivedCategories = categories.filter((c) => c.is_archived);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Categories"
         subtitle="Organize income, expenses, savings, and debt"

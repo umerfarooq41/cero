@@ -175,7 +175,7 @@ export default function Reflect() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Reflect"
         subtitle="Insights, trends, and financial clarity"

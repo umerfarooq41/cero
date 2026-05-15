@@ -735,7 +735,7 @@ export default function Plan() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Plan"
         subtitle={`Give every ${getCurrencyName(currency)} a purpose`}

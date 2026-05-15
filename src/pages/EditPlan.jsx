@@ -231,7 +231,7 @@ export default function EditPlan() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title="Edit Plan"
         subtitle={`Adjust your ${format(

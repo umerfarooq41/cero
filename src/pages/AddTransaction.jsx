@@ -429,7 +429,7 @@ export default function AddTransaction() {
   const amountWidth = `${Math.max(4, String(amount || '0.00').length)}ch`;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
         subtitle={

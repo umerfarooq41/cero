@@ -131,7 +131,7 @@ export default function AddAccount() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <PageHeader
         title={isEditing ? 'Edit Account' : 'Add Account'}
         subtitle={
