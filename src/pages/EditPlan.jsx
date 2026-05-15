@@ -236,41 +236,43 @@ export default function EditPlan() {
           className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
         >
         <div className="flex min-w-0 items-center gap-3">
-          <span
-            className={cn(
-              'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-              style.bg,
-              style.text
-            )}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </span>
+  
+  {/* Collapse Icon */}
+  <span
+    className={cn(
+      'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+          style.bg,
+          style.text
+        )}
+      >
+        {isCollapsed ? (
+          <ChevronRight className="h-4 w-4" />
+        ) : (
+          <ChevronDown className="h-4 w-4" />
+        )}
+      </span>
 
-          {/* Category Count Circle */}
-          <div
-            className={cn(
-              'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold',
-              style.bg,
-              style.text
-            )}
-          >
-            {items.filter((item) => !item.isSectionHeader).length}
-          </div>
+      {/* Title */}
+      <h3
+        className={cn(
+          'text-base font-bold tracking-tight',
+          style.text
+        )}
+      >
+        {title}
+      </h3>
 
-          {/* Title */}
-          <h3
-            className={cn(
-              'text-base font-bold tracking-tight',
-              style.text
-            )}
-          >
-            {title}
-          </h3>
-        </div>
+      {/* Count Circle */}
+      <div
+        className={cn(
+          'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold',
+          style.bg,
+          style.text
+        )}
+      >
+        {items.filter((item) => !item.isSectionHeader).length}
+      </div>
+    </div>
 
           <div
             className={cn(
