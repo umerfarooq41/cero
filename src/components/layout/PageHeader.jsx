@@ -10,9 +10,9 @@ export default function PageHeader({
       className={cn(
         `
         sticky top-0 z-40
-        bg-background/95
+        app-fixed-surface
         backdrop-blur-xl
-        supports-[backdrop-filter]:bg-background/90
+        supports-[backdrop-filter]:backdrop-blur-xl
         `,
         className
       )}
