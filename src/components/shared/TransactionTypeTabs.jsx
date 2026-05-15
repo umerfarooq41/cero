@@ -9,7 +9,7 @@ const DEFAULT_OPTIONS = [
 ];
 
 const activeClass = {
-  all: 'bg-background text-foreground shadow-[0_8px_24px_rgba(15,23,42,0.10)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.25)]',
+  all: 'border border-border/60 bg-card/80 text-foreground shadow-sm backdrop-blur-xl',
   income:
     'bg-emerald-500/10 text-emerald-700 shadow-[0_8px_24px_rgba(16,185,129,0.18)] dark:text-emerald-400 dark:shadow-[0_8px_24px_rgba(16,185,129,0.10)]',
   expense:
