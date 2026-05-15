@@ -39,6 +39,7 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import PageHeader from '@/components/layout/PageHeader';
+import { useTheme } from '@/lib/ThemeProvider';
 
 const SettingRow = ({
   icon: Icon,
@@ -81,13 +82,6 @@ const SarIcon = () => (
   />
 );
 
-const applyTheme = (theme) => {
-  const safeTheme = theme === 'dark' ? 'dark' : 'light';
-
-  document.documentElement.classList.toggle('dark', safeTheme === 'dark');
-  localStorage.setItem('cero-theme', safeTheme);
-};
-
 const getSavedTwentyFifthRule = (saved = {}, fallback = false) => {
   return (
     saved?.budgetLogic?.twentyFifthRule ??
@@ -122,6 +116,7 @@ export default function Settings() {
 
   const queryClient = useQueryClient();
   const { user, isAuthenticated, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -135,8 +130,8 @@ export default function Settings() {
         const saved = await getUserSettings();
 
         if (saved) {
-          const loadedTheme =
-            saved?.theme || localStorage.getItem('cero-theme') || 'light';
+          const loadedTheme = saved?.theme || theme || 'light';
+          setTheme(loadedTheme);
 
           setSettings((prev) => ({
             ...prev,
@@ -165,12 +160,6 @@ export default function Settings() {
 
     loadSettings();
   }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-
-    applyTheme(settings.theme);
-  }, [settings.theme, hydrated]);
 
   const saveSettings = async (newSettings) => {
     await saveUserSettings({
@@ -360,16 +349,18 @@ export default function Settings() {
 
           <div className="divide-y divide-border/50 px-4">
             <SettingRow
-              icon={settings.theme === 'dark' ? Moon : Sun}
+              icon={theme === 'dark' ? Moon : Sun}
               label="Dark Mode"
               description="Switch between light and dark theme"
             >
               <Switch
-                checked={settings.theme === 'dark'}
-                onCheckedChange={(v) =>
-                  updateSetting('theme', v ? 'dark' : 'light')
-                }
-              />
+              checked={theme === 'dark'}
+              onCheckedChange={(v) => {
+                const nextTheme = v ? 'dark' : 'light';
+                setTheme(nextTheme);
+                updateSetting('theme', nextTheme);
+              }}
+            />
             </SettingRow>
           </div>
         </div>
