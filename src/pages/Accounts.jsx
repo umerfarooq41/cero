@@ -118,8 +118,8 @@ export default function Accounts() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 lg:py-10">
-      <div className="mb-8">
+    <div className="max-w-3xl mx-auto px-4 pb-24">
+      <div className="sticky top-0 z-30 -mx-4 mb-6 bg-background/95 px-4 py-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90">
         <h1 className="text-2xl font-bold tracking-tight">Accounts</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           Your financial overview
