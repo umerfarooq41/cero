@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { format, subMonths, addMonths } from 'date-fns';
 import {
   PencilLine,
@@ -536,7 +537,14 @@ function PlanOverview({
 }
 
 export default function Plan() {
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const monthFromUrl = searchParams.get('month');
+
+  const [currentMonth, setCurrentMonth] = useState(
+    monthFromUrl || format(new Date(), 'yyyy-MM')
+  );
   const [isEditMode, setIsEditMode] = useState(false);
   const [editValues, setEditValues] = useState({});
   const [saving, setSaving] = useState(false);
@@ -789,7 +797,7 @@ export default function Plan() {
                       variant="secondary"
                       size="icon"
                       className="ml-1 h-9 w-9 shrink-0 rounded-xl"
-                      onClick={enterEditMode}
+                      onClick={() => navigate(`/edit-plan?month=${currentMonth}`)}
                     >
                       <PencilLine className="w-4 h-4" />
                     </Button>
