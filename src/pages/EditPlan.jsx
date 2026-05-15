@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, subMonths, addMonths } from 'date-fns';
 import {
-  Check,
-  AlertTriangle,
   Copy,
   Save,
   ChevronLeft,
@@ -381,27 +379,25 @@ export default function EditPlan() {
           </div>
         </div>
 
-        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated/95 px-4 py-3 shadow-sm backdrop-blur-xl">
+        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-white/40 surface-card card-elevated px-4 py-3 backdrop-blur-xl dark:border-white/[0.05]">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Left to Allocate
               </p>
 
-              <div
+              <p
                 className={cn(
-                  'mt-1 flex items-center gap-1.5 text-2xl font-bold tracking-tight',
-                  leftToAllocate === 0
-                    ? 'text-[hsl(var(--success))]'
-                    : leftToAllocate < 0
-                      ? 'text-destructive'
+                  'mt-1 text-2xl font-bold tracking-tight',
+                  leftToAllocate < 0
+                    ? 'text-red-600'
+                    : leftToAllocate === 0
+                      ? 'text-green-600'
                       : 'text-foreground'
                 )}
               >
-                {leftToAllocate === 0 && <Check className="h-5 w-5" />}
-                {leftToAllocate < 0 && <AlertTriangle className="h-4 w-4" />}
                 {formatCurrency(Math.abs(leftToAllocate))}
-              </div>
+              </p>
             </div>
 
             <div className="shrink-0 text-right">
@@ -426,9 +422,9 @@ export default function EditPlan() {
               className={cn(
                 'h-full rounded-full transition-all',
                 leftToAllocate < 0
-                  ? 'bg-destructive'
+                  ? 'bg-red-500'
                   : leftToAllocate === 0
-                    ? 'bg-[hsl(var(--success))]'
+                    ? 'bg-green-500'
                     : 'bg-primary'
               )}
               style={{ width: `${progress}%` }}

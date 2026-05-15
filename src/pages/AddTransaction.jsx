@@ -3,6 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   ArrowLeft,
+  ArrowDownLeft,
+  ArrowUpRight,
+  ArrowLeftRight,
   Trash2,
 } from 'lucide-react';
 
@@ -45,9 +48,9 @@ import {
 import { useCurrency } from '@/hooks/useCurrency';
 
 const typeOptions = [
-  { value: 'income', label: 'Income' },
-  { value: 'expense', label: 'Expense' },
-  { value: 'transfer', label: 'Transfer' },
+  { value: 'income', label: 'Income', icon: ArrowDownLeft },
+  { value: 'expense', label: 'Expense', icon: ArrowUpRight },
+  { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight },
 ];
 
 const getCurrencyCode = (currency) => {

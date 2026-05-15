@@ -161,6 +161,30 @@ export default function UnifiedCategorySection({
     setExpandedParents((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const parentCategories = categories.filter((c) => !c.parent_id);
+  const sectionType = parentCategories[0]?.type || title.toLowerCase();
+  const sectionStyles = {
+    income: {
+      text: 'text-emerald-700 dark:text-emerald-400',
+      bg: 'bg-emerald-500/5 dark:bg-emerald-400/5',
+      iconBg: 'bg-emerald-500/10 dark:bg-emerald-400/10',
+    },
+    expense: {
+      text: 'text-red-700 dark:text-red-400',
+      bg: 'bg-red-500/5 dark:bg-red-400/5',
+      iconBg: 'bg-red-500/10 dark:bg-red-400/10',
+    },
+    savings: {
+      text: 'text-blue-700 dark:text-blue-400',
+      bg: 'bg-blue-500/5 dark:bg-blue-400/5',
+      iconBg: 'bg-blue-500/10 dark:bg-blue-400/10',
+    },
+    debt: {
+      text: 'text-purple-700 dark:text-purple-400',
+      bg: 'bg-purple-500/5 dark:bg-purple-400/5',
+      iconBg: 'bg-purple-500/10 dark:bg-purple-400/10',
+    },
+  };
+  const sectionStyle = sectionStyles[sectionType] || sectionStyles.expense;
 
   const totalSpent = parentCategories.reduce((sum, c) => {
     const subs = subcategories.filter((s) => s.parent_id === c.id);
@@ -197,35 +221,56 @@ export default function UnifiedCategorySection({
   if (parentCategories.length === 0) return null;
 
   return (
-    <div className="surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] overflow-hidden transition-all duration-200">
+    <div className="surface-card card-elevated overflow-hidden rounded-xl border border-white/40 transition-all duration-200 dark:border-white/[0.05]">
       <button
         type="button"
         onClick={() => setIsCollapsed((p) => !p)}
-        className="w-full flex items-center justify-between px-5 py-3.5 border-b border-border hover:bg-accent/30 transition-colors"
+        className={cn(
+          'flex w-full items-center justify-between gap-3 border-b border-border/40 px-5 py-3.5 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]',
+          sectionStyle.bg
+        )}
       >
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {title}
-        </h3>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground tabular-nums inline-flex items-center gap-1">
-            {isEditMode ? (
-              <Money amount={totalPlanned} formatCurrency={formatCurrency} />
-            ) : (
-              <>
-                <Money amount={totalSpent} formatCurrency={formatCurrency} />
-                <span>/</span>
-                <Money amount={totalPlanned} formatCurrency={formatCurrency} />
-              </>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={cn(
+              'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+              sectionStyle.iconBg,
+              sectionStyle.text
             )}
+          >
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 transition-transform duration-200',
+                isCollapsed && 'rotate-180'
+              )}
+            />
           </span>
 
-          <ChevronDown
+          <h3
             className={cn(
-              'w-4 h-4 text-muted-foreground transition-transform duration-200',
-              isCollapsed && 'rotate-180'
+              'truncate text-sm font-bold tracking-wide',
+              sectionStyle.text
             )}
-          />
+          >
+            {title}
+          </h3>
+        </div>
+
+        <div
+          className={cn(
+            'shrink-0 text-right text-sm font-black tracking-tight tabular-nums sm:text-base',
+            sectionStyle.text
+          )}
+        >
+          {isEditMode ? (
+            <Money amount={totalPlanned} formatCurrency={formatCurrency} />
+          ) : (
+            <span className="inline-flex items-center gap-1">
+              <Money amount={totalSpent} formatCurrency={formatCurrency} />
+              <span className="opacity-50">/</span>
+              <Money amount={totalPlanned} formatCurrency={formatCurrency} />
+            </span>
+          )}
         </div>
       </button>
 
