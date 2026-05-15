@@ -64,28 +64,41 @@ export default function Accounts() {
     );
 
     return (
-      <div className="surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border">
-          <h3
-            className={cn(
-              'text-xs font-bold uppercase tracking-wider',
-              isLiability ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'
-            )}
-          >
-            {title}
-          </h3>
+      <div className="surface-card card-elevated overflow-hidden rounded-[1.75rem] border border-white/40 dark:border-white/[0.05]">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-5 py-4">
+          <div>
+            <h3
+              className={cn(
+                'text-sm font-bold uppercase tracking-[0.18em]',
+                isLiability
+                  ? 'text-destructive'
+                  : 'text-emerald-600 dark:text-emerald-400'
+              )}
+            >
+              {title}
+            </h3>
 
-          <span
+            <p className="mt-1 text-xs text-muted-foreground">
+              {accs.length} {accs.length === 1 ? 'account' : 'accounts'}
+            </p>
+          </div>
+
+          <div
             className={cn(
-              'text-sm font-bold tabular-nums',
-              isLiability ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'
+              'text-xl font-black tracking-tight tabular-nums',
+              isLiability
+                ? 'text-destructive'
+                : 'text-emerald-600 dark:text-emerald-400'
             )}
           >
             <InlineMoney>{formatCurrency(total)}</InlineMoney>
-          </span>
+          </div>
         </div>
 
-        <div className="divide-y divide-border/50">
+        {/* Rows */}
+        <div className="divide-y divide-border/40">
           {accs.map((acc) => {
             const Icon = typeIcons[acc.type] || Wallet;
             const balance = Math.abs(Number(acc.balance) || 0);
@@ -94,28 +107,38 @@ export default function Accounts() {
               <Link
                 key={acc.id}
                 to={`/accounts/${acc.id}`}
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/50 transition-colors"
+                className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
               >
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${acc.color || '#0078D4'}18` }}
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
+                  style={{
+                    backgroundColor: `${acc.color || '#0078D4'}15`,
+                  }}
                 >
                   <Icon
-                    className="w-4 h-4"
-                    style={{ color: acc.color || '#0078D4' }}
+                    className="h-6 w-6"
+                    style={{
+                      color: acc.color || '#0078D4',
+                    }}
                   />
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{acc.name}</div>
-                  <div className="text-xs text-muted-foreground capitalize">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-lg font-bold text-foreground">
+                    {acc.name}
+                  </div>
+
+                  <div className="mt-0.5 text-sm capitalize text-muted-foreground">
                     {acc.type?.replace('_', ' ') || 'Account'}
                   </div>
                 </div>
 
-                <span className="inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-semibold text-foreground tabular-nums">
-                  <InlineMoney>{formatCurrency(balance)}</InlineMoney>
-                </span>
+                {/* Neutral Amount Color */}
+                <div className="text-right">
+                  <div className="text-lg font-black tracking-tight text-foreground tabular-nums">
+                    <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                  </div>
+                </div>
               </Link>
             );
           })}
@@ -132,8 +155,13 @@ export default function Accounts() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
+        
+        {/* Net Worth Card */}
         <section className="surface-card card-elevated mb-8 rounded-[2rem] border border-white/40 p-5 dark:border-white/[0.05] sm:p-6">
+          
           <div className="grid grid-cols-[auto_1fr] items-center gap-4 sm:grid-cols-[auto_1fr_auto]">
+            
+            {/* Left */}
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
                 <Scale className="h-5 w-5" />
@@ -143,12 +171,10 @@ export default function Accounts() {
                 <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
                   Net Worth
                 </div>
-                <div className="mt-1 text-xs font-medium text-muted-foreground sm:hidden">
-                  Assets minus liabilities
-                </div>
               </div>
             </div>
 
+            {/* Amount */}
             <div
               className={cn(
                 'col-span-2 mt-4 flex items-center justify-center gap-1 text-4xl font-black tracking-tight tabular-nums sm:col-span-1 sm:mt-0 sm:text-5xl',
@@ -160,12 +186,12 @@ export default function Accounts() {
             </div>
           </div>
 
-          <p className="mt-4 border-t border-border/50 pt-4 text-center text-sm font-medium text-muted-foreground sm:text-base">
-            The current equilibrium of your efforts
-          </p>
-
+          {/* Bottom Cards */}
           <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
+            
+            {/* Assets */}
             <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
+              
               <div className="mb-3 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 sm:text-sm">
                 <ArrowUpRight className="h-4 w-4" />
                 <span>Assets</span>
@@ -180,7 +206,9 @@ export default function Accounts() {
               </div>
             </div>
 
+            {/* Liabilities */}
             <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
+              
               <div className="mb-3 flex items-center gap-2 text-xs font-bold text-destructive sm:text-sm">
                 <ArrowDownRight className="h-4 w-4" />
                 <span>Liabilities</span>
@@ -197,6 +225,7 @@ export default function Accounts() {
           </div>
         </section>
 
+        {/* Account Groups */}
         <div className="space-y-4">
           {renderGroup('Assets', assets, false)}
           {renderGroup('Liabilities', liabilities, true)}
