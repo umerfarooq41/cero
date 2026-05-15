@@ -1,125 +1,131 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================= */
-/* 🌍 DESIGN TOKENS */
+/* 🌍 CERO DESIGN TOKENS */
+/* Soft Fluent / Premium Finance UI */
 /* ============================= */
 
 @layer base {
   :root {
-    --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* 🎨 Base Colors */
-    --background: 220 15% 97%;
-    --foreground: 0 0% 8%;
+    --background: 218 42% 97%;
+    --foreground: 222 47% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card-foreground: 222 47% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 222 47% 9%;
 
-    --primary: 206 100% 42%;
+    --primary: 217 91% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 94%;
-    --secondary-foreground: 0 0% 15%;
+    --secondary: 220 25% 95%;
+    --secondary-foreground: 222 47% 12%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 9% 43%;
 
-    --accent: 220 10% 92%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 220 24% 93%;
+    --accent-foreground: 222 47% 11%;
 
-    --destructive: 354 90% 41%;
+    --destructive: 0 78% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 80% 28%;
+    --success: 145 63% 38%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
-    --ring: 206 100% 42%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
+
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 217 91% 53%;
 
     /* 📊 Charts */
-    --chart-1: 206 100% 42%;
-    --chart-2: 120 80% 28%;
-    --chart-3: 354 90% 41%;
-    --chart-4: 43 74% 52%;
-    --chart-5: 270 60% 55%;
+    --chart-1: 217 91% 53%;
+    --chart-2: 145 63% 38%;
+    --chart-3: 0 78% 56%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 267 84% 63%;
 
-    --radius: 0.75rem;
+    --radius: 1.125rem;
 
-    /* 📱 Sidebar */
+    /* 📱 Sidebar / Navigation */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 25%;
-    --sidebar-primary: 206 100% 42%;
+    --sidebar-foreground: 220 9% 35%;
+    --sidebar-primary: 217 91% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 10% 95%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 220 10% 92%;
-    --sidebar-ring: 206 100% 42%;
+    --sidebar-accent: 220 25% 95%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 220 20% 90%;
+    --sidebar-ring: 217 91% 53%;
 
     /* 💰 Financial Mood */
-    --mood-positive: 120 70% 35%;
-    --mood-negative: 354 80% 50%;
-    --mood-neutral: 220 10% 50%;
+    --mood-positive: 145 63% 38%;
+    --mood-negative: 0 78% 56%;
+    --mood-neutral: 220 9% 46%;
   }
 
   .dark {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 95%;
+    --background: 222 47% 5%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 222 38% 9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 222 38% 9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 206 100% 50%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 217 33% 13%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 217 33% 13%;
+    --muted-foreground: 215 20% 67%;
 
-    --accent: 0 0% 16%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 217 33% 16%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 354 80% 48%;
+    --destructive: 0 84% 63%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 70% 38%;
+    --success: 145 70% 48%;
     --success-foreground: 0 0% 100%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 206 100% 50%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 222 47% 11%;
 
-    --chart-1: 206 100% 50%;
-    --chart-2: 120 70% 38%;
-    --chart-3: 354 80% 48%;
-    --chart-4: 43 74% 58%;
-    --chart-5: 270 60% 60%;
+    --border: 217 30% 17%;
+    --input: 217 30% 17%;
+    --ring: 217 91% 60%;
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 206 100% 50%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 145 70% 48%;
+    --chart-3: 0 84% 63%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 267 90% 70%;
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 206 100% 50%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 30% 17%;
+    --sidebar-ring: 217 91% 60%;
 
-    /* 💰 Mood (dark tuned) */
-    --mood-positive: 120 60% 45%;
-    --mood-negative: 354 70% 55%;
-    --mood-neutral: 220 10% 65%;
+    --mood-positive: 145 70% 50%;
+    --mood-negative: 0 84% 64%;
+    --mood-neutral: 215 20% 68%;
   }
 }
 
@@ -138,28 +144,30 @@
   }
 
   body {
-    @apply text-foreground font-sans;
-    min-height: 100%;
+    @apply text-foreground font-sans antialiased;
+    min-height: 100vh;
 
-    /* Light mode: soft Fluent/Mica style app background */
     background:
-      radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.11), transparent 30%),
-      radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.08), transparent 28%),
-      radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.07), transparent 34%),
-      linear-gradient(135deg, hsl(var(--background)) 0%, hsl(220 30% 98%) 45%, hsl(220 25% 96%) 100%);
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.18), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%);
+
     background-attachment: fixed;
-    background-repeat: no-repeat;
   }
 
   .dark body {
-    /* Dark mode: premium deep gradient without overpowering cards */
     background:
-      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.20), transparent 30%),
-      radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.16), transparent 28%),
-      radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.10), transparent 32%),
-      linear-gradient(135deg, hsl(var(--background)) 0%, hsl(220 35% 7%) 48%, hsl(222 45% 5%) 100%);
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%),
+      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%);
+
     background-attachment: fixed;
-    background-repeat: no-repeat;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
   }
 }
 
@@ -178,76 +186,116 @@
     transform 0.2s ease;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ============================= */
 /* 🧊 GLASS / MODERN UI */
 /* ============================= */
 
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    background: rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.62);
   }
 
   .dark .glass {
-    background: rgba(18, 18, 20, 0.72);
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .surface {
     background:
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.88),
-        rgba(255, 255, 255, 0.96)
-      );
-    border: 1px solid rgba(255, 255, 255, 0.58);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.7);
   }
 
   .dark .surface {
     background:
-      linear-gradient(
-        180deg,
-        rgba(26, 28, 32, 0.92),
-        rgba(15, 17, 22, 0.96)
-      );
+      linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(8, 13, 28, 0.96));
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .card-elevated {
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.04),
-      0 8px 22px rgba(15, 23, 42, 0.08),
-      0 18px 44px rgba(15, 23, 42, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.56);
+      0 8px 22px rgba(15, 23, 42, 0.07),
+      0 20px 48px rgba(15, 23, 42, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.72);
   }
 
   .dark .card-elevated {
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.55),
-      0 10px 28px rgba(0, 0, 0, 0.42),
-      0 20px 56px rgba(0, 0, 0, 0.32);
+      0 12px 30px rgba(0, 0, 0, 0.38),
+      0 24px 60px rgba(0, 0, 0, 0.26);
     border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .card-soft {
+    background: hsl(var(--card) / 0.86);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.03),
+      0 6px 18px rgba(15, 23, 42, 0.05);
+  }
+
+  .dark .card-soft {
+    background: hsl(var(--card) / 0.78);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.45),
+      0 10px 26px rgba(0, 0, 0, 0.32);
   }
 
   .hover-lift:hover {
     transform: translateY(-2px);
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.04),
+      0 12px 30px rgba(15, 23, 42, 0.08),
+      0 26px 60px rgba(15, 23, 42, 0.06);
   }
 
-  .soft-card {
-    background: hsl(var(--card) / 0.88);
-    backdrop-filter: blur(14px) saturate(120%);
-    -webkit-backdrop-filter: blur(14px) saturate(120%);
+  .dark .hover-lift:hover {
     box-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.04),
-      0 6px 18px rgba(15, 23, 42, 0.07);
+      0 2px 4px rgba(0, 0, 0, 0.55),
+      0 14px 34px rgba(0, 0, 0, 0.42),
+      0 28px 68px rgba(0, 0, 0, 0.3);
   }
 
-  .dark .soft-card {
-    background: hsl(var(--card) / 0.82);
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.45),
-      0 8px 24px rgba(0, 0, 0, 0.34);
+  .app-bottom-nav {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.06);
+  }
+
+  .dark .app-bottom-nav {
+    background: rgba(2, 6, 23, 0.78);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .finance-positive {
+    color: hsl(var(--mood-positive));
+  }
+
+  .finance-negative {
+    color: hsl(var(--mood-negative));
+  }
+
+  .finance-muted {
+    color: hsl(var(--mood-neutral));
   }
 }
