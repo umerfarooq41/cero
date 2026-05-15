@@ -279,7 +279,7 @@ export default function AccountDetail() {
           </div>
         </div>
 
-        <section className="mb-6 overflow-hidden rounded-3xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+        <section className="mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card/75 shadow-md backdrop-blur-xl">
           <div
             className={cn(
               'p-6',
@@ -316,7 +316,7 @@ export default function AccountDetail() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-white/40 dark:border-white/[0.05] bg-white/45 dark:bg-white/[0.03] p-4 backdrop-blur-xl">
+              <div className="rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl">
                 <div className="text-xs text-muted-foreground">
                   Type
                 </div>
@@ -325,7 +325,7 @@ export default function AccountDetail() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/40 dark:border-white/[0.05] bg-white/45 dark:bg-white/[0.03] p-4 backdrop-blur-xl">
+              <div className="rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl">
                 <div className="text-xs text-muted-foreground">
                   Category
                 </div>
@@ -360,7 +360,7 @@ export default function AccountDetail() {
             description="No transactions for this account yet."
           />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
             <div className="divide-y divide-border/50">
               {transactions.map((transaction) => (
                 <TransactionRow

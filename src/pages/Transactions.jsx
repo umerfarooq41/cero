@@ -185,7 +185,7 @@ export default function Transactions() {
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         {/* Month + Date */}
         <div className="mb-4 flex justify-center">
-          <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
+          <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
             <Button
               type="button"
               variant="ghost"
@@ -294,7 +294,7 @@ export default function Transactions() {
                 key={date}
                 className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm"
               >
-                <div className="border-b border-border bg-accent/30 px-4 py-2.5">
+                <div className="border-b border-border/50 bg-card/50 px-4 py-2.5 backdrop-blur-xl">
                   <span className="text-xs font-semibold text-muted-foreground">
                     {date !== 'No Date'
                       ? format(new Date(date), 'EEEE, MMM d')

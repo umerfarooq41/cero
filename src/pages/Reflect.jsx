@@ -181,7 +181,7 @@ export default function Reflect() {
         subtitle="Insights, trends, and financial clarity"
       />
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-4 pb-24 lg:py-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         <ReflectPeriodSelector
           year={selectedYear}
           month={selectedMonth}

@@ -334,7 +334,7 @@ className={cn(
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
         <div className="mb-4">
           <div className="flex items-center justify-center">
-            <div className="flex w-full max-w-md items-center rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
+            <div className="flex w-full max-w-md items-center rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
               <Button
                 type="button"
                 variant="ghost"

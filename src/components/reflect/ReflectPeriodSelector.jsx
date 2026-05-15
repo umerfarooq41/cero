@@ -79,13 +79,13 @@ export default function ReflectPeriodSelector({
   </h3>
 </div>
 
-      <div className="mb-3 grid grid-cols-2 rounded-2xl bg-muted p-1">
+      <div className="mb-3 grid grid-cols-2 rounded-2xl border border-border/60 bg-card/60 p-1 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => setPeriodMode('month')}
           className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
             periodMode === 'month'
-              ? 'bg-background text-foreground shadow-sm'
+              ? 'bg-card/90 text-foreground shadow-sm'
               : 'text-muted-foreground'
           }`}
         >
@@ -97,7 +97,7 @@ export default function ReflectPeriodSelector({
           onClick={() => setPeriodMode('year')}
           className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
             periodMode === 'year'
-              ? 'bg-background text-foreground shadow-sm'
+              ? 'bg-card/90 text-foreground shadow-sm'
               : 'text-muted-foreground'
           }`}
         >
@@ -113,7 +113,7 @@ export default function ReflectPeriodSelector({
         }
       >
         <Select value={String(year)} onValueChange={onYearChange}>
-          <SelectTrigger className="h-11 rounded-2xl bg-background">
+          <SelectTrigger className="h-11 rounded-2xl border-border/60 bg-card/70 backdrop-blur-xl">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
 
@@ -131,7 +131,7 @@ export default function ReflectPeriodSelector({
             value={month === 'all' ? selectedMonth.value : month}
             onValueChange={onMonthChange}
           >
-            <SelectTrigger className="h-11 rounded-2xl bg-background">
+            <SelectTrigger className="h-11 rounded-2xl border-border/60 bg-card/70 backdrop-blur-xl">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
 
