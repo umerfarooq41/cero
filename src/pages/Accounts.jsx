@@ -87,8 +87,7 @@ export default function Accounts() {
 
           <div
             className={cn(
-              'text-lg font-black tracking-tight tabular-nums sm:text-xl',
-              isLiability
+                'text-base font-bold tracking-tight tabular-nums sm:text-lg',              isLiability
                 ? 'text-destructive'
                 : 'text-emerald-600 dark:text-emerald-400'
             )}
@@ -124,7 +123,7 @@ export default function Accounts() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-base font-bold text-foreground sm:text-lg">
+                  <div className="truncate text-sm font-bold text-foreground sm:text-base">
                     {acc.name}
                   </div>
 
@@ -135,7 +134,7 @@ export default function Accounts() {
 
                 {/* Neutral Amount Color */}
                 <div className="text-right">
-                  <div className="text-base font-black tracking-tight text-foreground tabular-nums sm:text-lg">
+                  <div className="text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-base">
                     <InlineMoney>{formatCurrency(balance)}</InlineMoney>
                   </div>
                 </div>
@@ -173,7 +172,7 @@ export default function Accounts() {
             {/* Amount */}
             <div
               className={cn(
-                'mt-4 flex items-center justify-center gap-1 text-3xl font-black tracking-tight tabular-nums sm:text-5xl',
+                'mt-3 flex items-center justify-center gap-1 text-2xl font-black tracking-tight tabular-nums sm:text-4xl',
                 netWorth >= 0 ? 'text-foreground' : 'text-destructive'
               )}
             >
@@ -198,7 +197,7 @@ export default function Accounts() {
                 <span>Assets</span>
               </div>
 
-              <div className="text-base font-extrabold tracking-tight text-foreground tabular-nums sm:text-xl">
+              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
                 <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
               </div>
 
@@ -215,7 +214,7 @@ export default function Accounts() {
                 <span>Liabilities</span>
               </div>
 
-              <div className="text-base font-extrabold tracking-tight text-foreground tabular-nums sm:text-xl">
+              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
                 <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
               </div>
 
