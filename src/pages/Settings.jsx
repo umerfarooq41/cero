@@ -39,7 +39,7 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import PageHeader from '@/components/layout/PageHeader';
-import { useTheme } from '@/lib/theme-provider';
+import { useTheme } from "@/components/ThemeProvider";
 
 const SettingRow = ({
   icon: Icon,
