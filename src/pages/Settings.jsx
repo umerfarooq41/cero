@@ -29,7 +29,12 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { getUserSettings, saveUserSettings } from '@/lib/budgetData';
+import {
+  getUserSettings,
+  saveUserSettings,
+  exportFinancialReport,
+  resetUserData,
+} from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
@@ -117,8 +122,11 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { user, isAuthenticated, signOut } = useAuth();
 
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [resetConfirm, setResetConfirm] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -209,6 +217,48 @@ export default function Settings() {
       console.error('Budget logic save failed:', error);
       setSettings(settings);
       toast.error(error.message || 'Could not save budget logic setting');
+    }
+  };
+
+  const handleExportReport = async () => {
+    setExporting(true);
+
+    try {
+      const result = await exportFinancialReport();
+
+      toast.success(`Report downloaded: ${result.filename}`);
+      setShowExportDialog(false);
+    } catch (error) {
+      console.error('Report export failed:', error);
+      toast.error(error.message || 'Could not export report');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleResetEverything = async () => {
+    if (resetConfirmText !== 'RESET') {
+      toast.error('Type RESET to confirm');
+      return;
+    }
+
+    setResetting(true);
+
+    try {
+      await resetUserData();
+      queryClient.clear();
+
+      toast.success('All Cero data has been deleted');
+
+      setShowResetDialog(false);
+      setResetConfirmText('');
+
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Reset database failed:', error);
+      toast.error(error.message || 'Could not reset database');
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -410,13 +460,13 @@ export default function Settings() {
           <div className="divide-y divide-border/50 px-4">
             <SettingRow
               icon={Download}
-              label="Export CSV"
-              description="Download all your data"
+              label="Export Report"
+              description="Download a polished HTML financial report"
             >
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => toast.info('Export coming soon')}
+                onClick={() => setShowExportDialog(true)}
               >
                 Export
               </Button>
@@ -424,8 +474,8 @@ export default function Settings() {
 
             <SettingRow
               icon={Trash2}
-              label="Reset Database"
-              description="Permanently delete all your data"
+              label="Reset Everything"
+              description="Permanently delete all Cero data from your account"
             >
               <Button
                 variant="destructive"
@@ -438,54 +488,98 @@ export default function Settings() {
           </div>
         </div>
 
-        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Reset All Data?</DialogTitle>
+              <DialogTitle>Export Financial Report</DialogTitle>
               <DialogDescription>
-                This will permanently delete all your transactions, accounts,
-                categories, and budget plans. This cannot be undone.
+                This will download a polished HTML report that opens in any
+                browser and can be printed or saved as PDF. It includes net worth,
+                accounts, monthly cash flow, category performance, and recent
+                transactions.
               </DialogDescription>
             </DialogHeader>
 
-            {!resetConfirm ? (
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowResetDialog(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => setResetConfirm(true)}
-                >
-                  I understand, continue
-                </Button>
-              </DialogFooter>
-            ) : (
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowResetDialog(false);
-                    setResetConfirm(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    toast.success('Data reset complete');
-                    setShowResetDialog(false);
-                    setResetConfirm(false);
-                  }}
-                >
-                  Permanently Delete Everything
-                </Button>
-              </DialogFooter>
-            )}
+            <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+              <div className="font-semibold">Report includes</div>
+              <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
+                <li>Net worth and account balances</li>
+                <li>Income, expenses, savings, and debt totals</li>
+                <li>Monthly cash-flow summary</li>
+                <li>Budget category performance</li>
+                <li>Latest 250 transactions</li>
+              </ul>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(false)}
+                disabled={exporting}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleExportReport} disabled={exporting}>
+                {exporting ? 'Preparing…' : 'Download Report'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={showResetDialog}
+          onOpenChange={(open) => {
+            setShowResetDialog(open);
+            if (!open) setResetConfirmText('');
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset Everything?</DialogTitle>
+              <DialogDescription>
+                This will permanently delete your transactions, accounts,
+                categories, budget plans, and app settings from Supabase. Your
+                login account will remain active, but this Cero data cannot be
+                restored.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
+              <div className="font-semibold text-destructive">
+                This action is permanent.
+              </div>
+              <p className="mt-1 text-muted-foreground">
+                Type <span className="font-bold text-foreground">RESET</span>{' '}
+                below to confirm deletion.
+              </p>
+
+              <input
+                value={resetConfirmText}
+                onChange={(event) => setResetConfirmText(event.target.value)}
+                placeholder="Type RESET"
+                className="mt-3 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-destructive/30"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowResetDialog(false);
+                  setResetConfirmText('');
+                }}
+                disabled={resetting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleResetEverything}
+                disabled={resetting || resetConfirmText !== 'RESET'}
+              >
+                {resetting ? 'Deleting…' : 'Delete Everything'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>
