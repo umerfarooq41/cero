@@ -120,9 +120,13 @@ export default function Accounts() {
 
   return (
     <>
-      <PageHeader title="Accounts" subtitle="Your financial overview" />
+      <PageHeader
+        title="Accounts"
+        subtitle="Your financial overview"
+        className="pb-6"
+      />
 
-      <main className="max-w-3xl mx-auto px-4 pb-24 pt-6">
+      <main className="max-w-3xl mx-auto px-4 pt-6 pb-28">
         <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center shadow-sm">
           <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
             Net Worth
