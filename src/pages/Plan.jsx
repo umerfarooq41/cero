@@ -47,7 +47,7 @@ const TABS = [
     activeClass:
       'bg-emerald-500/10 text-emerald-700 shadow-[0_8px_24px_rgba(16,185,129,0.18)] dark:text-emerald-400 dark:shadow-[0_8px_24px_rgba(16,185,129,0.10)]',
     inactiveClass:
-      'bg-emerald-500/5 text-emerald-700/75 hover:bg-emerald-500/10 dark:text-emerald-400/80',
+      'text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-700 dark:hover:text-emerald-400',
     icon: ArrowUpRight,
     shades: ['#14532D', '#15803D', '#16A34A', '#22C55E', '#4ADE80', '#86EFAC'],
   },
@@ -59,7 +59,7 @@ const TABS = [
     activeClass:
       'bg-red-500/10 text-red-700 shadow-[0_8px_24px_rgba(239,68,68,0.18)] dark:text-red-400 dark:shadow-[0_8px_24px_rgba(239,68,68,0.10)]',
     inactiveClass:
-      'bg-red-500/5 text-red-700/75 hover:bg-red-500/10 dark:text-red-400/80',
+      'text-muted-foreground hover:bg-red-500/5 hover:text-red-700 dark:hover:text-red-400',
     icon: ArrowDownRight,
     shades: ['#7F1D1D', '#991B1B', '#B91C1C', '#DC2626', '#EF4444', '#F87171'],
   },
@@ -71,7 +71,7 @@ const TABS = [
     activeClass:
       'bg-blue-500/10 text-blue-700 shadow-[0_8px_24px_rgba(59,130,246,0.18)] dark:text-blue-400 dark:shadow-[0_8px_24px_rgba(59,130,246,0.10)]',
     inactiveClass:
-      'bg-blue-500/5 text-blue-700/75 hover:bg-blue-500/10 dark:text-blue-400/80',
+      'text-muted-foreground hover:bg-blue-500/5 hover:text-blue-700 dark:hover:text-blue-400',
     icon: PiggyBank,
     shades: ['#1E3A8A', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
   },
@@ -83,7 +83,7 @@ const TABS = [
     activeClass:
       'bg-purple-500/10 text-purple-700 shadow-[0_8px_24px_rgba(124,58,237,0.18)] dark:text-purple-400 dark:shadow-[0_8px_24px_rgba(124,58,237,0.10)]',
     inactiveClass:
-      'bg-purple-500/5 text-purple-700/75 hover:bg-purple-500/10 dark:text-purple-400/80',
+      'text-muted-foreground hover:bg-purple-500/5 hover:text-purple-700 dark:hover:text-purple-400',
     icon: CreditCard,
     shades: ['#581C87', '#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD'],
   },
@@ -386,7 +386,7 @@ function PlanOverview({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-1 rounded-[1.75rem] border border-white/40 bg-white/35 p-1.5 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="grid w-full grid-cols-4 gap-1 rounded-2xl border border-white/40 bg-white/35 p-1.5 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
         {TABS.map((item) => {
           const TabIcon = item.icon;
           const active = item.key === activeTab;
@@ -397,12 +397,12 @@ function PlanOverview({
               type="button"
               onClick={() => setActiveTab(item.key)}
               className={cn(
-                'flex min-h-[52px] min-w-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] px-1.5 text-[10.5px] font-semibold leading-none transition-all duration-200 sm:text-xs',
+                'flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-1.5 py-2.5 text-[11px] font-semibold leading-none transition-all duration-200 sm:px-3 sm:text-sm',
                 active ? item.activeClass : item.inactiveClass
               )}
             >
-              <TabIcon className="h-3.5 w-3.5 stroke-[2.4]" />
-              <span className="max-w-full truncate">{item.title}</span>
+              <TabIcon className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              <span className="min-w-0 truncate">{item.title}</span>
             </button>
           );
         })}
