@@ -100,7 +100,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
   }, 0);
 
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm overflow-hidden">
       {/* Section header */}
       <button
         onClick={() => setIsOpen(p => !p)}

@@ -169,7 +169,7 @@ export default function Categories() {
           />
 
           {showArchived && archivedCategories.length > 0 && (
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm opacity-75">
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm opacity-75">
               <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
                 <Archive className="h-3.5 w-3.5 text-muted-foreground" />
 

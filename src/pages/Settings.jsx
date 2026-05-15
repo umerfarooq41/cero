@@ -274,7 +274,7 @@ export default function Settings() {
       />
 
       <main className="mx-auto w-full max-w-2xl px-4 py-3 pb-24 lg:py-8">
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Account
@@ -321,7 +321,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               App Management
@@ -351,7 +351,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Appearance
@@ -374,7 +374,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Regional
@@ -418,7 +418,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Budget Logic
@@ -454,7 +454,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Data & Privacy

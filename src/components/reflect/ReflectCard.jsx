@@ -8,7 +8,7 @@ export default function ReflectCard({ children, className }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className={cn(
-        'rounded-2xl border border-border bg-card shadow-sm overflow-hidden',
+        'rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm overflow-hidden',
         'focus:outline-none focus-visible:outline-none',
         className
       )}

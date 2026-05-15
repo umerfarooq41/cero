@@ -43,7 +43,7 @@ export default function PlanCategoryGroup({
   if (parentCategories.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-lg shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}

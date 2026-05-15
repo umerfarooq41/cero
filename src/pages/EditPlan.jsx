@@ -224,7 +224,7 @@ export default function EditPlan() {
     const total = sumType(type);
 
     return (
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection(type)}

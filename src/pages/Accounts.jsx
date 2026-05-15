@@ -64,7 +64,7 @@ export default function Accounts() {
     );
 
     return (
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
         
         {/* Header */}
         <div className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-3">
@@ -157,7 +157,7 @@ export default function Accounts() {
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 md:px-6 md:py-6">
         
         {/* Net Worth Card */}
-        <section className="mb-6 rounded-3xl border border-border bg-card p-5 shadow-md md:p-6">
+        <section className="mb-6 rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl p-5 shadow-md md:p-6">
           
           <div className="flex flex-col items-center justify-center text-center">
             
@@ -191,7 +191,7 @@ export default function Accounts() {
           <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
             
             {/* Assets */}
-            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sm">
               
               <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                 <ArrowUpRight className="h-4 w-4" />
@@ -208,7 +208,7 @@ export default function Accounts() {
             </div>
 
             {/* Liabilities */}
-            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sm">
               
               <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-destructive">
                 <ArrowDownRight className="h-4 w-4" />
