@@ -235,45 +235,48 @@ export default function EditPlan() {
           onClick={() => toggleSection(type)}
           className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
         >
-          <div className="flex min-w-0 items-center gap-3">
-            <span
-              className={cn(
-                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-                style.bg,
-                style.text
-              )}
-            >
-              {isCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </span>
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            className={cn(
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+              style.bg,
+              style.text
+            )}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </span>
 
-            <div className="min-w-0">
-              <h3
-                className={cn(
-                  'text-sm font-bold tracking-wide',
-                  style.text
-                )}
-              >
-                {title}
-              </h3>
-
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {items.filter((item) => !item.isSectionHeader).length}{' '}
-                {items.filter((item) => !item.isSectionHeader).length === 1
-                  ? 'category'
-                  : 'categories'}
-              </p>
-            </div>
+          {/* Category Count Circle */}
+          <div
+            className={cn(
+              'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold',
+              style.bg,
+              style.text
+            )}
+          >
+            {items.filter((item) => !item.isSectionHeader).length}
           </div>
+
+          {/* Title */}
+          <h3
+            className={cn(
+              'text-base font-bold tracking-tight',
+              style.text
+            )}
+          >
+            {title}
+          </h3>
+        </div>
 
           <div
             className={cn(
-              'shrink-0 text-right text-base font-black tracking-tight tabular-nums sm:text-lg',
-              style.text
-            )}
+            'shrink-0 text-right text-base font-bold tracking-tight tabular-nums',
+            style.text
+           )}
           >
             {formatCurrency(total)}
           </div>
