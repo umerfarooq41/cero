@@ -586,7 +586,7 @@ export default function AddTransaction() {
               {type === 'transfer' &&
                 transferCategoryType &&
                 filteredCategories.length === 0 && (
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     No matching {transferCategoryType} categories found.
                   </p>
                 )}

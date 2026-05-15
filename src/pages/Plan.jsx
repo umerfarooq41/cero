@@ -190,7 +190,7 @@ function DonutTooltip({ active, payload, currency, tab }) {
     <div className="rounded-xl border bg-popover px-3 py-2 shadow-lg">
       <p className="text-xs font-bold">{item?.name}</p>
 
-      <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{tab.label}</span>
         <Money amount={tracked} currency={currency} compact />
       </div>
@@ -744,7 +744,7 @@ export default function Plan() {
                         {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
                       </span>
 
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         Budget period
                       </span>
                     </button>
@@ -808,7 +808,7 @@ export default function Plan() {
                   onClick={copyFromPrev}
                   className="gap-2 text-xs"
                 >
-                  <Copy className="w-3.5 h-3.5" />
+                  <Copy className="h-4 w-4" />
                   Copy from last month
                 </Button>
               </motion.div>

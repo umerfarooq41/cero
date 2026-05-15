@@ -144,7 +144,7 @@ export default function CategoryCreatorModal({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Name
             </label>
             <Input
@@ -159,7 +159,7 @@ export default function CategoryCreatorModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Type
             </label>
             <div className="grid grid-cols-4 gap-1.5">
@@ -186,7 +186,7 @@ export default function CategoryCreatorModal({
 
           {filteredParents.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Parent optional
               </label>
               <Select
@@ -211,7 +211,7 @@ export default function CategoryCreatorModal({
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Color
             </label>
 
@@ -222,7 +222,7 @@ export default function CategoryCreatorModal({
                   type="button"
                   onClick={() => setColor(item)}
                   className={cn(
-                    'w-7 h-7 rounded-lg border border-border transition-all',
+                    'h-8 w-8 rounded-xl border border-border transition-all',
                     color === item
                       ? 'ring-2 ring-offset-2 ring-primary scale-110'
                       : 'hover:scale-105'
@@ -234,7 +234,7 @@ export default function CategoryCreatorModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Icon
             </label>
 

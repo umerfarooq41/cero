@@ -24,7 +24,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium leading-tight">{cat.name}</div>
           {hasSubs && (
-            <div className="text-[11px] text-muted-foreground">{subs.length} subcategor{subs.length > 1 ? 'ies' : 'y'}</div>
+            <div className="text-xs text-muted-foreground">{subs.length} subcategor{subs.length > 1 ? 'ies' : 'y'}</div>
           )}
         </div>
 
@@ -35,13 +35,13 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
             className="p-1.5 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
             title="Add subcategory"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
           <button
             onClick={() => onAction(cat)}
             className="p-1.5 rounded-md hover:bg-accent text-muted-foreground transition-colors"
           >
-            <MoreHorizontal className="w-3.5 h-3.5" />
+            <MoreHorizontal className="h-4 w-4" />
           </button>
         </div>
 
@@ -84,7 +84,7 @@ function SubRow({ sub, onAction }) {
         onClick={() => onAction(sub)}
         className="p-1.5 rounded-md hover:bg-accent opacity-0 group-hover:opacity-100 text-muted-foreground transition-all"
       >
-        <MoreHorizontal className="w-3.5 h-3.5" />
+        <MoreHorizontal className="h-4 w-4" />
       </button>
     </div>
   );
@@ -100,7 +100,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
   }, 0);
 
   return (
-    <div className="surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       {/* Section header */}
       <button
         onClick={() => setIsOpen(p => !p)}
@@ -122,7 +122,7 @@ export default function CategorySection({ type, label, categories, defaultExpand
             className="p-1 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
             title="Add category"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
         </div>
       </button>

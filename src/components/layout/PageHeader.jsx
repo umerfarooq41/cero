@@ -33,11 +33,10 @@ export default function PageHeader({
       >
         <h1
           className="
-            text-3xl
+            text-2xl
             font-bold
             tracking-tight
             text-foreground
-            md:text-4xl
           "
         >
           {title}
@@ -47,9 +46,8 @@ export default function PageHeader({
           <p
             className="
               mt-1
-              text-base
+              text-sm
               text-muted-foreground
-              md:text-lg
             "
           >
             {subtitle}

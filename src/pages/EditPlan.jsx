@@ -224,7 +224,7 @@ export default function EditPlan() {
     const total = sumType(type);
 
     return (
-      <div className="surface-card card-elevated overflow-hidden rounded-2xl border border-white/40 dark:border-white/[0.05]">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection(type)}
@@ -353,7 +353,7 @@ className={cn(
                   {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
                 </span>
 
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Editing budget period
                 </span>
               </button>

@@ -55,20 +55,20 @@ function SummaryCard({
   return (
     <div
       className={cn(
-        'surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] p-4 transition-all duration-300',
+        'rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-300',
         faded && 'opacity-50 scale-[0.98]'
       )}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
-        <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className="h-8 w-8 rounded-xl bg-secondary flex items-center justify-center">
+          <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>
 
-      <div className={cn('text-xl font-bold tabular-nums mb-2 inline-flex items-center gap-1', colors.text)}>
+      <div className={cn('text-2xl font-bold tracking-tight tabular-nums mb-2 inline-flex items-center gap-1', colors.text)}>
         {money(safeAmount)}
       </div>
 
@@ -84,7 +84,7 @@ function SummaryCard({
             />
           </div>
 
-          <div className="text-[11px] text-muted-foreground tabular-nums inline-flex items-center gap-1 flex-wrap">
+          <div className="text-xs text-muted-foreground tabular-nums inline-flex items-center gap-1 flex-wrap">
             {safeAmount === 0 ? (
               type === 'income' ? (
                 'Waiting for income'

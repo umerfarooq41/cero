@@ -164,7 +164,7 @@ export default function CategoryEditorModal({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Name
             </label>
             <Input
@@ -179,7 +179,7 @@ export default function CategoryEditorModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Type
             </label>
 
@@ -207,7 +207,7 @@ export default function CategoryEditorModal({
 
           {filteredParents.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Parent optional
               </label>
 
@@ -233,7 +233,7 @@ export default function CategoryEditorModal({
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Color
             </label>
 
@@ -244,7 +244,7 @@ export default function CategoryEditorModal({
                   type="button"
                   onClick={() => setColor(item)}
                   className={cn(
-                    'w-7 h-7 rounded-lg border border-border transition-all',
+                    'h-8 w-8 rounded-xl border border-border transition-all',
                     color === item
                       ? 'ring-2 ring-offset-2 ring-primary scale-110'
                       : 'hover:scale-105'
@@ -256,7 +256,7 @@ export default function CategoryEditorModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Icon
             </label>
 

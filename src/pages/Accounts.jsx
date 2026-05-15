@@ -64,14 +64,14 @@ export default function Accounts() {
     );
 
     return (
-      <div className="surface-card card-elevated overflow-hidden rounded-[1.75rem] border border-white/40 dark:border-white/[0.05]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-5 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-3">
           <div>
             <h3
               className={cn(
-                'text-sm font-bold uppercase tracking-[0.18em]',
+                'text-sm font-semibold',
                 isLiability
                   ? 'text-destructive'
                   : 'text-emerald-600 dark:text-emerald-400'
@@ -87,7 +87,8 @@ export default function Accounts() {
 
           <div
             className={cn(
-                'text-base font-bold tracking-tight tabular-nums sm:text-lg',              isLiability
+                'text-lg font-semibold tabular-nums',
+              isLiability
                 ? 'text-destructive'
                 : 'text-emerald-600 dark:text-emerald-400'
             )}
@@ -106,16 +107,16 @@ export default function Accounts() {
               <Link
                 key={acc.id}
                 to={`/accounts/${acc.id}`}
-                className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
+                className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
               >
                 <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                   style={{
                     backgroundColor: `${acc.color || '#0078D4'}15`,
                   }}
                 >
                   <Icon
-                    className="h-5 w-5"
+                    className="h-4 w-4"
                     style={{
                       color: acc.color || '#0078D4',
                     }}
@@ -123,18 +124,18 @@ export default function Accounts() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold text-foreground sm:text-base">
+                  <div className="truncate text-sm font-medium text-foreground">
                     {acc.name}
                   </div>
 
-                  <div className="mt-0.5 text-sm capitalize text-muted-foreground">
+                  <div className="mt-0.5 text-xs capitalize text-muted-foreground">
                     {acc.type?.replace('_', ' ') || 'Account'}
                   </div>
                 </div>
 
                 {/* Neutral Amount Color */}
                 <div className="text-right">
-                  <div className="text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-base">
+                  <div className="text-sm font-semibold tabular-nums text-foreground">
                     <InlineMoney>{formatCurrency(balance)}</InlineMoney>
                   </div>
                 </div>
@@ -153,10 +154,10 @@ export default function Accounts() {
         subtitle="Your financial overview"
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
+      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 md:px-6 md:py-6">
         
         {/* Net Worth Card */}
-        <section className="surface-card card-elevated mb-8 rounded-[2rem] border border-white/40 p-5 dark:border-white/[0.05] sm:p-6">
+        <section className="mb-6 rounded-3xl border border-border bg-card p-5 shadow-md md:p-6">
           
           <div className="flex flex-col items-center justify-center text-center">
             
@@ -164,7 +165,7 @@ export default function Accounts() {
             <div className="flex items-center gap-2">
               <Scale className="h-4 w-4 text-muted-foreground" />
 
-              <div className="text-sm font-semibold tracking-wide text-muted-foreground">
+              <div className="text-sm font-semibold text-foreground">
                 Net Worth
               </div>
             </div>
@@ -172,7 +173,7 @@ export default function Accounts() {
             {/* Amount */}
             <div
               className={cn(
-                'mt-3 flex items-center justify-center gap-1 text-2xl font-black tracking-tight tabular-nums sm:text-4xl',
+                'mt-3 flex items-center justify-center gap-1 text-2xl font-bold tracking-tight tabular-nums ',
                 netWorth >= 0 ? 'text-foreground' : 'text-destructive'
               )}
             >
@@ -181,7 +182,7 @@ export default function Accounts() {
             </div>
 
             {/* Subtext */}
-            <p className="mt-3 text-sm font-medium text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               The current equilibrium of your efforts
             </p>
           </div>
@@ -190,35 +191,35 @@ export default function Accounts() {
           <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
             
             {/* Assets */}
-            <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 sm:text-sm">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                 <ArrowUpRight className="h-4 w-4" />
                 <span>Assets</span>
               </div>
 
-              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums">
+              <div className="text-lg font-semibold tabular-nums text-foreground">
                 <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
               </div>
 
-              <div className="mt-1 text-xs font-medium text-muted-foreground">
+              <div className="mt-1 text-xs text-muted-foreground">
                 {assets.length} {assets.length === 1 ? 'account' : 'accounts'}
               </div>
             </div>
 
             {/* Liabilities */}
-            <div className="rounded-[1.15rem] border border-white/45 bg-white/35 p-3.5 shadow-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] sm:p-4">
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold text-destructive sm:text-sm">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-destructive">
                 <ArrowDownRight className="h-4 w-4" />
                 <span>Liabilities</span>
               </div>
 
-              <div className="text-sm font-bold tracking-tight text-foreground tabular-nums">
+              <div className="text-lg font-semibold tabular-nums text-foreground">
                 <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
               </div>
 
-              <div className="mt-1 text-xs font-medium text-muted-foreground">
+              <div className="mt-1 text-xs text-muted-foreground">
                 {liabilities.length} {liabilities.length === 1 ? 'account' : 'accounts'}
               </div>
             </div>

@@ -14,7 +14,7 @@ function Money({ amount, formatCurrency }) {
       <img
       src="/sar.svg"
       alt="SAR"
-      className="w-3.5 h-3.5 dark:invert"
+      className="h-4 w-4 dark:invert"
       />
       {Number(amount || 0).toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -119,7 +119,7 @@ function EditRow({
         </span>
 
         {lastMonthHint > 0 && (
-          <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+          <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
             <span>Last:</span>
             <Money amount={lastMonthHint} formatCurrency={formatCurrency} />
           </span>
@@ -221,7 +221,7 @@ export default function UnifiedCategorySection({
   if (parentCategories.length === 0) return null;
 
   return (
-    <div className="surface-card card-elevated overflow-hidden rounded-xl border border-white/40 transition-all duration-200 dark:border-white/[0.05]">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden transition-all duration-200">
       <button
         type="button"
         onClick={() => setIsCollapsed((p) => !p)}
@@ -324,7 +324,7 @@ export default function UnifiedCategorySection({
 
                             <ChevronDown
                               className={cn(
-                                'w-3.5 h-3.5 text-muted-foreground transition-transform',
+                                'h-4 w-4 text-muted-foreground transition-transform',
                                 isParentOpen && 'rotate-180'
                               )}
                             />

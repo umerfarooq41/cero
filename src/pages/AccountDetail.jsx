@@ -424,7 +424,7 @@ export default function AccountDetail() {
                   </SelectContent>
                 </Select>
 
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {accountTransactions.length} transaction
                   {accountTransactions.length > 1 ? 's' : ''} will be reassigned.
                 </p>

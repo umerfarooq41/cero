@@ -194,7 +194,7 @@ function HeroCashFlowCard({
 
           <div
             className={cn(
-              'pt-3 text-3xl font-bold tracking-tight tabular-nums sm:text-4xl',
+              'pt-3 text-2xl font-bold tracking-tight tabular-nums',
               positive
                 ? 'text-emerald-500 dark:text-emerald-400'
                 : 'text-red-500 dark:text-red-400'

@@ -17,7 +17,7 @@ function CurrencyAmount({ value, formatCurrency }) {
       <img
         src="/sar.svg"
         alt="SAR"
-        className="w-3.5 h-3.5 inline-block dark:invert"
+        className="h-4 w-4 inline-block dark:invert"
       />
       <span>
         {Number(Math.abs(value || 0)).toLocaleString('en-US', {
@@ -97,11 +97,11 @@ export default function TransactionRow({
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer"
+      className="flex items-center gap-3 px-3 py-3 min-h-[64px] hover:bg-accent/50 transition-colors cursor-pointer"
     >
       {isTransfer ? (
-        <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
-          <ArrowLeftRight className="w-3 h-3 stroke-[2.2]" />
+        <div className="h-8 w-8 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
+          <ArrowLeftRight className="h-4 w-4 stroke-[2.2]" />
         </div>
       ) : (
         <CategoryIcon
@@ -121,7 +121,7 @@ export default function TransactionRow({
         )}
 
         {secondarySubtitle && (
-          <div className="text-[11px] text-muted-foreground/80 truncate">
+          <div className="text-xs text-muted-foreground/80 truncate">
             {secondarySubtitle}
           </div>
         )}

@@ -50,8 +50,8 @@ const SettingRow = ({
   <div
     className={
       stackOnMobile
-        ? 'flex flex-col gap-3 px-1 py-4 sm:flex-row sm:items-center sm:gap-4'
-        : 'flex items-center gap-4 px-1 py-4'
+        ? 'flex flex-col gap-3 px-1 py-3 sm:flex-row sm:items-center sm:gap-4'
+        : 'flex items-center gap-4 px-1 py-3'
     }
   >
     <div className="flex min-w-0 flex-1 items-center gap-4">
@@ -273,8 +273,8 @@ export default function Settings() {
         subtitle="Preferences, categories, and app settings"
       />
 
-      <main className="mx-auto w-full max-w-2xl px-4 py-4 pb-24 lg:py-8">
-        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+      <main className="mx-auto w-full max-w-2xl px-4 py-3 pb-24 lg:py-8">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Account
@@ -321,7 +321,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               App Management
@@ -331,7 +331,7 @@ export default function Settings() {
           <div className="px-4">
             <Link
               to="/categories"
-              className="flex items-center justify-between rounded-lg px-1 py-4 transition-colors hover:bg-accent/50"
+              className="flex items-center justify-between rounded-lg px-1 py-3 transition-colors hover:bg-accent/50"
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary">
@@ -351,7 +351,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Appearance
@@ -374,7 +374,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Regional
@@ -418,7 +418,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Budget Logic
@@ -454,7 +454,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Data & Privacy

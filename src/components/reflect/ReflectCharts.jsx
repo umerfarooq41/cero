@@ -144,7 +144,7 @@ export default function ReflectCharts({
               </svg>
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold">
+                <span className="text-2xl font-bold">
                   {isYear ? '—' : `${efficiency}%`}
                 </span>
                 <span className="text-xs text-muted-foreground">

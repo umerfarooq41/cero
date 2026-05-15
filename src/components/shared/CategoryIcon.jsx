@@ -221,8 +221,8 @@ export default function CategoryIcon({ icon, color, size = 'md', className }) {
   };
 
   const iconSizes = {
-    xs: 'w-3 h-3',
-    sm: 'w-3.5 h-3.5',
+    xs: 'h-4 w-4',
+    sm: 'h-4 w-4',
     md: 'w-4 h-4',
     lg: 'w-5 h-5',
   };

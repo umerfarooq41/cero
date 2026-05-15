@@ -23,11 +23,11 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
 
   return (
     <div className={cn(
-      "surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] p-5 space-y-3",
+      "rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3",
       className
     )}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foregroundr">{label}</span>
         {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
       </div>
       <div className={cn("text-2xl font-bold tracking-tight", colorMap[type])}>
@@ -44,7 +44,7 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
               style={{ width: `${Math.min(percentage, 100)}%` }}
             />
           </div>
-          <div className="flex justify-between text-[11px] text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{Math.abs(amount)?.toLocaleString('en-US', { minimumFractionDigits: 2 })} spent</span>
             <span>{planned?.toLocaleString('en-US', { minimumFractionDigits: 2 })} planned</span>
           </div>

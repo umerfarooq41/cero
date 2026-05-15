@@ -36,13 +36,13 @@ export default function LeftToAllocateBanner({
   return (
     <div
       className={cn(
-        'sticky top-[72px] z-20 surface-card card-elevated backdrop-blur-xl border border-white/40 dark:border-white/[0.05] rounded-2xl px-4 py-3 transition-all duration-300',
+        'sticky top-[72px] z-20 rounded-3xl border border-border bg-card px-4 py-3 shadow-md backdrop-blur-xl transition-all duration-300',
         isEditMode ? bgColor : 'border-border'
       )}
     >
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-0.5 min-w-0">
-          <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Income
           </div>
 
@@ -54,13 +54,13 @@ export default function LeftToAllocateBanner({
         <div className="h-8 w-px bg-border" />
 
         <div className="flex-1 flex flex-col items-center">
-          <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide mb-0.5">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
             Left to Allocate
           </div>
 
           <div
             className={cn(
-              'text-xl font-bold tabular-nums tracking-tight inline-flex items-center gap-1 sm:text-2xl',
+              'text-2xl font-bold tracking-tight tabular-nums inline-flex items-center gap-1',
               stateColor
             )}
           >

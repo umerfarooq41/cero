@@ -24,7 +24,7 @@ export default function Sidebar() {
     <aside
       className="
         hidden lg:flex lg:static
-        h-full w-64 lg:w-72 flex-col
+        h-full w-64 flex-col
         app-fixed-surface
         border-0
         shadow-none
@@ -41,7 +41,7 @@ export default function Sidebar() {
             />
           </div>
 
-          <span className="font-semibold text-lg tracking-tight leading-none">
+          <span className="text-lg font-bold tracking-tight leading-none">
             Cero
           </span>
         </div>
@@ -56,7 +56,7 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 lg:px-4 lg:py-3 rounded-xl text-sm lg:text-[15px] font-medium transition-all duration-150',
+                'flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-150',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -64,7 +64,7 @@ export default function Sidebar() {
             >
               <item.icon
                 className={cn(
-                  'w-[18px] h-[18px] lg:w-5 lg:h-5 transition-all duration-150',
+                  'h-5 w-5 transition-all duration-150',
                   isActive && 'stroke-[2.5]'
                 )}
               />
