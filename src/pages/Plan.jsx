@@ -205,7 +205,7 @@ function CompactLeftToAllocateBanner({
 
           <p
             className={cn(
-              'mt-1 text-2xl font-bold tracking-tight',
+              'mt-1 text-xl font-bold tracking-tight sm:text-2xl',
               isOver
                 ? 'text-red-600'
                 : isBalanced
@@ -226,7 +226,7 @@ function CompactLeftToAllocateBanner({
             {isOver ? 'Over planned' : isBalanced ? 'Balanced' : 'Available'}
           </p>
 
-          <p className="mt-1 text-sm font-semibold">
+          <p className="mt-1 text-xs font-semibold sm:text-sm">
             <Money amount={allocated} currency={currency} compact />
             <span className="mx-1 text-muted-foreground">/</span>
             <Money amount={totalIncome} currency={currency} compact />

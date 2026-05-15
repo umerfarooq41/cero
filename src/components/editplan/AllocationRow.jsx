@@ -9,6 +9,7 @@ export default function AllocationRow({
   lastMonthHint,
   onChange,
   isSubcategory,
+  parentColor,
   formatCurrency,
 }) {
   return (
@@ -23,7 +24,12 @@ export default function AllocationRow({
       )}
 
       {isSubcategory && (
-        <div className="w-2 h-2 rounded-full bg-border shrink-0" />
+        <div
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{
+            backgroundColor: parentColor || category.color || 'hsl(var(--border))',
+          }}
+        />
       )}
 
       <div className="flex-1 min-w-0">

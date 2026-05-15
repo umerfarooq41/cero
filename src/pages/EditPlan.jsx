@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, subMonths, addMonths } from 'date-fns';
 import {
+  Check,
+  AlertTriangle,
   Copy,
   Save,
   ChevronLeft,
@@ -109,6 +111,7 @@ export default function EditPlan() {
           result.push({
             ...sub,
             isSubcategory: true,
+            parentColor: parent.color,
           })
         );
       } else {
@@ -225,19 +228,22 @@ export default function EditPlan() {
     const isCollapsed = collapsedSections[type];
     const style = sectionStyles[type] || sectionStyles.expense;
     const total = sumType(type);
+    const count = items.filter((item) => !item.isSectionHeader).length;
 
     return (
       <div className="surface-card card-elevated overflow-hidden rounded-2xl border border-white/40 dark:border-white/[0.05]">
         <button
           type="button"
           onClick={() => toggleSection(type)}
-          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
+          className={cn(
+            'flex w-full items-center justify-between gap-3 border-b border-border/40 px-5 py-3.5 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]',
+            style.bg
+          )}
         >
           <div className="flex min-w-0 items-center gap-3">
             <span
               className={cn(
-                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-                style.bg,
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/55 shadow-sm dark:bg-white/[0.04]',
                 style.text
               )}
             >
@@ -248,28 +254,32 @@ export default function EditPlan() {
               )}
             </span>
 
-            <div className="min-w-0">
-              <h3
-                className={cn(
-                  'text-sm font-bold tracking-wide',
-                  style.text
-                )}
-              >
-                {title}
-              </h3>
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{
+                backgroundColor:
+                  type === 'income'
+                    ? '#16A34A'
+                    : type === 'expense'
+                      ? '#DC2626'
+                      : type === 'savings'
+                        ? '#2563EB'
+                        : '#7C3AED',
+              }}
+            />
 
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {items.filter((item) => !item.isSectionHeader).length}{' '}
-                {items.filter((item) => !item.isSectionHeader).length === 1
-                  ? 'category'
-                  : 'categories'}
-              </p>
-            </div>
+            <h3 className={cn('truncate text-sm font-bold tracking-wide', style.text)}>
+              {title}
+            </h3>
+
+            <span className="rounded-full bg-white/50 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground dark:bg-white/[0.04]">
+              {count}
+            </span>
           </div>
 
           <div
             className={cn(
-              'shrink-0 text-right text-base font-black tracking-tight tabular-nums sm:text-lg',
+              'shrink-0 text-right text-sm font-black tracking-tight tabular-nums sm:text-base',
               style.text
             )}
           >
@@ -309,6 +319,7 @@ export default function EditPlan() {
                   lastMonthHint={getHint(cat.id)}
                   onChange={(value) => setValue(cat.id, value)}
                   isSubcategory={cat.isSubcategory}
+                  parentColor={cat.parentColor}
                   formatCurrency={formatCurrency}
                 />
               );
@@ -379,25 +390,27 @@ export default function EditPlan() {
           </div>
         </div>
 
-        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-white/40 surface-card card-elevated px-4 py-3 backdrop-blur-xl dark:border-white/[0.05]">
+        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated px-4 py-3 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Left to Allocate
               </p>
 
-              <p
+              <div
                 className={cn(
-                  'mt-1 text-2xl font-bold tracking-tight',
-                  leftToAllocate < 0
-                    ? 'text-red-600'
-                    : leftToAllocate === 0
-                      ? 'text-green-600'
+                  'mt-1 flex items-center gap-1.5 text-xl font-bold tracking-tight sm:text-2xl',
+                  leftToAllocate === 0
+                    ? 'text-[hsl(var(--success))]'
+                    : leftToAllocate < 0
+                      ? 'text-destructive'
                       : 'text-foreground'
                 )}
               >
+                {leftToAllocate === 0 && <Check className="h-5 w-5" />}
+                {leftToAllocate < 0 && <AlertTriangle className="h-4 w-4" />}
                 {formatCurrency(Math.abs(leftToAllocate))}
-              </p>
+              </div>
             </div>
 
             <div className="shrink-0 text-right">
@@ -409,7 +422,7 @@ export default function EditPlan() {
                     : 'Available'}
               </p>
 
-              <p className="mt-1 text-sm font-semibold">
+              <p className="mt-1 text-xs font-semibold sm:text-sm">
                 {formatCurrency(totalPlanned)}
                 <span className="mx-1 text-muted-foreground">/</span>
                 {formatCurrency(totalIncome)}
@@ -422,9 +435,9 @@ export default function EditPlan() {
               className={cn(
                 'h-full rounded-full transition-all',
                 leftToAllocate < 0
-                  ? 'bg-red-500'
+                  ? 'bg-destructive'
                   : leftToAllocate === 0
-                    ? 'bg-green-500'
+                    ? 'bg-[hsl(var(--success))]'
                     : 'bg-primary'
               )}
               style={{ width: `${progress}%` }}

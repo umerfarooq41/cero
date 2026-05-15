@@ -56,7 +56,7 @@ export default function LeftToAllocateBanner({
             Income
           </div>
 
-          <div className="text-base font-bold tabular-nums inline-flex items-center gap-1">
+          <div className="text-sm font-bold tabular-nums sm:text-base inline-flex items-center gap-1">
             {money(totalIncome)}
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function LeftToAllocateBanner({
 
           <div
             className={cn(
-              'text-2xl font-bold tabular-nums tracking-tight inline-flex items-center gap-1',
+              'text-xl font-bold tabular-nums tracking-tight inline-flex items-center gap-1 sm:text-2xl',
               stateColor
             )}
           >
