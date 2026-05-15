@@ -24,6 +24,9 @@ export default function BottomNav() {
       className="
         fixed bottom-0 left-0 right-0 z-50
         app-fixed-surface
+        border-0 border-t-0
+        shadow-none
+        ring-0
         backdrop-blur-xl
         supports-[backdrop-filter]:backdrop-blur-xl
         lg:hidden
