@@ -384,7 +384,7 @@ className={cn(
         <LeftToAllocateBanner
           leftToAllocate={leftToAllocate}
           totalIncome={totalIncome}
-          isEditMode
+          isEditMode = {false}
           formatCurrency={formatCurrency}
         />
 
