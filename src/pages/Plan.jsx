@@ -107,13 +107,13 @@ const getCurrencyName = (currency) => {
     USD: 'dollar',
     EUR: 'euro',
     GBP: 'pound',
+    JPY: 'yen',
+    CNY: 'yuan',
     INR: 'rupee',
     PKR: 'rupee',
     AED: 'dirham',
-    QAR: 'riyal',
-    KWD: 'dinar',
-    BHD: 'dinar',
-    OMR: 'rial',
+    TRY: 'lira',
+    RUB: 'ruble',
   };
 
   return map[code] || 'currency';
@@ -128,13 +128,13 @@ const getCurrencySymbol = (currency) => {
     USD: '$',
     EUR: '€',
     GBP: '£',
+    JPY: '¥',
+    CNY: '¥',
     INR: '₹',
     PKR: 'Rs',
     AED: 'د.إ',
-    QAR: 'ر.ق',
-    KWD: 'د.ك',
-    BHD: '.د.ب',
-    OMR: 'ر.ع.',
+    TRY: '₺',
+    RUB: '₽',
   };
 
   return currency?.symbol || map[code] || code;

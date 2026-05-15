@@ -14,13 +14,13 @@ export const getCurrencySymbol = (currency) => {
     USD: '$',
     EUR: '€',
     GBP: '£',
+    JPY: '¥',
+    CNY: '¥',
     INR: '₹',
     PKR: 'Rs',
     AED: 'د.إ',
-    QAR: 'ر.ق',
-    KWD: 'د.ك',
-    BHD: '.د.ب',
-    OMR: 'ر.ع.',
+    TRY: '₺',
+    RUB: '₽',
   };
 
   return currency?.symbol || map[code] || code;

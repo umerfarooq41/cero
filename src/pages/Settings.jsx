@@ -401,13 +401,13 @@ export default function Settings() {
                   <SelectItem value="USD">$ USD</SelectItem>
                   <SelectItem value="EUR">€ EUR</SelectItem>
                   <SelectItem value="GBP">£ GBP</SelectItem>
-                  <SelectItem value="PKR">Rs PKR</SelectItem>
+                  <SelectItem value="JPY">¥ JPY</SelectItem>
+                  <SelectItem value="CNY">¥ CNY</SelectItem>
                   <SelectItem value="INR">₹ INR</SelectItem>
+                  <SelectItem value="PKR">Rs PKR</SelectItem>
                   <SelectItem value="AED">د.إ AED</SelectItem>
-                  <SelectItem value="QAR">ر.ق QAR</SelectItem>
-                  <SelectItem value="KWD">د.ك KWD</SelectItem>
-                  <SelectItem value="BHD">.د.ب BHD</SelectItem>
-                  <SelectItem value="OMR">ر.ع. OMR</SelectItem>
+                  <SelectItem value="TRY">₺ TRY</SelectItem>
+                  <SelectItem value="RUB">₽ RUB</SelectItem>
                 </SelectContent>
               </Select>
             </SettingRow>

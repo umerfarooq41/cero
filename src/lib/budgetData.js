@@ -153,17 +153,17 @@ function getCurrencyCodeFromSettings(settings) {
 }
 
 function getCurrencySymbolFromCode(code = "SAR") {
-  const map = {
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    INR: "₹",
-    PKR: "Rs",
-    AED: "د.إ",
-    QAR: "ر.ق",
-    KWD: "د.ك",
-    BHD: ".د.ب",
-    OMR: "ر.ع.",
+    const map = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    JPY: '¥',
+    CNY: '¥',
+    INR: '₹',
+    PKR: 'Rs',
+    AED: 'د.إ',
+    TRY: '₺',
+    RUB: '₽',
   };
 
   return code === "SAR" ? "SAR" : map[code] || code;
