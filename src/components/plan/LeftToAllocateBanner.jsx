@@ -46,7 +46,7 @@ export default function LeftToAllocateBanner({
   return (
     <div
       className={cn(
-        'sticky top-0 z-20 bg-card/95 backdrop-blur-xl border rounded-xl p-4 shadow-sm transition-all duration-300',
+        'sticky top-0 z-20 surface-card card-elevated backdrop-blur-xl border border-white/40 dark:border-white/[0.05] rounded-xl p-4 transition-all duration-300',
         isEditMode ? bgColor : 'border-border'
       )}
     >

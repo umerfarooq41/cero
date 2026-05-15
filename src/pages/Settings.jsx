@@ -274,7 +274,7 @@ export default function Settings() {
       />
 
       <main className="mx-auto w-full max-w-2xl px-4 py-4 pb-24 lg:py-8">
-        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Account
@@ -321,7 +321,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               App Management
@@ -351,7 +351,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Appearance
@@ -374,7 +374,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Regional
@@ -418,7 +418,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mb-4 overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Budget Logic
@@ -454,7 +454,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Data & Privacy
@@ -504,7 +504,7 @@ export default function Settings() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+            <div className="rounded-2xl border border-white/40 dark:border-white/[0.05] bg-white/35 dark:bg-white/[0.03] p-4 text-sm backdrop-blur-xl">
               <div className="font-semibold">Report includes</div>
               <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
                 <li>Net worth and account balances</li>

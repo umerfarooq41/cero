@@ -190,7 +190,7 @@ export default function Transactions() {
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
         {/* Month + Date */}
         <div className="mb-4 flex justify-center">
-          <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+          <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
             <Button
               type="button"
               variant="ghost"
@@ -325,7 +325,7 @@ export default function Transactions() {
             {sortedDates.map((date) => (
               <div
                 key={date}
-                className="overflow-hidden rounded-xl border border-border bg-card"
+                className="overflow-hidden rounded-xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated"
               >
                 <div className="border-b border-border bg-accent/30 px-4 py-2.5">
                   <span className="text-xs font-semibold text-muted-foreground">

@@ -100,7 +100,7 @@ export default function Onboarding() {
           <p className="text-sm text-muted-foreground">{steps[step].subtitle}</p>
         </div>
 
-        <div className="bg-card rounded-2xl border border-border p-6 mb-8">
+        <div className="surface-card card-elevated rounded-2xl border border-white/40 dark:border-white/[0.05] p-6 mb-8">
           {step === 0 && (
             <div className="space-y-4 text-center">
               <p className="text-sm text-muted-foreground leading-relaxed">

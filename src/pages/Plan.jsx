@@ -189,7 +189,7 @@ function CompactLeftToAllocateBanner({
   return (
     <div
       className={cn(
-        'rounded-2xl border bg-card/95 px-4 py-3 shadow-sm backdrop-blur-xl',
+        'rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated px-4 py-3 backdrop-blur-xl',
         isEditMode && 'sticky top-[88px] z-10'
       )}
     >
@@ -405,7 +405,7 @@ function PlanOverview({
         })}
       </div>
 
-      <div className="rounded-[2rem] border bg-card p-4 shadow-sm">
+      <div className="rounded-[2rem] border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
@@ -491,7 +491,7 @@ function PlanOverview({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[2rem] border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-[2rem] border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
         <div className="border-b px-4 py-3">
           <h3 className="text-sm font-bold uppercase tracking-wide">
             {tab.title} Breakdown
@@ -751,7 +751,7 @@ export default function Plan() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="flex items-center justify-between rounded-2xl border border-border bg-card p-2 shadow-sm"
+                className="flex items-center justify-between rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-2"
               >
                 <Button
                   variant="ghost"
@@ -784,7 +784,7 @@ export default function Plan() {
                 transition={{ duration: 0.15 }}
               >
                 <div className="flex items-center justify-center">
-                  <div className="flex w-full max-w-md items-center rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+                  <div className="flex w-full max-w-md items-center rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
                     <Button
                       type="button"
                       variant="ghost"

@@ -450,7 +450,7 @@ export default function AddTransaction() {
           Back
         </Button>
 
-        <div className="mb-6 rounded-3xl border border-border bg-card p-8 shadow-sm">
+        <div className="mb-6 rounded-3xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-8">
   <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
     Amount
   </div>
@@ -522,7 +522,7 @@ export default function AddTransaction() {
           })}
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="space-y-4 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-5">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               {type === 'transfer' ? 'From Account' : 'Account'}

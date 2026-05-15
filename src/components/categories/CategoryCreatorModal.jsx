@@ -130,7 +130,7 @@ export default function CategoryCreatorModal({
           <DialogTitle>New Category</DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 p-3 rounded-2xl border border-border bg-secondary/40">
+        <div className="flex items-center gap-3 p-3 rounded-2xl border border-white/40 dark:border-white/[0.05] bg-white/45 dark:bg-white/[0.03] backdrop-blur-xl">
           <CategoryIcon icon={icon} color={color} size="lg" />
           <div className="min-w-0">
             <div className="text-sm font-semibold truncate">
@@ -215,7 +215,7 @@ export default function CategoryCreatorModal({
               Color
             </label>
 
-            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border bg-secondary/20 p-2">
+            <div className="grid grid-cols-10 gap-2 rounded-xl border border-white/40 dark:border-white/[0.05] bg-white/35 dark:bg-white/[0.03] p-2 backdrop-blur-xl">
               {colors.map((item) => (
                 <button
                   key={item}
@@ -238,7 +238,7 @@ export default function CategoryCreatorModal({
               Icon
             </label>
 
-            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-border bg-secondary/20">
+            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-white/40 dark:border-white/[0.05] bg-white/35 dark:bg-white/[0.03] backdrop-blur-xl">
               {iconNames.map((item) => (
                 <button
                   key={item}

@@ -33,7 +33,7 @@ export default function Sidebar() {
     >
       <div className="flex items-center justify-between px-6 h-16">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl overflow-hidden bg-card/90 shadow-sm ring-1 ring-border/50">
+          <div className="w-9 h-9 rounded-xl overflow-hidden surface-card card-elevated ring-1 ring-white/40 dark:ring-white/[0.05]">
             <img
               src="/icon-192.png"
               alt="Cero"

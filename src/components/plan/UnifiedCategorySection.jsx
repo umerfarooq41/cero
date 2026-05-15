@@ -197,7 +197,7 @@ export default function UnifiedCategorySection({
   if (parentCategories.length === 0) return null;
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden transition-all duration-200">
+    <div className="surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] overflow-hidden transition-all duration-200">
       <button
         type="button"
         onClick={() => setIsCollapsed((p) => !p)}

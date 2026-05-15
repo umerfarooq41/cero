@@ -23,7 +23,7 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
 
   return (
     <div className={cn(
-      "bg-card rounded-xl border border-border p-5 space-y-3",
+      "surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] p-5 space-y-3",
       className
     )}>
       <div className="flex items-center justify-between">

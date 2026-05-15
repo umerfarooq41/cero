@@ -62,7 +62,7 @@ export default function Accounts() {
     );
 
     return (
-      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+      <div className="surface-card card-elevated rounded-xl border border-white/40 dark:border-white/[0.05] overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {title}
@@ -126,7 +126,7 @@ export default function Accounts() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
-        <div className="bg-card rounded-2xl border border-border p-6 mb-8 text-center shadow-sm">
+        <div className="surface-card card-elevated rounded-2xl border border-white/40 dark:border-white/[0.05] p-6 mb-8 text-center">
           <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
             Net Worth
           </div>

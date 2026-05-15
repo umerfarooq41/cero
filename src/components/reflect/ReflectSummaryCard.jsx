@@ -262,7 +262,7 @@ function SecondaryCard({ title, value, children, tone = 'default' }) {
             : 'bg-muted/40';
 
   return (
-    <ReflectCard className="relative min-h-[160px] overflow-hidden rounded-3xl border border-border bg-card p-4">
+    <ReflectCard className="relative min-h-[160px] overflow-hidden rounded-3xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-4">
       <div
         className={cn(
           'pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl',

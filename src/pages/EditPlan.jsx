@@ -191,7 +191,7 @@ export default function EditPlan() {
     if (items.length === 0) return null;
 
     return (
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated">
         <div className="border-b border-border px-4 py-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {title}
@@ -243,7 +243,7 @@ export default function EditPlan() {
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
         <div className="mb-4">
           <div className="flex items-center justify-center">
-            <div className="flex w-full max-w-md items-center rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+            <div className="flex w-full max-w-md items-center rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-1.5">
               <Button
                 type="button"
                 variant="ghost"
@@ -290,7 +290,7 @@ export default function EditPlan() {
           </div>
         </div>
 
-        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur-xl">
+        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated/95 px-4 py-3 shadow-sm backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
