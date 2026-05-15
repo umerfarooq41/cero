@@ -388,7 +388,7 @@ className={cn(
           formatCurrency={formatCurrency}
         />
 
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mt-4 mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button
             variant="outline"
             size="sm"

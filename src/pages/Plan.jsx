@@ -328,11 +328,11 @@ function PlanOverview({
               type="button"
               onClick={() => setActiveTab(item.key)}
               className={cn(
-                'flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-1.5 py-2.5 text-[11px] font-semibold leading-none transition-all duration-200 sm:px-3 sm:text-sm',
+                'flex min-w-0 items-center justify-center gap-1 rounded-xl px-1 py-2.5 text-[10px] font-semibold leading-none transition-all duration-200 sm:gap-1.5 sm:px-3 sm:text-sm',
                 active ? item.activeClass : item.inactiveClass
               )}
             >
-              <TabIcon className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              <TabIcon className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
               <span className="min-w-0 truncate">{item.title}</span>
             </button>
           );
