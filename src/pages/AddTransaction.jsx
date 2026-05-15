@@ -3,13 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   ArrowLeft,
-  ArrowDownLeft,
-  ArrowUpRight,
-  ArrowLeftRight,
   Trash2,
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
+import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,29 +42,12 @@ import {
   useAllTransactions,
 } from '@/hooks/useBudgetData';
 
-import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
 
 const typeOptions = [
-  {
-    value: 'expense',
-    label: 'Expense',
-    icon: ArrowUpRight,
-    color: 'border-destructive bg-destructive/10 text-destructive',
-  },
-  {
-    value: 'income',
-    label: 'Income',
-    icon: ArrowDownLeft,
-    color:
-      'border-[hsl(var(--success))] bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]',
-  },
-  {
-    value: 'transfer',
-    label: 'Transfer',
-    icon: ArrowLeftRight,
-    color: 'border-primary bg-primary/10 text-primary',
-  },
+  { value: 'income', label: 'Income' },
+  { value: 'expense', label: 'Expense' },
+  { value: 'transfer', label: 'Transfer' },
 ];
 
 const getCurrencyCode = (currency) => {
@@ -494,33 +475,16 @@ export default function AddTransaction() {
   </div>
 </div>
 
-        <div className="mb-6 grid grid-cols-3 gap-2 rounded-2xl bg-secondary/80 p-1">
-          {typeOptions.map((opt) => {
-            const isActive = type === opt.value;
-            const Icon = opt.icon;
-
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  setType(opt.value);
-                  setCategoryId('');
-                  setToAccountId('');
-                }}
-                className={cn(
-                  'flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-sm font-medium transition-all duration-200',
-                  isActive
-                    ? `${opt.color} shadow-sm`
-                    : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
+        <TransactionTypeTabs
+          value={type}
+          options={typeOptions}
+          onChange={(nextType) => {
+            setType(nextType);
+            setCategoryId('');
+            setToAccountId('');
+          }}
+          className="mb-6"
+        />
 
         <div className="space-y-4 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated p-5">
           <div className="space-y-1.5">

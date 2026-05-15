@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 import FloatingActionButton from '@/components/shared/FloatingActionButton';
+import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
 
 import {
   useTransactions,
@@ -149,12 +150,6 @@ export default function Transactions() {
 
   const hasTransactions = sortedDates.length > 0;
 
-  const filterButtons = [
-    { value: 'all', label: 'All' },
-    { value: 'income', label: 'Income' },
-    { value: 'expense', label: 'Expense' },
-    { value: 'transfer', label: 'Transfer' },
-  ];
 
   const goToPreviousMonth = () => {
     setCurrentMonth((prev) =>
@@ -277,39 +272,11 @@ export default function Transactions() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 overflow-x-auto">
-          <div className="inline-flex w-full rounded-2xl bg-secondary/80 p-1">
-            {filterButtons.map((f) => {
-              const active = filterType === f.value;
-
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  onClick={() => setFilterType(f.value)}
-                  className={`
-                    flex-1
-                    whitespace-nowrap
-                    rounded-xl
-                    px-4
-                    py-2
-                    text-sm
-                    font-medium
-                    transition-all
-                    duration-200
-                    ${
-                      active
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }
-                  `}
-                >
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <TransactionTypeTabs
+          value={filterType}
+          onChange={setFilterType}
+          className="mb-6"
+        />
 
         {/* Empty */}
         {!hasTransactions ? (
