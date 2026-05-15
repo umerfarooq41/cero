@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, subMonths, addMonths } from 'date-fns';
 import {
-  Check,
-  AlertTriangle,
   Copy,
   Save,
   ChevronLeft,
@@ -13,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
+import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { budgetPlansApi } from '@/lib/budgetData';
@@ -141,10 +140,6 @@ export default function EditPlan() {
   const totalPlanned = totalExpenses + totalSavings + totalDebt;
   const leftToAllocate = totalIncome - totalPlanned;
 
-  const progress =
-    totalIncome > 0
-      ? Math.min(Math.max((totalPlanned / totalIncome) * 100, 0), 100)
-      : 0;
 
   const copyFromPrev = () => {
     const newValues = { ...values };
@@ -235,50 +230,45 @@ export default function EditPlan() {
           onClick={() => toggleSection(type)}
           className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
         >
-        <div className="flex min-w-0 items-center gap-3">
-  
-  {/* Collapse Icon */}
-  <span
-    className={cn(
-      'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-          style.bg,
-          style.text
-        )}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronDown className="h-4 w-4" />
-        )}
-      </span>
+          <div className="flex min-w-0 items-center gap-3">
+            <span
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+                style.bg,
+                style.text
+              )}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </span>
 
-      {/* Title */}
-      <h3
-        className={cn(
-          'text-base font-bold tracking-tight',
-          style.text
-        )}
-      >
-        {title}
-      </h3>
+            <div className="min-w-0">
+              <h3
+                className={cn(
+                  'text-sm font-bold tracking-wide',
+                  style.text
+                )}
+              >
+                {title}
+              </h3>
 
-      {/* Count Circle */}
-      <div
-        className={cn(
-          'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold',
-          style.bg,
-          style.text
-        )}
-      >
-        {items.filter((item) => !item.isSectionHeader).length}
-      </div>
-    </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {items.filter((item) => !item.isSectionHeader).length}{' '}
+                {items.filter((item) => !item.isSectionHeader).length === 1
+                  ? 'category'
+                  : 'categories'}
+              </p>
+            </div>
+          </div>
 
           <div
             className={cn(
-            'shrink-0 text-right text-base font-bold tracking-tight tabular-nums',
-            style.text
-           )}
+              'shrink-0 text-right text-base font-black tracking-tight tabular-nums sm:text-lg',
+              style.text
+            )}
           >
             {formatCurrency(total)}
           </div>
@@ -386,60 +376,12 @@ export default function EditPlan() {
           </div>
         </div>
 
-        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated/95 px-4 py-3 shadow-sm backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Left to Allocate
-              </p>
-
-              <div
-                className={cn(
-                  'mt-1 flex items-center gap-1.5 text-2xl font-bold tracking-tight',
-                  leftToAllocate === 0
-                    ? 'text-[hsl(var(--success))]'
-                    : leftToAllocate < 0
-                      ? 'text-destructive'
-                      : 'text-foreground'
-                )}
-              >
-                {leftToAllocate === 0 && <Check className="h-5 w-5" />}
-                {leftToAllocate < 0 && <AlertTriangle className="h-4 w-4" />}
-                {formatCurrency(Math.abs(leftToAllocate))}
-              </div>
-            </div>
-
-            <div className="shrink-0 text-right">
-              <p className="text-[11px] text-muted-foreground">
-                {leftToAllocate < 0
-                  ? 'Over planned'
-                  : leftToAllocate === 0
-                    ? 'Balanced'
-                    : 'Available'}
-              </p>
-
-              <p className="mt-1 text-sm font-semibold">
-                {formatCurrency(totalPlanned)}
-                <span className="mx-1 text-muted-foreground">/</span>
-                {formatCurrency(totalIncome)}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-            <div
-              className={cn(
-                'h-full rounded-full transition-all',
-                leftToAllocate < 0
-                  ? 'bg-destructive'
-                  : leftToAllocate === 0
-                    ? 'bg-[hsl(var(--success))]'
-                    : 'bg-primary'
-              )}
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
+        <LeftToAllocateBanner
+          leftToAllocate={leftToAllocate}
+          totalIncome={totalIncome}
+          isEditMode
+          formatCurrency={formatCurrency}
+        />
 
         <div className="mb-4 flex items-center justify-between gap-3">
           <Button

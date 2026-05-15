@@ -36,6 +36,7 @@ import {
   useCategories,
 } from '@/hooks/useBudgetData';
 
+import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 
 const TABS = [
@@ -175,77 +176,7 @@ function Money({ amount, currency, compact = false, className = '' }) {
   );
 }
 
-function CompactLeftToAllocateBanner({
-  leftToAllocate,
-  totalIncome,
-  isEditMode,
-  currency,
-}) {
-  const allocated = Number(totalIncome || 0) - Number(leftToAllocate || 0);
-  const progress =
-    Number(totalIncome || 0) > 0
-      ? Math.min(Math.max((allocated / Number(totalIncome || 0)) * 100, 0), 100)
-      : 0;
 
-  const isOver = Number(leftToAllocate || 0) < 0;
-  const isBalanced = Number(leftToAllocate || 0) === 0;
-
-  return (
-    <div
-      className={cn(
-        'rounded-2xl border border-white/40 dark:border-white/[0.05] surface-card card-elevated px-4 py-3 backdrop-blur-xl',
-        isEditMode && 'sticky top-[88px] z-10'
-      )}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Left to Allocate
-          </p>
-
-          <p
-            className={cn(
-              'mt-1 text-xl font-bold tracking-tight sm:text-2xl',
-              isOver
-                ? 'text-red-600'
-                : isBalanced
-                  ? 'text-green-600'
-                  : 'text-foreground'
-            )}
-          >
-            <Money
-              amount={Math.abs(leftToAllocate)}
-              currency={currency}
-              compact
-            />
-          </p>
-        </div>
-
-        <div className="shrink-0 text-right">
-          <p className="text-[11px] text-muted-foreground">
-            {isOver ? 'Over planned' : isBalanced ? 'Balanced' : 'Available'}
-          </p>
-
-          <p className="mt-1 text-xs font-semibold sm:text-sm">
-            <Money amount={allocated} currency={currency} compact />
-            <span className="mx-1 text-muted-foreground">/</span>
-            <Money amount={totalIncome} currency={currency} compact />
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn(
-            'h-full rounded-full transition-all',
-            isOver ? 'bg-red-500' : isBalanced ? 'bg-green-500' : 'bg-primary'
-          )}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 function DonutTooltip({ active, payload, currency, tab }) {
   if (!active || !payload?.length) return null;
@@ -855,13 +786,12 @@ export default function Plan() {
           transition={{ duration: 0.18 }}
           className="space-y-4 pt-4"
         >
-          <CompactLeftToAllocateBanner
+          <LeftToAllocateBanner
             leftToAllocate={leftToAllocate}
             totalIncome={totalIncomeDisplay}
             isEditMode={isEditMode}
-            currency={currency}
             formatCurrency={formatCurrency}
-          />
+            />
 
           <AnimatePresence>
             {isEditMode && (
