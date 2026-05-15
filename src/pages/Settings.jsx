@@ -483,100 +483,104 @@ export default function Settings() {
           </div>
         </div>
 
-        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Export Financial Report</DialogTitle>
-              <DialogDescription>
-                This will download a polished HTML report that opens in any
-                browser and can be printed or saved as PDF. It includes net worth,
-                accounts, monthly cash flow, category performance, and recent
-                transactions.
-              </DialogDescription>
-            </DialogHeader>
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+  <DialogContent className="overflow-hidden rounded-3xl border border-border/60 bg-card/80 p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+    <DialogHeader className="border-b border-border/50 px-6 py-5">
+      <DialogTitle className="text-lg font-semibold tracking-tight">
+        Export Financial Report
+      </DialogTitle>
+      <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        Download a polished HTML report that opens in any browser and can be printed or saved as PDF.
+      </DialogDescription>
+    </DialogHeader>
 
-            <div className="rounded-2xl border border-white/40 dark:border-white/[0.05] bg-white/35 dark:bg-white/[0.03] p-4 text-sm backdrop-blur-xl">
-              <div className="font-semibold">Report includes</div>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
-                <li>Net worth and account balances</li>
-                <li>Income, expenses, savings, and debt totals</li>
-                <li>Monthly cash-flow summary</li>
-                <li>Budget category performance</li>
-                <li>Latest 250 transactions</li>
-              </ul>
-            </div>
+    <div className="px-6 py-5">
+      <div className="rounded-2xl border border-border/50 bg-background/40 p-5 text-sm backdrop-blur-xl">
+        <div className="text-sm font-semibold tracking-tight">Report includes</div>
+        <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-muted-foreground">
+          <li>Net worth and account balances</li>
+          <li>Income, expenses, savings, and debt totals</li>
+          <li>Monthly cash-flow summary</li>
+          <li>Budget category performance</li>
+          <li>Latest 250 transactions</li>
+        </ul>
+      </div>
+    </div>
 
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowExportDialog(false)}
-                disabled={exporting}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleExportReport} disabled={exporting}>
-                {exporting ? 'Preparing…' : 'Download Report'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+    <DialogFooter className="border-t border-border/50 px-6 py-4">
+      <Button
+        variant="outline"
+        className="rounded-xl border-border/60 bg-background/40 backdrop-blur-xl"
+        onClick={() => setShowExportDialog(false)}
+        disabled={exporting}
+      >
+        Cancel
+      </Button>
+      <Button className="rounded-xl" onClick={handleExportReport} disabled={exporting}>
+        {exporting ? 'Preparing…' : 'Download Report'}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
         <Dialog
-          open={showResetDialog}
-          onOpenChange={(open) => {
-            setShowResetDialog(open);
-            if (!open) setResetConfirmText('');
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reset Everything?</DialogTitle>
-              <DialogDescription>
-                This will permanently delete your transactions, accounts,
-                categories, budget plans, and app settings from Supabase. Your
-                login account will remain active, but this Cero data cannot be
-                restored.
-              </DialogDescription>
-            </DialogHeader>
+  open={showResetDialog}
+  onOpenChange={(open) => {
+    setShowResetDialog(open);
+    if (!open) setResetConfirmText('');
+  }}
+>
+  <DialogContent className="overflow-hidden rounded-3xl border border-border/60 bg-card/80 p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+    <DialogHeader className="border-b border-border/50 px-6 py-5">
+      <DialogTitle className="text-lg font-semibold tracking-tight">
+        Reset Everything?
+      </DialogTitle>
+      <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        This permanently deletes your transactions, accounts, categories, budget plans, and app settings.
+      </DialogDescription>
+    </DialogHeader>
 
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-              <div className="font-semibold text-destructive">
-                This action is permanent.
-              </div>
-              <p className="mt-1 text-muted-foreground">
-                Type <span className="font-bold text-foreground">RESET</span>{' '}
-                below to confirm deletion.
-              </p>
+    <div className="px-6 py-5">
+      <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 backdrop-blur-xl">
+        <div className="text-sm font-semibold tracking-tight text-red-500">
+          This action is permanent.
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Type <span className="font-bold text-foreground">RESET</span> below to confirm deletion.
+        </p>
 
-              <input
-                value={resetConfirmText}
-                onChange={(event) => setResetConfirmText(event.target.value)}
-                placeholder="Type RESET"
-                className="mt-3 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-destructive/30"
-              />
-            </div>
+        <input
+          value={resetConfirmText}
+          onChange={(event) => setResetConfirmText(event.target.value)}
+          placeholder="Type RESET"
+          className="mt-4 h-11 w-full rounded-2xl border border-border/60 bg-background/60 px-4 text-sm shadow-sm outline-none transition-all focus:border-red-500/40 focus:ring-4 focus:ring-red-500/10"
+        />
+      </div>
+    </div>
 
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowResetDialog(false);
-                  setResetConfirmText('');
-                }}
-                disabled={resetting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleResetEverything}
-                disabled={resetting || resetConfirmText !== 'RESET'}
-              >
-                {resetting ? 'Deleting…' : 'Delete Everything'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+    <DialogFooter className="border-t border-border/50 px-6 py-4">
+      <Button
+        variant="outline"
+        className="rounded-xl border-border/60 bg-background/40 backdrop-blur-xl"
+        onClick={() => {
+          setShowResetDialog(false);
+          setResetConfirmText('');
+        }}
+        disabled={resetting}
+      >
+        Cancel
+      </Button>
+      <Button
+        variant="destructive"
+        className="rounded-xl bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600"
+        onClick={handleResetEverything}
+        disabled={resetting || resetConfirmText !== 'RESET'}
+      >
+        {resetting ? 'Deleting…' : 'Delete Everything'}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
       </main>
     </div>
   );
