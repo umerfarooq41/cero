@@ -27,8 +27,6 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import PageHeader from '@/components/layout/PageHeader';
-import MonthSelector from '@/components/shared/MonthSelector';
-import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
 import {
@@ -164,9 +162,7 @@ function Money({ amount, currency, compact = false, className = '' }) {
           }}
         />
       ) : (
-        <span className="text-current">
-          {symbol}
-        </span>
+        <span className="text-current">{symbol}</span>
       )}
 
       <span>{formatNumber(amount)}</span>
@@ -174,6 +170,77 @@ function Money({ amount, currency, compact = false, className = '' }) {
   );
 }
 
+function CompactLeftToAllocateBanner({
+  leftToAllocate,
+  totalIncome,
+  isEditMode,
+  currency,
+}) {
+  const allocated = Number(totalIncome || 0) - Number(leftToAllocate || 0);
+  const progress =
+    Number(totalIncome || 0) > 0
+      ? Math.min(Math.max((allocated / Number(totalIncome || 0)) * 100, 0), 100)
+      : 0;
+
+  const isOver = Number(leftToAllocate || 0) < 0;
+  const isBalanced = Number(leftToAllocate || 0) === 0;
+
+  return (
+    <div
+      className={cn(
+        'rounded-2xl border bg-card/95 px-4 py-3 shadow-sm backdrop-blur-xl',
+        isEditMode && 'sticky top-[88px] z-10'
+      )}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Left to Allocate
+          </p>
+
+          <p
+            className={cn(
+              'mt-1 text-2xl font-bold tracking-tight',
+              isOver
+                ? 'text-red-600'
+                : isBalanced
+                  ? 'text-green-600'
+                  : 'text-foreground'
+            )}
+          >
+            <Money
+              amount={Math.abs(leftToAllocate)}
+              currency={currency}
+              compact
+            />
+          </p>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <p className="text-[11px] text-muted-foreground">
+            {isOver ? 'Over planned' : isBalanced ? 'Balanced' : 'Available'}
+          </p>
+
+          <p className="mt-1 text-sm font-semibold">
+            <Money amount={allocated} currency={currency} compact />
+            <span className="mx-1 text-muted-foreground">/</span>
+            <Money amount={totalIncome} currency={currency} compact />
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn(
+            'h-full rounded-full transition-all',
+            isOver ? 'bg-red-500' : isBalanced ? 'bg-green-500' : 'bg-primary'
+          )}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 function DonutTooltip({ active, payload, currency, tab }) {
   if (!active || !payload?.length) return null;
@@ -238,15 +305,15 @@ function PlanOverview({
           : Number(budget.getCategorySpent(category.id) || 0);
 
       return {
-  id: category.id,
-  name: category.name,
-  category,
-  planned,
-  tracked,
-  remaining: planned - tracked,
-  color: tab.shades[index % tab.shades.length],
-  categoryColor: category.color,
-};
+        id: category.id,
+        name: category.name,
+        category,
+        planned,
+        tracked,
+        remaining: planned - tracked,
+        color: tab.shades[index % tab.shades.length],
+        categoryColor: category.color,
+      };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
 
@@ -407,10 +474,10 @@ function PlanOverview({
                 <div key={item.id} className="px-4 py-4">
                   <div className="flex items-center gap-3">
                     <CategoryIconBadge
-  icon={item.category?.icon}
-  color={item.categoryColor || item.color}
-  size="md"
-/>
+                      icon={item.category?.icon}
+                      color={item.categoryColor || item.color}
+                      size="md"
+                    />
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
@@ -663,147 +730,146 @@ export default function Plan() {
               </motion.div>
             ) : (
               <motion.div
-  key="read-header"
-  initial={{ opacity: 0, y: -8 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0, y: -8 }}
-  transition={{ duration: 0.15 }}
->
-  <div className="flex items-center justify-center">
-    <div className="flex w-full max-w-md items-center rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="h-9 w-9 shrink-0 rounded-xl"
-        onClick={() =>
-          setCurrentMonth(
-            format(
-              subMonths(new Date(`${currentMonth}-01`), 1),
-              'yyyy-MM'
-            )
-          )
-        }
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
+                key="read-header"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div className="flex items-center justify-center">
+                  <div className="flex w-full max-w-md items-center rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0 rounded-xl"
+                      onClick={() =>
+                        setCurrentMonth(
+                          format(
+                            subMonths(new Date(`${currentMonth}-01`), 1),
+                            'yyyy-MM'
+                          )
+                        )
+                      }
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
 
-      <button
-        type="button"
-        className="flex flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 hover:bg-secondary/60"
-      >
-        <span className="text-sm font-semibold text-foreground">
-          {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
-        </span>
+                    <button
+                      type="button"
+                      className="flex flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 hover:bg-secondary/60"
+                    >
+                      <span className="text-sm font-semibold text-foreground">
+                        {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
+                      </span>
 
-        <span className="text-[11px] text-muted-foreground">
-          Budget period
-        </span>
-      </button>
+                      <span className="text-[11px] text-muted-foreground">
+                        Budget period
+                      </span>
+                    </button>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="h-9 w-9 shrink-0 rounded-xl"
-        onClick={() =>
-          setCurrentMonth(
-            format(
-              addMonths(new Date(`${currentMonth}-01`), 1),
-              'yyyy-MM'
-            )
-          )
-        }
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0 rounded-xl"
+                      onClick={() =>
+                        setCurrentMonth(
+                          format(
+                            addMonths(new Date(`${currentMonth}-01`), 1),
+                            'yyyy-MM'
+                          )
+                        )
+                      }
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
 
-      <Button
-        variant="secondary"
-        size="icon"
-        className="ml-1 h-9 w-9 shrink-0 rounded-xl"
-        onClick={enterEditMode}
-      >
-        <PencilLine className="w-4 h-4" />
-      </Button>
-    </div>
-  </div>
-</motion.div>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="ml-1 h-9 w-9 shrink-0 rounded-xl"
+                      onClick={enterEditMode}
+                    >
+                      <PencilLine className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18 }}
-        className="space-y-4 pt-4"
-      >
-        <LeftToAllocateBanner
-          leftToAllocate={leftToAllocate}
-          totalIncome={totalIncomeDisplay}
-          isEditMode={isEditMode}
-          currency={currency}
-          formatCurrency={formatCurrency}
-        />
-
-        <AnimatePresence>
-          {isEditMode && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex justify-end overflow-hidden"
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyFromPrev}
-                className="gap-2 text-xs"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                Copy from last month
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {isEditMode ? (
-          <>
-            {[
-              ['Income', incomeCategories],
-              ['Expenses', expenseCategories],
-              ['Savings', savingsCategories],
-              ['Debt', debtCategories],
-            ].map(([title, sectionCategories]) => (
-              <UnifiedCategorySection
-                key={title}
-                title={title}
-                categories={sectionCategories}
-                subcategories={allSubs}
-                isEditMode={isEditMode}
-                getCategorySpent={budget.getCategorySpent}
-                getCategoryPlanned={budget.getCategoryPlanned}
-                editValues={editValues}
-                onEditChange={onEditChange}
-                prevValues={prevValuesMap}
-                currency={currency}
-                formatCurrency={formatCurrency}
-              />
-            ))}
-          </>
-        ) : (
-          <PlanOverview
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            categories={categories}
-            subcategories={allSubs}
-            budget={budget}
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          className="space-y-4 pt-4"
+        >
+          <CompactLeftToAllocateBanner
+            leftToAllocate={leftToAllocate}
+            totalIncome={totalIncomeDisplay}
+            isEditMode={isEditMode}
             currency={currency}
+            formatCurrency={formatCurrency}
           />
-        )}
-      </motion.div>
 
+          <AnimatePresence>
+            {isEditMode && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex justify-end overflow-hidden"
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyFromPrev}
+                  className="gap-2 text-xs"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  Copy from last month
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {isEditMode ? (
+            <>
+              {[
+                ['Income', incomeCategories],
+                ['Expenses', expenseCategories],
+                ['Savings', savingsCategories],
+                ['Debt', debtCategories],
+              ].map(([title, sectionCategories]) => (
+                <UnifiedCategorySection
+                  key={title}
+                  title={title}
+                  categories={sectionCategories}
+                  subcategories={allSubs}
+                  isEditMode={isEditMode}
+                  getCategorySpent={budget.getCategorySpent}
+                  getCategoryPlanned={budget.getCategoryPlanned}
+                  editValues={editValues}
+                  onEditChange={onEditChange}
+                  prevValues={prevValuesMap}
+                  currency={currency}
+                  formatCurrency={formatCurrency}
+                />
+              ))}
+            </>
+          ) : (
+            <PlanOverview
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              categories={categories}
+              subcategories={allSubs}
+              budget={budget}
+              currency={currency}
+            />
+          )}
+        </motion.div>
       </main>
     </div>
   );

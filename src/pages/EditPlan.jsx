@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { format, subMonths } from 'date-fns';
-import { Check, AlertTriangle, Copy, Save } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { format, subMonths, addMonths } from 'date-fns';
+import {
+  Check,
+  AlertTriangle,
+  Copy,
+  Save,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
-import MonthSelector from '@/components/shared/MonthSelector';
 import AllocationRow from '@/components/editplan/AllocationRow';
 import { useCategories, useAllocations } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
@@ -16,9 +23,16 @@ import { cn } from '@/lib/utils';
 
 export default function EditPlan() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const searchParams = new URLSearchParams(location.search);
+  const monthFromUrl = searchParams.get('month');
+
+  const [currentMonth, setCurrentMonth] = useState(
+    monthFromUrl || format(new Date(), 'yyyy-MM')
+  );
+
   const [values, setValues] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -27,7 +41,11 @@ export default function EditPlan() {
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
-  const prevMonth = format(subMonths(new Date(currentMonth + '-01'), 1), 'yyyy-MM');
+  const prevMonth = format(
+    subMonths(new Date(`${currentMonth}-01`), 1),
+    'yyyy-MM'
+  );
+
   const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
   useEffect(() => {
@@ -37,13 +55,34 @@ export default function EditPlan() {
       initial[a.category_id] = a.planned_amount || 0;
     });
 
+    categories.forEach((category) => {
+      if (!(category.id in initial)) {
+        initial[category.id] = 0;
+      }
+    });
+
     setValues(initial);
-  }, [allocations]);
+  }, [allocations, categories]);
+
+  const changeMonth = (nextMonth) => {
+    setCurrentMonth(nextMonth);
+    navigate(`/edit-plan?month=${nextMonth}`, { replace: true });
+  };
+
+  const goToPreviousMonth = () => {
+    changeMonth(
+      format(subMonths(new Date(`${currentMonth}-01`), 1), 'yyyy-MM')
+    );
+  };
+
+  const goToNextMonth = () => {
+    changeMonth(format(addMonths(new Date(`${currentMonth}-01`), 1), 'yyyy-MM'));
+  };
 
   const setValue = (catId, amount) => {
     setValues((prev) => ({
       ...prev,
-      [catId]: amount,
+      [catId]: Number(amount || 0),
     }));
   };
 
@@ -82,7 +121,7 @@ export default function EditPlan() {
 
         if (subs.length > 0 && !category.parent_id) return sum;
 
-        return sum + (values[category.id] || 0);
+        return sum + Number(values[category.id] || 0);
       }, 0);
   };
 
@@ -90,10 +129,17 @@ export default function EditPlan() {
   const totalExpenses = sumType('expense');
   const totalSavings = sumType('savings');
   const totalDebt = sumType('debt');
-  const leftToAllocate = totalIncome - totalExpenses - totalSavings - totalDebt;
+
+  const totalPlanned = totalExpenses + totalSavings + totalDebt;
+  const leftToAllocate = totalIncome - totalPlanned;
+
+  const progress =
+    totalIncome > 0
+      ? Math.min(Math.max((totalPlanned / totalIncome) * 100, 0), 100)
+      : 0;
 
   const copyFromPrev = () => {
-    const newValues = {};
+    const newValues = { ...values };
 
     prevAllocations.forEach((allocation) => {
       newValues[allocation.category_id] = allocation.planned_amount || 0;
@@ -118,7 +164,7 @@ export default function EditPlan() {
           id: existing[catId]?.id,
           category_id: catId,
           month: currentMonth,
-          planned_amount: amount,
+          planned_amount: Number(amount || 0),
         })
       );
 
@@ -126,7 +172,7 @@ export default function EditPlan() {
 
       queryClient.invalidateQueries();
       toast.success('Plan saved');
-      navigate('/');
+      navigate(`/?month=${currentMonth}`);
     } catch (error) {
       console.error('Plan save failed:', error);
       toast.error(error.message || 'Could not save plan');
@@ -145,8 +191,8 @@ export default function EditPlan() {
     if (items.length === 0) return null;
 
     return (
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border px-5 py-3.5">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-4 py-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {title}
           </h3>
@@ -188,60 +234,72 @@ export default function EditPlan() {
     <div className="min-h-screen bg-background">
       <PageHeader
         title="Edit Plan"
-        subtitle={`Adjust your ${format(new Date(currentMonth + '-01'), 'MMMM yyyy')} budget plan`}
+        subtitle={`Adjust your ${format(
+          new Date(`${currentMonth}-01`),
+          'MMMM yyyy'
+        )} budget plan`}
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-28 lg:py-8">
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Planning Month
-              </p>
+        <div className="mb-4">
+          <div className="flex items-center justify-center">
+            <div className="flex w-full max-w-md items-center rounded-2xl border border-border bg-card/90 p-1.5 shadow-sm">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-xl"
+                onClick={goToPreviousMonth}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
 
-              <h2 className="truncate text-lg font-bold tracking-tight">
-                {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}
-              </h2>
+              <button
+                type="button"
+                className="flex flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 hover:bg-secondary/60"
+              >
+                <span className="text-sm font-semibold text-foreground">
+                  {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
+                </span>
+
+                <span className="text-[11px] text-muted-foreground">
+                  Editing budget period
+                </span>
+              </button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-xl"
+                onClick={goToNextMonth}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="ml-1 h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
+                onClick={() => navigate(`/?month=${currentMonth}`)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="h-10 shrink-0 gap-2 rounded-xl px-4 text-sm font-semibold"
-            >
-              <Save className="h-4 w-4" />
-              {saving ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-
-          <div className="p-3">
-            <MonthSelector
-              currentMonth={currentMonth}
-              onChange={setCurrentMonth}
-            />
           </div>
         </div>
 
-        <div className="sticky top-[88px] z-10 mb-6 rounded-xl border border-border bg-card/95 p-4 shadow-sm backdrop-blur-xl">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">
-                Total Income
-              </div>
-
-              <div className="text-lg font-bold">
-                {formatCurrency(totalIncome)}
-              </div>
-            </div>
-
-            <div className="space-y-1 text-right">
-              <div className="text-xs text-muted-foreground">
+        <div className="sticky top-[88px] z-10 mb-4 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Left to Allocate
-              </div>
+              </p>
 
               <div
                 className={cn(
-                  'flex items-center justify-end gap-1.5 text-lg font-bold',
+                  'mt-1 flex items-center gap-1.5 text-2xl font-bold tracking-tight',
                   leftToAllocate === 0
                     ? 'text-[hsl(var(--success))]'
                     : leftToAllocate < 0
@@ -251,21 +309,61 @@ export default function EditPlan() {
               >
                 {leftToAllocate === 0 && <Check className="h-5 w-5" />}
                 {leftToAllocate < 0 && <AlertTriangle className="h-4 w-4" />}
-                {formatCurrency(leftToAllocate)}
+                {formatCurrency(Math.abs(leftToAllocate))}
               </div>
             </div>
+
+            <div className="shrink-0 text-right">
+              <p className="text-[11px] text-muted-foreground">
+                {leftToAllocate < 0
+                  ? 'Over planned'
+                  : leftToAllocate === 0
+                    ? 'Balanced'
+                    : 'Available'}
+              </p>
+
+              <p className="mt-1 text-sm font-semibold">
+                {formatCurrency(totalPlanned)}
+                <span className="mx-1 text-muted-foreground">/</span>
+                {formatCurrency(totalIncome)}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+            <div
+              className={cn(
+                'h-full rounded-full transition-all',
+                leftToAllocate < 0
+                  ? 'bg-destructive'
+                  : leftToAllocate === 0
+                    ? 'bg-[hsl(var(--success))]'
+                    : 'bg-primary'
+              )}
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
 
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={copyFromPrev}
-            className="gap-2 text-xs"
+            className="gap-2 rounded-xl text-xs"
           >
             <Copy className="h-3.5 w-3.5" />
             Copy from last month
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            size="sm"
+            className="gap-2 rounded-xl text-xs font-semibold"
+          >
+            <Save className="h-3.5 w-3.5" />
+            {saving ? 'Saving...' : 'Save Plan'}
           </Button>
         </div>
 
