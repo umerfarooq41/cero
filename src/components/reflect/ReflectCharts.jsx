@@ -36,6 +36,13 @@ const formatPercent = (value) => {
   return `${Math.round(value)}%`;
 };
 
+const getCategoryColor = (item) =>
+  item?.color ||
+  item?.categoryColor ||
+  item?.parentColor ||
+  item?.hex_color ||
+  'hsl(var(--muted-foreground))';
+
 const tooltipProps = {
   cursor: false,
   allowEscapeViewBox: { x: true, y: true },
@@ -161,7 +168,7 @@ export default function ReflectCharts({
   const groupedSpendingBreakdown = useMemo(() => {
     const withPercents = safeSpendingBreakdown.map((item) => ({
       ...item,
-      color: item.color || 'hsl(var(--muted-foreground))',
+      color: getCategoryColor(item),
       percent:
         totalCategorySpend > 0
           ? (Number(item.value || 0) / totalCategorySpend) * 100
@@ -397,7 +404,14 @@ export default function ReflectCharts({
                     <div className={`${CHART_WRAP_CLASS} h-44 w-44`}>
                       {isVisible ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <PieChart margin={{ top: 0, right: 90, bottom: 0, left: 0 }}>
+                          <PieChart
+                            margin={{
+                              top: 0,
+                              right: 90,
+                              bottom: 0,
+                              left: 0,
+                            }}
+                          >
                             <Pie
                               data={groupedSpendingBreakdown}
                               cx="50%"
@@ -413,8 +427,8 @@ export default function ReflectCharts({
                             >
                               {groupedSpendingBreakdown.map((entry) => (
                                 <Cell
-                                  key={entry.name}
-                                  fill={entry.color}
+                                  key={entry.id || entry.name}
+                                  fill={getCategoryColor(entry)}
                                   tabIndex={-1}
                                   focusable="false"
                                   style={{ outline: 'none' }}
@@ -451,33 +465,37 @@ export default function ReflectCharts({
                   </div>
 
                   <div className="w-full flex-1 space-y-3">
-                    {groupedSpendingBreakdown.map((category) => (
-                      <div
-                        key={category.name}
-                        className="flex items-center gap-3"
-                      >
+                    {groupedSpendingBreakdown.map((category) => {
+                      const categoryColor = getCategoryColor(category);
+
+                      return (
                         <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: category.color }}
-                        />
-
-                        <span className="min-w-0 flex-1 truncate text-sm">
-                          {category.name}
-                        </span>
-
-                        <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                          {formatPercent(category.percent)}
-                        </span>
-
-                        <span className="text-sm font-medium tabular-nums">
-                          <CurrencyAmount
-                            amount={category.value}
-                            currency={currency}
-                            compact
+                          key={category.id || category.name}
+                          className="flex items-center gap-3"
+                        >
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: categoryColor }}
                           />
-                        </span>
-                      </div>
-                    ))}
+
+                          <span className="min-w-0 flex-1 truncate text-sm">
+                            {category.name}
+                          </span>
+
+                          <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                            {formatPercent(category.percent)}
+                          </span>
+
+                          <span className="text-sm font-medium tabular-nums">
+                            <CurrencyAmount
+                              amount={category.value}
+                              currency={currency}
+                              compact
+                            />
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
