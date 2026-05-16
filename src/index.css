@@ -182,8 +182,7 @@
     border-color 0.25s ease,
     fill 0.25s ease,
     stroke 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.2s ease;
+    box-shadow 0.25s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
