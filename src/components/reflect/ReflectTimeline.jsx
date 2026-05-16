@@ -25,15 +25,29 @@ function getCurrentQuarter() {
   return Math.floor(new Date().getMonth() / 3) + 1;
 }
 
-function TimelineAmount({ label, amount, currency, tone }) {
-  return (
-    <div className="flex items-center justify-between gap-2 text-[11px]">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={cn('font-semibold tabular-nums', tone)}>
-        <CurrencyAmount amount={amount} currency={currency} compact />
-      </span>
-    </div>
+function getItemKey(item, index) {
+  return String(
+    item.key ??
+      `${item.year ?? 'period'}-${item.monthValue ?? item.label ?? index}`
   );
+}
+
+function generateSparkline(values = []) {
+  if (!values.length) return '';
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  return values
+    .map((value, index) => {
+      const x = (index / Math.max(values.length - 1, 1)) * 120;
+      const normalized = (value - min) / range;
+      const y = 20 - normalized * 16;
+
+      return `${x},${y}`;
+    })
+    .join(' ');
 }
 
 export default function ReflectTimeline({
@@ -51,32 +65,77 @@ export default function ReflectTimeline({
   const currentYear = new Date().getFullYear();
   const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
   const currentQuarter = getCurrentQuarter();
+  const currentQuarterLabel = `Q${currentQuarter}`;
 
-  const activeKey = useMemo(() => {
+  const activeItemKey = useMemo(() => {
+    if (!timelineItems.length) return null;
+
     if (isYear) {
-      return Number(selectedYear) === currentYear ? `Q${currentQuarter}` : 'Q1';
+      const targetQuarter =
+        Number(selectedYear) === currentYear ? currentQuarterLabel : 'Q1';
+
+      const activeQuarterItem = timelineItems.find((item, index) => {
+        const key = getItemKey(item, index);
+        const label = String(item.label ?? '');
+        const quarter = String(item.quarter ?? '');
+
+        return (
+          key === targetQuarter ||
+          key === `${selectedYear}-${targetQuarter}` ||
+          label === targetQuarter ||
+          quarter === targetQuarter
+        );
+      });
+
+      return activeQuarterItem
+        ? getItemKey(activeQuarterItem, timelineItems.indexOf(activeQuarterItem))
+        : getItemKey(timelineItems[0], 0);
     }
 
-    return `${selectedYear}-${selectedMonth}`;
-  }, [isYear, selectedYear, selectedMonth, currentYear, currentQuarter]);
+    const activeMonthItem = timelineItems.find((item, index) => {
+      const key = getItemKey(item, index);
+
+      return (
+        key === `${selectedYear}-${selectedMonth}` ||
+        (Number(item.year) === Number(selectedYear) &&
+          item.monthValue === selectedMonth)
+      );
+    });
+
+    return activeMonthItem
+      ? getItemKey(activeMonthItem, timelineItems.indexOf(activeMonthItem))
+      : null;
+  }, [
+    isYear,
+    selectedYear,
+    selectedMonth,
+    currentYear,
+    currentQuarterLabel,
+    timelineItems,
+  ]);
 
   useEffect(() => {
-    const activeEl = itemRefs.current[activeKey];
+    if (!activeItemKey) return;
+
+    const activeElement = itemRefs.current[activeItemKey];
     const scroller = scrollerRef.current;
 
-    if (!activeEl || !scroller) return;
+    if (!activeElement || !scroller) return;
 
-    activeEl.scrollIntoView({
+    activeElement.scrollIntoView({
       behavior: 'smooth',
       inline: 'center',
       block: 'nearest',
     });
-  }, [activeKey, timelineItems.length]);
+  }, [activeItemKey, timelineItems.length]);
 
-  const title = isYear ? `Year Timeline — ${selectedYear}` : `Monthly Timeline — ${selectedYear}`;
+  const title = isYear
+    ? `Year Timeline — ${selectedYear}`
+    : `Monthly Timeline — ${selectedYear}`;
+
   const subtitle = isYear
     ? 'Quarterly cash-flow rhythm. Tap a quarter to inspect its first month.'
-    : 'Tap a month to move the whole Reflect view.';
+    : 'Tap any month to move the whole Reflect view.';
 
   const handleItemClick = (item) => {
     if (isYear) {
@@ -96,11 +155,16 @@ export default function ReflectTimeline({
             <CalendarRange className="h-4 w-4 text-muted-foreground" />
             <span>{title}</span>
           </h3>
+
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         </div>
 
         <div className="hidden shrink-0 items-center gap-1 rounded-full bg-muted/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground sm:flex">
-          <span>{isYear ? 'Quarters' : MONTH_LABELS[Number(selectedMonth || currentMonth) - 1]}</span>
+          <span>
+            {isYear
+              ? 'Quarters'
+              : MONTH_LABELS[Number(selectedMonth || currentMonth) - 1]}
+          </span>
           <ChevronRight className="h-3.5 w-3.5" />
         </div>
       </div>
@@ -110,14 +174,20 @@ export default function ReflectTimeline({
         className="flex snap-x gap-3 overflow-x-auto px-4 pb-4 [scrollbar-width:none] sm:px-5 [&::-webkit-scrollbar]:hidden"
       >
         {timelineItems.map((item, index) => {
-          const key = item.key || `${selectedYear}-${item.monthValue || index}`;
-          const isActive = isYear
-            ? key === activeKey
-            : item.monthValue === selectedMonth;
-          const isCurrent = isYear
-            ? Number(selectedYear) === currentYear && item.quarterIndex === currentQuarter
-            : Number(selectedYear) === currentYear && item.monthValue === currentMonth;
+          const key = getItemKey(item, index);
+          const isActive = key === activeItemKey;
+
+          const isNow = isYear
+            ? Number(selectedYear) === currentYear &&
+              (key === currentQuarterLabel ||
+                key === `${selectedYear}-${currentQuarterLabel}` ||
+                item.label === currentQuarterLabel ||
+                item.quarter === currentQuarterLabel)
+            : Number(item.year) === currentYear &&
+              item.monthValue === currentMonth;
+
           const positive = Number(item.net || 0) >= 0;
+          const sparklinePoints = generateSparkline(item.sparkline || []);
 
           return (
             <motion.button
@@ -129,12 +199,16 @@ export default function ReflectTimeline({
               onClick={() => handleItemClick(item)}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: Math.min(index * 0.035, 0.25) }}
+              transition={{
+                duration: 0.35,
+                delay: Math.min(index * 0.035, 0.25),
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className={cn(
                 'group min-w-[168px] snap-center rounded-2xl border p-3 text-left transition-all duration-300',
                 'focus:outline-none focus:ring-2 focus:ring-ring/40',
                 isActive
-                  ? 'border-primary/40 bg-primary/8 shadow-md shadow-primary/10'
+                  ? 'border-primary/40 bg-primary/[0.08] shadow-md shadow-primary/10'
                   : 'border-border/60 bg-background/35 hover:border-primary/25 hover:bg-background/55'
               )}
             >
@@ -143,12 +217,13 @@ export default function ReflectTimeline({
                   <div className="text-sm font-bold tracking-tight text-foreground">
                     {item.label}
                   </div>
+
                   <div className="mt-0.5 text-[11px] text-muted-foreground">
                     {item.subLabel}
                   </div>
                 </div>
 
-                {(isActive || isCurrent) && (
+                {(isActive || isNow) && (
                   <span
                     className={cn(
                       'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
@@ -162,23 +237,42 @@ export default function ReflectTimeline({
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <TimelineAmount
-                  label="Income"
-                  amount={item.income}
-                  currency={currency}
-                  tone="text-emerald-600 dark:text-emerald-400"
-                />
-                <TimelineAmount
-                  label="Expenses"
-                  amount={item.expenses}
-                  currency={currency}
-                  tone="text-red-600 dark:text-red-400"
-                />
-              </div>
+              <svg
+                width="100%"
+                height="24"
+                viewBox="0 0 120 24"
+                className="overflow-visible"
+              >
+                {sparklinePoints ? (
+                  <polyline
+                    fill="none"
+                    stroke={
+                      positive
+                        ? 'hsl(var(--success))'
+                        : 'hsl(var(--destructive))'
+                    }
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={sparklinePoints}
+                  />
+                ) : (
+                  <line
+                    x1="0"
+                    y1="12"
+                    x2="120"
+                    y2="12"
+                    stroke="hsl(var(--muted-foreground))"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    opacity="0.35"
+                  />
+                )}
+              </svg>
 
               <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-2">
                 <span className="text-[11px] text-muted-foreground">Net</span>
+
                 <span
                   className={cn(
                     'text-xs font-bold tabular-nums',
@@ -187,8 +281,23 @@ export default function ReflectTimeline({
                       : 'text-red-600 dark:text-red-400'
                   )}
                 >
-                  <CurrencyAmount amount={item.net} currency={currency} compact />
+                  <CurrencyAmount
+                    amount={item.net}
+                    currency={currency}
+                    compact
+                  />
                 </span>
+              </div>
+
+              <div className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-full',
+                    positive ? 'bg-emerald-500' : 'bg-red-500'
+                  )}
+                />
+
+                <span>{positive ? 'Positive' : 'Negative'}</span>
               </div>
             </motion.button>
           );
