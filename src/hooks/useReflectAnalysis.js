@@ -31,23 +31,26 @@ export const MONTH_LABELS = [
   'Dec',
 ];
 
+export const FULL_MONTH_LABELS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 const QUARTERS = [
-  {
-    label: 'Q1',
-    months: ['01', '02', '03'],
-  },
-  {
-    label: 'Q2',
-    months: ['04', '05', '06'],
-  },
-  {
-    label: 'Q3',
-    months: ['07', '08', '09'],
-  },
-  {
-    label: 'Q4',
-    months: ['10', '11', '12'],
-  },
+  { label: 'Q1', subLabel: 'Jan – Mar', months: ['01', '02', '03'] },
+  { label: 'Q2', subLabel: 'Apr – Jun', months: ['04', '05', '06'] },
+  { label: 'Q3', subLabel: 'Jul – Sep', months: ['07', '08', '09'] },
+  { label: 'Q4', subLabel: 'Oct – Dec', months: ['10', '11', '12'] },
 ];
 
 export function getPeriodRange(year, month) {
@@ -112,6 +115,24 @@ function getRollingMonthKeys(monthKey, count = 3) {
       label: format(monthDate, 'MMM'),
     };
   });
+}
+
+function getQuarterTotals(allTransactions, selectedYear, quarter, settings) {
+  return quarter.months.reduce(
+    (sum, month) => {
+      const monthTotals = getMonthTotals(
+        allTransactions,
+        `${selectedYear}-${month}`,
+        settings
+      );
+
+      return {
+        income: sum.income + monthTotals.income,
+        expenses: sum.expenses + monthTotals.expenses,
+      };
+    },
+    { income: 0, expenses: 0 }
+  );
 }
 
 export default function useReflectAnalysis({
@@ -247,23 +268,11 @@ export default function useReflectAnalysis({
   const cashFlow = useMemo(() => {
     if (isYear) {
       return QUARTERS.map((quarter) => {
-        const totals = quarter.months.reduce(
-          (sum, month) => {
-            const monthTotals = getMonthTotals(
-              allTransactions,
-              `${selectedYear}-${month}`,
-              settings
-            );
-
-            return {
-              income: sum.income + monthTotals.income,
-              expenses: sum.expenses + monthTotals.expenses,
-            };
-          },
-          {
-            income: 0,
-            expenses: 0,
-          }
+        const totals = getQuarterTotals(
+          allTransactions,
+          selectedYear,
+          quarter,
+          settings
         );
 
         return {
@@ -286,6 +295,47 @@ export default function useReflectAnalysis({
       };
     });
   }, [isYear, selectedYear, monthKey, allTransactions, settings]);
+
+  const timelineItems = useMemo(() => {
+    if (isYear) {
+      return QUARTERS.map((quarter, index) => {
+        const totals = getQuarterTotals(
+          allTransactions,
+          selectedYear,
+          quarter,
+          settings
+        );
+
+        return {
+          key: quarter.label,
+          label: quarter.label,
+          subLabel: quarter.subLabel,
+          income: totals.income,
+          expenses: totals.expenses,
+          net: totals.income - totals.expenses,
+          firstMonth: quarter.months[0],
+          quarterIndex: index + 1,
+        };
+      });
+    }
+
+    return MONTH_LABELS.map((label, index) => {
+      const monthValue = String(index + 1).padStart(2, '0');
+      const key = `${selectedYear}-${monthValue}`;
+      const totals = getMonthTotals(allTransactions, key, settings);
+
+      return {
+        key,
+        label,
+        subLabel: FULL_MONTH_LABELS[index],
+        monthValue,
+        income: totals.income,
+        expenses: totals.expenses,
+        net: totals.net,
+        active: monthValue === selectedMonth,
+      };
+    });
+  }, [isYear, selectedYear, selectedMonth, allTransactions, settings]);
 
   const spendingTrend = useMemo(() => {
     if (isYear) {
@@ -347,6 +397,7 @@ export default function useReflectAnalysis({
     efficiency,
     spendingBreakdown,
     cashFlow,
+    timelineItems,
     spendingTrend,
     topCategory: spendingBreakdown[0],
   };

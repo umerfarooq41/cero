@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import ReflectCard from './ReflectCard.jsx';
 
@@ -98,6 +99,58 @@ export function InlineMoney({ children, className }) {
   );
 }
 
+const clampPercent = (value) => Math.max(0, Math.min(Number(value || 0), 100));
+
+function getSelectedPeriodProgress({ selectedYear, selectedMonth, isYear }) {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonthIndex = now.getMonth();
+  const currentMonth = currentMonthIndex + 1;
+  const yearNumber = Number(selectedYear || currentYear);
+
+  if (isYear) {
+    const monthsPassed =
+      yearNumber < currentYear
+        ? 12
+        : yearNumber > currentYear
+          ? 0
+          : currentMonth;
+
+    return {
+      daysLeft: 0,
+      monthElapsedPercent: 100,
+      yearElapsedPercent: clampPercent((monthsPassed / 12) * 100),
+      monthsPassed: Math.max(monthsPassed, 1),
+      isCurrentPeriod: yearNumber === currentYear,
+    };
+  }
+
+  const monthNumber = Number(selectedMonth || currentMonth);
+  const selectedDate = new Date(yearNumber, monthNumber - 1, 1);
+  const selectedPeriodIndex = yearNumber * 12 + monthNumber;
+  const currentPeriodIndex = currentYear * 12 + currentMonth;
+  const daysInMonth = new Date(yearNumber, monthNumber, 0).getDate();
+
+  let elapsedDay = 0;
+
+  if (selectedPeriodIndex < currentPeriodIndex) {
+    elapsedDay = daysInMonth;
+  } else if (selectedPeriodIndex === currentPeriodIndex) {
+    elapsedDay = now.getDate();
+  }
+
+  const daysLeft = Math.max(daysInMonth - elapsedDay, 1);
+  const monthElapsedPercent = clampPercent((elapsedDay / daysInMonth) * 100);
+
+  return {
+    daysLeft,
+    monthElapsedPercent,
+    yearElapsedPercent: clampPercent(((selectedDate.getMonth() + 1) / 12) * 100),
+    monthsPassed: Math.max(selectedDate.getMonth() + 1, 1),
+    isCurrentPeriod: selectedPeriodIndex === currentPeriodIndex,
+  };
+}
+
 function MoneyRow({ label, amount, currency, tone }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
@@ -111,24 +164,25 @@ function MoneyRow({ label, amount, currency, tone }) {
 }
 
 function AnimatedBar({ value, className, delay = 'delay-150' }) {
-  const safeValue = Math.max(0, Math.min(Number(value || 0), 100));
+  const safeValue = clampPercent(value);
+  const scaleX = safeValue / 100;
 
   return (
     <div className="h-2 overflow-hidden rounded-full bg-muted">
       <div
         className={cn(
-          'h-full rounded-full transition-all duration-700 ease-out',
+          'h-full rounded-full origin-left transition-transform duration-700 ease-out will-change-transform',
           delay,
           className
         )}
-        style={{ width: `${safeValue}%` }}
+        style={{ transform: `scaleX(${scaleX})` }}
       />
     </div>
   );
 }
 
 function PercentBar({ label, value, className, delay }) {
-  const safeValue = Math.max(0, Math.min(Number(value || 0), 100));
+  const safeValue = clampPercent(value);
 
   return (
     <div className="space-y-1.5">
@@ -292,11 +346,12 @@ function SecondaryCard({ title, value, children, tone = 'default' }) {
 
 export default function ReflectSummaryCard({
   isYear,
+  selectedYear,
+  selectedMonth,
   income,
   expenses,
   trackedSavings = 0,
   trackedDebt = 0,
-  plannedIncome,
   plannedExpenses,
   plannedSavings = 0,
   plannedDebt = 0,
@@ -306,74 +361,111 @@ export default function ReflectSummaryCard({
   netWorth,
   totalAssets,
   totalLiabilities,
-  savingsRate,
   currency,
 }) {
-  const now = new Date();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const currentDay = now.getDate();
-  const daysLeft = Math.max(daysInMonth - currentDay, 1);
-  const monthElapsedPercent = (currentDay / daysInMonth) * 100;
-  const yearElapsedPercent = ((now.getMonth() + 1) / 12) * 100;
+  const computed = useMemo(() => {
+    const periodProgress = getSelectedPeriodProgress({
+      selectedYear,
+      selectedMonth,
+      isYear,
+    });
 
-  const netWorthHealth =
-    totalAssets > 0
-      ? Math.max(
-          0,
-          Math.min(((totalAssets - totalLiabilities) / totalAssets) * 100, 100)
-        )
-      : 0;
+    const netWorthHealth =
+      totalAssets > 0
+        ? Math.max(
+            0,
+            Math.min(((totalAssets - totalLiabilities) / totalAssets) * 100, 100)
+          )
+        : 0;
 
-  const monthlyBudgetDifference = plannedExpenses - expenses;
-  const monthlyBudgetUsed =
-    plannedExpenses > 0 ? Math.min((expenses / plannedExpenses) * 100, 100) : 0;
+    const monthlyBudgetDifference = plannedExpenses - expenses;
+    const monthlyBudgetUsed =
+      plannedExpenses > 0 ? Math.min((expenses / plannedExpenses) * 100, 100) : 0;
 
-  const dailyLimit = monthlyBudgetDifference > 0 ? monthlyBudgetDifference / daysLeft : 0;
+    const dailyLimit =
+      monthlyBudgetDifference > 0
+        ? monthlyBudgetDifference / periodProgress.daysLeft
+        : 0;
 
-  const monthlyStatus =
-    plannedExpenses === 0
-      ? 'Tracked'
-      : monthlyBudgetUsed <= monthElapsedPercent
-        ? 'Excellent'
-        : monthlyBudgetUsed <= monthElapsedPercent + 10
-          ? 'On Track'
-          : 'Warning';
+    const monthlyStatus =
+      plannedExpenses === 0
+        ? 'Tracked'
+        : monthlyBudgetUsed <= periodProgress.monthElapsedPercent
+          ? 'Excellent'
+          : monthlyBudgetUsed <= periodProgress.monthElapsedPercent + 10
+            ? 'On Track'
+            : 'Warning';
 
-  const monthlyTone =
-    plannedExpenses === 0
-      ? 'info'
-      : monthlyBudgetUsed <= monthElapsedPercent
-        ? 'good'
-        : monthlyBudgetUsed <= monthElapsedPercent + 10
-          ? 'warning'
-          : 'bad';
+    const monthlyTone =
+      plannedExpenses === 0
+        ? 'info'
+        : monthlyBudgetUsed <= periodProgress.monthElapsedPercent
+          ? 'good'
+          : monthlyBudgetUsed <= periodProgress.monthElapsedPercent + 10
+            ? 'warning'
+            : 'bad';
 
-  const yearlyPlanCap = Number(totalPlannedOutflow ?? plannedExpenses + plannedSavings + plannedDebt) || 0;
-  const yearlyTotalYtd = Number(totalTrackedOutflow ?? expenses + trackedSavings + trackedDebt) || 0;
-  const yearlyPlanUsedPercent =
-    yearlyPlanCap > 0 ? Math.min((yearlyTotalYtd / yearlyPlanCap) * 100, 100) : 0;
+    const yearlyPlanCap =
+      Number(totalPlannedOutflow ?? plannedExpenses + plannedSavings + plannedDebt) || 0;
 
-  const monthsPassed = Math.max(now.getMonth() + 1, 1);
-  const monthlyAverage = yearlyTotalYtd / monthsPassed;
-  const paceDifference = yearElapsedPercent - yearlyPlanUsedPercent;
+    const yearlyTotalYtd =
+      Number(totalTrackedOutflow ?? expenses + trackedSavings + trackedDebt) || 0;
 
-  const yearlyStatus =
-    yearlyPlanCap === 0
-      ? 'No Plan Yet'
-      : yearlyPlanUsedPercent <= yearElapsedPercent
-        ? 'Ahead of Plan'
-        : yearlyPlanUsedPercent <= yearElapsedPercent + 10
-          ? 'On Track'
-          : 'Behind Plan';
+    const yearlyPlanUsedPercent =
+      yearlyPlanCap > 0 ? Math.min((yearlyTotalYtd / yearlyPlanCap) * 100, 100) : 0;
 
-  const yearlyTone =
-    yearlyPlanCap === 0
-      ? 'info'
-      : yearlyPlanUsedPercent <= yearElapsedPercent
-        ? 'good'
-        : yearlyPlanUsedPercent <= yearElapsedPercent + 10
-          ? 'warning'
-          : 'bad';
+    const monthlyAverage = yearlyTotalYtd / periodProgress.monthsPassed;
+    const paceDifference = periodProgress.yearElapsedPercent - yearlyPlanUsedPercent;
+
+    const yearlyStatus =
+      yearlyPlanCap === 0
+        ? 'No Plan Yet'
+        : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent
+          ? 'Ahead of Plan'
+          : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent + 10
+            ? 'On Track'
+            : 'Behind Plan';
+
+    const yearlyTone =
+      yearlyPlanCap === 0
+        ? 'info'
+        : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent
+          ? 'good'
+          : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent + 10
+            ? 'warning'
+            : 'bad';
+
+    return {
+      ...periodProgress,
+      netWorthHealth,
+      monthlyBudgetDifference,
+      monthlyBudgetUsed,
+      dailyLimit,
+      monthlyStatus,
+      monthlyTone,
+      yearlyPlanCap,
+      yearlyTotalYtd,
+      yearlyPlanUsedPercent,
+      monthlyAverage,
+      paceDifference,
+      yearlyStatus,
+      yearlyTone,
+    };
+  }, [
+    isYear,
+    selectedYear,
+    selectedMonth,
+    expenses,
+    plannedExpenses,
+    plannedSavings,
+    plannedDebt,
+    totalAssets,
+    totalLiabilities,
+    trackedSavings,
+    trackedDebt,
+    totalPlannedOutflow,
+    totalTrackedOutflow,
+  ]);
 
   return (
     <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -407,13 +499,13 @@ export default function ReflectSummaryCard({
 
           <div className="space-y-1.5">
             <AnimatedBar
-              value={netWorthHealth}
+              value={computed.netWorthHealth}
               className="bg-cyan-400"
               delay="delay-300"
             />
 
             <p className="text-xs text-muted-foreground">
-              {Math.round(netWorthHealth)}% asset-backed
+              {Math.round(computed.netWorthHealth)}% asset-backed
             </p>
           </div>
         </div>
@@ -421,8 +513,8 @@ export default function ReflectSummaryCard({
 
       <SecondaryCard
         title={isYear ? 'Yearly Performance' : 'Budget Health'}
-        value={isYear ? yearlyStatus : monthlyStatus}
-        tone={isYear ? yearlyTone : monthlyTone}
+        value={isYear ? computed.yearlyStatus : computed.monthlyStatus}
+        tone={isYear ? computed.yearlyTone : computed.monthlyTone}
       >
         <div className="space-y-3">
           {isYear ? (
@@ -430,21 +522,21 @@ export default function ReflectSummaryCard({
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Total YTD</p>
                 <div className="mt-1 text-xl font-bold tracking-tight tabular-nums text-foreground">
-                  <CurrencyAmount amount={yearlyTotalYtd} currency={currency} />
+                  <CurrencyAmount amount={computed.yearlyTotalYtd} currency={currency} />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <MoneyRow
                   label="Monthly Avg"
-                  amount={monthlyAverage}
+                  amount={computed.monthlyAverage}
                   currency={currency}
                   tone="text-muted-foreground"
                 />
 
                 <MoneyRow
                   label="Annual Cap"
-                  amount={yearlyPlanCap}
+                  amount={computed.yearlyPlanCap}
                   currency={currency}
                   tone="text-muted-foreground"
                 />
@@ -453,20 +545,20 @@ export default function ReflectSummaryCard({
               <div className="space-y-3">
                 <PercentBar
                   label="Year Passed"
-                  value={yearElapsedPercent}
+                  value={computed.yearElapsedPercent}
                   className="bg-cyan-400"
                   delay="delay-300"
                 />
 
                 <PercentBar
                   label="Plan Used"
-                  value={yearlyPlanUsedPercent}
+                  value={computed.yearlyPlanUsedPercent}
                   className={
-                    yearlyTone === 'good'
+                    computed.yearlyTone === 'good'
                       ? 'bg-emerald-400'
-                      : yearlyTone === 'warning'
+                      : computed.yearlyTone === 'warning'
                         ? 'bg-amber-400'
-                        : yearlyTone === 'bad'
+                        : computed.yearlyTone === 'bad'
                           ? 'bg-red-400'
                           : 'bg-cyan-400'
                   }
@@ -475,11 +567,11 @@ export default function ReflectSummaryCard({
               </div>
 
               <p className="text-xs leading-snug text-muted-foreground">
-                {yearlyPlanCap === 0
+                {computed.yearlyPlanCap === 0
                   ? 'Add yearly or monthly plans to compare usage against the year.'
-                  : paceDifference >= 0
-                    ? `${Math.round(paceDifference)}% ahead of yearly pace.`
-                    : `${Math.abs(Math.round(paceDifference))}% behind yearly pace.`}
+                  : computed.paceDifference >= 0
+                    ? `${Math.round(computed.paceDifference)}% ahead of yearly pace.`
+                    : `${Math.abs(Math.round(computed.paceDifference))}% behind yearly pace.`}
               </p>
             </>
           ) : (
@@ -492,16 +584,16 @@ export default function ReflectSummaryCard({
                 <div
                   className={cn(
                     'mt-1 text-xl font-bold tracking-tight tabular-nums',
-                    monthlyBudgetDifference >= 0
+                    computed.monthlyBudgetDifference >= 0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-red-600 dark:text-red-400'
                   )}
                 >
                   <CurrencyAmount
-                    amount={Math.abs(monthlyBudgetDifference)}
+                    amount={Math.abs(computed.monthlyBudgetDifference)}
                     currency={currency}
                   />{' '}
-                  {monthlyBudgetDifference >= 0 ? 'Left' : 'Over'}
+                  {computed.monthlyBudgetDifference >= 0 ? 'Left' : 'Over'}
                 </div>
               </div>
 
@@ -518,7 +610,7 @@ export default function ReflectSummaryCard({
                   amount={expenses}
                   currency={currency}
                   tone={
-                    monthlyBudgetDifference >= 0
+                    computed.monthlyBudgetDifference >= 0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-red-600 dark:text-red-400'
                   }
@@ -528,11 +620,11 @@ export default function ReflectSummaryCard({
               {plannedExpenses > 0 && (
                 <>
                   <AnimatedBar
-                    value={monthlyBudgetUsed}
+                    value={computed.monthlyBudgetUsed}
                     className={
-                      monthlyTone === 'good'
+                      computed.monthlyTone === 'good'
                         ? 'bg-emerald-400'
-                        : monthlyTone === 'warning'
+                        : computed.monthlyTone === 'warning'
                           ? 'bg-amber-400'
                           : 'bg-red-400'
                     }
@@ -542,7 +634,7 @@ export default function ReflectSummaryCard({
                   <p className="text-xs leading-snug text-muted-foreground">
                     Daily Limit:{' '}
                     <span className="font-semibold text-foreground">
-                      <CurrencyAmount amount={dailyLimit} currency={currency} compact /> / day
+                      <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact /> / day
                     </span>
                   </p>
                 </>

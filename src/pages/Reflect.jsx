@@ -15,6 +15,7 @@ import ReflectSummaryCards, {
   CurrencyAmount,
   InlineMoney,
 } from '@/components/reflect/ReflectSummaryCard.jsx';
+import ReflectTimeline from '@/components/reflect/ReflectTimeline.jsx';
 import ReflectCharts from '@/components/reflect/ReflectCharts.jsx';
 import ReflectInsightCard from '@/components/reflect/ReflectInsightCard.jsx';
 
@@ -43,6 +44,7 @@ export default function Reflect() {
 
   const [selectedYear, setSelectedYear] = useState(format(today, 'yyyy'));
   const [selectedMonth, setSelectedMonth] = useState(format(today, 'MM'));
+  const [periodMode, setPeriodMode] = useState('month');
 
   const currency = useCurrency();
 
@@ -51,7 +53,8 @@ export default function Reflect() {
   const { data: accounts = [] } = useAccounts();
   const { data: settings = {} } = useUserSettings();
 
-  const isYearView = selectedMonth === 'all';
+  const isYearView = periodMode === 'year';
+  const analysisMonth = isYearView ? 'all' : selectedMonth;
 
   const currentMonthKey = isYearView
     ? null
@@ -62,7 +65,7 @@ export default function Reflect() {
 
   const analysis = useReflectAnalysis({
     selectedYear,
-    selectedMonth,
+    selectedMonth: analysisMonth,
     allTransactions,
     accounts,
     categories,
@@ -91,6 +94,7 @@ export default function Reflect() {
     efficiency,
     spendingBreakdown,
     cashFlow,
+    timelineItems,
     spendingTrend,
     topCategory,
   } = analysis;
@@ -184,13 +188,27 @@ export default function Reflect() {
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         <ReflectPeriodSelector
           year={selectedYear}
-          month={selectedMonth}
+          month={analysisMonth}
+          periodMode={periodMode}
+          onPeriodModeChange={setPeriodMode}
           onYearChange={setSelectedYear}
+          onMonthChange={setSelectedMonth}
+        />
+
+        <ReflectTimeline
+          isYear={isYear}
+          selectedYear={selectedYear}
+          selectedMonth={selectedMonth}
+          timelineItems={timelineItems}
+          currency={currency}
+          onPeriodModeChange={setPeriodMode}
           onMonthChange={setSelectedMonth}
         />
 
         <ReflectSummaryCards
           isYear={isYear}
+          selectedYear={selectedYear}
+          selectedMonth={analysisMonth}
           income={income}
           expenses={expenses}
           trackedSavings={trackedSavings}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import {
   Select,
@@ -29,12 +30,16 @@ const MONTHS = [
 export default function ReflectPeriodSelector({
   year,
   month,
+  periodMode: controlledPeriodMode,
+  onPeriodModeChange,
   onYearChange,
   onMonthChange,
 }) {
-  const [periodMode, setPeriodMode] = useState(
+  const [internalPeriodMode, setInternalPeriodMode] = useState(
     month === 'all' ? 'year' : 'month'
   );
+
+  const periodMode = controlledPeriodMode ?? internalPeriodMode;
 
   const currentYear = new Date().getFullYear();
 
@@ -45,6 +50,18 @@ export default function ReflectPeriodSelector({
       ),
     [currentYear]
   );
+
+  const selectedMonth = useMemo(() => {
+    return (
+      MONTHS.find((item) => item.value === month) ||
+      MONTHS[new Date().getMonth()]
+    );
+  }, [month]);
+
+  const changeMode = (nextMode) => {
+    setInternalPeriodMode(nextMode);
+    onPeriodModeChange?.(nextMode);
+  };
 
   useEffect(() => {
     if (periodMode === 'year' && month !== 'all') {
@@ -57,32 +74,37 @@ export default function ReflectPeriodSelector({
     }
   }, [periodMode, month, onMonthChange]);
 
-  const selectedMonth =
-    MONTHS.find((item) => item.value === month) ||
-    MONTHS[new Date().getMonth()];
-
   const heading =
     periodMode === 'year'
       ? `Year ${year}`
       : `${selectedMonth.label} ${year}`;
 
   return (
-    <ReflectCard className="mb-4 p-4">
+    <ReflectCard className="mb-4 p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-3">
-  <h3 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
-    <CalendarDays className="h-4 w-4 text-muted-foreground" />
-    <span>Reporting Period</span>
-  </h3>
+        <h3 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <span>Reporting Period</span>
+        </h3>
 
-  <h3 className="shrink-0 text-sm font-semibold">
-    {heading}
-  </h3>
-</div>
+        <AnimatePresence mode="wait">
+          <motion.h3
+            key={heading}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+            className="shrink-0 text-sm font-semibold"
+          >
+            {heading}
+          </motion.h3>
+        </AnimatePresence>
+      </div>
 
       <div className="mb-3 grid grid-cols-2 rounded-2xl border border-border/60 bg-card/60 p-1 backdrop-blur-xl">
         <button
           type="button"
-          onClick={() => setPeriodMode('month')}
+          onClick={() => changeMode('month')}
           className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
             periodMode === 'month'
               ? 'bg-card/90 text-foreground shadow-sm'
@@ -94,7 +116,7 @@ export default function ReflectPeriodSelector({
 
         <button
           type="button"
-          onClick={() => setPeriodMode('year')}
+          onClick={() => changeMode('year')}
           className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
             periodMode === 'year'
               ? 'bg-card/90 text-foreground shadow-sm'

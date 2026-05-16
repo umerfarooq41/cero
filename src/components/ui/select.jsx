@@ -73,7 +73,7 @@ const SelectContent = React.forwardRef(
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
           "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
-          "data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-out",
           className
         )}
         position={position}
