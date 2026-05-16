@@ -23,7 +23,7 @@ import {
 } from './ReflectSummaryCard.jsx';
 
 const CHART_WRAP_CLASS =
-  'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_.recharts-layer]:outline-none [&_.recharts-active-bar]:hidden [&_.recharts-tooltip-cursor]:hidden [&_*]:focus:outline-none';
+  'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_.recharts-rectangle]:outline-none [&_.recharts-active-bar]:hidden [&_.recharts-tooltip-cursor]:hidden [&_.recharts-dot]:outline-none [&_.recharts-active-dot]:hidden [&_*]:focus:outline-none [&_*]:focus-visible:outline-none';
 
 const getChartAnimation = (active) => ({
   isAnimationActive: active,
@@ -267,34 +267,31 @@ export default function ReflectCharts({
                       />
 
                       <Tooltip
-                        {...tooltipProps}
-                        contentStyle={tooltipStyle}
-                        formatter={(value) =>
-                          formatCurrencyText(value, currency)
-                        }
-                      />
+  {...tooltipProps}
+  cursor={false}
+  contentStyle={tooltipStyle}
+  formatter={(value) =>
+    formatCurrencyText(value, currency)
+  }
+/>
 
                       <Bar
-                        dataKey="income"
-                        fill="hsl(var(--success))"
-                        radius={[8, 8, 0, 0]}
-                        activeBar={{
-                          fill: 'hsl(var(--success))',
-                          stroke: 'none',
-                        }}
-                        {...getChartAnimation(isVisible)}
-                      />
+  dataKey="income"
+  fill="hsl(var(--success))"
+  radius={[8, 8, 0, 0]}
+  activeBar={false}
+  style={{ outline: 'none' }}
+  {...getChartAnimation(isVisible)}
+/>
 
-                      <Bar
-                        dataKey="expenses"
-                        fill="hsl(var(--destructive))"
-                        radius={[8, 8, 0, 0]}
-                        activeBar={{
-                          fill: 'hsl(var(--destructive))',
-                          stroke: 'none',
-                        }}
-                        {...getChartAnimation(isVisible)}
-                      />
+<Bar
+  dataKey="expenses"
+  fill="hsl(var(--destructive))"
+  radius={[8, 8, 0, 0]}
+  activeBar={false}
+  style={{ outline: 'none' }}
+  {...getChartAnimation(isVisible)}
+/>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -566,26 +563,29 @@ export default function ReflectCharts({
                         />
 
                         <Tooltip
-                          {...tooltipProps}
-                          contentStyle={tooltipStyle}
-                          formatter={(value) =>
-                            formatCurrencyText(value, currency)
-                          }
-                          labelFormatter={(label) =>
-                            isYear ? label : `Day ${label}`
-                          }
-                        />
+  {...tooltipProps}
+  cursor={false}
+  contentStyle={tooltipStyle}
+  formatter={(value) =>
+    formatCurrencyText(value, currency)
+  }
+  labelFormatter={(label) =>
+    isYear ? label : `Day ${label}`
+  }
+/>
 
                         <Area
-                          type="monotone"
-                          dataKey="amount"
-                          stroke="hsl(var(--primary))"
-                          fill="hsl(var(--primary))"
-                          fillOpacity={0.14}
-                          strokeWidth={2.5}
-                          activeDot={false}
-                          {...getChartAnimation(isVisible)}
-                        />
+  type="monotone"
+  dataKey="amount"
+  stroke="hsl(var(--primary))"
+  fill="hsl(var(--primary))"
+  fillOpacity={0.14}
+  strokeWidth={2.5}
+  activeDot={false}
+  dot={false}
+  style={{ outline: 'none' }}
+  {...getChartAnimation(isVisible)}
+/>
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
