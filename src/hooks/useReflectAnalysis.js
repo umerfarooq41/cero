@@ -5,17 +5,6 @@ import {
   filterTransactionsByBudgetYear,
 } from '@/lib/budgetLogic';
 
-export const CHART_COLORS = [
-  '#0078D4',
-  '#107C10',
-  '#C50F1F',
-  '#8764B8',
-  '#CA5010',
-  '#008272',
-  '#4F6BED',
-  '#FFB900',
-];
-
 export const MONTH_LABELS = [
   'Jan',
   'Feb',
@@ -64,6 +53,33 @@ function getCategoryType(categories, categoryId) {
 
   const parent = categories.find((item) => item.id === category.parent_id);
   return parent?.type || null;
+}
+
+function getCategoryColor(categories, categoryId) {
+  const category = categories.find((item) => item.id === categoryId);
+
+  if (!category) {
+    return 'hsl(var(--muted-foreground))';
+  }
+
+  const parent = category.parent_id
+    ? categories.find((item) => item.id === category.parent_id)
+    : null;
+
+  return (
+    category.color ||
+    category.colour ||
+    category.hex_color ||
+    parent?.color ||
+    parent?.colour ||
+    parent?.hex_color ||
+    'hsl(var(--muted-foreground))'
+  );
+}
+
+function getCategoryName(categories, categoryId) {
+  const category = categories.find((item) => item.id === categoryId);
+  return category?.name || 'Uncategorized';
 }
 
 function getMonthTotals(allTransactions, month, settings) {
@@ -230,24 +246,23 @@ export default function useReflectAnalysis({
     periodTransactions
       .filter((transaction) => transaction.type === 'expense')
       .forEach((transaction) => {
-        const category = categories.find(
-          (item) => item.id === transaction.category_id
-        );
+        const categoryId = transaction.category_id;
+        const name = getCategoryName(categories, categoryId);
+        const color = getCategoryColor(categories, categoryId);
+        const amount = Number(transaction.amount) || 0;
 
-        const name = category?.name || 'Uncategorized';
+        if (!categorySpending[name]) {
+          categorySpending[name] = {
+            name,
+            value: 0,
+            color,
+          };
+        }
 
-        categorySpending[name] =
-          (categorySpending[name] || 0) + (Number(transaction.amount) || 0);
+        categorySpending[name].value += amount;
       });
 
-    return Object.entries(categorySpending)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 7)
-      .map(([name, value], index) => ({
-        name,
-        value,
-        color: CHART_COLORS[index % CHART_COLORS.length],
-      }));
+    return Object.values(categorySpending).sort((a, b) => b.value - a.value);
   }, [periodTransactions, categories]);
 
   const cashFlow = useMemo(() => {
