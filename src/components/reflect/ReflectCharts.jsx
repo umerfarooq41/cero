@@ -23,7 +23,7 @@ import {
 } from './ReflectSummaryCard.jsx';
 
 const CHART_WRAP_CLASS =
-  'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_.recharts-rectangle]:outline-none [&_.recharts-active-bar]:hidden [&_.recharts-tooltip-cursor]:hidden [&_.recharts-dot]:outline-none [&_.recharts-active-dot]:hidden [&_*]:focus:outline-none [&_*]:focus-visible:outline-none';
+  'w-full min-w-0 select-none [-webkit-tap-highlight-color:transparent] [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper]:select-none [&_.recharts-surface]:outline-none [&_.recharts-surface]:select-none [&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_.recharts-rectangle]:outline-none [&_.recharts-active-bar]:outline-none [&_.recharts-tooltip-cursor]:hidden [&_.recharts-dot]:outline-none [&_.recharts-active-dot]:hidden [&_svg]:outline-none [&_svg_*]:outline-none [&_*]:focus:outline-none [&_*]:focus-visible:outline-none';
 
 const getChartAnimation = (active) => ({
   isAnimationActive: active,
@@ -45,7 +45,7 @@ const getCategoryColor = (item) =>
 
 const tooltipProps = {
   cursor: false,
-  allowEscapeViewBox: { x: true, y: true },
+  allowEscapeViewBox: { x: false, y: false },
   wrapperStyle: {
     zIndex: 9999,
     pointerEvents: 'none',
@@ -58,10 +58,6 @@ const donutTooltipProps = {
   wrapperStyle: {
     zIndex: 9999,
     pointerEvents: 'none',
-  },
-  position: {
-    x: 52,
-    y: 12,
   },
 };
 
@@ -267,31 +263,41 @@ export default function ReflectCharts({
                       />
 
                       <Tooltip
-  {...tooltipProps}
-  cursor={false}
-  contentStyle={tooltipStyle}
-  formatter={(value) =>
-    formatCurrencyText(value, currency)
-  }
-/>
+                        {...tooltipProps}
+                        cursor={false}
+                        contentStyle={{
+                          ...tooltipStyle,
+                          maxWidth: 150,
+                          whiteSpace: 'normal',
+                        }}
+                        formatter={(value) =>
+                          formatCurrencyText(value, currency)
+                        }
+                      />
 
                       <Bar
-  dataKey="income"
-  fill="hsl(var(--success))"
-  radius={[8, 8, 0, 0]}
-  activeBar={false}
-  style={{ outline: 'none' }}
-  {...getChartAnimation(isVisible)}
-/>
+                        dataKey="income"
+                        fill="hsl(var(--success))"
+                        radius={[8, 8, 0, 0]}
+                        activeBar={false}
+                        style={{
+                          outline: 'none',
+                          WebkitTapHighlightColor: 'transparent',
+                        }}
+                        {...getChartAnimation(isVisible)}
+                      />
 
-<Bar
-  dataKey="expenses"
-  fill="hsl(var(--destructive))"
-  radius={[8, 8, 0, 0]}
-  activeBar={false}
-  style={{ outline: 'none' }}
-  {...getChartAnimation(isVisible)}
-/>
+                      <Bar
+                        dataKey="expenses"
+                        fill="hsl(var(--destructive))"
+                        radius={[8, 8, 0, 0]}
+                        activeBar={false}
+                        style={{
+                          outline: 'none',
+                          WebkitTapHighlightColor: 'transparent',
+                        }}
+                        {...getChartAnimation(isVisible)}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -416,7 +422,14 @@ export default function ReflectCharts({
                     <div className={`${CHART_WRAP_CLASS} h-44 w-44`}>
                       {isVisible ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                          <PieChart
+                            margin={{
+                              top: 0,
+                              right: 0,
+                              bottom: 0,
+                              left: 0,
+                            }}
+                          >
                             <Pie
                               data={groupedSpendingBreakdown}
                               cx="50%"
@@ -443,16 +456,17 @@ export default function ReflectCharts({
                             </Pie>
 
                             <Tooltip
-  {...donutTooltipProps}
-  contentStyle={{
-    ...tooltipStyle,
-    zIndex: 9999,
-    maxWidth: 140,
-    whiteSpace: 'normal',
-  }}
-  formatter={(value) =>
-    formatCurrencyText(value, currency)
-  }
+                              {...donutTooltipProps}
+                              cursor={false}
+                              contentStyle={{
+                                ...tooltipStyle,
+                                zIndex: 9999,
+                                maxWidth: 140,
+                                whiteSpace: 'normal',
+                              }}
+                              formatter={(value) =>
+                                formatCurrencyText(value, currency)
+                              }
                             />
                           </PieChart>
                         </ResponsiveContainer>
@@ -534,7 +548,10 @@ export default function ReflectCharts({
                 <div className={`${CHART_WRAP_CLASS} h-56 min-h-[224px]`}>
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={safeSpendingTrend}>
+                      <AreaChart
+                        data={safeSpendingTrend}
+                        margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+                      >
                         <CartesianGrid
                           vertical={false}
                           strokeDasharray="3 3"
@@ -563,33 +580,36 @@ export default function ReflectCharts({
                         />
 
                         <Tooltip
-  {...tooltipProps}
-  cursor={false}
-  contentStyle={{
-    ...tooltipStyle,
-    maxWidth: 150,
-    whiteSpace: 'normal',
-  }}
-  formatter={(value) =>
-    formatCurrencyText(value, currency)
-  }
-  labelFormatter={(label) =>
-    isYear ? label : `Day ${label}`
-  }
-/>
+                          {...tooltipProps}
+                          cursor={false}
+                          contentStyle={{
+                            ...tooltipStyle,
+                            maxWidth: 150,
+                            whiteSpace: 'normal',
+                          }}
+                          formatter={(value) =>
+                            formatCurrencyText(value, currency)
+                          }
+                          labelFormatter={(label) =>
+                            isYear ? label : `Day ${label}`
+                          }
+                        />
 
                         <Area
-  type="monotone"
-  dataKey="amount"
-  stroke="hsl(var(--primary))"
-  fill="hsl(var(--primary))"
-  fillOpacity={0.14}
-  strokeWidth={2.5}
-  activeDot={false}
-  dot={false}
-  style={{ outline: 'none' }}
-  {...getChartAnimation(isVisible)}
-/>
+                          type="monotone"
+                          dataKey="amount"
+                          stroke="hsl(var(--primary))"
+                          fill="hsl(var(--primary))"
+                          fillOpacity={0.14}
+                          strokeWidth={2.5}
+                          activeDot={false}
+                          dot={false}
+                          style={{
+                            outline: 'none',
+                            WebkitTapHighlightColor: 'transparent',
+                          }}
+                          {...getChartAnimation(isVisible)}
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
