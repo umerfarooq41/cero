@@ -15,7 +15,6 @@ import ReflectSummaryCards, {
   CurrencyAmount,
   InlineMoney,
 } from '@/components/reflect/ReflectSummaryCard.jsx';
-import ReflectTimeline from '@/components/reflect/ReflectTimeline.jsx';
 import ReflectCharts from '@/components/reflect/ReflectCharts.jsx';
 import ReflectInsightCard from '@/components/reflect/ReflectInsightCard.jsx';
 
@@ -94,7 +93,6 @@ export default function Reflect() {
     efficiency,
     spendingBreakdown,
     cashFlow,
-    timelineItems,
     spendingTrend,
     topCategory,
   } = analysis;
@@ -192,16 +190,6 @@ export default function Reflect() {
           periodMode={periodMode}
           onPeriodModeChange={setPeriodMode}
           onYearChange={setSelectedYear}
-          onMonthChange={setSelectedMonth}
-        />
-
-        <ReflectTimeline
-          isYear={isYear}
-          selectedYear={selectedYear}
-          selectedMonth={selectedMonth}
-          timelineItems={timelineItems}
-          currency={currency}
-          onPeriodModeChange={setPeriodMode}
           onMonthChange={setSelectedMonth}
         />
 

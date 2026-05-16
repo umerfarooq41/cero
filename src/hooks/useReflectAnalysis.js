@@ -31,26 +31,11 @@ export const MONTH_LABELS = [
   'Dec',
 ];
 
-export const FULL_MONTH_LABELS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
 const QUARTERS = [
-  { label: 'Q1', subLabel: 'Jan – Mar', months: ['01', '02', '03'] },
-  { label: 'Q2', subLabel: 'Apr – Jun', months: ['04', '05', '06'] },
-  { label: 'Q3', subLabel: 'Jul – Sep', months: ['07', '08', '09'] },
-  { label: 'Q4', subLabel: 'Oct – Dec', months: ['10', '11', '12'] },
+  { label: 'Q1', months: ['01', '02', '03'] },
+  { label: 'Q2', months: ['04', '05', '06'] },
+  { label: 'Q3', months: ['07', '08', '09'] },
+  { label: 'Q4', months: ['10', '11', '12'] },
 ];
 
 export function getPeriodRange(year, month) {
@@ -296,47 +281,6 @@ export default function useReflectAnalysis({
     });
   }, [isYear, selectedYear, monthKey, allTransactions, settings]);
 
-  const timelineItems = useMemo(() => {
-    if (isYear) {
-      return QUARTERS.map((quarter, index) => {
-        const totals = getQuarterTotals(
-          allTransactions,
-          selectedYear,
-          quarter,
-          settings
-        );
-
-        return {
-          key: quarter.label,
-          label: quarter.label,
-          subLabel: quarter.subLabel,
-          income: totals.income,
-          expenses: totals.expenses,
-          net: totals.income - totals.expenses,
-          firstMonth: quarter.months[0],
-          quarterIndex: index + 1,
-        };
-      });
-    }
-
-    return MONTH_LABELS.map((label, index) => {
-      const monthValue = String(index + 1).padStart(2, '0');
-      const key = `${selectedYear}-${monthValue}`;
-      const totals = getMonthTotals(allTransactions, key, settings);
-
-      return {
-        key,
-        label,
-        subLabel: FULL_MONTH_LABELS[index],
-        monthValue,
-        income: totals.income,
-        expenses: totals.expenses,
-        net: totals.net,
-        active: monthValue === selectedMonth,
-      };
-    });
-  }, [isYear, selectedYear, selectedMonth, allTransactions, settings]);
-
   const spendingTrend = useMemo(() => {
     if (isYear) {
       return MONTH_LABELS.map((label, index) => {
@@ -352,7 +296,10 @@ export default function useReflectAnalysis({
                 settings
               ).length > 0
           )
-          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+          .reduce(
+            (sum, transaction) => sum + (Number(transaction.amount) || 0),
+            0
+          );
 
         return { label, amount };
       });
@@ -397,7 +344,6 @@ export default function useReflectAnalysis({
     efficiency,
     spendingBreakdown,
     cashFlow,
-    timelineItems,
     spendingTrend,
     topCategory: spendingBreakdown[0],
   };
