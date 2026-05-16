@@ -565,7 +565,11 @@ export default function ReflectCharts({
                         <Tooltip
   {...tooltipProps}
   cursor={false}
-  contentStyle={tooltipStyle}
+  contentStyle={{
+    ...tooltipStyle,
+    maxWidth: 150,
+    whiteSpace: 'normal',
+  }}
   formatter={(value) =>
     formatCurrencyText(value, currency)
   }
