@@ -23,7 +23,7 @@ import {
 } from './ReflectSummaryCard.jsx';
 
 const CHART_WRAP_CLASS =
-  'w-full min-w-0 overflow-visible [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:outline-none [&_.recharts-surface]:overflow-visible [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_*]:focus:outline-none';
+  'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_.recharts-layer]:outline-none [&_.recharts-active-bar]:hidden [&_.recharts-tooltip-cursor]:hidden [&_*]:focus:outline-none';
 
 const getChartAnimation = (active) => ({
   isAnimationActive: active,
@@ -47,14 +47,17 @@ const tooltipProps = {
   cursor: false,
   allowEscapeViewBox: { x: true, y: true },
   wrapperStyle: {
-    zIndex: 60,
+    zIndex: 9999,
     pointerEvents: 'none',
   },
 };
 
 const donutTooltipProps = {
   ...tooltipProps,
-  position: { x: 178, y: 18 },
+  wrapperStyle: {
+    zIndex: 9999,
+    pointerEvents: 'none',
+  },
 };
 
 function RevealChartCard({ children }) {
@@ -79,7 +82,7 @@ function RevealChartCard({ children }) {
         duration: 0.5,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="min-w-0 overflow-visible"
+      className="min-w-0"
     >
       {children(isInView)}
     </motion.div>
@@ -206,7 +209,7 @@ export default function ReflectCharts({
       <div className="mb-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="overflow-visible p-5">
+            <ReflectCard className="p-5">
               <div className="mb-5">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
                   <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -229,6 +232,7 @@ export default function ReflectCharts({
                       data={safeCashFlow}
                       barGap={6}
                       barCategoryGap="32%"
+                      margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
                     >
                       <CartesianGrid
                         vertical={false}
@@ -269,7 +273,10 @@ export default function ReflectCharts({
                         dataKey="income"
                         fill="hsl(var(--success))"
                         radius={[8, 8, 0, 0]}
-                        activeBar={false}
+                        activeBar={{
+                          fill: 'hsl(var(--success))',
+                          stroke: 'none',
+                        }}
                         {...getChartAnimation(isVisible)}
                       />
 
@@ -277,7 +284,10 @@ export default function ReflectCharts({
                         dataKey="expenses"
                         fill="hsl(var(--destructive))"
                         radius={[8, 8, 0, 0]}
-                        activeBar={false}
+                        activeBar={{
+                          fill: 'hsl(var(--destructive))',
+                          stroke: 'none',
+                        }}
                         {...getChartAnimation(isVisible)}
                       />
                     </BarChart>
@@ -393,25 +403,18 @@ export default function ReflectCharts({
       <div className="mb-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="overflow-visible p-5">
+            <ReflectCard className="p-5">
               <h3 className="mb-4 text-sm font-semibold">
                 Top Spending Categories
               </h3>
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="flex flex-col items-center gap-6 overflow-visible md:flex-row lg:flex-col xl:flex-row">
-                  <div className="relative h-44 w-44 shrink-0 overflow-visible">
+                <div className="flex flex-col items-center gap-6 md:flex-row lg:flex-col xl:flex-row">
+                  <div className="relative h-44 w-44 shrink-0">
                     <div className={`${CHART_WRAP_CLASS} h-44 w-44`}>
                       {isVisible ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <PieChart
-                            margin={{
-                              top: 0,
-                              right: 90,
-                              bottom: 0,
-                              left: 0,
-                            }}
-                          >
+                          <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                             <Pie
                               data={groupedSpendingBreakdown}
                               cx="50%"
@@ -423,6 +426,7 @@ export default function ReflectCharts({
                               stroke="hsl(var(--card))"
                               strokeWidth={2}
                               activeShape={false}
+                              activeIndex={-1}
                               {...getChartAnimation(isVisible)}
                             >
                               {groupedSpendingBreakdown.map((entry) => (
@@ -438,7 +442,14 @@ export default function ReflectCharts({
 
                             <Tooltip
                               {...donutTooltipProps}
-                              contentStyle={tooltipStyle}
+                              contentStyle={{
+                                ...tooltipStyle,
+                                zIndex: 9999,
+                              }}
+                              wrapperStyle={{
+                                zIndex: 9999,
+                                pointerEvents: 'none',
+                              }}
                               formatter={(value) =>
                                 formatCurrencyText(value, currency)
                               }
@@ -450,7 +461,7 @@ export default function ReflectCharts({
                       )}
                     </div>
 
-                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center text-center">
                       <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                         Total
                       </span>
@@ -512,7 +523,7 @@ export default function ReflectCharts({
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="overflow-visible p-5">
+            <ReflectCard className="p-5">
               <h3 className="mb-4 text-sm font-semibold">
                 {isYear
                   ? 'Monthly Spending This Year'
