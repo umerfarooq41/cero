@@ -53,10 +53,15 @@ const tooltipProps = {
 };
 
 const donutTooltipProps = {
-  ...tooltipProps,
+  cursor: false,
+  allowEscapeViewBox: { x: false, y: false },
   wrapperStyle: {
     zIndex: 9999,
     pointerEvents: 'none',
+  },
+  position: {
+    x: 52,
+    y: 12,
   },
 };
 
@@ -441,18 +446,16 @@ export default function ReflectCharts({
                             </Pie>
 
                             <Tooltip
-                              {...donutTooltipProps}
-                              contentStyle={{
-                                ...tooltipStyle,
-                                zIndex: 9999,
-                              }}
-                              wrapperStyle={{
-                                zIndex: 9999,
-                                pointerEvents: 'none',
-                              }}
-                              formatter={(value) =>
-                                formatCurrencyText(value, currency)
-                              }
+  {...donutTooltipProps}
+  contentStyle={{
+    ...tooltipStyle,
+    zIndex: 9999,
+    maxWidth: 140,
+    whiteSpace: 'normal',
+  }}
+  formatter={(value) =>
+    formatCurrencyText(value, currency)
+  }
                             />
                           </PieChart>
                         </ResponsiveContainer>
