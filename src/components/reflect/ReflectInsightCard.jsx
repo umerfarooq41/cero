@@ -54,24 +54,24 @@ export default function ReflectInsightCard({
         )}
       />
 
-      <div className="relative flex items-start gap-3">
-        <div
-          className={cn(
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl',
-            dotClass
-          )}
-        >
-          <Icon className={cn('h-4 w-4', toneClass)} />
-        </div>
+      <div className="relative min-w-0">
+        <div className="flex items-center gap-2.5">
+          <div
+            className={cn(
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl',
+              dotClass
+            )}
+          >
+            <Icon className={cn('h-4 w-4', toneClass)} />
+          </div>
 
-        <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold tracking-tight text-foreground">
+          <h4 className="min-w-0 text-sm font-semibold tracking-tight text-foreground">
             {title}
           </h4>
+        </div>
 
-          <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            {text}
-          </div>
+        <div className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {text}
         </div>
       </div>
     </ReflectCard>
