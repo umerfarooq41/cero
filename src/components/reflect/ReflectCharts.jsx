@@ -23,7 +23,7 @@ import {
 } from './ReflectSummaryCard.jsx';
 
 const CHART_WRAP_CLASS =
-  'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_*]:focus:outline-none';
+  'w-full min-w-0 overflow-visible [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:outline-none [&_.recharts-surface]:overflow-visible [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_*]:focus:outline-none';
 
 const getChartAnimation = (active) => ({
   isAnimationActive: active,
@@ -34,6 +34,20 @@ const getChartAnimation = (active) => ({
 const formatPercent = (value) => {
   if (!Number.isFinite(value)) return '0%';
   return `${Math.round(value)}%`;
+};
+
+const tooltipProps = {
+  cursor: false,
+  allowEscapeViewBox: { x: true, y: true },
+  wrapperStyle: {
+    zIndex: 60,
+    pointerEvents: 'none',
+  },
+};
+
+const donutTooltipProps = {
+  ...tooltipProps,
+  position: { x: 178, y: 18 },
 };
 
 function RevealChartCard({ children }) {
@@ -58,7 +72,7 @@ function RevealChartCard({ children }) {
         duration: 0.5,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="min-w-0"
+      className="min-w-0 overflow-visible"
     >
       {children(isInView)}
     </motion.div>
@@ -70,7 +84,7 @@ function ChartShell({ className = '' }) {
     <div
       className={`${className} flex items-center justify-center rounded-2xl bg-muted/20`}
     >
-      <div className="h-8 w-8 rounded-full border-2 border-border border-t-primary animate-spin" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
     </div>
   );
 }
@@ -145,18 +159,21 @@ export default function ReflectCharts({
   );
 
   const groupedSpendingBreakdown = useMemo(() => {
-    if (safeSpendingBreakdown.length <= 5) {
-      return safeSpendingBreakdown.map((item) => ({
-        ...item,
-        percent:
-          totalCategorySpend > 0
-            ? (Number(item.value || 0) / totalCategorySpend) * 100
-            : 0,
-      }));
+    const withPercents = safeSpendingBreakdown.map((item) => ({
+      ...item,
+      color: item.color || 'hsl(var(--muted-foreground))',
+      percent:
+        totalCategorySpend > 0
+          ? (Number(item.value || 0) / totalCategorySpend) * 100
+          : 0,
+    }));
+
+    if (withPercents.length <= 5) {
+      return withPercents;
     }
 
-    const topItems = safeSpendingBreakdown.slice(0, 5);
-    const otherItems = safeSpendingBreakdown.slice(5);
+    const topItems = withPercents.slice(0, 5);
+    const otherItems = withPercents.slice(5);
 
     const othersValue = otherItems.reduce(
       (sum, item) => sum + Number(item.value || 0),
@@ -164,13 +181,7 @@ export default function ReflectCharts({
     );
 
     return [
-      ...topItems.map((item) => ({
-        ...item,
-        percent:
-          totalCategorySpend > 0
-            ? (Number(item.value || 0) / totalCategorySpend) * 100
-            : 0,
-      })),
+      ...topItems,
       {
         name: 'Others',
         value: othersValue,
@@ -188,7 +199,7 @@ export default function ReflectCharts({
       <div className="mb-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="overflow-visible p-5">
               <div className="mb-5">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
                   <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -240,7 +251,7 @@ export default function ReflectCharts({
                       />
 
                       <Tooltip
-                        cursor={false}
+                        {...tooltipProps}
                         contentStyle={tooltipStyle}
                         formatter={(value) =>
                           formatCurrencyText(value, currency)
@@ -251,6 +262,7 @@ export default function ReflectCharts({
                         dataKey="income"
                         fill="hsl(var(--success))"
                         radius={[8, 8, 0, 0]}
+                        activeBar={false}
                         {...getChartAnimation(isVisible)}
                       />
 
@@ -258,6 +270,7 @@ export default function ReflectCharts({
                         dataKey="expenses"
                         fill="hsl(var(--destructive))"
                         radius={[8, 8, 0, 0]}
+                        activeBar={false}
                         {...getChartAnimation(isVisible)}
                       />
                     </BarChart>
@@ -373,18 +386,18 @@ export default function ReflectCharts({
       <div className="mb-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="overflow-visible p-5">
               <h3 className="mb-4 text-sm font-semibold">
                 Top Spending Categories
               </h3>
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="flex flex-col items-center gap-6 md:flex-row lg:flex-col xl:flex-row">
-                  <div className="relative h-44 w-44 shrink-0">
+                <div className="flex flex-col items-center gap-6 overflow-visible md:flex-row lg:flex-col xl:flex-row">
+                  <div className="relative h-44 w-44 shrink-0 overflow-visible">
                     <div className={`${CHART_WRAP_CLASS} h-44 w-44`}>
                       {isVisible ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
+                          <PieChart margin={{ top: 0, right: 90, bottom: 0, left: 0 }}>
                             <Pie
                               data={groupedSpendingBreakdown}
                               cx="50%"
@@ -395,6 +408,7 @@ export default function ReflectCharts({
                               dataKey="value"
                               stroke="hsl(var(--card))"
                               strokeWidth={2}
+                              activeShape={false}
                               {...getChartAnimation(isVisible)}
                             >
                               {groupedSpendingBreakdown.map((entry) => (
@@ -409,7 +423,7 @@ export default function ReflectCharts({
                             </Pie>
 
                             <Tooltip
-                              cursor={false}
+                              {...donutTooltipProps}
                               contentStyle={tooltipStyle}
                               formatter={(value) =>
                                 formatCurrencyText(value, currency)
@@ -480,7 +494,7 @@ export default function ReflectCharts({
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="overflow-visible p-5">
               <h3 className="mb-4 text-sm font-semibold">
                 {isYear
                   ? 'Monthly Spending This Year'
@@ -520,7 +534,7 @@ export default function ReflectCharts({
                         />
 
                         <Tooltip
-                          cursor={false}
+                          {...tooltipProps}
                           contentStyle={tooltipStyle}
                           formatter={(value) =>
                             formatCurrencyText(value, currency)
@@ -537,7 +551,7 @@ export default function ReflectCharts({
                           fill="hsl(var(--primary))"
                           fillOpacity={0.14}
                           strokeWidth={2.5}
-                          activeDot={{ r: 4, strokeWidth: 0 }}
+                          activeDot={false}
                           {...getChartAnimation(isVisible)}
                         />
                       </AreaChart>
