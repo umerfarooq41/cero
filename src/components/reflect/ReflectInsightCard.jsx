@@ -9,70 +9,81 @@ export default function ReflectInsightCard({
 }) {
   const toneClass =
     tone === 'good'
-      ? 'text-emerald-500 dark:text-emerald-400'
+      ? 'text-emerald-600 dark:text-emerald-400'
       : tone === 'bad'
-        ? 'text-red-500 dark:text-red-400'
+        ? 'text-red-600 dark:text-red-400'
         : tone === 'warning'
-          ? 'text-amber-500 dark:text-amber-400'
+          ? 'text-amber-600 dark:text-amber-400'
           : tone === 'info'
-            ? 'text-cyan-500 dark:text-cyan-400'
+            ? 'text-cyan-600 dark:text-cyan-400'
             : 'text-primary';
 
-  const dotClass =
+  const badgeClass =
     tone === 'good'
-      ? 'bg-emerald-500/12'
+      ? 'bg-emerald-500/10 ring-emerald-500/15'
       : tone === 'bad'
-        ? 'bg-red-500/12'
+        ? 'bg-red-500/10 ring-red-500/15'
         : tone === 'warning'
-          ? 'bg-amber-500/12'
+          ? 'bg-amber-500/10 ring-amber-500/15'
           : tone === 'info'
-            ? 'bg-cyan-500/12'
-            : 'bg-primary/12';
+            ? 'bg-cyan-500/10 ring-cyan-500/15'
+            : 'bg-primary/10 ring-primary/15';
+
+  const accentClass =
+    tone === 'good'
+      ? 'bg-emerald-500/70'
+      : tone === 'bad'
+        ? 'bg-red-500/70'
+        : tone === 'warning'
+          ? 'bg-amber-500/70'
+          : tone === 'info'
+            ? 'bg-cyan-500/70'
+            : 'bg-primary/70';
 
   const borderClass =
     tone === 'good'
-      ? 'border-emerald-500/15'
+      ? 'border-emerald-500/10'
       : tone === 'bad'
-        ? 'border-red-500/15'
+        ? 'border-red-500/10'
         : tone === 'warning'
-          ? 'border-amber-500/15'
+          ? 'border-amber-500/10'
           : tone === 'info'
-            ? 'border-cyan-500/15'
+            ? 'border-cyan-500/10'
             : 'border-border/60';
 
   return (
     <ReflectCard
       className={cn(
-        'relative overflow-hidden rounded-3xl border bg-card/75 p-4 shadow-sm backdrop-blur-xl',
+        'relative overflow-hidden rounded-3xl border bg-card/80 p-4 shadow-sm backdrop-blur-xl transition-colors',
         borderClass
       )}
     >
       <div
         className={cn(
-          'pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full blur-3xl',
-          dotClass
+          'absolute left-0 top-4 h-10 w-1 rounded-r-full',
+          accentClass
         )}
       />
 
-      <div className="relative min-w-0">
+      <div className="relative pl-2">
         <div className="flex items-center gap-2.5">
           <div
             className={cn(
-              'flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl',
-              dotClass
+              'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ring-1',
+              badgeClass
             )}
           >
-            <Icon className={cn('h-4 w-4', toneClass)} />
+            <Icon className={cn('h-3.5 w-3.5', toneClass)} />
           </div>
 
-          <h4 className="min-w-0 text-sm font-semibold tracking-tight text-foreground">
+          <h4 className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-foreground">
             {title}
           </h4>
         </div>
 
-        <div className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {text}
-        </div>
+        </p>
       </div>
     </ReflectCard>
   );
