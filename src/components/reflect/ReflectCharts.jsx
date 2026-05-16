@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { BarChart3, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
@@ -24,6 +25,17 @@ import {
 const CHART_WRAP_CLASS =
   'w-full min-w-0 [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_*]:focus:outline-none';
 
+const chartAnimation = {
+  isAnimationActive: true,
+  animationDuration: 700,
+  animationEasing: 'ease-out',
+};
+
+const formatPercent = (value) => {
+  if (!Number.isFinite(value)) return '0%';
+  return `${Math.round(value)}%`;
+};
+
 export default function ReflectCharts({
   isYear,
   cashFlow,
@@ -34,6 +46,100 @@ export default function ReflectCharts({
   currency,
   tooltipStyle,
 }) {
+  const safeCashFlow = Array.isArray(cashFlow) ? cashFlow : [];
+  const safeSpendingBreakdown = Array.isArray(spendingBreakdown)
+    ? spendingBreakdown
+    : [];
+  const safeSpendingTrend = Array.isArray(spendingTrend) ? spendingTrend : [];
+
+  const totalTrackedIncome = useMemo(
+    () =>
+      safeCashFlow.reduce(
+        (sum, item) => sum + Number(item.income || 0),
+        0
+      ),
+    [safeCashFlow]
+  );
+
+  const totalTrackedExpenses = useMemo(
+    () =>
+      safeCashFlow.reduce(
+        (sum, item) => sum + Number(item.expenses || 0),
+        0
+      ),
+    [safeCashFlow]
+  );
+
+  const yearSpendingRatio =
+    isYear && totalTrackedIncome > 0
+      ? Math.min(
+          100,
+          Math.round((totalTrackedExpenses / totalTrackedIncome) * 100)
+        )
+      : 0;
+
+  const ringScore = isYear ? yearSpendingRatio : efficiency || 0;
+
+  const ringColor = isYear
+    ? yearSpendingRatio <= 65
+      ? 'hsl(var(--success))'
+      : yearSpendingRatio <= 85
+        ? 'hsl(var(--warning))'
+        : 'hsl(var(--destructive))'
+    : efficiency >= 70
+      ? 'hsl(var(--success))'
+      : efficiency >= 40
+        ? 'hsl(var(--warning))'
+        : 'hsl(var(--destructive))';
+
+  const totalCategorySpend = useMemo(
+    () =>
+      safeSpendingBreakdown.reduce(
+        (sum, item) => sum + Number(item.value || 0),
+        0
+      ),
+    [safeSpendingBreakdown]
+  );
+
+  const groupedSpendingBreakdown = useMemo(() => {
+    if (safeSpendingBreakdown.length <= 5) {
+      return safeSpendingBreakdown.map((item) => ({
+        ...item,
+        percent:
+          totalCategorySpend > 0
+            ? (Number(item.value || 0) / totalCategorySpend) * 100
+            : 0,
+      }));
+    }
+
+    const topItems = safeSpendingBreakdown.slice(0, 5);
+    const otherItems = safeSpendingBreakdown.slice(5);
+
+    const othersValue = otherItems.reduce(
+      (sum, item) => sum + Number(item.value || 0),
+      0
+    );
+
+    return [
+      ...topItems.map((item) => ({
+        ...item,
+        percent:
+          totalCategorySpend > 0
+            ? (Number(item.value || 0) / totalCategorySpend) * 100
+            : 0,
+      })),
+      {
+        name: 'Others',
+        value: othersValue,
+        color: 'hsl(var(--muted-foreground))',
+        percent:
+          totalCategorySpend > 0
+            ? (othersValue / totalCategorySpend) * 100
+            : 0,
+      },
+    ];
+  }, [safeSpendingBreakdown, totalCategorySpend]);
+
   return (
     <>
       <div className="mb-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
@@ -41,17 +147,21 @@ export default function ReflectCharts({
           <div className="mb-5">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              {isYear ? 'Cash Flow — Full Year' : 'Cash Flow — Last 6 Months'}
+              {isYear
+                ? 'Cash Flow — Year by Quarter'
+                : 'Cash Flow — Recent 3 Months'}
             </h3>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              Income and expenses by month
+              {isYear
+                ? 'Income and expenses grouped by quarter'
+                : 'Selected month with the previous two months'}
             </p>
           </div>
 
           <div className={`${CHART_WRAP_CLASS} h-64 min-h-[256px]`}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cashFlow} barGap={6} barCategoryGap="28%">
+              <BarChart data={safeCashFlow} barGap={6} barCategoryGap="32%">
                 <CartesianGrid
                   vertical={false}
                   strokeDasharray="3 3"
@@ -81,16 +191,16 @@ export default function ReflectCharts({
 
                 <Bar
                   dataKey="income"
-                  fill="#16A34A"
+                  fill="hsl(var(--success))"
                   radius={[8, 8, 0, 0]}
-                  isAnimationActive={false}
+                  {...chartAnimation}
                 />
 
                 <Bar
                   dataKey="expenses"
-                  fill="#EF4444"
+                  fill="hsl(var(--destructive))"
                   radius={[8, 8, 0, 0]}
-                  isAnimationActive={false}
+                  {...chartAnimation}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -101,12 +211,12 @@ export default function ReflectCharts({
           <div className="mb-5">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <Target className="h-4 w-4 text-muted-foreground" />
-              Budget Efficiency
+              {isYear ? 'Yearly Spending Pace' : 'Budget Efficiency'}
             </h3>
 
             <p className="mt-1 text-xs text-muted-foreground">
               {isYear
-                ? 'Available for monthly budget review'
+                ? 'Tracked expenses compared with tracked income'
                 : 'How closely spending follows your plan'}
             </p>
           </div>
@@ -124,20 +234,15 @@ export default function ReflectCharts({
                 <motion.path
                   initial={{ strokeDasharray: '0, 100' }}
                   animate={{
-                    strokeDasharray: `${isYear ? 0 : efficiency || 0}, 100`,
+                    strokeDasharray: `${Math.max(
+                      0,
+                      Math.min(100, ringScore)
+                    )}, 100`,
                   }}
-                  transition={{ duration: 0.8 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
-                  stroke={
-                    isYear
-                      ? '#69797E'
-                      : efficiency >= 70
-                        ? '#16A34A'
-                        : efficiency >= 40
-                          ? '#F59E0B'
-                          : '#EF4444'
-                  }
+                  stroke={ringColor}
                   strokeWidth="3"
                   strokeLinecap="round"
                 />
@@ -145,10 +250,10 @@ export default function ReflectCharts({
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold">
-                  {isYear ? '—' : `${efficiency}%`}
+                  {isYear ? `${yearSpendingRatio}%` : `${efficiency}%`}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {isYear ? 'year view' : 'score'}
+                  {isYear ? 'used' : 'score'}
                 </span>
               </div>
             </div>
@@ -156,12 +261,33 @@ export default function ReflectCharts({
 
           <div className="flex flex-wrap justify-center gap-x-1 gap-y-1 text-center text-sm font-medium">
             {isYear ? (
-              'Select a month to review allocation accuracy.'
+              totalTrackedIncome > 0 ? (
+                <>
+                  <CurrencyAmount
+                    amount={totalTrackedExpenses}
+                    currency={currency}
+                    compact
+                  />
+                  <span>spent from</span>
+                  <CurrencyAmount
+                    amount={totalTrackedIncome}
+                    currency={currency}
+                    compact
+                  />
+                  <span>tracked income.</span>
+                </>
+              ) : (
+                'Add income transactions to calculate yearly spending pace.'
+              )
             ) : leftToAllocate === 0 ? (
               'Every planned amount is allocated.'
             ) : leftToAllocate > 0 ? (
               <>
-                <CurrencyAmount amount={leftToAllocate} currency={currency} compact />
+                <CurrencyAmount
+                  amount={leftToAllocate}
+                  currency={currency}
+                  compact
+                />
                 <span>still left to allocate.</span>
               </>
             ) : (
@@ -184,53 +310,72 @@ export default function ReflectCharts({
             Top Spending Categories
           </h3>
 
-          {spendingBreakdown.length > 0 ? (
+          {groupedSpendingBreakdown.length > 0 ? (
             <div className="flex flex-col items-center gap-6 md:flex-row lg:flex-col xl:flex-row">
-              <div className={`${CHART_WRAP_CLASS} h-44 w-44 shrink-0`}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={spendingBreakdown}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={45}
-                      outerRadius={72}
-                      paddingAngle={3}
-                      dataKey="value"
-                      isAnimationActive={false}
-                      stroke="hsl(var(--card))"
-                      strokeWidth={2}
-                    >
-                      {spendingBreakdown.map((entry) => (
-                        <Cell
-                          key={entry.name}
-                          fill={entry.color}
-                          tabIndex={-1}
-                          focusable="false"
-                          style={{ outline: 'none' }}
-                        />
-                      ))}
-                    </Pie>
+              <div className="relative h-44 w-44 shrink-0">
+                <div className={`${CHART_WRAP_CLASS} h-44 w-44`}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={groupedSpendingBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={45}
+                        outerRadius={72}
+                        paddingAngle={3}
+                        dataKey="value"
+                        stroke="hsl(var(--card))"
+                        strokeWidth={2}
+                        {...chartAnimation}
+                      >
+                        {groupedSpendingBreakdown.map((entry) => (
+                          <Cell
+                            key={entry.name}
+                            fill={entry.color}
+                            tabIndex={-1}
+                            focusable="false"
+                            style={{ outline: 'none' }}
+                          />
+                        ))}
+                      </Pie>
 
-                    <Tooltip
-                      cursor={false}
-                      contentStyle={tooltipStyle}
-                      formatter={(value) => formatCurrencyText(value, currency)}
+                      <Tooltip
+                        cursor={false}
+                        contentStyle={tooltipStyle}
+                        formatter={(value) => formatCurrencyText(value, currency)}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Total
+                  </span>
+                  <span className="mt-1 text-sm font-bold tabular-nums">
+                    <CurrencyAmount
+                      amount={totalCategorySpend}
+                      currency={currency}
+                      compact
                     />
-                  </PieChart>
-                </ResponsiveContainer>
+                  </span>
+                </div>
               </div>
 
               <div className="w-full flex-1 space-y-3">
-                {spendingBreakdown.map((category) => (
+                {groupedSpendingBreakdown.map((category) => (
                   <div key={category.name} className="flex items-center gap-3">
                     <div
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: category.color }}
                     />
 
-                    <span className="flex-1 truncate text-sm">
+                    <span className="min-w-0 flex-1 truncate text-sm">
                       {category.name}
+                    </span>
+
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                      {formatPercent(category.percent)}
                     </span>
 
                     <span className="text-sm font-medium tabular-nums">
@@ -259,10 +404,10 @@ export default function ReflectCharts({
             {isYear ? 'Monthly Spending This Year' : 'Daily Spending This Month'}
           </h3>
 
-          {spendingTrend.length > 0 ? (
+          {safeSpendingTrend.length > 0 ? (
             <div className={`${CHART_WRAP_CLASS} h-56 min-h-[224px]`}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spendingTrend}>
+                <AreaChart data={safeSpendingTrend}>
                   <CartesianGrid
                     vertical={false}
                     strokeDasharray="3 3"
@@ -294,12 +439,12 @@ export default function ReflectCharts({
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="#0078D4"
-                    fill="#0078D4"
-                    fillOpacity={0.12}
+                    stroke="hsl(var(--primary))"
+                    fill="hsl(var(--primary))"
+                    fillOpacity={0.14}
                     strokeWidth={2.5}
-                    isAnimationActive={false}
                     activeDot={{ r: 4, strokeWidth: 0 }}
+                    {...chartAnimation}
                   />
                 </AreaChart>
               </ResponsiveContainer>

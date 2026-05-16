@@ -31,6 +31,25 @@ export const MONTH_LABELS = [
   'Dec',
 ];
 
+const QUARTERS = [
+  {
+    label: 'Q1',
+    months: ['01', '02', '03'],
+  },
+  {
+    label: 'Q2',
+    months: ['04', '05', '06'],
+  },
+  {
+    label: 'Q3',
+    months: ['07', '08', '09'],
+  },
+  {
+    label: 'Q4',
+    months: ['10', '11', '12'],
+  },
+];
+
 export function getPeriodRange(year, month) {
   if (month === 'all') {
     return {
@@ -57,6 +76,42 @@ function getCategoryType(categories, categoryId) {
 
   const parent = categories.find((item) => item.id === category.parent_id);
   return parent?.type || null;
+}
+
+function getMonthTotals(allTransactions, month, settings) {
+  const txns = filterTransactionsByBudgetMonth(
+    allTransactions,
+    month,
+    settings
+  );
+
+  const income = txns
+    .filter((transaction) => transaction.type === 'income')
+    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+
+  const expenses = txns
+    .filter((transaction) => transaction.type === 'expense')
+    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+
+  return {
+    income,
+    expenses,
+    net: income - expenses,
+  };
+}
+
+function getRollingMonthKeys(monthKey, count = 3) {
+  const [year, month] = monthKey.split('-').map(Number);
+  const selectedDate = new Date(year, month - 1, 1);
+
+  return Array.from({ length: count }, (_, index) => {
+    const monthDate = subMonths(selectedDate, count - 1 - index);
+
+    return {
+      key: format(monthDate, 'yyyy-MM'),
+      label: format(monthDate, 'MMM'),
+    };
+  });
 }
 
 export default function useReflectAnalysis({
@@ -190,77 +245,46 @@ export default function useReflectAnalysis({
   }, [periodTransactions, categories]);
 
   const cashFlow = useMemo(() => {
-    const months = [];
-
     if (isYear) {
-      for (let index = 0; index < 12; index += 1) {
-        const month = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
+      return QUARTERS.map((quarter) => {
+        const totals = quarter.months.reduce(
+          (sum, month) => {
+            const monthTotals = getMonthTotals(
+              allTransactions,
+              `${selectedYear}-${month}`,
+              settings
+            );
 
-        const txns = filterTransactionsByBudgetMonth(
-          allTransactions,
-          month,
-          settings
+            return {
+              income: sum.income + monthTotals.income,
+              expenses: sum.expenses + monthTotals.expenses,
+            };
+          },
+          {
+            income: 0,
+            expenses: 0,
+          }
         );
 
-        const monthIncome = txns
-          .filter((transaction) => transaction.type === 'income')
-          .reduce(
-            (sum, transaction) => sum + (Number(transaction.amount) || 0),
-            0
-          );
-
-        const monthExpenses = txns
-          .filter((transaction) => transaction.type === 'expense')
-          .reduce(
-            (sum, transaction) => sum + (Number(transaction.amount) || 0),
-            0
-          );
-
-        months.push({
-          month: MONTH_LABELS[index],
-          income: monthIncome,
-          expenses: monthExpenses,
-          net: monthIncome - monthExpenses,
-        });
-      }
-
-      return months;
-    }
-
-    for (let index = 5; index >= 0; index -= 1) {
-      const monthDate = subMonths(new Date(`${monthKey}-01`), index);
-      const month = format(monthDate, 'yyyy-MM');
-      const label = format(monthDate, 'MMM');
-
-      const txns = filterTransactionsByBudgetMonth(
-        allTransactions,
-        month,
-        settings
-      );
-
-      const monthIncome = txns
-        .filter((transaction) => transaction.type === 'income')
-        .reduce(
-          (sum, transaction) => sum + (Number(transaction.amount) || 0),
-          0
-        );
-
-      const monthExpenses = txns
-        .filter((transaction) => transaction.type === 'expense')
-        .reduce(
-          (sum, transaction) => sum + (Number(transaction.amount) || 0),
-          0
-        );
-
-      months.push({
-        month: label,
-        income: monthIncome,
-        expenses: monthExpenses,
-        net: monthIncome - monthExpenses,
+        return {
+          month: quarter.label,
+          income: totals.income,
+          expenses: totals.expenses,
+          net: totals.income - totals.expenses,
+        };
       });
     }
 
-    return months;
+    return getRollingMonthKeys(monthKey, 3).map(({ key, label }) => {
+      const totals = getMonthTotals(allTransactions, key, settings);
+
+      return {
+        month: label,
+        income: totals.income,
+        expenses: totals.expenses,
+        net: totals.net,
+      };
+    });
   }, [isYear, selectedYear, monthKey, allTransactions, settings]);
 
   const spendingTrend = useMemo(() => {
@@ -269,21 +293,16 @@ export default function useReflectAnalysis({
         const month = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
 
         const amount = allTransactions
+          .filter((transaction) => transaction.type === 'expense')
           .filter(
             (transaction) =>
-              transaction.type === 'expense'
+              filterTransactionsByBudgetMonth(
+                [transaction],
+                month,
+                settings
+              ).length > 0
           )
-          .filter((transaction) =>
-            filterTransactionsByBudgetMonth(
-              [transaction],
-              month,
-              settings
-            ).length > 0
-          )
-          .reduce(
-            (sum, transaction) => sum + (Number(transaction.amount) || 0),
-            0
-          );
+          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
 
         return { label, amount };
       });
