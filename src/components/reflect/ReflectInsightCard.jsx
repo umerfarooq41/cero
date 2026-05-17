@@ -7,6 +7,7 @@ export default function ReflectInsightCard({
   text,
   tone = 'default',
   metric,
+  accent = 'blue',
 }) {
   const metricClass =
     tone === 'good'
@@ -19,27 +20,31 @@ export default function ReflectInsightCard({
             ? 'text-cyan-600 dark:text-cyan-400'
             : 'text-primary';
 
-  const leftBorderClass =
-    tone === 'good'
+  const accentClass =
+    accent === 'green'
       ? 'bg-emerald-500'
-      : tone === 'bad'
+      : accent === 'red'
         ? 'bg-red-500'
-        : tone === 'warning'
+        : accent === 'yellow'
           ? 'bg-amber-500'
-          : tone === 'info'
-            ? 'bg-cyan-500'
-            : 'bg-primary';
+          : accent === 'purple'
+            ? 'bg-purple-500'
+            : accent === 'cyan'
+              ? 'bg-cyan-500'
+              : 'bg-blue-500';
 
   const borderClass =
-    tone === 'good'
-      ? 'border-emerald-500/15'
-      : tone === 'bad'
-        ? 'border-red-500/15'
-        : tone === 'warning'
-          ? 'border-amber-500/15'
-          : tone === 'info'
-            ? 'border-cyan-500/15'
-            : 'border-border/70';
+    accent === 'green'
+      ? 'border-emerald-500/25'
+      : accent === 'red'
+        ? 'border-red-500/25'
+        : accent === 'yellow'
+          ? 'border-amber-500/25'
+          : accent === 'purple'
+            ? 'border-purple-500/25'
+            : accent === 'cyan'
+              ? 'border-cyan-500/25'
+              : 'border-blue-500/25';
 
   return (
     <ReflectCard
@@ -51,7 +56,7 @@ export default function ReflectInsightCard({
       <div
         className={cn(
           'absolute left-0 top-4 h-11 w-1 rounded-r-full',
-          leftBorderClass
+          accentClass
         )}
       />
 
