@@ -140,7 +140,6 @@ export default function EditPlan() {
   const totalPlanned = totalExpenses + totalSavings + totalDebt;
   const leftToAllocate = totalIncome - totalPlanned;
 
-
   const copyFromPrev = () => {
     const newValues = { ...values };
 
@@ -191,20 +190,16 @@ export default function EditPlan() {
 
   const sectionStyles = {
     income: {
-      text: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-500/10 dark:bg-emerald-400/10',
+      text: 'text-green-700 dark:text-green-400',
     },
     expense: {
-      text: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-500/10 dark:bg-red-400/10',
+      text: 'text-red-700 dark:text-red-400',
     },
     savings: {
-      text: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-500/10 dark:bg-blue-400/10',
+      text: 'text-blue-700 dark:text-blue-400',
     },
     debt: {
-      text: 'text-purple-600 dark:text-purple-400',
-      bg: 'bg-purple-500/10 dark:bg-purple-400/10',
+      text: 'text-purple-700 dark:text-purple-400',
     },
   };
 
@@ -222,58 +217,37 @@ export default function EditPlan() {
     const isCollapsed = collapsedSections[type];
     const style = sectionStyles[type] || sectionStyles.expense;
     const total = sumType(type);
+    const categoryCount = items.filter((item) => !item.isSectionHeader).length;
 
     return (
-      <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <button
           type="button"
           onClick={() => toggleSection(type)}
-          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
+          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-5 py-3.5 text-left transition-colors hover:bg-accent/30"
         >
-<div className="flex min-w-0 items-center gap-3">
-  
-  {/* Collapse Icon */}
-  <span
-    className={cn(
-      'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-      style.bg,
-      style.text
-    )}
-  >
-    {isCollapsed ? (
-      <ChevronRight className="h-4 w-4" />
-    ) : (
-      <ChevronDown className="h-4 w-4" />
-    )}
-  </span>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+                isCollapsed && '-rotate-90'
+              )}
+            />
 
-  {/* Title */}
-  <h3
-    className={cn(
-      'text-base font-bold tracking-tight',
-      style.text
-    )}
-  >
-    {title}
-  </h3>
+            <h3 className={cn('text-sm font-semibold', style.text)}>
+              {title}
+            </h3>
 
-  {/* Count Circle */}
-  <div
-    className={cn(
-      'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold',
-      style.bg,
-      style.text
-    )}
-  >
-    {items.filter((item) => !item.isSectionHeader).length}
-  </div>
-</div>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+              {categoryCount}
+            </span>
+          </div>
 
           <div
-className={cn(
-  'shrink-0 text-right text-base font-bold tracking-tight tabular-nums',
-  style.text
-)}
+            className={cn(
+              'shrink-0 text-right text-sm font-semibold tabular-nums',
+              style.text
+            )}
           >
             {formatCurrency(total)}
           </div>
@@ -384,11 +358,11 @@ className={cn(
         <LeftToAllocateBanner
           leftToAllocate={leftToAllocate}
           totalIncome={totalIncome}
-          isEditMode = {true}
+          isEditMode={true}
           formatCurrency={formatCurrency}
         />
 
-        <div className="mt-4 mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button
             variant="outline"
             size="sm"
