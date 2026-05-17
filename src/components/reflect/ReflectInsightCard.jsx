@@ -19,7 +19,7 @@ export default function ReflectInsightCard({
             ? 'text-cyan-600 dark:text-cyan-400'
             : 'text-primary';
 
-  const badgeClass =
+  const iconClass =
     tone === 'good'
       ? 'bg-emerald-500/10 ring-emerald-500/15'
       : tone === 'bad'
@@ -55,41 +55,35 @@ export default function ReflectInsightCard({
   return (
     <ReflectCard
       className={cn(
-        'relative h-full min-h-[124px] overflow-hidden rounded-3xl border bg-card/80 p-4 shadow-sm backdrop-blur-xl transition-colors',
+        'relative overflow-hidden rounded-2xl border bg-card/80 p-3.5 shadow-sm backdrop-blur-xl transition-colors',
         borderClass
       )}
     >
       <div
         className={cn(
-          'absolute left-0 top-4 h-10 w-1 rounded-r-full',
+          'absolute left-0 top-3.5 h-9 w-1 rounded-r-full',
           accentClass
         )}
       />
 
       <div className="relative pl-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2.5">
-              <div
-                className={cn(
-                  'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ring-1',
-                  badgeClass
-                )}
-              >
-                <Icon className={cn('h-3.5 w-3.5', toneClass)} />
-              </div>
-
-              <h4 className="min-w-0 text-sm font-semibold leading-5 tracking-tight text-foreground">
-                {title}
-              </h4>
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+            <div
+              className={cn(
+                'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ring-1',
+                iconClass
+              )}
+            >
+              <Icon className={cn('h-3.5 w-3.5', toneClass)} />
             </div>
 
-            <p className="mt-2 text-[13px] leading-5 text-muted-foreground">
-              {text}
-            </p>
+            <h4 className="min-w-0 text-sm font-semibold leading-5 tracking-tight text-foreground">
+              {title}
+            </h4>
           </div>
 
-          {metric && (
+          {metric ? (
             <span
               className={cn(
                 'shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold leading-5 tabular-nums',
@@ -98,8 +92,12 @@ export default function ReflectInsightCard({
             >
               {metric}
             </span>
-          )}
+          ) : null}
         </div>
+
+        <p className="mt-2 pl-9 text-[13px] leading-5 text-muted-foreground">
+          {text}
+        </p>
       </div>
     </ReflectCard>
   );

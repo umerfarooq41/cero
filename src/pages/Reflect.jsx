@@ -119,7 +119,6 @@ function buildReflectInsights({
   netCashFlow,
   savingsRate,
   efficiency,
-  spendingBreakdown,
   topCategory,
 }) {
   const periodName = isYear ? 'year' : 'month';
@@ -140,8 +139,9 @@ function buildReflectInsights({
       ? clampPercent((totalTrackedOutflow / totalPlannedOutflow) * 100)
       : 0;
 
-  const outflowRemaining = totalPlannedOutflow - totalTrackedOutflow;
   const monthlyBudgetRemaining = plannedExpenses - expenses;
+  const yearlyPlanRemaining = totalPlannedOutflow - totalTrackedOutflow;
+
   const budgetTone = isYear
     ? getBudgetTone(yearlyPlanUsedPercent, progressPercent, totalPlannedOutflow > 0)
     : getBudgetTone(monthlyBudgetUsedPercent, progressPercent, plannedExpenses > 0);
@@ -153,13 +153,13 @@ function buildReflectInsights({
       metric: <MoneyMetric amount={netCashFlow} currency={currency} signed />,
       text: cashFlowPositive ? (
         <>
-          Income beat expenses by{' '}
-          <MoneyText amount={netCashFlow} currency={currency} /> this {periodName}.
+          Income was higher than expenses by{' '}
+          <MoneyText amount={netCashFlow} currency={currency} /> this {periodName}, so the period ended with positive net cash flow.
         </>
       ) : (
         <>
-          Expenses exceeded income by{' '}
-          <MoneyText amount={Math.abs(netCashFlow)} currency={currency} />.
+          Expenses were higher than income by{' '}
+          <MoneyText amount={Math.abs(netCashFlow)} currency={currency} /> this {periodName}, so review the largest spending areas.
         </>
       ),
       tone: cashFlowPositive ? 'good' : 'bad',
@@ -175,11 +175,11 @@ function buildReflectInsights({
           text:
             totalPlannedOutflow > 0 ? (
               <>
-                Tracked <MoneyText amount={totalTrackedOutflow} currency={currency} /> of{' '}
-                <MoneyText amount={totalPlannedOutflow} currency={currency} /> planned.
+                You have tracked <MoneyText amount={totalTrackedOutflow} currency={currency} /> from a planned yearly outflow of{' '}
+                <MoneyText amount={totalPlannedOutflow} currency={currency} />.
               </>
             ) : (
-              'Add yearly plans to compare actual usage against target.'
+              'Add yearly or monthly plans first, then Reflect can compare actual usage against your full-year target.'
             ),
           tone: budgetTone,
         }
@@ -200,17 +200,17 @@ function buildReflectInsights({
             plannedExpenses > 0 ? (
               monthlyBudgetRemaining >= 0 ? (
                 <>
-                  <MoneyText amount={monthlyBudgetRemaining} currency={currency} /> left from{' '}
+                  You still have <MoneyText amount={monthlyBudgetRemaining} currency={currency} /> left from the planned expense budget of{' '}
                   <MoneyText amount={plannedExpenses} currency={currency} />.
                 </>
               ) : (
                 <>
-                  Over plan by{' '}
-                  <MoneyText amount={Math.abs(monthlyBudgetRemaining)} currency={currency} />.
+                  Expenses are over the planned budget by{' '}
+                  <MoneyText amount={Math.abs(monthlyBudgetRemaining)} currency={currency} />, so optional spending needs attention.
                 </>
               )
             ) : (
-              'Add an expense plan to measure monthly budget pace.'
+              'Add an expense plan for this month to measure budget pace and remaining spending room.'
             ),
           tone: monthlyBudgetRemaining < 0 ? 'bad' : budgetTone,
         },
@@ -224,10 +224,10 @@ function buildReflectInsights({
       ),
       text: topCategory ? (
         <>
-          {topCategory.name} used {topCategoryPercent}% of expenses this {periodName}.
+          {topCategory.name} is the largest category, using {topCategoryPercent}% of total expenses this {periodName}.
         </>
       ) : (
-        `No expense categories recorded for this ${periodName} yet.`
+        `No expense category has been recorded for this ${periodName} yet; category insights will appear after transactions are added.`
       ),
       tone:
         topCategoryPercent >= 50
@@ -245,17 +245,18 @@ function buildReflectInsights({
       text: hasIncome ? (
         isYear ? (
           <>
-            Saved <MoneyText amount={trackedSavings} currency={currency} /> and paid{' '}
-            <MoneyText amount={trackedDebt} currency={currency} /> debt.
+            Your savings rate is {formatPercent(savingsRate)}; this includes{' '}
+            <MoneyText amount={trackedSavings} currency={currency} /> saved and{' '}
+            <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt.
           </>
         ) : (
           <>
-            Net margin is {formatPercent(savingsRate)} with{' '}
-            <MoneyText amount={netCashFlow} currency={currency} signed /> cash flow.
+            Your savings rate is {formatPercent(savingsRate)} with{' '}
+            <MoneyText amount={netCashFlow} currency={currency} signed /> net cash flow for the selected month.
           </>
         )
       ) : (
-        `Add income transactions to calculate ${periodName} savings rate.`
+        `Add income transactions to calculate the ${periodName} savings rate and cash-flow margin.`
       ),
       tone: hasIncome ? getToneFromSavingsRate(savingsRate) : 'info',
     },
@@ -270,19 +271,18 @@ function buildReflectInsights({
       text: isYear ? (
         totalPlannedOutflow > 0 ? (
           <>
-            Year is {Math.round(progressPercent)}% passed; plan usage is{' '}
-            {Math.round(yearlyPlanUsedPercent)}%.
+            The year is {Math.round(progressPercent)}% complete and plan usage is {Math.round(yearlyPlanUsedPercent)}%; remaining planned room is{' '}
+            <MoneyText amount={yearlyPlanRemaining} currency={currency} />.
           </>
         ) : (
-          'Year progress is ready once yearly plan data exists.'
+          'Year progress is visible now; add plan data to compare yearly time passed against planned usage.'
         )
       ) : plannedExpenses > 0 ? (
         <>
-          Month is {Math.round(progressPercent)}% passed; expense usage is{' '}
-          {Math.round(monthlyBudgetUsedPercent)}%.
+          The month is {Math.round(progressPercent)}% complete while expense usage is {Math.round(monthlyBudgetUsedPercent)}%, showing whether spending pace is comfortable or tight.
         </>
       ) : (
-        'Monthly pace tracking starts after adding an expense plan.'
+        'Monthly pace tracking starts after adding an expense plan for the selected month.'
       ),
       tone: isYear ? budgetTone : plannedExpenses > 0 ? budgetTone : 'info',
     },
@@ -365,7 +365,6 @@ export default function Reflect() {
         netCashFlow,
         savingsRate,
         efficiency,
-        spendingBreakdown,
         topCategory,
       }),
     [
@@ -383,7 +382,6 @@ export default function Reflect() {
       netCashFlow,
       savingsRate,
       efficiency,
-      spendingBreakdown,
       topCategory,
     ]
   );
@@ -444,7 +442,7 @@ export default function Reflect() {
             <h3 className="text-sm font-semibold">Smart Insights</h3>
           </div>
 
-          <div className="grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-3 md:grid-cols-2">
             {insights.map((insight) => (
               <ReflectInsightCard
                 key={`${isYear ? 'year' : 'month'}-${insight.title}`}
