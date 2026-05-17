@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { BarChart3, Target } from 'lucide-react';
+import { BarChart3, ChartPie, LineChart, Target } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import {
   Area,
@@ -96,6 +96,52 @@ function ChartShell({ className = '' }) {
       className={`${className} flex items-center justify-center rounded-2xl bg-muted/20`}
     >
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+    </div>
+  );
+}
+
+function ChartHeading({ icon: Icon, title, subtitle, tone = 'default' }) {
+  const toneClass =
+    tone === 'good'
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : tone === 'bad'
+        ? 'text-red-600 dark:text-red-400'
+        : tone === 'warning'
+          ? 'text-amber-600 dark:text-amber-400'
+          : tone === 'info'
+            ? 'text-cyan-600 dark:text-cyan-400'
+            : 'text-muted-foreground';
+
+  const iconClass =
+    tone === 'good'
+      ? 'bg-emerald-500/10 ring-emerald-500/15'
+      : tone === 'bad'
+        ? 'bg-red-500/10 ring-red-500/15'
+        : tone === 'warning'
+          ? 'bg-amber-500/10 ring-amber-500/15'
+          : tone === 'info'
+            ? 'bg-cyan-500/10 ring-cyan-500/15'
+            : 'bg-muted/60 ring-border/70';
+
+  return (
+    <div className="mb-5 flex items-start gap-3">
+      <div
+        className={`${iconClass} mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1`}
+      >
+        <Icon className={`${toneClass} h-4 w-4`} />
+      </div>
+
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold leading-5 tracking-tight text-foreground">
+          {title}
+        </h3>
+
+        {subtitle ? (
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {subtitle}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -211,20 +257,20 @@ export default function ReflectCharts({
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-5">
-              <div className="mb-5">
-                <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                  {isYear
+              <ChartHeading
+                icon={BarChart3}
+                tone="info"
+                title={
+                  isYear
                     ? 'Cash Flow — Year by Quarter'
-                    : 'Cash Flow — Recent 3 Months'}
-                </h3>
-
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {isYear
+                    : 'Cash Flow — Recent 3 Months'
+                }
+                subtitle={
+                  isYear
                     ? 'Income and expenses grouped by quarter'
-                    : 'Selected month with the previous two months'}
-                </p>
-              </div>
+                    : 'Selected month with the previous two months'
+                }
+              />
 
               <div className={`${CHART_WRAP_CLASS} h-64 min-h-[256px]`}>
                 {isVisible ? (
@@ -311,18 +357,16 @@ export default function ReflectCharts({
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-5">
-              <div className="mb-5">
-                <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                  {isYear ? 'Yearly Spending Pace' : 'Budget Efficiency'}
-                </h3>
-
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {isYear
+              <ChartHeading
+                icon={Target}
+                tone={isYear ? 'warning' : 'good'}
+                title={isYear ? 'Yearly Spending Pace' : 'Budget Efficiency'}
+                subtitle={
+                  isYear
                     ? 'Tracked expenses compared with tracked income'
-                    : 'How closely spending follows your plan'}
-                </p>
-              </div>
+                    : 'How closely spending follows your plan'
+                }
+              />
 
               <div className="flex items-center justify-center py-3">
                 <div className="relative h-40 w-40">
@@ -412,9 +456,12 @@ export default function ReflectCharts({
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-5">
-              <h3 className="mb-4 text-sm font-semibold">
-                Top Spending Categories
-              </h3>
+              <ChartHeading
+                icon={ChartPie}
+                tone="warning"
+                title="Top Spending Categories"
+                subtitle="Where your tracked expenses are concentrated"
+              />
 
               {groupedSpendingBreakdown.length > 0 ? (
                 <div className="flex flex-col items-center gap-6 md:flex-row lg:flex-col xl:flex-row">
@@ -538,11 +585,20 @@ export default function ReflectCharts({
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-5">
-              <h3 className="mb-4 text-sm font-semibold">
-                {isYear
-                  ? 'Monthly Spending This Year'
-                  : 'Daily Spending This Month'}
-              </h3>
+              <ChartHeading
+                icon={LineChart}
+                tone="info"
+                title={
+                  isYear
+                    ? 'Monthly Spending This Year'
+                    : 'Daily Spending This Month'
+                }
+                subtitle={
+                  isYear
+                    ? 'Expense movement across the selected year'
+                    : 'Daily expense movement in the selected month'
+                }
+              />
 
               {safeSpendingTrend.length > 0 ? (
                 <div className={`${CHART_WRAP_CLASS} h-56 min-h-[224px]`}>
