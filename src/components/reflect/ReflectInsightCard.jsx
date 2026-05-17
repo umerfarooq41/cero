@@ -1,13 +1,48 @@
 import { cn } from '@/lib/utils';
 import ReflectCard from './ReflectCard.jsx';
 
+const ACCENT_CLASSES = [
+  {
+    bar: 'bg-emerald-500',
+    border: 'border-emerald-500/25',
+  },
+  {
+    bar: 'bg-red-500',
+    border: 'border-red-500/25',
+  },
+  {
+    bar: 'bg-blue-500',
+    border: 'border-blue-500/25',
+  },
+  {
+    bar: 'bg-amber-500',
+    border: 'border-amber-500/25',
+  },
+  {
+    bar: 'bg-purple-500',
+    border: 'border-purple-500/25',
+  },
+  {
+    bar: 'bg-cyan-500',
+    border: 'border-cyan-500/25',
+  },
+];
+
+const getAccentFromTitle = (title = '') => {
+  const text = String(title);
+  const hash = text.split('').reduce((sum, char) => {
+    return sum + char.charCodeAt(0);
+  }, 0);
+
+  return ACCENT_CLASSES[hash % ACCENT_CLASSES.length];
+};
+
 export default function ReflectInsightCard({
   icon: Icon,
   title,
   text,
   tone = 'default',
   metric,
-  accent = 'blue',
 }) {
   const metricClass =
     tone === 'good'
@@ -20,43 +55,19 @@ export default function ReflectInsightCard({
             ? 'text-cyan-600 dark:text-cyan-400'
             : 'text-primary';
 
-  const accentClass =
-    accent === 'green'
-      ? 'bg-emerald-500'
-      : accent === 'red'
-        ? 'bg-red-500'
-        : accent === 'yellow'
-          ? 'bg-amber-500'
-          : accent === 'purple'
-            ? 'bg-purple-500'
-            : accent === 'cyan'
-              ? 'bg-cyan-500'
-              : 'bg-blue-500';
-
-  const borderClass =
-    accent === 'green'
-      ? 'border-emerald-500/25'
-      : accent === 'red'
-        ? 'border-red-500/25'
-        : accent === 'yellow'
-          ? 'border-amber-500/25'
-          : accent === 'purple'
-            ? 'border-purple-500/25'
-            : accent === 'cyan'
-              ? 'border-cyan-500/25'
-              : 'border-blue-500/25';
+  const accent = getAccentFromTitle(title);
 
   return (
     <ReflectCard
       className={cn(
         'relative overflow-hidden rounded-2xl border bg-card/85 p-4 shadow-sm backdrop-blur-xl transition-colors',
-        borderClass
+        accent.border
       )}
     >
       <div
         className={cn(
           'absolute left-0 top-4 h-11 w-1 rounded-r-full',
-          accentClass
+          accent.bar
         )}
       />
 
