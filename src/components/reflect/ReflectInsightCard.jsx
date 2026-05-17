@@ -56,20 +56,12 @@ export default function ReflectInsightCard({
       />
 
       <div className="relative pl-2.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 items-center gap-2">
-              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <div className="flex min-w-0 items-center gap-2">
+          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
-              <h4 className="min-w-0 text-[15px] font-semibold leading-5 tracking-tight text-foreground">
-                {title}
-              </h4>
-            </div>
-
-            <p className="mt-1 text-left text-[13px] leading-5 text-muted-foreground">
-              {text}
-            </p>
-          </div>
+          <h4 className="min-w-0 flex-1 text-[15px] font-semibold leading-5 tracking-tight text-foreground">
+            {title}
+          </h4>
 
           {metric ? (
             <span
@@ -82,6 +74,10 @@ export default function ReflectInsightCard({
             </span>
           ) : null}
         </div>
+
+        <p className="mt-1 text-left text-[13px] leading-5 text-muted-foreground">
+          {text}
+        </p>
       </div>
     </ReflectCard>
   );
