@@ -45,7 +45,7 @@ export default function LeftToAllocateBanner({
             Income
           </div>
 
-          <div className="inline-flex items-center justify-center gap-1 text-xl font-bold tracking-tight text-foreground tabular-nums sm:text-2xl [&_svg]:h-[1em] [&_svg]:w-[1em]">
+          <div className="inline-flex items-center justify-center gap-1 text-lg font-bold tracking-tight text-foreground tabular-nums sm:text-xl [&_svg]:h-[1em] [&_svg]:w-[1em]">
             <span className="inline-flex items-center gap-1 leading-none">
               {money(totalIncome)}
             </span>
@@ -61,7 +61,7 @@ export default function LeftToAllocateBanner({
 
           <div
             className={cn(
-              'inline-flex items-center justify-center gap-1 text-xl font-bold tracking-tight tabular-nums sm:text-2xl [&_svg]:h-[1em] [&_svg]:w-[1em]',
+              'inline-flex items-center justify-center gap-1 text-lg font-bold tracking-tight tabular-nums sm:text-xl [&_svg]:h-[1em] [&_svg]:w-[1em]',
               stateColor
             )}
           >
