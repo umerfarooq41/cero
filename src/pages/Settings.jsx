@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Monitor,
   Moon,
   Sun,
   Globe,
@@ -104,7 +105,7 @@ const getSavedAutoSweepSurplus = (saved = {}, fallback = false) => {
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    theme: 'light',
+    theme: 'system',
     currency: 'SAR',
     budgetLogic: {
       twentyFifthRule: false,
@@ -130,7 +131,7 @@ export default function Settings() {
         const saved = await getUserSettings();
 
         if (saved) {
-          const loadedTheme = saved?.theme || theme || 'light';
+          const loadedTheme = saved?.theme || theme || 'system';
           setTheme(loadedTheme);
 
           setSettings((prev) => ({
@@ -349,18 +350,44 @@ export default function Settings() {
 
           <div className="divide-y divide-border/50 px-4">
             <SettingRow
-              icon={theme === 'dark' ? Moon : Sun}
-              label="Dark Mode"
-              description="Switch between light and dark theme"
+              icon={theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor}
+              label="Theme"
+              description="Choose system, light, or dark appearance"
             >
-              <Switch
-              checked={theme === 'dark'}
-              onCheckedChange={(v) => {
-                const nextTheme = v ? 'dark' : 'light';
-                setTheme(nextTheme);
-                updateSetting('theme', nextTheme);
-              }}
-            />
+              <Select
+                value={theme}
+                onValueChange={(nextTheme) => {
+                  setTheme(nextTheme);
+                  updateSetting('theme', nextTheme);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[132px] rounded-xl px-3">
+                  <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+
+                <SelectContent align="end">
+                  <SelectItem value="system">
+                    <span className="flex items-center gap-2">
+                      <Monitor className="h-4 w-4" />
+                      System
+                    </span>
+                  </SelectItem>
+
+                  <SelectItem value="light">
+                    <span className="flex items-center gap-2">
+                      <Sun className="h-4 w-4" />
+                      Light
+                    </span>
+                  </SelectItem>
+
+                  <SelectItem value="dark">
+                    <span className="flex items-center gap-2">
+                      <Moon className="h-4 w-4" />
+                      Dark
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </SettingRow>
           </div>
         </div>

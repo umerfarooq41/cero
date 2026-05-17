@@ -1,68 +1,41 @@
-import { createContext, useContext, useEffect, useState } from "react";
+<div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+  <div className="flex items-center justify-between gap-4">
+    <div className="space-y-1">
+      <h3 className="text-sm font-semibold text-foreground">
+        Appearance
+      </h3>
+      <p className="text-xs text-muted-foreground">
+        Choose how Cero looks on this device.
+      </p>
+    </div>
 
-const ThemeContext = createContext();
+    <Select value={theme} onValueChange={setTheme}>
+      <SelectTrigger className="h-10 w-[140px] rounded-xl">
+        <SelectValue placeholder="Theme" />
+      </SelectTrigger>
 
-export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "system"
-  );
+      <SelectContent align="end">
+        <SelectItem value="system">
+          <span className="flex items-center gap-2">
+            <Monitor className="h-4 w-4" />
+            System
+          </span>
+        </SelectItem>
 
-  const getSystemTheme = () =>
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+        <SelectItem value="light">
+          <span className="flex items-center gap-2">
+            <Sun className="h-4 w-4" />
+            Light
+          </span>
+        </SelectItem>
 
-  const applyTheme = (mode) => {
-    const root = document.documentElement;
-    const resolved = mode === "system" ? getSystemTheme() : mode;
-
-    // 🌗 Tailwind dark mode
-    if (resolved === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
-    // 🔥 Favicon sync
-    const favicon = document.getElementById("favicon");
-    if (favicon) {
-      favicon.href =
-        resolved === "dark"
-          ? "/icon-dark.png"
-          : "/icon-light.png";
-    }
-
-    // 🎨 Optional: browser UI color (mobile)
-    const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) {
-      metaTheme.content = resolved === "dark" ? "#0b2230" : "#ffffff";
-    }
-  };
-
-  useEffect(() => {
-    applyTheme(theme);
-    localStorage.setItem("theme", theme);
-
-    // Listen to OS theme change
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const listener = () => {
-      if (theme === "system") {
-        applyTheme("system");
-      }
-    };
-
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, [theme]);
-
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-
-export function useTheme() {
-  return useContext(ThemeContext);
-}
+        <SelectItem value="dark">
+          <span className="flex items-center gap-2">
+            <Moon className="h-4 w-4" />
+            Dark
+          </span>
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</div>
