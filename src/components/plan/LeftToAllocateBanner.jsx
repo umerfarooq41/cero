@@ -32,7 +32,6 @@ export default function LeftToAllocateBanner({
       ? 'bg-destructive/5 border-destructive/20'
       : 'bg-primary/5 border-primary/20';
 
-
   return (
     <div
       className={cn(
@@ -40,27 +39,27 @@ export default function LeftToAllocateBanner({
         isEditMode ? bgColor : 'border-border'
       )}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-0.5 min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="relative grid grid-cols-2 items-center">
+        <div className="min-w-0 pr-4 text-center">
+          <div className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Income
           </div>
 
-          <div className="text-sm font-bold tabular-nums sm:text-base inline-flex items-center gap-1">
+          <div className="inline-flex items-center justify-center gap-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
             {money(totalIncome)}
           </div>
         </div>
 
-        <div className="h-8 w-px bg-border" />
+        <div className="absolute left-1/2 top-1/2 h-10 w-px -translate-x-1/2 -translate-y-1/2 bg-border" />
 
-        <div className="flex-1 flex flex-col items-center">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+        <div className="relative min-w-0 pl-4 pr-11 text-center">
+          <div className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Left to Allocate
           </div>
 
           <div
             className={cn(
-              'text-2xl font-bold tracking-tight tabular-nums inline-flex items-center gap-1',
+              'inline-flex items-center justify-center gap-1 text-2xl font-bold tracking-tight tabular-nums',
               stateColor
             )}
           >
@@ -68,21 +67,22 @@ export default function LeftToAllocateBanner({
             {money(Math.abs(leftToAllocate))}
           </div>
 
-        </div>
-
-        <div
-          className={cn(
-            'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
-            isZero
-              ? 'bg-[hsl(var(--success)/0.15)]'
-              : isOver
-                ? 'bg-destructive/10'
-                : 'bg-primary/10'
-          )}
-        >
-          {isZero && <Check className={cn('w-4 h-4', stateColor)} />}
-          {isOver && <AlertTriangle className={cn('w-4 h-4', stateColor)} />}
-          {isUnder && <CircleDollarSign className={cn('w-4 h-4', stateColor)} />}
+          <div
+            className={cn(
+              'absolute right-0 top-1/2 flex h-9 w-9 -translate-y-1/2 shrink-0 items-center justify-center rounded-full',
+              isZero
+                ? 'bg-[hsl(var(--success)/0.15)]'
+                : isOver
+                  ? 'bg-destructive/10'
+                  : 'bg-primary/10'
+            )}
+          >
+            {isZero && <Check className={cn('h-4 w-4', stateColor)} />}
+            {isOver && <AlertTriangle className={cn('h-4 w-4', stateColor)} />}
+            {isUnder && (
+              <CircleDollarSign className={cn('h-4 w-4', stateColor)} />
+            )}
+          </div>
         </div>
       </div>
     </div>
