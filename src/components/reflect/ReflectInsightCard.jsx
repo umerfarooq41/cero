@@ -1,40 +1,69 @@
 import { cn } from '@/lib/utils';
 import ReflectCard from './ReflectCard.jsx';
 
-const ACCENT_CLASSES = [
-  {
-    bar: 'bg-emerald-500',
-    border: 'border-emerald-500/25',
-  },
-  {
+const ACCENT_CLASSES = {
+  red: {
     bar: 'bg-red-500',
     border: 'border-red-500/25',
   },
-  {
-    bar: 'bg-blue-500',
-    border: 'border-blue-500/25',
-  },
-  {
+  yellow: {
     bar: 'bg-amber-500',
     border: 'border-amber-500/25',
   },
-  {
+  blue: {
+    bar: 'bg-blue-500',
+    border: 'border-blue-500/25',
+  },
+  green: {
+    bar: 'bg-emerald-500',
+    border: 'border-emerald-500/25',
+  },
+  purple: {
     bar: 'bg-purple-500',
     border: 'border-purple-500/25',
   },
-  {
-    bar: 'bg-cyan-500',
-    border: 'border-cyan-500/25',
-  },
-];
+};
 
 const getAccentFromTitle = (title = '') => {
-  const text = String(title);
-  const hash = text.split('').reduce((sum, char) => {
-    return sum + char.charCodeAt(0);
-  }, 0);
+  const normalized = String(title).toLowerCase();
 
-  return ACCENT_CLASSES[hash % ACCENT_CLASSES.length];
+  if (
+    normalized.includes('cash flow') ||
+    normalized.includes('overspending') ||
+    normalized.includes('negative') ||
+    normalized.includes('alert')
+  ) {
+    return ACCENT_CLASSES.red;
+  }
+
+  if (
+    normalized.includes('budget') ||
+    normalized.includes('warning') ||
+    normalized.includes('pace') ||
+    normalized.includes('plan')
+  ) {
+    return ACCENT_CLASSES.yellow;
+  }
+
+  if (
+    normalized.includes('income') ||
+    normalized.includes('monthly') ||
+    normalized.includes('yearly') ||
+    normalized.includes('performance')
+  ) {
+    return ACCENT_CLASSES.blue;
+  }
+
+  if (
+    normalized.includes('saving') ||
+    normalized.includes('saved') ||
+    normalized.includes('surplus') ||
+    normalized.includes('positive')
+  ) {
+    return ACCENT_CLASSES.green;
+  }
+
+  return ACCENT_CLASSES.purple;
 };
 
 export default function ReflectInsightCard({
