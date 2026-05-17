@@ -35,41 +35,46 @@ export default function LeftToAllocateBanner({
   return (
     <div
       className={cn(
-        'sticky top-[72px] z-20 rounded-3xl border border-border/60 bg-card/75 px-4 py-3 shadow-md backdrop-blur-xl transition-all duration-300',
+        'sticky top-[72px] z-20 rounded-3xl border border-border/60 bg-card/75 px-4 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300',
         isEditMode ? bgColor : 'border-border'
       )}
     >
       <div className="relative grid grid-cols-2 items-center">
         <div className="min-w-0 pr-4 text-center">
-          <div className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="mb-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
             Income
           </div>
 
-          <div className="inline-flex items-center justify-center gap-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {money(totalIncome)}
+          <div className="inline-flex items-center justify-center gap-1 text-xl font-bold tracking-tight text-foreground tabular-nums sm:text-2xl [&_svg]:h-[1em] [&_svg]:w-[1em]">
+            <span className="inline-flex items-center gap-1 leading-none">
+              {money(totalIncome)}
+            </span>
           </div>
         </div>
 
         <div className="absolute left-1/2 top-1/2 h-10 w-px -translate-x-1/2 -translate-y-1/2 bg-border" />
 
-        <div className="relative min-w-0 pl-4 pr-11 text-center">
-          <div className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Left to Allocate
+        <div className="relative min-w-0 pl-4 pr-10 text-center">
+          <div className="mb-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
+            Left to allocate
           </div>
 
           <div
             className={cn(
-              'inline-flex items-center justify-center gap-1 text-2xl font-bold tracking-tight tabular-nums',
+              'inline-flex items-center justify-center gap-1 text-xl font-bold tracking-tight tabular-nums sm:text-2xl [&_svg]:h-[1em] [&_svg]:w-[1em]',
               stateColor
             )}
           >
-            {isOver && <span>-</span>}
-            {money(Math.abs(leftToAllocate))}
+            {isOver && <span className="leading-none">-</span>}
+
+            <span className="inline-flex items-center gap-1 leading-none">
+              {money(Math.abs(leftToAllocate))}
+            </span>
           </div>
 
           <div
             className={cn(
-              'absolute right-0 top-1/2 flex h-9 w-9 -translate-y-1/2 shrink-0 items-center justify-center rounded-full',
+              'absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 shrink-0 items-center justify-center rounded-full',
               isZero
                 ? 'bg-[hsl(var(--success)/0.15)]'
                 : isOver
