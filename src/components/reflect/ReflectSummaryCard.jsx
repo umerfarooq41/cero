@@ -197,21 +197,11 @@ function getToneClasses(tone = 'default') {
   };
 }
 
-function CardHeading({ icon: Icon, title, tone = 'default', badge }) {
-  const toneClasses = getToneClasses(tone);
-
+function CardHeading({ icon: Icon, title, badge }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <div className="flex min-w-0 items-center gap-2.5">
-        <span
-          className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1',
-            toneClasses.bg,
-            toneClasses.ring
-          )}
-        >
-          <Icon className={cn('h-4 w-4', toneClasses.text)} />
-        </span>
+      <div className="flex min-w-0 items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
         <p className="min-w-0 text-sm font-semibold leading-5 text-foreground">
           {title}
