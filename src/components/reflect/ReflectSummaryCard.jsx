@@ -212,21 +212,7 @@ function HeroCashFlowCard({
     income > 0 ? Math.min((Math.max(expenses, 0) / income) * 100, 100) : 0;
 
   return (
-    <ReflectCard
-      className={cn(
-        'relative min-h-[220px] overflow-hidden rounded-3xl border p-5 sm:col-span-2',
-        positive
-          ? 'border-emerald-500/15 bg-gradient-to-br from-emerald-500/10 via-card to-card'
-          : 'border-red-500/15 bg-gradient-to-br from-red-500/10 via-card to-card'
-      )}
-    >
-      <div
-        className={cn(
-          'pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full blur-3xl',
-          positive ? 'bg-emerald-500/15' : 'bg-red-500/15'
-        )}
-      />
-
+    <ReflectCard className="relative min-h-[220px] overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-5 shadow-md backdrop-blur-xl sm:col-span-2">
       <div className="relative flex h-full flex-col justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
