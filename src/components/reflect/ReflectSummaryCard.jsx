@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Activity, BarChart3, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReflectCard from './ReflectCard.jsx';
 
@@ -151,6 +152,77 @@ function getSelectedPeriodProgress({ selectedYear, selectedMonth, isYear }) {
   };
 }
 
+function getToneClasses(tone = 'default') {
+  if (tone === 'good') {
+    return {
+      text: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-500/10',
+      ring: 'ring-emerald-500/15',
+      glow: 'bg-emerald-500/10',
+    };
+  }
+
+  if (tone === 'bad') {
+    return {
+      text: 'text-red-600 dark:text-red-400',
+      bg: 'bg-red-500/10',
+      ring: 'ring-red-500/15',
+      glow: 'bg-red-500/10',
+    };
+  }
+
+  if (tone === 'warning') {
+    return {
+      text: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-500/10',
+      ring: 'ring-amber-500/15',
+      glow: 'bg-amber-500/10',
+    };
+  }
+
+  if (tone === 'info') {
+    return {
+      text: 'text-cyan-600 dark:text-cyan-400',
+      bg: 'bg-cyan-500/10',
+      ring: 'ring-cyan-500/15',
+      glow: 'bg-cyan-500/10',
+    };
+  }
+
+  return {
+    text: 'text-primary',
+    bg: 'bg-primary/10',
+    ring: 'ring-primary/15',
+    glow: 'bg-muted/40',
+  };
+}
+
+function CardHeading({ icon: Icon, title, tone = 'default', badge }) {
+  const toneClasses = getToneClasses(tone);
+
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span
+          className={cn(
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1',
+            toneClasses.bg,
+            toneClasses.ring
+          )}
+        >
+          <Icon className={cn('h-4 w-4', toneClasses.text)} />
+        </span>
+
+        <p className="min-w-0 text-sm font-semibold leading-5 text-foreground">
+          {title}
+        </p>
+      </div>
+
+      {badge}
+    </div>
+  );
+}
+
 function MoneyRow({ label, amount, currency, tone }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
@@ -188,7 +260,9 @@ function PercentBar({ label, value, className, delay }) {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-3 text-xs font-medium">
         <span className="text-muted-foreground">{label}</span>
-        <span className="tabular-nums text-foreground">{Math.round(safeValue)}%</span>
+        <span className="tabular-nums text-foreground">
+          {Math.round(safeValue)}%
+        </span>
       </div>
 
       <AnimatedBar value={safeValue} className={className} delay={delay} />
@@ -204,6 +278,7 @@ function HeroCashFlowCard({
   currency,
 }) {
   const positive = netCashFlow >= 0;
+  const tone = positive ? 'good' : 'bad';
 
   const savedProgress =
     income > 0 ? Math.min((Math.max(netCashFlow, 0) / income) * 100, 100) : 0;
@@ -215,29 +290,30 @@ function HeroCashFlowCard({
     <ReflectCard className="relative min-h-[220px] overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-5 shadow-md backdrop-blur-xl sm:col-span-2">
       <div className="relative flex h-full flex-col justify-between gap-6">
         <div className="space-y-2">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-semibold text-foreground">
-              {isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-            </p>
-
-            <span
-              className={cn(
-                'rounded-full px-2.5 py-1 text-xs font-semibold',
-                positive
-                  ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400'
-                  : 'bg-red-500/10 text-red-500 dark:text-red-400'
-              )}
-            >
-              {positive ? 'Positive' : 'Negative'}
-            </span>
-          </div>
+          <CardHeading
+            icon={BarChart3}
+            title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
+            tone={tone}
+            badge={
+              <span
+                className={cn(
+                  'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
+                  positive
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                )}
+              >
+                {positive ? 'Positive' : 'Negative'}
+              </span>
+            }
+          />
 
           <div
             className={cn(
               'pt-3 text-2xl font-bold tracking-tight tabular-nums',
               positive
-                ? 'text-emerald-500 dark:text-emerald-400'
-                : 'text-red-500 dark:text-red-400'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-600 dark:text-red-400'
             )}
           >
             <CurrencyAmount amount={netCashFlow} currency={currency} />
@@ -278,46 +354,32 @@ function HeroCashFlowCard({
   );
 }
 
-function SecondaryCard({ title, value, children, tone = 'default' }) {
-  const valueClass =
-    tone === 'good'
-      ? 'text-emerald-500 dark:text-emerald-400'
-      : tone === 'bad'
-        ? 'text-red-500 dark:text-red-400'
-        : tone === 'info'
-          ? 'text-cyan-500 dark:text-cyan-400'
-          : tone === 'warning'
-            ? 'text-amber-500 dark:text-amber-400'
-            : 'text-foreground';
-
-  const glowClass =
-    tone === 'good'
-      ? 'bg-emerald-500/10'
-      : tone === 'bad'
-        ? 'bg-red-500/10'
-        : tone === 'info'
-          ? 'bg-cyan-500/10'
-          : tone === 'warning'
-            ? 'bg-amber-500/10'
-            : 'bg-muted/40';
+function SecondaryCard({
+  icon: Icon,
+  title,
+  value,
+  children,
+  tone = 'default',
+}) {
+  const toneClasses = getToneClasses(tone);
 
   return (
     <ReflectCard className="relative min-h-[160px] overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-4 shadow-md backdrop-blur-xl">
       <div
         className={cn(
           'pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl',
-          glowClass
+          toneClasses.glow
         )}
       />
 
       <div className="relative flex h-full flex-col justify-between gap-5">
         <div>
-          <p className="text-sm font-semibold text-foreground">{title}</p>
+          <CardHeading icon={Icon} title={title} tone={tone} />
 
           <div
             className={cn(
               'mt-3 text-2xl font-bold tracking-tight tabular-nums',
-              valueClass
+              toneClasses.text
             )}
           >
             {value}
@@ -464,6 +526,7 @@ export default function ReflectSummaryCard({
       />
 
       <SecondaryCard
+        icon={Wallet}
         title="Net Worth"
         value={<CurrencyAmount amount={netWorth} currency={currency} />}
         tone={netWorth >= 0 ? 'info' : 'bad'}
@@ -498,6 +561,7 @@ export default function ReflectSummaryCard({
       </SecondaryCard>
 
       <SecondaryCard
+        icon={Activity}
         title={isYear ? 'Yearly Performance' : 'Budget Health'}
         value={isYear ? computed.yearlyStatus : computed.monthlyStatus}
         tone={isYear ? computed.yearlyTone : computed.monthlyTone}
@@ -506,9 +570,14 @@ export default function ReflectSummaryCard({
           {isYear ? (
             <>
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Total YTD</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Total YTD
+                </p>
                 <div className="mt-1 text-xl font-bold tracking-tight tabular-nums text-foreground">
-                  <CurrencyAmount amount={computed.yearlyTotalYtd} currency={currency} />
+                  <CurrencyAmount
+                    amount={computed.yearlyTotalYtd}
+                    currency={currency}
+                  />
                 </div>
               </div>
 
@@ -620,7 +689,12 @@ export default function ReflectSummaryCard({
                   <p className="text-xs leading-snug text-muted-foreground">
                     Daily Limit:{' '}
                     <span className="font-semibold text-foreground">
-                      <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact /> / day
+                      <CurrencyAmount
+                        amount={computed.dailyLimit}
+                        currency={currency}
+                        compact
+                      />{' '}
+                      / day
                     </span>
                   </p>
                 </>
