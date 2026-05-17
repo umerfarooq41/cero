@@ -100,48 +100,22 @@ function ChartShell({ className = '' }) {
   );
 }
 
-function ChartHeading({ icon: Icon, title, subtitle, tone = 'default' }) {
-  const toneClass =
-    tone === 'good'
-      ? 'text-emerald-600 dark:text-emerald-400'
-      : tone === 'bad'
-        ? 'text-red-600 dark:text-red-400'
-        : tone === 'warning'
-          ? 'text-amber-600 dark:text-amber-400'
-          : tone === 'info'
-            ? 'text-cyan-600 dark:text-cyan-400'
-            : 'text-muted-foreground';
-
-  const iconClass =
-    tone === 'good'
-      ? 'bg-emerald-500/10 ring-emerald-500/15'
-      : tone === 'bad'
-        ? 'bg-red-500/10 ring-red-500/15'
-        : tone === 'warning'
-          ? 'bg-amber-500/10 ring-amber-500/15'
-          : tone === 'info'
-            ? 'bg-cyan-500/10 ring-cyan-500/15'
-            : 'bg-muted/60 ring-border/70';
-
+function ChartHeading({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-5 flex items-start gap-3">
-      <div
-        className={`${iconClass} mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1`}
-      >
-        <Icon className={`${toneClass} h-4 w-4`} />
-      </div>
+    <div className="mb-5 min-w-0">
+      <div className="flex min-w-0 items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
-      <div className="min-w-0">
-        <h3 className="text-sm font-semibold leading-5 tracking-tight text-foreground">
+        <h3 className="min-w-0 text-sm font-semibold leading-5 tracking-tight text-foreground">
           {title}
         </h3>
-
-        {subtitle ? (
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {subtitle}
-          </p>
-        ) : null}
       </div>
+
+      {subtitle ? (
+        <p className="mt-1 text-left text-xs leading-5 text-muted-foreground">
+          {subtitle}
+        </p>
+      ) : null}
     </div>
   );
 }
