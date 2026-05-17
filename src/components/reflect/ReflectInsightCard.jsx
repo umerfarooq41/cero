@@ -6,6 +6,7 @@ export default function ReflectInsightCard({
   title,
   text,
   tone = 'default',
+  metric,
 }) {
   const toneClass =
     tone === 'good'
@@ -54,7 +55,7 @@ export default function ReflectInsightCard({
   return (
     <ReflectCard
       className={cn(
-        'relative overflow-hidden rounded-3xl border bg-card/80 p-4 shadow-sm backdrop-blur-xl transition-colors',
+        'relative h-full min-h-[124px] overflow-hidden rounded-3xl border bg-card/80 p-4 shadow-sm backdrop-blur-xl transition-colors',
         borderClass
       )}
     >
@@ -65,25 +66,40 @@ export default function ReflectInsightCard({
         )}
       />
 
-      <div className="relative pl-2">
-        <div className="flex items-center gap-2.5">
+      <div className="relative flex h-full flex-col pl-2">
+        <div className="flex items-start gap-2.5">
           <div
             className={cn(
-              'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ring-1',
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1',
               badgeClass
             )}
           >
-            <Icon className={cn('h-3.5 w-3.5', toneClass)} />
+            <Icon className={cn('h-4 w-4', toneClass)} />
           </div>
 
-          <h4 className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-foreground">
-            {title}
-          </h4>
-        </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h4 className="text-sm font-semibold leading-5 tracking-tight text-foreground">
+                {title}
+              </h4>
 
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {text}
-        </p>
+              {metric ? (
+                <span
+                  className={cn(
+                    'inline-flex max-w-[46%] shrink-0 items-center justify-end whitespace-nowrap rounded-full bg-muted px-2 py-0.5 text-right text-[11px] font-bold leading-5 tabular-nums',
+                    toneClass
+                  )}
+                >
+                  {metric}
+                </span>
+              ) : null}
+            </div>
+
+            <p className="mt-1.5 text-[13px] leading-5 text-muted-foreground">
+              {text}
+            </p>
+          </div>
+        </div>
       </div>
     </ReflectCard>
   );

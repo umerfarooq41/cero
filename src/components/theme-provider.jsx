@@ -1,41 +1,126 @@
-<div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-  <div className="flex items-center justify-between gap-4">
-    <div className="space-y-1">
-      <h3 className="text-sm font-semibold text-foreground">
-        Appearance
-      </h3>
-      <p className="text-xs text-muted-foreground">
-        Choose how Cero looks on this device.
-      </p>
-    </div>
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-    <Select value={theme} onValueChange={setTheme}>
-      <SelectTrigger className="h-10 w-[140px] rounded-xl">
-        <SelectValue placeholder="Theme" />
-      </SelectTrigger>
+const ThemeContext = createContext(null);
 
-      <SelectContent align="end">
-        <SelectItem value="system">
-          <span className="flex items-center gap-2">
-            <Monitor className="h-4 w-4" />
-            System
-          </span>
-        </SelectItem>
+const THEME_STORAGE_KEY = 'theme';
 
-        <SelectItem value="light">
-          <span className="flex items-center gap-2">
-            <Sun className="h-4 w-4" />
-            Light
-          </span>
-        </SelectItem>
+function getStoredTheme() {
+  if (typeof window === 'undefined') return 'system';
 
-        <SelectItem value="dark">
-          <span className="flex items-center gap-2">
-            <Moon className="h-4 w-4" />
-            Dark
-          </span>
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-</div>
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+  if (
+    savedTheme === 'system' ||
+    savedTheme === 'light' ||
+    savedTheme === 'dark'
+  ) {
+    return savedTheme;
+  }
+
+  return 'system';
+}
+
+function getSystemTheme() {
+  if (typeof window === 'undefined') return 'light';
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+function applyTheme(mode) {
+  if (typeof window === 'undefined') return 'light';
+
+  const root = document.documentElement;
+  const resolvedTheme = mode === 'system' ? getSystemTheme() : mode;
+
+  if (resolvedTheme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+
+  const favicon = document.getElementById('favicon');
+
+  if (favicon) {
+    favicon.href =
+      resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
+  }
+
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+
+  if (themeColor) {
+    themeColor.setAttribute(
+      'content',
+      resolvedTheme === 'dark' ? '#020617' : '#f8fafc'
+    );
+  }
+
+  return resolvedTheme;
+}
+
+export function ThemeProvider({ children }) {
+  const [theme, setThemeState] = useState(getStoredTheme);
+  const [resolvedTheme, setResolvedTheme] = useState(() =>
+    applyTheme(getStoredTheme())
+  );
+
+  useEffect(() => {
+    const resolved = applyTheme(theme);
+    setResolvedTheme(resolved);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleSystemThemeChange = () => {
+      if (theme === 'system') {
+        const resolved = applyTheme('system');
+        setResolvedTheme(resolved);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, [theme]);
+
+  const setTheme = (newTheme) => {
+    if (
+      newTheme !== 'system' &&
+      newTheme !== 'light' &&
+      newTheme !== 'dark'
+    ) {
+      return;
+    }
+
+    setThemeState(newTheme);
+  };
+
+  const value = useMemo(
+    () => ({
+      theme,
+      resolvedTheme,
+      setTheme,
+      isDark: resolvedTheme === 'dark',
+    }),
+    [theme, resolvedTheme]
+  );
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider');
+  }
+
+  return context;
+}
