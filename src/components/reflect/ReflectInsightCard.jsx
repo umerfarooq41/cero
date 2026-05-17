@@ -17,7 +17,9 @@ export default function ReflectInsightCard({
           ? 'text-amber-600 dark:text-amber-400'
           : tone === 'info'
             ? 'text-cyan-600 dark:text-cyan-400'
-            : 'text-primary';
+            : tone === 'default'
+              ? 'text-primary'
+              : 'text-primary';
 
   const iconClass =
     tone === 'good'
@@ -30,57 +32,65 @@ export default function ReflectInsightCard({
             ? 'bg-cyan-500/10 ring-cyan-500/15'
             : 'bg-primary/10 ring-primary/15';
 
-  const accentClass =
+  const leftBorderClass =
     tone === 'good'
-      ? 'bg-emerald-500/70'
+      ? 'bg-emerald-500'
       : tone === 'bad'
-        ? 'bg-red-500/70'
+        ? 'bg-red-500'
         : tone === 'warning'
-          ? 'bg-amber-500/70'
+          ? 'bg-amber-500'
           : tone === 'info'
-            ? 'bg-cyan-500/70'
-            : 'bg-primary/70';
+            ? 'bg-cyan-500'
+            : 'bg-primary';
 
   const borderClass =
     tone === 'good'
-      ? 'border-emerald-500/10'
+      ? 'border-emerald-500/15'
       : tone === 'bad'
-        ? 'border-red-500/10'
+        ? 'border-red-500/15'
         : tone === 'warning'
-          ? 'border-amber-500/10'
+          ? 'border-amber-500/15'
           : tone === 'info'
-            ? 'border-cyan-500/10'
-            : 'border-border/60';
+            ? 'border-cyan-500/15'
+            : 'border-border/70';
 
   return (
     <ReflectCard
       className={cn(
-        'relative overflow-hidden rounded-2xl border bg-card/80 p-3.5 shadow-sm backdrop-blur-xl transition-colors',
+        'relative overflow-hidden rounded-2xl border bg-card/85 p-4 shadow-sm backdrop-blur-xl transition-colors',
         borderClass
       )}
     >
+      {/* Left color highlight */}
       <div
         className={cn(
-          'absolute left-0 top-3.5 h-9 w-1 rounded-r-full',
-          accentClass
+          'absolute left-0 top-4 h-11 w-1 rounded-r-full',
+          leftBorderClass
         )}
       />
 
-      <div className="relative pl-2">
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <div className="relative pl-2.5">
+        {/* Icon + heading inline */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             <div
               className={cn(
-                'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ring-1',
+                'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1',
                 iconClass
               )}
             >
-              <Icon className={cn('h-3.5 w-3.5', toneClass)} />
+              <Icon className={cn('h-4 w-4', toneClass)} />
             </div>
 
-            <h4 className="min-w-0 text-sm font-semibold leading-5 tracking-tight text-foreground">
-              {title}
-            </h4>
+            <div className="min-w-0 flex-1">
+              <h4 className="text-[15px] font-semibold leading-5 tracking-tight text-foreground">
+                {title}
+              </h4>
+
+              <p className="mt-1 text-[13px] leading-5 text-muted-foreground">
+                {text}
+              </p>
+            </div>
           </div>
 
           {metric ? (
@@ -94,10 +104,6 @@ export default function ReflectInsightCard({
             </span>
           ) : null}
         </div>
-
-        <p className="mt-2 pl-9 text-[13px] leading-5 text-muted-foreground">
-          {text}
-        </p>
       </div>
     </ReflectCard>
   );
