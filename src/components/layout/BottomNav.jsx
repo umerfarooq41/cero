@@ -1,18 +1,16 @@
-import { Link, useLocation } from 'react-router-dom';
 import {
-  PieChart,
-  LayoutDashboard,
+  ChartPie,
+  CalendarCheck,
   ArrowLeftRight,
-  Wallet,
+  WalletCards,
   Settings,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/reflect', icon: PieChart, label: 'Reflect' },
-  { path: '/', icon: LayoutDashboard, label: 'Plan' },
+  { path: '/reflect', icon: ChartPie, label: 'Reflect' },
+  { path: '/', icon: CalendarCheck, label: 'Plan' },
   { path: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
-  { path: '/accounts', icon: Wallet, label: 'Accounts' },
+  { path: '/accounts', icon: WalletCards, label: 'Accounts' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
