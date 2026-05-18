@@ -2,31 +2,59 @@ import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, addMonths, subMonths } from 'date-fns';
+import { motion } from 'framer-motion';
 
 export default function MonthSelector({ currentMonth, onChange }) {
-  const date = new Date(currentMonth + '-01');
+  const date = new Date(`${currentMonth}-01`);
+
+  const goToPreviousMonth = () => {
+    onChange(format(subMonths(date, 1), 'yyyy-MM'));
+  };
+
+  const goToNextMonth = () => {
+    onChange(format(addMonths(date, 1), 'yyyy-MM'));
+  };
 
   return (
-    <div className="flex items-center gap-2">
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-8 w-8"
-        onClick={() => onChange(format(subMonths(date, 1), 'yyyy-MM'))}
+    <motion.div
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.15}
+      onDragEnd={(_, info) => {
+        if (info.offset.x < -40) goToNextMonth();
+        if (info.offset.x > 40) goToPreviousMonth();
+      }}
+      className="flex touch-pan-y select-none items-center gap-2"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 shrink-0"
+        onClick={goToPreviousMonth}
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className="text-sm font-semibold min-w-[120px] text-center">
+
+      <motion.span
+        key={currentMonth}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+        className="min-w-[120px] text-center text-sm font-semibold text-foreground"
+      >
         {format(date, 'MMMM yyyy')}
-      </span>
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-8 w-8"
-        onClick={() => onChange(format(addMonths(date, 1), 'yyyy-MM'))}
+      </motion.span>
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 shrink-0"
+        onClick={goToNextMonth}
       >
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight className="h-4 w-4" />
       </Button>
-    </div>
+    </motion.div>
   );
 }

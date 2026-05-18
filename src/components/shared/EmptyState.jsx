@@ -1,21 +1,48 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
-export default function EmptyState({ icon: Icon, title, description, actionLabel, onAction }) {
+export default function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      {Icon && (
-        <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">
-          <Icon className="w-6 h-6 text-muted-foreground" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.5,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
+      className="flex flex-col items-center justify-center px-6 py-16 text-center"
+    >
+      <div className="relative mb-6">
+        <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-2xl" />
+
+        <div
+          className="
+            relative flex h-16 w-16 items-center justify-center
+            rounded-2xl border border-primary/10
+            bg-primary/[0.08]
+          "
+        >
+          {Icon && <Icon className="h-7 w-7 text-primary/60" />}
         </div>
+      </div>
+
+      {title && (
+        <p className="mb-1 text-base font-semibold text-foreground">
+          {title}
+        </p>
       )}
-      <h3 className="text-base font-semibold mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground max-w-xs mb-6">{description}</p>
-      {actionLabel && onAction && (
-        <Button onClick={onAction} size="sm">
-          {actionLabel}
-        </Button>
+
+      {description && (
+        <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+          {description}
+        </p>
       )}
-    </div>
+
+      {action && <div className="mt-5">{action}</div>}
+    </motion.div>
   );
 }

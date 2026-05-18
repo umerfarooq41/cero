@@ -142,6 +142,7 @@
   html {
     min-height: 100%;
     background: hsl(var(--background));
+    scroll-behavior: smooth;
   }
 
   body {
@@ -172,6 +173,34 @@
   }
 }
 
+
+
+/* ============================= */
+/* 🖱️ GLOBAL SCROLL POLISH */
+/* ============================= */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+main,
+[data-scroll] {
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ============================= */
 /* 🔢 PREMIUM FINANCE NUMBERS */
@@ -330,6 +359,28 @@
     background: rgba(2, 6, 23, 0.78);
     border-top: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+
+  .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    transform: scale(2.5);
+    pointer-events: none;
+  }
+
+  .btn-ripple:active::after {
+    opacity: 1;
+    transition: none;
   }
 
   .finance-positive {
