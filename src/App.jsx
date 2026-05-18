@@ -13,6 +13,7 @@ import PageNotFound from './lib/PageNotFound';
 import { useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 
+import Dashboard from '@/pages/Dashboard';
 import Plan from '@/pages/Plan';
 import EditPlan from '@/pages/EditPlan';
 import Transactions from '@/pages/Transactions';
@@ -27,6 +28,7 @@ import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
 
 import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
+import CommandPalette from '@/components/shared/CommandPalette';
 
 const LoadingScreen = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -79,7 +81,8 @@ const AuthenticatedApp = () => {
       <Route path="/onboarding" element={<Onboarding />} />
 
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Plan />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/plan" element={<Plan />} />
         <Route path="/edit-plan" element={<EditPlan />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/add-transaction" element={<AddTransaction />} />
@@ -106,7 +109,8 @@ function App() {
       </Router>
 
       <Toaster />
-    </QueryClientProvider>
+          <CommandPalette />
+      </QueryClientProvider>
   );
 }
 

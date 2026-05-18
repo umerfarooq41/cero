@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -68,17 +69,25 @@ function ReadRow({ category, spent, planned, isSubcategory, formatCurrency }) {
           </span>
         </div>
 
-        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-          <div
+        <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+          <motion.div
             className={cn(
-              'h-full rounded-full transition-all duration-500',
+              'absolute inset-y-0 left-0 rounded-full',
               isOver
                 ? 'bg-destructive'
                 : category.type === 'income'
                   ? 'bg-[hsl(var(--success))]'
                   : 'bg-primary'
             )}
-            style={{ width: `${percentage}%` }}
+            initial={{ width: 0 }}
+            animate={{ width: `${percentage}%` }}
+            transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 0.05 }}
+          />
+          <motion.div
+            className="absolute inset-y-0 w-10 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+            initial={{ left: '-2.5rem' }}
+            animate={{ left: '110%' }}
+            transition={{ duration: 1.0, delay: 0.5, ease: 'easeInOut' }}
           />
         </div>
       </div>

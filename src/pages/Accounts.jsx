@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
+import NetWorthDelta from '@/components/shared/NetWorthDelta';
 import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
@@ -158,75 +159,15 @@ export default function Accounts() {
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 md:py-6">
         
-        {/* Net Worth Card */}
-        <section className="animate-child mb-6 rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl p-5 shadow-md md:p-6">
-          
-          <div className="flex flex-col items-center justify-center text-center">
-            
-            {/* Title */}
-            <div className="flex items-center gap-2">
-              <Scale className="h-4 w-4 text-muted-foreground" />
-
-              <div className="text-sm font-semibold text-foreground">
-                Net Worth
-              </div>
-            </div>
-
-            {/* Amount */}
-            <div
-              className={cn(
-                'mt-3 flex items-center justify-center gap-1 text-2xl font-bold tracking-tight tabular-nums ',
-                netWorth >= 0 ? 'text-foreground' : 'text-destructive'
-              )}
-            >
-              {netWorth < 0 && <span>-</span>}
-              <InlineMoney>{formatCurrency(Math.abs(netWorth))}</InlineMoney>
-            </div>
-
-            {/* Subtext */}
-            <p className="mt-2 text-sm text-muted-foreground">
-              The current equilibrium of your efforts
-            </p>
-          </div>
-
-          {/* Bottom Cards */}
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
-            
-            {/* Assets */}
-            <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sm">
-              
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                <ArrowUpRight className="h-4 w-4" />
-                <span>Assets</span>
-              </div>
-
-              <div className="text-lg font-semibold tabular-nums text-foreground">
-                <InlineMoney>{formatCurrency(totalAssets)}</InlineMoney>
-              </div>
-
-              <div className="mt-1 text-xs text-muted-foreground">
-                {assets.length} {assets.length === 1 ? 'account' : 'accounts'}
-              </div>
-            </div>
-
-            {/* Liabilities */}
-            <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sm">
-              
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-destructive">
-                <ArrowDownRight className="h-4 w-4" />
-                <span>Liabilities</span>
-              </div>
-
-              <div className="text-lg font-semibold tabular-nums text-foreground">
-                <InlineMoney>{formatCurrency(totalLiabilities)}</InlineMoney>
-              </div>
-
-              <div className="mt-1 text-xs text-muted-foreground">
-                {liabilities.length} {liabilities.length === 1 ? 'account' : 'accounts'}
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Net Worth Card — animated */}
+        <div className="animate-child mb-6">
+          <NetWorthDelta
+            netWorth={netWorth}
+            totalAssets={totalAssets}
+            totalLiabilities={totalLiabilities}
+            formatCurrency={formatCurrency}
+          />
+        </div>
 
         {/* Account Groups */}
         <div className="animate-child space-y-4">

@@ -36,6 +36,8 @@ import {
 } from '@/hooks/useBudgetData';
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
+import SpendingVelocityWidget from '@/components/plan/SpendingVelocityWidget';
+import SavingsRateCard from '@/components/plan/SavingsRateCard';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
@@ -713,6 +715,21 @@ export default function Plan() {
             isEditMode={isEditMode}
             formatCurrency={formatCurrency}
             />
+
+          {!isEditMode && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-child">
+              <SpendingVelocityWidget
+                totalExpenses={budget.totalExpenses}
+                plannedExpenses={budget.totalPlannedExpenses}
+                currentMonth={currentMonth}
+                formatCurrency={formatCurrency}
+              />
+              <SavingsRateCard
+                income={budget.totalIncome}
+                expenses={budget.totalExpenses}
+              />
+            </div>
+          )}
 
           <AnimatePresence>
             {isEditMode && (

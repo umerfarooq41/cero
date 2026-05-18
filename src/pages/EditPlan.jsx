@@ -165,7 +165,7 @@ export default function EditPlan() {
 
       queryClient.invalidateQueries();
       toast.success('Plan saved');
-      navigate(`/?month=${currentMonth}`);
+      navigate(`/plan?month=${currentMonth}`);
     } catch (error) {
       console.error('Plan save failed:', error);
       toast.error(error.message || 'Could not save plan');
@@ -309,7 +309,7 @@ export default function EditPlan() {
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
-                  onClick={() => navigate(`/?month=${currentMonth}`)}
+                  onClick={() => navigate(`/plan?month=${currentMonth}`)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
