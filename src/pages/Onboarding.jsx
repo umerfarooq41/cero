@@ -112,15 +112,39 @@ export default function Onboarding() {
     setLoading(true);
 
     try {
-      await accountsApi.create({
-        name: cleanAccountName,
-        type: 'checking',
-        category: 'asset',
-        balance: Number.parseFloat(accountBalance) || 0,
-        color: '#0078D4',
-      });
+      const [existingAccounts, existingCategories] = await Promise.all([
+        accountsApi.list(),
+        categoriesApi.list(),
+      ]);
 
-      await categoriesApi.bulkCreate(defaultCategories);
+      const accountAlreadyExists = existingAccounts.some(
+        (account) =>
+          account.name?.trim().toLowerCase() === cleanAccountName.toLowerCase()
+      );
+
+      if (!accountAlreadyExists) {
+        await accountsApi.create({
+          name: cleanAccountName,
+          type: 'checking',
+          category: 'asset',
+          balance: Number.parseFloat(accountBalance) || 0,
+          color: '#0078D4',
+        });
+      }
+
+      const categoriesToCreate = defaultCategories.filter(
+        (starterCategory) =>
+          !existingCategories.some(
+            (category) =>
+              category.name?.trim().toLowerCase() ===
+                starterCategory.name.toLowerCase() &&
+              category.type === starterCategory.type
+          )
+      );
+
+      if (categoriesToCreate.length > 0) {
+        await categoriesApi.bulkCreate(categoriesToCreate);
+      }
 
       await saveUserSettings({
         onboarding_complete: true,
