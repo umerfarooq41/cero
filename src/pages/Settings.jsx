@@ -41,6 +41,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import PageHeader from '@/components/layout/PageHeader';
 import { useTheme } from '@/components/theme-provider';
+import { currencies } from '@/lib/currencies';
 
 const SettingRow = ({
   icon: Icon,
@@ -435,22 +436,18 @@ export default function Settings() {
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="SAR">
-                    <span className="inline-flex items-center gap-1.5">
-                      <SarIcon />
-                      SAR
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="USD">$ USD</SelectItem>
-                  <SelectItem value="EUR">€ EUR</SelectItem>
-                  <SelectItem value="GBP">£ GBP</SelectItem>
-                  <SelectItem value="JPY">¥ JPY</SelectItem>
-                  <SelectItem value="CNY">¥ CNY</SelectItem>
-                  <SelectItem value="INR">₹ INR</SelectItem>
-                  <SelectItem value="PKR">Rs PKR</SelectItem>
-                  <SelectItem value="AED">د.إ AED</SelectItem>
-                  <SelectItem value="TRY">₺ TRY</SelectItem>
-                  <SelectItem value="RUB">₽ RUB</SelectItem>
+                  {currencies.map((item) => (
+                    <SelectItem key={item.code} value={item.code}>
+                      {item.code === 'SAR' ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <SarIcon />
+                          {item.shortDisplay}
+                        </span>
+                      ) : (
+                        item.shortDisplay
+                      )}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </SettingRow>

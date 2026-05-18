@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getCurrencySymbol } from "@/lib/currencies";
 
 async function currentUserId() {
   const { data, error } = await supabase.auth.getSession();
@@ -153,20 +154,7 @@ function getCurrencyCodeFromSettings(settings) {
 }
 
 function getCurrencySymbolFromCode(code = "SAR") {
-    const map = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    CNY: '¥',
-    INR: '₹',
-    PKR: 'Rs',
-    AED: 'د.إ',
-    TRY: '₺',
-    RUB: '₽',
-  };
-
-  return code === "SAR" ? "SAR" : map[code] || code;
+  return getCurrencySymbol(code);
 }
 
 function formatReportMoney(value, currencyCode = "SAR") {

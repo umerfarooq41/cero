@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { getUserSettings } from '@/lib/budgetData';
 import { useAuth } from '@/lib/AuthContext';
+import { getCurrencyCode, getCurrencySymbol } from '@/lib/currencies';
 
 export function useCurrency() {
   const { session } = useAuth();
 
-  const { data: symbol = 'SAR' } = useQuery({
-    queryKey: ['currency-symbol', session?.user?.id],
+  const { data: currencyCode = 'SAR' } = useQuery({
+    queryKey: ['currency-code', session?.user?.id],
     queryFn: async () => {
       const settings = await getUserSettings();
       return settings?.currency || 'SAR';
@@ -15,22 +16,25 @@ export function useCurrency() {
     staleTime: 0,
   });
 
-  return symbol;
+  return currencyCode;
 }
 
 export function useCurrencyFormatter() {
-  const symbol = useCurrency();
+  const currencyCode = useCurrency();
 
-  return (amount) => formatCurrency(amount, symbol);
+  return (amount) => formatCurrency(amount, currencyCode);
 }
 
-export function formatCurrency(amount, symbol = 'SAR') {
+export function formatCurrency(amount, currency = 'SAR') {
+  const code = getCurrencyCode(currency);
+  const symbol = getCurrencySymbol(code);
+
   const value = Math.abs(amount || 0).toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-  if (symbol === 'SAR') {
+  if (code === 'SAR') {
     return (
       <span className="inline-flex items-center gap-1 align-middle text-inherit">
         <span

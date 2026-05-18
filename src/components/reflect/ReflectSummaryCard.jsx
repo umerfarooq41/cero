@@ -1,32 +1,15 @@
 import React, { useMemo } from 'react';
 import { Activity, BarChart3, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  getCurrencyCode as getSharedCurrencyCode,
+  getCurrencySymbol as getSharedCurrencySymbol,
+} from '@/lib/currencies';
 import ReflectCard from './ReflectCard.jsx';
 
-export const getCurrencyCode = (currency) => {
-  if (typeof currency === 'string') return currency;
-  return currency?.code || currency?.currency || 'SAR';
-};
+export const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
-export const getCurrencySymbol = (currency) => {
-  const code = getCurrencyCode(currency);
-
-  const map = {
-    SAR: 'SAR',
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    CNY: '¥',
-    INR: '₹',
-    PKR: 'Rs',
-    AED: 'د.إ',
-    TRY: '₺',
-    RUB: '₽',
-  };
-
-  return currency?.symbol || map[code] || code;
-};
+export const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
 
 export const formatNumber = (value = 0) => {
   const number = Number(value || 0);

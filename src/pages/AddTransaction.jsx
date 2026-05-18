@@ -46,6 +46,10 @@ import {
 } from '@/hooks/useBudgetData';
 
 import { useCurrency } from '@/hooks/useCurrency';
+import {
+  getCurrencyCode as getSharedCurrencyCode,
+  getCurrencySymbol as getSharedCurrencySymbol,
+} from '@/lib/currencies';
 
 const typeOptions = [
   { value: 'income', label: 'Income', icon: ArrowDownLeft },
@@ -53,29 +57,9 @@ const typeOptions = [
   { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight },
 ];
 
-const getCurrencyCode = (currency) => {
-  if (typeof currency === 'string') return currency;
-  return currency?.code || currency?.currency || 'SAR';
-};
+const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
-const getCurrencySymbol = (currency) => {
-  const code = getCurrencyCode(currency);
-
-  const map = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    CNY: '¥',
-    INR: '₹',
-    PKR: 'Rs',
-    AED: 'د.إ',
-    TRY: '₺',
-    RUB: '₽',
-  };
-
-  return currency?.symbol || map[code] || code;
-};
+const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
 
 function CurrencyPrefix({ currency }) {
   const currencyCode = getCurrencyCode(currency);

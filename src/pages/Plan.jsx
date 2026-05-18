@@ -38,6 +38,11 @@ import {
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
+import {
+  getCurrencyCode as getSharedCurrencyCode,
+  getCurrencyNoun as getSharedCurrencyNoun,
+  getCurrencySymbol as getSharedCurrencySymbol,
+} from '@/lib/currencies';
 
 const TABS = [
   {
@@ -99,51 +104,11 @@ const formatNumber = (value = 0) => {
   }).format(number);
 };
 
-const getCurrencyCode = (currency) => {
-  if (typeof currency === 'string') return currency;
-  return currency?.code || currency?.currency || 'SAR';
-};
+const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
-const getCurrencyName = (currency) => {
-  const code = getCurrencyCode(currency);
+const getCurrencyName = (currency) => getSharedCurrencyNoun(currency);
 
-  const map = {
-    SAR: 'riyal',
-    USD: 'dollar',
-    EUR: 'euro',
-    GBP: 'pound',
-    JPY: 'yen',
-    CNY: 'yuan',
-    INR: 'rupee',
-    PKR: 'rupee',
-    AED: 'dirham',
-    TRY: 'lira',
-    RUB: 'ruble',
-  };
-
-  return map[code] || 'currency';
-};
-
-const getCurrencySymbol = (currency) => {
-  const code = getCurrencyCode(currency);
-
-  if (code === 'SAR') return 'SAR';
-
-  const map = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    CNY: '¥',
-    INR: '₹',
-    PKR: 'Rs',
-    AED: 'د.إ',
-    TRY: '₺',
-    RUB: '₽',
-  };
-
-  return currency?.symbol || map[code] || code;
-};
+const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
 
 function Money({ amount, currency, compact = false, className = '' }) {
   const code = getCurrencyCode(currency);

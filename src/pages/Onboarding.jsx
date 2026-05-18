@@ -6,10 +6,13 @@ import {
   FolderOpen,
   Sparkles,
   CheckCircle2,
+  Coins,
+  Landmark,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -20,6 +23,7 @@ import {
 
 import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, categoriesApi, saveUserSettings } from '@/lib/budgetData';
+import { currencies, getCurrencyByCode } from '@/lib/currencies';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -30,33 +34,25 @@ const steps = [
     icon: Sparkles,
   },
   {
-    title: 'Regional Setup',
-    subtitle: 'Set your currency and format',
-    icon: Wallet,
+    title: 'Currency Setup',
+    subtitle: 'Choose how your money is displayed',
+    icon: Coins,
   },
   {
     title: 'Your First Account',
     subtitle: 'Add your main bank or cash account',
-    icon: Wallet,
+    icon: Landmark,
   },
   {
-    title: 'Quick Categories',
-    subtitle: "We'll set up the basics",
+    title: 'Starter Categories',
+    subtitle: 'Begin with a clean category setup',
     icon: FolderOpen,
   },
 ];
 
-const currencyOptions = [
-  { value: 'SAR', label: 'SAR — Saudi Riyal', symbol: 'SAR' },
-  { value: 'USD', label: '$ — US Dollar', symbol: '$' },
-  { value: 'EUR', label: '€ — Euro', symbol: '€' },
-  { value: 'GBP', label: '£ — British Pound', symbol: '£' },
-  { value: 'PKR', label: '₨ — Pakistani Rupee', symbol: '₨' },
-];
-
 const defaultCategories = [
   { name: 'Salary', type: 'income', icon: 'briefcase', color: '#107C10' },
-  { name: 'Freelance', type: 'income', icon: 'dollar', color: '#008272' },
+  { name: 'Other Income', type: 'income', icon: 'dollar', color: '#008272' },
 
   { name: 'Housing', type: 'expense', icon: 'home', color: '#0078D4' },
   { name: 'Food & Dining', type: 'expense', icon: 'utensils', color: '#CA5010' },
@@ -64,13 +60,39 @@ const defaultCategories = [
   { name: 'Utilities', type: 'expense', icon: 'electric', color: '#FFB900' },
   { name: 'Shopping', type: 'expense', icon: 'shopping', color: '#E3008C' },
   { name: 'Health', type: 'expense', icon: 'health', color: '#C50F1F' },
-  { name: 'Entertainment', type: 'expense', icon: 'gaming', color: '#8764B8' },
 
   { name: 'Emergency Fund', type: 'savings', icon: 'piggy', color: '#107C10' },
-  { name: 'Investments', type: 'savings', icon: 'trending', color: '#0078D4' },
 
   { name: 'Credit Card', type: 'debt', icon: 'credit', color: '#C50F1F' },
 ];
+
+const categoryTypeLabel = {
+  income: 'Income',
+  expense: 'Expense',
+  savings: 'Savings',
+  debt: 'Debt',
+};
+
+const SarIcon = () => (
+  <img
+    src="/sar.svg"
+    alt="SAR"
+    className="inline-block h-4 w-4 dark:invert"
+  />
+);
+
+const CurrencyLabel = ({ option, compact = false }) => {
+  if (option.code === 'SAR') {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <SarIcon />
+        {compact ? option.shortDisplay : option.display}
+      </span>
+    );
+  }
+
+  return compact ? option.shortDisplay : option.display;
+};
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -80,12 +102,11 @@ export default function Onboarding() {
   const [currency, setCurrency] = useState('SAR');
   const [accountName, setAccountName] = useState('Main Account');
   const [accountBalance, setAccountBalance] = useState('');
+  const [createStarterCategories, setCreateStarterCategories] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const StepIcon = steps[step].icon;
-
-  const selectedCurrency =
-    currencyOptions.find((item) => item.value === currency) || currencyOptions[0];
+  const selectedCurrency = getCurrencyByCode(currency);
 
   const goBack = () => {
     setStep((current) => Math.max(current - 1, 0));
@@ -112,10 +133,18 @@ export default function Onboarding() {
     setLoading(true);
 
     try {
-      const [existingAccounts, existingCategories] = await Promise.all([
+      const [existingAccountsRaw, existingCategoriesRaw] = await Promise.all([
         accountsApi.list(),
         categoriesApi.list(),
       ]);
+
+      const existingAccounts = Array.isArray(existingAccountsRaw)
+        ? existingAccountsRaw
+        : [];
+
+      const existingCategories = Array.isArray(existingCategoriesRaw)
+        ? existingCategoriesRaw
+        : [];
 
       const accountAlreadyExists = existingAccounts.some(
         (account) =>
@@ -132,26 +161,31 @@ export default function Onboarding() {
         });
       }
 
-      const categoriesToCreate = defaultCategories.filter(
-        (starterCategory) =>
-          !existingCategories.some(
-            (category) =>
-              category.name?.trim().toLowerCase() ===
-                starterCategory.name.toLowerCase() &&
-              category.type === starterCategory.type
-          )
-      );
+      if (createStarterCategories) {
+        const categoriesToCreate = defaultCategories.filter(
+          (starterCategory) =>
+            !existingCategories.some(
+              (category) =>
+                category.name?.trim().toLowerCase() ===
+                  starterCategory.name.toLowerCase() &&
+                category.type === starterCategory.type
+            )
+        );
 
-      if (categoriesToCreate.length > 0) {
-        await categoriesApi.bulkCreate(categoriesToCreate);
+        if (categoriesToCreate.length > 0) {
+          await categoriesApi.bulkCreate(categoriesToCreate);
+        }
       }
 
       await saveUserSettings({
         onboarding_complete: true,
         currency,
+        currency_placement: 'before',
         theme: 'system',
         number_format: 'comma',
         date_format: 'MM/DD/YYYY',
+        shift25th: false,
+        auto_sweep: false,
       });
 
       await queryClient.invalidateQueries();
@@ -167,24 +201,33 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-transparent px-4 py-8">
+      <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center">
         {/* Progress */}
-        <div className="mb-10 flex gap-1.5">
-          {steps.map((_, index) => (
-            <div
-              key={index}
-              className={cn(
-                'h-1 flex-1 rounded-full transition-all duration-500',
-                index <= step ? 'bg-primary shadow-sm' : 'bg-secondary/70'
-              )}
-            />
-          ))}
+        <div className="mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
+          <div className="flex gap-1.5">
+            {steps.map((_, index) => (
+              <div
+                key={index}
+                className={cn(
+                  'h-1 flex-1 rounded-full transition-all duration-500',
+                  index <= step ? 'bg-primary shadow-sm' : 'bg-secondary/70'
+                )}
+              />
+            ))}
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+            <span>
+              Step {step + 1} of {steps.length}
+            </span>
+            <span>{steps[step].title}</span>
+          </div>
         </div>
 
         {/* Header */}
-        <div className="mb-10 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
+        <div className="mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 text-center shadow-sm backdrop-blur-xl">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
             {step === 0 ? (
               <>
                 <img
@@ -212,20 +255,34 @@ export default function Onboarding() {
           </p>
         </div>
 
-        {/* Card */}
-        <div className="surface-card card-elevated mb-8 min-h-[260px] rounded-2xl border border-border/60 p-6">
+        {/* Main Card */}
+        <div className="mb-5 min-h-[292px] overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm backdrop-blur-xl">
           {step === 0 && (
             <div className="space-y-4 text-center">
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Cero uses zero-based budgeting — every unit of income gets a job
-                before you spend it. Plan your income, assign it to categories,
-                and track every transaction with clarity.
+                Start with a clear monthly plan. Add your income, assign it to
+                what matters, and track every transaction as the month unfolds.
               </p>
 
-              <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
-                <p className="text-sm font-medium text-primary">
-                  Goal: Left to Allocate = {selectedCurrency.symbol} 0.00
+              <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Planning goal
+                </div>
+
+                <p className="mt-1 text-sm font-semibold text-primary">
+                  Plan first. Spend second.
                 </p>
+              </div>
+
+              <div className="rounded-2xl border border-border/60 bg-background/40 p-4 text-left backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    You can change your currency, accounts, and categories
+                    anytime.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -238,24 +295,34 @@ export default function Onboarding() {
                 </label>
 
                 <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
 
                   <SelectContent>
-                    {currencyOptions.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
+                    {currencies.map((item) => (
+                      <SelectItem key={item.code} value={item.code}>
+                        <CurrencyLabel option={item} />
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-secondary/40 p-4">
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  This currency will be used across Plan, Transactions, Accounts,
-                  Reflect, and Settings.
+              <div className="rounded-2xl border border-border/60 bg-background/40 p-4 backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <Coins className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    This currency will be used across Plan, Transactions,
+                    Accounts, Reflect, and Settings.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                <p className="text-xs font-medium text-primary">
+                  Selected: <CurrencyLabel option={selectedCurrency} />
                 </p>
               </div>
             </div>
@@ -272,6 +339,7 @@ export default function Onboarding() {
                   value={accountName}
                   onChange={(event) => setAccountName(event.target.value)}
                   placeholder="Main Account"
+                  className="h-11 rounded-xl"
                 />
               </div>
 
@@ -287,55 +355,101 @@ export default function Onboarding() {
                   placeholder="0.00"
                   step="0.01"
                   inputMode="decimal"
+                  className="h-11 rounded-xl"
                 />
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-secondary/40 p-4">
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  You can add more accounts later from the Accounts page.
-                </p>
+              <div className="rounded-2xl border border-border/60 bg-background/40 p-4 backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Add your main account now. You can add more cash, bank, or
+                    liability accounts later.
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 rounded-xl border border-primary/10 bg-primary/5 p-4">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  Starter categories will be added so you can begin planning
-                  immediately. You can edit, delete, or add more categories later.
-                </p>
-              </div>
-
-              <div className="grid max-h-52 grid-cols-2 gap-1.5 overflow-y-auto pr-1">
-                {defaultCategories.map((category) => (
-                  <div
-                    key={`${category.type}-${category.name}`}
-                    className="flex items-center gap-2 rounded-lg bg-secondary/50 px-2 py-1.5"
-                  >
-                    <div
-                      className="h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: category.color }}
-                    />
-
-                    <span className="truncate text-xs">
-                      {category.name}
-                    </span>
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background/40 p-4 backdrop-blur-xl">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">
+                    Create starter categories
                   </div>
-                ))}
+
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                    Recommended for a faster first setup.
+                  </p>
+                </div>
+
+                <Switch
+                  checked={createStarterCategories}
+                  onCheckedChange={setCreateStarterCategories}
+                />
               </div>
+
+              {createStarterCategories ? (
+                <>
+                  <div className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Cero will add a small starter set. You can edit, delete,
+                      or add more categories later.
+                    </p>
+                  </div>
+
+                  <div className="grid max-h-44 grid-cols-2 gap-1.5 overflow-y-auto pr-1">
+                    {defaultCategories.map((category) => (
+                      <div
+                        key={`${category.type}-${category.name}`}
+                        className="flex min-w-0 items-center gap-2 rounded-lg bg-secondary/50 px-2 py-1.5"
+                      >
+                        <div
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+
+                        <div className="min-w-0">
+                          <div className="truncate text-xs font-medium">
+                            {category.name}
+                          </div>
+
+                          <div className="truncate text-[10px] text-muted-foreground">
+                            {categoryTypeLabel[category.type]}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-2xl border border-border/60 bg-background/40 p-5 text-center backdrop-blur-xl">
+                  <FolderOpen className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
+
+                  <p className="text-sm font-medium">
+                    Starter categories skipped
+                  </p>
+
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    You can create your own categories later from the Categories
+                    page.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="space-y-3">
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
           <Button
             onClick={goNext}
             disabled={loading}
-            className="h-12 w-full gap-2 text-sm font-semibold"
+            className="h-12 w-full gap-2 rounded-xl text-sm font-semibold"
           >
             {loading
               ? 'Setting up...'
@@ -351,13 +465,13 @@ export default function Onboarding() {
               type="button"
               variant="ghost"
               onClick={goBack}
-              className="h-10 w-full text-xs text-muted-foreground"
+              className="mt-2 h-10 w-full rounded-xl text-xs text-muted-foreground"
             >
               Back
             </Button>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -47,6 +47,10 @@ import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
+import {
+  getCurrencyCode as getSharedCurrencyCode,
+  getCurrencySymbol as getSharedCurrencySymbol,
+} from '@/lib/currencies';
 
 const typeIcons = {
   checking: Landmark,
@@ -59,29 +63,9 @@ const typeIcons = {
 };
 
 
-const getCurrencyCode = (currency) => {
-  if (typeof currency === 'string') return currency;
-  return currency?.code || currency?.currency || 'SAR';
-};
+const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
-const getCurrencySymbol = (currency) => {
-  const code = getCurrencyCode(currency);
-
-  const map = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    CNY: '¥',
-    INR: '₹',
-    PKR: 'Rs',
-    AED: 'د.إ',
-    TRY: '₺',
-    RUB: '₽',
-  };
-
-  return currency?.symbol || map[code] || code;
-};
+const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
 
 function formatNumber(value = 0) {
   const number = Number(value || 0);
