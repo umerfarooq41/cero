@@ -286,7 +286,6 @@ export default function Settings() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Settings"
         subtitle="Preferences, categories, and app settings"
       />

@@ -300,7 +300,6 @@ export default function EditPlan() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Edit Plan"
         subtitle={`Adjust your ${format(
           new Date(`${currentMonth}-01`),

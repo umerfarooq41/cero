@@ -164,7 +164,6 @@ export default function Transactions() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Transactions"
         subtitle={`${filtered.length} transactions this month`}
       />

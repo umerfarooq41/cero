@@ -7,6 +7,7 @@ export default function PageHeader({
 }) {
   return (
     <header
+      data-no-page-entrance
       className={cn(
         `
         sticky top-0 z-40

@@ -135,7 +135,6 @@ export default function AddAccount() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title={isEditing ? 'Edit Account' : 'Add Account'}
         subtitle={
           isEditing

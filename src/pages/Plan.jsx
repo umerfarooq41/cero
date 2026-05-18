@@ -634,7 +634,6 @@ export default function Plan() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Plan"
         subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
       />

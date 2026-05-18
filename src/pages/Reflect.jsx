@@ -391,7 +391,6 @@ export default function Reflect() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Reflect"
         subtitle="Insights, trends, and financial clarity"
       />

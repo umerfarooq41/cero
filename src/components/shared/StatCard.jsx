@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export default function StatCard({ label, amount, planned, type = 'neutral', icon: Icon, className }) {
@@ -35,13 +36,26 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
       </div>
       {planned !== undefined && (
         <div className="space-y-1.5">
-          <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-            <div 
+          <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+            <motion.div
               className={cn(
-                "h-full rounded-full transition-all duration-500",
+                'absolute inset-y-0 left-0 rounded-full',
                 isOver ? 'bg-destructive' : barColorMap[type]
               )}
-              style={{ width: `${Math.min(percentage, 100)}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(percentage, 100)}%` }}
+              transition={{
+                type: 'spring',
+                stiffness: 120,
+                damping: 20,
+                delay: 0.1,
+              }}
+            />
+            <motion.div
+              className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              initial={{ left: '-4rem' }}
+              animate={{ left: '110%' }}
+              transition={{ duration: 1.2, delay: 0.6, ease: 'easeInOut' }}
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground tabular-nums">

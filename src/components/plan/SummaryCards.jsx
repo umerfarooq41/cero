@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, PiggyBank, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
@@ -76,13 +77,23 @@ function SummaryCard({
 
       {safePlanned > 0 && (
         <>
-          <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-1.5">
-            <div
-              className={cn('h-full rounded-full transition-all duration-500', colors.bar)}
-              style={{
-                width: `${percentage}%`,
-                transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          <div className="relative h-2 bg-secondary rounded-full overflow-hidden mb-2">
+            <motion.div
+              className={cn('absolute inset-y-0 left-0 rounded-full', colors.bar)}
+              initial={{ width: 0 }}
+              animate={{ width: `${percentage}%` }}
+              transition={{
+                type: 'spring',
+                stiffness: 120,
+                damping: 20,
+                delay: 0.1,
               }}
+            />
+            <motion.div
+              className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              initial={{ left: '-4rem' }}
+              animate={{ left: '110%' }}
+              transition={{ duration: 1.2, delay: 0.6, ease: 'easeInOut' }}
             />
           </div>
 

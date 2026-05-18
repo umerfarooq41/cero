@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useAnimate, stagger } from 'framer-motion';
 
-export function usePageEntrance(selector = '.animate-child') {
+export function usePageEntrance(
+  selector = '.animate-child:not(header):not(.page-header):not([data-no-page-entrance])'
+) {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {

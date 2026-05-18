@@ -108,7 +108,6 @@ export default function Categories() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Categories"
         subtitle="Organize income, expenses, savings, and debt"
       />

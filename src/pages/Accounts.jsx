@@ -152,7 +152,6 @@ export default function Accounts() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title="Accounts"
         subtitle="Your financial overview"
       />

@@ -202,7 +202,6 @@ export default function AccountDetail() {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
         <PageHeader
-          className="animate-child"
           title="Account"
           subtitle="Account details and activity"
         />
@@ -230,7 +229,6 @@ export default function AccountDetail() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        className="animate-child"
         title={account.name}
         subtitle={`${account.type?.replace('_', ' ') || 'Account'} details and activity`}
       />
