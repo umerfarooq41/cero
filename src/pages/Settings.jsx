@@ -254,6 +254,16 @@ export default function Settings() {
 
     try {
       await resetUserData();
+
+      await saveUserSettings({
+        onboarding_complete: false,
+        currency: 'SAR',
+        currency_placement: 'before',
+        theme: 'system',
+        shift25th: false,
+        auto_sweep: false,
+      });
+
       queryClient.clear();
 
       toast.success('All Cero data has been deleted');
@@ -261,7 +271,7 @@ export default function Settings() {
       setShowResetDialog(false);
       setResetConfirmText('');
 
-      navigate('/', { replace: true });
+      navigate('/onboarding', { replace: true });
     } catch (error) {
       console.error('Reset database failed:', error);
       toast.error(error.message || 'Could not reset database');
