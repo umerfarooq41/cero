@@ -403,7 +403,7 @@ export default function Settings() {
             <SettingRow
               icon={Globe}
               label="Currency"
-              description="Select your currency symbol"
+              description="Select your display currency"
             >
               <Select
                 value={settings.currency}
