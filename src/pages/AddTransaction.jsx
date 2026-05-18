@@ -46,6 +46,7 @@ import {
 } from '@/hooks/useBudgetData';
 
 import { useCurrency } from '@/hooks/useCurrency';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
@@ -145,6 +146,7 @@ function isSavingsAccount(account) {
 }
 
 export default function AddTransaction() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -397,8 +399,9 @@ export default function AddTransaction() {
   const amountWidth = `${Math.max(4, String(amount || '0.00').length)}ch`;
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
         subtitle={
           isEditing
@@ -412,13 +415,13 @@ export default function AddTransaction() {
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="mb-4 gap-2"
+          className="animate-child mb-4 gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
 
-        <div className="mb-6 rounded-3xl border border-border/60 bg-card/75 p-6 shadow-md backdrop-blur-xl md:p-8">
+        <div className="animate-child mb-6 rounded-3xl border border-border/60 bg-card/75 p-6 shadow-md backdrop-blur-xl md:p-8">
   <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
     Amount
   </div>
@@ -470,10 +473,10 @@ export default function AddTransaction() {
             setCategoryId('');
             setToAccountId('');
           }}
-          className="mb-6"
+          className="mb-6 animate-child"
         />
 
-        <div className="space-y-4 rounded-2xl border border-border/60 bg-card/70 p-5 shadow-sm backdrop-blur-xl">
+        <div className="animate-child space-y-4 rounded-2xl border border-border/60 bg-card/70 p-5 shadow-sm backdrop-blur-xl">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               {type === 'transfer' ? 'From Account' : 'Account'}
@@ -606,7 +609,7 @@ export default function AddTransaction() {
         <Button
           onClick={handleSubmit}
           disabled={saving || !amount}
-          className="mt-6 h-12 w-full rounded-xl text-sm font-semibold"
+          className="animate-child mt-6 h-12 w-full rounded-xl text-sm font-semibold"
         >
           {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
         </Button>
@@ -618,7 +621,7 @@ export default function AddTransaction() {
                 type="button"
                 variant="outline"
                 disabled={saving}
-                className="mt-3 h-12 w-full rounded-xl border-destructive/30 text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+                className="animate-child mt-3 h-12 w-full rounded-xl border-destructive/30 text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Transaction

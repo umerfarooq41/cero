@@ -23,8 +23,10 @@ import { useCategories } from '@/hooks/useBudgetData';
 import CategorySection from '@/components/categories/CategorySection';
 import CategoryEditorModal from '@/components/categories/CategoryEditorModal';
 import CategoryActionSheet from '@/components/categories/CategoryActionSheet';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 export default function Categories() {
+  const scope = usePageEntrance();
   const queryClient = useQueryClient();
   const { data: categories = [] } = useCategories();
 
@@ -104,15 +106,16 @@ export default function Categories() {
   const archivedCategories = categories.filter((c) => c.is_archived);
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Categories"
         subtitle="Organize income, expenses, savings, and debt"
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
         {archivedCategories.length > 0 && (
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex justify-end animate-child">
             <Button
               variant="ghost"
               size="sm"
@@ -127,7 +130,7 @@ export default function Categories() {
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="animate-child space-y-4">
           <CategorySection
             type="income"
             label="Income"
@@ -223,7 +226,7 @@ export default function Categories() {
 
         <Button
           onClick={() => openNew('expense')}
-          className="fixed bottom-24 right-5 z-50 h-14 w-14 rounded-2xl p-0 shadow-lg shadow-primary/25 lg:bottom-6"
+          className="animate-child fixed bottom-24 right-5 z-50 h-14 w-14 rounded-2xl p-0 shadow-lg shadow-primary/25 lg:bottom-6"
           size="icon"
         >
           <Plus className="h-6 w-6" />

@@ -17,6 +17,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const typeIcons = {
   checking: Landmark,
@@ -37,6 +38,7 @@ function InlineMoney({ children }) {
 }
 
 export default function Accounts() {
+  const scope = usePageEntrance();
   const formatCurrency = useCurrencyFormatter();
   const { data: accounts = [] } = useAccounts();
 
@@ -148,8 +150,9 @@ export default function Accounts() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Accounts"
         subtitle="Your financial overview"
       />
@@ -157,7 +160,7 @@ export default function Accounts() {
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 md:py-6">
         
         {/* Net Worth Card */}
-        <section className="mb-6 rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl p-5 shadow-md md:p-6">
+        <section className="animate-child mb-6 rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl p-5 shadow-md md:p-6">
           
           <div className="flex flex-col items-center justify-center text-center">
             
@@ -227,7 +230,7 @@ export default function Accounts() {
         </section>
 
         {/* Account Groups */}
-        <div className="space-y-4">
+        <div className="animate-child space-y-4">
           {renderGroup('Assets', assets, false)}
           {renderGroup('Liabilities', liabilities, true)}
         </div>

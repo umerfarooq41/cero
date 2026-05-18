@@ -38,6 +38,7 @@ import {
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencyNoun as getSharedCurrencyNoun,
@@ -471,6 +472,7 @@ function PlanOverview({
 }
 
 export default function Plan() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -630,14 +632,15 @@ export default function Plan() {
   );
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Plan"
         subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 lg:py-8">
-        <div className="mb-4">
+        <div className="mb-4 animate-child">
           <AnimatePresence mode="wait">
             {isEditMode ? (
               <motion.div
@@ -745,7 +748,7 @@ export default function Plan() {
         <motion.div
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18 }}
-          className="space-y-4 pt-4"
+          className="animate-child space-y-4 pt-4"
         >
           <LeftToAllocateBanner
             leftToAllocate={leftToAllocate}

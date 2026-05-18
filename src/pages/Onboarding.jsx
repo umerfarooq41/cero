@@ -26,6 +26,7 @@ import { accountsApi, categoriesApi, saveUserSettings } from '@/lib/budgetData';
 import { currencies, getCurrencyByCode } from '@/lib/currencies';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const steps = [
   {
@@ -95,6 +96,7 @@ const CurrencyLabel = ({ option, compact = false }) => {
 };
 
 export default function Onboarding() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -201,10 +203,10 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent px-4 py-8">
+    <div ref={scope} className="min-h-screen bg-transparent px-4 py-8">
       <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center">
         {/* Progress */}
-        <div className="mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
           <div className="flex gap-1.5">
             {steps.map((_, index) => (
               <div
@@ -226,7 +228,7 @@ export default function Onboarding() {
         </div>
 
         {/* Header */}
-        <div className="mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 text-center shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 text-center shadow-sm backdrop-blur-xl">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
             {step === 0 ? (
               <>
@@ -256,7 +258,7 @@ export default function Onboarding() {
         </div>
 
         {/* Main Card */}
-        <div className="mb-5 min-h-[292px] overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-5 min-h-[292px] overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm backdrop-blur-xl">
           {step === 0 && (
             <div className="space-y-4 text-center">
               <p className="text-sm leading-relaxed text-muted-foreground">
@@ -445,7 +447,7 @@ export default function Onboarding() {
         </div>
 
         {/* Actions */}
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
+        <div className="animate-child overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
           <Button
             onClick={goNext}
             disabled={loading}

@@ -25,6 +25,7 @@ import {
 } from '@/hooks/useBudgetData';
 
 import { useCurrency } from '@/hooks/useCurrency';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
@@ -79,6 +80,7 @@ function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
 const ADD_TRANSACTION_ROUTE = '/add-transaction';
 
 export default function Transactions() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const currency = useCurrency();
 
@@ -160,15 +162,16 @@ export default function Transactions() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Transactions"
         subtitle={`${filtered.length} transactions this month`}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         {/* Month + Date */}
-        <div className="mb-4 flex justify-center">
+        <div className="mb-4 flex justify-center animate-child">
           <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
             <Button
               type="button"
@@ -242,7 +245,7 @@ export default function Transactions() {
         </div>
 
         {/* Search */}
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex gap-2 animate-child">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -259,20 +262,22 @@ export default function Transactions() {
         <TransactionTypeTabs
           value={filterType}
           onChange={setFilterType}
-          className="mb-6"
+          className="mb-6 animate-child"
         />
 
         {/* Empty */}
         {!hasTransactions ? (
-          <EmptyState
-            icon={ArrowLeftRight}
+          <div className="animate-child">
+            <EmptyState
+              icon={ArrowLeftRight}
             title="No transactions yet"
             description="Add your first transaction to start tracking your spending."
             actionLabel="Add Transaction"
             onAction={() => navigate(ADD_TRANSACTION_ROUTE)}
-          />
+            />
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="animate-child space-y-4">
             {sortedDates.map((date) => (
               <div
                 key={date}

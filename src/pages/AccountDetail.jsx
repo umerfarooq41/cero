@@ -47,6 +47,7 @@ import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
@@ -109,6 +110,7 @@ function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
 
 
 export default function AccountDetail() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const currency = useCurrency();
@@ -198,13 +200,14 @@ export default function AccountDetail() {
 
   if (!account) {
     return (
-      <div className="min-h-screen bg-transparent">
+      <div ref={scope} className="min-h-screen bg-transparent">
         <PageHeader
+          className="animate-child"
           title="Account"
           subtitle="Account details and activity"
         />
 
-        <main className="mx-auto w-full max-w-lg px-4 py-10 text-center">
+        <main className="animate-child mx-auto w-full max-w-lg px-4 py-10 text-center">
           <p className="text-muted-foreground">Account not found</p>
 
           <Button
@@ -225,14 +228,15 @@ export default function AccountDetail() {
   const balance = Math.abs(Number(account.balance) || 0);
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title={account.name}
         subtitle={`${account.type?.replace('_', ' ') || 'Account'} details and activity`}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex items-center justify-between gap-3 animate-child">
           <Button
             variant="ghost"
             size="sm"
@@ -263,7 +267,7 @@ export default function AccountDetail() {
           </div>
         </div>
 
-        <section className="mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card/75 shadow-md backdrop-blur-xl">
+        <section className="animate-child mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card/75 shadow-md backdrop-blur-xl">
           <div
             className={cn(
               'p-6',
@@ -328,7 +332,7 @@ export default function AccountDetail() {
           </div>
         </section>
 
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between animate-child">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Recent Transactions
           </h2>
@@ -339,12 +343,14 @@ export default function AccountDetail() {
         </div>
 
         {transactions.length === 0 ? (
-          <EmptyState
-            title="No transactions"
+          <div className="animate-child">
+            <EmptyState
+              title="No transactions"
             description="No transactions for this account yet."
-          />
+            />
+          </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+          <div className="animate-child overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
             <div className="divide-y divide-border/50">
               {transactions.map((transaction) => (
                 <TransactionRow

@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   ChartPie,
   CalendarCheck,
@@ -16,72 +17,103 @@ const navItems = [
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+function isNavItemActive(pathname, path) {
+  if (path === '/') {
+    return (
+      pathname === '/' ||
+      pathname.startsWith('/plan') ||
+      pathname.startsWith('/edit-plan')
+    );
+  }
+
+  return pathname === path || pathname.startsWith(`${path}/`);
+}
+
 export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav
-      className="
-        fixed bottom-0 left-0 right-0 z-50
-        app-fixed-surface
-        border-0
-        shadow-none
-        ring-0
-        lg:hidden
-      "
-    >
+    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
+      {/* Backdrop blur panel */}
+      <div className="absolute inset-0 app-fixed-surface app-bottom-nav" />
+
       <div
         className="
-          mx-auto
-          max-w-3xl
-          grid grid-cols-5
-          h-16
+          relative mx-auto
+          grid h-16 max-w-3xl grid-cols-5
           pb-[env(safe-area-inset-bottom)]
         "
       >
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = isNavItemActive(location.pathname, item.path);
+          const Icon = item.icon;
 
           return (
             <Link
               key={item.path}
               to={item.path}
-              className="flex items-center justify-center"
+              aria-label={item.label}
+              className="relative flex items-center justify-center"
             >
+              {isActive && (
+                <motion.div
+                  layoutId="nav-pill"
+                  className="
+                    absolute inset-x-2 inset-y-1.5
+                    rounded-2xl
+                    bg-primary/10
+                  "
+                  transition={{
+                    type: 'spring',
+                    stiffness: 380,
+                    damping: 30,
+                  }}
+                />
+              )}
+
               <div
                 className={cn(
                   `
+                  relative z-10
                   flex flex-col items-center justify-center
-                  gap-1
-                  px-2 py-2
-                  transition-all duration-200
+                  gap-1 px-2 py-2
+                  transition-colors duration-200
                   `,
                   isActive
                     ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <item.icon
-                  className={cn(
-                    `
-                    w-5 h-5
-                    transition-all duration-200
-                    `,
-                    isActive && 'scale-110 stroke-[2.5]'
-                  )}
-                />
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.15 : 1,
+                    y: isActive ? -1 : 0,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 25,
+                  }}
+                >
+                  <Icon
+                    className={cn(
+                      'h-5 w-5 transition-all duration-200',
+                      isActive && 'stroke-[2.5]'
+                    )}
+                  />
+                </motion.div>
 
-                <span
+                <motion.span
+                  animate={{
+                    opacity: isActive ? 1 : 0.6,
+                  }}
                   className={cn(
-                    `
-                    text-[11px]
-                    transition-all duration-200
-                    `,
+                    'text-[11px] transition-all duration-200',
                     isActive ? 'font-semibold' : 'font-medium'
                   )}
                 >
                   {item.label}
-                </span>
+                </motion.span>
               </div>
             </Link>
           );

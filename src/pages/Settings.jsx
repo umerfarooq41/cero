@@ -42,6 +42,7 @@ import { useAuth } from '@/lib/AuthContext';
 import PageHeader from '@/components/layout/PageHeader';
 import { useTheme } from '@/components/theme-provider';
 import { currencies } from '@/lib/currencies';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const SettingRow = ({
   icon: Icon,
@@ -105,6 +106,7 @@ const getSavedAutoSweepSurplus = (saved = {}, fallback = false) => {
 };
 
 export default function Settings() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -282,14 +284,15 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Settings"
         subtitle="Preferences, categories, and app settings"
       />
 
       <main className="mx-auto w-full max-w-4xl px-4 py-3 pb-24 lg:py-8">
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Account
@@ -333,7 +336,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               App Management
@@ -363,7 +366,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Appearance
@@ -414,7 +417,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Regional
@@ -454,7 +457,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Budget Logic
@@ -490,7 +493,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="animate-child overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
           <div className="border-b border-border px-5 py-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Data & Privacy

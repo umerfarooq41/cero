@@ -20,6 +20,7 @@ import { accountsApi } from '@/lib/budgetData';
 import { useAccounts } from '@/hooks/useBudgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const accountTypes = [
   { value: 'checking', label: 'Checking' },
@@ -65,6 +66,7 @@ const colors = [
 ];
 
 export default function AddAccount() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -131,8 +133,9 @@ export default function AddAccount() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title={isEditing ? 'Edit Account' : 'Add Account'}
         subtitle={
           isEditing
@@ -146,13 +149,13 @@ export default function AddAccount() {
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="mb-4 gap-2"
+          className="animate-child mb-4 gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
 
-        <div className="space-y-5 rounded-2xl border border-border/60 bg-card/70 p-5 shadow-sm backdrop-blur-xl">
+        <div className="animate-child space-y-5 rounded-2xl border border-border/60 bg-card/70 p-5 shadow-sm backdrop-blur-xl">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Account Name
@@ -245,7 +248,7 @@ export default function AddAccount() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="mt-6 h-12 w-full rounded-xl text-sm font-semibold"
+          className="animate-child mt-6 h-12 w-full rounded-xl text-sm font-semibold"
         >
           {saving
             ? 'Saving...'

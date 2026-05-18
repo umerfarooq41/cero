@@ -21,8 +21,10 @@ import CategoryIcon from '@/components/shared/CategoryIcon';
 import { useCategories, useAllocations } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 export default function EditPlan() {
+  const scope = usePageEntrance();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -296,8 +298,9 @@ export default function EditPlan() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Edit Plan"
         subtitle={`Adjust your ${format(
           new Date(`${currentMonth}-01`),
@@ -306,7 +309,7 @@ export default function EditPlan() {
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
-        <div className="mb-4">
+        <div className="mb-4 animate-child">
           <div className="flex items-center justify-center">
             <div className="flex w-full max-w-md items-center rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
               <Button
@@ -355,14 +358,16 @@ export default function EditPlan() {
           </div>
         </div>
 
-        <LeftToAllocateBanner
-          leftToAllocate={leftToAllocate}
-          totalIncome={totalIncome}
-          isEditMode={true}
-          formatCurrency={formatCurrency}
-        />
+        <div className="animate-child">
+          <LeftToAllocateBanner
+            leftToAllocate={leftToAllocate}
+            totalIncome={totalIncome}
+            isEditMode={true}
+            formatCurrency={formatCurrency}
+          />
+        </div>
 
-        <div className="mb-4 mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="animate-child mb-4 mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button
             variant="outline"
             size="sm"
@@ -384,7 +389,7 @@ export default function EditPlan() {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="animate-child space-y-4">
           {renderSection('Income', 'income')}
           {renderSection('Expenses', 'expense')}
           {renderSection('Savings', 'savings')}

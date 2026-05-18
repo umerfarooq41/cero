@@ -30,6 +30,7 @@ import {
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const tooltipStyle = {
   backgroundColor: 'hsl(var(--popover))',
@@ -290,6 +291,7 @@ function buildReflectInsights({
 }
 
 export default function Reflect() {
+  const scope = usePageEntrance();
   const today = new Date();
 
   const [selectedYear, setSelectedYear] = useState(format(today, 'yyyy'));
@@ -387,56 +389,63 @@ export default function Reflect() {
   );
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
+        className="animate-child"
         title="Reflect"
         subtitle="Insights, trends, and financial clarity"
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
-        <ReflectPeriodSelector
-          year={selectedYear}
-          month={analysisMonth}
-          periodMode={periodMode}
-          onPeriodModeChange={setPeriodMode}
-          onYearChange={setSelectedYear}
-          onMonthChange={setSelectedMonth}
-        />
+        <div className="animate-child">
+          <ReflectPeriodSelector
+            year={selectedYear}
+            month={analysisMonth}
+            periodMode={periodMode}
+            onPeriodModeChange={setPeriodMode}
+            onYearChange={setSelectedYear}
+            onMonthChange={setSelectedMonth}
+          />
+        </div>
 
-        <ReflectSummaryCards
-          isYear={isYear}
-          selectedYear={selectedYear}
-          selectedMonth={analysisMonth}
-          income={income}
-          expenses={expenses}
-          trackedSavings={trackedSavings}
-          trackedDebt={trackedDebt}
-          plannedIncome={plannedIncome}
-          plannedExpenses={plannedExpenses}
-          plannedSavings={plannedSavings}
-          plannedDebt={plannedDebt}
-          totalPlannedOutflow={totalPlannedOutflow}
-          totalTrackedOutflow={totalTrackedOutflow}
-          netCashFlow={netCashFlow}
-          netWorth={netWorth}
-          totalAssets={totalAssets}
-          totalLiabilities={totalLiabilities}
-          savingsRate={savingsRate}
-          currency={currency}
-        />
+        <div className="animate-child">
+          <ReflectSummaryCards
+            isYear={isYear}
+            selectedYear={selectedYear}
+            selectedMonth={analysisMonth}
+            income={income}
+            expenses={expenses}
+            trackedSavings={trackedSavings}
+            trackedDebt={trackedDebt}
+            plannedIncome={plannedIncome}
+            plannedExpenses={plannedExpenses}
+            plannedSavings={plannedSavings}
+            plannedDebt={plannedDebt}
+            totalPlannedOutflow={totalPlannedOutflow}
+            totalTrackedOutflow={totalTrackedOutflow}
+            netCashFlow={netCashFlow}
+            netWorth={netWorth}
+            totalAssets={totalAssets}
+            totalLiabilities={totalLiabilities}
+            savingsRate={savingsRate}
+            currency={currency}
+          />
+        </div>
 
-        <ReflectCharts
-          isYear={isYear}
-          cashFlow={cashFlow}
-          spendingBreakdown={spendingBreakdown}
-          spendingTrend={spendingTrend}
-          efficiency={efficiency}
-          leftToAllocate={leftToAllocate}
-          currency={currency}
-          tooltipStyle={tooltipStyle}
-        />
+        <div className="animate-child">
+          <ReflectCharts
+            isYear={isYear}
+            cashFlow={cashFlow}
+            spendingBreakdown={spendingBreakdown}
+            spendingTrend={spendingTrend}
+            efficiency={efficiency}
+            leftToAllocate={leftToAllocate}
+            currency={currency}
+            tooltipStyle={tooltipStyle}
+          />
+        </div>
 
-        <div>
+        <div className="animate-child">
           <div className="mb-3 flex items-center gap-2">
             <Brain className="h-4 w-4 text-muted-foreground" />
             <h3 className="text-sm font-semibold">Smart Insights</h3>

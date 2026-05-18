@@ -1,14 +1,16 @@
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
+import { usePageEntrance } from '@/hooks/usePageTransition';
 
 export default function PageNotFound() {
+  const scope = usePageEntrance();
   const location = useLocation();
   const { user } = useAuth();
   const pageName = location.pathname.substring(1);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-      <div className="max-w-md w-full">
+    <div ref={scope} className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+      <div className="animate-child max-w-md w-full">
         <div className="text-center space-y-6">
           <div className="space-y-2">
             <h1 className="text-7xl font-light text-slate-300">404</h1>

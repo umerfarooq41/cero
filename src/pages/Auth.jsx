@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
+import { usePageEntrance } from "@/hooks/usePageTransition";
 
 export default function Auth() {
   const { isAuthenticated, signIn, signUp, signInWithGoogle } = useAuth();
+  const scope = usePageEntrance();
   const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,8 +52,8 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm surface-card card-elevated border border-white/40 dark:border-white/[0.05] rounded-xl p-6 space-y-5">
+    <div ref={scope} className="min-h-screen bg-transparent flex items-center justify-center p-4">
+      <form onSubmit={handleSubmit} className="animate-child w-full max-w-sm surface-card card-elevated border border-white/40 dark:border-white/[0.05] rounded-xl p-6 space-y-5">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
             <Wallet className="w-6 h-6 text-primary" />
