@@ -117,7 +117,7 @@ function Money({ amount, currency, compact = false, className = '' }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
         className
       )}
     >
@@ -136,7 +136,7 @@ function Money({ amount, currency, compact = false, className = '' }) {
         <span className="text-current">{symbol}</span>
       )}
 
-      <span>{formatNumber(amount)}</span>
+      <span className="tabular-nums">{formatNumber(amount)}</span>
     </span>
   );
 }
@@ -153,14 +153,14 @@ function DonutTooltip({ active, payload, currency, tab }) {
 
   return (
     <div className="rounded-xl border bg-popover px-3 py-2 shadow-lg">
-      <p className="text-xs font-bold">{item?.name}</p>
+      <p className="text-xs font-bold tabular-nums">{item?.name}</p>
 
       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{tab.label}</span>
         <Money amount={tracked} currency={currency} compact />
       </div>
 
-      <p className="mt-1 text-[11px] font-semibold" style={{ color: item?.color }}>
+      <p className="mt-1 text-[11px] font-semibold tabular-nums" style={{ color: item?.color }}>
         {percent}% tracked
       </p>
     </div>
@@ -307,7 +307,7 @@ function PlanOverview({
       <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight tabular-nums">
               <Money amount={totalTracked} currency={currency} />
             </h2>
 
@@ -322,7 +322,7 @@ function PlanOverview({
               {totalRemaining >= 0 ? 'Left' : 'Over'}
             </p>
             <p
-              className={`text-sm font-bold ${
+              className={`text-sm font-bold tabular-nums ${
                 totalRemaining < 0 ? 'text-red-600' : 'text-foreground'
               }`}
             >
@@ -379,11 +379,12 @@ function PlanOverview({
     {tab.label}
   </p>
 
-  <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+  <p className="mt-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
     {Math.round(progress)}%
   </p>
 </div>
 </div>
+      </div>
 
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <div className="border-b px-4 py-3">
@@ -419,7 +420,7 @@ function PlanOverview({
                           {item.name}
                         </p>
 
-                        <p className="shrink-0 text-sm font-bold">
+                        <p className="shrink-0 text-sm font-bold tabular-nums">
                           <Money
                             amount={item.tracked}
                             currency={currency}
@@ -439,7 +440,7 @@ function PlanOverview({
                         />
                       </div>
 
-                      <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground tabular-nums">
                         <span>
                           {formatNumber(item.tracked)} /{' '}
                           {formatNumber(item.planned)}

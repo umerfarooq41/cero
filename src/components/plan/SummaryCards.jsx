@@ -101,7 +101,7 @@ function SummaryCard({
               </>
             ) : (
               <>
-                <span>{Math.round(percentage)}% of</span>
+                <span className="tabular-nums">{Math.round(percentage)}% of</span>
                 {money(safePlanned)}
               </>
             )}

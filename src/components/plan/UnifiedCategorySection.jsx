@@ -6,20 +6,20 @@ import { Input } from '@/components/ui/input';
 
 function Money({ amount, formatCurrency }) {
   if (formatCurrency) {
-    return <>{formatCurrency(amount)}</>;
+    return <span className="tabular-nums inline-flex items-center gap-1">{formatCurrency(amount)}</span>;
   }
 
   return (
-    <span className="inline-flex items-center gap-1">
+    <span className="inline-flex items-center gap-1 tabular-nums">
       <img
       src="/sar.svg"
       alt="SAR"
       className="h-4 w-4 dark:invert"
       />
-      {Number(amount || 0).toLocaleString('en-US', {
+      <span className="tabular-nums">{Number(amount || 0).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-      })}
+      })}</span>
     </span>
   );
 }
@@ -119,7 +119,7 @@ function EditRow({
         </span>
 
         {lastMonthHint > 0 && (
-          <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+          <span className="text-xs text-muted-foreground inline-flex items-center gap-1 tabular-nums">
             <span>Last:</span>
             <Money amount={lastMonthHint} formatCurrency={formatCurrency} />
           </span>
@@ -265,7 +265,7 @@ export default function UnifiedCategorySection({
           {isEditMode ? (
             <Money amount={totalPlanned} formatCurrency={formatCurrency} />
           ) : (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 tabular-nums">
               <Money amount={totalSpent} formatCurrency={formatCurrency} />
               <span className="opacity-50">/</span>
               <Money amount={totalPlanned} formatCurrency={formatCurrency} />

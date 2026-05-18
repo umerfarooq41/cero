@@ -83,7 +83,7 @@ function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
         className
       )}
     >
@@ -102,7 +102,7 @@ function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
         <span className="text-current">{symbol}</span>
       )}
 
-      <span>{formatNumber(amount)}</span>
+      <span className="tabular-nums">{formatNumber(amount)}</span>
     </span>
   );
 }

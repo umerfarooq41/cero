@@ -369,7 +369,7 @@ export default function ReflectCharts({
                   </svg>
 
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold">
+                    <span className="text-2xl font-bold tabular-nums">
                       {isYear ? `${yearSpendingRatio}%` : `${safeEfficiency}%`}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -379,7 +379,7 @@ export default function ReflectCharts({
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-x-1 gap-y-1 text-center text-sm font-medium">
+              <div className="flex flex-wrap justify-center gap-x-1 gap-y-1 text-center text-sm font-medium tabular-nums">
                 {isYear ? (
                   totalTrackedIncome > 0 ? (
                     <>

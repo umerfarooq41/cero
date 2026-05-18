@@ -424,7 +424,7 @@ export default function AddTransaction() {
   </div>
 
   <div className="flex justify-center overflow-hidden">
-    <div className="inline-flex max-w-full items-center gap-3 text-5xl font-bold leading-none text-foreground">
+    <div className="inline-flex max-w-full items-center gap-3 text-5xl font-bold leading-none text-foreground tabular-nums">
       <CurrencyPrefix currency={currency} />
 
       <input

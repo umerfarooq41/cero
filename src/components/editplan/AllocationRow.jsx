@@ -43,7 +43,7 @@ export default function AllocationRow({
         </span>
 
         {lastMonthHint > 0 && (
-          <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+          <span className="text-xs text-muted-foreground inline-flex items-center gap-1 tabular-nums">
             Last month:
             {formatCurrency
               ? formatCurrency(lastMonthHint)

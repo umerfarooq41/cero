@@ -30,7 +30,7 @@ const typeIcons = {
 
 function InlineMoney({ children }) {
   return (
-    <span className="inline-flex items-center align-middle whitespace-nowrap">
+    <span className="inline-flex items-center align-middle whitespace-nowrap tabular-nums">
       {children}
     </span>
   );

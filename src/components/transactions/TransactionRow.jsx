@@ -6,20 +6,20 @@ import { cn } from '@/lib/utils';
 function CurrencyAmount({ value, formatCurrency }) {
   if (formatCurrency) {
     return (
-      <span className="inline-flex items-center align-middle whitespace-nowrap">
+      <span className="inline-flex items-center align-middle whitespace-nowrap tabular-nums">
         {formatCurrency(value)}
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap">
+    <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap tabular-nums">
       <img
         src="/sar.svg"
         alt="SAR"
         className="h-4 w-4 inline-block dark:invert"
       />
-      <span>
+      <span className="tabular-nums">
         {Number(Math.abs(value || 0)).toLocaleString('en-US', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,

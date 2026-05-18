@@ -53,7 +53,7 @@ export function CurrencyAmount({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current',
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
         className
       )}
     >
@@ -65,7 +65,7 @@ export function CurrencyAmount({
         <span>{symbol}</span>
       )}
 
-      <span>{formatNumber(amount)}</span>
+      <span className="tabular-nums">{formatNumber(amount)}</span>
     </span>
   );
 }
@@ -74,7 +74,7 @@ export function InlineMoney({ children, className }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center align-middle whitespace-nowrap leading-none text-current',
+        'inline-flex items-center align-middle whitespace-nowrap leading-none text-current tabular-nums',
         className
       )}
     >
@@ -234,7 +234,7 @@ function PercentBar({ label, value, className, delay }) {
       <div className="flex items-center justify-between gap-3 text-xs font-medium">
         <span className="text-muted-foreground">{label}</span>
         <span className="tabular-nums text-foreground">
-          {Math.round(safeValue)}%
+          <span className="tabular-nums">{Math.round(safeValue)}%</span>
         </span>
       </div>
 
@@ -317,8 +317,8 @@ function HeroCashFlowCard({
             />
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{Math.round(savedProgress)}% saved</span>
-              <span>{Math.round(expenseProgress)}% spent</span>
+              <span className="tabular-nums">{Math.round(savedProgress)}% saved</span>
+              <span className="tabular-nums">{Math.round(expenseProgress)}% spent</span>
             </div>
           </div>
         </div>
@@ -527,7 +527,7 @@ export default function ReflectSummaryCard({
             />
 
             <p className="text-xs text-muted-foreground">
-              {Math.round(computed.netWorthHealth)}% asset-backed
+              <span className="tabular-nums">{Math.round(computed.netWorthHealth)}% asset-backed</span>
             </p>
           </div>
         </div>
