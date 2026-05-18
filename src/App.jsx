@@ -28,7 +28,6 @@ import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
 
 import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
-import CommandPalette from '@/components/shared/CommandPalette';
 
 const LoadingScreen = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -109,8 +108,7 @@ function App() {
       </Router>
 
       <Toaster />
-          <CommandPalette />
-      </QueryClientProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -10,8 +10,19 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard', matches: ['/'] },
-  { path: '/plan', icon: CalendarCheck, label: 'Plan', matches: ['/plan', '/edit-plan'] },
+  {
+    path: '/',
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    matches: ['/'],
+    exact: true,
+  },
+  {
+    path: '/plan',
+    icon: CalendarCheck,
+    label: 'Plan',
+    matches: ['/plan', '/edit-plan'],
+  },
   {
     path: '/transactions',
     icon: Receipt,
@@ -24,12 +35,18 @@ const navItems = [
     label: 'Accounts',
     matches: ['/accounts', '/add-account'],
   },
-  { path: '/reflect', icon: ChartPie, label: 'Reflect', matches: ['/reflect'] },
+  {
+    path: '/reflect',
+    icon: ChartPie,
+    label: 'Reflect',
+    matches: ['/reflect'],
+  },
 ];
 
 function isNavItemActive(pathname, item) {
+  if (item.exact) return pathname === item.path;
+
   return item.matches.some((path) => {
-    if (path === '/') return pathname === '/';
     return pathname === path || pathname.startsWith(`${path}/`);
   });
 }
@@ -76,7 +93,7 @@ export default function BottomNav() {
                   `
                   relative z-10
                   flex flex-col items-center justify-center
-                  gap-1 px-1.5 py-2
+                  gap-1 px-2 py-2
                   transition-colors duration-200
                   `,
                   isActive
@@ -102,7 +119,7 @@ export default function BottomNav() {
                 <motion.span
                   animate={{ opacity: isActive ? 1 : 0.6 }}
                   className={cn(
-                    'text-[10px] transition-all duration-200 sm:text-[11px]',
+                    'text-[11px] transition-all duration-200',
                     isActive ? 'font-semibold' : 'font-medium'
                   )}
                 >

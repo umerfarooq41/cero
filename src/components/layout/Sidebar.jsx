@@ -3,17 +3,28 @@ import { motion } from 'framer-motion';
 import {
   ChartPie,
   CalendarCheck,
-  FolderOpen,
   LayoutDashboard,
   Receipt,
   Settings,
+  Tags,
   WalletCards,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard', matches: ['/'] },
-  { path: '/plan', icon: CalendarCheck, label: 'Plan', matches: ['/plan', '/edit-plan'] },
+  {
+    path: '/',
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    matches: ['/'],
+    exact: true,
+  },
+  {
+    path: '/plan',
+    icon: CalendarCheck,
+    label: 'Plan',
+    matches: ['/plan', '/edit-plan'],
+  },
   {
     path: '/transactions',
     icon: Receipt,
@@ -26,17 +37,33 @@ const navItems = [
     label: 'Accounts',
     matches: ['/accounts', '/add-account'],
   },
-  { path: '/reflect', icon: ChartPie, label: 'Reflect', matches: ['/reflect'] },
+  {
+    path: '/reflect',
+    icon: ChartPie,
+    label: 'Reflect',
+    matches: ['/reflect'],
+  },
 ];
 
 const utilityItems = [
-  { path: '/settings', icon: Settings, label: 'Settings', matches: ['/settings'] },
-  { path: '/categories', icon: FolderOpen, label: 'Categories', matches: ['/categories'] },
+  {
+    path: '/categories',
+    icon: Tags,
+    label: 'Categories',
+    matches: ['/categories'],
+  },
+  {
+    path: '/settings',
+    icon: Settings,
+    label: 'Settings',
+    matches: ['/settings'],
+  },
 ];
 
 function isNavItemActive(pathname, item) {
+  if (item.exact) return pathname === item.path;
+
   return item.matches.some((path) => {
-    if (path === '/') return pathname === '/';
     return pathname === path || pathname.startsWith(`${path}/`);
   });
 }
@@ -52,9 +79,9 @@ function SidebarLink({ item, compact = false }) {
       aria-current={isActive ? 'page' : undefined}
       className="relative block"
     >
-      {isActive && (
+      {isActive && !compact && (
         <motion.div
-          layoutId={compact ? 'sidebar-utility-active' : 'sidebar-active'}
+          layoutId="sidebar-active"
           className="absolute inset-0 rounded-xl bg-primary/[0.08]"
           transition={{ type: 'spring', stiffness: 350, damping: 28 }}
         />
@@ -85,7 +112,8 @@ function SidebarLink({ item, compact = false }) {
 
         <Icon
           className={cn(
-            'h-5 w-5 transition-all duration-200',
+            compact ? 'h-4 w-4' : 'h-5 w-5',
+            'transition-all duration-200',
             isActive && 'stroke-[2.5]'
           )}
         />
@@ -128,23 +156,19 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="space-y-3 px-4 py-4">
-        <div className="space-y-1 rounded-2xl border border-border/50 bg-card/45 p-1.5 backdrop-blur-xl">
+      <div className="space-y-2 px-3 pb-4">
+        <div className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">
+          Manage
+        </div>
+
+        <div className="space-y-1">
           {utilityItems.map((item) => (
             <SidebarLink key={item.path} item={item} compact />
           ))}
         </div>
+      </div>
 
-        <button
-          onClick={() => {
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }));
-          }}
-          className="w-full flex items-center justify-between rounded-xl border border-border/50 bg-secondary/60 px-3 py-2 text-xs text-muted-foreground hover:bg-secondary transition-colors"
-        >
-          <span>Quick actions</span>
-          <kbd className="rounded bg-background/60 px-1.5 py-0.5 font-mono text-[10px] border border-border/40">⌘K</kbd>
-        </button>
-
+      <div className="px-4 pb-4">
         <div className="text-center text-xs text-muted-foreground">
           Zero-Based Budgeting
         </div>
