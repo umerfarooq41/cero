@@ -1,10 +1,18 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClientInstance } from '@/lib/query-client';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+} from 'react-router-dom';
+
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
+
 import Plan from '@/pages/Plan';
 import EditPlan from '@/pages/EditPlan';
 import Transactions from '@/pages/Transactions';
@@ -17,29 +25,55 @@ import Settings from '@/pages/Settings';
 import Reflect from '@/pages/Reflect';
 import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
-import { useAutoSweepSurplus } from '@/hooks/useBudgetData';
+
+import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
+
+const LoadingScreen = () => (
+  <div className="fixed inset-0 flex items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" />
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  const {
+    data: userSettings,
+    isFetching: isFetchingSettings,
+  } = useUserSettings();
 
   useAutoSweepSurplus();
 
-  if (isLoadingAuth) {
+  if (isLoadingAuth || (isAuthenticated && isFetchingSettings)) {
+    return <LoadingScreen />;
+  }
+
+  if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Auth />} />
+        <Route path="/signup" element={<Auth />} />
+        <Route path="*" element={<Auth />} />
+      </Routes>
     );
+  }
+
+  const onboardingComplete = userSettings?.onboarding_complete === true;
+  const isOnboardingRoute = location.pathname === '/onboarding';
+
+  if (!onboardingComplete && !isOnboardingRoute) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  if (onboardingComplete && isOnboardingRoute) {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <Routes>
-      <Route path="/login" element={<Auth />} />
-      <Route path="/signup" element={<Auth />} />
-      {!isAuthenticated && <Route path="*" element={<Auth />} />}
-      {isAuthenticated && (
-        <>
       <Route path="/onboarding" element={<Onboarding />} />
+
       <Route element={<AppLayout />}>
         <Route path="/" element={<Plan />} />
         <Route path="/edit-plan" element={<EditPlan />} />
@@ -54,26 +88,22 @@ const AuthenticatedApp = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/reflect" element={<Reflect />} />
       </Route>
+
       <Route path="*" element={<PageNotFound />} />
-        </>
-      )}
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
-  )
+    <QueryClientProvider client={queryClientInstance}>
+      <Router>
+        <AuthenticatedApp />
+      </Router>
+
+      <Toaster />
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
