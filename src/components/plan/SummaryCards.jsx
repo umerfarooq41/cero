@@ -20,6 +20,7 @@ function SummaryCard({
   const safeAmount = Number(amount) || 0;
   const safePlanned = Number(planned) || 0;
   const money = formatCurrency || fallbackFormatCurrency;
+  const animatedAmount = useCountUp(safeAmount, 700);
 
   const percentage =
     safePlanned > 0
@@ -69,7 +70,7 @@ function SummaryCard({
       </div>
 
       <div className={cn('text-2xl font-bold tracking-tight tabular-nums mb-2 inline-flex items-center gap-1', colors.text)}>
-        {money(safeAmount)}
+        {money(animatedAmount)}
       </div>
 
       {safePlanned > 0 && (
