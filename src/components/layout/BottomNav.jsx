@@ -10,23 +10,28 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/reflect', icon: ChartPie, label: 'Reflect' },
-  { path: '/', icon: CalendarCheck, label: 'Plan' },
-  { path: '/transactions', icon: Receipt, label: 'Transactions' },
-  { path: '/accounts', icon: WalletCards, label: 'Accounts' },
-  { path: '/settings', icon: Settings, label: 'Settings' },
+  { path: '/reflect', icon: ChartPie, label: 'Reflect', matches: ['/reflect'] },
+  { path: '/', icon: CalendarCheck, label: 'Plan', matches: ['/', '/plan', '/edit-plan'] },
+  {
+    path: '/transactions',
+    icon: Receipt,
+    label: 'Transactions',
+    matches: ['/transactions', '/add-transaction'],
+  },
+  {
+    path: '/accounts',
+    icon: WalletCards,
+    label: 'Accounts',
+    matches: ['/accounts', '/add-account'],
+  },
+  { path: '/settings', icon: Settings, label: 'Settings', matches: ['/settings', '/categories'] },
 ];
 
-function isNavItemActive(pathname, path) {
-  if (path === '/') {
-    return (
-      pathname === '/' ||
-      pathname.startsWith('/plan') ||
-      pathname.startsWith('/edit-plan')
-    );
-  }
-
-  return pathname === path || pathname.startsWith(`${path}/`);
+function isNavItemActive(pathname, item) {
+  return item.matches.some((path) => {
+    if (path === '/') return pathname === '/';
+    return pathname === path || pathname.startsWith(`${path}/`);
+  });
 }
 
 export default function BottomNav() {
@@ -34,7 +39,6 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-      {/* Backdrop blur panel */}
       <div className="absolute inset-0 app-fixed-surface app-bottom-nav" />
 
       <div
@@ -45,7 +49,7 @@ export default function BottomNav() {
         "
       >
         {navItems.map((item) => {
-          const isActive = isNavItemActive(location.pathname, item.path);
+          const isActive = isNavItemActive(location.pathname, item);
           const Icon = item.icon;
 
           return (
@@ -53,6 +57,7 @@ export default function BottomNav() {
               key={item.path}
               to={item.path}
               aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className="relative flex items-center justify-center"
             >
               {isActive && (
@@ -60,14 +65,9 @@ export default function BottomNav() {
                   layoutId="nav-pill"
                   className="
                     absolute inset-x-2 inset-y-1.5
-                    rounded-2xl
-                    bg-primary/10
+                    rounded-2xl bg-primary/10
                   "
-                  transition={{
-                    type: 'spring',
-                    stiffness: 380,
-                    damping: 30,
-                  }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
 
@@ -89,11 +89,7 @@ export default function BottomNav() {
                     scale: isActive ? 1.15 : 1,
                     y: isActive ? -1 : 0,
                   }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
-                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   <Icon
                     className={cn(
@@ -104,9 +100,7 @@ export default function BottomNav() {
                 </motion.div>
 
                 <motion.span
-                  animate={{
-                    opacity: isActive ? 1 : 0.6,
-                  }}
+                  animate={{ opacity: isActive ? 1 : 0.6 }}
                   className={cn(
                     'text-[11px] transition-all duration-200',
                     isActive ? 'font-semibold' : 'font-medium'
