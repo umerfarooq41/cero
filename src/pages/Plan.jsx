@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format, subMonths, addMonths } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import {
   PencilLine,
   Copy,
@@ -10,8 +10,6 @@ import {
   ArrowDownRight,
   PiggyBank,
   CreditCard,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import {
   PieChart,
@@ -30,6 +28,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '@/components/layout/PageHeader';
 import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
+import MonthSelector from '@/components/shared/MonthSelector';
 import {
   useBudgetSummary,
   useAllocations,
@@ -681,63 +680,22 @@ export default function Plan() {
                 transition={{ duration: 0.15 }}
               >
                 <div className="flex items-center justify-center">
-                  <div className="flex w-full max-w-md items-center rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 shrink-0 rounded-xl"
-                      onClick={() =>
-                        setCurrentMonth(
-                          format(
-                            subMonths(new Date(`${currentMonth}-01`), 1),
-                            'yyyy-MM'
-                          )
-                        )
-                      }
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-
-                    <button
-                      type="button"
-                      className="flex flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 hover:bg-secondary/60"
-                    >
-                      <span className="text-sm font-semibold text-foreground">
-                        {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
-                      </span>
-
-                      <span className="text-xs text-muted-foreground">
-                        Budget period
-                      </span>
-                    </button>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 shrink-0 rounded-xl"
-                      onClick={() =>
-                        setCurrentMonth(
-                          format(
-                            addMonths(new Date(`${currentMonth}-01`), 1),
-                            'yyyy-MM'
-                          )
-                        )
-                      }
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="ml-1 h-9 w-9 shrink-0 rounded-xl"
-                      onClick={() => navigate(`/edit-plan?month=${currentMonth}`)}
-                    >
-                      <PencilLine className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <MonthSelector
+                    currentMonth={currentMonth}
+                    onChange={setCurrentMonth}
+                    subtitle="Budget period"
+                    trailingAction={
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 rounded-xl"
+                        onClick={() => navigate(`/edit-plan?month=${currentMonth}`)}
+                      >
+                        <PencilLine className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                 </div>
               </motion.div>
             )}

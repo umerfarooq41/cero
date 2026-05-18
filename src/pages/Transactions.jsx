@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, addMonths, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import {
   Search,
   ArrowLeftRight,
   X,
-  ChevronLeft,
-  ChevronRight,
   CalendarDays,
 } from 'lucide-react';
 
@@ -17,6 +15,7 @@ import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
+import MonthSelector from '@/components/shared/MonthSelector';
 
 import {
   useTransactions,
@@ -137,17 +136,8 @@ export default function Transactions() {
   const hasTransactions = sortedDates.length > 0;
 
 
-  const goToPreviousMonth = () => {
-    setCurrentMonth((prev) =>
-      format(subMonths(new Date(`${prev}-01`), 1), 'yyyy-MM')
-    );
-    setSelectedDate('');
-  };
-
-  const goToNextMonth = () => {
-    setCurrentMonth((prev) =>
-      format(addMonths(new Date(`${prev}-01`), 1), 'yyyy-MM')
-    );
+  const handleMonthChange = (nextMonth) => {
+    setCurrentMonth(nextMonth);
     setSelectedDate('');
   };
 
@@ -171,76 +161,48 @@ export default function Transactions() {
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         {/* Month + Date */}
         <div className="mb-4 flex justify-center animate-child">
-          <div className="flex w-full max-w-md items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 shrink-0 rounded-xl"
-              onClick={goToPreviousMonth}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+          <MonthSelector
+            currentMonth={currentMonth}
+            onChange={handleMonthChange}
+            subtitle={selectedDate ? format(new Date(selectedDate), 'MMM d, yyyy') : 'Transaction period'}
+            onLabelClick={openDatePicker}
+            trailingAction={
+              <>
+                <label className="relative h-9 w-9 shrink-0 cursor-pointer">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                    <CalendarDays className="h-4 w-4" />
+                  </span>
 
-            <button
-              type="button"
-              onClick={openDatePicker}
-              className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 text-center transition-colors hover:bg-secondary/70"
-            >
-              <span className="text-sm font-semibold text-foreground">
-                {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
-              </span>
+                  <Input
+                    id="transaction-date-picker"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => {
+                      const date = e.target.value;
+                      setSelectedDate(date);
 
-              {selectedDate && (
-                <span className="mt-0.5 text-xs text-muted-foreground">
-                  {format(new Date(selectedDate), 'MMM d, yyyy')}
-                </span>
-              )}
-            </button>
+                      if (date) {
+                        setCurrentMonth(format(new Date(date), 'yyyy-MM'));
+                      }
+                    }}
+                    className="absolute inset-0 h-9 w-9 cursor-pointer opacity-0"
+                  />
+                </label>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 shrink-0 rounded-xl"
-              onClick={goToNextMonth}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-
-            <label className="relative h-9 w-9 shrink-0 cursor-pointer">
-  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80">
-    <CalendarDays className="h-4 w-4" />
-  </span>
-
-  <Input
-    id="transaction-date-picker"
-    type="date"
-    value={selectedDate}
-    onChange={(e) => {
-      const date = e.target.value;
-      setSelectedDate(date);
-
-      if (date) {
-        setCurrentMonth(format(new Date(date), 'yyyy-MM'));
-      }
-    }}
-    className="absolute inset-0 h-9 w-9 cursor-pointer opacity-0"
-  />
-</label>
-
-            {selectedDate && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
-                onClick={() => setSelectedDate('')}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+                {selectedDate && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
+                    onClick={() => setSelectedDate('')}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </>
+            }
+          />
         </div>
 
         {/* Search */}

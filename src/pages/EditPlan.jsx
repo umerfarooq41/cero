@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format, subMonths, addMonths } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import {
   Copy,
   Save,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
   X,
 } from 'lucide-react';
@@ -18,6 +16,7 @@ import { budgetPlansApi } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import AllocationRow from '@/components/editplan/AllocationRow';
 import CategoryIcon from '@/components/shared/CategoryIcon';
+import MonthSelector from '@/components/shared/MonthSelector';
 import { useCategories, useAllocations } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
@@ -71,16 +70,6 @@ export default function EditPlan() {
   const changeMonth = (nextMonth) => {
     setCurrentMonth(nextMonth);
     navigate(`/edit-plan?month=${nextMonth}`, { replace: true });
-  };
-
-  const goToPreviousMonth = () => {
-    changeMonth(
-      format(subMonths(new Date(`${currentMonth}-01`), 1), 'yyyy-MM')
-    );
-  };
-
-  const goToNextMonth = () => {
-    changeMonth(format(addMonths(new Date(`${currentMonth}-01`), 1), 'yyyy-MM'));
   };
 
   const setValue = (catId, amount) => {
@@ -310,50 +299,22 @@ export default function EditPlan() {
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
         <div className="mb-4 animate-child">
           <div className="flex items-center justify-center">
-            <div className="flex w-full max-w-md items-center rounded-2xl border border-border/60 bg-card/70 p-1.5 shadow-sm backdrop-blur-xl">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 shrink-0 rounded-xl"
-                onClick={goToPreviousMonth}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-
-              <button
-                type="button"
-                className="flex flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 hover:bg-secondary/60"
-              >
-                <span className="text-sm font-semibold text-foreground">
-                  {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
-                </span>
-
-                <span className="text-xs text-muted-foreground">
-                  Editing budget period
-                </span>
-              </button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 shrink-0 rounded-xl"
-                onClick={goToNextMonth}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="ml-1 h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
-                onClick={() => navigate(`/?month=${currentMonth}`)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <MonthSelector
+              currentMonth={currentMonth}
+              onChange={changeMonth}
+              subtitle="Editing budget period"
+              trailingAction={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
+                  onClick={() => navigate(`/?month=${currentMonth}`)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              }
+            />
           </div>
         </div>
 
