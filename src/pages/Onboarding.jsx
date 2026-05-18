@@ -184,8 +184,23 @@ export default function Onboarding() {
 
         {/* Header */}
         <div className="mb-10 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
-            <StepIcon className="h-7 w-7 text-primary" />
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
+            {step === 0 ? (
+              <>
+                <img
+                  src="/icon-light.png"
+                  alt="Cero"
+                  className="block h-12 w-12 object-contain dark:hidden"
+                />
+                <img
+                  src="/icon-dark.png"
+                  alt="Cero"
+                  className="hidden h-12 w-12 object-contain dark:block"
+                />
+              </>
+            ) : (
+              <StepIcon className="h-7 w-7 text-primary" />
+            )}
           </div>
 
           <h1 className="mb-2 text-2xl font-bold tracking-tight">
