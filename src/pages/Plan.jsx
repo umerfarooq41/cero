@@ -375,20 +375,14 @@ function PlanOverview({
           </ResponsiveContainer>
 
           <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              {tab.label}
-            </p>
+  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+    {tab.label}
+  </p>
 
-            <p className="mt-1 text-xl font-bold">
-              <Money amount={totalTracked} currency={currency} compact />
-            </p>
-
-            <p className="text-xs text-muted-foreground">
-              {Math.round(progress)}%
-            </p>
-          </div>
-        </div>
-      </div>
+  <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+    {Math.round(progress)}%
+  </p>
+</div>
 
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <div className="border-b px-4 py-3">
