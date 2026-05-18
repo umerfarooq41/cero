@@ -40,12 +40,12 @@ const AuthenticatedApp = () => {
 
   const {
     data: userSettings,
-    isFetching: isFetchingSettings,
+    isFetched: settingsFetched,
   } = useUserSettings();
 
   useAutoSweepSurplus();
 
-  if (isLoadingAuth || (isAuthenticated && isFetchingSettings)) {
+  if (isLoadingAuth) {
     return <LoadingScreen />;
   }
 
@@ -57,6 +57,10 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<Auth />} />
       </Routes>
     );
+  }
+
+  if (!settingsFetched) {
+    return <LoadingScreen />;
   }
 
   const onboardingComplete = userSettings?.onboarding_complete === true;
