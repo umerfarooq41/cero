@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, PiggyBank, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCountUp } from '@/hooks/useCountUp';
 
 const fallbackFormatCurrency = (amount) =>
   Math.abs(amount || 0).toLocaleString('en-US', {

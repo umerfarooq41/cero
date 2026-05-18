@@ -6,7 +6,6 @@ import {
   getCurrencySymbol as getSharedCurrencySymbol,
 } from '@/lib/currencies';
 import ReflectCard from './ReflectCard.jsx';
-import { useCountUp } from '@/hooks/useCountUp';
 
 export const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
