@@ -14,10 +14,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Cero" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-  <!-- Default favicon (fallback = dark) -->
-  <link id="favicon" rel="icon" type="image/png" href="/icon-192.png" />
+  <!-- Icons -->
+  <link id="favicon" rel="icon" type="image/png" href="/icon-dark.png" />
+  <link rel="apple-touch-icon" href="/icon-dark.png" />
 
   <title>Cero</title>
 </head>
@@ -28,20 +28,23 @@
   <!-- React -->
   <script type="module" src="/src/main.jsx"></script>
 
-  <!-- 🌗 Auto Light/Dark Icon Switching -->
+  <!-- Auto Light/Dark Icon Switching -->
   <script>
     function setFavicon() {
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const favicon = document.getElementById("favicon");
+      const favicon = document.getElementById('favicon');
+
+      if (!favicon) return;
 
       favicon.href = isDark
-        ? "/icon-192.png"          // dark
-        : "/icon-light-192.png";  // light
+        ? '/icon-dark.png'
+        : '/icon-light.png';
     }
 
     setFavicon();
 
-    window.matchMedia('(prefers-color-scheme: dark)')
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
       .addEventListener('change', setFavicon);
   </script>
 </body>
