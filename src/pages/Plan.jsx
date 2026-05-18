@@ -383,6 +383,7 @@ function PlanOverview({
     {Math.round(progress)}%
   </p>
 </div>
+</div>
 
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <div className="border-b px-4 py-3">
