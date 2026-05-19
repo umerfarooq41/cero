@@ -3,10 +3,13 @@ import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+const MotionLink = motion(Link);
+
 export default function FloatingActionButton({
   to,
   onClick,
   ariaLabel = 'Add',
+  label = 'Add',
   className,
 }) {
   const baseClassName = cn(
@@ -19,7 +22,7 @@ export default function FloatingActionButton({
     'flex items-center justify-center',
     'h-14 w-14',
     'lg:h-12 lg:w-auto lg:px-5 lg:gap-2',
-    'rounded-2xl lg:rounded-2xl',
+    'rounded-2xl',
     'relative overflow-hidden',
 
     // Visual
@@ -39,7 +42,7 @@ export default function FloatingActionButton({
       <Plus className="relative z-10 h-5 w-5 stroke-[2.4]" />
 
       <span className="relative z-10 hidden text-sm font-semibold lg:inline">
-        Add
+        {label}
       </span>
     </>
   );
@@ -59,11 +62,14 @@ export default function FloatingActionButton({
 
   if (to) {
     return (
-      <motion.div {...motionProps}>
-        <Link to={to} aria-label={ariaLabel} className={baseClassName}>
-          {content}
-        </Link>
-      </motion.div>
+      <MotionLink
+        to={to}
+        aria-label={ariaLabel}
+        className={baseClassName}
+        {...motionProps}
+      >
+        {content}
+      </MotionLink>
     );
   }
 
