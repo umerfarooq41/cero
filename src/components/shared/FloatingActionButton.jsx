@@ -21,11 +21,11 @@ export default function FloatingActionButton({
   }, []);
 
   const baseClassName = cn(
-    // True viewport position
-    'fixed z-[9999]',
-    'right-5',
-    'bottom-[calc(5.75rem+env(safe-area-inset-bottom))]',
-    'lg:right-8 lg:bottom-8',
+    // Forced viewport position
+    '!fixed z-[9999]',
+    '!left-auto !right-5',
+    '!bottom-[calc(5.75rem+env(safe-area-inset-bottom))]',
+    'lg:!right-8 lg:!bottom-8',
 
     // Size / shape
     'flex items-center justify-center',
@@ -39,7 +39,6 @@ export default function FloatingActionButton({
     'shadow-[0_8px_32px_hsl(var(--primary)/0.45)]',
     'dark:shadow-[0_8px_32px_hsl(var(--primary)/0.35)]',
 
-    // Interaction
     'transition-none',
     className
   );
@@ -71,27 +70,26 @@ export default function FloatingActionButton({
 
   if (!mounted) return null;
 
-  return createPortal(
-    to ? (
-      <MotionLink
-        to={to}
-        aria-label={ariaLabel}
-        className={baseClassName}
-        {...motionProps}
-      >
-        {content}
-      </MotionLink>
-    ) : (
-      <motion.button
-        type="button"
-        onClick={onClick}
-        aria-label={ariaLabel}
-        className={baseClassName}
-        {...motionProps}
-      >
-        {content}
-      </motion.button>
-    ),
-    document.body
+  const fab = to ? (
+    <MotionLink
+      to={to}
+      aria-label={ariaLabel}
+      className={baseClassName}
+      {...motionProps}
+    >
+      {content}
+    </MotionLink>
+  ) : (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className={baseClassName}
+      {...motionProps}
+    >
+      {content}
+    </motion.button>
   );
+
+  return createPortal(fab, document.body);
 }
