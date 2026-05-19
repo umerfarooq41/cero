@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -12,13 +14,20 @@ export default function FloatingActionButton({
   label = 'Add',
   className,
 }) {
-  const baseClassName = cn(
-    // Position
-    'fixed z-50',
-    'bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-5',
-    'lg:bottom-8 lg:right-8',
+  const [mounted, setMounted] = useState(false);
 
-    // Shape / size
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const baseClassName = cn(
+    // True viewport position
+    'fixed z-[9999]',
+    'right-5',
+    'bottom-[calc(5.75rem+env(safe-area-inset-bottom))]',
+    'lg:right-8 lg:bottom-8',
+
+    // Size / shape
     'flex items-center justify-center',
     'h-14 w-14',
     'lg:h-12 lg:w-auto lg:px-5 lg:gap-2',
@@ -60,8 +69,10 @@ export default function FloatingActionButton({
     whileTap: { scale: 0.94 },
   };
 
-  if (to) {
-    return (
+  if (!mounted) return null;
+
+  return createPortal(
+    to ? (
       <MotionLink
         to={to}
         aria-label={ariaLabel}
@@ -70,18 +81,17 @@ export default function FloatingActionButton({
       >
         {content}
       </MotionLink>
-    );
-  }
-
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      aria-label={ariaLabel}
-      className={baseClassName}
-      {...motionProps}
-    >
-      {content}
-    </motion.button>
+    ) : (
+      <motion.button
+        type="button"
+        onClick={onClick}
+        aria-label={ariaLabel}
+        className={baseClassName}
+        {...motionProps}
+      >
+        {content}
+      </motion.button>
+    ),
+    document.body
   );
 }
