@@ -543,16 +543,6 @@ export default function ReflectDeepAnalysis({
         isYear={isYear}
         currency={currency}
       />
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <BudgetVsActual rows={budgetVsActual} currency={currency} />
-        <CategoryTrends
-          rows={categoryTrends}
-          comparablePeriodLabel={comparablePeriodLabel}
-          isYear={isYear}
-          currency={currency}
-        />
-      </div>
     </section>
   );
 }
