@@ -350,9 +350,6 @@ export default function Reflect() {
     savingsRate,
     efficiency,
     spendingBreakdown,
-    budgetVsActual,
-    categoryTrends,
-    comparablePeriodLabel,
     cashFlow,
     spendingTrend,
     topCategory,
@@ -460,9 +457,6 @@ export default function Reflect() {
             selectedMonth={isYear ? selectedMonth : analysisMonth}
             goals={savingsGoals}
             goalContributions={goalContributions}
-            budgetVsActual={budgetVsActual}
-            categoryTrends={categoryTrends}
-            comparablePeriodLabel={comparablePeriodLabel}
             currency={currency}
           />
         </div>
