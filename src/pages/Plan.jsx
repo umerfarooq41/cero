@@ -27,17 +27,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import PageHeader from '@/components/layout/PageHeader';
 import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
+import GoalsPanel from '@/components/goals/GoalsPanel';
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
 import MonthSelector from '@/components/shared/MonthSelector';
 import {
   useBudgetSummary,
   useAllocations,
   useCategories,
+  useAccounts,
+  useSavingsGoals,
+  useGoalContributions,
 } from '@/hooks/useBudgetData';
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
-import SpendingVelocityWidget from '@/components/plan/SpendingVelocityWidget';
-import SavingsRateCard from '@/components/plan/SavingsRateCard';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
@@ -493,6 +495,9 @@ export default function Plan() {
 
   const budget = useBudgetSummary(currentMonth);
   const { data: categories = [] } = useCategories();
+  const { data: accounts = [] } = useAccounts();
+  const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: goalContributions = [] } = useGoalContributions();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
   const prevMonth = format(
@@ -716,21 +721,6 @@ export default function Plan() {
             formatCurrency={formatCurrency}
             />
 
-          {!isEditMode && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-child">
-              <SpendingVelocityWidget
-                totalExpenses={budget.totalExpenses}
-                plannedExpenses={budget.totalPlannedExpenses}
-                currentMonth={currentMonth}
-                formatCurrency={formatCurrency}
-              />
-              <SavingsRateCard
-                income={budget.totalIncome}
-                expenses={budget.totalExpenses}
-              />
-            </div>
-          )}
-
           <AnimatePresence>
             {isEditMode && (
               <motion.div
@@ -752,6 +742,18 @@ export default function Plan() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {!isEditMode && (
+            <GoalsPanel
+              goals={savingsGoals}
+              contributions={goalContributions}
+              categories={categories}
+              accounts={accounts}
+              formatCurrency={formatCurrency}
+              title="Savings goals"
+              subtitle="Manual contributions, progress rings, and monthly required saving."
+            />
+          )}
 
           {isEditMode ? (
             <>

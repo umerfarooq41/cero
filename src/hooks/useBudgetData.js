@@ -5,6 +5,8 @@ import {
   budgetPlansApi,
   categoriesApi,
   recurringTransactionsApi,
+  savingsGoalsApi,
+  goalContributionsApi,
   transactionsApi,
   getUserSettings,
 } from '@/lib/budgetData';
@@ -119,6 +121,31 @@ export function useRecurringTransactions() {
   return useQuery({
     queryKey: ['recurring-transactions', session?.user?.id],
     queryFn: () => recurringTransactionsApi.list(),
+    enabled: Boolean(session?.user?.id),
+    initialData: [],
+  });
+}
+
+export function useSavingsGoals() {
+  const { session } = useAuth();
+
+  return useQuery({
+    queryKey: ['savings-goals', session?.user?.id],
+    queryFn: async () => {
+      const goals = await savingsGoalsApi.list();
+      return goals.filter((goal) => !goal.is_archived);
+    },
+    enabled: Boolean(session?.user?.id),
+    initialData: [],
+  });
+}
+
+export function useGoalContributions() {
+  const { session } = useAuth();
+
+  return useQuery({
+    queryKey: ['goal-contributions', session?.user?.id],
+    queryFn: () => goalContributionsApi.list(),
     enabled: Boolean(session?.user?.id),
     initialData: [],
   });

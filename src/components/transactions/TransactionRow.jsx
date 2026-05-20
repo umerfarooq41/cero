@@ -75,27 +75,34 @@ export default function TransactionRow({
 
   const config = typeConfig[transaction.type] || typeConfig.expense;
   const isTransfer = transaction.type === 'transfer';
+  const isRecurring = Boolean(
+    transaction.recurring_transaction_id || transaction.recurring_posted_for_date
+  );
+  const isGoalContribution = Boolean(
+    transaction.savings_goal_id || transaction.goal_contribution_id
+  );
 
   const accountName = account?.name || 'Account';
   const transactionTypeLabel = formatTransactionType(transaction.type);
   const transferTypeLabel = getTransferType(account, toAccount);
 
-  const title = isTransfer
-    ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
-    : category?.name || 'Uncategorized';
+  const title = isGoalContribution
+    ? category?.name || 'Goal contribution'
+    : isTransfer
+      ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
+      : category?.name || 'Uncategorized';
 
   const transferCategoryName =
   category?.name || transferTypeLabel || 'Transfer';
 
-  const primarySubtitle = isTransfer
-    ? `Transfer - ${transferCategoryName}`
-    : `${transactionTypeLabel} - ${accountName}`;
+  const primarySubtitle = isGoalContribution
+    ? `Goal contribution - ${accountName}`
+    : isTransfer
+      ? `Transfer - ${transferCategoryName}`
+      : `${transactionTypeLabel} - ${accountName}`;
 
-  const secondarySubtitle = !isTransfer ? transaction.note : null;
+  const secondarySubtitle = !isTransfer || isGoalContribution ? transaction.note : null;
   const amountValue = Math.abs(Number(transaction.amount || 0));
-  const isRecurring = Boolean(
-    transaction.recurring_transaction_id || transaction.recurring_posted_for_date
-  );
 
   return (
     <div
@@ -129,11 +136,19 @@ export default function TransactionRow({
           </div>
         )}
 
-        {isRecurring && (
-          <div className="mt-1">
-            <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-primary">
-              Recurring
-            </span>
+        {(isRecurring || isGoalContribution) && (
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {isRecurring && (
+              <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-primary">
+                Recurring
+              </span>
+            )}
+
+            {isGoalContribution && (
+              <span className="inline-flex items-center rounded-full border border-emerald-500/15 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-emerald-700 dark:text-emerald-400">
+                Goal
+              </span>
+            )}
           </div>
         )}
       </div>

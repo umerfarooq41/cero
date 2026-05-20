@@ -6,7 +6,6 @@ import {
   Gauge,
   Landmark,
   ListPlus,
-  PiggyBank,
   Plus,
   Receipt,
   Sparkles,
@@ -19,6 +18,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import RecurringTransactionsPanel from '@/components/transactions/RecurringTransactionsPanel';
+import GoalsPanel from '@/components/goals/GoalsPanel';
 import { Button } from '@/components/ui/button';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
@@ -27,6 +27,8 @@ import {
   useCategories,
   useTransactions,
   useRecurringTransactions,
+  useSavingsGoals,
+  useGoalContributions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
@@ -180,6 +182,8 @@ export default function Dashboard() {
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
+  const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: goalContributions = [] } = useGoalContributions();
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -332,23 +336,18 @@ export default function Dashboard() {
             className="animate-child"
           />
 
-          <DashboardCard
+          <GoalsPanel
+            goals={savingsGoals}
+            contributions={goalContributions}
+            categories={categories}
+            accounts={accounts}
+            formatCurrency={formatCurrency}
             title="Top goal progress"
-            subtitle="Savings goals will appear here after the goals module is added."
-            icon={Target}
+            subtitle="Your highest-priority savings goal with manual contribution tracking."
+            limit={1}
+            compact
             className="animate-child"
-          >
-            <EmptyDashboardState
-              icon={PiggyBank}
-              title="No savings goal selected"
-              description="The goals update will add progress rings, manual contributions, and monthly required saving."
-              action={
-                <Button asChild size="sm" variant="secondary" className="rounded-xl">
-                  <Link to="/plan">Open Plan</Link>
-                </Button>
-              }
-            />
-          </DashboardCard>
+          />
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.9fr]">

@@ -117,6 +117,28 @@ export const recurringTransactionsApi = {
   delete: (id) => deleteRow("recurring_transactions", id),
 };
 
+export const savingsGoalsApi = {
+  list: () =>
+    listRows("savings_goals", {
+      orderBy: "target_date",
+      ascending: true,
+    }),
+  create: (values) => createRow("savings_goals", values),
+  update: (id, values) => updateRow("savings_goals", id, values),
+  delete: (id) => deleteRow("savings_goals", id),
+};
+
+export const goalContributionsApi = {
+  list: () =>
+    listRows("goal_contributions", {
+      orderBy: "contribution_date",
+      ascending: false,
+    }),
+  create: (values) => createRow("goal_contributions", values),
+  update: (id, values) => updateRow("goal_contributions", id, values),
+  delete: (id) => deleteRow("goal_contributions", id),
+};
+
 export const budgetPlansApi = {
   list: (month) => listRows("budget_plans", { orderBy: "category_id", ascending: true, filters: { month } }),
   upsert: async ({ id, category_id, month, planned_amount }) => {
