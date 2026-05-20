@@ -1,6 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { accountsApi, budgetPlansApi, categoriesApi, transactionsApi, getUserSettings } from '@/lib/budgetData';
+import {
+  accountsApi,
+  budgetPlansApi,
+  categoriesApi,
+  recurringTransactionsApi,
+  transactionsApi,
+  getUserSettings,
+} from '@/lib/budgetData';
 import {
   calculateAutoSweepSurplus,
   filterTransactionsByBudgetMonth,
@@ -101,6 +108,17 @@ export function useAllTransactions() {
   return useQuery({
     queryKey: ['all-transactions', session?.user?.id],
     queryFn: () => transactionsApi.list(),
+    enabled: Boolean(session?.user?.id),
+    initialData: [],
+  });
+}
+
+export function useRecurringTransactions() {
+  const { session } = useAuth();
+
+  return useQuery({
+    queryKey: ['recurring-transactions', session?.user?.id],
+    queryFn: () => recurringTransactionsApi.list(),
     enabled: Boolean(session?.user?.id),
     initialData: [],
   });

@@ -12,6 +12,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import TransactionRow from '@/components/transactions/TransactionRow';
+import RecurringTransactionsPanel from '@/components/transactions/RecurringTransactionsPanel';
 import EmptyState from '@/components/shared/EmptyState';
 import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
@@ -21,6 +22,7 @@ import {
   useTransactions,
   useCategories,
   useAccounts,
+  useRecurringTransactions,
 } from '@/hooks/useBudgetData';
 
 import { useCurrency } from '@/hooks/useCurrency';
@@ -98,6 +100,7 @@ export default function Transactions() {
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
 
   const filtered = transactions.filter((t) => {
     const cat = categories.find((c) => c.id === t.category_id);
@@ -202,6 +205,15 @@ export default function Transactions() {
                 )}
               </>
             }
+          />
+        </div>
+
+        <div className="mb-5 animate-child">
+          <RecurringTransactionsPanel
+            recurringTransactions={recurringTransactions}
+            categories={categories}
+            accounts={accounts}
+            formatCurrency={formatCurrency}
           />
         </div>
 

@@ -2,7 +2,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   ArrowRight,
-  CalendarClock,
   ChartPie,
   Gauge,
   Landmark,
@@ -19,6 +18,7 @@ import {
 import PageHeader from '@/components/layout/PageHeader';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import TransactionRow from '@/components/transactions/TransactionRow';
+import RecurringTransactionsPanel from '@/components/transactions/RecurringTransactionsPanel';
 import { Button } from '@/components/ui/button';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
@@ -26,6 +26,7 @@ import {
   useBudgetSummary,
   useCategories,
   useTransactions,
+  useRecurringTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
@@ -178,6 +179,7 @@ export default function Dashboard() {
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -318,31 +320,17 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <DashboardCard
+          <RecurringTransactionsPanel
+            recurringTransactions={recurringTransactions}
+            categories={categories}
+            accounts={accounts}
+            formatCurrency={formatCurrency}
             title="Upcoming bills"
-            subtitle="Recurring transactions will appear here once manual-post bills are added."
-            icon={CalendarClock}
-            action={
-              <Button asChild variant="ghost" size="sm" className="gap-1 text-xs">
-                <Link to="/transactions">
-                  View
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            }
+            subtitle="Manual-post recurring items with due and overdue status."
+            limit={3}
+            compact
             className="animate-child"
-          >
-            <EmptyDashboardState
-              icon={CalendarClock}
-              title="No upcoming bills yet"
-              description="Next step will add manual-post recurring transactions with due and overdue states."
-              action={
-                <Button asChild size="sm" variant="secondary" className="rounded-xl">
-                  <Link to="/transactions">Open Transactions</Link>
-                </Button>
-              }
-            />
-          </DashboardCard>
+          />
 
           <DashboardCard
             title="Top goal progress"

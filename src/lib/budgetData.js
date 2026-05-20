@@ -106,6 +106,17 @@ export const transactionsApi = {
   delete: (id) => deleteRow("transactions", id),
 };
 
+export const recurringTransactionsApi = {
+  list: () =>
+    listRows("recurring_transactions", {
+      orderBy: "next_due_date",
+      ascending: true,
+    }),
+  create: (values) => createRow("recurring_transactions", values),
+  update: (id, values) => updateRow("recurring_transactions", id, values),
+  delete: (id) => deleteRow("recurring_transactions", id),
+};
+
 export const budgetPlansApi = {
   list: (month) => listRows("budget_plans", { orderBy: "category_id", ascending: true, filters: { month } }),
   upsert: async ({ id, category_id, month, planned_amount }) => {
