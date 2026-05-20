@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  accountsApi,
   goalContributionsApi,
   savingsGoalsApi,
   transactionsApi,
@@ -107,12 +106,6 @@ function GoalMoney({ value, formatCurrency }) {
       {formatCurrency(Math.abs(Number(value || 0)))}
     </span>
   );
-}
-
-function getContributionAccountDelta(account, amount) {
-  if (!account) return 0;
-
-  return account.category === 'liability' ? Number(amount || 0) : -Number(amount || 0);
 }
 
 function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
@@ -279,8 +272,8 @@ function ContributionDialog({
           <DialogTitle>Add goal contribution</DialogTitle>
           <DialogDescription>
             {goal?.name
-              ? `Move money toward ${goal.name}. This creates a linked transaction.`
-              : 'Move money toward a savings goal.'}
+              ? `Assign money toward ${goal.name}. This records a neutral savings transfer.`
+              : 'Assign money toward a savings goal.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -567,7 +560,6 @@ export default function GoalsPanel({
 
     try {
       const amount = Number(values.amount || 0);
-      const sourceAccount = accounts.find((account) => account.id === values.account_id);
       const savingsCategory = getDefaultSavingsCategory(categories);
       const note = values.note || `Contribution to ${selectedGoal.name}`;
 
@@ -577,7 +569,7 @@ export default function GoalsPanel({
         date: values.contribution_date,
         note,
         account_id: values.account_id,
-        to_account_id: null,
+        to_account_id: values.account_id,
         category_id: savingsCategory?.id || null,
         savings_goal_id: selectedGoal.id,
       });
@@ -594,14 +586,6 @@ export default function GoalsPanel({
       await transactionsApi.update(transaction.id, {
         goal_contribution_id: contribution.id,
       });
-
-      if (sourceAccount) {
-        const delta = getContributionAccountDelta(sourceAccount, amount);
-
-        await accountsApi.update(sourceAccount.id, {
-          balance: (Number(sourceAccount.balance) || 0) + delta,
-        });
-      }
 
       refreshGoals();
       setContributionDialogOpen(false);
