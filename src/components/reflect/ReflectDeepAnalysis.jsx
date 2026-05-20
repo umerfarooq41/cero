@@ -523,9 +523,6 @@ export default function ReflectDeepAnalysis({
   selectedMonth,
   goals = [],
   goalContributions = [],
-  budgetVsActual = [],
-  categoryTrends = [],
-  comparablePeriodLabel,
   currency,
 }) {
   return (
