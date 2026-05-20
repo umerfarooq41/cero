@@ -270,22 +270,15 @@ function RecurringRuleDialog({
       return;
     }
 
-    if (form.type !== 'transfer' && !form.category_id) {
-      toast.error('Select a category');
-      return;
-    }
-
-    if (form.type === 'transfer' && transferCategoryType && !form.category_id) {
-      toast.error(`Select a ${transferCategoryType} category`);
-      return;
-    }
-
+    // Category is intentionally optional for recurring rules.
+    // The database allows category_id to be null, and users may want to save
+    // upcoming bills/income before assigning a budget category.
     if (!form.next_due_date) {
       toast.error('Select the next due date');
       return;
     }
 
-    onSave({
+    const payload = {
       name: form.name.trim(),
       amount,
       type: form.type,
@@ -297,7 +290,9 @@ function RecurringRuleDialog({
       next_due_date: form.next_due_date,
       note: form.note.trim() || null,
       is_active: form.is_active,
-    });
+    };
+
+    onSave(payload);
   };
 
   return (
@@ -409,13 +404,13 @@ function RecurringRuleDialog({
 
           {(form.type !== 'transfer' || transferCategoryType) && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Category</label>
+              <label className="text-xs font-medium text-muted-foreground">Category optional</label>
               <Select
                 value={form.category_id}
                 onValueChange={(value) => updateForm('category_id', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="Select category optional" />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredCategories.map((category) => (
@@ -431,6 +426,11 @@ function RecurringRuleDialog({
                   ))}
                 </SelectContent>
               </Select>
+              {filteredCategories.length === 0 && (
+                <p className="text-xs leading-5 text-muted-foreground">
+                  No matching categories found. You can still save this recurring rule and categorize it later.
+                </p>
+              )}
             </div>
           )}
 
