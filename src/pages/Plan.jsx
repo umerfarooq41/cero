@@ -27,16 +27,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import PageHeader from '@/components/layout/PageHeader';
 import UnifiedCategorySection from '@/components/plan/UnifiedCategorySection';
-import GoalsPanel from '@/components/goals/GoalsPanel';
+import GoalRow from '@/components/goals/GoalRow';
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
 import MonthSelector from '@/components/shared/MonthSelector';
 import {
   useBudgetSummary,
   useAllocations,
   useCategories,
-  useAccounts,
   useSavingsGoals,
-  useGoalContributions,
 } from '@/hooks/useBudgetData';
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
@@ -178,6 +176,7 @@ function PlanOverview({
   subcategories,
   budget,
   currency,
+  savingsGoals = [],
 }) {
   const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
 
@@ -393,80 +392,101 @@ function PlanOverview({
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <div className="border-b px-4 py-3">
           <h3 className="text-sm font-bold uppercase tracking-wide">
-            {tab.title} Breakdown
+            {activeTab === 'savings'
+              ? 'Savings & Goals Breakdown'
+              : `${tab.title} Breakdown`}
           </h3>
         </div>
 
         <div className="divide-y">
-          {chartData.length === 0 ? (
+          {chartData.length === 0 &&
+          !(activeTab === 'savings' && savingsGoals.length > 0) ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
               No {tab.title.toLowerCase()} data yet
             </div>
           ) : (
-            chartData.map((item) => {
-              const percent =
-                item.planned > 0
-                  ? Math.min((item.tracked / item.planned) * 100, 100)
-                  : 0;
+            <>
+              {chartData.map((item) => {
+                const percent =
+                  item.planned > 0
+                    ? Math.min((item.tracked / item.planned) * 100, 100)
+                    : 0;
 
-              return (
-                <div key={item.id} className="px-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <CategoryIconBadge
-                      icon={item.category?.icon}
-                      color={item.categoryColor || item.color}
-                      size="md"
-                    />
+                return (
+                  <div key={item.id} className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <CategoryIconBadge
+                        icon={item.category?.icon}
+                        color={item.categoryColor || item.color}
+                        size="md"
+                      />
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="truncate text-sm font-semibold">
-                          {item.name}
-                        </p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="truncate text-sm font-semibold">
+                            {item.name}
+                          </p>
 
-                        <p className="shrink-0 text-sm font-bold tabular-nums">
-                          <Money
-                            amount={item.tracked}
-                            currency={currency}
-                            compact
+                          <p className="shrink-0 text-sm font-bold tabular-nums">
+                            <Money
+                              amount={item.tracked}
+                              currency={currency}
+                              compact
+                            />
+                          </p>
+                        </div>
+
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${percent}%`,
+                              backgroundColor:
+                                item.remaining < 0 ? '#DC2626' : item.color,
+                            }}
                           />
-                        </p>
-                      </div>
+                        </div>
 
-                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            width: `${percent}%`,
-                            backgroundColor:
-                              item.remaining < 0 ? '#DC2626' : item.color,
-                          }}
-                        />
-                      </div>
+                        <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground tabular-nums">
+                          <span>
+                            {formatNumber(item.tracked)} /{' '}
+                            {formatNumber(item.planned)}
+                          </span>
 
-                      <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground tabular-nums">
-                        <span>
-                          {formatNumber(item.tracked)} /{' '}
-                          {formatNumber(item.planned)}
-                        </span>
-
-                        <span
-                          className={
-                            item.remaining < 0
-                              ? 'font-medium text-red-600'
-                              : ''
-                          }
-                        >
-                          {item.remaining >= 0
-                            ? `${formatNumber(item.remaining)} left`
-                            : `${formatNumber(Math.abs(item.remaining))} over`}
-                        </span>
+                          <span
+                            className={
+                              item.remaining < 0
+                                ? 'font-medium text-red-600'
+                                : ''
+                            }
+                          >
+                            {item.remaining >= 0
+                              ? `${formatNumber(item.remaining)} left`
+                              : `${formatNumber(Math.abs(item.remaining))} over`}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+
+              {activeTab === 'savings' && savingsGoals.length > 0 && (
+                <>
+                  <div className="bg-muted/20 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    Savings Goals
+                  </div>
+
+                  {savingsGoals.map((goal) => (
+                    <GoalRow
+                      key={goal.id}
+                      goal={goal}
+                      currency={currency}
+                    />
+                  ))}
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -495,9 +515,7 @@ export default function Plan() {
 
   const budget = useBudgetSummary(currentMonth);
   const { data: categories = [] } = useCategories();
-  const { data: accounts = [] } = useAccounts();
   const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: goalContributions = [] } = useGoalContributions();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
   const prevMonth = format(
@@ -743,18 +761,6 @@ export default function Plan() {
             )}
           </AnimatePresence>
 
-          {!isEditMode && (
-            <GoalsPanel
-              goals={savingsGoals}
-              contributions={goalContributions}
-              categories={categories}
-              accounts={accounts}
-              formatCurrency={formatCurrency}
-              title="Savings goals"
-              subtitle="Manual contributions, progress rings, and monthly required saving."
-            />
-          )}
-
           {isEditMode ? (
             <>
               {[
@@ -787,6 +793,7 @@ export default function Plan() {
               subcategories={allSubs}
               budget={budget}
               currency={currency}
+              savingsGoals={savingsGoals}
             />
           )}
         </motion.div>
