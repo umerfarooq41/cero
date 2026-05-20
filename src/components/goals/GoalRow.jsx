@@ -6,19 +6,54 @@ import {
   getMonthlyRequiredSaving,
 } from '@/lib/goals';
 import { cn } from '@/lib/utils';
+import {
+  getCurrencyCode as getSharedCurrencyCode,
+  getCurrencySymbol as getSharedCurrencySymbol,
+} from '@/lib/currencies';
 
-function GoalMoney({ value, formatCurrency }) {
+const formatNumber = (value = 0) => {
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: number % 1 === 0 ? 0 : 2,
+  }).format(number);
+};
+
+function Money({ amount, currency, compact = false, className = '' }) {
+  const code = getSharedCurrencyCode(currency);
+  const symbol = getSharedCurrencySymbol(currency);
+
   return (
-    <span className="inline-flex items-center whitespace-nowrap tabular-nums">
-      {formatCurrency(Math.abs(Number(value || 0)))}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
+        className
+      )}
+    >
+      {code === 'SAR' ? (
+        <span
+          className={cn(
+            'inline-block shrink-0 bg-current align-middle',
+            compact ? 'h-[0.8em] w-[0.8em]' : 'h-[0.9em] w-[0.9em]'
+          )}
+          style={{
+            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+            mask: 'url(/sar.svg) center / contain no-repeat',
+          }}
+        />
+      ) : (
+        <span className="text-current">{symbol}</span>
+      )}
+
+      <span className="tabular-nums">{formatNumber(amount)}</span>
     </span>
   );
 }
 
 export default function GoalRow({
   goal,
-  formatCurrency,
-  color = '#2563EB',
+  currency,
   onClick,
   className,
 }) {
@@ -27,8 +62,9 @@ export default function GoalRow({
   const progress = getGoalProgress(goal);
   const remaining = getGoalRemaining(goal);
   const monthlyRequired = getMonthlyRequiredSaving(goal);
-
   const isComplete = remaining <= 0;
+
+  const color = goal?.color_key || '#2563EB';
 
   return (
     <button
@@ -36,13 +72,14 @@ export default function GoalRow({
       onClick={() => onClick?.(goal)}
       className={cn(
         'w-full px-4 py-4 text-left transition-colors hover:bg-muted/40',
+        !onClick && 'cursor-default hover:bg-transparent',
         className
       )}
     >
       <div className="flex items-center gap-3">
         <CategoryIconBadge
           icon={goal?.icon_key || 'target'}
-          color={goal?.color_key || color}
+          color={color}
           size="md"
         />
 
@@ -53,7 +90,7 @@ export default function GoalRow({
             </p>
 
             <p className="shrink-0 text-sm font-bold tabular-nums">
-              {progress}%
+              <Money amount={current} currency={currency} compact />
             </p>
           </div>
 
@@ -64,16 +101,15 @@ export default function GoalRow({
                 width: `${Math.min(progress, 100)}%`,
                 backgroundColor: isComplete
                   ? 'hsl(var(--success))'
-                  : goal?.color_key || color,
+                  : color,
               }}
             />
           </div>
 
           <div className="mt-1 flex items-center justify-between gap-3 text-xs text-muted-foreground tabular-nums">
             <span className="min-w-0 truncate">
-              <GoalMoney value={current} formatCurrency={formatCurrency} />
-              {' / '}
-              <GoalMoney value={target} formatCurrency={formatCurrency} />
+              {progress}% complete · Target{' '}
+              <Money amount={target} currency={currency} compact />
               {' · '}
               {isComplete ? (
                 'Funded'
@@ -81,10 +117,7 @@ export default function GoalRow({
                 'Set deadline'
               ) : (
                 <>
-                  <GoalMoney
-                    value={monthlyRequired}
-                    formatCurrency={formatCurrency}
-                  />
+                  <Money amount={monthlyRequired} currency={currency} compact />
                   {' / month'}
                 </>
               )}
