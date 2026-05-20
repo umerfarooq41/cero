@@ -18,7 +18,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import RecurringTransactionsPanel from '@/components/transactions/RecurringTransactionsPanel';
-import GoalsPanel from '@/components/goals/GoalsPanel';
+import GoalRow from '@/components/goals/GoalRow';
 import { Button } from '@/components/ui/button';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import {
@@ -28,7 +28,6 @@ import {
   useTransactions,
   useRecurringTransactions,
   useSavingsGoals,
-  useGoalContributions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
@@ -49,14 +48,13 @@ function DashboardCard({
       )}
     >
       <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {Icon && (
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
+              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             )}
-            <h2 className="text-sm font-bold tracking-tight text-foreground md:text-base">
+
+            <h2 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground md:text-base">
               {title}
             </h2>
           </div>
@@ -68,7 +66,7 @@ function DashboardCard({
           )}
         </div>
 
-        {action}
+        {action && <div className="shrink-0">{action}</div>}
       </div>
 
       {children}
@@ -82,10 +80,13 @@ function EmptyDashboardState({ icon: Icon, title, description, action }) {
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
         <Icon className="h-5 w-5" />
       </div>
+
       <p className="mt-3 text-sm font-semibold text-foreground">{title}</p>
+
       <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
         {description}
       </p>
+
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
@@ -101,8 +102,10 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
           <Icon className="h-5 w-5" />
         </span>
+
         <div className="min-w-0">
           <p className="text-sm font-bold text-foreground">{title}</p>
+
           <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
             {subtitle}
           </p>
@@ -128,12 +131,14 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
+
         {Icon && (
           <span className={cn('rounded-xl p-1.5', toneClass)}>
             <Icon className="h-3.5 w-3.5" />
           </span>
         )}
       </div>
+
       <div className="mt-2 text-lg font-bold tracking-tight text-foreground tabular-nums">
         {value}
       </div>
@@ -147,7 +152,9 @@ function getMonthProgress(month) {
 
   if (!year || !monthNumber) return 0;
 
-  const currentMonth = now.getFullYear() === year && now.getMonth() + 1 === monthNumber;
+  const currentMonth =
+    now.getFullYear() === year && now.getMonth() + 1 === monthNumber;
+
   const futureMonth =
     year > now.getFullYear() ||
     (year === now.getFullYear() && monthNumber > now.getMonth() + 1);
@@ -156,7 +163,11 @@ function getMonthProgress(month) {
   if (!currentMonth) return 100;
 
   const daysInMonth = new Date(year, monthNumber, 0).getDate();
-  return Math.min(100, Math.max(0, Math.round((now.getDate() / daysInMonth) * 100)));
+
+  return Math.min(
+    100,
+    Math.max(0, Math.round((now.getDate() / daysInMonth) * 100))
+  );
 }
 
 function getTransactionCategory(transaction, categories) {
@@ -171,6 +182,38 @@ function getTransactionToAccount(transaction, accounts) {
   return accounts.find((account) => account.id === transaction.to_account_id);
 }
 
+function getGoalProgressValue(goal) {
+  const current = Number(goal?.current_amount || 0);
+  const target = Number(goal?.target_amount || 0);
+
+  if (target <= 0) return 0;
+
+  return Math.min(100, Math.round((current / target) * 100));
+}
+
+function getTopGoal(goals = []) {
+  const activeGoals = goals.filter((goal) => !goal.is_archived);
+
+  if (activeGoals.length === 0) return null;
+
+  return [...activeGoals].sort((a, b) => {
+    const aProgress = getGoalProgressValue(a);
+    const bProgress = getGoalProgressValue(b);
+
+    const aComplete = aProgress >= 100;
+    const bComplete = bProgress >= 100;
+
+    if (aComplete !== bComplete) return aComplete ? 1 : -1;
+
+    const aDate = a.target_date || '9999-12-31';
+    const bDate = b.target_date || '9999-12-31';
+
+    if (aDate !== bDate) return String(aDate).localeCompare(String(bDate));
+
+    return bProgress - aProgress;
+  })[0];
+}
+
 export default function Dashboard() {
   const scope = usePageEntrance();
   const navigate = useNavigate();
@@ -183,7 +226,8 @@ export default function Dashboard() {
   const { data: accounts = [] } = useAccounts();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: goalContributions = [] } = useGoalContributions();
+
+  const topGoal = getTopGoal(savingsGoals);
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -196,12 +240,14 @@ export default function Dashboard() {
     Number(budget.totalTrackedDebt || 0);
 
   const monthProgress = getMonthProgress(currentMonth);
+
   const spendingProgress =
     plannedOutflow > 0
       ? Math.min(100, Math.round((trackedOutflow / plannedOutflow) * 100))
       : 0;
 
   const paceDifference = spendingProgress - monthProgress;
+
   const paceTone =
     plannedOutflow === 0
       ? 'neutral'
@@ -253,6 +299,7 @@ export default function Dashboard() {
                   <span>Month passed</span>
                   <span className="tabular-nums">{monthProgress}%</span>
                 </div>
+
                 <div className="h-2 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-500"
@@ -266,6 +313,7 @@ export default function Dashboard() {
                   <span>Plan used</span>
                   <span className="tabular-nums">{spendingProgress}%</span>
                 </div>
+
                 <div className="h-2 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-500"
@@ -302,17 +350,20 @@ export default function Dashboard() {
                 icon={Sparkles}
                 tone="good"
               />
+
               <StatPill
                 label="Expenses"
                 value={formatCurrency(budget.totalExpenses || 0)}
                 icon={TrendingDown}
                 tone="danger"
               />
+
               <StatPill
                 label="Planned"
                 value={formatCurrency(plannedOutflow || 0)}
                 icon={Receipt}
               />
+
               <StatPill
                 label="Tracked"
                 value={formatCurrency(trackedOutflow || 0)}
@@ -336,18 +387,46 @@ export default function Dashboard() {
             className="animate-child"
           />
 
-          <GoalsPanel
-            goals={savingsGoals}
-            contributions={goalContributions}
-            categories={categories}
-            accounts={accounts}
-            formatCurrency={formatCurrency}
+          <DashboardCard
             title="Top goal progress"
-            subtitle="Your highest-priority savings goal with manual contribution tracking."
-            limit={1}
-            compact
+            subtitle="Your highest-priority savings goal."
+            icon={Target}
+            action={
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-xs"
+              >
+                <Link to="/plan">
+                  View plan
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            }
             className="animate-child"
-          />
+          >
+            {topGoal ? (
+              <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/35">
+                <GoalRow
+                  goal={topGoal}
+                  formatCurrency={formatCurrency}
+                  onClick={() => navigate('/plan')}
+                />
+              </div>
+            ) : (
+              <EmptyDashboardState
+                icon={Target}
+                title="No savings goal yet"
+                description="Create a savings goal from your Plan screen to start tracking progress here."
+                action={
+                  <Button asChild size="sm" className="rounded-xl">
+                    <Link to="/plan">Open Plan</Link>
+                  </Button>
+                }
+              />
+            )}
+          </DashboardCard>
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
@@ -356,7 +435,12 @@ export default function Dashboard() {
             subtitle="Latest activity from the current budget month."
             icon={Receipt}
             action={
-              <Button asChild variant="ghost" size="sm" className="gap-1 text-xs">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-xs"
+              >
                 <Link to="/transactions">
                   View all
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -387,7 +471,9 @@ export default function Dashboard() {
                       account={getTransactionAccount(transaction, accounts)}
                       toAccount={getTransactionToAccount(transaction, accounts)}
                       formatCurrency={formatCurrency}
-                      onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
+                      onClick={() =>
+                        navigate(`/transactions/${transaction.id}/edit`)
+                      }
                     />
                   ))}
                 </div>
@@ -408,18 +494,21 @@ export default function Dashboard() {
                 title="Add transaction"
                 subtitle="Track income or spending"
               />
+
               <QuickAction
                 to="/plan"
                 icon={Target}
                 title="Review plan"
                 subtitle="Assign your money"
               />
+
               <QuickAction
                 to="/accounts"
                 icon={WalletCards}
                 title="Accounts"
                 subtitle="Check balances"
               />
+
               <QuickAction
                 to="/reflect"
                 icon={ChartPie}
@@ -433,4 +522,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
