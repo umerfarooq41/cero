@@ -18,6 +18,7 @@ import ReflectSummaryCards, {
   InlineMoney,
 } from '@/components/reflect/ReflectSummaryCard.jsx';
 import ReflectCharts from '@/components/reflect/ReflectCharts.jsx';
+import ReflectDeepAnalysis from '@/components/reflect/ReflectDeepAnalysis.jsx';
 import ReflectInsightCard from '@/components/reflect/ReflectInsightCard.jsx';
 
 import {
@@ -25,6 +26,8 @@ import {
   useAllTransactions,
   useBudgetSummary,
   useCategories,
+  useGoalContributions,
+  useSavingsGoals,
   useUserSettings,
   useYearBudgetSummary,
 } from '@/hooks/useBudgetData';
@@ -304,6 +307,8 @@ export default function Reflect() {
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: accounts = [] } = useAccounts();
   const { data: settings = {} } = useUserSettings();
+  const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: goalContributions = [] } = useGoalContributions();
 
   const isYearView = periodMode === 'year';
   const analysisMonth = isYearView ? 'all' : selectedMonth;
@@ -345,6 +350,9 @@ export default function Reflect() {
     savingsRate,
     efficiency,
     spendingBreakdown,
+    budgetVsActual,
+    categoryTrends,
+    comparablePeriodLabel,
     cashFlow,
     spendingTrend,
     topCategory,
@@ -441,6 +449,21 @@ export default function Reflect() {
             leftToAllocate={leftToAllocate}
             currency={currency}
             tooltipStyle={tooltipStyle}
+          />
+        </div>
+
+
+        <div className="animate-child">
+          <ReflectDeepAnalysis
+            isYear={isYear}
+            selectedYear={selectedYear}
+            selectedMonth={isYear ? selectedMonth : analysisMonth}
+            goals={savingsGoals}
+            goalContributions={goalContributions}
+            budgetVsActual={budgetVsActual}
+            categoryTrends={categoryTrends}
+            comparablePeriodLabel={comparablePeriodLabel}
+            currency={currency}
           />
         </div>
 

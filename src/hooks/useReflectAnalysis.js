@@ -136,6 +136,89 @@ function getQuarterTotals(allTransactions, selectedYear, quarter, settings) {
   );
 }
 
+function getCategoryById(categories, categoryId) {
+  return categories.find((item) => item.id === categoryId) || null;
+}
+
+function getComparablePeriodKey({ selectedYear, selectedMonth, isYear }) {
+  if (isYear) {
+    return {
+      label: String(Number(selectedYear) - 1),
+      year: String(Number(selectedYear) - 1),
+      monthKey: null,
+    };
+  }
+
+  const [year, month] = String(`${selectedYear}-${selectedMonth}`).split('-').map(Number);
+  const date = new Date(year, month - 2, 1);
+
+  return {
+    label: format(date, 'MMM yyyy'),
+    year: format(date, 'yyyy'),
+    monthKey: format(date, 'yyyy-MM'),
+  };
+}
+
+function getTransactionsForComparablePeriod({
+  allTransactions,
+  selectedYear,
+  selectedMonth,
+  isYear,
+  settings,
+}) {
+  const comparable = getComparablePeriodKey({ selectedYear, selectedMonth, isYear });
+
+  if (isYear) {
+    return filterTransactionsByBudgetYear(
+      allTransactions,
+      comparable.year,
+      settings
+    );
+  }
+
+  return filterTransactionsByBudgetMonth(
+    allTransactions,
+    comparable.monthKey,
+    settings
+  );
+}
+
+function buildCategoryTotals(transactions, categories, { expenseOnly = false } = {}) {
+  const totals = {};
+
+  transactions.forEach((transaction) => {
+    const type = transaction.type;
+    const categoryId = transaction.category_id || 'uncategorized';
+    const category = getCategoryById(categories, categoryId);
+    const resolvedType = category ? getCategoryType(categories, categoryId) : type;
+
+    if (expenseOnly && type !== 'expense') return;
+
+    // Ordinary account-to-account transfers do not belong in budget variance.
+    // Savings/debt transfers stay visible because they represent planned allocations.
+    if (type === 'transfer' && !['savings', 'debt'].includes(resolvedType)) {
+      return;
+    }
+
+    const name = category?.name || 'Uncategorized';
+    const amount = Number(transaction.amount) || 0;
+
+    if (!totals[categoryId]) {
+      totals[categoryId] = {
+        id: categoryId,
+        name,
+        type: resolvedType || type || 'other',
+        color: getCategoryColor(categories, categoryId),
+        amount: 0,
+      };
+    }
+
+    totals[categoryId].amount += amount;
+  });
+
+  return totals;
+}
+
 export default function useReflectAnalysis({
   selectedYear,
   selectedMonth,
@@ -265,6 +348,134 @@ export default function useReflectAnalysis({
     return Object.values(categorySpending).sort((a, b) => b.value - a.value);
   }, [periodTransactions, categories]);
 
+  const budgetVsActual = useMemo(() => {
+    const plannedByCategory = {};
+    const actualByCategory = buildCategoryTotals(periodTransactions, categories);
+
+    (budget?.allocations || []).forEach((allocation) => {
+      const categoryId = allocation.category_id;
+      if (!categoryId) return;
+
+      const category = getCategoryById(categories, categoryId);
+      const type = getCategoryType(categories, categoryId);
+
+      if (!plannedByCategory[categoryId]) {
+        plannedByCategory[categoryId] = {
+          id: categoryId,
+          name: category?.name || 'Uncategorized',
+          type: type || 'other',
+          color: getCategoryColor(categories, categoryId),
+          planned: 0,
+        };
+      }
+
+      plannedByCategory[categoryId].planned += Number(allocation.planned_amount) || 0;
+    });
+
+    const categoryIds = new Set([
+      ...Object.keys(plannedByCategory),
+      ...Object.keys(actualByCategory),
+    ]);
+
+    return Array.from(categoryIds)
+      .map((categoryId) => {
+        const plannedRow = plannedByCategory[categoryId];
+        const actualRow = actualByCategory[categoryId];
+        const planned = Number(plannedRow?.planned || 0);
+        const actual = Number(actualRow?.amount || 0);
+        const variance = planned - actual;
+        const usedPercent = planned > 0 ? (actual / planned) * 100 : actual > 0 ? 100 : 0;
+        const type = plannedRow?.type || actualRow?.type || 'other';
+
+        return {
+          id: categoryId,
+          name: plannedRow?.name || actualRow?.name || 'Uncategorized',
+          type,
+          color: plannedRow?.color || actualRow?.color || 'hsl(var(--muted-foreground))',
+          planned,
+          actual,
+          variance,
+          usedPercent,
+          isOver: planned > 0 && actual > planned,
+        };
+      })
+      .filter((row) => row.planned > 0 || row.actual > 0)
+      .sort((a, b) => {
+        const typeRank = { expense: 0, savings: 1, debt: 2, income: 3 };
+        const rankDiff = (typeRank[a.type] ?? 9) - (typeRank[b.type] ?? 9);
+        if (rankDiff !== 0) return rankDiff;
+
+        return Math.abs(b.variance) - Math.abs(a.variance);
+      });
+  }, [budget?.allocations, periodTransactions, categories]);
+
+  const categoryTrends = useMemo(() => {
+    const previousTransactions = getTransactionsForComparablePeriod({
+      allTransactions,
+      selectedYear,
+      selectedMonth,
+      isYear,
+      settings,
+    });
+
+    const currentTotals = buildCategoryTotals(periodTransactions, categories, {
+      expenseOnly: true,
+    });
+
+    const previousTotals = buildCategoryTotals(previousTransactions, categories, {
+      expenseOnly: true,
+    });
+
+    const categoryIds = new Set([
+      ...Object.keys(currentTotals),
+      ...Object.keys(previousTotals),
+    ]);
+
+    return Array.from(categoryIds)
+      .map((categoryId) => {
+        const current = currentTotals[categoryId];
+        const previous = previousTotals[categoryId];
+        const currentAmount = Number(current?.amount || 0);
+        const previousAmount = Number(previous?.amount || 0);
+        const change = currentAmount - previousAmount;
+        const changePercent =
+          previousAmount > 0
+            ? (change / previousAmount) * 100
+            : currentAmount > 0
+              ? 100
+              : 0;
+
+        return {
+          id: categoryId,
+          name: current?.name || previous?.name || 'Uncategorized',
+          color: current?.color || previous?.color || 'hsl(var(--muted-foreground))',
+          current: currentAmount,
+          previous: previousAmount,
+          change,
+          changePercent,
+          direction: change > 0 ? 'up' : change < 0 ? 'down' : 'flat',
+        };
+      })
+      .filter((row) => row.current > 0 || row.previous > 0)
+      .sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
+  }, [
+    allTransactions,
+    periodTransactions,
+    categories,
+    selectedYear,
+    selectedMonth,
+    isYear,
+    settings,
+  ]);
+
+  const comparablePeriodLabel = useMemo(() => {
+    return getComparablePeriodKey({
+      selectedYear,
+      selectedMonth,
+      isYear,
+    }).label;
+  }, [selectedYear, selectedMonth, isYear]);
+
   const cashFlow = useMemo(() => {
     if (isYear) {
       return QUARTERS.map((quarter) => {
@@ -358,6 +569,9 @@ export default function useReflectAnalysis({
     savingsRate,
     efficiency,
     spendingBreakdown,
+    budgetVsActual,
+    categoryTrends,
+    comparablePeriodLabel,
     cashFlow,
     spendingTrend,
     topCategory: spendingBreakdown[0],
