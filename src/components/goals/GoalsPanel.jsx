@@ -514,11 +514,32 @@ export default function GoalsPanel({
     setSaving(true);
 
     try {
+      const payload = {
+        name: String(values.name || '').trim(),
+        target_amount: Number(values.target_amount || 0),
+        target_date: values.target_date || null,
+        note: values.note ? String(values.note).trim() : null,
+      };
+
+      if (!payload.name) {
+        toast.error('Enter a goal name');
+        return;
+      }
+
+      if (!payload.target_amount || payload.target_amount <= 0) {
+        toast.error('Enter a valid target amount');
+        return;
+      }
+
       if (editingGoal) {
-        await savingsGoalsApi.update(editingGoal.id, values);
+        await savingsGoalsApi.update(editingGoal.id, payload);
         toast.success('Goal updated');
       } else {
-        await savingsGoalsApi.create(values);
+        await savingsGoalsApi.create({
+          ...payload,
+          current_amount: 0,
+          is_archived: false,
+        });
         toast.success('Goal created');
       }
 
@@ -527,7 +548,7 @@ export default function GoalsPanel({
       setEditingGoal(null);
     } catch (error) {
       console.error('Goal save failed:', error);
-      toast.error(error.message || 'Could not save goal');
+      toast.error(error?.message || error?.details || 'Could not save goal');
     } finally {
       setSaving(false);
     }
@@ -560,32 +581,49 @@ export default function GoalsPanel({
 
     try {
       const amount = Number(values.amount || 0);
+      const contributionDate = values.contribution_date || todayIsoDate();
       const savingsCategory = getDefaultSavingsCategory(categories);
       const note = values.note || `Contribution to ${selectedGoal.name}`;
 
-      const transaction = await transactionsApi.create({
-        amount,
-        type: 'transfer',
-        date: values.contribution_date,
-        note,
-        account_id: values.account_id,
-        to_account_id: values.account_id,
-        category_id: savingsCategory?.id || null,
-        savings_goal_id: selectedGoal.id,
-      });
+      if (!amount || amount <= 0) {
+        toast.error('Enter a valid contribution amount');
+        return;
+      }
 
+      if (!values.account_id) {
+        toast.error('Select the account funding this goal');
+        return;
+      }
+
+      // Save the contribution first so goal progress updates even if the
+      // optional linked transaction fails because of an older schema cache.
       const contribution = await goalContributionsApi.create({
         goal_id: selectedGoal.id,
         account_id: values.account_id,
         amount,
-        contribution_date: values.contribution_date,
+        contribution_date: contributionDate,
         note,
-        transaction_id: transaction.id,
       });
 
-      await transactionsApi.update(transaction.id, {
-        goal_contribution_id: contribution.id,
-      });
+      try {
+        const transaction = await transactionsApi.create({
+          amount,
+          type: 'transfer',
+          date: contributionDate,
+          note,
+          account_id: values.account_id,
+          to_account_id: values.account_id,
+          category_id: savingsCategory?.id || null,
+          savings_goal_id: selectedGoal.id,
+          goal_contribution_id: contribution.id,
+        });
+
+        await goalContributionsApi.update(contribution.id, {
+          transaction_id: transaction.id,
+        });
+      } catch (transactionError) {
+        console.warn('Goal contribution saved, but transaction link failed:', transactionError);
+      }
 
       refreshGoals();
       setContributionDialogOpen(false);
@@ -593,7 +631,7 @@ export default function GoalsPanel({
       toast.success('Contribution added');
     } catch (error) {
       console.error('Goal contribution failed:', error);
-      toast.error(error.message || 'Could not add contribution');
+      toast.error(error?.message || error?.details || 'Could not add contribution');
     } finally {
       setSaving(false);
     }
