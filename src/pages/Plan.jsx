@@ -88,7 +88,8 @@ const TABS = [
 ];
 
 const SOURCE_BADGE_CLASS = {
-  recurring: 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  recurring:
+    'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
   goal: 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400',
 };
 
@@ -107,9 +108,14 @@ const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
 
 function normalizeType(value) {
   const type = String(value || '').toLowerCase();
-  if (type === 'transfer' || type === 'debt_payment' || type === 'debt') return 'debt';
+
+  if (type === 'transfer' || type === 'debt_payment' || type === 'debt') {
+    return 'debt';
+  }
+
   if (type === 'income') return 'income';
   if (type === 'savings') return 'savings';
+
   return 'expense';
 }
 
@@ -122,68 +128,12 @@ function getCategoryType(category, categories = []) {
 }
 
 function getAllocationSourceType(allocation) {
-  return allocation?.source_type || allocation?.item_type || allocation?.plan_item_type || 'category';
-}
-
-function isActiveRule(rule) {
-  if (!rule || rule.is_archived) return false;
-  if (rule.is_active === false) return false;
-  const status = String(rule.status || '').toLowerCase();
-  return status !== 'paused' && status !== 'inactive' && status !== 'archived';
-}
-
-function getMonthEnd(month) {
-  const start = new Date(`${month}-01T00:00:00`);
-  const end = new Date(start);
-  end.setMonth(end.getMonth() + 1);
-  end.setMilliseconds(end.getMilliseconds() - 1);
-  return end;
-}
-
-function recurringIsRelevant(rule, month) {
-  if (!isActiveRule(rule) || !rule?.next_due_date || !month) return false;
-
-  const nextDue = new Date(`${String(rule.next_due_date).slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(nextDue.getTime())) return false;
-
-  const monthEnd = getMonthEnd(month);
-  const frequency = String(rule.frequency || 'monthly').toLowerCase();
-
-  if (frequency.includes('year')) {
-    const selectedMonth = new Date(`${month}-01T00:00:00`);
-    return nextDue.getMonth() === selectedMonth.getMonth() && nextDue <= monthEnd;
-  }
-
-  return nextDue <= monthEnd;
-}
-
-function formatDateText(value) {
-  if (!value) return 'Not scheduled';
-  const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return 'Not scheduled';
-
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-}
-
-function getDueText(value) {
-  if (!value) return 'Due date not set';
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const due = new Date(`${String(value).slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(due.getTime())) return 'Due date not set';
-
-  const diff = Math.round((due.getTime() - today.getTime()) / 86400000);
-  if (diff === 0) return 'Due today';
-  if (diff === 1) return 'Due tomorrow';
-  if (diff > 1) return `Due in ${diff}d`;
-  if (diff === -1) return 'Overdue by 1d';
-  return `Overdue by ${Math.abs(diff)}d`;
+  return (
+    allocation?.source_type ||
+    allocation?.item_type ||
+    allocation?.plan_item_type ||
+    'category'
+  );
 }
 
 function Money({ amount, currency, compact = false, className = '' }) {
@@ -234,7 +184,10 @@ function DonutTooltip({ active, payload, currency, tab }) {
         <Money amount={tracked} currency={currency} compact />
       </div>
 
-      <p className="mt-1 text-[11px] font-semibold tabular-nums" style={{ color: item?.color }}>
+      <p
+        className="mt-1 text-[11px] font-semibold tabular-nums"
+        style={{ color: item?.color }}
+      >
         {percent}% tracked
       </p>
     </div>
@@ -242,10 +195,14 @@ function DonutTooltip({ active, payload, currency, tab }) {
 }
 
 function ReadOnlyBreakdownRow({ item, currency }) {
-  const percent = item.planned > 0 ? Math.min((item.tracked / item.planned) * 100, 100) : 0;
+  const isSourceRow = Boolean(item.sourceType);
+  const percent =
+    item.planned > 0 ? Math.min((item.tracked / item.planned) * 100, 100) : 0;
+
+  const rightAmount = isSourceRow ? item.planned : item.tracked;
 
   return (
-    <div className={cn('px-4 py-4', item.sourceType && 'bg-white/10 dark:bg-white/[0.015]')}>
+    <div className={cn('px-4 py-4', isSourceRow && 'bg-white/10 dark:bg-white/[0.015]')}>
       <div className="flex items-center gap-3">
         <CategoryIconBadge
           icon={item.icon || item.category?.icon}
@@ -254,10 +211,11 @@ function ReadOnlyBreakdownRow({ item, currency }) {
         />
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                 <p className="truncate text-sm font-semibold">{item.name}</p>
+
                 {item.sourceType && (
                   <Badge
                     variant="outline"
@@ -270,15 +228,10 @@ function ReadOnlyBreakdownRow({ item, currency }) {
                   </Badge>
                 )}
               </div>
-              {item.description && (
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {item.description}
-                </p>
-              )}
             </div>
 
             <p className="shrink-0 text-sm font-bold tabular-nums">
-              <Money amount={item.tracked} currency={currency} compact />
+              <Money amount={rightAmount} currency={currency} compact />
             </p>
           </div>
 
@@ -324,7 +277,12 @@ function PlanOverview({
     return allocations
       .filter((allocation) => {
         const sourceType = getAllocationSourceType(allocation);
-        return sourceType !== 'category' && !allocation.category_id && normalizeType(allocation.budget_type) === activeTab;
+
+        return (
+          sourceType !== 'category' &&
+          !allocation.category_id &&
+          normalizeType(allocation.budget_type) === activeTab
+        );
       })
       .map((allocation, index) => {
         const planned = Number(allocation.planned_amount || 0);
@@ -332,35 +290,49 @@ function PlanOverview({
 
         return {
           id: `${sourceType}:${allocation.source_id || allocation.id}`,
-          name: allocation.label || (sourceType === 'goal' ? 'Savings goal' : 'Recurring item'),
+          name:
+            allocation.label ||
+            (sourceType === 'goal' ? 'Savings goal' : 'Recurring item'),
           planned,
           tracked: 0,
           remaining: planned,
-          color: allocation.color || tab.shades[(index + 3) % tab.shades.length] || tab.color,
+          color:
+            allocation.color ||
+            tab.shades[(index + 3) % tab.shades.length] ||
+            tab.color,
           icon: allocation.icon || (sourceType === 'goal' ? 'target' : 'receipt'),
           sourceType,
-          description: '',
         };
       })
       .filter((item) => item.planned > 0);
   }, [activeTab, allocations, tab]);
 
   const sectionCategories = categories.filter(
-    (c) => getCategoryType(c, categories) === activeTab && !c.parent_id
+    (category) => getCategoryType(category, categories) === activeTab && !category.parent_id
   );
 
   const categoryRows = sectionCategories
     .map((category, index) => {
-      const childCategories = subcategories.filter((s) => s.parent_id === category.id);
+      const childCategories = subcategories.filter(
+        (subcategory) => subcategory.parent_id === category.id
+      );
 
       const planned =
         childCategories.length > 0
-          ? childCategories.reduce((sum, child) => sum + Number(budget.getCategoryPlanned(child.id) || 0), 0)
+          ? childCategories.reduce(
+              (sum, child) =>
+                sum + Number(budget.getCategoryPlanned(child.id) || 0),
+              0
+            )
           : Number(budget.getCategoryPlanned(category.id) || 0);
 
       const tracked =
         childCategories.length > 0
-          ? childCategories.reduce((sum, child) => sum + Number(budget.getCategorySpent(child.id) || 0), 0)
+          ? childCategories.reduce(
+              (sum, child) =>
+                sum + Number(budget.getCategorySpent(child.id) || 0),
+              0
+            )
           : Number(budget.getCategorySpent(category.id) || 0);
 
       return {
@@ -378,10 +350,18 @@ function PlanOverview({
     .filter((item) => item.planned > 0 || item.tracked > 0);
 
   const chartData = [...categoryRows, ...extraPlanRows];
-  const totalTracked = chartData.reduce((sum, item) => sum + item.tracked, 0);
-  const totalPlanned = chartData.reduce((sum, item) => sum + item.planned, 0);
+
+  const totalTracked = chartData.reduce(
+    (sum, item) => sum + Number(item.tracked || 0),
+    0
+  );
+  const totalPlanned = chartData.reduce(
+    (sum, item) => sum + Number(item.planned || 0),
+    0
+  );
   const totalRemaining = totalPlanned - totalTracked;
-  const progress = totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
+  const progress =
+    totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
 
   const donutChartData = useMemo(() => {
     if (chartData.length === 0) {
@@ -410,10 +390,17 @@ function PlanOverview({
     }));
 
     const others = sorted.slice(4);
+
     if (others.length === 0) return topFour;
 
-    const othersTracked = others.reduce((sum, item) => sum + Number(item.tracked || 0), 0);
-    const othersPlanned = others.reduce((sum, item) => sum + Number(item.planned || 0), 0);
+    const othersTracked = others.reduce(
+      (sum, item) => sum + Number(item.tracked || 0),
+      0
+    );
+    const othersPlanned = others.reduce(
+      (sum, item) => sum + Number(item.planned || 0),
+      0
+    );
 
     return [
       ...topFour,
@@ -462,13 +449,22 @@ function PlanOverview({
             </h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              {tab.label} of <Money amount={totalPlanned} currency={currency} compact />
+              {tab.label} of{' '}
+              <Money amount={totalPlanned} currency={currency} compact />
             </p>
           </div>
 
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">{totalRemaining >= 0 ? 'Left' : 'Over'}</p>
-            <p className={`text-sm font-bold tabular-nums ${totalRemaining < 0 ? 'text-red-600' : 'text-foreground'}`}>
+            <p className="text-xs text-muted-foreground">
+              {totalRemaining >= 0 ? 'Left' : 'Over'}
+            </p>
+
+            <p
+              className={cn(
+                'text-sm font-bold tabular-nums',
+                totalRemaining < 0 ? 'text-red-600' : 'text-foreground'
+              )}
+            >
               <Money amount={Math.abs(totalRemaining)} currency={currency} compact />
             </p>
           </div>
@@ -503,7 +499,11 @@ function PlanOverview({
                 content={<DonutTooltip currency={currency} tab={tab} />}
                 cursor={false}
                 offset={12}
-                wrapperStyle={{ outline: 'none', zIndex: 30, pointerEvents: 'none' }}
+                wrapperStyle={{
+                  outline: 'none',
+                  zIndex: 30,
+                  pointerEvents: 'none',
+                }}
                 allowEscapeViewBox={{ x: false, y: false }}
               />
             </PieChart>
@@ -513,6 +513,7 @@ function PlanOverview({
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               {tab.label}
             </p>
+
             <p className="mt-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
               {Math.round(progress)}%
             </p>
@@ -523,7 +524,9 @@ function PlanOverview({
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
         <div className="border-b px-4 py-3">
           <h3 className="text-sm font-bold uppercase tracking-wide">
-            {activeTab === 'savings' ? 'Savings & Goals Breakdown' : `${tab.title} Breakdown`}
+            {activeTab === 'savings'
+              ? 'Savings & Goals Breakdown'
+              : `${tab.title} Breakdown`}
           </h3>
         </div>
 
@@ -534,7 +537,11 @@ function PlanOverview({
             </div>
           ) : (
             chartData.map((item) => (
-              <ReadOnlyBreakdownRow key={item.id} item={item} currency={currency} />
+              <ReadOnlyBreakdownRow
+                key={item.id}
+                item={item}
+                currency={currency}
+              />
             ))
           )}
         </div>
@@ -547,10 +554,13 @@ export default function Plan() {
   const scope = usePageEntrance();
   const navigate = useNavigate();
   const location = useLocation();
+
   const searchParams = new URLSearchParams(location.search);
   const monthFromUrl = searchParams.get('month');
 
-  const [currentMonth, setCurrentMonth] = useState(monthFromUrl || format(new Date(), 'yyyy-MM'));
+  const [currentMonth, setCurrentMonth] = useState(
+    monthFromUrl || format(new Date(), 'yyyy-MM')
+  );
   const [activeTab, setActiveTab] = useState('expense');
 
   const currency = useCurrency();
@@ -560,7 +570,10 @@ export default function Plan() {
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
-  const allSubs = useMemo(() => categories.filter((c) => c.parent_id), [categories]);
+  const allSubs = useMemo(
+    () => categories.filter((category) => category.parent_id),
+    [categories]
+  );
 
   const plannedTotals = useMemo(() => {
     const totals = {
@@ -572,6 +585,7 @@ export default function Plan() {
 
     allocations.forEach((allocation) => {
       const sourceType = getAllocationSourceType(allocation);
+
       if (sourceType === 'category' || allocation.category_id) return;
 
       const type = normalizeType(allocation.budget_type);
@@ -579,15 +593,26 @@ export default function Plan() {
     });
 
     return totals;
-  }, [allocations, budget.totalPlannedDebt, budget.totalPlannedExpenses, budget.totalPlannedIncome, budget.totalPlannedSavings]);
+  }, [
+    allocations,
+    budget.totalPlannedDebt,
+    budget.totalPlannedExpenses,
+    budget.totalPlannedIncome,
+    budget.totalPlannedSavings,
+  ]);
 
   const leftToAllocate =
-    plannedTotals.income - plannedTotals.expense - plannedTotals.savings - plannedTotals.debt;
+    plannedTotals.income -
+    plannedTotals.expense -
+    plannedTotals.savings -
+    plannedTotals.debt;
 
   const handleMonthChange = (month) => {
     setCurrentMonth(month);
+
     const params = new URLSearchParams(location.search);
     params.set('month', month);
+
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
@@ -611,7 +636,11 @@ export default function Plan() {
                   variant="secondary"
                   size="icon"
                   className="h-9 w-9 shrink-0 rounded-xl"
-                  onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}
+                  onClick={() =>
+                    navigate(
+                      `/manage-plan?tab=monthly-plan&month=${currentMonth}`
+                    )
+                  }
                   aria-label="Manage monthly plan"
                 >
                   <PencilLine className="h-4 w-4" />
@@ -638,8 +667,6 @@ export default function Plan() {
             budget={budget}
             currency={currency}
             allocations={allocations}
-            recurringTransactions={recurringTransactions}
-            savingsGoals={savingsGoals}
           />
         </div>
       </main>
