@@ -1,12 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ChartPie,
   CalendarCheck,
   LayoutDashboard,
   Receipt,
   Settings,
-  Tags,
+  SlidersHorizontal,
   WalletCards,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,20 +37,14 @@ const navItems = [
     matches: ['/accounts', '/add-account'],
   },
   {
-    path: '/reflect',
-    icon: ChartPie,
-    label: 'Reflect',
-    matches: ['/reflect'],
+    path: '/manage-plan',
+    icon: SlidersHorizontal,
+    label: 'Manage Plan',
+    matches: ['/manage-plan', '/categories'],
   },
 ];
 
-const utilityItems = [
-  {
-    path: '/categories',
-    icon: Tags,
-    label: 'Categories',
-    matches: ['/categories'],
-  },
+const bottomItems = [
   {
     path: '/settings',
     icon: Settings,
@@ -156,16 +149,10 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="space-y-2 px-3 pb-4">
-        <div className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">
-          Manage
-        </div>
-
-        <div className="space-y-1">
-          {utilityItems.map((item) => (
-            <SidebarLink key={item.path} item={item} compact />
-          ))}
-        </div>
+      <div className="space-y-1 px-3 pb-4">
+        {bottomItems.map((item) => (
+          <SidebarLink key={item.path} item={item} compact />
+        ))}
       </div>
 
       <div className="px-4 pb-4">

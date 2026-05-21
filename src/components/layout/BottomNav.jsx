@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ChartPie,
   CalendarCheck,
   LayoutDashboard,
   Receipt,
+  SlidersHorizontal,
   WalletCards,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,10 +36,10 @@ const navItems = [
     matches: ['/accounts', '/add-account'],
   },
   {
-    path: '/reflect',
-    icon: ChartPie,
-    label: 'Reflect',
-    matches: ['/reflect'],
+    path: '/manage-plan',
+    icon: SlidersHorizontal,
+    label: 'Manage',
+    matches: ['/manage-plan', '/categories'],
   },
 ];
 
@@ -75,25 +75,13 @@ export default function BottomNav() {
               to={item.path}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="relative flex items-center justify-center"
+              className="relative flex min-w-0 items-center justify-center"
             >
-              {isActive && (
-                <motion.div
-                  layoutId="nav-pill"
-                  className="
-                    absolute inset-x-2 inset-y-1.5
-                    rounded-2xl bg-primary/10
-                  "
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-
               <div
                 className={cn(
                   `
-                  relative z-10
-                  flex flex-col items-center justify-center
-                  gap-1 px-2 py-2
+                  relative z-10 flex min-w-0 flex-col items-center justify-center
+                  gap-1 px-1 py-1.5 text-center
                   transition-colors duration-200
                   `,
                   isActive
@@ -103,14 +91,23 @@ export default function BottomNav() {
               >
                 <motion.div
                   animate={{
-                    scale: isActive ? 1.15 : 1,
+                    scale: isActive ? 1.08 : 1,
                     y: isActive ? -1 : 0,
                   }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  className="relative flex h-9 w-9 items-center justify-center"
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-icon-highlight"
+                      className="absolute inset-0 rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+
                   <Icon
                     className={cn(
-                      'h-5 w-5 transition-all duration-200',
+                      'relative z-10 h-5 w-5 transition-all duration-200',
                       isActive && 'stroke-[2.5]'
                     )}
                   />
@@ -119,7 +116,7 @@ export default function BottomNav() {
                 <motion.span
                   animate={{ opacity: isActive ? 1 : 0.6 }}
                   className={cn(
-                    'text-[11px] transition-all duration-200',
+                    'block max-w-full truncate text-[10px] leading-none transition-all duration-200 sm:text-[11px]',
                     isActive ? 'font-semibold' : 'font-medium'
                   )}
                 >

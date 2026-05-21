@@ -21,7 +21,7 @@ import AddTransaction from '@/pages/AddTransaction';
 import Accounts from '@/pages/Accounts';
 import AccountDetail from '@/pages/AccountDetail';
 import AddAccount from '@/pages/AddAccount';
-import Categories from '@/pages/Categories';
+import ManagePlan from '@/pages/ManagePlan';
 import Settings from '@/pages/Settings';
 import Reflect from '@/pages/Reflect';
 import Onboarding from '@/pages/Onboarding';
@@ -90,7 +90,8 @@ const AuthenticatedApp = () => {
         <Route path="/accounts/:id" element={<AccountDetail />} />
         <Route path="/add-account" element={<AddAccount />} />
         <Route path="/accounts/:id/edit" element={<AddAccount />} />
-        <Route path="/categories" element={<Categories />} />
+        <Route path="/manage-plan" element={<ManagePlan />} />
+        <Route path="/categories" element={<Navigate to="/manage-plan?tab=categories" replace />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/reflect" element={<Reflect />} />
       </Route>
