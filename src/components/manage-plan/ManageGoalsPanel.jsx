@@ -84,13 +84,6 @@ const COLORS = [
 
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
-function formatMoneyText(amount) {
-  return Number(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-}
-
 const emptyGoalForm = () => ({
   name: '',
   target_amount: '',
@@ -410,7 +403,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
 
           <p className="mt-2 text-xs text-muted-foreground tabular-nums">
             {formatCurrency(current)} / {formatCurrency(target)} · Required{' '}
-            {monthlyRequired === null ? 'set deadline' : `${formatMoneyText(monthlyRequired)}/month`} · Target{' '}
+            {monthlyRequired === null ? 'set deadline' : `${formatCurrency(monthlyRequired)}/month`} · Target{' '}
             {formatGoalDate(goal.target_date)}
           </p>
         </div>
