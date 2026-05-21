@@ -31,8 +31,8 @@ export const managePlanTabs = [
 
 export default function ManagePlanTabs({ activeTab, onChange }) {
   return (
-    <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="inline-grid min-w-full grid-cols-4 gap-1 rounded-2xl border border-border/60 bg-card/60 p-1 shadow-sm backdrop-blur-xl">
+    <div className="rounded-2xl border border-border/60 bg-card/60 p-1 shadow-sm backdrop-blur-xl">
+      <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
         {managePlanTabs.map((tab) => {
           const isActive = activeTab === tab.value;
           const Icon = tab.icon;
@@ -43,7 +43,7 @@ export default function ManagePlanTabs({ activeTab, onChange }) {
               type="button"
               onClick={() => onChange(tab.value)}
               className={cn(
-                'relative flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-xs font-semibold transition-colors sm:text-sm',
+                'relative flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold transition-colors sm:text-sm',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -58,11 +58,8 @@ export default function ManagePlanTabs({ activeTab, onChange }) {
               )}
 
               <Icon className="relative z-10 h-4 w-4 shrink-0" />
-              <span className="relative z-10 hidden truncate sm:inline">
-                {tab.label}
-              </span>
-              <span className="relative z-10 truncate sm:hidden">
-                {tab.shortLabel}
+              <span className="relative z-10 truncate">
+                {tab.shortLabel || tab.label}
               </span>
             </button>
           );
