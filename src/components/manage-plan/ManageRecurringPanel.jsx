@@ -1,29 +1,38 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
+  Archive,
+  ArchiveRestore,
   ArrowDownLeft,
   ArrowLeftRight,
   ArrowUpRight,
-  Edit3,
-  PauseCircle,
-  PlayCircle,
+  ChevronDown,
+  MoreVertical,
+  Pencil,
   Plus,
-  Repeat,
   Trash2,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import CategoryIcon, { iconNames } from '@/components/shared/CategoryIcon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { recurringTransactionsApi } from '@/lib/budgetData';
 import {
@@ -41,64 +50,116 @@ import {
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 
-const emptyForm = () => ({
+const COLORS = [
+  '#276FE4',
+  '#16AAFE',
+  '#5FCEF3',
+  '#18D1C8',
+  '#1B8989',
+  '#2898BB',
+  '#8CBC95',
+  '#9CB3C7',
+  '#6F979F',
+  '#54887C',
+  '#72AA00',
+  '#38C17D',
+  '#3BA40E',
+  '#634E4A',
+  '#A85539',
+  '#A58F85',
+  '#EEB82D',
+  '#FFB800',
+  '#FF8B00',
+  '#FF6D10',
+  '#F84C00',
+  '#FB2C2C',
+  '#E40335',
+  '#B1003B',
+  '#E98ABE',
+  '#F39AB5',
+  '#FA5C8C',
+  '#E33BA3',
+  '#B393EA',
+  '#8C7EF0',
+  '#6970ED',
+  '#8845F5',
+];
+
+const TYPE_ACCENT = {
+  income: 'text-green-700 dark:text-green-400',
+  expense: 'text-red-700 dark:text-red-400',
+  transfer: 'text-purple-700 dark:text-purple-400',
+};
+
+const TYPE_ICONS = {
+  income: ArrowDownLeft,
+  expense: ArrowUpRight,
+  transfer: ArrowLeftRight,
+};
+
+const TYPE_LABELS = {
+  income: 'Income',
+  expense: 'Expenses',
+  transfer: 'Debt Payments',
+};
+
+const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+const emptyForm = (type = 'expense') => ({
   name: '',
   amount: '',
-  type: 'expense',
+  type,
   category_id: 'none',
   account_id: 'none',
   to_account_id: 'none',
   frequency: 'monthly',
   next_due_date: todayIsoDate(),
   is_active: true,
+  icon: 'receipt',
+  color: randomColor(),
   note: '',
 });
 
-const typeOptions = [
-  { value: 'income', label: 'Income', icon: ArrowDownLeft },
-  { value: 'expense', label: 'Expense', icon: ArrowUpRight },
-  { value: 'transfer', label: 'Debt Payment / Transfer', icon: ArrowLeftRight },
-];
-
-function NativeSelect({ value, onChange, children }) {
-  return (
-    <select
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {children}
-    </select>
-  );
-}
-
-function normalizeType(type) {
+function normalizeCategoryType(type) {
   if (type === 'saving') return 'savings';
   if (type === 'liability') return 'debt';
   return String(type || '').toLowerCase();
 }
 
-function getTypeIcon(type) {
-  if (type === 'income') return ArrowDownLeft;
-  if (type === 'transfer') return ArrowLeftRight;
-  return ArrowUpRight;
-}
-
-function getTypeLabel(type) {
-  if (type === 'income') return 'Income';
-  if (type === 'transfer') return 'Debt / Transfer';
-  return 'Expense';
+function normalizeRuleType(type) {
+  if (type === 'debt') return 'transfer';
+  return ['income', 'expense', 'transfer'].includes(type) ? type : 'expense';
 }
 
 function getStatusClass(status) {
-  if (status.key === 'overdue') return 'border-destructive/20 bg-destructive/10 text-destructive';
-  if (status.key === 'due_today') return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400';
-  if (status.key === 'paused') return 'border-border bg-secondary text-muted-foreground';
+  if (status.key === 'overdue') {
+    return 'border-destructive/20 bg-destructive/10 text-destructive';
+  }
+
+  if (status.key === 'due_today') {
+    return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400';
+  }
+
+  if (status.key === 'paused') {
+    return 'border-border bg-secondary text-muted-foreground';
+  }
+
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
-function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories, onSave, saving }) {
-  const [form, setForm] = useState(emptyForm);
+function RecurringRuleModal({
+  open,
+  onClose,
+  onSave,
+  editingRule = null,
+  initialType = 'expense',
+  accounts = [],
+  categories = [],
+  saving = false,
+}) {
+  const nameRef = useRef(null);
+  const [form, setForm] = useState(() => emptyForm(initialType));
+  const isEditing = !!editingRule;
 
   useEffect(() => {
     if (!open) return;
@@ -107,25 +168,31 @@ function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories
       setForm({
         name: editingRule.name || '',
         amount: String(editingRule.amount ?? ''),
-        type: editingRule.type || 'expense',
+        type: normalizeRuleType(editingRule.type),
         category_id: editingRule.category_id || 'none',
         account_id: editingRule.account_id || 'none',
         to_account_id: editingRule.to_account_id || 'none',
         frequency: editingRule.frequency || 'monthly',
         next_due_date: editingRule.next_due_date || todayIsoDate(),
         is_active: editingRule.is_active !== false,
+        icon: editingRule.icon || 'receipt',
+        color: editingRule.color || COLORS[0],
         note: editingRule.note || '',
       });
     } else {
-      setForm(emptyForm());
+      setForm(emptyForm(initialType));
     }
-  }, [editingRule, open]);
+
+    setTimeout(() => nameRef.current?.focus(), 80);
+  }, [editingRule, initialType, open]);
 
   const filteredCategories = useMemo(() => {
     return categories.filter((category) => {
-      const type = normalizeType(category.type);
+      const type = normalizeCategoryType(category.type);
+
       if (form.type === 'income') return type === 'income';
       if (form.type === 'expense') return type === 'expense';
+
       return type === 'debt' || type === 'savings';
     });
   }, [categories, form.type]);
@@ -134,7 +201,7 @@ function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSave = async () => {
     const amount = Number(form.amount || 0);
 
     if (!form.name.trim()) {
@@ -157,53 +224,98 @@ function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories
       return;
     }
 
-    onSave({
+    await onSave({
       name: form.name.trim(),
       amount,
       type: form.type,
       category_id: form.category_id === 'none' ? null : form.category_id,
       account_id: form.account_id === 'none' ? null : form.account_id,
-      to_account_id: form.type === 'transfer' && form.to_account_id !== 'none' ? form.to_account_id : null,
+      to_account_id:
+        form.type === 'transfer' && form.to_account_id !== 'none'
+          ? form.to_account_id
+          : null,
       frequency: form.frequency,
       start_date: editingRule?.start_date || form.next_due_date,
       next_due_date: form.next_due_date,
       is_active: form.is_active,
+      icon: form.icon,
+      color: form.color,
       note: form.note.trim() || null,
     });
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl border-border/60 bg-card/95 p-5 backdrop-blur-xl sm:max-w-2xl">
+    <Dialog open={open} onOpenChange={(nextOpen) => !saving && !nextOpen && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{editingRule ? 'Edit recurring rule' : 'Add recurring rule'}</DialogTitle>
-          <DialogDescription>
-            Manage Plan only creates and edits rules. Posting happens later from Transactions → Scheduled.
-          </DialogDescription>
+          <DialogTitle>{isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/40 bg-white/45 p-3 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <CategoryIcon icon={form.icon} color={form.color} size="lg" />
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold">
+              {form.name.trim() || 'Recurring Rule'}
+            </div>
+            <div className="text-xs capitalize text-muted-foreground">
+              {TYPE_LABELS[form.type] || 'Expense'} · Manual post only
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Name</label>
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Name
+            </label>
             <Input
+              ref={nameRef}
               value={form.name}
               onChange={(event) => updateForm('name', event.target.value)}
-              placeholder="Rent, salary, car loan..."
+              placeholder="e.g. Rent, Salary, Car Loan"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') handleSave();
+              }}
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Type
+            </label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {Object.entries(TYPE_LABELS).map(([value, label]) => {
+                const Icon = TYPE_ICONS[value];
+
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      updateForm('type', value);
+                      updateForm('category_id', 'none');
+                      updateForm('to_account_id', 'none');
+                    }}
+                    className={cn(
+                      'flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-medium transition-all',
+                      form.type === value
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-secondary text-muted-foreground hover:bg-accent'
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span>{label.replace(' Payments', '')}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Type</label>
-              <NativeSelect value={form.type} onChange={(value) => updateForm('type', value)}>
-                {typeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </NativeSelect>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Amount</label>
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Amount
+              </label>
               <Input
                 value={form.amount}
                 onChange={(event) => updateForm('amount', event.target.value)}
@@ -214,68 +326,106 @@ function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories
                 placeholder="0.00"
               />
             </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Frequency
+              </label>
+              <Select value={form.frequency} onValueChange={(value) => updateForm('frequency', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FREQUENCY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Category</label>
-              <NativeSelect value={form.category_id} onChange={(value) => updateForm('category_id', value)}>
-                <option value="none">No category</option>
-                {filteredCategories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </NativeSelect>
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Category
+              </label>
+              <Select value={form.category_id} onValueChange={(value) => updateForm('category_id', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="No category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No category</SelectItem>
+                  {filteredCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Account</label>
-              <NativeSelect value={form.account_id} onChange={(value) => updateForm('account_id', value)}>
-                <option value="none">Select account</option>
-                {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>{account.name}</option>
-                ))}
-              </NativeSelect>
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Account
+              </label>
+              <Select value={form.account_id} onValueChange={(value) => updateForm('account_id', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select account" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Select account</SelectItem>
+                  {accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {form.type === 'transfer' && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Destination account</label>
-              <NativeSelect value={form.to_account_id} onChange={(value) => updateForm('to_account_id', value)}>
-                <option value="none">Optional destination</option>
-                {accounts
-                  .filter((account) => account.id !== form.account_id)
-                  .map((account) => (
-                    <option key={account.id} value={account.id}>{account.name}</option>
-                  ))}
-              </NativeSelect>
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Destination Account Optional
+              </label>
+              <Select value={form.to_account_id} onValueChange={(value) => updateForm('to_account_id', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Optional destination" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Optional destination</SelectItem>
+                  {accounts
+                    .filter((account) => account.id !== form.account_id)
+                    .map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Frequency</label>
-              <NativeSelect value={form.frequency} onChange={(value) => updateForm('frequency', value)}>
-                {FREQUENCY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </NativeSelect>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Next due date</label>
-              <Input
-                value={form.next_due_date}
-                onChange={(event) => updateForm('next_due_date', event.target.value)}
-                type="date"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Next Due Date
+            </label>
+            <Input
+              value={form.next_due_date}
+              onChange={(event) => updateForm('next_due_date', event.target.value)}
+              type="date"
+            />
           </div>
 
-          <label className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm">
+          <label className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/35 px-4 py-3 text-sm backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
             <span>
-              <span className="font-medium">Rule status</span>
-              <span className="block text-xs text-muted-foreground">Paused rules stay saved but will not appear as active scheduled items.</span>
+              <span className="font-medium">Active rule</span>
+              <span className="block text-xs text-muted-foreground">
+                Paused rules stay saved but are not treated as active scheduled items.
+              </span>
             </span>
             <input
               type="checkbox"
@@ -286,7 +436,60 @@ function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories
           </label>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Note</label>
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Color
+            </label>
+            <div className="grid grid-cols-10 gap-2 rounded-xl border border-white/40 bg-white/35 p-2 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+              {COLORS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => updateForm('color', item)}
+                  className={cn(
+                    'h-8 w-8 rounded-xl border border-border transition-all',
+                    form.color === item
+                      ? 'scale-110 ring-2 ring-primary ring-offset-2'
+                      : 'hover:scale-105'
+                  )}
+                  style={{ backgroundColor: item }}
+                  aria-label={`Use color ${item}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Icon
+            </label>
+            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl border border-white/40 bg-white/35 p-2 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03] sm:grid-cols-7 md:grid-cols-8">
+              {iconNames.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => updateForm('icon', item)}
+                  className={cn(
+                    'flex h-10 items-center justify-center rounded-xl border transition-all',
+                    form.icon === item
+                      ? 'scale-105 border-primary bg-primary/10 ring-1 ring-primary'
+                      : 'border-transparent hover:border-border hover:bg-accent'
+                  )}
+                  title={item}
+                >
+                  <CategoryIcon
+                    icon={item}
+                    color={form.icon === item ? form.color : '#888'}
+                    size="sm"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Note
+            </label>
             <Textarea
               value={form.note}
               onChange={(event) => updateForm('note', event.target.value)}
@@ -296,57 +499,214 @@ function RecurringDialog({ open, onOpenChange, editingRule, accounts, categories
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={saving}>{saving ? 'Saving...' : 'Save Rule'}</Button>
+        <DialogFooter className="mt-2">
+          <Button variant="outline" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving || !form.name.trim()}>
+            {saving ? 'Saving...' : isEditing ? 'Update Rule' : 'Create Rule'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function RecurringRow({ rule, account, category, onEdit, onToggle, onDelete, formatCurrency }) {
-  const status = getRecurringStatus(rule);
-  const Icon = getTypeIcon(rule.type);
+function RecurringActionSheet({ rule, open, onClose, onEdit, onArchive, onDelete }) {
+  if (!rule) return null;
 
   return (
-    <div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Icon className="h-4 w-4" />
-      </div>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-xs">
+        <DialogHeader>
+          <div className="mb-1 flex items-center gap-3">
+            <CategoryIcon icon={rule.icon || 'receipt'} color={rule.color || COLORS[0]} size="md" />
+            <div className="min-w-0">
+              <DialogTitle className="truncate text-base">{rule.name}</DialogTitle>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {TYPE_LABELS[normalizeRuleType(rule.type)] || 'Expense'} rule
+              </p>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-1 py-1">
+          <button
+            type="button"
+            onClick={() => {
+              onEdit(rule);
+              onClose();
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent"
+          >
+            <Pencil className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Edit Rule</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onArchive(rule);
+              onClose();
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent"
+          >
+            {rule.is_archived ? (
+              <ArchiveRestore className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <Archive className="h-4 w-4 text-muted-foreground" />
+            )}
+            <span className="text-sm font-medium">
+              {rule.is_archived ? 'Unarchive' : 'Archive Rule'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onDelete(rule);
+              onClose();
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+            <span className="text-sm font-medium text-destructive">Delete Rule</span>
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RecurringRow({ rule, account, category, onAction, formatCurrency }) {
+  const status = getRecurringStatus(rule);
+  const fallbackIcon = normalizeRuleType(rule.type) === 'income' ? 'income' : normalizeRuleType(rule.type) === 'transfer' ? 'loan' : 'receipt';
+
+  return (
+    <div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/40">
+      <CategoryIcon
+        icon={rule.icon || category?.icon || fallbackIcon}
+        color={rule.color || category?.color || COLORS[0]}
+        size="sm"
+      />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold">{rule.name}</p>
-          <Badge variant="outline" className={cn('shrink-0 rounded-full px-2 py-0 text-[10px]', getStatusClass(status))}>
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="truncate text-sm font-medium leading-tight">{rule.name}</div>
+          <Badge
+            variant="outline"
+            className={cn('shrink-0 rounded-full px-2 py-0 text-[10px]', getStatusClass(status))}
+          >
             {status.label}
           </Badge>
         </div>
-        <p className="mt-1 truncate text-xs text-muted-foreground">
-          {getTypeLabel(rule.type)} · {getRecurringFrequencyLabel(rule.frequency)} · Next {formatRecurringDate(rule.next_due_date)}
+        <div className="mt-1 truncate text-xs text-muted-foreground">
+          {getRecurringFrequencyLabel(rule.frequency)} · Next {formatRecurringDate(rule.next_due_date)}
           {category ? ` · ${category.name}` : ''}
           {account ? ` · ${account.name}` : ''}
-        </p>
+        </div>
       </div>
 
       <div className="shrink-0 text-right">
-        <p className="text-sm font-bold tabular-nums">{formatCurrency(Math.abs(Number(rule.amount || 0)))}</p>
-        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+        <div className="text-sm font-semibold tabular-nums">
+          {formatCurrency(Math.abs(Number(rule.amount || 0)))}
+        </div>
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
           Manual post
-        </p>
+        </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => onToggle(rule)}>
-          {rule.is_active === false ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
-        </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => onEdit(rule)}>
-          <Edit3 className="h-4 w-4" />
-        </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-destructive" onClick={() => onDelete(rule)}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+      <button
+        type="button"
+        onClick={() => onAction(rule)}
+        className="rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent sm:opacity-0 sm:group-hover:opacity-100"
+        aria-label={`Open actions for ${rule.name}`}
+      >
+        <MoreVertical className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function RecurringSection({ type, label, rules, accounts, categories, defaultExpanded = false, onAddNew, onAction, formatCurrency }) {
+  const [isOpen, setIsOpen] = useState(defaultExpanded);
+  const Icon = TYPE_ICONS[type] || ArrowUpRight;
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-accent/30"
+      >
+        <div className="flex items-center gap-2.5">
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 text-muted-foreground transition-transform duration-200',
+              !isOpen && '-rotate-90'
+            )}
+          />
+          <Icon className={cn('h-4 w-4', TYPE_ACCENT[type])} />
+          <h3 className={cn('text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+            {rules.length}
+          </span>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddNew(type);
+            }}
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+            title="Add recurring rule"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            {rules.length === 0 ? (
+              <div className="border-t border-border/50 px-5 py-6 text-center">
+                <p className="text-xs text-muted-foreground">
+                  No {label.toLowerCase()} recurring rules yet.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onAddNew(type)}
+                  className="mt-1 text-xs font-medium text-primary hover:underline"
+                >
+                  Add one
+                </button>
+              </div>
+            ) : (
+              <div className="divide-y divide-border/50 border-t border-border/50">
+                {rules.map((rule) => (
+                  <RecurringRow
+                    key={rule.id}
+                    rule={rule}
+                    account={accounts.find((account) => account.id === rule.account_id)}
+                    category={categories.find((category) => category.id === rule.category_id)}
+                    onAction={onAction}
+                    formatCurrency={formatCurrency}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -358,28 +718,46 @@ export default function ManageRecurringPanel() {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState(null);
   const [editingRule, setEditingRule] = useState(null);
+  const [initialType, setInitialType] = useState('expense');
   const [saving, setSaving] = useState(false);
 
-  const sortedRules = [...recurringRules].sort((a, b) => {
-    if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
-    return String(a.next_due_date || '').localeCompare(String(b.next_due_date || ''));
-  });
+  const visibleRules = useMemo(() => {
+    return recurringRules
+      .filter((rule) => !rule.is_archived)
+      .sort((a, b) => {
+        if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
+        return String(a.next_due_date || '').localeCompare(String(b.next_due_date || ''));
+      });
+  }, [recurringRules]);
 
-  const groupedRules = {
-    income: sortedRules.filter((rule) => rule.type === 'income'),
-    expense: sortedRules.filter((rule) => rule.type === 'expense'),
-    transfer: sortedRules.filter((rule) => rule.type === 'transfer'),
+  const groupedRules = useMemo(() => {
+    return {
+      income: visibleRules.filter((rule) => normalizeRuleType(rule.type) === 'income'),
+      expense: visibleRules.filter((rule) => normalizeRuleType(rule.type) === 'expense'),
+      transfer: visibleRules.filter((rule) => normalizeRuleType(rule.type) === 'transfer'),
+    };
+  }, [visibleRules]);
+
+  const refresh = async () => {
+    await queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey?.[0] === 'recurring-transactions',
+    });
   };
 
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
-  };
-
-  const openNew = () => {
+  const openNew = (type = 'expense') => {
+    setInitialType(type);
     setEditingRule(null);
-    setDialogOpen(true);
+    setModalOpen(true);
+  };
+
+  const openEdit = (rule) => {
+    setInitialType(normalizeRuleType(rule.type));
+    setEditingRule(rule);
+    setModalOpen(true);
   };
 
   const handleSave = async (payload) => {
@@ -394,9 +772,10 @@ export default function ManageRecurringPanel() {
         toast.success('Recurring rule created');
       }
 
-      refresh();
-      setDialogOpen(false);
+      await refresh();
+      setModalOpen(false);
       setEditingRule(null);
+      setSelectedRule(null);
     } catch (error) {
       console.error('Recurring rule save failed:', error);
       toast.error(error.message || 'Could not save recurring rule');
@@ -405,21 +784,23 @@ export default function ManageRecurringPanel() {
     }
   };
 
-  const handleToggle = async (rule) => {
+  const handleArchive = async (rule) => {
     try {
-      await recurringTransactionsApi.update(rule.id, { is_active: rule.is_active === false });
-      refresh();
-      toast.success(rule.is_active === false ? 'Recurring rule resumed' : 'Recurring rule paused');
+      await recurringTransactionsApi.update(rule.id, {
+        is_archived: !rule.is_archived,
+      });
+      await refresh();
+      toast.success(rule.is_archived ? 'Recurring rule restored' : 'Recurring rule archived');
     } catch (error) {
-      console.error('Recurring rule toggle failed:', error);
-      toast.error(error.message || 'Could not update recurring rule');
+      console.error('Recurring rule archive failed:', error);
+      toast.error(error.message || 'Could not archive recurring rule');
     }
   };
 
   const handleDelete = async (rule) => {
     try {
       await recurringTransactionsApi.delete(rule.id);
-      refresh();
+      await refresh();
       toast.success('Recurring rule deleted');
     } catch (error) {
       console.error('Recurring rule delete failed:', error);
@@ -427,76 +808,85 @@ export default function ManageRecurringPanel() {
     }
   };
 
-  const renderGroup = (title, rules, emptyText) => (
-    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-      <div className="flex items-center justify-between border-b border-border/50 px-5 py-3.5">
-        <div className="flex items-center gap-2">
-          <Repeat className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">{title}</h3>
-        </div>
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
-          {rules.length}
-        </span>
-      </div>
-
-      {rules.length ? (
-        <div className="divide-y divide-border/50">
-          {rules.map((rule) => (
-            <RecurringRow
-              key={rule.id}
-              rule={rule}
-              account={accounts.find((account) => account.id === rule.account_id)}
-              category={categories.find((category) => category.id === rule.category_id)}
-              onEdit={(nextRule) => {
-                setEditingRule(nextRule);
-                setDialogOpen(true);
-              }}
-              onToggle={handleToggle}
-              onDelete={handleDelete}
-              formatCurrency={formatCurrency}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-          {emptyText}
-        </div>
-      )}
-    </section>
-  );
+  const handleAction = (rule) => {
+    setSelectedRule(rule);
+    setActionSheetOpen(true);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Recurring rules</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Create predictable income, bills, subscriptions, and debt payments. Nothing is posted from this page.
+          <h2 className="text-base font-semibold">Recurring</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create and manage predictable income, bills, subscriptions, and debt payments. Posting happens from Transactions → Scheduled.
           </p>
         </div>
-        <Button type="button" size="sm" onClick={openNew} className="gap-2 rounded-xl text-xs font-semibold">
-          <Plus className="h-3.5 w-3.5" />
+        <Button onClick={() => openNew('expense')} className="rounded-2xl">
+          <Plus className="mr-2 h-4 w-4" />
           Add Rule
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {renderGroup('Income', groupedRules.income, 'No recurring income rules yet.')}
-        {renderGroup('Expenses', groupedRules.expense, 'No recurring expense rules yet.')}
-        {renderGroup('Debt Payments / Transfers', groupedRules.transfer, 'No recurring debt payment or transfer rules yet.')}
+      <div className="space-y-3">
+        <RecurringSection
+          type="income"
+          label="Income"
+          rules={groupedRules.income}
+          accounts={accounts}
+          categories={categories}
+          defaultExpanded
+          onAddNew={openNew}
+          onAction={handleAction}
+          formatCurrency={formatCurrency}
+        />
+
+        <RecurringSection
+          type="expense"
+          label="Expenses"
+          rules={groupedRules.expense}
+          accounts={accounts}
+          categories={categories}
+          defaultExpanded
+          onAddNew={openNew}
+          onAction={handleAction}
+          formatCurrency={formatCurrency}
+        />
+
+        <RecurringSection
+          type="transfer"
+          label="Debt Payments"
+          rules={groupedRules.transfer}
+          accounts={accounts}
+          categories={categories}
+          defaultExpanded
+          onAddNew={openNew}
+          onAction={handleAction}
+          formatCurrency={formatCurrency}
+        />
       </div>
 
-      <RecurringDialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) setEditingRule(null);
+      <RecurringRuleModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingRule(null);
         }}
+        onSave={handleSave}
         editingRule={editingRule}
+        initialType={initialType}
         accounts={accounts}
         categories={categories}
-        onSave={handleSave}
         saving={saving}
+      />
+
+      <RecurringActionSheet
+        rule={selectedRule}
+        open={actionSheetOpen}
+        onClose={() => setActionSheetOpen(false)}
+        onEdit={openEdit}
+        onArchive={handleArchive}
+        onDelete={handleDelete}
       />
     </div>
   );
