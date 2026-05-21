@@ -140,12 +140,36 @@ export const goalContributionsApi = {
 };
 
 export const budgetPlansApi = {
-  list: (month) => listRows("budget_plans", { orderBy: "category_id", ascending: true, filters: { month } }),
-  upsert: async ({ id, category_id, month, planned_amount }) => {
+  list: (month) => listRows("budget_plans", { orderBy: "created_at", ascending: true, filters: { month } }),
+  upsert: async ({
+    id,
+    category_id,
+    month,
+    planned_amount,
+    source_type = 'category',
+    source_id,
+    budget_type,
+    label,
+    icon,
+    color,
+  }) => {
+    const payload = {
+      category_id,
+      month,
+      planned_amount,
+      source_type,
+      source_id,
+      budget_type,
+      label,
+      icon,
+      color,
+    };
+
     if (id) {
-      return updateRow("budget_plans", id, { planned_amount });
+      return updateRow("budget_plans", id, payload);
     }
-    return createRow("budget_plans", { category_id, month, planned_amount });
+
+    return createRow("budget_plans", payload);
   },
 };
 

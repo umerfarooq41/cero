@@ -4,40 +4,180 @@ import { ChevronDown, Copy, Save } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import AllocationRow from '@/components/editplan/AllocationRow';
 import CategoryIcon from '@/components/shared/CategoryIcon';
+import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { budgetPlansApi } from '@/lib/budgetData';
-import { useAllocations, useCategories } from '@/hooks/useBudgetData';
+import {
+  useAllocations,
+  useCategories,
+  useRecurringTransactions,
+  useSavingsGoals,
+} from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
+import { getMonthlyRequiredSaving } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 
 const sectionConfig = {
   income: {
     title: 'Income',
     text: 'text-green-700 dark:text-green-400',
+    badge: 'bg-green-500/10 text-green-700 ring-green-500/15 dark:text-green-400',
   },
   expense: {
     title: 'Expenses',
     text: 'text-red-700 dark:text-red-400',
+    badge: 'bg-red-500/10 text-red-700 ring-red-500/15 dark:text-red-400',
   },
   savings: {
     title: 'Savings',
     text: 'text-blue-700 dark:text-blue-400',
+    badge: 'bg-blue-500/10 text-blue-700 ring-blue-500/15 dark:text-blue-400',
   },
   debt: {
     title: 'Debt',
     text: 'text-purple-700 dark:text-purple-400',
+    badge: 'bg-purple-500/10 text-purple-700 ring-purple-500/15 dark:text-purple-400',
   },
 };
 
-export default function MonthlyPlanPanel({ currentMonth }) {
+const SOURCE_BADGE_CLASS = {
+  recurring: 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  goal: 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400',
+};
+
+function normalizeType(value) {
+  const type = String(value || '').toLowerCase();
+  if (type === 'transfer' || type === 'debt_payment' || type === 'debt') return 'debt';
+  if (type === 'income') return 'income';
+  if (type === 'savings') return 'savings';
+  return 'expense';
+}
+
+function getCategoryType(category, categories = []) {
+  if (!category) return null;
+  if (category.type) return normalizeType(category.type);
+
+  const parent = categories.find((item) => item.id === category.parent_id);
+  return parent ? normalizeType(parent.type) : null;
+}
+
+function isLeafCategory(category, categories = []) {
+  return !categories.some((item) => item.parent_id === category.id);
+}
+
+function isDueInMonth(rule, month) {
+  if (!rule?.next_due_date || !month) return false;
+  return String(rule.next_due_date).slice(0, 7) === month;
+}
+
+function getAllocationSourceType(allocation) {
+  return allocation?.source_type || allocation?.item_type || allocation?.plan_item_type || 'category';
+}
+
+function getAllocationSourceId(allocation) {
+  return allocation?.source_id || allocation?.item_id || allocation?.plan_item_id || null;
+}
+
+function getAllocationRowKey(allocation) {
+  const sourceType = getAllocationSourceType(allocation);
+  const sourceId = getAllocationSourceId(allocation);
+
+  if (sourceType && sourceType !== 'category' && sourceId) {
+    return `${sourceType}:${sourceId}`;
+  }
+
+  return allocation?.category_id ? `category:${allocation.category_id}` : null;
+}
+
+function PlanAmountRow({
+  row,
+  value,
+  lastMonthHint,
+  onChange,
+  formatCurrency,
+}) {
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-3 px-4 py-2.5',
+        row.isSubcategory && 'pl-14',
+        row.sourceType && 'bg-white/10 dark:bg-white/[0.015]'
+      )}
+    >
+      {!row.isSubcategory && (
+        <CategoryIcon icon={row.icon} color={row.color} size="sm" />
+      )}
+
+      {row.isSubcategory && (
+        <div
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: row.parentColor || row.color || 'hsl(var(--border))' }}
+        />
+      )}
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          <span
+            className={cn(
+              'block truncate text-sm',
+              row.isSubcategory ? 'text-muted-foreground' : 'font-medium text-foreground'
+            )}
+          >
+            {row.name}
+          </span>
+
+          {row.sourceType && (
+            <Badge
+              variant="outline"
+              className={cn(
+                'h-5 rounded-full px-2 text-[10px] font-semibold leading-none',
+                SOURCE_BADGE_CLASS[row.sourceType]
+              )}
+            >
+              {row.sourceType === 'goal' ? 'Goal' : 'Recurring'}
+            </Badge>
+          )}
+        </div>
+
+        {(row.description || lastMonthHint > 0) && (
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+            {row.description && <span className="truncate">{row.description}</span>}
+            {lastMonthHint > 0 && (
+              <span className="tabular-nums">
+                Last month: {formatCurrency(lastMonthHint)}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="w-28 shrink-0">
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          value={value || ''}
+          onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
+          placeholder="0.00"
+          className="h-8 text-right text-sm tabular-nums"
+        />
+      </div>
+    </div>
+  );
+}
+
+export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
 
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
+  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const prevMonth = format(
     subMonths(new Date(`${currentMonth}-01T00:00:00`), 1),
@@ -49,64 +189,194 @@ export default function MonthlyPlanPanel({ currentMonth }) {
   const [saving, setSaving] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({});
 
-  useEffect(() => {
-    const initial = {};
+  const leafCategoryIds = useMemo(() => {
+    return new Set(
+      categories
+        .filter((category) => isLeafCategory(category, categories))
+        .map((category) => category.id)
+    );
+  }, [categories]);
+
+  const allocationByRowKey = useMemo(() => {
+    const result = {};
 
     allocations.forEach((allocation) => {
-      initial[allocation.category_id] = allocation.planned_amount || 0;
-    });
-
-    categories.forEach((category) => {
-      if (!(category.id in initial)) {
-        initial[category.id] = 0;
-      }
-    });
-
-    setValues(initial);
-  }, [allocations, categories]);
-
-  const getLeafCategories = (type) => {
-    const parents = categories.filter((c) => c.type === type && !c.parent_id);
-    const result = [];
-
-    parents.forEach((parent) => {
-      const subs = categories.filter((c) => c.parent_id === parent.id);
-
-      if (subs.length > 0) {
-        result.push({
-          ...parent,
-          isSectionHeader: true,
-          sectionTotal: subs.reduce(
-            (sum, sub) => sum + Number(values[sub.id] || 0),
-            0
-          ),
-        });
-
-        subs.forEach((sub) => {
-          result.push({
-            ...sub,
-            isSubcategory: true,
-            parentColor: parent.color,
-          });
-        });
-      } else {
-        result.push(parent);
-      }
+      const key = getAllocationRowKey(allocation);
+      if (key) result[key] = allocation;
     });
 
     return result;
-  };
+  }, [allocations]);
+
+  const prevAllocationByRowKey = useMemo(() => {
+    const result = {};
+
+    prevAllocations.forEach((allocation) => {
+      const key = getAllocationRowKey(allocation);
+      if (key) result[key] = allocation;
+    });
+
+    return result;
+  }, [prevAllocations]);
+
+  const rowsByType = useMemo(() => {
+    const result = {
+      income: [],
+      expense: [],
+      savings: [],
+      debt: [],
+    };
+
+    const recurringByCategory = new Map();
+    const standaloneRecurring = [];
+
+    recurringTransactions
+      .filter((rule) => rule.is_active && !rule.is_archived && isDueInMonth(rule, currentMonth))
+      .forEach((rule) => {
+        const category = categories.find((item) => item.id === rule.category_id);
+        const ruleType = getCategoryType(category, categories) || normalizeType(rule.type);
+        const amount = Number(rule.amount || 0);
+
+        if (rule.category_id && leafCategoryIds.has(rule.category_id)) {
+          const current = recurringByCategory.get(rule.category_id) || {
+            amount: 0,
+            names: [],
+          };
+
+          current.amount += amount;
+          current.names.push(rule.name);
+          recurringByCategory.set(rule.category_id, current);
+          return;
+        }
+
+        standaloneRecurring.push({
+          key: `recurring:${rule.id}`,
+          id: rule.id,
+          name: rule.name,
+          type: ruleType,
+          icon: rule.icon || 'receipt',
+          color: rule.color || '#f59e0b',
+          sourceType: 'recurring',
+          sourceId: rule.id,
+          categoryId: rule.category_id || null,
+          suggestedAmount: amount,
+          description: `${rule.frequency || 'Monthly'} · due ${rule.next_due_date || 'not set'}`,
+        });
+      });
+
+    const parentsByType = {
+      income: categories.filter((category) => getCategoryType(category, categories) === 'income' && !category.parent_id),
+      expense: categories.filter((category) => getCategoryType(category, categories) === 'expense' && !category.parent_id),
+      savings: categories.filter((category) => getCategoryType(category, categories) === 'savings' && !category.parent_id),
+      debt: categories.filter((category) => getCategoryType(category, categories) === 'debt' && !category.parent_id),
+    };
+
+    Object.entries(parentsByType).forEach(([type, parents]) => {
+      parents.forEach((parent) => {
+        const subs = categories.filter((category) => category.parent_id === parent.id);
+
+        if (subs.length > 0) {
+          const childRows = subs.map((sub) => {
+            const recurring = recurringByCategory.get(sub.id);
+
+            return {
+              key: `category:${sub.id}`,
+              id: sub.id,
+              categoryId: sub.id,
+              name: sub.name,
+              type,
+              icon: sub.icon || parent.icon,
+              color: sub.color || parent.color,
+              isSubcategory: true,
+              parentColor: parent.color,
+              sourceType: recurring ? 'recurring' : null,
+              suggestedAmount: recurring?.amount || 0,
+              description: recurring ? recurring.names.join(', ') : '',
+            };
+          });
+
+          result[type].push({
+            key: `section:${parent.id}`,
+            id: parent.id,
+            name: parent.name,
+            type,
+            icon: parent.icon,
+            color: parent.color,
+            isSectionHeader: true,
+            children: childRows,
+          });
+
+          result[type].push(...childRows);
+          return;
+        }
+
+        const recurring = recurringByCategory.get(parent.id);
+        result[type].push({
+          key: `category:${parent.id}`,
+          id: parent.id,
+          categoryId: parent.id,
+          name: parent.name,
+          type,
+          icon: parent.icon,
+          color: parent.color,
+          sourceType: recurring ? 'recurring' : null,
+          suggestedAmount: recurring?.amount || 0,
+          description: recurring ? recurring.names.join(', ') : '',
+        });
+      });
+    });
+
+    standaloneRecurring.forEach((row) => {
+      result[row.type]?.push(row);
+    });
+
+    savingsGoals
+      .filter((goal) => !goal.is_archived)
+      .forEach((goal) => {
+        const monthlyRequired = getMonthlyRequiredSaving(goal);
+        if (monthlyRequired === null || Number(monthlyRequired || 0) <= 0) return;
+
+        result.savings.push({
+          key: `goal:${goal.id}`,
+          id: goal.id,
+          name: goal.name,
+          type: 'savings',
+          icon: goal.icon_key || 'target',
+          color: goal.color_key || '#276FE4',
+          sourceType: 'goal',
+          sourceId: goal.id,
+          categoryId: null,
+          suggestedAmount: Number(monthlyRequired || 0),
+          description: `Required ${formatCurrency(monthlyRequired)}/month`,
+        });
+      });
+
+    return result;
+  }, [categories, currentMonth, formatCurrency, leafCategoryIds, recurringTransactions, savingsGoals]);
+
+  const allRows = useMemo(() => {
+    return Object.values(rowsByType)
+      .flat()
+      .filter((row) => !row.isSectionHeader);
+  }, [rowsByType]);
+
+  useEffect(() => {
+    const initial = {};
+
+    allRows.forEach((row) => {
+      const allocation = allocationByRowKey[row.key];
+      initial[row.key] = allocation
+        ? Number(allocation.planned_amount || 0)
+        : Number(row.suggestedAmount || 0);
+    });
+
+    setValues(initial);
+  }, [allocationByRowKey, allRows]);
 
   const sumType = (type) => {
-    return categories
-      .filter((category) => category.type === type)
-      .reduce((sum, category) => {
-        const subs = categories.filter((sub) => sub.parent_id === category.id);
-
-        if (subs.length > 0 && !category.parent_id) return sum;
-
-        return sum + Number(values[category.id] || 0);
-      }, 0);
+    return rowsByType[type]
+      .filter((row) => !row.isSectionHeader)
+      .reduce((sum, row) => sum + Number(values[row.key] || 0), 0);
   };
 
   const totals = useMemo(() => {
@@ -122,24 +392,27 @@ export default function MonthlyPlanPanel({ currentMonth }) {
       totalDebt,
       leftToAllocate: totalIncome - totalExpenses - totalSavings - totalDebt,
     };
-  }, [categories, values]);
+  }, [rowsByType, values]);
 
-  const getHint = (categoryId) => {
-    return prevAllocations.find((a) => a.category_id === categoryId)?.planned_amount || 0;
+  const getHint = (rowKey) => {
+    return Number(prevAllocationByRowKey[rowKey]?.planned_amount || 0);
   };
 
-  const setValue = (categoryId, amount) => {
+  const setValue = (rowKey, amount) => {
     setValues((current) => ({
       ...current,
-      [categoryId]: Number(amount || 0),
+      [rowKey]: Number(amount || 0),
     }));
   };
 
   const copyFromPreviousMonth = () => {
     const nextValues = { ...values };
 
-    prevAllocations.forEach((allocation) => {
-      nextValues[allocation.category_id] = allocation.planned_amount || 0;
+    allRows.forEach((row) => {
+      const previousValue = prevAllocationByRowKey[row.key]?.planned_amount;
+      if (previousValue !== undefined && previousValue !== null) {
+        nextValues[row.key] = Number(previousValue || 0);
+      }
     });
 
     setValues(nextValues);
@@ -150,24 +423,30 @@ export default function MonthlyPlanPanel({ currentMonth }) {
     setSaving(true);
 
     try {
-      const existingByCategory = {};
-      allocations.forEach((allocation) => {
-        existingByCategory[allocation.category_id] = allocation;
-      });
-
       await Promise.all(
-        Object.entries(values).map(([categoryId, plannedAmount]) =>
-          budgetPlansApi.upsert({
-            id: existingByCategory[categoryId]?.id,
-            category_id: categoryId,
+        allRows.map((row) => {
+          const existingAllocation = allocationByRowKey[row.key];
+          const sourceType = row.sourceType || 'category';
+          const sourceId = row.sourceId || row.categoryId || row.id;
+
+          return budgetPlansApi.upsert({
+            id: existingAllocation?.id,
+            category_id: row.categoryId || null,
             month: currentMonth,
-            planned_amount: Number(plannedAmount || 0),
-          })
-        )
+            planned_amount: Number(values[row.key] || 0),
+            source_type: sourceType,
+            source_id: sourceId,
+            budget_type: row.type,
+            label: row.name,
+            icon: row.icon,
+            color: row.color,
+          });
+        })
       );
 
       queryClient.invalidateQueries({ queryKey: ['allocations'] });
       queryClient.invalidateQueries({ queryKey: ['all-allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
       toast.success('Monthly plan saved');
     } catch (error) {
       console.error('Monthly plan save failed:', error);
@@ -186,7 +465,7 @@ export default function MonthlyPlanPanel({ currentMonth }) {
 
   const renderSection = (type) => {
     const config = sectionConfig[type];
-    const items = getLeafCategories(type);
+    const items = rowsByType[type] || [];
     if (!items.length) return null;
 
     const isCollapsed = collapsedSections[type];
@@ -222,35 +501,38 @@ export default function MonthlyPlanPanel({ currentMonth }) {
 
         {!isCollapsed && (
           <div className="divide-y divide-border/50">
-            {items.map((category) => {
-              if (category.isSectionHeader) {
+            {items.map((row) => {
+              if (row.isSectionHeader) {
+                const sectionTotal = row.children.reduce(
+                  (sum, child) => sum + Number(values[child.key] || 0),
+                  0
+                );
+
                 return (
                   <div
-                    key={category.id}
+                    key={row.key}
                     className="flex items-center gap-3 bg-white/20 px-4 py-3 dark:bg-white/[0.02]"
                   >
-                    <CategoryIcon icon={category.icon} color={category.color} size="sm" />
+                    <CategoryIcon icon={row.icon} color={row.color} size="sm" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-foreground">
-                        {category.name}
+                        {row.name}
                       </div>
                     </div>
                     <div className="shrink-0 text-right text-sm font-bold tabular-nums">
-                      {formatCurrency(category.sectionTotal || 0)}
+                      {formatCurrency(sectionTotal || 0)}
                     </div>
                   </div>
                 );
               }
 
               return (
-                <AllocationRow
-                  key={category.id}
-                  category={category}
-                  value={values[category.id]}
-                  lastMonthHint={getHint(category.id)}
-                  onChange={(value) => setValue(category.id, value)}
-                  isSubcategory={category.isSubcategory}
-                  parentColor={category.parentColor}
+                <PlanAmountRow
+                  key={row.key}
+                  row={row}
+                  value={values[row.key]}
+                  lastMonthHint={getHint(row.key)}
+                  onChange={(value) => setValue(row.key, value)}
                   formatCurrency={formatCurrency}
                 />
               );
@@ -263,6 +545,22 @@ export default function MonthlyPlanPanel({ currentMonth }) {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold">Monthly Plan</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Plan the selected month. Recurring rules and savings goals appear inline as suggested planned amounts.
+          </p>
+        </div>
+
+        <MonthSelector
+          currentMonth={currentMonth}
+          onChange={onMonthChange}
+          subtitle="Planning month"
+          className="max-w-md lg:max-w-sm"
+        />
+      </div>
+
       <LeftToAllocateBanner
         leftToAllocate={totals.leftToAllocate}
         totalIncome={totals.totalIncome}
@@ -272,9 +570,9 @@ export default function MonthlyPlanPanel({ currentMonth }) {
 
       <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Monthly planned amounts</h2>
+          <h2 className="text-sm font-semibold">Planned amounts</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Category structure stays separate. This tab only saves the selected month’s planned values.
+            Badges show where an amount came from. Editing a Recurring or Goal row only changes this month’s plan.
           </p>
         </div>
 

@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import { Settings2 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
-import MonthSelector from '@/components/shared/MonthSelector';
 import ManagePlanTabs, { managePlanTabs } from '@/components/manage-plan/ManagePlanTabs';
 import MonthlyPlanPanel from '@/components/manage-plan/MonthlyPlanPanel';
 import ManageCategoriesPanel from '@/components/manage-plan/ManageCategoriesPanel';
@@ -32,7 +31,6 @@ export default function ManagePlan() {
 
   const updateUrl = (nextMonth = currentMonth, nextTab = activeTab, replace = false) => {
     const params = new URLSearchParams();
-
     params.set('tab', nextTab);
 
     if (nextTab === 'monthly-plan') {
@@ -44,7 +42,7 @@ export default function ManagePlan() {
 
   const changeMonth = (nextMonth) => {
     setCurrentMonth(nextMonth);
-    updateUrl(nextMonth, activeTab, true);
+    updateUrl(nextMonth, 'monthly-plan', true);
   };
 
   const changeTab = (nextTab) => {
@@ -55,7 +53,7 @@ export default function ManagePlan() {
     if (activeTab === 'categories') return <ManageCategoriesPanel />;
     if (activeTab === 'recurring') return <ManageRecurringPanel />;
     if (activeTab === 'goals') return <ManageGoalsPanel />;
-    return <MonthlyPlanPanel currentMonth={currentMonth} />;
+    return <MonthlyPlanPanel currentMonth={currentMonth} onMonthChange={changeMonth} />;
   };
 
   return (
@@ -67,16 +65,6 @@ export default function ManagePlan() {
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
-        {activeTab === 'monthly-plan' && (
-          <div className="animate-child mb-4 flex items-center justify-center">
-            <MonthSelector
-              currentMonth={currentMonth}
-              onChange={changeMonth}
-              subtitle="Setup period"
-            />
-          </div>
-        )}
-
         <div className="animate-child mb-4">
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>
