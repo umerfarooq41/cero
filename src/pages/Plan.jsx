@@ -26,8 +26,6 @@ import {
   useAllocations,
   useBudgetSummary,
   useCategories,
-  useRecurringTransactions,
-  useSavingsGoals,
 } from '@/hooks/useBudgetData';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
@@ -36,13 +34,6 @@ import {
   getCurrencyNoun as getSharedCurrencyNoun,
   getCurrencySymbol as getSharedCurrencySymbol,
 } from '@/lib/currencies';
-import {
-  formatGoalDate,
-  getGoalProgress,
-  getGoalRemaining,
-  getGoalStatus,
-  getMonthlyRequiredSaving,
-} from '@/lib/goals';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -318,151 +309,6 @@ function ReadOnlyBreakdownRow({ item, currency }) {
   );
 }
 
-function RecurringPreviewSection({ activeTab, categories, recurringTransactions, currency }) {
-  if (activeTab === 'savings') return null;
-
-  const rows = recurringTransactions
-    .filter((rule) => isActiveRule(rule))
-    .filter((rule) => {
-      const category = categories.find((item) => item.id === rule.category_id);
-      const type = getCategoryType(category, categories) || normalizeType(rule.type);
-      return type === activeTab;
-    })
-    .slice(0, 6);
-
-  if (!rows.length) return null;
-
-  const title =
-    activeTab === 'income'
-      ? 'Recurring Income'
-      : activeTab === 'debt'
-        ? 'Recurring Debt Payments'
-        : 'Recurring Expenses';
-
-  return (
-    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-      <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-bold uppercase tracking-wide">{title}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Read-only preview. Posting happens in Transactions → Scheduled.
-        </p>
-      </div>
-
-      <div className="divide-y divide-border/50">
-        {rows.map((rule) => {
-          const category = categories.find((item) => item.id === rule.category_id);
-
-          return (
-            <div key={rule.id} className="flex items-center gap-3 px-4 py-4">
-              <CategoryIconBadge
-                icon={rule.icon || category?.icon || 'receipt'}
-                color={rule.color || category?.color || '#f59e0b'}
-                size="md"
-              />
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="truncate text-sm font-semibold">{rule.name || 'Recurring rule'}</p>
-                  <p className="shrink-0 text-sm font-bold tabular-nums">
-                    <Money amount={rule.amount || 0} currency={currency} compact />
-                  </p>
-                </div>
-
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {rule.frequency || 'Monthly'} · {getDueText(rule.next_due_date)}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                  Next {formatDateText(rule.next_due_date)}
-                  {category?.name ? ` · ${category.name}` : ''}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function PlanGoalRow({ goal, allocation, currency }) {
-  const target = Number(goal?.target_amount || 0);
-  const progress = getGoalProgress(goal);
-  const remaining = getGoalRemaining(goal);
-  const status = getGoalStatus(goal);
-  const monthlyRequired = Number(allocation?.planned_amount ?? getMonthlyRequiredSaving(goal) ?? 0);
-  const isComplete = remaining <= 0 || progress >= 100;
-
-  return (
-    <div className="flex items-center gap-3 px-4 py-4">
-      <CategoryIconBadge
-        icon={goal?.icon_key || 'target'}
-        color={goal?.color_key || '#2563EB'}
-        size="md"
-      />
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-              <p className="truncate text-sm font-semibold">{goal?.name || 'Savings goal'}</p>
-              <Badge
-                variant="outline"
-                className="h-5 rounded-full border-blue-500/20 bg-blue-500/10 px-2 text-[10px] font-semibold leading-none text-blue-700 dark:text-blue-400"
-              >
-                Goal
-              </Badge>
-            </div>
-          </div>
-
-          <p className="shrink-0 text-sm font-bold tabular-nums">
-            {isComplete ? 'Completed' : <Money amount={monthlyRequired} currency={currency} compact />}
-          </p>
-        </div>
-
-        <p className="mt-1 truncate text-xs text-muted-foreground">
-          {isComplete ? '100% complete' : `${status.label} · ${progress}% complete`}
-        </p>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          Target <Money amount={target} currency={currency} compact /> · {formatGoalDate(goal?.target_date)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function SavingsGoalsSection({ savingsGoals, allocations, currency }) {
-  const activeGoals = savingsGoals.filter((goal) => !goal.is_archived);
-  if (!activeGoals.length) return null;
-
-  const allocationByGoalId = new Map(
-    allocations
-      .filter((allocation) => getAllocationSourceType(allocation) === 'goal')
-      .map((allocation) => [allocation.source_id, allocation])
-  );
-
-  return (
-    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-      <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-bold uppercase tracking-wide">Savings Goals</h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Read-only targets. Contributions happen in Transactions → Scheduled.
-        </p>
-      </div>
-
-      <div className="divide-y divide-border/50">
-        {activeGoals.map((goal) => (
-          <PlanGoalRow
-            key={goal.id}
-            goal={goal}
-            allocation={allocationByGoalId.get(goal.id)}
-            currency={currency}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function PlanOverview({
   activeTab,
   setActiveTab,
@@ -471,8 +317,6 @@ function PlanOverview({
   budget,
   currency,
   allocations,
-  recurringTransactions,
-  savingsGoals,
 }) {
   const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
 
@@ -495,7 +339,7 @@ function PlanOverview({
           color: allocation.color || tab.shades[(index + 3) % tab.shades.length] || tab.color,
           icon: allocation.icon || (sourceType === 'goal' ? 'target' : 'receipt'),
           sourceType,
-          description: sourceType === 'goal' ? 'Goal allocation' : 'Recurring allocation',
+          description: '',
         };
       })
       .filter((item) => item.planned > 0);
@@ -695,21 +539,6 @@ function PlanOverview({
           )}
         </div>
       </div>
-
-      <RecurringPreviewSection
-        activeTab={activeTab}
-        categories={categories}
-        recurringTransactions={recurringTransactions}
-        currency={currency}
-      />
-
-      {activeTab === 'savings' && (
-        <SavingsGoalsSection
-          savingsGoals={savingsGoals}
-          allocations={allocations}
-          currency={currency}
-        />
-      )}
     </div>
   );
 }
@@ -730,8 +559,6 @@ export default function Plan() {
   const budget = useBudgetSummary(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
-  const { data: recurringTransactions = [] } = useRecurringTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const allSubs = useMemo(() => categories.filter((c) => c.parent_id), [categories]);
 
