@@ -16,7 +16,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import CategoryIcon, { iconNames } from '@/components/shared/CategoryIcon';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -581,9 +580,10 @@ function RecurringActionSheet({ rule, open, onClose, onEdit, onArchive, onDelete
 function RecurringRow({ rule, account, category, onAction, formatCurrency }) {
   const status = getRecurringStatus(rule);
   const fallbackIcon = normalizeRuleType(rule.type) === 'income' ? 'income' : normalizeRuleType(rule.type) === 'transfer' ? 'loan' : 'receipt';
+  const amount = Math.abs(Number(rule.amount || 0));
 
   return (
-    <div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/40">
+    <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
       <CategoryIcon
         icon={rule.icon || category?.icon || fallbackIcon}
         color={rule.color || category?.color || COLORS[0]}
@@ -591,35 +591,29 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency }) {
       />
 
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <div className="truncate text-sm font-medium leading-tight">{rule.name}</div>
-          <Badge
-            variant="outline"
-            className={cn('shrink-0 rounded-full px-2 py-0 text-[10px]', getStatusClass(status))}
-          >
-            {status.label}
-          </Badge>
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0 truncate text-sm font-semibold leading-tight">
+            {rule.name}
+          </div>
+          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+            {formatCurrency(amount)}
+          </div>
         </div>
-        <div className="mt-1 truncate text-xs text-muted-foreground">
-          {getRecurringFrequencyLabel(rule.frequency)} · Next {formatRecurringDate(rule.next_due_date)}
-          {category ? ` · ${category.name}` : ''}
-          {account ? ` · ${account.name}` : ''}
-        </div>
-      </div>
 
-      <div className="shrink-0 text-right">
-        <div className="text-sm font-semibold tabular-nums">
-          {formatCurrency(Math.abs(Number(rule.amount || 0)))}
-        </div>
-        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Manual post
-        </div>
+        <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
+          {getRecurringFrequencyLabel(rule.frequency)} · {status.label}
+        </p>
+
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          Next {formatRecurringDate(rule.next_due_date)}
+          {account ? ` · ${account.name}` : ''}
+        </p>
       </div>
 
       <button
         type="button"
         onClick={() => onAction(rule)}
-        className="rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent sm:opacity-0 sm:group-hover:opacity-100"
+        className="-mr-1 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
         aria-label={`Open actions for ${rule.name}`}
       >
         <MoreVertical className="h-4 w-4" />
