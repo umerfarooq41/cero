@@ -13,6 +13,7 @@ export default function LeftToAllocateBanner({
   totalIncome,
   isEditMode,
   formatCurrency,
+  sticky = true,
 }) {
   const money = formatCurrency || fallbackFormatCurrency;
 
@@ -35,7 +36,8 @@ export default function LeftToAllocateBanner({
   return (
     <div
       className={cn(
-        'sticky top-[72px] z-20 rounded-3xl border border-border/60 bg-card/75 px-4 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300',
+        sticky ? 'sticky top-[72px] z-20' : 'relative z-0',
+        'rounded-3xl border border-border/60 bg-card/75 px-4 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300',
         isEditMode ? bgColor : 'border-border'
       )}
     >
