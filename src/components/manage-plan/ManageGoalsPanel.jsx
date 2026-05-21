@@ -14,7 +14,6 @@ import {
 import { toast } from 'sonner';
 
 import CategoryIcon, { iconNames } from '@/components/shared/CategoryIcon';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -93,17 +92,6 @@ const emptyGoalForm = () => ({
   color_key: randomColor(),
   note: '',
 });
-
-function ProgressBar({ progress, color }) {
-  return (
-    <div className="h-2 overflow-hidden rounded-full bg-secondary">
-      <div
-        className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${Math.min(progress, 100)}%`, backgroundColor: color || 'hsl(var(--primary))' }}
-      />
-    </div>
-  );
-}
 
 function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
   if (!goal) return null;
@@ -374,49 +362,51 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
 
 function GoalRow({ goal, onAction, formatCurrency }) {
   const progress = getGoalProgress(goal);
-  const current = Number(goal.current_amount || 0);
   const target = Number(goal.target_amount || 0);
   const monthlyRequired = getMonthlyRequiredSaving(goal);
+  const remaining = getGoalRemaining(goal);
   const status = getGoalStatus(goal);
   const color = goal.color_key || '#276FE4';
   const isArchived = Boolean(goal.is_archived);
+  const isCompleted = remaining <= 0 || progress >= 100;
+  const statusLabel = status.key === 'due' ? 'Target passed' : status.label;
 
   return (
-    <div className="group px-4 py-3 transition-colors hover:bg-accent/40">
-      <div className="flex items-start gap-3">
-        <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
+    <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+      <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className={cn('min-w-0 flex-1 truncate text-sm font-medium leading-tight', isArchived && 'text-muted-foreground line-through')}>
-              {goal.name}
-            </h3>
-            <Badge variant="outline" className={cn('shrink-0 rounded-full px-2 py-0 text-[10px]', status.className)}>
-              {isArchived ? 'Archived' : status.label}
-            </Badge>
-            <span className="shrink-0 text-xs font-bold tabular-nums text-muted-foreground">{progress}%</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <h3 className={cn('min-w-0 truncate text-sm font-semibold leading-tight', isArchived && 'text-muted-foreground line-through')}>
+            {goal.name}
+          </h3>
+
+          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+            {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrency(monthlyRequired)}
           </div>
-
-          <div className="mt-2">
-            <ProgressBar progress={progress} color={isArchived ? '#94a3b8' : color} />
-          </div>
-
-          <p className="mt-2 text-xs text-muted-foreground tabular-nums">
-            {formatCurrency(current)} / {formatCurrency(target)} · Required{' '}
-            {monthlyRequired === null ? 'set deadline' : `${formatCurrency(monthlyRequired)}/month`} · Target{' '}
-            {formatGoalDate(goal.target_date)}
-          </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onAction(goal)}
-          className="rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
-          aria-label={`Open actions for ${goal.name}`}
-        >
-          <MoreVertical className="h-4 w-4" />
-        </button>
+        <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
+          {isArchived
+            ? `Archived · ${progress}% complete`
+            : isCompleted
+              ? '100% complete'
+              : `${statusLabel} · ${progress}% complete`}
+        </p>
+
+        <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
+          Target {formatCurrency(target)}
+        </p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onAction(goal)}
+        className="-mr-1 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        aria-label={`Open actions for ${goal.name}`}
+      >
+        <MoreVertical className="h-4 w-4" />
+      </button>
     </div>
   );
 }
