@@ -15,15 +15,13 @@ import AppLayout from '@/components/layout/AppLayout';
 
 import Dashboard from '@/pages/Dashboard';
 import Plan from '@/pages/Plan';
-import EditPlan from '@/pages/EditPlan';
 import Transactions from '@/pages/Transactions';
+import ManagePlan from '@/pages/ManagePlan';
 import AddTransaction from '@/pages/AddTransaction';
 import Accounts from '@/pages/Accounts';
 import AccountDetail from '@/pages/AccountDetail';
 import AddAccount from '@/pages/AddAccount';
-import ManagePlan from '@/pages/ManagePlan';
 import Settings from '@/pages/Settings';
-import Reflect from '@/pages/Reflect';
 import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
 
@@ -82,7 +80,10 @@ const AuthenticatedApp = () => {
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/plan" element={<Plan />} />
-        <Route path="/edit-plan" element={<EditPlan />} />
+        <Route
+          path="/edit-plan"
+          element={<Navigate to="/manage-plan?tab=monthly-plan" replace />}
+        />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/add-transaction" element={<AddTransaction />} />
         <Route path="/transactions/:id/edit" element={<AddTransaction />} />
@@ -91,9 +92,15 @@ const AuthenticatedApp = () => {
         <Route path="/add-account" element={<AddAccount />} />
         <Route path="/accounts/:id/edit" element={<AddAccount />} />
         <Route path="/manage-plan" element={<ManagePlan />} />
-        <Route path="/categories" element={<Navigate to="/manage-plan?tab=categories" replace />} />
+        <Route
+          path="/categories"
+          element={<Navigate to="/manage-plan?tab=categories" replace />}
+        />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/reflect" element={<Reflect />} />
+        <Route
+          path="/reflect"
+          element={<Navigate to="/?tab=reflect" replace />}
+        />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
