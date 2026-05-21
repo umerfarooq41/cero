@@ -65,73 +65,13 @@ function getCategoryType(category, categories = []) {
   return parent ? normalizeType(parent.type) : null;
 }
 
-function getRuleCategoryId(rule) {
-  return (
-    rule?.category_id ||
-    rule?.categoryId ||
-    rule?.budget_category_id ||
-    rule?.budgetCategoryId ||
-    rule?.category?.id ||
-    null
-  );
-}
-
 function isLeafCategory(category, categories = []) {
   return !categories.some((item) => item.parent_id === category.id);
 }
 
-function getFrequencyKey(value) {
-  return String(value || 'monthly').toLowerCase().replace(/[\s-]+/g, '_');
-}
-
-function isRuleActive(rule) {
-  if (!rule || rule.is_archived) return false;
-  if (rule.is_active === false) return false;
-
-  const status = String(rule.status || '').toLowerCase();
-  return status !== 'paused' && status !== 'archived' && status !== 'inactive';
-}
-
-function getMonthRange(month) {
-  const start = new Date(`${month}-01T00:00:00`);
-  const end = new Date(start);
-  end.setMonth(end.getMonth() + 1);
-  end.setMilliseconds(end.getMilliseconds() - 1);
-  return { start, end };
-}
-
-function recurringOccursInMonth(rule, month) {
+function isDueInMonth(rule, month) {
   if (!rule?.next_due_date || !month) return false;
-
-  const nextDue = new Date(`${String(rule.next_due_date).slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(nextDue.getTime())) return false;
-
-  const { start, end } = getMonthRange(month);
-  const frequency = getFrequencyKey(rule.frequency);
-
-  if (frequency.includes('year')) {
-    return nextDue.getMonth() === start.getMonth() && nextDue <= end;
-  }
-
-  if (frequency.includes('quarter') || frequency.includes('month') || frequency.includes('week') || frequency.includes('day')) {
-    return nextDue <= end;
-  }
-
-  return nextDue >= start && nextDue <= end;
-}
-
-function formatDateText(value) {
-  if (!value) return 'not set';
-  const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return 'not set';
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
-}
-
-function formatMoneyText(amount) {
-  return Number(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
+  return String(rule.next_due_date).slice(0, 7) === month;
 }
 
 function getAllocationSourceType(allocation) {
@@ -291,22 +231,21 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const standaloneRecurring = [];
 
     recurringTransactions
-      .filter((rule) => isRuleActive(rule))
+      .filter((rule) => rule.is_active && !rule.is_archived && isDueInMonth(rule, currentMonth))
       .forEach((rule) => {
-        const ruleCategoryId = getRuleCategoryId(rule);
-        const category = categories.find((item) => item.id === ruleCategoryId);
+        const category = categories.find((item) => item.id === rule.category_id);
         const ruleType = getCategoryType(category, categories) || normalizeType(rule.type);
         const amount = Number(rule.amount || 0);
 
-        if (ruleCategoryId && leafCategoryIds.has(ruleCategoryId)) {
-          const current = recurringByCategory.get(ruleCategoryId) || {
+        if (rule.category_id && leafCategoryIds.has(rule.category_id)) {
+          const current = recurringByCategory.get(rule.category_id) || {
             amount: 0,
             names: [],
           };
 
           current.amount += amount;
           current.names.push(rule.name);
-          recurringByCategory.set(ruleCategoryId, current);
+          recurringByCategory.set(rule.category_id, current);
           return;
         }
 
@@ -319,9 +258,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           color: rule.color || '#f59e0b',
           sourceType: 'recurring',
           sourceId: rule.id,
-          categoryId: ruleCategoryId || null,
+          categoryId: rule.category_id || null,
           suggestedAmount: amount,
-          description: `${rule.frequency || 'Monthly'} · due ${formatDateText(rule.next_due_date)}`,
+          description: `${rule.frequency || 'Monthly'} · due ${rule.next_due_date || 'not set'}`,
         });
       });
 
@@ -408,12 +347,12 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           sourceId: goal.id,
           categoryId: null,
           suggestedAmount: Number(monthlyRequired || 0),
-          description: `Required ${formatMoneyText(monthlyRequired)}/month`,
+          description: `Required ${formatCurrency(monthlyRequired)}/month`,
         });
       });
 
     return result;
-  }, [categories, currentMonth, leafCategoryIds, recurringTransactions, savingsGoals]);
+  }, [categories, currentMonth, formatCurrency, leafCategoryIds, recurringTransactions, savingsGoals]);
 
   const allRows = useMemo(() => {
     return Object.values(rowsByType)
@@ -616,14 +555,13 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
         <MonthSelector
           currentMonth={currentMonth}
-          onChange={onMonthChange || (() => {})}
+          onChange={onMonthChange}
           subtitle="Planning month"
           className="max-w-md lg:max-w-sm"
         />
       </div>
 
       <LeftToAllocateBanner
-        sticky={false}
         leftToAllocate={totals.leftToAllocate}
         totalIncome={totals.totalIncome}
         isEditMode={true}
