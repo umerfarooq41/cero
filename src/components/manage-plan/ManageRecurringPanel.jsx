@@ -105,6 +105,26 @@ const TYPE_LABELS = {
 
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
+const RECURRING_FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'due-this-month', label: 'Due This Month' },
+  { value: 'active', label: 'Active' },
+  { value: 'paused', label: 'Paused' },
+  { value: 'archived', label: 'Archived' },
+];
+
+function isRuleDueThisMonth(rule) {
+  if (!rule.next_due_date) return false;
+
+  const dueDate = new Date(`${rule.next_due_date}T00:00:00`);
+  const now = new Date();
+
+  return (
+    dueDate.getFullYear() === now.getFullYear() &&
+    dueDate.getMonth() === now.getMonth()
+  );
+}
+
 const emptyForm = (type = 'expense') => ({
   name: '',
   amount: '',
@@ -724,15 +744,23 @@ export default function ManageRecurringPanel() {
   const [editingRule, setEditingRule] = useState(null);
   const [initialType, setInitialType] = useState('expense');
   const [saving, setSaving] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const visibleRules = useMemo(() => {
     return recurringRules
-      .filter((rule) => !rule.is_archived)
+      .filter((rule) => {
+        if (activeFilter === 'archived') return Boolean(rule.is_archived);
+        if (rule.is_archived) return false;
+        if (activeFilter === 'due-this-month') return isRuleDueThisMonth(rule);
+        if (activeFilter === 'active') return rule.is_active !== false;
+        if (activeFilter === 'paused') return rule.is_active === false;
+        return true;
+      })
       .sort((a, b) => {
         if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
         return String(a.next_due_date || '').localeCompare(String(b.next_due_date || ''));
       });
-  }, [recurringRules]);
+  }, [activeFilter, recurringRules]);
 
   const groupedRules = useMemo(() => {
     return {
@@ -826,6 +854,30 @@ export default function ManageRecurringPanel() {
           <Plus className="mr-2 h-4 w-4" />
           Add Rule
         </Button>
+      </div>
+
+      <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="inline-flex min-w-full gap-1 rounded-2xl border border-border/60 bg-card/60 p-1 shadow-sm backdrop-blur-xl">
+          {RECURRING_FILTERS.map((filter) => {
+            const isActive = activeFilter === filter.value;
+
+            return (
+              <button
+                key={filter.value}
+                type="button"
+                onClick={() => setActiveFilter(filter.value)}
+                className={cn(
+                  'relative flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition-colors sm:text-sm',
+                  isActive
+                    ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/10'
+                    : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                )}
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-3">

@@ -84,6 +84,15 @@ const COLORS = [
 
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
+
+const GOAL_FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'archived', label: 'Archived' },
+];
+
+
 const emptyGoalForm = () => ({
   name: '',
   target_amount: '',
@@ -513,6 +522,7 @@ export default function ManageGoalsPanel() {
   const [saving, setSaving] = useState(false);
   const [actionTarget, setActionTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const groupedGoals = useMemo(() => {
     const sortedGoals = sortGoalsByPriority(savingsGoals);
@@ -600,33 +610,62 @@ export default function ManageGoalsPanel() {
         </Button>
       </div>
 
+      <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="inline-flex min-w-full gap-1 rounded-2xl border border-border/60 bg-card/60 p-1 shadow-sm backdrop-blur-xl">
+          {GOAL_FILTERS.map((filter) => {
+            const isActive = activeFilter === filter.value;
+
+            return (
+              <button
+                key={filter.value}
+                type="button"
+                onClick={() => setActiveFilter(filter.value)}
+                className={cn(
+                  'relative flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition-colors sm:text-sm',
+                  isActive
+                    ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/10'
+                    : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                )}
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="space-y-4">
-        <GoalSection
-          title="Active Goals"
-          tone="active"
-          goals={groupedGoals.active}
-          defaultExpanded
-          emptyText="No active savings goals yet."
-          onAddNew={openNew}
-          onAction={setActionTarget}
-          formatCurrency={formatCurrency}
-        />
+        {(activeFilter === 'all' || activeFilter === 'active') && (
+          <GoalSection
+            title="Active Goals"
+            tone="active"
+            goals={groupedGoals.active}
+            defaultExpanded
+            emptyText="No active savings goals yet."
+            onAddNew={openNew}
+            onAction={setActionTarget}
+            formatCurrency={formatCurrency}
+          />
+        )}
 
-        <GoalSection
-          title="Completed Goals"
-          tone="completed"
-          goals={groupedGoals.completed}
-          defaultExpanded={groupedGoals.active.length === 0}
-          emptyText="Completed goals will appear here."
-          onAction={setActionTarget}
-          formatCurrency={formatCurrency}
-        />
+        {(activeFilter === 'all' || activeFilter === 'completed') && (
+          <GoalSection
+            title="Completed Goals"
+            tone="completed"
+            goals={groupedGoals.completed}
+            defaultExpanded={activeFilter === 'completed' || groupedGoals.active.length === 0}
+            emptyText="Completed goals will appear here."
+            onAction={setActionTarget}
+            formatCurrency={formatCurrency}
+          />
+        )}
 
-        {groupedGoals.archived.length > 0 && (
+        {activeFilter === 'archived' && (
           <GoalSection
             title="Archived Goals"
             tone="archived"
             goals={groupedGoals.archived}
+            defaultExpanded
             emptyText="Archived goals will appear here."
             onAction={setActionTarget}
             formatCurrency={formatCurrency}

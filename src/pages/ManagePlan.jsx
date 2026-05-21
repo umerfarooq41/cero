@@ -32,8 +32,13 @@ export default function ManagePlan() {
 
   const updateUrl = (nextMonth = currentMonth, nextTab = activeTab, replace = false) => {
     const params = new URLSearchParams();
-    params.set('month', nextMonth);
+
     params.set('tab', nextTab);
+
+    if (nextTab === 'monthly-plan') {
+      params.set('month', nextMonth);
+    }
+
     navigate(`/manage-plan?${params.toString()}`, { replace });
   };
 
@@ -62,13 +67,15 @@ export default function ManagePlan() {
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
-        <div className="animate-child mb-4 flex items-center justify-center">
-          <MonthSelector
-            currentMonth={currentMonth}
-            onChange={changeMonth}
-            subtitle="Setup period"
-          />
-        </div>
+        {activeTab === 'monthly-plan' && (
+          <div className="animate-child mb-4 flex items-center justify-center">
+            <MonthSelector
+              currentMonth={currentMonth}
+              onChange={changeMonth}
+              subtitle="Setup period"
+            />
+          </div>
+        )}
 
         <div className="animate-child mb-4">
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
