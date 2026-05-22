@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addMonths, format, subMonths } from 'date-fns';
-import { ChevronDown, ChevronLeft, ChevronRight, Copy, Save } from 'lucide-react';
+import { format, subMonths } from 'date-fns';
+import { ChevronDown, Copy, Save } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -645,50 +645,13 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   const monthLabel = format(new Date(`${currentMonth}-01T00:00:00`), 'MMMM yyyy');
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold">Monthly Plan</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Plan the selected month. Recurring rules and savings goals appear inline with badges and suggested amounts.
-          </p>
-        </div>
-
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1 rounded-2xl bg-secondary/70 p-1 shadow-sm">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => shiftMonth(-1)}
-              className="h-8 w-8 rounded-xl"
-              aria-label="Previous month"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-8 min-w-[9.5rem] rounded-xl px-3 text-sm font-semibold tabular-nums"
-            >
-              {monthLabel}
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => shiftMonth(1)}
-              className="h-8 w-8 rounded-xl"
-              aria-label="Next month"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
+<div className="flex justify-center">
+  <MonthSelector
+    currentMonth={currentMonth}
+    onChange={onMonthChange || (() => {})}
+    subtitle="Planning month"
+  />
+</div>
       <LeftToAllocateBanner
         sticky={false}
         leftToAllocate={totals.leftToAllocate}
