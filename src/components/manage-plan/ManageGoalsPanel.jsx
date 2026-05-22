@@ -33,6 +33,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { savingsGoalsApi } from '@/lib/budgetData';
 import {
@@ -44,6 +51,7 @@ import {
   sortGoalsByPriority,
 } from '@/lib/goals';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
+import { useAccounts } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
 
 const COLORS = [
@@ -88,10 +96,39 @@ const emptyGoalForm = () => ({
   target_amount: '',
   current_amount: '',
   target_date: '',
+  from_account_id: 'none',
+  to_account_id: 'none',
   icon_key: 'target',
   color_key: randomColor(),
   note: '',
 });
+
+function normalizeAccountType(value) {
+  return String(value || '').toLowerCase();
+}
+
+function normalizeAccountCategory(value) {
+  return String(value || '').toLowerCase();
+}
+
+function isCheckingAccount(account) {
+  return (
+    normalizeAccountCategory(account?.category) === 'asset' &&
+    normalizeAccountType(account?.type) === 'checking'
+  );
+}
+
+function isSavingsAccount(account) {
+  return (
+    normalizeAccountCategory(account?.category) === 'asset' &&
+    normalizeAccountType(account?.type) === 'savings'
+  );
+}
+
+function getAccountLabel(account) {
+  const type = String(account?.type || 'account').replace(/_/g, ' ');
+  return `${account?.name || 'Account'} · ${type}`;
+}
 
 function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
   if (!goal) return null;
@@ -159,7 +196,7 @@ function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
   );
 }
 
-function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
+function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts = [] }) {
   const nameRef = useRef(null);
   const [form, setForm] = useState(emptyGoalForm);
 
@@ -172,6 +209,8 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
         target_amount: String(editingGoal.target_amount ?? ''),
         current_amount: String(editingGoal.current_amount ?? ''),
         target_date: editingGoal.target_date || '',
+        from_account_id: editingGoal.from_account_id || 'none',
+        to_account_id: editingGoal.to_account_id || 'none',
         icon_key: editingGoal.icon_key || 'target',
         color_key: editingGoal.color_key || '#276FE4',
         note: editingGoal.note || '',
@@ -182,6 +221,16 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
 
     setTimeout(() => nameRef.current?.focus(), 80);
   }, [editingGoal, open]);
+
+  const checkingAccounts = useMemo(
+    () => accounts.filter((account) => isCheckingAccount(account)),
+    [accounts]
+  );
+
+  const savingsAccounts = useMemo(
+    () => accounts.filter((account) => isSavingsAccount(account)),
+    [accounts]
+  );
 
   const updateForm = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -211,11 +260,28 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
       return;
     }
 
+    if (form.from_account_id === 'none') {
+      toast.error('Select a from account');
+      return;
+    }
+
+    if (form.to_account_id === 'none') {
+      toast.error('Select a savings account');
+      return;
+    }
+
+    if (form.from_account_id === form.to_account_id) {
+      toast.error('From and to accounts must be different');
+      return;
+    }
+
     onSave({
       name: form.name.trim(),
       target_amount: targetAmount,
       current_amount: currentAmount,
       target_date: form.target_date || null,
+      from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
+      to_account_id: form.to_account_id === 'none' ? null : form.to_account_id,
       icon_key: form.icon_key || 'target',
       color_key: form.color_key || '#276FE4',
       note: form.note.trim() || null,
@@ -291,6 +357,54 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving }) {
                 onChange={(event) => updateForm('target_date', event.target.value)}
                 type="date"
               />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">From account</label>
+              <Select value={form.from_account_id} onValueChange={(value) => updateForm('from_account_id', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select checking account" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Select checking account</SelectItem>
+                  {checkingAccounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {getAccountLabel(account)}
+                    </SelectItem>
+                  ))}
+                  {checkingAccounts.length === 0 && (
+                    <SelectItem value="no-checking-accounts" disabled>
+                      No checking accounts
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">To account</label>
+              <Select value={form.to_account_id} onValueChange={(value) => updateForm('to_account_id', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select savings account" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Select savings account</SelectItem>
+                  {savingsAccounts
+                    .filter((account) => account.id !== form.from_account_id)
+                    .map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {getAccountLabel(account)}
+                      </SelectItem>
+                    ))}
+                  {savingsAccounts.length === 0 && (
+                    <SelectItem value="no-savings-accounts" disabled>
+                      No savings accounts
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -491,6 +605,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
 export default function ManageGoalsPanel() {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
+  const { data: accounts = [] } = useAccounts();
 
   const { data: savingsGoals = [] } = useQuery({
     queryKey: ['manage-savings-goals'],
@@ -633,6 +748,7 @@ export default function ManageGoalsPanel() {
         editingGoal={editingGoal}
         onSave={handleSave}
         saving={saving}
+        accounts={accounts}
       />
 
       <GoalActionSheet
