@@ -76,10 +76,15 @@ export default function TransactionRow({
   const config = typeConfig[transaction.type] || typeConfig.expense;
   const isTransfer = transaction.type === 'transfer';
   const isRecurring = Boolean(
-    transaction.recurring_transaction_id || transaction.recurring_posted_for_date
+    transaction.source_type === 'recurring' ||
+      transaction.recurring_transaction_id ||
+      transaction.recurring_posted_for_date
   );
   const isGoalContribution = Boolean(
-    transaction.savings_goal_id || transaction.goal_contribution_id
+    transaction.source_type === 'goal' ||
+      transaction.source_type === 'savings_goal' ||
+      transaction.savings_goal_id ||
+      transaction.goal_contribution_id
   );
 
   const accountName = account?.name || 'Account';
