@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import CategoryIcon from '@/components/shared/CategoryIcon';
+import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,8 @@ const sectionConfig = {
   income: {
     title: 'Income',
     text: 'text-green-700 dark:text-green-400',
-    badge: 'bg-green-500/10 text-green-700 ring-green-500/15 dark:text-green-400',
+    badge:
+      'bg-green-500/10 text-green-700 ring-green-500/15 dark:text-green-400',
   },
   expense: {
     title: 'Expenses',
@@ -44,20 +46,27 @@ const sectionConfig = {
   debt: {
     title: 'Debt',
     text: 'text-purple-700 dark:text-purple-400',
-    badge: 'bg-purple-500/10 text-purple-700 ring-purple-500/15 dark:text-purple-400',
+    badge:
+      'bg-purple-500/10 text-purple-700 ring-purple-500/15 dark:text-purple-400',
   },
 };
 
 const SOURCE_BADGE_CLASS = {
-  recurring: 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  recurring:
+    'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
   goal: 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400',
 };
 
 function normalizeType(value) {
   const type = String(value || '').toLowerCase();
-  if (type === 'transfer' || type === 'debt_payment' || type === 'debt') return 'debt';
+
+  if (type === 'transfer' || type === 'debt_payment' || type === 'debt') {
+    return 'debt';
+  }
+
   if (type === 'income') return 'income';
   if (type === 'savings') return 'savings';
+
   return 'expense';
 }
 
@@ -90,6 +99,7 @@ function getFrequencyKey(value) {
 
 function formatFrequency(value) {
   const frequency = String(value || 'monthly').replace(/[_-]+/g, ' ').trim();
+
   if (!frequency) return 'Monthly';
 
   return frequency
@@ -103,58 +113,28 @@ function isRuleActive(rule) {
   if (rule.is_active === false) return false;
 
   const status = String(rule.status || '').toLowerCase();
+
   return status !== 'paused' && status !== 'archived' && status !== 'inactive';
-}
-
-function getMonthRange(month) {
-  const start = new Date(`${month}-01T00:00:00`);
-  const end = new Date(start);
-  end.setMonth(end.getMonth() + 1);
-  end.setMilliseconds(end.getMilliseconds() - 1);
-  return { start, end };
-}
-
-function recurringOccursInMonth(rule, month) {
-  if (!rule?.next_due_date || !month) return false;
-
-  const nextDue = new Date(`${String(rule.next_due_date).slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(nextDue.getTime())) return false;
-
-  const { start, end } = getMonthRange(month);
-  const frequency = getFrequencyKey(rule.frequency);
-
-  if (frequency.includes('year')) {
-    return nextDue.getMonth() === start.getMonth() && nextDue <= end;
-  }
-
-  if (frequency.includes('quarter') || frequency.includes('month') || frequency.includes('week') || frequency.includes('day')) {
-    return nextDue <= end;
-  }
-
-  return nextDue >= start && nextDue <= end;
 }
 
 function formatDateText(value) {
   if (!value) return 'date not set';
+
   const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
+
   if (Number.isNaN(date.getTime())) return 'date not set';
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
 }
 
 function getRecurringPlanDescription(rule) {
-  return `${formatFrequency(rule?.frequency)} · Next ${formatDateText(rule?.next_due_date)}`;
-}
-
-function getGoalPlanDescription(goal) {
-  const progress = getGoalProgress(goal);
-  const status = getGoalStatus(goal);
-  const target = formatMoneyText(goal?.target_amount);
-  const targetDate = goal?.target_date ? formatGoalDate(goal.target_date) : null;
-
-  const statusText = status?.key === 'due' ? 'Target passed' : status?.label || 'Active';
-  const targetText = targetDate ? `Target ${target} · ${targetDate}` : `Target ${target}`;
-
-  return `${statusText} · ${progress}% complete · ${targetText}`;
+  return `${formatFrequency(rule?.frequency)} · Next ${formatDateText(
+    rule?.next_due_date
+  )}`;
 }
 
 function formatMoneyText(amount) {
@@ -164,8 +144,28 @@ function formatMoneyText(amount) {
   });
 }
 
+function getGoalPlanDescription(goal) {
+  const progress = getGoalProgress(goal);
+  const status = getGoalStatus(goal);
+  const target = formatMoneyText(goal?.target_amount);
+  const targetDate = goal?.target_date ? formatGoalDate(goal.target_date) : null;
+
+  const statusText =
+    status?.key === 'due' ? 'Target passed' : status?.label || 'Active';
+  const targetText = targetDate
+    ? `Target ${target} · ${targetDate}`
+    : `Target ${target}`;
+
+  return `${statusText} · ${progress}% complete · ${targetText}`;
+}
+
 function getAllocationSourceType(allocation) {
-  return allocation?.source_type || allocation?.item_type || allocation?.plan_item_type || 'category';
+  return (
+    allocation?.source_type ||
+    allocation?.item_type ||
+    allocation?.plan_item_type ||
+    'category'
+  );
 }
 
 function getAllocationSourceId(allocation) {
@@ -205,7 +205,10 @@ function PlanAmountRow({
       {row.isSubcategory && (
         <div
           className="h-2 w-2 shrink-0 rounded-full"
-          style={{ backgroundColor: row.parentColor || row.color || 'hsl(var(--border))' }}
+          style={{
+            backgroundColor:
+              row.parentColor || row.color || 'hsl(var(--border))',
+          }}
         />
       )}
 
@@ -214,7 +217,9 @@ function PlanAmountRow({
           <span
             className={cn(
               'block truncate text-sm',
-              row.isSubcategory ? 'text-muted-foreground' : 'font-medium text-foreground'
+              row.isSubcategory
+                ? 'text-muted-foreground'
+                : 'font-medium text-foreground'
             )}
           >
             {row.name}
@@ -235,7 +240,10 @@ function PlanAmountRow({
 
         {(row.description || lastMonthHint > 0) && (
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-            {row.description && <span className="truncate">{row.description}</span>}
+            {row.description && (
+              <span className="truncate">{row.description}</span>
+            )}
+
             {lastMonthHint > 0 && (
               <span className="tabular-nums">
                 Last month: {formatCurrency(lastMonthHint)}
@@ -325,7 +333,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       .forEach((rule) => {
         const ruleCategoryId = getRuleCategoryId(rule);
         const category = categories.find((item) => item.id === ruleCategoryId);
-        const ruleType = getCategoryType(category, categories) || normalizeType(rule.type);
+        const ruleType =
+          getCategoryType(category, categories) || normalizeType(rule.type);
         const amount = Number(rule.amount || 0);
 
         if (ruleCategoryId && leafCategoryIds.has(ruleCategoryId)) {
@@ -358,15 +367,33 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       });
 
     const parentsByType = {
-      income: categories.filter((category) => getCategoryType(category, categories) === 'income' && !category.parent_id),
-      expense: categories.filter((category) => getCategoryType(category, categories) === 'expense' && !category.parent_id),
-      savings: categories.filter((category) => getCategoryType(category, categories) === 'savings' && !category.parent_id),
-      debt: categories.filter((category) => getCategoryType(category, categories) === 'debt' && !category.parent_id),
+      income: categories.filter(
+        (category) =>
+          getCategoryType(category, categories) === 'income' &&
+          !category.parent_id
+      ),
+      expense: categories.filter(
+        (category) =>
+          getCategoryType(category, categories) === 'expense' &&
+          !category.parent_id
+      ),
+      savings: categories.filter(
+        (category) =>
+          getCategoryType(category, categories) === 'savings' &&
+          !category.parent_id
+      ),
+      debt: categories.filter(
+        (category) =>
+          getCategoryType(category, categories) === 'debt' &&
+          !category.parent_id
+      ),
     };
 
     Object.entries(parentsByType).forEach(([type, parents]) => {
       parents.forEach((parent) => {
-        const subs = categories.filter((category) => category.parent_id === parent.id);
+        const subs = categories.filter(
+          (category) => category.parent_id === parent.id
+        );
 
         if (subs.length > 0) {
           const childRows = subs.map((sub) => {
@@ -384,7 +411,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
               parentColor: parent.color,
               sourceType: recurring ? 'recurring' : null,
               suggestedAmount: recurring?.amount || 0,
-              description: recurring ? [...new Set(recurring.descriptions)].join(' · ') : '',
+              description: recurring
+                ? [...new Set(recurring.descriptions)].join(' · ')
+                : '',
             };
           });
 
@@ -404,6 +433,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         }
 
         const recurring = recurringByCategory.get(parent.id);
+
         result[type].push({
           key: `category:${parent.id}`,
           id: parent.id,
@@ -414,7 +444,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           color: parent.color,
           sourceType: recurring ? 'recurring' : null,
           suggestedAmount: recurring?.amount || 0,
-          description: recurring ? [...new Set(recurring.descriptions)].join(' · ') : '',
+          description: recurring
+            ? [...new Set(recurring.descriptions)].join(' · ')
+            : '',
         });
       });
     });
@@ -427,7 +459,10 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       .filter((goal) => !goal.is_archived)
       .forEach((goal) => {
         const monthlyRequired = getMonthlyRequiredSaving(goal);
-        if (monthlyRequired === null || Number(monthlyRequired || 0) <= 0) return;
+
+        if (monthlyRequired === null || Number(monthlyRequired || 0) <= 0) {
+          return;
+        }
 
         result.savings.push({
           key: `goal:${goal.id}`,
@@ -445,7 +480,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       });
 
     return result;
-  }, [categories, currentMonth, leafCategoryIds, recurringTransactions, savingsGoals]);
+  }, [categories, leafCategoryIds, recurringTransactions, savingsGoals]);
 
   const allRows = useMemo(() => {
     return Object.values(rowsByType)
@@ -458,6 +493,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
     allRows.forEach((row) => {
       const allocation = allocationByRowKey[row.key];
+
       initial[row.key] = allocation
         ? Number(allocation.planned_amount || 0)
         : Number(row.suggestedAmount || 0);
@@ -503,6 +539,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
     allRows.forEach((row) => {
       const previousValue = prevAllocationByRowKey[row.key]?.planned_amount;
+
       if (previousValue !== undefined && previousValue !== null) {
         nextValues[row.key] = Number(previousValue || 0);
       }
@@ -559,6 +596,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   const renderSection = (type) => {
     const config = sectionConfig[type];
     const items = rowsByType[type] || [];
+
     if (!items.length) return null;
 
     const isCollapsed = collapsedSections[type];
@@ -579,15 +617,22 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                 isCollapsed && '-rotate-90'
               )}
             />
+
             <h3 className={cn('text-sm font-semibold', config.text)}>
               {config.title}
             </h3>
+
             <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
               {count}
             </span>
           </div>
 
-          <div className={cn('shrink-0 text-right text-sm font-semibold tabular-nums', config.text)}>
+          <div
+            className={cn(
+              'shrink-0 text-right text-sm font-semibold tabular-nums',
+              config.text
+            )}
+          >
             {formatCurrency(total)}
           </div>
         </button>
@@ -607,11 +652,13 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                     className="flex items-center gap-3 bg-white/20 px-4 py-3 dark:bg-white/[0.02]"
                   >
                     <CategoryIcon icon={row.icon} color={row.color} size="sm" />
+
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-foreground">
                         {row.name}
                       </div>
                     </div>
+
                     <div className="shrink-0 text-right text-sm font-bold tabular-nums">
                       {formatCurrency(sectionTotal || 0)}
                     </div>
@@ -636,22 +683,16 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     );
   };
 
-  const shiftMonth = (amount) => {
-    const baseDate = new Date(`${currentMonth}-01T00:00:00`);
-    const nextMonth = format(addMonths(baseDate, amount), 'yyyy-MM');
-    onMonthChange?.(nextMonth);
-  };
-
-  const monthLabel = format(new Date(`${currentMonth}-01T00:00:00`), 'MMMM yyyy');
-
   return (
-<div className="flex justify-center">
-  <MonthSelector
-    currentMonth={currentMonth}
-    onChange={onMonthChange || (() => {})}
-    subtitle="Planning month"
-  />
-</div>
+    <div className="space-y-4">
+      <div className="flex justify-center">
+        <MonthSelector
+          currentMonth={currentMonth}
+          onChange={onMonthChange || (() => {})}
+          subtitle="Planning month"
+        />
+      </div>
+
       <LeftToAllocateBanner
         sticky={false}
         leftToAllocate={totals.leftToAllocate}
@@ -664,7 +705,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         <div>
           <h2 className="text-sm font-semibold">Planned amounts</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Recurring and Goal badges show source amounts. Editing any row only changes this month’s plan.
+            Recurring and Goal badges show source amounts. Editing any row only
+            changes this month’s plan.
           </p>
         </div>
 
