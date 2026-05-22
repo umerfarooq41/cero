@@ -29,15 +29,17 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   useAccounts,
   useCategories,
+  useAllocations,
+  useGoalContributions,
   useRecurringTransactions,
   useSavingsGoals,
+  useTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import {
   accountsApi,
   goalContributionsApi,
   recurringTransactionsApi,
-  savingsGoalsApi,
   transactionsApi,
 } from '@/lib/budgetData';
 import {
@@ -173,6 +175,97 @@ const RECURRING_SECTIONS = [
   { type: 'transfer', label: 'Debt Payments' },
 ];
 
+function getCurrentMonthKey() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function getGoalContributionAmount(row) {
+  return Math.max(0, Number(row?.amount || 0));
+}
+
+function getGoalSourceId(row) {
+  return row?.goal_id || row?.savings_goal_id || null;
+}
+
+function sumGoalContributionsByGoal(rows = []) {
+  return rows.reduce((totals, row) => {
+    const goalId = getGoalSourceId(row);
+    if (!goalId) return totals;
+
+    totals[goalId] = (totals[goalId] || 0) + getGoalContributionAmount(row);
+    return totals;
+  }, {});
+}
+
+function sumGoalTransactionsByGoal(rows = []) {
+  return rows.reduce((totals, row) => {
+    const goalId = row?.savings_goal_id || null;
+    if (!goalId || row?.type !== 'transfer') return totals;
+
+    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(row?.amount || 0));
+    return totals;
+  }, {});
+}
+
+
+function sumRecurringTransfersByRule(rows = []) {
+  return rows.reduce((totals, row) => {
+    const ruleId = row?.recurring_transaction_id || null;
+    if (!ruleId || row?.type !== 'transfer') return totals;
+
+    totals[ruleId] = (totals[ruleId] || 0) + Math.max(0, Number(row?.amount || 0));
+    return totals;
+  }, {});
+}
+
+function getGoalPlanRow(goal, allocations = []) {
+  return allocations.find((allocation) => {
+    const sourceType = String(allocation?.source_type || '').toLowerCase();
+    return (sourceType === 'goal' || sourceType === 'savings_goal') && allocation?.source_id === goal?.id;
+  });
+}
+
+function getGoalMonthlyPlanAmount(goal, allocations = []) {
+  const planRow = getGoalPlanRow(goal, allocations);
+
+  if (planRow) {
+    return Math.max(0, Number(planRow.planned_amount || 0));
+  }
+
+  const fallback = getMonthlyRequiredSaving(goal);
+  return fallback === null ? null : Math.max(0, Number(fallback || 0));
+}
+
+
+function getRecurringPlanRow(rule, allocations = []) {
+  return allocations.find((allocation) => {
+    const sourceType = String(allocation?.source_type || '').toLowerCase();
+    return (
+      (sourceType === 'recurring' || sourceType === 'recurring_transaction') &&
+      allocation?.source_id === rule?.id
+    );
+  });
+}
+
+function getRecurringMonthlyPlanAmount(rule, allocations = []) {
+  const planRow = getRecurringPlanRow(rule, allocations);
+
+  if (planRow) {
+    return Math.max(0, Number(planRow.planned_amount || 0));
+  }
+
+  return Math.max(0, Number(rule?.amount || 0));
+}
+
+function isCreditCardAccount(account) {
+  const type = String(account?.type || '').toLowerCase();
+  return type === 'credit_card' || type === 'credit-card' || type === 'creditcard';
+}
+
+function isFlexibleCreditCardDebt(rule, toAccount) {
+  return normalizeRuleType(rule?.type) === 'transfer' && isCreditCardAccount(toAccount);
+}
+
 function normalizeRuleType(type) {
   if (type === 'debt') return 'transfer';
   return ['income', 'expense', 'transfer'].includes(type) ? type : 'expense';
@@ -252,12 +345,54 @@ function ScheduledStatusBadge({ children, className }) {
   );
 }
 
-function ScheduledRecurringRow({ rule, account, toAccount, category, currency, posting, onPost }) {
+function ScheduledRecurringRow({
+  rule,
+  account,
+  toAccount,
+  category,
+  currency,
+  posting,
+  onPost,
+  onFlexiblePay,
+}) {
   const status = getRecurringStatus(rule);
   const dueNow = isDueNow(status);
-  const amount = Math.abs(Number(rule.amount || 0));
+  const baseAmount = Math.abs(Number(rule.amount || 0));
   const type = normalizeRuleType(rule.type);
+  const flexibleCreditCard = isFlexibleCreditCardDebt(rule, toAccount);
+  const plannedThisMonth = Number(rule.month_planned_amount ?? baseAmount);
+  const paidThisMonth = Number(rule.month_paid_amount || 0);
+  const monthRemaining = Math.max(0, plannedThisMonth - paidThisMonth);
+  const isMonthCovered = flexibleCreditCard && plannedThisMonth > 0 && monthRemaining <= 0;
+  const displayAmount = flexibleCreditCard
+    ? isMonthCovered
+      ? plannedThisMonth
+      : monthRemaining
+    : baseAmount;
   const fallbackIcon = type === 'income' ? 'income' : type === 'transfer' ? 'loan' : 'receipt';
+  const buttonLabel = flexibleCreditCard
+    ? posting
+      ? 'Saving…'
+      : isMonthCovered
+        ? 'Add extra'
+        : 'Pay'
+    : posting
+      ? 'Posting…'
+      : dueNow
+        ? 'Post'
+        : 'Future';
+  const canUseAction = flexibleCreditCard
+    ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
+    : dueNow && !posting && rule.is_active;
+
+  const handleAction = () => {
+    if (flexibleCreditCard) {
+      onFlexiblePay(rule);
+      return;
+    }
+
+    onPost(rule);
+  };
 
   return (
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
@@ -284,7 +419,7 @@ function ScheduledRecurringRow({ rule, account, toAccount, category, currency, p
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
           Next {formatRecurringDate(rule.next_due_date)}
           {type === 'transfer'
-            ? ` · ${account?.name || 'From account'} → ${toAccount?.name || 'To account'}`
+            ? ` · ${toAccount?.name || 'Debt account'}`
             : account
               ? ` · ${account.name}`
               : ''}
@@ -293,17 +428,17 @@ function ScheduledRecurringRow({ rule, account, toAccount, category, currency, p
 
       <div className="ml-2 flex shrink-0 flex-col items-end gap-2 text-right">
         <div className="text-sm font-semibold tabular-nums text-foreground">
-          {formatCurrencyElement(amount, currency)}
+          {formatCurrencyElement(displayAmount, currency)}
         </div>
 
         <Button
           size="sm"
-          variant={dueNow ? 'default' : 'secondary'}
-          onClick={() => onPost(rule)}
-          disabled={!dueNow || posting || !rule.is_active}
+          variant={dueNow || flexibleCreditCard ? 'default' : 'secondary'}
+          onClick={handleAction}
+          disabled={!canUseAction}
           className="h-7 rounded-xl px-3 text-xs"
         >
-          {posting ? 'Posting…' : dueNow ? 'Post' : 'Future'}
+          {buttonLabel}
         </Button>
       </div>
     </div>
@@ -313,13 +448,18 @@ function ScheduledRecurringRow({ rule, account, toAccount, category, currency, p
 function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onContribute }) {
   const progress = getGoalProgress(goal);
   const target = Number(goal.target_amount || 0);
-  const monthlyRequired = getMonthlyRequiredSaving(goal);
   const remaining = getGoalRemaining(goal);
   const status = getGoalStatus(goal);
   const color = goal.color_key || '#276FE4';
   const isCompleted = remaining <= 0 || progress >= 100;
   const statusLabel = status.key === 'due' ? 'Target passed' : status.label;
   const missingAccounts = !fromAccount || !toAccount;
+  const plannedThisMonth = Number(goal.month_planned_amount || 0);
+  const contributedThisMonth = Number(goal.month_contributed_amount || 0);
+  const monthRemaining = Math.max(0, plannedThisMonth - contributedThisMonth);
+  const hasPostedThisMonth = contributedThisMonth > 0;
+  const isMonthDone = !isCompleted && plannedThisMonth > 0 && monthRemaining <= 0;
+  const displayAmount = isMonthDone ? plannedThisMonth : monthRemaining;
 
   return (
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
@@ -336,15 +476,16 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
           Target {formatCurrencyElement(target, currency)}
-          {fromAccount || toAccount
-            ? ` · ${fromAccount?.name || 'From account'} → ${toAccount?.name || 'Savings account'}`
-            : ''}
         </p>
       </div>
 
       <div className="ml-2 flex shrink-0 flex-col items-end gap-2 text-right">
         <div className="text-sm font-semibold tabular-nums text-foreground">
-          {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrencyElement(monthlyRequired, currency)}
+          {isCompleted
+            ? 'Completed'
+            : plannedThisMonth === null
+              ? 'Set target'
+              : formatCurrencyElement(displayAmount, currency)}
         </div>
 
         <Button
@@ -353,10 +494,104 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
           disabled={isCompleted || missingAccounts || saving}
           className="h-7 rounded-xl px-3 text-xs"
         >
-          {saving ? 'Saving…' : isCompleted ? 'Done' : 'Contribute'}
+          {saving ? 'Saving…' : isCompleted ? 'Done' : hasPostedThisMonth ? 'Add extra' : 'Contribute'}
         </Button>
       </div>
     </div>
+  );
+}
+
+function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, onSubmit, saving }) {
+  const plannedAmount = Number(rule?.month_planned_amount || rule?.amount || 0);
+  const paidThisMonth = Number(rule?.month_paid_amount || 0);
+  const remainingAmount = Math.max(0, plannedAmount - paidThisMonth);
+  const suggestedAmount = remainingAmount > 0 ? remainingAmount : '';
+
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(recurringTodayIsoDate());
+  const [note, setNote] = useState('');
+
+  const fromAccount = accounts.find((account) => account.id === rule?.account_id);
+  const toAccount = accounts.find((account) => account.id === rule?.to_account_id);
+
+  useEffect(() => {
+    if (!open) return;
+    setAmount(suggestedAmount ? String(suggestedAmount) : '');
+    setDate(recurringTodayIsoDate());
+    setNote(rule ? `${rule.name} · Recurring` : '');
+  }, [open, rule, suggestedAmount]);
+
+  if (!rule) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg rounded-3xl border-border/60 bg-card/95 backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle>{remainingAmount > 0 ? `Pay ${rule.name}` : `Add extra to ${rule.name}`}</DialogTitle>
+          <DialogDescription>
+            This posts a credit card payment transfer using the saved recurring accounts.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-1">
+          <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Payment path
+            </p>
+            <p className="mt-1 text-sm font-bold text-foreground">
+              {fromAccount?.name || 'Missing from account'} → {toAccount?.name || 'Missing credit card'}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Checking decreases and the credit card liability decreases.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Amount</label>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder="0.00"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Date</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Note</label>
+            <Textarea
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              className="h-20 resize-none"
+              placeholder="Optional note"
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => onSubmit({ amount: Number(amount || 0), date, note })}
+            disabled={saving || !fromAccount || !toAccount}
+          >
+            {saving ? 'Saving...' : remainingAmount > 0 ? 'Pay' : 'Add extra'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -464,23 +699,85 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
 export default function ScheduledTransactions() {
   const currency = useCurrency();
   const queryClient = useQueryClient();
+  const currentMonth = getCurrentMonthKey();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
+  const { data: goalContributions = [] } = useGoalContributions();
+  const { data: monthTransactions = [] } = useTransactions(currentMonth);
+  const { data: allocations = [] } = useAllocations(currentMonth);
 
   const [postingId, setPostingId] = useState(null);
   const [savingGoalId, setSavingGoalId] = useState(null);
   const [selectedGoal, setSelectedGoal] = useState(null);
+  const [selectedRecurringPayment, setSelectedRecurringPayment] = useState(null);
+
+  const recurringPaymentsByRule = useMemo(
+    () => sumRecurringTransfersByRule(monthTransactions),
+    [monthTransactions]
+  );
 
   const activeRecurring = useMemo(
-    () => sortRecurringByDueDate(recurringTransactions.filter((rule) => !rule.is_archived)),
-    [recurringTransactions]
+    () =>
+      sortRecurringByDueDate(
+        recurringTransactions
+          .filter((rule) => !rule.is_archived)
+          .map((rule) => {
+            const toAccount = accounts.find((account) => account.id === rule.to_account_id);
+            const plannedThisMonth = getRecurringMonthlyPlanAmount(rule, allocations);
+            const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
+
+            return {
+              ...rule,
+              month_planned_amount: plannedThisMonth,
+              month_paid_amount: isFlexibleCreditCardDebt(rule, toAccount) ? paidThisMonth : 0,
+              month_remaining_amount: isFlexibleCreditCardDebt(rule, toAccount)
+                ? Math.max(0, Number(plannedThisMonth || 0) - paidThisMonth)
+                : null,
+            };
+          })
+      ),
+    [accounts, allocations, recurringPaymentsByRule, recurringTransactions]
+  );
+
+  const contributionTotalsByGoal = useMemo(
+    () => sumGoalContributionsByGoal(goalContributions),
+    [goalContributions]
+  );
+
+  const monthContributionsByGoal = useMemo(
+    () => sumGoalTransactionsByGoal(monthTransactions),
+    [monthTransactions]
   );
 
   const activeGoals = useMemo(
-    () => sortGoalsByPriority(savingsGoals.filter((goal) => !goal.is_archived)),
-    [savingsGoals]
+    () =>
+      sortGoalsByPriority(
+        savingsGoals
+          .filter((goal) => !goal.is_archived)
+          .map((goal) => {
+            const contributedAmount = contributionTotalsByGoal[goal.id] || 0;
+            const goalWithProgress = {
+              ...goal,
+              current_amount: Math.max(0, Number(goal.current_amount || 0)) + contributedAmount,
+            };
+            const plannedThisMonth = getGoalMonthlyPlanAmount(goalWithProgress, allocations);
+            const contributedThisMonth = monthContributionsByGoal[goal.id] || 0;
+            const monthRemainingAmount =
+              plannedThisMonth === null
+                ? null
+                : Math.max(0, Number(plannedThisMonth || 0) - contributedThisMonth);
+
+            return {
+              ...goalWithProgress,
+              month_planned_amount: plannedThisMonth,
+              month_contributed_amount: contributedThisMonth,
+              month_remaining_amount: monthRemainingAmount,
+            };
+          })
+      ),
+    [allocations, contributionTotalsByGoal, monthContributionsByGoal, savingsGoals]
   );
 
   const invalidateData = () => {
@@ -527,7 +824,9 @@ export default function ScheduledTransactions() {
       return;
     }
 
-    if (rule.type === 'transfer' && !rule.to_account_id) {
+    const transactionType = normalizeRuleType(rule.type);
+
+    if (transactionType === 'transfer' && !rule.to_account_id) {
       toast.error('This recurring transfer is missing a destination account');
       return;
     }
@@ -538,12 +837,12 @@ export default function ScheduledTransactions() {
       const postedForDate = rule.next_due_date || recurringTodayIsoDate();
       const transactionPayload = {
         amount: Number(rule.amount || 0),
-        type: rule.type,
+        type: transactionType,
         date: postedForDate,
         note: rule.note || `${rule.name} · Recurring`,
         category_id: rule.category_id || null,
         account_id: rule.account_id || null,
-        to_account_id: rule.type === 'transfer' ? rule.to_account_id || null : null,
+        to_account_id: transactionType === 'transfer' ? rule.to_account_id || null : null,
         recurring_transaction_id: rule.id,
         recurring_posted_for_date: postedForDate,
       };
@@ -562,6 +861,78 @@ export default function ScheduledTransactions() {
     } catch (error) {
       console.error('Recurring post failed:', error);
       toast.error(error.message || 'Could not post recurring transaction');
+    } finally {
+      setPostingId(null);
+    }
+  };
+
+  const handleFlexibleRecurringPayment = async ({ amount, date, note }) => {
+    if (!selectedRecurringPayment) return;
+
+    const rule = selectedRecurringPayment;
+    const fromAccount = accounts.find((account) => account.id === rule.account_id);
+    const toAccount = accounts.find((account) => account.id === rule.to_account_id);
+    const alreadyPaidThisMonth = Number(rule.month_paid_amount || 0);
+    const plannedThisMonth = Number(rule.month_planned_amount || rule.amount || 0);
+    const wasMonthCovered = plannedThisMonth > 0 && alreadyPaidThisMonth >= plannedThisMonth;
+    const willMonthBeCovered = plannedThisMonth > 0 && alreadyPaidThisMonth + Number(amount || 0) >= plannedThisMonth;
+
+    if (!amount || amount <= 0) {
+      toast.error('Enter a valid payment amount');
+      return;
+    }
+
+    if (!fromAccount || !toAccount) {
+      toast.error('This credit card payment is missing its from/to accounts');
+      return;
+    }
+
+    if (fromAccount.id === toAccount.id) {
+      toast.error('Payment from/to accounts must be different');
+      return;
+    }
+
+    setPostingId(rule.id);
+
+    try {
+      const paymentDate = date || recurringTodayIsoDate();
+      const postedForDate = rule.next_due_date || paymentDate;
+      const paymentNote = note || `${rule.name} · Recurring`;
+
+      const transactionPayload = {
+        amount,
+        type: 'transfer',
+        date: paymentDate,
+        note: paymentNote,
+        category_id: rule.category_id || null,
+        account_id: fromAccount.id,
+        to_account_id: toAccount.id,
+        recurring_transaction_id: rule.id,
+        recurring_posted_for_date: postedForDate,
+      };
+
+      const transaction = await transactionsApi.create(transactionPayload);
+      await updateAccountBalances(transactionPayload);
+
+      if (!wasMonthCovered && willMonthBeCovered) {
+        await recurringTransactionsApi.update(rule.id, {
+          last_posted_date: recurringTodayIsoDate(),
+          last_posted_transaction_id: transaction.id,
+          next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
+        });
+      } else {
+        await recurringTransactionsApi.update(rule.id, {
+          last_posted_date: recurringTodayIsoDate(),
+          last_posted_transaction_id: transaction.id,
+        });
+      }
+
+      invalidateData();
+      setSelectedRecurringPayment(null);
+      toast.success(willMonthBeCovered ? 'Credit card payment posted' : 'Partial credit card payment posted');
+    } catch (error) {
+      console.error('Credit card payment failed:', error);
+      toast.error(error.message || 'Could not post credit card payment');
     } finally {
       setPostingId(null);
     }
@@ -618,14 +989,9 @@ export default function ScheduledTransactions() {
       const transaction = await transactionsApi.create(transactionPayload);
       await updateAccountBalances(transactionPayload);
 
-      await Promise.all([
-        savingsGoalsApi.update(selectedGoal.id, {
-          current_amount: Number(selectedGoal.current_amount || 0) + amount,
-        }),
-        goalContributionsApi.update(contribution.id, {
-          transaction_id: transaction.id,
-        }),
-      ]);
+      await goalContributionsApi.update(contribution.id, {
+        transaction_id: transaction.id,
+      });
 
       invalidateData();
       setSelectedGoal(null);
@@ -692,6 +1058,7 @@ export default function ScheduledTransactions() {
                         currency={currency}
                         posting={postingId === rule.id}
                         onPost={handlePostRecurring}
+                        onFlexiblePay={setSelectedRecurringPayment}
                       />
                     );
                   })}
@@ -745,6 +1112,16 @@ export default function ScheduledTransactions() {
           </ScheduledSectionCard>
         )}
       </section>
+
+      <RecurringPaymentDialog
+        rule={selectedRecurringPayment}
+        accounts={accounts}
+        currency={currency}
+        open={Boolean(selectedRecurringPayment)}
+        onOpenChange={(open) => !open && setSelectedRecurringPayment(null)}
+        onSubmit={handleFlexibleRecurringPayment}
+        saving={Boolean(postingId)}
+      />
 
       <GoalContributionDialog
         goal={selectedGoal}
