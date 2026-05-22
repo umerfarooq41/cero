@@ -1,9 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Scale,
-  ArrowUpRight,
-  ArrowDownRight,
   TrendingUp,
   Building,
   Landmark,
@@ -43,16 +40,18 @@ export default function Accounts() {
   const formatCurrency = useCurrencyFormatter();
   const { data: accounts = [] } = useAccounts();
 
-  const assets = accounts.filter((a) => a.category === 'asset');
-  const liabilities = accounts.filter((a) => a.category === 'liability');
+  const assets = accounts.filter((account) => account.category === 'asset');
+  const liabilities = accounts.filter(
+    (account) => account.category === 'liability'
+  );
 
   const totalAssets = assets.reduce(
-    (s, a) => s + (Number(a.balance) || 0),
+    (sum, account) => sum + (Number(account.balance) || 0),
     0
   );
 
   const totalLiabilities = liabilities.reduce(
-    (s, a) => s + Math.abs(Number(a.balance) || 0),
+    (sum, account) => sum + Math.abs(Number(account.balance) || 0),
     0
   );
 
@@ -62,19 +61,17 @@ export default function Accounts() {
     if (accs.length === 0) return null;
 
     const total = accs.reduce(
-      (s, a) => s + Math.abs(Number(a.balance) || 0),
+      (sum, account) => sum + Math.abs(Number(account.balance) || 0),
       0
     );
 
     return (
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-3">
-          <div>
+      <section className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-3.5">
+          <div className="flex min-w-0 items-center gap-2">
             <h3
               className={cn(
-                'text-sm font-semibold',
+                'truncate text-sm font-semibold',
                 isLiability
                   ? 'text-destructive'
                   : 'text-emerald-600 dark:text-emerald-400'
@@ -83,14 +80,21 @@ export default function Accounts() {
               {title}
             </h3>
 
-            <p className="mt-1 text-xs text-muted-foreground">
-              {accs.length} {accs.length === 1 ? 'account' : 'accounts'}
-            </p>
+            <span
+              className={cn(
+                'flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none tabular-nums',
+                isLiability
+                  ? 'bg-destructive/10 text-destructive'
+                  : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+              )}
+            >
+              {accs.length}
+            </span>
           </div>
 
           <div
             className={cn(
-                'text-lg font-semibold tabular-nums',
+              'shrink-0 text-right text-sm font-bold tabular-nums sm:text-base',
               isLiability
                 ? 'text-destructive'
                 : 'text-emerald-600 dark:text-emerald-400'
@@ -100,45 +104,43 @@ export default function Accounts() {
           </div>
         </div>
 
-        {/* Rows */}
         <div className="divide-y divide-border/40">
-          {accs.map((acc) => {
-            const Icon = typeIcons[acc.type] || Wallet;
-            const balance = Math.abs(Number(acc.balance) || 0);
+          {accs.map((account) => {
+            const Icon = typeIcons[account.type] || Wallet;
+            const balance = Math.abs(Number(account.balance) || 0);
 
             return (
               <Link
-                key={acc.id}
-                to={`/accounts/${acc.id}`}
-                className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
+                key={account.id}
+                to={`/accounts/${account.id}`}
+                className="grid min-h-[4.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
               >
                 <div
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                   style={{
-                    backgroundColor: `${acc.color || '#0078D4'}15`,
+                    backgroundColor: `${account.color || '#0078D4'}15`,
                   }}
                 >
                   <Icon
                     className="h-4 w-4"
                     style={{
-                      color: acc.color || '#0078D4',
+                      color: account.color || '#0078D4',
                     }}
                   />
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-foreground">
-                    {acc.name}
+                <div className="flex min-w-0 flex-col justify-center">
+                  <div className="truncate text-sm font-medium leading-tight text-foreground">
+                    {account.name}
                   </div>
 
-                  <div className="mt-0.5 text-xs capitalize text-muted-foreground">
-                    {acc.type?.replace('_', ' ') || 'Account'}
+                  <div className="mt-1 text-xs capitalize leading-none text-muted-foreground">
+                    {account.type?.replace('_', ' ') || 'Account'}
                   </div>
                 </div>
 
-                {/* Neutral Amount Color */}
-                <div className="text-right">
-                  <div className="text-sm font-semibold tabular-nums text-foreground">
+                <div className="flex items-center justify-end text-right">
+                  <div className="text-sm font-medium tabular-nums text-foreground">
                     <InlineMoney>{formatCurrency(balance)}</InlineMoney>
                   </div>
                 </div>
@@ -146,20 +148,15 @@ export default function Accounts() {
             );
           })}
         </div>
-      </div>
+      </section>
     );
   };
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <PageHeader
-        title="Accounts"
-        subtitle="Your financial overview"
-      />
+      <PageHeader title="Accounts" subtitle="Your financial overview" />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 md:py-6">
-        
-        {/* Net Worth Card — animated */}
         <div className="animate-child mb-6">
           <NetWorthDelta
             netWorth={netWorth}
@@ -169,16 +166,12 @@ export default function Accounts() {
           />
         </div>
 
-        {/* Account Groups */}
         <div className="animate-child space-y-4">
           {renderGroup('Assets', assets, false)}
           {renderGroup('Liabilities', liabilities, true)}
         </div>
 
-        <FloatingActionButton
-          to="/add-account"
-          ariaLabel="Add account"
-        />
+        <FloatingActionButton to="/add-account" ariaLabel="Add account" />
       </main>
     </div>
   );
