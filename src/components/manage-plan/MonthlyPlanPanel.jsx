@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { format, subMonths } from 'date-fns';
-import { ChevronDown, Copy, Save } from 'lucide-react';
+import { addMonths, format, subMonths } from 'date-fns';
+import { ChevronDown, ChevronLeft, ChevronRight, Copy, Save } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import CategoryIcon from '@/components/shared/CategoryIcon';
-import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -637,9 +636,17 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     );
   };
 
+  const shiftMonth = (amount) => {
+    const baseDate = new Date(`${currentMonth}-01T00:00:00`);
+    const nextMonth = format(addMonths(baseDate, amount), 'yyyy-MM');
+    onMonthChange?.(nextMonth);
+  };
+
+  const monthLabel = format(new Date(`${currentMonth}-01T00:00:00`), 'MMMM yyyy');
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between">
+      <div className="space-y-3">
         <div>
           <h2 className="text-sm font-semibold">Monthly Plan</h2>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -647,12 +654,39 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           </p>
         </div>
 
-        <MonthSelector
-          currentMonth={currentMonth}
-          onChange={onMonthChange || (() => {})}
-          subtitle="Planning month"
-          className="max-w-md lg:max-w-sm"
-        />
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-1 rounded-2xl bg-secondary/70 p-1 shadow-sm">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => shiftMonth(-1)}
+              className="h-8 w-8 rounded-xl"
+              aria-label="Previous month"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 min-w-[9.5rem] rounded-xl px-3 text-sm font-semibold tabular-nums"
+            >
+              {monthLabel}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => shiftMonth(1)}
+              className="h-8 w-8 rounded-xl"
+              aria-label="Next month"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <LeftToAllocateBanner
@@ -663,7 +697,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         formatCurrency={formatCurrency}
       />
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-3">
         <div>
           <h2 className="text-sm font-semibold">Planned amounts</h2>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -671,7 +705,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
           <Button
             type="button"
             variant="outline"
@@ -680,7 +714,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
             className="gap-2 rounded-xl text-xs"
           >
             <Copy className="h-3.5 w-3.5" />
-            Copy from previous month
+            Copy previous
           </Button>
 
           <Button
