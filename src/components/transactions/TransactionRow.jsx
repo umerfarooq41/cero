@@ -50,6 +50,44 @@ function getTransferType(account, toAccount) {
   return formatTransactionType(category);
 }
 
+function cleanGeneratedNote(note = '') {
+  return String(note)
+    .replace(/\s*·\s*Recurring\s*$/i, '')
+    .replace(/^Contribution to\s+/i, '')
+    .trim();
+}
+
+function getGoalName(transaction, category) {
+  return (
+    transaction.goal_name ||
+    transaction.savings_goal_name ||
+    transaction.goal?.name ||
+    transaction.savings_goal?.name ||
+    cleanGeneratedNote(transaction.note) ||
+    category?.name ||
+    'Goal'
+  );
+}
+
+function SourceBadge({ type }) {
+  if (!type) return null;
+
+  const isGoal = type === 'goal';
+
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[9px] font-bold leading-none',
+        isGoal
+          ? 'border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+          : 'border-primary/15 bg-primary/10 text-primary'
+      )}
+    >
+      {isGoal ? 'Goal' : 'Recurring'}
+    </span>
+  );
+}
+
 export default function TransactionRow({
   transaction,
   category,
@@ -90,23 +128,20 @@ export default function TransactionRow({
   const accountName = account?.name || 'Account';
   const transactionTypeLabel = formatTransactionType(transaction.type);
   const transferTypeLabel = getTransferType(account, toAccount);
+  const transferTitle = [accountName, toAccount?.name].filter(Boolean).join(' to ');
+  const transferCategoryName = isGoalContribution
+    ? getGoalName(transaction, category)
+    : category?.name || cleanGeneratedNote(transaction.note) || transferTypeLabel || 'Transfer';
 
-  const title = isGoalContribution
-    ? category?.name || 'Goal contribution'
-    : isTransfer
-      ? [account?.name, toAccount?.name].filter(Boolean).join(' → ')
-      : category?.name || 'Uncategorized';
+  const title = isTransfer
+    ? transferTitle || 'Transfer'
+    : category?.name || cleanGeneratedNote(transaction.note) || 'Uncategorized';
 
-  const transferCategoryName =
-  category?.name || transferTypeLabel || 'Transfer';
+  const primarySubtitle = isTransfer
+    ? `Transfer - ${transferCategoryName}`
+    : `${transactionTypeLabel} - ${accountName}`;
 
-  const primarySubtitle = isGoalContribution
-    ? `Goal contribution - ${accountName}`
-    : isTransfer
-      ? `Transfer - ${transferCategoryName}`
-      : `${transactionTypeLabel} - ${accountName}`;
-
-  const secondarySubtitle = !isTransfer || isGoalContribution ? transaction.note : null;
+  const sourceBadgeType = isGoalContribution ? 'goal' : isRecurring ? 'recurring' : null;
   const amountValue = Math.abs(Number(transaction.amount || 0));
 
   return (
@@ -126,42 +161,23 @@ export default function TransactionRow({
         />
       )}
 
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{title}</div>
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <div className="truncate text-sm font-medium">{title}</div>
+          <SourceBadge type={sourceBadgeType} />
+        </div>
 
         {primarySubtitle && (
-          <div className="text-xs text-muted-foreground truncate">
+          <div className="truncate text-xs text-muted-foreground">
             {primarySubtitle}
-          </div>
-        )}
-
-        {secondarySubtitle && (
-          <div className="text-xs text-muted-foreground/80 truncate">
-            {secondarySubtitle}
-          </div>
-        )}
-
-        {(isRecurring || isGoalContribution) && (
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            {isRecurring && (
-              <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-primary">
-                Recurring
-              </span>
-            )}
-
-            {isGoalContribution && (
-              <span className="inline-flex items-center rounded-full border border-emerald-500/15 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-emerald-700 dark:text-emerald-400">
-                Goal
-              </span>
-            )}
           </div>
         )}
       </div>
 
-      <div className="text-right shrink-0">
+      <div className="shrink-0 text-right">
         <div
           className={cn(
-            'text-sm font-semibold tabular-nums inline-flex items-center gap-1 whitespace-nowrap',
+            'inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold tabular-nums',
             config.color
           )}
         >
