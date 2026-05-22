@@ -16,27 +16,38 @@ export default function NetWorthDelta({
   totalLiabilities = 0,
   formatCurrency,
 }) {
-  const fmt = formatCurrency || ((n) => Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2 }));
+  const fmt =
+    formatCurrency ||
+    ((n) =>
+      Math.abs(n).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+      }));
+
   const animatedNW = useCountUp(Math.abs(netWorth), 750);
   const animatedAssets = useCountUp(totalAssets, 650);
   const animatedLiab = useCountUp(totalLiabilities, 650);
 
   const total = totalAssets + totalLiabilities;
   const assetPct = total > 0 ? (totalAssets / total) * 100 : 50;
+  const liabilityPct = total > 0 ? 100 - assetPct : 50;
 
   return (
-    <section className="rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl p-5 shadow-md md:p-6">
+    <section className="rounded-3xl border border-border/60 bg-card/70 p-5 shadow-md backdrop-blur-xl md:p-6">
       {/* Net Worth */}
-      <div className="flex flex-col items-center text-center mb-6">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="mb-6 flex flex-col items-center text-center">
+        <div className="mb-3 flex items-center gap-2">
           <Scale className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-semibold text-foreground">Net Worth</span>
+          <span className="text-sm font-semibold text-foreground">
+            Net Worth
+          </span>
         </div>
 
-        <div className={cn(
-          'text-3xl font-bold tracking-tight tabular-nums inline-flex items-center gap-1',
-          netWorth >= 0 ? 'text-foreground' : 'text-destructive'
-        )}>
+        <div
+          className={cn(
+            'inline-flex items-center gap-1 text-3xl font-bold tracking-tight tabular-nums',
+            netWorth >= 0 ? 'text-foreground' : 'text-destructive'
+          )}
+        >
           {netWorth < 0 && <span>-</span>}
           {fmt(animatedNW)}
         </div>
@@ -47,46 +58,60 @@ export default function NetWorthDelta({
       </div>
 
       {/* Assets vs Liabilities split bar */}
-      <div className="relative h-3 rounded-full overflow-hidden bg-destructive/20 mb-4">
+      <div className="relative mb-4 h-3 overflow-hidden rounded-full bg-destructive/20">
         <motion.div
           className="absolute inset-y-0 left-0 rounded-full bg-[hsl(var(--success))]"
           initial={{ width: 0 }}
           animate={{ width: `${assetPct}%` }}
-          transition={{ type: 'spring', stiffness: 80, damping: 18, delay: 0.2 }}
+          transition={{
+            type: 'spring',
+            stiffness: 80,
+            damping: 18,
+            delay: 0.2,
+          }}
         />
+
         <motion.div
           className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-white/25 to-transparent"
           initial={{ left: '-3rem' }}
           animate={{ left: '110%' }}
-          transition={{ duration: 1.1, delay: 0.9, ease: 'easeInOut' }}
+          transition={{
+            duration: 1.1,
+            delay: 0.9,
+            ease: 'easeInOut',
+          }}
         />
       </div>
 
       {/* Two stat cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-            <ArrowUpRight className="h-4 w-4" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-card/70 p-4 text-center shadow-sm backdrop-blur-xl">
+          <div className="mb-1.5 flex items-center justify-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <ArrowUpRight className="h-3.5 w-3.5" />
             <span>Assets</span>
           </div>
-          <div className="text-lg font-semibold tabular-nums text-foreground">
+
+          <div className="text-sm font-medium tabular-nums text-foreground sm:text-[15px]">
             {fmt(animatedAssets)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
+
+          <div className="mt-1 text-[11px] text-muted-foreground">
             {Math.round(assetPct)}% of total
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-destructive">
-            <ArrowDownRight className="h-4 w-4" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-card/70 p-4 text-center shadow-sm backdrop-blur-xl">
+          <div className="mb-1.5 flex items-center justify-center gap-1.5 text-xs font-medium text-destructive">
+            <ArrowDownRight className="h-3.5 w-3.5" />
             <span>Liabilities</span>
           </div>
-          <div className="text-lg font-semibold tabular-nums text-foreground">
+
+          <div className="text-sm font-medium tabular-nums text-foreground sm:text-[15px]">
             {fmt(animatedLiab)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            {Math.round(100 - assetPct)}% of total
+
+          <div className="mt-1 text-[11px] text-muted-foreground">
+            {Math.round(liabilityPct)}% of total
           </div>
         </div>
       </div>
