@@ -162,25 +162,40 @@ function isDueNow(status) {
   return status.key === 'overdue' || status.key === 'due_today';
 }
 
-function ScheduledSection({ icon: Icon, title, subtitle, children }) {
+function ScheduledSection({ icon: Icon, title, subtitle, count, children }) {
   return (
-    <section className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5">
-      <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
-        </span>
-        <div className="min-w-0">
-          <h2 className="text-sm font-bold tracking-tight text-foreground md:text-base">
-            {title}
-          </h2>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {subtitle}
-          </p>
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3 px-1">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
+                {title}
+              </h2>
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1.5 text-[11px] font-bold text-muted-foreground">
+                {count}
+              </span>
+            </div>
+            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+              {subtitle}
+            </p>
+          </div>
         </div>
       </div>
 
       {children}
     </section>
+  );
+}
+
+function ScheduledList({ children }) {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/75 shadow-sm backdrop-blur-xl divide-y divide-border/50">
+      {children}
+    </div>
   );
 }
 
@@ -190,7 +205,7 @@ function RecurringAmount({ rule, currency }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap text-sm font-bold tabular-nums',
+        'inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold tabular-nums',
         rule.type === 'income'
           ? 'text-[hsl(var(--success))]'
           : rule.type === 'expense'
@@ -201,6 +216,20 @@ function RecurringAmount({ rule, currency }) {
       {rule.type === 'income' ? '+' : rule.type === 'expense' ? '-' : ''}
       <CurrencyAmount amount={amount} currency={currency} />
     </span>
+  );
+}
+
+function ScheduledStatusBadge({ children, className }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        'h-5 rounded-full px-2 py-0 text-[10px] font-semibold leading-none',
+        className
+      )}
+    >
+      {children}
+    </Badge>
   );
 }
 
@@ -483,20 +512,23 @@ export default function ScheduledTransactions() {
   };
 
   return (
-    <div className="animate-child space-y-5">
+    <div className="animate-child space-y-7">
       <ScheduledSection
         icon={CalendarClock}
         title="Recurring Bills & Income"
-        subtitle="Due or overdue rules can be posted here. Future items stay visible without a post action."
+        subtitle="Post only items that are due or overdue."
+        count={activeRecurring.length}
       >
         {activeRecurring.length === 0 ? (
-          <EmptyState
-            icon={Clock3}
-            title="No recurring rules"
-            description="Create recurring income, bills, and debt rules from Manage Plan first."
-          />
+          <div className="rounded-3xl border border-border/60 bg-card/75 p-4 shadow-sm backdrop-blur-xl">
+            <EmptyState
+              icon={Clock3}
+              title="No recurring rules"
+              description="Create recurring income, bills, and debt rules from Manage Plan first."
+            />
+          </div>
         ) : (
-          <div className="space-y-3">
+          <ScheduledList>
             {activeRecurring.map((rule) => {
               const status = getRecurringStatus(rule);
               const Icon = rule.is_active ? getTypeIcon(rule.type) : Clock3;
@@ -506,88 +538,78 @@ export default function ScheduledTransactions() {
               const dueNow = isDueNow(status);
 
               return (
-                <div
-                  key={rule.id}
-                  className="rounded-2xl border border-border/60 bg-background/35 p-3 transition-colors hover:bg-background/55"
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={cn(
-                        'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl',
-                        rule.type === 'income'
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : rule.type === 'expense'
-                            ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                            : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
+                <div key={rule.id} className="flex min-h-[72px] items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 md:px-4">
+                  <span
+                    className={cn(
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                      rule.type === 'income'
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : rule.type === 'expense'
+                          ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                          : 'bg-primary/10 text-primary'
+                    )}
+                  >
+                    <Icon className="h-4 w-4 stroke-[2.2]" />
+                  </span>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-bold text-foreground">{rule.name}</p>
-                        <Badge variant="outline" className={cn('rounded-full px-2 py-0 text-[10px]', getStatusClass(status))}>
-                          {status.label}
-                        </Badge>
-                        <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px]">
-                          Recurring
-                        </Badge>
-                      </div>
-
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                        {getRecurringFrequencyLabel(rule.frequency)} · Next {formatRecurringDate(rule.next_due_date)}
-                      </p>
-
-                      <p className="text-xs leading-5 text-muted-foreground/85">
-                        {rule.type === 'transfer'
-                          ? `${account?.name || 'From account'} → ${toAccount?.name || 'To account'}`
-                          : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
-                      </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <p className="truncate text-sm font-medium text-foreground">{rule.name}</p>
+                      <ScheduledStatusBadge className={getStatusClass(status)}>
+                        {status.label}
+                      </ScheduledStatusBadge>
                     </div>
 
-                    <div className="shrink-0 text-right">
-                      <RecurringAmount rule={rule} currency={currency} />
-                    </div>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {getRecurringFrequencyLabel(rule.frequency)} · Next {formatRecurringDate(rule.next_due_date)}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground/80">
+                      {rule.type === 'transfer'
+                        ? `${account?.name || 'From account'} → ${toAccount?.name || 'To account'}`
+                        : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
+                    </p>
                   </div>
 
-                  <div className="mt-3 flex justify-end">
+                  <div className="flex shrink-0 flex-col items-end gap-2 text-right">
+                    <RecurringAmount rule={rule} currency={currency} />
                     {dueNow ? (
                       <Button
                         size="sm"
                         onClick={() => handlePostRecurring(rule)}
                         disabled={postingId === rule.id || !rule.is_active}
-                        className="h-9 rounded-xl gap-1"
+                        className="h-8 rounded-xl px-2.5 text-xs"
                       >
-                        <CheckCircle2 className="h-4 w-4" />
-                        {postingId === rule.id ? 'Posting...' : 'Post Now'}
+                        {postingId === rule.id ? 'Posting...' : 'Post'}
                       </Button>
                     ) : (
-                      <span className="inline-flex h-9 items-center rounded-xl bg-secondary px-3 text-xs font-semibold text-muted-foreground">
-                        Not due yet
+                      <span className="inline-flex h-7 items-center rounded-xl bg-secondary px-2.5 text-[11px] font-semibold text-muted-foreground">
+                        Future
                       </span>
                     )}
                   </div>
                 </div>
               );
             })}
-          </div>
+          </ScheduledList>
         )}
       </ScheduledSection>
 
       <ScheduledSection
         icon={Target}
         title="Savings Goals"
-        subtitle="Post manual contributions as checking-to-savings transfers linked to the goal."
+        subtitle="Contributions post as checking-to-savings transfers."
+        count={activeGoals.length}
       >
         {activeGoals.length === 0 ? (
-          <EmptyState
-            icon={PiggyBank}
-            title="No active savings goals"
-            description="Create savings goals from Manage Plan before posting contributions."
-          />
+          <div className="rounded-3xl border border-border/60 bg-card/75 p-4 shadow-sm backdrop-blur-xl">
+            <EmptyState
+              icon={PiggyBank}
+              title="No active savings goals"
+              description="Create savings goals from Manage Plan before posting contributions."
+            />
+          </div>
         ) : (
-          <div className="space-y-3">
+          <ScheduledList>
             {activeGoals.map((goal) => {
               const progress = getGoalProgress(goal);
               const remaining = getGoalRemaining(goal);
@@ -599,72 +621,67 @@ export default function ScheduledTransactions() {
               const missingAccounts = !fromAccount || !toAccount;
 
               return (
-                <div
-                  key={goal.id}
-                  className="rounded-2xl border border-border/60 bg-background/35 p-3 transition-colors hover:bg-background/55"
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor: `${goal.color_key || '#22c55e'}18`,
-                        color: goal.color_key || '#22c55e',
-                      }}
-                    >
-                      <PiggyBank className="h-4 w-4" />
-                    </span>
+                <div key={goal.id} className="flex min-h-[76px] items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 md:px-4">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                    style={{
+                      backgroundColor: `${goal.color_key || '#22c55e'}18`,
+                      color: goal.color_key || '#22c55e',
+                    }}
+                  >
+                    <PiggyBank className="h-4 w-4 stroke-[2.2]" />
+                  </span>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-bold text-foreground">{goal.name}</p>
-                        <Badge variant="outline" className={cn('rounded-full px-2 py-0 text-[10px]', status.className)}>
-                          {status.label}
-                        </Badge>
-                        <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px]">
-                          Goal
-                        </Badge>
-                      </div>
-
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                        {progress}% complete · Target {formatGoalDate(goal.target_date)}
-                      </p>
-
-                      <p className="text-xs leading-5 text-muted-foreground/85">
-                        {fromAccount?.name || 'Missing from account'} → {toAccount?.name || 'Missing savings account'}
-                      </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <p className="truncate text-sm font-medium text-foreground">{goal.name}</p>
+                      <ScheduledStatusBadge className={status.className}>
+                        {status.label}
+                      </ScheduledStatusBadge>
                     </div>
 
-                    <div className="shrink-0 text-right">
-                      <div className="text-sm font-bold text-foreground tabular-nums">
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {progress}% complete · Target {formatGoalDate(goal.target_date)}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground/80">
+                      {fromAccount?.name || 'Missing from account'} → {toAccount?.name || 'Missing savings account'}
+                    </p>
+                    <p className="mt-1 truncate text-[11px] text-muted-foreground/80 md:hidden">
+                      {monthlyRequired
+                        ? <>Required: <CurrencyAmount amount={monthlyRequired} currency={currency} /></>
+                        : 'No monthly required amount'}
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 flex-col items-end gap-2 text-right">
+                    <div>
+                      <div className="text-sm font-semibold text-foreground tabular-nums">
                         <CurrencyAmount amount={remaining} currency={currency} />
                       </div>
-                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                         Remaining
                       </p>
                     </div>
-                  </div>
 
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-background/40 px-3 py-2">
-                    <p className="text-xs leading-5 text-muted-foreground">
+                    <div className="hidden text-[11px] text-muted-foreground/80 md:block">
                       {monthlyRequired
-                        ? <>Required this month: <CurrencyAmount amount={monthlyRequired} currency={currency} /></>
-                        : 'No monthly required amount'}
-                    </p>
+                        ? <>Required: <CurrencyAmount amount={monthlyRequired} currency={currency} /></>
+                        : 'No monthly required'}
+                    </div>
 
                     <Button
                       size="sm"
                       onClick={() => setSelectedGoal(goal)}
                       disabled={complete || missingAccounts || savingGoalId === goal.id}
-                      className="h-9 rounded-xl gap-1"
+                      className="h-8 rounded-xl px-2.5 text-xs"
                     >
-                      <CheckCircle2 className="h-4 w-4" />
-                      {savingGoalId === goal.id ? 'Contributing...' : complete ? 'Completed' : 'Contribute'}
+                      {savingGoalId === goal.id ? 'Saving...' : complete ? 'Done' : 'Contribute'}
                     </Button>
                   </div>
                 </div>
               );
             })}
-          </div>
+          </ScheduledList>
         )}
       </ScheduledSection>
 
