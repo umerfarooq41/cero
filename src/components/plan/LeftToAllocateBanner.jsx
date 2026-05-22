@@ -37,18 +37,18 @@ export default function LeftToAllocateBanner({
     <div
       className={cn(
         sticky ? 'sticky top-[72px] z-20' : 'relative z-auto',
-        'rounded-3xl border border-border/60 bg-card/75 px-4 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300',
+        'rounded-3xl border border-border/60 bg-card/75 px-3 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300 sm:px-4',
         isEditMode ? bgColor : 'border-border'
       )}
     >
       <div className="relative grid grid-cols-2 items-center">
-        <div className="min-w-0 pr-4 text-center">
+        <div className="min-w-0 pr-3 text-center sm:pr-4">
           <div className="mb-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
             Income
           </div>
 
-          <div className="inline-flex items-center justify-center gap-1 text-lg font-bold tracking-tight text-foreground tabular-nums sm:text-xl [&_svg]:h-[1em] [&_svg]:w-[1em]">
-            <span className="inline-flex items-center gap-1 leading-none">
+          <div className="inline-flex max-w-full items-center justify-center gap-1 truncate text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-lg [&_svg]:h-[1em] [&_svg]:w-[1em]">
+            <span className="inline-flex min-w-0 items-center gap-1 truncate leading-none">
               {money(totalIncome)}
             </span>
           </div>
@@ -56,39 +56,43 @@ export default function LeftToAllocateBanner({
 
         <div className="absolute left-1/2 top-1/2 h-10 w-px -translate-x-1/2 -translate-y-1/2 bg-border" />
 
-        <div className="relative min-w-0 pl-4 pr-10 text-center">
-          <div className="mb-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
-            Left to allocate
-          </div>
+        <div className="min-w-0 pl-3 sm:pl-4">
+          <div className="flex min-w-0 items-center justify-center gap-2">
+            <div className="min-w-0 flex-1 text-center">
+              <div className="mb-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
+                Left to allocate
+              </div>
 
-          <div
-            className={cn(
-              'inline-flex items-center justify-center gap-1 text-lg font-bold tracking-tight tabular-nums sm:text-xl [&_svg]:h-[1em] [&_svg]:w-[1em]',
-              stateColor
-            )}
-          >
-            {isOver && <span className="leading-none">-</span>}
+              <div
+                className={cn(
+                  'inline-flex max-w-full items-center justify-center gap-1 truncate text-sm font-bold tracking-tight tabular-nums sm:text-lg [&_svg]:h-[1em] [&_svg]:w-[1em]',
+                  stateColor
+                )}
+              >
+                {isOver && <span className="shrink-0 leading-none">-</span>}
 
-            <span className="inline-flex items-center gap-1 leading-none">
-              {money(Math.abs(leftToAllocate))}
-            </span>
-          </div>
+                <span className="inline-flex min-w-0 items-center gap-1 truncate leading-none">
+                  {money(Math.abs(leftToAllocate))}
+                </span>
+              </div>
+            </div>
 
-          <div
-            className={cn(
-              'absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 shrink-0 items-center justify-center rounded-full',
-              isZero
-                ? 'bg-[hsl(var(--success)/0.15)]'
-                : isOver
-                  ? 'bg-destructive/10'
-                  : 'bg-primary/10'
-            )}
-          >
-            {isZero && <Check className={cn('h-4 w-4', stateColor)} />}
-            {isOver && <AlertTriangle className={cn('h-4 w-4', stateColor)} />}
-            {isUnder && (
-              <CircleDollarSign className={cn('h-4 w-4', stateColor)} />
-            )}
+            <div
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                isZero
+                  ? 'bg-[hsl(var(--success)/0.15)]'
+                  : isOver
+                    ? 'bg-destructive/10'
+                    : 'bg-primary/10'
+              )}
+            >
+              {isZero && <Check className={cn('h-4 w-4', stateColor)} />}
+              {isOver && <AlertTriangle className={cn('h-4 w-4', stateColor)} />}
+              {isUnder && (
+                <CircleDollarSign className={cn('h-4 w-4', stateColor)} />
+              )}
+            </div>
           </div>
         </div>
       </div>
