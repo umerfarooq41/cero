@@ -130,6 +130,30 @@ function normalizeRuleType(type) {
   return ['income', 'expense', 'transfer'].includes(type) ? type : 'expense';
 }
 
+function normalizeAccountType(value) {
+  return String(value || '').toLowerCase();
+}
+
+function normalizeAccountCategory(value) {
+  return String(value || '').toLowerCase();
+}
+
+function isCheckingAccount(account) {
+  return (
+    normalizeAccountCategory(account?.category) === 'asset' &&
+    normalizeAccountType(account?.type) === 'checking'
+  );
+}
+
+function isLiabilityAccount(account) {
+  return normalizeAccountCategory(account?.category) === 'liability';
+}
+
+function getAccountLabel(account) {
+  const type = String(account?.type || 'account').replace(/_/g, ' ');
+  return `${account?.name || 'Account'} · ${type}`;
+}
+
 function getStatusClass(status) {
   if (status.key === 'overdue') {
     return 'border-destructive/20 bg-destructive/10 text-destructive';
@@ -196,6 +220,16 @@ function RecurringRuleModal({
     });
   }, [categories, form.type]);
 
+  const checkingAccounts = useMemo(
+    () => accounts.filter((account) => isCheckingAccount(account)),
+    [accounts]
+  );
+
+  const liabilityAccounts = useMemo(
+    () => accounts.filter((account) => isLiabilityAccount(account)),
+    [accounts]
+  );
+
   const updateForm = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
@@ -214,7 +248,16 @@ function RecurringRuleModal({
     }
 
     if (form.account_id === 'none') {
-      toast.error('Select an account');
+      toast.error(
+        form.type === 'transfer'
+          ? 'Select a from account'
+          : 'Select a checking account'
+      );
+      return;
+    }
+
+    if (form.type === 'transfer' && form.to_account_id === 'none') {
+      toast.error('Select a liability account');
       return;
     }
 
@@ -230,9 +273,7 @@ function RecurringRuleModal({
       category_id: form.category_id === 'none' ? null : form.category_id,
       account_id: form.account_id === 'none' ? null : form.account_id,
       to_account_id:
-        form.type === 'transfer' && form.to_account_id !== 'none'
-          ? form.to_account_id
-          : null,
+        form.type === 'transfer' ? form.to_account_id : null,
       frequency: form.frequency,
       start_date: editingRule?.start_date || form.next_due_date,
       next_due_date: form.next_due_date,
@@ -293,6 +334,7 @@ function RecurringRuleModal({
                     onClick={() => {
                       updateForm('type', value);
                       updateForm('category_id', 'none');
+                      updateForm('account_id', 'none');
                       updateForm('to_account_id', 'none');
                     }}
                     className={cn(
@@ -367,19 +409,34 @@ function RecurringRuleModal({
 
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Account
+                {form.type === 'transfer' ? 'From Account' : 'Account'}
               </label>
               <Select value={form.account_id} onValueChange={(value) => updateForm('account_id', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue
+                    placeholder={
+                      form.type === 'transfer'
+                        ? 'Select from account'
+                        : 'Select checking account'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Select account</SelectItem>
-                  {accounts.map((account) => (
+                  <SelectItem value="none">
+                    {form.type === 'transfer'
+                      ? 'Select from account'
+                      : 'Select checking account'}
+                  </SelectItem>
+                  {checkingAccounts.map((account) => (
                     <SelectItem key={account.id} value={account.id}>
-                      {account.name}
+                      {getAccountLabel(account)}
                     </SelectItem>
                   ))}
+                  {checkingAccounts.length === 0 && (
+                    <SelectItem value="no-checking-accounts" disabled>
+                      No checking accounts
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -388,21 +445,26 @@ function RecurringRuleModal({
           {form.type === 'transfer' && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Destination Account Optional
+                To Account
               </label>
               <Select value={form.to_account_id} onValueChange={(value) => updateForm('to_account_id', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Optional destination" />
+                  <SelectValue placeholder="Select liability account" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Optional destination</SelectItem>
-                  {accounts
+                  <SelectItem value="none">Select liability account</SelectItem>
+                  {liabilityAccounts
                     .filter((account) => account.id !== form.account_id)
                     .map((account) => (
                       <SelectItem key={account.id} value={account.id}>
-                        {account.name}
+                        {getAccountLabel(account)}
                       </SelectItem>
                     ))}
+                  {liabilityAccounts.length === 0 && (
+                    <SelectItem value="no-liability-accounts" disabled>
+                      No liability accounts
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
