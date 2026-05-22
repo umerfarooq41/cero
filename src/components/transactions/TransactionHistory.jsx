@@ -77,14 +77,18 @@ function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
 
 function isRecurringTransaction(transaction) {
   return Boolean(
-    transaction?.recurring_transaction_id ||
+    transaction?.source_type === 'recurring' ||
+      transaction?.recurring_transaction_id ||
       transaction?.recurring_posted_for_date
   );
 }
 
 function isGoalContribution(transaction) {
   return Boolean(
-    transaction?.savings_goal_id || transaction?.goal_contribution_id
+    transaction?.source_type === 'goal' ||
+      transaction?.source_type === 'savings_goal' ||
+      transaction?.savings_goal_id ||
+      transaction?.goal_contribution_id
   );
 }
 
