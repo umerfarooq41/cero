@@ -56,9 +56,10 @@ export function getMonthlyRequiredSaving(goal) {
   const months = getMonthsUntilTarget(goal?.target_date);
 
   if (months === null) return null;
+
   if (months <= 0) return remaining;
 
-  return remaining / months;
+  return Math.ceil(remaining / months);
 }
 
 export function getGoalStatus(goal) {
@@ -70,7 +71,8 @@ export function getGoalStatus(goal) {
     return {
       key: 'complete',
       label: 'Funded',
-      className: 'border-[hsl(var(--success)/0.2)] bg-[hsl(var(--success)/0.08)] text-[hsl(var(--success))]',
+      className:
+        'border-[hsl(var(--success)/0.2)] bg-[hsl(var(--success)/0.08)] text-[hsl(var(--success))]',
     };
   }
 
@@ -86,7 +88,8 @@ export function getGoalStatus(goal) {
     return {
       key: 'urgent',
       label: `${months} mo left`,
-      className: 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+      className:
+        'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
     };
   }
 
@@ -118,7 +121,8 @@ export function getDefaultSavingsCategory(categories = []) {
 
   return (
     categories.find(
-      (category) => normalize(category.type) === 'savings' && !category.parent_id
+      (category) =>
+        normalize(category.type) === 'savings' && !category.parent_id
     ) ||
     categories.find((category) => normalize(category.type) === 'savings') ||
     null
