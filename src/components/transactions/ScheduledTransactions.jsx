@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  CalendarClock,
+  ArrowDownLeft,
+  ArrowLeftRight,
+  ArrowUpRight,
+  ChevronDown,
   Clock3,
   PiggyBank,
   Target,
@@ -149,64 +153,88 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
+const TYPE_ACCENT = {
+  income: 'text-green-700 dark:text-green-400',
+  expense: 'text-red-700 dark:text-red-400',
+  transfer: 'text-purple-700 dark:text-purple-400',
+  active: 'text-blue-700 dark:text-blue-400',
+};
+
+const TYPE_ICONS = {
+  income: ArrowDownLeft,
+  expense: ArrowUpRight,
+  transfer: ArrowLeftRight,
+  active: Target,
+};
+
+const RECURRING_SECTIONS = [
+  { type: 'income', label: 'Income' },
+  { type: 'expense', label: 'Expenses' },
+  { type: 'transfer', label: 'Debt Payments' },
+];
+
+function normalizeRuleType(type) {
+  if (type === 'debt') return 'transfer';
+  return ['income', 'expense', 'transfer'].includes(type) ? type : 'expense';
+}
+
+function formatCurrencyElement(amount, currency, className = '') {
+  return <CurrencyAmount amount={amount} currency={currency} className={className} />;
+}
+
 function isDueNow(status) {
   return status.key === 'overdue' || status.key === 'due_today';
 }
 
-function ScheduledSection({ icon: Icon, title, subtitle, count, children }) {
+function ScheduledSectionCard({ type = 'active', label, count, defaultExpanded = false, emptyText, children }) {
+  const [isOpen, setIsOpen] = useState(defaultExpanded);
+  const Icon = TYPE_ICONS[type] || Target;
+
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3 px-1">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon className="h-4 w-4" />
-          </span>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
-                {title}
-              </h2>
-              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1.5 text-[11px] font-bold text-muted-foreground">
-                {count}
-              </span>
-            </div>
-            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-              {subtitle}
-            </p>
-          </div>
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-accent/30"
+      >
+        <div className="flex min-w-0 items-center gap-2.5">
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+              !isOpen && '-rotate-90'
+            )}
+          />
+          <Icon className={cn('h-4 w-4 shrink-0', TYPE_ACCENT[type])} />
+          <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
         </div>
-      </div>
 
-      {children}
-    </section>
-  );
-}
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+          {count}
+        </span>
+      </button>
 
-function ScheduledList({ children }) {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/75 shadow-sm backdrop-blur-xl divide-y divide-border/50">
-      {children}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            {count === 0 ? (
+              <div className="border-t border-border/50 px-5 py-6 text-center">
+                <p className="text-xs text-muted-foreground">{emptyText}</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border/50 border-t border-border/50">
+                {children}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  );
-}
-
-function RecurringAmount({ rule, currency }) {
-  const amount = Math.abs(Number(rule.amount || 0));
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold tabular-nums',
-        rule.type === 'income'
-          ? 'text-[hsl(var(--success))]'
-          : rule.type === 'expense'
-            ? 'text-destructive'
-            : 'text-primary'
-      )}
-    >
-      {rule.type === 'income' ? '+' : rule.type === 'expense' ? '-' : ''}
-      <CurrencyAmount amount={amount} currency={currency} />
-    </span>
   );
 }
 
@@ -221,6 +249,113 @@ function ScheduledStatusBadge({ children, className }) {
     >
       {children}
     </Badge>
+  );
+}
+
+function ScheduledRecurringRow({ rule, account, toAccount, category, currency, posting, onPost }) {
+  const status = getRecurringStatus(rule);
+  const dueNow = isDueNow(status);
+  const amount = Math.abs(Number(rule.amount || 0));
+  const type = normalizeRuleType(rule.type);
+  const fallbackIcon = type === 'income' ? 'income' : type === 'transfer' ? 'loan' : 'receipt';
+
+  return (
+    <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+      <CategoryIcon
+        icon={rule.icon || category?.icon || fallbackIcon}
+        color={rule.color || category?.color || (type === 'income' ? '#22c55e' : type === 'transfer' ? '#8b5cf6' : '#ef4444')}
+        size="sm"
+      />
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0 truncate text-sm font-semibold leading-tight">
+            {rule.name}
+          </div>
+          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+            {formatCurrencyElement(amount, currency)}
+          </div>
+        </div>
+
+        <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-xs font-medium text-muted-foreground">
+          <span className="truncate">{getRecurringFrequencyLabel(rule.frequency)} · {status.label}</span>
+          {!rule.is_active && (
+            <ScheduledStatusBadge className="border-border bg-secondary text-muted-foreground">
+              Paused
+            </ScheduledStatusBadge>
+          )}
+        </p>
+
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          Next {formatRecurringDate(rule.next_due_date)}
+          {type === 'transfer'
+            ? ` · ${account?.name || 'From account'} → ${toAccount?.name || 'To account'}`
+            : account
+              ? ` · ${account.name}`
+              : ''}
+        </p>
+      </div>
+
+      <Button
+        size="sm"
+        variant={dueNow ? 'default' : 'secondary'}
+        onClick={() => onPost(rule)}
+        disabled={!dueNow || posting || !rule.is_active}
+        className="-mr-1 h-8 shrink-0 rounded-xl px-3 text-xs"
+      >
+        {posting ? 'Posting…' : dueNow ? 'Post' : 'Future'}
+      </Button>
+    </div>
+  );
+}
+
+function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onContribute }) {
+  const progress = getGoalProgress(goal);
+  const target = Number(goal.target_amount || 0);
+  const monthlyRequired = getMonthlyRequiredSaving(goal);
+  const remaining = getGoalRemaining(goal);
+  const status = getGoalStatus(goal);
+  const color = goal.color_key || '#276FE4';
+  const isCompleted = remaining <= 0 || progress >= 100;
+  const statusLabel = status.key === 'due' ? 'Target passed' : status.label;
+  const missingAccounts = !fromAccount || !toAccount;
+
+  return (
+    <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+      <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <h3 className="min-w-0 truncate text-sm font-semibold leading-tight">
+            {goal.name}
+          </h3>
+
+          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+            {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrencyElement(monthlyRequired, currency)}
+          </div>
+        </div>
+
+        <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
+          {isCompleted ? '100% complete' : `${statusLabel} · ${progress}% complete`}
+        </p>
+
+        <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
+          Target {formatCurrencyElement(target, currency)}
+          {fromAccount || toAccount
+            ? ` · ${fromAccount?.name || 'From account'} → ${toAccount?.name || 'Savings account'}`
+            : ''}
+        </p>
+      </div>
+
+      <Button
+        size="sm"
+        onClick={() => onContribute(goal)}
+        disabled={isCompleted || missingAccounts || saving}
+        className="-mr-1 h-8 shrink-0 rounded-xl px-3 text-xs"
+      >
+        {saving ? 'Saving…' : isCompleted ? 'Done' : 'Contribute'}
+      </Button>
+    </div>
   );
 }
 
@@ -502,16 +637,25 @@ export default function ScheduledTransactions() {
     }
   };
 
+  const recurringByType = useMemo(() => {
+    return RECURRING_SECTIONS.reduce((groups, section) => {
+      groups[section.type] = activeRecurring.filter((rule) => normalizeRuleType(rule.type) === section.type);
+      return groups;
+    }, {});
+  }, [activeRecurring]);
+
   return (
     <div className="animate-child space-y-7">
-      <ScheduledSection
-        icon={CalendarClock}
-        title="Recurring Bills & Income"
-        subtitle="Post only items that are due or overdue."
-        count={activeRecurring.length}
-      >
+      <section className="space-y-3">
+        <div className="px-1">
+          <h2 className="text-base font-semibold">Recurring Bills & Income</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Same layout as Manage Plan, with posting actions only for due items.
+          </p>
+        </div>
+
         {activeRecurring.length === 0 ? (
-          <div className="rounded-3xl border border-border/60 bg-card/75 p-4 shadow-sm backdrop-blur-xl">
+          <div className="rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
             <EmptyState
               icon={Clock3}
               title="No recurring rules"
@@ -519,73 +663,54 @@ export default function ScheduledTransactions() {
             />
           </div>
         ) : (
-          <ScheduledList>
-            {activeRecurring.map((rule) => {
-              const status = getRecurringStatus(rule);
-              const category = categories.find((item) => item.id === rule.category_id);
-              const account = accounts.find((item) => item.id === rule.account_id);
-              const toAccount = accounts.find((item) => item.id === rule.to_account_id);
-              const dueNow = isDueNow(status);
+          <div className="space-y-4">
+            {RECURRING_SECTIONS.map((section) => {
+              const rules = recurringByType[section.type] || [];
 
               return (
-                <div key={rule.id} className="flex min-h-[72px] items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 md:px-4">
-                  <CategoryIcon
-                    icon={rule.icon || category?.icon || (rule.type === 'income' ? 'income' : rule.type === 'transfer' ? 'loan' : 'receipt')}
-                    color={rule.color || category?.color || (rule.type === 'income' ? '#22c55e' : rule.type === 'expense' ? '#ef4444' : '#276FE4')}
-                    size="md"
-                    className="h-9 w-9 rounded-xl"
-                  />
+                <ScheduledSectionCard
+                  key={section.type}
+                  type={section.type}
+                  label={section.label}
+                  count={rules.length}
+                  defaultExpanded={section.type === 'expense' || rules.length > 0}
+                  emptyText={`No scheduled ${section.label.toLowerCase()} right now.`}
+                >
+                  {rules.map((rule) => {
+                    const category = categories.find((item) => item.id === rule.category_id);
+                    const account = accounts.find((item) => item.id === rule.account_id);
+                    const toAccount = accounts.find((item) => item.id === rule.to_account_id);
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <p className="truncate text-sm font-medium text-foreground">{rule.name}</p>
-                      <ScheduledStatusBadge className={getStatusClass(status)}>
-                        {status.label}
-                      </ScheduledStatusBadge>
-                    </div>
-
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {getRecurringFrequencyLabel(rule.frequency)} · Next {formatRecurringDate(rule.next_due_date)}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground/80">
-                      {rule.type === 'transfer'
-                        ? `${account?.name || 'From account'} → ${toAccount?.name || 'To account'}`
-                        : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
-                    </p>
-                  </div>
-
-                  <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-                    <RecurringAmount rule={rule} currency={currency} />
-                    {dueNow ? (
-                      <Button
-                        size="sm"
-                        onClick={() => handlePostRecurring(rule)}
-                        disabled={postingId === rule.id || !rule.is_active}
-                        className="h-8 rounded-xl px-2.5 text-xs"
-                      >
-                        {postingId === rule.id ? 'Posting...' : 'Post'}
-                      </Button>
-                    ) : (
-                      <span className="inline-flex h-7 items-center rounded-xl bg-secondary px-2.5 text-[11px] font-semibold text-muted-foreground">
-                        Future
-                      </span>
-                    )}
-                  </div>
-                </div>
+                    return (
+                      <ScheduledRecurringRow
+                        key={rule.id}
+                        rule={rule}
+                        account={account}
+                        toAccount={toAccount}
+                        category={category}
+                        currency={currency}
+                        posting={postingId === rule.id}
+                        onPost={handlePostRecurring}
+                      />
+                    );
+                  })}
+                </ScheduledSectionCard>
               );
             })}
-          </ScheduledList>
+          </div>
         )}
-      </ScheduledSection>
+      </section>
 
-      <ScheduledSection
-        icon={Target}
-        title="Savings Goals"
-        subtitle="Contributions post as checking-to-savings transfers."
-        count={activeGoals.length}
-      >
+      <section className="space-y-3">
+        <div className="px-1">
+          <h2 className="text-base font-semibold">Savings Goals</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Same goal rows as Manage Plan, with contribution actions for execution.
+          </p>
+        </div>
+
         {activeGoals.length === 0 ? (
-          <div className="rounded-3xl border border-border/60 bg-card/75 p-4 shadow-sm backdrop-blur-xl">
+          <div className="rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
             <EmptyState
               icon={PiggyBank}
               title="No active savings goals"
@@ -593,78 +718,32 @@ export default function ScheduledTransactions() {
             />
           </div>
         ) : (
-          <ScheduledList>
+          <ScheduledSectionCard
+            type="active"
+            label="Active Goals"
+            count={activeGoals.length}
+            defaultExpanded
+            emptyText="No active savings goals right now."
+          >
             {activeGoals.map((goal) => {
-              const progress = getGoalProgress(goal);
-              const remaining = getGoalRemaining(goal);
-              const status = getGoalStatus(goal);
-              const monthlyRequired = getMonthlyRequiredSaving(goal);
               const fromAccount = accounts.find((account) => account.id === goal.from_account_id);
               const toAccount = accounts.find((account) => account.id === goal.to_account_id);
-              const complete = remaining <= 0 || progress >= 100;
-              const missingAccounts = !fromAccount || !toAccount;
 
               return (
-                <div key={goal.id} className="flex min-h-[76px] items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 md:px-4">
-                  <CategoryIcon
-                    icon={goal.icon_key || 'target'}
-                    color={goal.color_key || '#276FE4'}
-                    size="md"
-                    className="h-9 w-9 rounded-xl"
-                  />
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <p className="truncate text-sm font-medium text-foreground">{goal.name}</p>
-                      <ScheduledStatusBadge className={status.className}>
-                        {status.label}
-                      </ScheduledStatusBadge>
-                    </div>
-
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {progress}% complete · Target {formatGoalDate(goal.target_date)}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground/80">
-                      {fromAccount?.name || 'Missing from account'} → {toAccount?.name || 'Missing savings account'}
-                    </p>
-                    <p className="mt-1 truncate text-[11px] text-muted-foreground/80 md:hidden">
-                      {monthlyRequired
-                        ? <>Required: <CurrencyAmount amount={monthlyRequired} currency={currency} /></>
-                        : 'No monthly required amount'}
-                    </p>
-                  </div>
-
-                  <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-                    <div>
-                      <div className="text-sm font-semibold text-foreground tabular-nums">
-                        <CurrencyAmount amount={remaining} currency={currency} />
-                      </div>
-                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Remaining
-                      </p>
-                    </div>
-
-                    <div className="hidden text-[11px] text-muted-foreground/80 md:block">
-                      {monthlyRequired
-                        ? <>Required: <CurrencyAmount amount={monthlyRequired} currency={currency} /></>
-                        : 'No monthly required'}
-                    </div>
-
-                    <Button
-                      size="sm"
-                      onClick={() => setSelectedGoal(goal)}
-                      disabled={complete || missingAccounts || savingGoalId === goal.id}
-                      className="h-8 rounded-xl px-2.5 text-xs"
-                    >
-                      {savingGoalId === goal.id ? 'Saving...' : complete ? 'Done' : 'Contribute'}
-                    </Button>
-                  </div>
-                </div>
+                <ScheduledGoalRow
+                  key={goal.id}
+                  goal={goal}
+                  fromAccount={fromAccount}
+                  toAccount={toAccount}
+                  currency={currency}
+                  saving={savingGoalId === goal.id}
+                  onContribute={setSelectedGoal}
+                />
               );
             })}
-          </ScheduledList>
+          </ScheduledSectionCard>
         )}
-      </ScheduledSection>
+      </section>
 
       <GoalContributionDialog
         goal={selectedGoal}
