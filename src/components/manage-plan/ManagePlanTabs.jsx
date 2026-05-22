@@ -14,7 +14,7 @@ export const managePlanTabs = [
   },
   {
     value: 'categories',
-    label: 'Categories',
+    label: 'Category',
     desktopLabel: 'Categories',
     icon: ListTree,
     activeClass:
@@ -45,11 +45,11 @@ export default function ManagePlanTabs({ activeTab, onChange, className = '' }) 
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border/60 bg-card/70 p-1 shadow-sm backdrop-blur-xl sm:p-1.5',
+        'rounded-2xl border border-border/60 bg-card/70 p-0.5 shadow-sm backdrop-blur-xl sm:p-1',
         className
       )}
     >
-      <div className="grid grid-cols-4 gap-0.5 sm:gap-1">
+      <div className="grid grid-cols-4 gap-0">
         {managePlanTabs.map((tab) => {
           const isActive = activeTab === tab.value;
           const Icon = tab.icon;
@@ -64,10 +64,10 @@ export default function ManagePlanTabs({ activeTab, onChange, className = '' }) 
                 `
                 relative flex min-w-0 items-center justify-center
                 gap-0.5 overflow-hidden rounded-xl px-0.5 py-2.5
-                text-[9px] font-semibold leading-none
+                text-[10px] font-semibold leading-none
                 transition-colors duration-200
                 active:scale-[0.99]
-                xs:gap-1 xs:text-[10px]
+                xs:text-[11px]
                 sm:gap-1.5 sm:px-3 sm:text-sm
                 `,
                 isActive
@@ -93,7 +93,7 @@ export default function ManagePlanTabs({ activeTab, onChange, className = '' }) 
 
               <Icon
                 className={cn(
-                  'relative z-10 h-3 w-3 shrink-0 transition-all duration-200 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4',
+                  'relative z-10 h-3.5 w-3.5 shrink-0 transition-all duration-200 xs:h-4 xs:w-4 sm:h-4 sm:w-4',
                   isActive && 'stroke-[2.5]'
                 )}
               />
