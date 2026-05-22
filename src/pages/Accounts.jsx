@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -8,6 +8,7 @@ import {
   Banknote,
   PiggyBank,
   Wallet,
+  ChevronDown,
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
@@ -40,6 +41,11 @@ export default function Accounts() {
   const formatCurrency = useCurrencyFormatter();
   const { data: accounts = [] } = useAccounts();
 
+  const [collapsedGroups, setCollapsedGroups] = useState({
+    assets: false,
+    liabilities: false,
+  });
+
   const assets = accounts.filter((account) => account.category === 'asset');
   const liabilities = accounts.filter(
     (account) => account.category === 'liability'
@@ -57,8 +63,18 @@ export default function Accounts() {
 
   const netWorth = totalAssets - totalLiabilities;
 
+  const toggleGroup = (key) => {
+    setCollapsedGroups((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  };
+
   const renderGroup = (title, accs, isLiability) => {
     if (accs.length === 0) return null;
+
+    const groupKey = isLiability ? 'liabilities' : 'assets';
+    const isCollapsed = collapsedGroups[groupKey];
 
     const total = accs.reduce(
       (sum, account) => sum + Math.abs(Number(account.balance) || 0),
@@ -67,8 +83,19 @@ export default function Accounts() {
 
     return (
       <section className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-3.5">
+        <button
+          type="button"
+          onClick={() => toggleGroup(groupKey)}
+          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3.5 text-left transition-colors hover:bg-accent/30"
+        >
           <div className="flex min-w-0 items-center gap-2">
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+                isCollapsed && '-rotate-90'
+              )}
+            />
+
             <h3
               className={cn(
                 'truncate text-sm font-semibold',
@@ -102,52 +129,54 @@ export default function Accounts() {
           >
             <InlineMoney>{formatCurrency(total)}</InlineMoney>
           </div>
-        </div>
+        </button>
 
-        <div className="divide-y divide-border/40">
-          {accs.map((account) => {
-            const Icon = typeIcons[account.type] || Wallet;
-            const balance = Math.abs(Number(account.balance) || 0);
+        {!isCollapsed && (
+          <div className="divide-y divide-border/40">
+            {accs.map((account) => {
+              const Icon = typeIcons[account.type] || Wallet;
+              const balance = Math.abs(Number(account.balance) || 0);
 
-            return (
-              <Link
-                key={account.id}
-                to={`/accounts/${account.id}`}
-                className="grid min-h-[4.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
-              >
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                  style={{
-                    backgroundColor: `${account.color || '#0078D4'}15`,
-                  }}
+              return (
+                <Link
+                  key={account.id}
+                  to={`/accounts/${account.id}`}
+                  className="grid min-h-[4.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-white/20 dark:hover:bg-white/[0.03]"
                 >
-                  <Icon
-                    className="h-4 w-4"
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                     style={{
-                      color: account.color || '#0078D4',
+                      backgroundColor: `${account.color || '#0078D4'}15`,
                     }}
-                  />
-                </div>
-
-                <div className="flex min-w-0 flex-col justify-center">
-                  <div className="truncate text-sm font-medium leading-tight text-foreground">
-                    {account.name}
+                  >
+                    <Icon
+                      className="h-4 w-4"
+                      style={{
+                        color: account.color || '#0078D4',
+                      }}
+                    />
                   </div>
 
-                  <div className="mt-1 text-xs capitalize leading-none text-muted-foreground">
-                    {account.type?.replace('_', ' ') || 'Account'}
-                  </div>
-                </div>
+                  <div className="flex min-w-0 flex-col justify-center">
+                    <div className="truncate text-sm font-medium leading-tight text-foreground">
+                      {account.name}
+                    </div>
 
-                <div className="flex items-center justify-end text-right">
-                  <div className="text-sm font-medium tabular-nums text-foreground">
-                    <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                    <div className="mt-1 text-xs capitalize leading-none text-muted-foreground">
+                      {account.type?.replace('_', ' ') || 'Account'}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+
+                  <div className="flex items-center justify-end text-right">
+                    <div className="text-sm font-medium tabular-nums text-foreground">
+                      <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
     );
   };
