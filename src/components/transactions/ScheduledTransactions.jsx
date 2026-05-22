@@ -267,15 +267,10 @@ function ScheduledRecurringRow({ rule, account, toAccount, category, currency, p
         size="sm"
       />
 
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between gap-3">
-          <div className="min-w-0 truncate text-sm font-semibold leading-tight">
-            {rule.name}
-          </div>
-          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
-            {formatCurrencyElement(amount, currency)}
-          </div>
-        </div>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <h3 className="min-w-0 truncate text-sm font-semibold leading-tight">
+          {rule.name}
+        </h3>
 
         <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-xs font-medium text-muted-foreground">
           <span className="truncate">{getRecurringFrequencyLabel(rule.frequency)} · {status.label}</span>
@@ -296,15 +291,21 @@ function ScheduledRecurringRow({ rule, account, toAccount, category, currency, p
         </p>
       </div>
 
-      <Button
-        size="sm"
-        variant={dueNow ? 'default' : 'secondary'}
-        onClick={() => onPost(rule)}
-        disabled={!dueNow || posting || !rule.is_active}
-        className="-mr-1 h-8 shrink-0 rounded-xl px-3 text-xs"
-      >
-        {posting ? 'Posting…' : dueNow ? 'Post' : 'Future'}
-      </Button>
+      <div className="ml-2 flex shrink-0 flex-col items-end gap-2 text-right">
+        <div className="text-sm font-semibold tabular-nums text-foreground">
+          {formatCurrencyElement(amount, currency)}
+        </div>
+
+        <Button
+          size="sm"
+          variant={dueNow ? 'default' : 'secondary'}
+          onClick={() => onPost(rule)}
+          disabled={!dueNow || posting || !rule.is_active}
+          className="h-7 rounded-xl px-3 text-xs"
+        >
+          {posting ? 'Posting…' : dueNow ? 'Post' : 'Future'}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -324,16 +325,10 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
       <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
 
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between gap-3">
-          <h3 className="min-w-0 truncate text-sm font-semibold leading-tight">
-            {goal.name}
-          </h3>
-
-          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
-            {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrencyElement(monthlyRequired, currency)}
-          </div>
-        </div>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <h3 className="min-w-0 truncate text-sm font-semibold leading-tight">
+          {goal.name}
+        </h3>
 
         <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
           {isCompleted ? '100% complete' : `${statusLabel} · ${progress}% complete`}
@@ -347,14 +342,20 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
         </p>
       </div>
 
-      <Button
-        size="sm"
-        onClick={() => onContribute(goal)}
-        disabled={isCompleted || missingAccounts || saving}
-        className="-mr-1 h-8 shrink-0 rounded-xl px-3 text-xs"
-      >
-        {saving ? 'Saving…' : isCompleted ? 'Done' : 'Contribute'}
-      </Button>
+      <div className="ml-2 flex shrink-0 flex-col items-end gap-2 text-right">
+        <div className="text-sm font-semibold tabular-nums text-foreground">
+          {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrencyElement(monthlyRequired, currency)}
+        </div>
+
+        <Button
+          size="sm"
+          onClick={() => onContribute(goal)}
+          disabled={isCompleted || missingAccounts || saving}
+          className="h-7 rounded-xl px-3 text-xs"
+        >
+          {saving ? 'Saving…' : isCompleted ? 'Done' : 'Contribute'}
+        </Button>
+      </div>
     </div>
   );
 }
