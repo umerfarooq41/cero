@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowDownLeft,
-  ArrowLeftRight,
-  ArrowUpRight,
   CalendarClock,
-  CheckCircle2,
   Clock3,
   PiggyBank,
   Target,
@@ -13,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import EmptyState from '@/components/shared/EmptyState';
+import CategoryIcon from '@/components/shared/CategoryIcon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -134,12 +131,6 @@ function getTransactionDeltas(transaction, accounts) {
   }
 
   return deltas;
-}
-
-function getTypeIcon(type) {
-  if (type === 'income') return ArrowDownLeft;
-  if (type === 'transfer') return ArrowLeftRight;
-  return ArrowUpRight;
 }
 
 function getStatusClass(status) {
@@ -531,7 +522,6 @@ export default function ScheduledTransactions() {
           <ScheduledList>
             {activeRecurring.map((rule) => {
               const status = getRecurringStatus(rule);
-              const Icon = rule.is_active ? getTypeIcon(rule.type) : Clock3;
               const category = categories.find((item) => item.id === rule.category_id);
               const account = accounts.find((item) => item.id === rule.account_id);
               const toAccount = accounts.find((item) => item.id === rule.to_account_id);
@@ -539,18 +529,12 @@ export default function ScheduledTransactions() {
 
               return (
                 <div key={rule.id} className="flex min-h-[72px] items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 md:px-4">
-                  <span
-                    className={cn(
-                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
-                      rule.type === 'income'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                        : rule.type === 'expense'
-                          ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                          : 'bg-primary/10 text-primary'
-                    )}
-                  >
-                    <Icon className="h-4 w-4 stroke-[2.2]" />
-                  </span>
+                  <CategoryIcon
+                    icon={rule.icon || category?.icon || (rule.type === 'income' ? 'income' : rule.type === 'transfer' ? 'loan' : 'receipt')}
+                    color={rule.color || category?.color || (rule.type === 'income' ? '#22c55e' : rule.type === 'expense' ? '#ef4444' : '#276FE4')}
+                    size="md"
+                    className="h-9 w-9 rounded-xl"
+                  />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 items-center gap-2">
@@ -622,15 +606,12 @@ export default function ScheduledTransactions() {
 
               return (
                 <div key={goal.id} className="flex min-h-[76px] items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 md:px-4">
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                    style={{
-                      backgroundColor: `${goal.color_key || '#22c55e'}18`,
-                      color: goal.color_key || '#22c55e',
-                    }}
-                  >
-                    <PiggyBank className="h-4 w-4 stroke-[2.2]" />
-                  </span>
+                  <CategoryIcon
+                    icon={goal.icon_key || 'target'}
+                    color={goal.color_key || '#276FE4'}
+                    size="md"
+                    className="h-9 w-9 rounded-xl"
+                  />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 items-center gap-2">
