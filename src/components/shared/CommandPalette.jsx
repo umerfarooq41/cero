@@ -31,7 +31,7 @@ import {
   ChartPie,
   Settings,
   Plus,
-  FolderOpen,
+  SlidersHorizontal,
   PencilLine,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -44,9 +44,9 @@ const COMMANDS = [
       { label: 'Plan',           icon: CalendarCheck,  to: '/plan' },
       { label: 'Transactions',   icon: Receipt,        to: '/transactions' },
       { label: 'Accounts',       icon: WalletCards,    to: '/accounts' },
-      { label: 'Reflect',        icon: ChartPie,       to: '/reflect' },
+      { label: 'Reflect',        icon: ChartPie,       to: '/?tab=reflect' },
       { label: 'Settings',       icon: Settings,       to: '/settings' },
-      { label: 'Categories',     icon: FolderOpen,     to: '/categories' },
+      { label: 'Manage Plan',    icon: SlidersHorizontal, to: '/manage-plan' },
     ],
   },
   {
@@ -57,7 +57,7 @@ const COMMANDS = [
       {
         label: 'Edit This Month\'s Plan',
         icon: PencilLine,
-        to: `/edit-plan?month=${format(new Date(), 'yyyy-MM')}`,
+        to: `/manage-plan?tab=monthly-plan&month=${format(new Date(), 'yyyy-MM')}`, 
       },
     ],
   },
