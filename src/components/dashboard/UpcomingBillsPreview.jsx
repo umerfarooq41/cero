@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { isSameMonth, parseISO } from 'date-fns';
 import {
   ArrowDownLeft,
   ArrowLeftRight,
@@ -41,45 +40,6 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
-function getTransactionRecurringRuleId(transaction) {
-  return (
-    transaction?.recurring_transaction_id ||
-    transaction?.recurring_rule_id ||
-    transaction?.source_id ||
-    null
-  );
-}
-
-function hasPostedCurrentOccurrence(rule, transactions = []) {
-  if (!rule?.id || !rule?.next_due_date) return false;
-
-  let dueDate;
-  try {
-    dueDate = parseISO(rule.next_due_date);
-  } catch {
-    return false;
-  }
-
-  return transactions.some((transaction) => {
-    const linkedRuleId = getTransactionRecurringRuleId(transaction);
-    const sourceType = String(transaction?.source_type || '').toLowerCase();
-    const isRecurringSource =
-      linkedRuleId === rule.id &&
-      (!sourceType ||
-        sourceType === 'recurring' ||
-        sourceType === 'recurring_transaction' ||
-        Boolean(transaction?.recurring_transaction_id));
-
-    if (!isRecurringSource || !transaction?.date) return false;
-
-    try {
-      return isSameMonth(parseISO(transaction.date), dueDate);
-    } catch {
-      return false;
-    }
-  });
-}
-
 function RuleAmount({ rule, formatCurrency }) {
   const amount = Math.abs(Number(rule.amount || 0));
 
@@ -100,6 +60,31 @@ function RuleAmount({ rule, formatCurrency }) {
   );
 }
 
+
+function getMonthKey(value) {
+  if (!value) return null;
+  return String(value).slice(0, 7);
+}
+
+function hasPostedTransactionForDueMonth(rule, transactions = []) {
+  const dueMonth = getMonthKey(rule.next_due_date);
+  if (!dueMonth) return false;
+
+  return transactions.some((transaction) => {
+    const transactionMonth = getMonthKey(
+      transaction.recurring_posted_for_date || transaction.date
+    );
+
+    if (transactionMonth !== dueMonth) return false;
+
+    return (
+      transaction.recurring_transaction_id === rule.id ||
+      transaction.source_id === rule.id ||
+      transaction.recurring_id === rule.id
+    );
+  });
+}
+
 export default function UpcomingBillsPreview({
   recurringTransactions = [],
   accounts = [],
@@ -111,24 +96,24 @@ export default function UpcomingBillsPreview({
 }) {
   const previewRules = sortRecurringByDueDate(recurringTransactions)
     .filter((rule) => rule.is_active !== false)
-    .filter((rule) => !hasPostedCurrentOccurrence(rule, transactions))
+    .filter((rule) => !hasPostedTransactionForDueMonth(rule, transactions))
     .slice(0, limit);
 
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5',
+        'min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
         className
       )}
     >
-      <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <CalendarClock className="h-4 w-4" />
             </span>
-            <div>
-              <h2 className="text-sm font-bold tracking-tight text-foreground md:text-base">
+            <div className="min-w-0">
+              <h2 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
                 Upcoming bills
               </h2>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -138,7 +123,7 @@ export default function UpcomingBillsPreview({
           </div>
         </div>
 
-        <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 text-xs">
+        <Button asChild variant="ghost" size="sm" className="shrink-0 self-start gap-1 text-xs">
           <Link to="/transactions?tab=scheduled">
             View Scheduled
             <ArrowRight className="h-3.5 w-3.5" />
@@ -170,7 +155,7 @@ export default function UpcomingBillsPreview({
                 key={rule.id}
                 className="rounded-2xl border border-border/60 bg-background/35 p-3"
               >
-                <div className="flex items-start gap-3">
+                <div className="flex min-w-0 items-start gap-3">
                   <span
                     className={cn(
                       'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl',
@@ -186,7 +171,7 @@ export default function UpcomingBillsPreview({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-sm font-bold text-foreground">{rule.name}</p>
+                      <p className="min-w-0 break-words text-sm font-bold leading-5 text-foreground">{rule.name}</p>
                       <Badge
                         variant="outline"
                         className={cn('rounded-full px-2 py-0 text-[10px]', getStatusClass(status))}
@@ -199,14 +184,18 @@ export default function UpcomingBillsPreview({
                       {getRecurringFrequencyLabel(rule.frequency)} · Due {formatRecurringDate(rule.next_due_date)}
                     </p>
 
-                    <p className="text-xs leading-5 text-muted-foreground/85">
+                    <p className="break-words text-xs leading-5 text-muted-foreground/85">
                       {rule.type === 'transfer'
                         ? `${account?.name || 'Account'} → ${toAccount?.name || 'Account'}`
                         : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
                     </p>
+
+                    <div className="mt-2 sm:hidden">
+                      <RuleAmount rule={rule} formatCurrency={formatCurrency} />
+                    </div>
                   </div>
 
-                  <div className="shrink-0 text-right">
+                  <div className="hidden shrink-0 text-right sm:block">
                     <RuleAmount rule={rule} formatCurrency={formatCurrency} />
                   </div>
                 </div>
