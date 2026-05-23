@@ -78,8 +78,11 @@ async function reverseGoalProgress(transaction, savingsGoals = []) {
     const goal = savingsGoals.find((item) => item.id === goalId);
 
     if (goal) {
+      const startingAmount = Math.max(0, Number(goal.starting_amount ?? 0));
+      const currentAmount = Math.max(0, Number(goal.current_amount || 0));
+
       await savingsGoalsApi.update(goalId, {
-        current_amount: Math.max(0, Number(goal.current_amount || 0) - amount),
+        current_amount: Math.max(startingAmount, currentAmount - amount),
       });
     }
   }
