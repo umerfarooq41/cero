@@ -37,13 +37,15 @@ import {
   useAccounts,
   useAllTransactions,
   useCategories,
+  useSavingsGoals,
 } from '@/hooks/useBudgetData';
 
 import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { accountsApi, transactionsApi } from '@/lib/budgetData';
+import { accountsApi } from '@/lib/budgetData';
+import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -123,6 +125,7 @@ export default function AccountDetail() {
   const { data: accounts = [] } = useAccounts();
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: categories = [] } = useCategories();
+  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [replacementAccountId, setReplacementAccountId] = useState('');
@@ -139,11 +142,26 @@ export default function AccountDetail() {
   const replacementAccounts = accounts.filter((a) => a.id !== accountId);
 
   const handleDeleteTransaction = async (id) => {
+    const transaction = allTransactions.find((item) => item.id === id);
+
+    if (!transaction) {
+      toast.error('Transaction not found');
+      return;
+    }
+
     try {
-      await transactionsApi.delete(id);
+      await deleteTransactionWithEffects({
+        transaction,
+        accounts,
+        savingsGoals,
+      });
 
       queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
 
       toast.success('Transaction deleted');
     } catch (error) {
