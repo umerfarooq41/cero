@@ -177,7 +177,7 @@ function getGoalTrackState(goal) {
   return { label: 'Behind pace', tone: 'warning' };
 }
 
-function GoalProgressAnalysis({ goals, goalTransactions, currency }) {
+function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = false }) {
   const activeGoals = Array.isArray(goals) ? goals : [];
   const safeGoalTransactions = Array.isArray(goalTransactions) ? goalTransactions : [];
 
@@ -533,6 +533,7 @@ export default function ReflectDeepAnalysis({
       </div>
 
       <GoalProgressAnalysis
+        isYear={isYear}
         goals={goals}
         goalTransactions={goalTransactions}
         currency={currency}
