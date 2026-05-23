@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CalendarClock, Clock3 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
@@ -42,9 +42,19 @@ function TransactionsSegmentedControl({ value, onChange }) {
   );
 }
 
+const validTabs = new Set(['history', 'scheduled']);
+
 export default function Transactions() {
   const scope = usePageEntrance();
-  const [activeTab, setActiveTab] = useState('history');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const activeTab = validTabs.has(requestedTab) ? requestedTab : 'history';
+
+  const handleTabChange = (nextTab) => {
+    setSearchParams(nextTab === 'scheduled' ? { tab: 'scheduled' } : {}, {
+      replace: true,
+    });
+  };
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
@@ -58,7 +68,7 @@ export default function Transactions() {
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
-        <TransactionsSegmentedControl value={activeTab} onChange={setActiveTab} />
+        <TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} />
 
         {activeTab === 'history' ? (
           <TransactionHistory />
