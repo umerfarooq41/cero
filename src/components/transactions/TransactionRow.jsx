@@ -128,7 +128,7 @@ export default function TransactionRow({
   const accountName = account?.name || 'Account';
   const transactionTypeLabel = formatTransactionType(transaction.type);
   const transferTypeLabel = getTransferType(account, toAccount);
-  const transferTitle = [accountName, toAccount?.name].filter(Boolean).join(' to ');
+  const transferTitle = [accountName, toAccount?.name].filter(Boolean).join(' → ');
   const transferCategoryName = isGoalContribution
     ? getGoalName(transaction, category)
     : category?.name || cleanGeneratedNote(transaction.note) || transferTypeLabel || 'Transfer';
