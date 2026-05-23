@@ -259,9 +259,6 @@ export default function AddTransaction() {
     queryClient.invalidateQueries({ queryKey: ['transactions'] });
     queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
     queryClient.invalidateQueries({ queryKey: ['accounts'] });
-    queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-    queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
-    queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
   };
 
   const handleSubmit = async () => {
@@ -381,6 +378,8 @@ export default function AddTransaction() {
       });
 
       refreshData();
+      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
 
       toast.success('Transaction deleted');
       navigate('/transactions');
