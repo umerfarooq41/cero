@@ -26,6 +26,7 @@ import {
   useAllocations,
   useBudgetSummary,
   useCategories,
+  useTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
@@ -133,6 +134,33 @@ function getAllocationSourceType(allocation) {
     allocation?.item_type ||
     allocation?.plan_item_type ||
     'category'
+  );
+}
+
+function normalizeSourceType(value) {
+  const sourceType = String(value || 'category').toLowerCase();
+
+  if (sourceType === 'savings_goal') return 'goal';
+  if (sourceType === 'recurring_transaction') return 'recurring';
+
+  return sourceType;
+}
+
+function getTransactionAmount(transaction) {
+  return Math.max(0, Number(transaction?.amount || 0));
+}
+
+function getTransactionGoalId(transaction) {
+  return transaction?.savings_goal_id || transaction?.goal_id || null;
+}
+
+function isSourceLinkedTransaction(transaction) {
+  return Boolean(
+    transaction?.recurring_transaction_id ||
+      transaction?.recurring_posted_for_date ||
+      transaction?.savings_goal_id ||
+      transaction?.goal_id ||
+      transaction?.goal_contribution_id
   );
 }
 
@@ -270,13 +298,59 @@ function PlanOverview({
   budget,
   currency,
   allocations,
+  transactions,
 }) {
   const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
+
+  const sourceAllocationByCategory = useMemo(() => {
+    const result = new Map();
+
+    allocations.forEach((allocation) => {
+      const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+
+      if (sourceType === 'category' || !allocation.category_id) return;
+      result.set(allocation.category_id, { ...allocation, sourceType });
+    });
+
+    return result;
+  }, [allocations]);
+
+  const getTrackedForSource = (sourceType, sourceId, categoryId) => {
+    const normalizedSourceType = normalizeSourceType(sourceType);
+
+    return transactions.reduce((sum, transaction) => {
+      if (normalizedSourceType === 'goal') {
+        return getTransactionGoalId(transaction) === sourceId
+          ? sum + getTransactionAmount(transaction)
+          : sum;
+      }
+
+      if (normalizedSourceType === 'recurring') {
+        const matchesRule = sourceId && transaction.recurring_transaction_id === sourceId;
+        const matchesCategoryGroup =
+          categoryId &&
+          transaction.category_id === categoryId &&
+          Boolean(transaction.recurring_transaction_id || transaction.recurring_posted_for_date);
+
+        return matchesRule || matchesCategoryGroup
+          ? sum + getTransactionAmount(transaction)
+          : sum;
+      }
+
+      return sum;
+    }, 0);
+  };
+
+  const getTrackedForCategory = (categoryId) => {
+    return transactions
+      .filter((transaction) => transaction.category_id === categoryId && !isSourceLinkedTransaction(transaction))
+      .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
+  };
 
   const extraPlanRows = useMemo(() => {
     return allocations
       .filter((allocation) => {
-        const sourceType = getAllocationSourceType(allocation);
+        const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
 
         return (
           sourceType !== 'category' &&
@@ -286,7 +360,7 @@ function PlanOverview({
       })
       .map((allocation, index) => {
         const planned = Number(allocation.planned_amount || 0);
-        const sourceType = getAllocationSourceType(allocation);
+        const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
 
         return {
           id: `${sourceType}:${allocation.source_id || allocation.id}`,
@@ -294,8 +368,8 @@ function PlanOverview({
             allocation.label ||
             (sourceType === 'goal' ? 'Savings goal' : 'Recurring item'),
           planned,
-          tracked: 0,
-          remaining: planned,
+          tracked: getTrackedForSource(sourceType, allocation.source_id, allocation.category_id),
+          remaining: planned - getTrackedForSource(sourceType, allocation.source_id, allocation.category_id),
           color:
             allocation.color ||
             tab.shades[(index + 3) % tab.shades.length] ||
@@ -305,7 +379,7 @@ function PlanOverview({
         };
       })
       .filter((item) => item.planned > 0);
-  }, [activeTab, allocations, tab]);
+  }, [activeTab, allocations, tab, transactions]);
 
   const sectionCategories = categories.filter(
     (category) => getCategoryType(category, categories) === activeTab && !category.parent_id
@@ -326,25 +400,30 @@ function PlanOverview({
             )
           : Number(budget.getCategoryPlanned(category.id) || 0);
 
-      const tracked =
-        childCategories.length > 0
+      const sourceAllocation = sourceAllocationByCategory.get(category.id);
+      const sourceType = sourceAllocation?.sourceType || null;
+      const sourceId = sourceAllocation?.source_id || null;
+
+      const tracked = sourceType
+        ? getTrackedForSource(sourceType, sourceId, category.id)
+        : childCategories.length > 0
           ? childCategories.reduce(
-              (sum, child) =>
-                sum + Number(budget.getCategorySpent(child.id) || 0),
+              (sum, child) => sum + getTrackedForCategory(child.id),
               0
             )
-          : Number(budget.getCategorySpent(category.id) || 0);
+          : getTrackedForCategory(category.id);
 
       return {
         id: category.id,
-        name: category.name,
+        name: sourceAllocation?.label || category.name,
         category,
         planned,
         tracked,
         remaining: planned - tracked,
-        color: tab.shades[index % tab.shades.length],
+        color: sourceAllocation?.color || tab.shades[index % tab.shades.length],
         categoryColor: category.color,
-        icon: category.icon,
+        icon: sourceAllocation?.icon || category.icon,
+        sourceType,
       };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
@@ -569,6 +648,7 @@ export default function Plan() {
   const budget = useBudgetSummary(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
+  const { data: transactions = [] } = useTransactions(currentMonth);
 
   const allSubs = useMemo(
     () => categories.filter((category) => category.parent_id),
@@ -586,7 +666,7 @@ export default function Plan() {
     allocations.forEach((allocation) => {
       const sourceType = getAllocationSourceType(allocation);
 
-      if (sourceType === 'category' || allocation.category_id) return;
+      if (normalizeSourceType(sourceType) === 'category' || allocation.category_id) return;
 
       const type = normalizeType(allocation.budget_type);
       totals[type] += Number(allocation.planned_amount || 0);
@@ -667,6 +747,7 @@ export default function Plan() {
             budget={budget}
             currency={currency}
             allocations={allocations}
+            transactions={transactions}
           />
         </div>
       </main>
