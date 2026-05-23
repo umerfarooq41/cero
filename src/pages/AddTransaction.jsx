@@ -37,12 +37,14 @@ import {
 
 import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
+import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
 import { toast } from 'sonner';
 
 import {
   useCategories,
   useAccounts,
   useAllTransactions,
+  useSavingsGoals,
 } from '@/hooks/useBudgetData';
 
 import { useCurrency } from '@/hooks/useCurrency';
@@ -156,6 +158,7 @@ export default function AddTransaction() {
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: allTransactions = [] } = useAllTransactions();
+  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const existingTransaction = allTransactions.find((t) => t.id === id);
   const currency = useCurrency();
@@ -256,6 +259,9 @@ export default function AddTransaction() {
     queryClient.invalidateQueries({ queryKey: ['transactions'] });
     queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
     queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+    queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
+    queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
   };
 
   const handleSubmit = async () => {
@@ -368,21 +374,11 @@ export default function AddTransaction() {
     setSaving(true);
 
     try {
-      const oldDeltas = getTransactionDeltas(existingTransaction, accounts);
-
-      const balanceUpdates = Object.keys(oldDeltas).map((changedAccountId) => {
-        const account = accounts.find((a) => a.id === changedAccountId);
-
-        if (!account) return Promise.resolve();
-
-        return accountsApi.update(changedAccountId, {
-          balance: (Number(account.balance) || 0) - oldDeltas[changedAccountId],
-        });
+      await deleteTransactionWithEffects({
+        transaction: existingTransaction,
+        accounts,
+        savingsGoals,
       });
-
-      await Promise.all(balanceUpdates);
-
-      await transactionsApi.delete(id);
 
       refreshData();
 
