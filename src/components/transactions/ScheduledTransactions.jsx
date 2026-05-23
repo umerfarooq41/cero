@@ -199,7 +199,7 @@ function sumGoalContributionsByGoal(rows = []) {
 
 function sumGoalTransactionsByGoal(rows = []) {
   return rows.reduce((totals, row) => {
-    const goalId = row?.savings_goal_id || null;
+    const goalId = row?.savings_goal_id || row?.goal_id || null;
     if (!goalId || row?.type !== 'transfer') return totals;
 
     totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(row?.amount || 0));
@@ -207,11 +207,10 @@ function sumGoalTransactionsByGoal(rows = []) {
   }, {});
 }
 
-
-function sumRecurringTransfersByRule(rows = []) {
+function sumRecurringPostedByRule(rows = []) {
   return rows.reduce((totals, row) => {
     const ruleId = row?.recurring_transaction_id || null;
-    if (!ruleId || row?.type !== 'transfer') return totals;
+    if (!ruleId) return totals;
 
     totals[ruleId] = (totals[ruleId] || 0) + Math.max(0, Number(row?.amount || 0));
     return totals;
@@ -454,11 +453,15 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
   const isCompleted = remaining <= 0 || progress >= 100;
   const statusLabel = status.key === 'due' ? 'Target passed' : status.label;
   const missingAccounts = !fromAccount || !toAccount;
-  const plannedThisMonth = Number(goal.month_planned_amount || 0);
+  const plannedAmountRaw = goal.month_planned_amount;
+  const plannedThisMonth = Number(plannedAmountRaw || 0);
+  const hasMonthlyPlan = plannedAmountRaw !== null && plannedThisMonth > 0;
   const contributedThisMonth = Number(goal.month_contributed_amount || 0);
-  const monthRemaining = Math.max(0, plannedThisMonth - contributedThisMonth);
-  const hasPostedThisMonth = contributedThisMonth > 0;
-  const isMonthDone = !isCompleted && plannedThisMonth > 0 && monthRemaining <= 0;
+  const monthRemaining = hasMonthlyPlan
+    ? Math.max(0, plannedThisMonth - contributedThisMonth)
+    : null;
+  const hasPostedThisMonth = hasMonthlyPlan && contributedThisMonth > 0;
+  const isMonthDone = !isCompleted && hasMonthlyPlan && monthRemaining <= 0;
   const displayAmount = isMonthDone ? plannedThisMonth : monthRemaining;
 
   return (
@@ -483,7 +486,7 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
         <div className="text-sm font-semibold tabular-nums text-foreground">
           {isCompleted
             ? 'Completed'
-            : plannedThisMonth === null
+            : !hasMonthlyPlan
               ? 'Set target'
               : formatCurrencyElement(displayAmount, currency)}
         </div>
@@ -491,10 +494,18 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
         <Button
           size="sm"
           onClick={() => onContribute(goal)}
-          disabled={isCompleted || missingAccounts || saving}
+          disabled={isCompleted || missingAccounts || !hasMonthlyPlan || saving}
           className="h-7 rounded-xl px-3 text-xs"
         >
-          {saving ? 'Saving…' : isCompleted ? 'Done' : hasPostedThisMonth ? 'Add extra' : 'Contribute'}
+          {saving
+            ? 'Saving…'
+            : isCompleted
+              ? 'Done'
+              : !hasMonthlyPlan
+                ? 'Set target'
+                : isMonthDone
+                  ? 'Add extra'
+                  : 'Contribute'}
         </Button>
       </div>
     </div>
@@ -599,11 +610,12 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
   const suggestedAmount = useMemo(() => {
     if (!goal) return '';
 
-    const monthRemaining = Number(goal.month_remaining_amount || 0);
+    const remainingThisMonth = Number(goal.month_remaining_amount || 0);
+    if (remainingThisMonth > 0) return String(remainingThisMonth);
 
-    if (monthRemaining > 0) {
-      return String(monthRemaining);
-    }
+    const plannedThisMonth = Number(goal.month_planned_amount || 0);
+    const contributedThisMonth = Number(goal.month_contributed_amount || 0);
+    if (plannedThisMonth > 0 && contributedThisMonth <= 0) return String(plannedThisMonth);
 
     return '';
   }, [goal]);
@@ -628,7 +640,7 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg rounded-3xl border-border/60 bg-card/95 backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle>{suggestedAmount ? `Contribute to ${goal.name}` : `Add extra to ${goal.name}`}</DialogTitle>
+          <DialogTitle>Contribute to {goal.name}</DialogTitle>
           <DialogDescription>
             This creates a transfer from the saved checking account to the saved savings account.
           </DialogDescription>
@@ -693,7 +705,7 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
             onClick={() => onSubmit({ amount: Number(amount || 0), date, note })}
             disabled={saving || !fromAccount || !toAccount}
           >
-            {saving ? 'Saving...' : suggestedAmount ? 'Contribute' : 'Add extra'}
+            {saving ? 'Contributing...' : 'Contribute'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -718,7 +730,7 @@ export default function ScheduledTransactions() {
   const [selectedRecurringPayment, setSelectedRecurringPayment] = useState(null);
 
   const recurringPaymentsByRule = useMemo(
-    () => sumRecurringTransfersByRule(monthTransactions),
+    () => sumRecurringPostedByRule(monthTransactions),
     [monthTransactions]
   );
 
@@ -732,13 +744,17 @@ export default function ScheduledTransactions() {
             const plannedThisMonth = getRecurringMonthlyPlanAmount(rule, allocations);
             const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
 
+            const isFlexiblePayment = isFlexibleCreditCardDebt(rule, toAccount);
+
             return {
               ...rule,
               month_planned_amount: plannedThisMonth,
-              month_paid_amount: isFlexibleCreditCardDebt(rule, toAccount) ? paidThisMonth : 0,
-              month_remaining_amount: isFlexibleCreditCardDebt(rule, toAccount)
+              month_paid_amount: paidThisMonth,
+              month_remaining_amount: isFlexiblePayment
                 ? Math.max(0, Number(plannedThisMonth || 0) - paidThisMonth)
                 : null,
+              is_flexible_payment: isFlexiblePayment,
+              is_month_done: paidThisMonth > 0,
             };
           })
       ),
@@ -762,10 +778,10 @@ export default function ScheduledTransactions() {
             };
             const plannedThisMonth = getGoalMonthlyPlanAmount(goalWithProgress, allocations);
             const contributedThisMonth = monthContributionsByGoal[goal.id] || 0;
-            const monthRemainingAmount =
-              plannedThisMonth === null
-                ? null
-                : Math.max(0, Number(plannedThisMonth || 0) - contributedThisMonth);
+            const hasMonthlyPlan = plannedThisMonth !== null && Number(plannedThisMonth || 0) > 0;
+            const monthRemainingAmount = hasMonthlyPlan
+              ? Math.max(0, Number(plannedThisMonth || 0) - contributedThisMonth)
+              : null;
 
             return {
               ...goalWithProgress,
@@ -987,12 +1003,12 @@ export default function ScheduledTransactions() {
       const transaction = await transactionsApi.create(transactionPayload);
       await updateAccountBalances(transactionPayload);
 
-      await savingsGoalsApi.update(selectedGoal.id, {
-        current_amount: Math.max(0, Number(selectedGoal.current_amount || 0)) + Number(amount || 0),
-      });
-
       await goalContributionsApi.update(contribution.id, {
         transaction_id: transaction.id,
+      });
+
+      await savingsGoalsApi.update(selectedGoal.id, {
+        current_amount: Math.max(0, Number(selectedGoal.current_amount || 0)) + Number(amount || 0),
       });
 
       invalidateData();
