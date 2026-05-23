@@ -173,6 +173,33 @@ function getRegularPlannedForCategoryFromAllocations(allocations, categoryId) {
     .reduce((sum, allocation) => sum + Number(allocation.planned_amount || 0), 0);
 }
 
+function getSourceLabel(allocation) {
+  return String(
+    allocation?.label ||
+      allocation?.name ||
+      allocation?.title ||
+      (normalizeSourceType(getAllocationSourceType(allocation)) === 'goal'
+        ? 'Savings goal'
+        : 'Recurring item')
+  ).trim();
+}
+
+function normalizeSourceLabel(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function getSourceFallbackKey(allocation) {
+  const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+  const type = normalizeType(allocation?.budget_type);
+  const label = normalizeSourceLabel(getSourceLabel(allocation));
+  const amount = Number(allocation?.planned_amount || 0).toFixed(2);
+
+  return `${sourceType}:${type}:${label}:${amount}`;
+}
+
 function getSourceRowKey(allocation) {
   const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
 
@@ -180,36 +207,62 @@ function getSourceRowKey(allocation) {
     return `${sourceType}:${allocation.source_id}`;
   }
 
-  return [
-    sourceType,
-    allocation.category_id || 'no-category',
-    allocation.budget_type || 'no-type',
-    allocation.label || allocation.id,
-  ].join(':');
+  return getSourceFallbackKey(allocation);
+}
+
+function pickBetterSourceAllocation(current, next) {
+  if (!current) return next;
+  if (!next) return current;
+
+  if (!current.source_id && next.source_id) return next;
+  if (current.source_id && !next.source_id) return current;
+
+  const currentAmount = Number(current.planned_amount || 0);
+  const nextAmount = Number(next.planned_amount || 0);
+
+  if (nextAmount !== currentAmount) {
+    return nextAmount > currentAmount ? next : current;
+  }
+
+  const currentMetadataScore = [current.label, current.icon, current.color].filter(Boolean).length;
+  const nextMetadataScore = [next.label, next.icon, next.color].filter(Boolean).length;
+
+  return nextMetadataScore >= currentMetadataScore ? next : current;
 }
 
 function dedupeSourceAllocations(allocations = []) {
-  const rows = new Map();
+  const rowsByKey = new Map();
+  const keyAliases = new Map();
 
   allocations.forEach((allocation) => {
     const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
     if (sourceType === 'category') return;
 
-    const key = getSourceRowKey(allocation);
-    const existing = rows.get(key);
+    const strongKey = allocation.source_id ? `${sourceType}:${allocation.source_id}` : null;
+    const fallbackKey = getSourceFallbackKey(allocation);
+    const existingKey =
+      (strongKey && keyAliases.get(strongKey)) ||
+      keyAliases.get(fallbackKey) ||
+      strongKey ||
+      fallbackKey;
 
-    if (!existing) {
-      rows.set(key, allocation);
-      return;
+    const existing = rowsByKey.get(existingKey);
+    const selected = pickBetterSourceAllocation(existing, allocation);
+    const selectedKey = selected?.source_id
+      ? `${sourceType}:${selected.source_id}`
+      : existingKey;
+
+    if (selectedKey !== existingKey && rowsByKey.has(existingKey)) {
+      rowsByKey.delete(existingKey);
     }
 
-    const existingAmount = Number(existing.planned_amount || 0);
-    const nextAmount = Number(allocation.planned_amount || 0);
+    rowsByKey.set(selectedKey, selected);
 
-    rows.set(key, nextAmount >= existingAmount ? allocation : existing);
+    if (strongKey) keyAliases.set(strongKey, selectedKey);
+    keyAliases.set(fallbackKey, selectedKey);
   });
 
-  return Array.from(rows.values());
+  return Array.from(rowsByKey.values());
 }
 
 function Money({ amount, currency, compact = false, className = '' }) {
@@ -408,9 +461,7 @@ function PlanOverview({
 
         return {
           id: getSourceRowKey(allocation),
-          name:
-            allocation.label ||
-            (sourceType === 'goal' ? 'Savings goal' : 'Recurring item'),
+          name: getSourceLabel(allocation),
           planned,
           tracked,
           remaining: planned - tracked,
@@ -732,6 +783,7 @@ export default function Plan() {
 
     return totals;
   }, [allocations, categories]);
+
 
   const leftToAllocate =
     plannedTotals.income -
