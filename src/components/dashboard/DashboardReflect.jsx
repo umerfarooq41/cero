@@ -25,7 +25,6 @@ import {
   useAllTransactions,
   useBudgetSummary,
   useCategories,
-  useGoalContributions,
   useSavingsGoals,
   useUserSettings,
   useYearBudgetSummary,
@@ -306,7 +305,6 @@ export default function DashboardReflect() {
   const { data: accounts = [] } = useAccounts();
   const { data: settings = {} } = useUserSettings();
   const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: goalContributions = [] } = useGoalContributions();
 
   const isYearView = periodMode === 'year';
   const analysisMonth = isYearView ? 'all' : selectedMonth;
@@ -330,6 +328,7 @@ export default function DashboardReflect() {
 
   const {
     isYear,
+    periodTransactions,
     income,
     expenses,
     trackedSavings,
@@ -448,7 +447,7 @@ export default function DashboardReflect() {
             selectedYear={selectedYear}
             selectedMonth={isYear ? selectedMonth : analysisMonth}
             goals={savingsGoals}
-            goalContributions={goalContributions}
+            goalTransactions={periodTransactions}
             currency={currency}
           />
         </div>
