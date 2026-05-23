@@ -25,21 +25,19 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
         className
       )}
     >
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Target className="h-4 w-4" />
-            </span>
-            <div className="min-w-0">
-              <h2 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
-                Top goal progress
-              </h2>
-              <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-                Your highest-priority savings goal.
-              </p>
-            </div>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <Target className="h-4 w-4 shrink-0 text-muted-foreground" />
+
+            <h2 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground md:text-base">
+              Top goal progress
+            </h2>
           </div>
+
+          <p className="mt-1 text-left text-xs leading-5 text-muted-foreground">
+            Your highest-priority savings goal.
+          </p>
         </div>
 
         <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 px-2 text-xs">

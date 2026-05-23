@@ -30,21 +30,20 @@ const safeNumber = (value) => Number(value || 0);
 
 function SectionHeading({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-5 flex min-w-0 items-start gap-2">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Icon className="h-4 w-4" />
-      </span>
+    <div className="mb-5 min-w-0">
+      <div className="flex min-w-0 items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
-      <div className="min-w-0">
-        <h3 className="text-sm font-semibold leading-5 tracking-tight text-foreground">
+        <h3 className="min-w-0 text-sm font-semibold leading-5 tracking-tight text-foreground">
           {title}
         </h3>
-        {subtitle ? (
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {subtitle}
-          </p>
-        ) : null}
       </div>
+
+      {subtitle ? (
+        <p className="mt-1 text-left text-xs leading-5 text-muted-foreground">
+          {subtitle}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -122,11 +121,11 @@ function MiniMetric({ label, value, subtext, tone = 'default' }) {
           : 'text-foreground';
 
   return (
-    <div className="min-w-0 rounded-2xl border border-border/60 bg-muted/20 p-3">
+    <div className="rounded-2xl border border-border/60 bg-muted/20 p-3">
       <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
-      <div className={cn('mt-1 min-w-0 overflow-hidden text-sm font-bold tabular-nums', toneClass)}>
+      <div className={cn('mt-1 text-sm font-bold tabular-nums', toneClass)}>
         {value}
       </div>
       {subtext ? <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{subtext}</p> : null}
@@ -228,10 +227,9 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
           text="Create savings goals from Plan or Dashboard, then Reflect will show progress and pace analysis here."
         />
       ) : (
-        <div className="grid min-w-0 gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-          <div className="flex min-w-0 flex-col items-stretch gap-4 rounded-3xl bg-muted/20 p-4 sm:flex-row sm:items-center">
-            <div className="flex justify-center sm:block">
-              <ProgressRing value={stats.overallProgress}>
+        <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+          <div className="flex items-center gap-4 rounded-3xl bg-muted/20 p-4">
+            <ProgressRing value={stats.overallProgress}>
               <div>
                 <p className="text-lg font-bold leading-none tabular-nums">
                   {Math.round(clampPercent(stats.overallProgress))}%
@@ -241,7 +239,6 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                 </p>
               </div>
             </ProgressRing>
-            </div>
 
             <div className="min-w-0 flex-1 space-y-2">
               <MiniMetric
@@ -250,7 +247,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                 subtext={`Target ${formatCurrencyText(stats.totalTarget, currency)}`}
                 tone="good"
               />
-              <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <MiniMetric
                   label={isYear ? 'Contributed this year' : 'Contributed this month'}
                   value={<Money value={stats.periodContribution} currency={currency} />}
@@ -271,11 +268,11 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
               const monthlyRequired = getMonthlyRequiredSaving(goal);
 
               return (
-                <div key={goal.id} className="min-w-0 rounded-2xl border border-border/60 bg-card/60 p-3">
-                  <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div key={goal.id} className="rounded-2xl border border-border/60 bg-card/60 p-3">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-foreground">{goal.name}</p>
-                      <p className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 text-xs text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         <Money value={goal.current_amount} currency={currency} /> of{' '}
                         <Money value={goal.target_amount} currency={currency} />
                       </p>
@@ -283,7 +280,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
 
                     <span
                       className={cn(
-                        'w-fit shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                        'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold',
                         track.tone === 'good'
                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                           : track.tone === 'warning'
@@ -302,7 +299,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                     />
                   </div>
 
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
                     <span>{Math.round(progress)}% complete</span>
                     <span>
                       {monthlyRequired === null ? 'No deadline' : `${formatCurrencyText(monthlyRequired, currency)}/mo`}
