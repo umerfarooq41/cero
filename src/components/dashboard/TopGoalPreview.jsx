@@ -24,7 +24,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
         className
       )}
     >
-      <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -41,7 +41,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
           </div>
         </div>
 
-        <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 text-xs">
+        <Button asChild variant="ghost" size="sm" className="w-fit shrink-0 gap-1 text-xs">
           <Link to="/transactions?tab=scheduled">
             View Scheduled
             <ArrowRight className="h-3.5 w-3.5" />
@@ -50,19 +50,19 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
       </div>
 
       {topGoal ? (
-        <div className="rounded-2xl border border-border/60 bg-background/35 p-4">
-          <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-4">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="truncate text-base font-bold tracking-tight text-foreground">
                 {topGoal.name}
               </p>
-              <p className="mt-1 text-sm font-semibold text-muted-foreground tabular-nums">
+              <p className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 text-sm font-semibold text-muted-foreground tabular-nums">
                 {formatCurrency(Number(topGoal.current_amount || 0))} /{' '}
                 {formatCurrency(Number(topGoal.target_amount || 0))}
               </p>
             </div>
 
-            <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary">
+            <span className="w-fit shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary">
               {getGoalProgress(topGoal)}% complete
             </span>
           </div>
@@ -74,7 +74,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
             />
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-border/50 bg-card/45 p-3">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Required monthly
