@@ -242,23 +242,24 @@ function buildReflectInsights({
     },
     {
       icon: PiggyBank,
-      title: `${periodLabel} Savings Rate`,
+      title: `${periodLabel} Savings & Debt Rate`,
       metric: hasIncome ? formatPercent(savingsRate) : 'No income',
       text: hasIncome ? (
         isYear ? (
           <>
-            Your savings rate is {formatPercent(savingsRate)}; this includes{' '}
+            Your savings and debt rate is {formatPercent(savingsRate)}; this includes{' '}
             <MoneyText amount={trackedSavings} currency={currency} /> saved and{' '}
             <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt.
           </>
         ) : (
           <>
-            Your savings rate is {formatPercent(savingsRate)} with{' '}
-            <MoneyText amount={netCashFlow} currency={currency} signed /> net cash flow for the selected month.
+            Your savings and debt rate is {formatPercent(savingsRate)}; this includes{' '}
+            <MoneyText amount={trackedSavings} currency={currency} /> saved and{' '}
+            <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt.
           </>
         )
       ) : (
-        `Add income transactions to calculate the ${periodName} savings rate and cash-flow margin.`
+        `Add income transactions to calculate the ${periodName} savings and debt allocation rate.`
       ),
       tone: hasIncome ? getToneFromSavingsRate(savingsRate) : 'info',
     },
