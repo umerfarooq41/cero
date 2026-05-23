@@ -51,7 +51,7 @@ import {
   sortGoalsByPriority,
 } from '@/lib/goals';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
-import { useAccounts } from '@/hooks/useBudgetData';
+import { useAccounts, useAllTransactions } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
 
 const COLORS = [
@@ -128,6 +128,21 @@ function isSavingsAccount(account) {
 function getAccountLabel(account) {
   const type = String(account?.type || 'account').replace(/_/g, ' ');
   return `${account?.name || 'Account'} · ${type}`;
+}
+
+function getGoalTransactionGoalId(transaction) {
+  return transaction?.savings_goal_id || transaction?.goal_id || null;
+}
+
+function sumPostedGoalTransactionsByGoal(transactions = []) {
+  return transactions.reduce((totals, transaction) => {
+    const goalId = getGoalTransactionGoalId(transaction);
+
+    if (!goalId || transaction?.type !== 'transfer') return totals;
+
+    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(transaction?.amount || 0));
+    return totals;
+  }, {});
 }
 
 function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
@@ -207,7 +222,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       setForm({
         name: editingGoal.name || '',
         target_amount: String(editingGoal.target_amount ?? ''),
-        current_amount: String(editingGoal.current_amount ?? ''),
+        current_amount: String(editingGoal.starting_amount ?? editingGoal.current_amount ?? ''),
         target_date: editingGoal.target_date || '',
         from_account_id: editingGoal.from_account_id || 'none',
         to_account_id: editingGoal.to_account_id || 'none',
@@ -278,6 +293,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
     onSave({
       name: form.name.trim(),
       target_amount: targetAmount,
+      starting_amount: currentAmount,
       current_amount: currentAmount,
       target_date: form.target_date || null,
       from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
@@ -606,12 +622,34 @@ export default function ManageGoalsPanel() {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
   const { data: accounts = [] } = useAccounts();
+  const { data: allTransactions = [] } = useAllTransactions();
 
   const { data: savingsGoals = [] } = useQuery({
     queryKey: ['manage-savings-goals'],
     queryFn: () => savingsGoalsApi.list(),
     initialData: [],
   });
+
+  const postedGoalTotals = useMemo(
+    () => sumPostedGoalTransactionsByGoal(allTransactions),
+    [allTransactions]
+  );
+
+  const normalizedGoals = useMemo(
+    () => savingsGoals.map((goal) => {
+      const postedTotal = Number(postedGoalTotals[goal.id] || 0);
+      const startingAmount = Math.max(
+        0,
+        Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - postedTotal))
+      );
+
+      return {
+        ...goal,
+        starting_amount: startingAmount,
+      };
+    }),
+    [postedGoalTotals, savingsGoals]
+  );
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
@@ -620,14 +658,14 @@ export default function ManageGoalsPanel() {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const groupedGoals = useMemo(() => {
-    const sortedGoals = sortGoalsByPriority(savingsGoals);
+    const sortedGoals = sortGoalsByPriority(normalizedGoals);
 
     return {
       active: sortedGoals.filter((goal) => !goal.is_archived && getGoalRemaining(goal) > 0),
       completed: sortedGoals.filter((goal) => !goal.is_archived && getGoalRemaining(goal) <= 0),
       archived: sortedGoals.filter((goal) => goal.is_archived),
     };
-  }, [savingsGoals]);
+  }, [normalizedGoals]);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['manage-savings-goals'] });
@@ -644,10 +682,18 @@ export default function ManageGoalsPanel() {
 
     try {
       if (editingGoal?.id) {
-        await savingsGoalsApi.update(editingGoal.id, payload);
+        const postedTotal = Number(postedGoalTotals[editingGoal.id] || 0);
+
+        await savingsGoalsApi.update(editingGoal.id, {
+          ...payload,
+          current_amount: Number(payload.starting_amount || 0) + postedTotal,
+        });
         toast.success('Savings goal updated');
       } else {
-        await savingsGoalsApi.create(payload);
+        await savingsGoalsApi.create({
+          ...payload,
+          current_amount: Number(payload.starting_amount || 0),
+        });
         toast.success('Savings goal created');
       }
 
