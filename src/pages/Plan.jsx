@@ -154,22 +154,13 @@ function getTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
-function hasRecurringMarker(transaction) {
+function isSourceLinkedTransaction(transaction) {
   return Boolean(
     transaction?.recurring_transaction_id ||
       transaction?.recurring_posted_for_date ||
-      transaction?.source_type === 'recurring'
-  );
-}
-
-function isSourceLinkedTransaction(transaction) {
-  return Boolean(
-    hasRecurringMarker(transaction) ||
       transaction?.savings_goal_id ||
       transaction?.goal_id ||
-      transaction?.goal_contribution_id ||
-      transaction?.source_type === 'goal' ||
-      transaction?.source_type === 'savings_goal'
+      transaction?.goal_contribution_id
   );
 }
 
@@ -182,121 +173,69 @@ function getRegularPlannedForCategoryFromAllocations(allocations, categoryId) {
     .reduce((sum, allocation) => sum + Number(allocation.planned_amount || 0), 0);
 }
 
-function getSourceLabel(allocation) {
-  return String(
-    allocation?.label ||
-      allocation?.name ||
-      allocation?.description ||
-      allocation?.source_name ||
-      ''
-  )
+function getNormalizedText(value) {
+  return String(value || '')
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
 }
 
-function getSourceFingerprint(allocation) {
+function getSourceNaturalKey(allocation) {
   const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
-  const amount = Number(allocation?.planned_amount || 0);
-  const budgetType = normalizeType(allocation?.budget_type);
-  const categoryId = allocation?.category_id || 'no-category';
-  const label = getSourceLabel(allocation) || allocation?.source_id || allocation?.id || 'source';
+  const type = normalizeType(allocation.budget_type);
+  const label = getNormalizedText(allocation.label || allocation.name);
+  const amount = Number(allocation.planned_amount || 0).toFixed(2);
 
-  return [sourceType, budgetType, categoryId, label, amount].join(':');
+  return `${sourceType}:${type}:${label}:${amount}`;
 }
 
 function getSourceRowKey(allocation) {
   const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+  const naturalKey = getSourceNaturalKey(allocation);
 
-  if (allocation.source_id) {
-    return `${sourceType}:${allocation.source_id}`;
-  }
-
-  return `fallback:${getSourceFingerprint(allocation)}`;
+  return allocation.source_id
+    ? `${naturalKey}:${allocation.source_id}`
+    : `${naturalKey}:fallback:${allocation.category_id || allocation.id || 'no-id'}`;
 }
 
-function isBetterSourceAllocation(next, existing) {
-  if (!existing) return true;
-  if (next?.source_id && !existing?.source_id) return true;
-  if (!next?.source_id && existing?.source_id) return false;
+function pickBetterSourceAllocation(current, next) {
+  if (!current) return next;
 
-  const nextAmount = Number(next?.planned_amount || 0);
-  const existingAmount = Number(existing?.planned_amount || 0);
+  const currentHasSourceId = Boolean(current.source_id);
+  const nextHasSourceId = Boolean(next.source_id);
 
-  return nextAmount >= existingAmount;
+  if (nextHasSourceId && !currentHasSourceId) return next;
+  if (currentHasSourceId && !nextHasSourceId) return current;
+
+  const currentHasCategory = Boolean(current.category_id);
+  const nextHasCategory = Boolean(next.category_id);
+
+  if (nextHasCategory && !currentHasCategory) return next;
+  if (currentHasCategory && !nextHasCategory) return current;
+
+  const currentAmount = Number(current.planned_amount || 0);
+  const nextAmount = Number(next.planned_amount || 0);
+
+  return nextAmount >= currentAmount ? next : current;
 }
 
 function dedupeSourceAllocations(allocations = []) {
-  const sourceRows = allocations.filter((allocation) => {
-    const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
-    return sourceType !== 'category';
-  });
-
-  const byId = new Map();
-  const byFingerprint = new Map();
-
-  sourceRows
-    .slice()
-    .sort((a, b) => Number(Boolean(b.source_id)) - Number(Boolean(a.source_id)))
-    .forEach((allocation) => {
-      const key = getSourceRowKey(allocation);
-      const fingerprint = getSourceFingerprint(allocation);
-
-      const existingById = byId.get(key);
-      const existingByFingerprint = byFingerprint.get(fingerprint);
-      const existing = existingById || existingByFingerprint;
-
-      if (!isBetterSourceAllocation(allocation, existing)) return;
-
-      if (existing) {
-        byId.delete(getSourceRowKey(existing));
-        byFingerprint.delete(getSourceFingerprint(existing));
-      }
-
-      byId.set(key, allocation);
-      byFingerprint.set(fingerprint, allocation);
-    });
-
-  return Array.from(byId.values());
-}
-
-function buildPlannedTotals({ allocations = [], categories = [] }) {
-  const totals = {
-    income: 0,
-    expense: 0,
-    savings: 0,
-    debt: 0,
-  };
-
-  const regularCategoryRows = new Map();
+  const byNaturalKey = new Map();
 
   allocations.forEach((allocation) => {
     const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
-    if (sourceType !== 'category') return;
+    if (sourceType === 'category') return;
 
-    const categoryId = allocation.category_id;
-    if (!categoryId) return;
+    const naturalKey = getSourceNaturalKey(allocation);
+    const existing = byNaturalKey.get(naturalKey);
 
-    const existing = regularCategoryRows.get(categoryId);
-    const amount = Number(allocation.planned_amount || 0);
-
-    regularCategoryRows.set(categoryId, existing ? existing + amount : amount);
+    byNaturalKey.set(
+      naturalKey,
+      pickBetterSourceAllocation(existing, allocation)
+    );
   });
 
-  regularCategoryRows.forEach((amount, categoryId) => {
-    const category = categories.find((item) => item.id === categoryId);
-    const type = getCategoryType(category, categories);
-
-    if (!type || !Object.prototype.hasOwnProperty.call(totals, type)) return;
-    totals[type] += amount;
-  });
-
-  dedupeSourceAllocations(allocations).forEach((allocation) => {
-    const type = normalizeType(allocation.budget_type);
-    if (!Object.prototype.hasOwnProperty.call(totals, type)) return;
-    totals[type] += Number(allocation.planned_amount || 0);
-  });
-
-  return totals;
+  return Array.from(byNaturalKey.values());
 }
 
 function Money({ amount, currency, compact = false, className = '' }) {
@@ -430,6 +369,7 @@ function PlanOverview({
   setActiveTab,
   categories,
   subcategories,
+  budget,
   currency,
   allocations,
   transactions,
@@ -453,12 +393,16 @@ function PlanOverview({
 
       if (normalizedSourceType === 'recurring') {
         const matchesRule = sourceId && transaction.recurring_transaction_id === sourceId;
-        const matchesCategory =
-          categoryId &&
-          transaction.category_id === categoryId &&
-          hasRecurringMarker(transaction);
+        const hasRecurringMarker = Boolean(
+          transaction.recurring_transaction_id ||
+            transaction.recurring_posted_for_date ||
+            transaction.source_type === 'recurring'
+        );
 
-        return matchesRule || matchesCategory
+        const matchesCategoryGroup =
+          categoryId && transaction.category_id === categoryId && hasRecurringMarker;
+
+        return matchesRule || matchesCategoryGroup
           ? sum + getTransactionAmount(transaction)
           : sum;
       }
@@ -777,10 +721,40 @@ export default function Plan() {
     [categories]
   );
 
-  const plannedTotals = useMemo(
-    () => buildPlannedTotals({ allocations, categories }),
-    [allocations, categories]
-  );
+  const plannedTotals = useMemo(() => {
+    const totals = {
+      income: 0,
+      expense: 0,
+      savings: 0,
+      debt: 0,
+    };
+
+    allocations.forEach((allocation) => {
+      const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+      if (sourceType !== 'category') return;
+
+      let type = allocation.budget_type ? normalizeType(allocation.budget_type) : null;
+
+      if (!type && allocation.category_id) {
+        const category = categories.find((item) => item.id === allocation.category_id);
+        type = getCategoryType(category, categories);
+      }
+
+      if (!type || !Object.prototype.hasOwnProperty.call(totals, type)) return;
+
+      totals[type] += Number(allocation.planned_amount || 0);
+    });
+
+    dedupeSourceAllocations(allocations).forEach((allocation) => {
+      const type = normalizeType(allocation.budget_type);
+      if (!Object.prototype.hasOwnProperty.call(totals, type)) return;
+
+      totals[type] += Number(allocation.planned_amount || 0);
+    });
+
+    return totals;
+  }, [allocations, categories]);
+
 
   const leftToAllocate =
     plannedTotals.income -
