@@ -30,7 +30,6 @@ import {
   useAccounts,
   useCategories,
   useAllocations,
-  useGoalContributions,
   useRecurringTransactions,
   useSavingsGoals,
   useTransactions,
@@ -40,6 +39,7 @@ import {
   accountsApi,
   goalContributionsApi,
   recurringTransactionsApi,
+  savingsGoalsApi,
   transactionsApi,
 } from '@/lib/budgetData';
 import {
@@ -598,9 +598,14 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
 function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, onSubmit, saving }) {
   const suggestedAmount = useMemo(() => {
     if (!goal) return '';
-    const monthly = getMonthlyRequiredSaving(goal);
-    const remaining = getGoalRemaining(goal);
-    return String(monthly || remaining || '');
+
+    const monthRemaining = Number(goal.month_remaining_amount || 0);
+
+    if (monthRemaining > 0) {
+      return String(monthRemaining);
+    }
+
+    return '';
   }, [goal]);
 
   const [amount, setAmount] = useState('');
@@ -623,7 +628,7 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg rounded-3xl border-border/60 bg-card/95 backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle>Contribute to {goal.name}</DialogTitle>
+          <DialogTitle>{suggestedAmount ? `Contribute to ${goal.name}` : `Add extra to ${goal.name}`}</DialogTitle>
           <DialogDescription>
             This creates a transfer from the saved checking account to the saved savings account.
           </DialogDescription>
@@ -688,7 +693,7 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
             onClick={() => onSubmit({ amount: Number(amount || 0), date, note })}
             disabled={saving || !fromAccount || !toAccount}
           >
-            {saving ? 'Contributing...' : 'Contribute'}
+            {saving ? 'Saving...' : suggestedAmount ? 'Contribute' : 'Add extra'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -704,7 +709,6 @@ export default function ScheduledTransactions() {
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
-  const { data: goalContributions = [] } = useGoalContributions();
   const { data: monthTransactions = [] } = useTransactions(currentMonth);
   const { data: allocations = [] } = useAllocations(currentMonth);
 
@@ -741,11 +745,6 @@ export default function ScheduledTransactions() {
     [accounts, allocations, recurringPaymentsByRule, recurringTransactions]
   );
 
-  const contributionTotalsByGoal = useMemo(
-    () => sumGoalContributionsByGoal(goalContributions),
-    [goalContributions]
-  );
-
   const monthContributionsByGoal = useMemo(
     () => sumGoalTransactionsByGoal(monthTransactions),
     [monthTransactions]
@@ -757,10 +756,9 @@ export default function ScheduledTransactions() {
         savingsGoals
           .filter((goal) => !goal.is_archived)
           .map((goal) => {
-            const contributedAmount = contributionTotalsByGoal[goal.id] || 0;
             const goalWithProgress = {
               ...goal,
-              current_amount: Math.max(0, Number(goal.current_amount || 0)) + contributedAmount,
+              current_amount: Math.max(0, Number(goal.current_amount || 0)),
             };
             const plannedThisMonth = getGoalMonthlyPlanAmount(goalWithProgress, allocations);
             const contributedThisMonth = monthContributionsByGoal[goal.id] || 0;
@@ -777,7 +775,7 @@ export default function ScheduledTransactions() {
             };
           })
       ),
-    [allocations, contributionTotalsByGoal, monthContributionsByGoal, savingsGoals]
+    [allocations, monthContributionsByGoal, savingsGoals]
   );
 
   const invalidateData = () => {
@@ -988,6 +986,10 @@ export default function ScheduledTransactions() {
 
       const transaction = await transactionsApi.create(transactionPayload);
       await updateAccountBalances(transactionPayload);
+
+      await savingsGoalsApi.update(selectedGoal.id, {
+        current_amount: Math.max(0, Number(selectedGoal.current_amount || 0)) + Number(amount || 0),
+      });
 
       await goalContributionsApi.update(contribution.id, {
         transaction_id: transaction.id,
