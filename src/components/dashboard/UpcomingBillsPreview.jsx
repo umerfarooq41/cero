@@ -18,6 +18,10 @@ import {
 } from '@/lib/recurringTransactions';
 import { cn } from '@/lib/utils';
 
+function getMonthKey(value) {
+  return String(value || '').slice(0, 7);
+}
+
 function getTypeIcon(type) {
   if (type === 'income') return ArrowDownLeft;
   if (type === 'transfer') return ArrowLeftRight;
@@ -40,13 +44,49 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
+function isRuleAlreadyPostedForDueMonth(rule, transactions = []) {
+  const dueMonth = getMonthKey(rule.next_due_date);
+  const ruleAmount = Math.abs(Number(rule.amount || 0));
+  const ruleName = String(rule.name || '').trim().toLowerCase();
+
+  return transactions.some((transaction) => {
+    const transactionMonth = getMonthKey(transaction.date);
+    const transactionAmount = Math.abs(Number(transaction.amount || 0));
+    const note = String(transaction.note || '').toLowerCase();
+
+    if (dueMonth && transactionMonth && dueMonth !== transactionMonth) return false;
+
+    if (transaction.recurring_transaction_id && transaction.recurring_transaction_id === rule.id) {
+      return true;
+    }
+
+    if (
+      transaction.recurring_posted_for_date &&
+      getMonthKey(transaction.recurring_posted_for_date) === dueMonth &&
+      (transaction.recurring_transaction_id === rule.id || note.includes(ruleName))
+    ) {
+      return true;
+    }
+
+    const likelySameRule =
+      transaction.type === rule.type &&
+      transaction.account_id === rule.account_id &&
+      (rule.type === 'transfer' ? transaction.to_account_id === rule.to_account_id : true) &&
+      (rule.category_id ? transaction.category_id === rule.category_id : true) &&
+      Math.abs(transactionAmount - ruleAmount) < 0.01 &&
+      (transaction.source_type === 'recurring' || note.includes('recurring') || note.includes(ruleName));
+
+    return likelySameRule;
+  });
+}
+
 function RuleAmount({ rule, formatCurrency }) {
   const amount = Math.abs(Number(rule.amount || 0));
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap text-sm font-bold tabular-nums',
+        'inline-flex max-w-[112px] items-center justify-end gap-0.5 overflow-hidden whitespace-nowrap text-[12px] font-bold tabular-nums sm:max-w-none sm:gap-1 sm:text-sm',
         rule.type === 'income'
           ? 'text-[hsl(var(--success))]'
           : rule.type === 'expense'
@@ -60,31 +100,6 @@ function RuleAmount({ rule, formatCurrency }) {
   );
 }
 
-
-function getMonthKey(value) {
-  if (!value) return null;
-  return String(value).slice(0, 7);
-}
-
-function hasPostedTransactionForDueMonth(rule, transactions = []) {
-  const dueMonth = getMonthKey(rule.next_due_date);
-  if (!dueMonth) return false;
-
-  return transactions.some((transaction) => {
-    const transactionMonth = getMonthKey(
-      transaction.recurring_posted_for_date || transaction.date
-    );
-
-    if (transactionMonth !== dueMonth) return false;
-
-    return (
-      transaction.recurring_transaction_id === rule.id ||
-      transaction.source_id === rule.id ||
-      transaction.recurring_id === rule.id
-    );
-  });
-}
-
 export default function UpcomingBillsPreview({
   recurringTransactions = [],
   accounts = [],
@@ -96,19 +111,19 @@ export default function UpcomingBillsPreview({
 }) {
   const previewRules = sortRecurringByDueDate(recurringTransactions)
     .filter((rule) => rule.is_active !== false)
-    .filter((rule) => !hasPostedTransactionForDueMonth(rule, transactions))
+    .filter((rule) => !isRuleAlreadyPostedForDueMonth(rule, transactions))
     .slice(0, limit);
 
   return (
     <section
       className={cn(
-        'min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
+        'rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5',
         className
       )}
     >
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <CalendarClock className="h-4 w-4" />
             </span>
@@ -116,16 +131,16 @@ export default function UpcomingBillsPreview({
               <h2 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
                 Upcoming bills
               </h2>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                 Compact preview of important recurring items.
               </p>
             </div>
           </div>
         </div>
 
-        <Button asChild variant="ghost" size="sm" className="shrink-0 self-start gap-1 text-xs">
+        <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 px-2 text-xs">
           <Link to="/transactions?tab=scheduled">
-            View Scheduled
+            Scheduled
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </Button>
@@ -153,12 +168,12 @@ export default function UpcomingBillsPreview({
             return (
               <div
                 key={rule.id}
-                className="rounded-2xl border border-border/60 bg-background/35 p-3"
+                className="rounded-2xl border border-border/60 bg-background/35 p-2.5 sm:p-3"
               >
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
                   <span
                     className={cn(
-                      'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl',
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl sm:h-9 sm:w-9',
                       rule.type === 'income'
                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                         : rule.type === 'expense'
@@ -166,36 +181,34 @@ export default function UpcomingBillsPreview({
                           : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="min-w-0 break-words text-sm font-bold leading-5 text-foreground">{rule.name}</p>
+                    <div className="flex min-w-0 items-center gap-1.5">
+                      <p className="min-w-0 truncate text-[13px] font-bold text-foreground sm:text-sm">
+                        {rule.name}
+                      </p>
                       <Badge
                         variant="outline"
-                        className={cn('rounded-full px-2 py-0 text-[10px]', getStatusClass(status))}
+                        className={cn('shrink-0 rounded-full px-1.5 py-0 text-[9px]', getStatusClass(status))}
                       >
-                        {status.label}
+                        {status.shortLabel || status.label}
                       </Badge>
                     </div>
 
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-5">
                       {getRecurringFrequencyLabel(rule.frequency)} · Due {formatRecurringDate(rule.next_due_date)}
                     </p>
 
-                    <p className="break-words text-xs leading-5 text-muted-foreground/85">
+                    <p className="truncate text-[11px] leading-4 text-muted-foreground/85 sm:text-xs sm:leading-5">
                       {rule.type === 'transfer'
                         ? `${account?.name || 'Account'} → ${toAccount?.name || 'Account'}`
                         : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
                     </p>
-
-                    <div className="mt-2 sm:hidden">
-                      <RuleAmount rule={rule} formatCurrency={formatCurrency} />
-                    </div>
                   </div>
 
-                  <div className="hidden shrink-0 text-right sm:block">
+                  <div className="shrink-0 text-right">
                     <RuleAmount rule={rule} formatCurrency={formatCurrency} />
                   </div>
                 </div>

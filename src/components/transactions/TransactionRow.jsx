@@ -69,7 +69,7 @@ function getGoalName(transaction, category) {
   );
 }
 
-function SourceBadge({ type }) {
+function SourceBadge({ type, compact = false }) {
   if (!type) return null;
 
   const isGoal = type === 'goal';
@@ -77,13 +77,14 @@ function SourceBadge({ type }) {
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[9px] font-bold leading-none',
+        'inline-flex shrink-0 items-center rounded-full border font-bold leading-none',
+        compact ? 'px-1.5 py-0.5 text-[8px]' : 'px-1.5 py-0.5 text-[9px]',
         isGoal
           ? 'border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
           : 'border-primary/15 bg-primary/10 text-primary'
       )}
     >
-      {isGoal ? 'Goal' : 'Recurring'}
+      {compact ? (isGoal ? 'G' : 'R') : isGoal ? 'Goal' : 'Recurring'}
     </span>
   );
 }
@@ -95,6 +96,7 @@ export default function TransactionRow({
   toAccount,
   formatCurrency,
   onClick,
+  compactSourceBadges = false,
 }) {
   const typeConfig = {
     income: {
@@ -147,11 +149,11 @@ export default function TransactionRow({
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 px-3 py-3 min-h-[64px] hover:bg-accent/50 transition-colors cursor-pointer"
+      className="flex min-w-0 items-center gap-2 px-2.5 py-2.5 min-h-[58px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:px-3 sm:py-3 sm:min-h-[64px]"
     >
       {isTransfer ? (
-        <div className="h-8 w-8 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
-          <ArrowLeftRight className="h-4 w-4 stroke-[2.2]" />
+        <div className="h-7 w-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0 sm:h-8 sm:w-8">
+          <ArrowLeftRight className="h-3.5 w-3.5 stroke-[2.2] sm:h-4 sm:w-4" />
         </div>
       ) : (
         <CategoryIcon
@@ -163,12 +165,12 @@ export default function TransactionRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
-          <div className="truncate text-sm font-medium">{title}</div>
-          <SourceBadge type={sourceBadgeType} />
+          <div className="truncate text-[13px] font-medium sm:text-sm">{title}</div>
+          <SourceBadge type={sourceBadgeType} compact={compactSourceBadges} />
         </div>
 
         {primarySubtitle && (
-          <div className="truncate text-xs text-muted-foreground">
+          <div className="truncate text-[11px] text-muted-foreground sm:text-xs">
             {primarySubtitle}
           </div>
         )}
@@ -177,7 +179,7 @@ export default function TransactionRow({
       <div className="shrink-0 text-right">
         <div
           className={cn(
-            'inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold tabular-nums',
+            'inline-flex items-center gap-0.5 whitespace-nowrap text-[12px] font-semibold tabular-nums sm:gap-1 sm:text-sm',
             config.color
           )}
         >
