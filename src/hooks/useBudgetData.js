@@ -10,6 +10,7 @@ import {
   transactionsApi,
   getUserSettings,
 } from '@/lib/budgetData';
+import { buildPlanTotals } from '@/lib/planData';
 import {
   calculateAutoSweepSurplus,
   filterTransactionsByBudgetMonth,
@@ -173,7 +174,51 @@ export function useAllAllocations() {
   });
 }
 
-function buildBudgetSummary({ categories = [], transactions = [], allocations = [] }) {
+function getCategoryType(categories, categoryId) {
+  const category = categories.find((item) => item.id === categoryId);
+  if (!category) return null;
+
+  if (category.type) return category.type;
+
+  const parent = categories.find((item) => item.id === category.parent_id);
+  return parent?.type || null;
+}
+
+function getGoalTransactionId(transaction) {
+  return transaction?.savings_goal_id || transaction?.goal_id || null;
+}
+
+function isGoalTransfer(transaction) {
+  return Boolean(
+    transaction?.type === 'transfer' &&
+      (getGoalTransactionId(transaction) || transaction?.goal_contribution_id)
+  );
+}
+
+function getAccountById(accounts = []) {
+  return new Map(accounts.map((account) => [account.id, account]));
+}
+
+function isDebtTransfer(transaction, accountsById) {
+  if (transaction?.type !== 'transfer') return false;
+  if (isGoalTransfer(transaction)) return false;
+
+  const destinationAccount = accountsById.get(transaction?.to_account_id);
+  const category = String(destinationAccount?.category || '').toLowerCase();
+  const type = String(destinationAccount?.type || '').toLowerCase();
+
+  return category === 'liability' || ['loan', 'credit_card', 'debt'].includes(type);
+}
+
+function buildBudgetSummary({
+  categories = [],
+  transactions = [],
+  allocations = [],
+  accounts = [],
+  plannedTotals,
+}) {
+  const accountsById = getAccountById(accounts);
+
   const getCategorySpent = (categoryId) => {
     return transactions
       .filter(t => t.category_id === categoryId)
@@ -186,34 +231,14 @@ function buildBudgetSummary({ categories = [], transactions = [], allocations = 
       .reduce((sum, a) => sum + (Number(a.planned_amount) || 0), 0);
   };
 
-  const getCategoryType = (categoryId) => {
-    const category = categories.find(c => c.id === categoryId);
-    if (!category) return null;
-
-    if (category.type) return category.type;
-
-    const parent = categories.find(c => c.id === category.parent_id);
-    return parent?.type || null;
-  };
-
   const sumTrackedByType = (type) => {
     return transactions
-      .filter(t => getCategoryType(t.category_id) === type)
-      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-  };
-
-  const sumPlannedByType = (type) => {
-    return categories
-      .filter(c => c.type === type && !c.parent_id)
-      .reduce((sum, c) => {
-        const subs = categories.filter(s => s.parent_id === c.id);
-
-        if (subs.length > 0) {
-          return sum + subs.reduce((s, sub) => s + getCategoryPlanned(sub.id), 0);
-        }
-
-        return sum + getCategoryPlanned(c.id);
-      }, 0);
+      .filter((transaction) => {
+        if (type === 'savings' && isGoalTransfer(transaction)) return true;
+        if (type === 'debt' && isDebtTransfer(transaction, accountsById)) return true;
+        return getCategoryType(categories, transaction.category_id) === type;
+      })
+      .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
   };
 
   const totalIncome = transactions
@@ -227,10 +252,11 @@ function buildBudgetSummary({ categories = [], transactions = [], allocations = 
   const totalTrackedSavings = sumTrackedByType('savings');
   const totalTrackedDebt = sumTrackedByType('debt');
 
-  const totalPlannedIncome = sumPlannedByType('income');
-  const totalPlannedExpenses = sumPlannedByType('expense');
-  const totalPlannedSavings = sumPlannedByType('savings');
-  const totalPlannedDebt = sumPlannedByType('debt');
+  const planTotals = plannedTotals || buildPlanTotals({ allocations, categories });
+  const totalPlannedIncome = planTotals.income;
+  const totalPlannedExpenses = planTotals.expense;
+  const totalPlannedSavings = planTotals.savings;
+  const totalPlannedDebt = planTotals.debt;
 
   const leftToAllocate =
     totalPlannedIncome -
@@ -242,6 +268,7 @@ function buildBudgetSummary({ categories = [], transactions = [], allocations = 
     categories,
     transactions,
     allocations,
+    accounts,
     getCategorySpent,
     getCategoryPlanned,
     totalIncome,
@@ -260,14 +287,16 @@ export function useBudgetSummary(month) {
   const { data: categories = [] } = useCategories();
   const { data: transactions = [] } = useTransactions(month);
   const { data: allocations = [] } = useAllocations(month);
+  const { data: accounts = [] } = useAccounts();
 
-  return buildBudgetSummary({ categories, transactions, allocations });
+  return buildBudgetSummary({ categories, transactions, allocations, accounts });
 }
 
 export function useYearBudgetSummary(year) {
   const { data: categories = [] } = useCategories();
   const { data: transactions = [] } = useAllTransactions();
   const { data: allocations = [] } = useAllAllocations();
+  const { data: accounts = [] } = useAccounts();
 
   const { data: settings = {} } = useUserSettings();
 
@@ -277,11 +306,37 @@ export function useYearBudgetSummary(year) {
     settings
   );
   const yearAllocations = allocations.filter(a => a.month?.startsWith(`${year}-`));
+  const allocationsByMonth = yearAllocations.reduce((groups, allocation) => {
+    const month = allocation.month;
+    if (!month) return groups;
+    groups[month] = groups[month] || [];
+    groups[month].push(allocation);
+    return groups;
+  }, {});
+
+  const plannedTotals = Object.values(allocationsByMonth).reduce(
+    (sum, monthAllocations) => {
+      const monthTotals = buildPlanTotals({
+        allocations: monthAllocations,
+        categories,
+      });
+
+      return {
+        income: sum.income + monthTotals.income,
+        expense: sum.expense + monthTotals.expense,
+        savings: sum.savings + monthTotals.savings,
+        debt: sum.debt + monthTotals.debt,
+      };
+    },
+    { income: 0, expense: 0, savings: 0, debt: 0 }
+  );
 
   return buildBudgetSummary({
     categories,
     transactions: yearTransactions,
     allocations: yearAllocations,
+    accounts,
+    plannedTotals,
   });
 }
 
