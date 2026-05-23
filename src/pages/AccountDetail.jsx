@@ -44,7 +44,7 @@ import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { accountsApi } from '@/lib/budgetData';
+import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
