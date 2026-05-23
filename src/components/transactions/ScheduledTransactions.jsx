@@ -37,6 +37,7 @@ import {
 import { useCurrency } from '@/hooks/useCurrency';
 import {
   accountsApi,
+  budgetPlansApi,
   goalContributionsApi,
   recurringTransactionsApi,
   savingsGoalsApi,
@@ -801,6 +802,8 @@ export default function ScheduledTransactions() {
     queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
     queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
     queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
+    queryClient.invalidateQueries({ queryKey: ['allocations'] });
+    queryClient.invalidateQueries({ queryKey: ['all-allocations'] });
     queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
   };
 
@@ -979,6 +982,23 @@ export default function ScheduledTransactions() {
     try {
       const contributionDate = date || goalTodayIsoDate();
       const contributionNote = note || `Contribution to ${selectedGoal.name}`;
+
+      const existingGoalPlan = getGoalPlanRow(selectedGoal, allocations);
+      const plannedAmountSnapshot = Number(selectedGoal.month_planned_amount || 0);
+
+      if (!existingGoalPlan && plannedAmountSnapshot > 0) {
+        await budgetPlansApi.upsert({
+          category_id: null,
+          month: currentMonth,
+          planned_amount: plannedAmountSnapshot,
+          source_type: 'goal',
+          source_id: selectedGoal.id,
+          budget_type: 'savings',
+          label: selectedGoal.name,
+          icon: selectedGoal.icon_key || 'target',
+          color: selectedGoal.color_key || '#276FE4',
+        });
+      }
 
       const contribution = await goalContributionsApi.create({
         goal_id: selectedGoal.id,
