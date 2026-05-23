@@ -2,11 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   ArrowRight,
-  ChartPie,
   Landmark,
   ListPlus,
   Plus,
   Receipt,
+  SlidersHorizontal,
   Sparkles,
   Target,
   TrendingDown,
@@ -15,9 +15,9 @@ import {
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import TransactionRow from '@/components/transactions/TransactionRow';
-import RecurringTransactionsPanel from '@/components/transactions/RecurringTransactionsPanel';
-import GoalRow from '@/components/goals/GoalRow';
 import SpendingVelocityWidget from '@/components/dashboard/SpendingVelocityWidget';
+import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
+import TopGoalPreview from '@/components/dashboard/TopGoalPreview';
 import { Button } from '@/components/ui/button';
 import {
   useAccounts,
@@ -156,38 +156,6 @@ function getTransactionToAccount(transaction, accounts) {
   return accounts.find((account) => account.id === transaction.to_account_id);
 }
 
-function getGoalProgressValue(goal) {
-  const current = Number(goal?.current_amount || 0);
-  const target = Number(goal?.target_amount || 0);
-
-  if (target <= 0) return 0;
-
-  return Math.min(100, Math.round((current / target) * 100));
-}
-
-function getTopGoal(goals = []) {
-  const activeGoals = goals.filter((goal) => !goal.is_archived);
-
-  if (activeGoals.length === 0) return null;
-
-  return [...activeGoals].sort((a, b) => {
-    const aProgress = getGoalProgressValue(a);
-    const bProgress = getGoalProgressValue(b);
-
-    const aComplete = aProgress >= 100;
-    const bComplete = bProgress >= 100;
-
-    if (aComplete !== bComplete) return aComplete ? 1 : -1;
-
-    const aDate = a.target_date || '9999-12-31';
-    const bDate = b.target_date || '9999-12-31';
-
-    if (aDate !== bDate) return String(aDate).localeCompare(String(bDate));
-
-    return bProgress - aProgress;
-  })[0];
-}
-
 export default function DashboardOverview() {
   const navigate = useNavigate();
   const currentMonth = format(new Date(), 'yyyy-MM');
@@ -200,7 +168,6 @@ export default function DashboardOverview() {
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
 
-  const topGoal = getTopGoal(savingsGoals);
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -279,58 +246,20 @@ export default function DashboardOverview() {
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <RecurringTransactionsPanel
+          <UpcomingBillsPreview
             recurringTransactions={recurringTransactions}
             categories={categories}
             accounts={accounts}
             formatCurrency={formatCurrency}
-            title="Upcoming bills"
-            subtitle="Manual-post recurring items with due and overdue status."
             limit={3}
-            compact
             className="animate-child"
           />
 
-          <DashboardCard
-            title="Top goal progress"
-            subtitle="Your highest-priority savings goal."
-            icon={Target}
-            action={
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className="gap-1 text-xs"
-              >
-                <Link to="/plan">
-                  View plan
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            }
+          <TopGoalPreview
+            goals={savingsGoals}
+            formatCurrency={formatCurrency}
             className="animate-child"
-          >
-            {topGoal ? (
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/35">
-                <GoalRow
-                  goal={topGoal}
-                  formatCurrency={formatCurrency}
-                  onClick={() => navigate('/plan')}
-                />
-              </div>
-            ) : (
-              <EmptyDashboardState
-                icon={Target}
-                title="No savings goal yet"
-                description="Create a savings goal from your Plan screen to start tracking progress here."
-                action={
-                  <Button asChild size="sm" className="rounded-xl">
-                    <Link to="/plan">Open Plan</Link>
-                  </Button>
-                }
-              />
-            )}
-          </DashboardCard>
+          />
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
@@ -414,10 +343,10 @@ export default function DashboardOverview() {
               />
 
               <QuickAction
-                to="/?tab=reflect"
-                icon={ChartPie}
-                title="Reflect"
-                subtitle="Analyze progress"
+                to="/manage-plan"
+                icon={SlidersHorizontal}
+                title="Manage Plan"
+                subtitle="Configure budget setup"
               />
             </div>
           </DashboardCard>
