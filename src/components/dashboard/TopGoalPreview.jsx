@@ -20,18 +20,18 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5',
+        'min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
         className
       )}
     >
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Target className="h-4 w-4" />
             </span>
-            <div>
-              <h2 className="text-sm font-bold tracking-tight text-foreground md:text-base">
+            <div className="min-w-0">
+              <h2 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
                 Top goal progress
               </h2>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -41,7 +41,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
           </div>
         </div>
 
-        <Button asChild variant="ghost" size="sm" className="w-fit shrink-0 gap-1 text-xs">
+        <Button asChild variant="ghost" size="sm" className="shrink-0 self-start gap-1 text-xs">
           <Link to="/transactions?tab=scheduled">
             View Scheduled
             <ArrowRight className="h-3.5 w-3.5" />
@@ -50,13 +50,13 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
       </div>
 
       {topGoal ? (
-        <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-4">
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <p className="truncate text-base font-bold tracking-tight text-foreground">
+        <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-3 sm:p-4">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="break-words text-base font-bold leading-6 tracking-tight text-foreground">
                 {topGoal.name}
               </p>
-              <p className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 text-sm font-semibold text-muted-foreground tabular-nums">
+              <p className="mt-1 break-words text-sm font-semibold leading-5 text-muted-foreground tabular-nums">
                 {formatCurrency(Number(topGoal.current_amount || 0))} /{' '}
                 {formatCurrency(Number(topGoal.target_amount || 0))}
               </p>
@@ -79,7 +79,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Required monthly
               </p>
-              <p className="mt-1 text-sm font-bold text-foreground tabular-nums">
+              <p className="mt-1 break-words text-sm font-bold leading-5 text-foreground tabular-nums">
                 {getMonthlyRequiredSaving(topGoal) === null
                   ? 'No target date'
                   : formatCurrency(getMonthlyRequiredSaving(topGoal))}
@@ -90,7 +90,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Target
               </p>
-              <p className="mt-1 text-sm font-bold text-foreground">
+              <p className="mt-1 break-words text-sm font-bold leading-5 text-foreground">
                 {formatGoalDate(topGoal.target_date)}
               </p>
             </div>
