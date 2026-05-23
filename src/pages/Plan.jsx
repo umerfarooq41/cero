@@ -356,6 +356,11 @@ function PlanOverview({
       .map((allocation, index) => {
         const planned = Number(allocation.planned_amount || 0);
         const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+        const tracked = getTrackedForSource(
+          sourceType,
+          allocation.source_id,
+          allocation.category_id
+        );
 
         return {
           id: `${sourceType}:${allocation.source_id || allocation.id}`,
@@ -363,8 +368,8 @@ function PlanOverview({
             allocation.label ||
             (sourceType === 'goal' ? 'Savings goal' : 'Recurring item'),
           planned,
-          tracked: getTrackedForSource(sourceType, allocation.source_id, allocation.category_id),
-          remaining: planned - getTrackedForSource(sourceType, allocation.source_id, allocation.category_id),
+          tracked,
+          remaining: planned - tracked,
           color:
             allocation.color ||
             tab.shades[(index + 3) % tab.shades.length] ||
