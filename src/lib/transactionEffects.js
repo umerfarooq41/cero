@@ -68,28 +68,59 @@ async function reverseAccountBalances(transaction, accounts = []) {
   );
 }
 
-async function reverseGoalProgress(transaction, savingsGoals = []) {
-  if (!isGoalContributionTransaction(transaction)) return;
+async function findGoalIdFromLinkedContribution(transaction) {
+  if (!transaction?.goal_contribution_id && !transaction?.id) return null;
 
-  const goalId = getTransactionGoalId(transaction);
-  const amount = Math.max(0, Number(transaction?.amount || 0));
+  const contributions = await goalContributionsApi.list();
 
-  if (goalId && amount > 0) {
-    const goal = savingsGoals.find((item) => item.id === goalId);
+  const linkedContribution = contributions.find((item) => {
+    return (
+      (transaction.goal_contribution_id && item.id === transaction.goal_contribution_id) ||
+      (transaction.id && item.transaction_id === transaction.id)
+    );
+  });
 
-    if (goal) {
-      const startingAmount = Math.max(0, Number(goal.starting_amount ?? 0));
-      const currentAmount = Math.max(0, Number(goal.current_amount || 0));
+  return linkedContribution?.goal_id || null;
+}
 
-      await savingsGoalsApi.update(goalId, {
-        current_amount: Math.max(startingAmount, currentAmount - amount),
-      });
-    }
-  }
+async function deleteLinkedGoalContributions(transaction) {
+  if (!transaction?.id && !transaction?.goal_contribution_id) return;
 
-  if (transaction?.goal_contribution_id) {
-    await goalContributionsApi.delete(transaction.goal_contribution_id);
-  }
+  const contributions = await goalContributionsApi.list();
+
+  const linkedContributions = contributions.filter((item) => {
+    return (
+      (transaction.goal_contribution_id && item.id === transaction.goal_contribution_id) ||
+      (transaction.id && item.transaction_id === transaction.id)
+    );
+  });
+
+  await Promise.all(
+    linkedContributions.map((contribution) => goalContributionsApi.delete(contribution.id))
+  );
+}
+
+async function recalculateGoalCurrentAmount(goalId, savingsGoals = []) {
+  if (!goalId) return;
+
+  const goals = savingsGoals.length ? savingsGoals : await savingsGoalsApi.list();
+  const goal = goals.find((item) => item.id === goalId);
+
+  if (!goal) return;
+
+  const transactions = await transactionsApi.list();
+  const postedTotal = transactions
+    .filter((transaction) => {
+      const transactionGoalId = getTransactionGoalId(transaction);
+      return transactionGoalId === goalId && transaction.type === 'transfer';
+    })
+    .reduce((sum, transaction) => sum + Math.max(0, Number(transaction.amount || 0)), 0);
+
+  const startingAmount = Math.max(0, Number(goal.starting_amount ?? 0));
+
+  await savingsGoalsApi.update(goalId, {
+    current_amount: startingAmount + postedTotal,
+  });
 }
 
 export async function deleteTransactionWithEffects({
@@ -101,7 +132,18 @@ export async function deleteTransactionWithEffects({
     throw new Error('Transaction not found');
   }
 
+  const directGoalId = getTransactionGoalId(transaction);
+  const linkedGoalId = directGoalId || (await findGoalIdFromLinkedContribution(transaction));
+
   await reverseAccountBalances(transaction, accounts);
-  await reverseGoalProgress(transaction, savingsGoals);
+
+  if (isGoalContributionTransaction(transaction) || linkedGoalId) {
+    await deleteLinkedGoalContributions(transaction);
+  }
+
   await transactionsApi.delete(transaction.id);
+
+  if (linkedGoalId) {
+    await recalculateGoalCurrentAmount(linkedGoalId, savingsGoals);
+  }
 }
