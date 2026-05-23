@@ -24,11 +24,7 @@ export default function Dashboard() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title="Dashboard"
-        subtitle={
-          activeTab === 'reflect'
-            ? 'Insights, trends, and financial clarity'
-            : 'Your money command center for this month'
-        }
+        subtitle="Your financial command center"
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 lg:py-8">
