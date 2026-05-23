@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { isSameMonth, parseISO } from 'date-fns';
 import {
   ArrowDownLeft,
   ArrowLeftRight,
@@ -40,6 +41,45 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
+function getTransactionRecurringRuleId(transaction) {
+  return (
+    transaction?.recurring_transaction_id ||
+    transaction?.recurring_rule_id ||
+    transaction?.source_id ||
+    null
+  );
+}
+
+function hasPostedCurrentOccurrence(rule, transactions = []) {
+  if (!rule?.id || !rule?.next_due_date) return false;
+
+  let dueDate;
+  try {
+    dueDate = parseISO(rule.next_due_date);
+  } catch {
+    return false;
+  }
+
+  return transactions.some((transaction) => {
+    const linkedRuleId = getTransactionRecurringRuleId(transaction);
+    const sourceType = String(transaction?.source_type || '').toLowerCase();
+    const isRecurringSource =
+      linkedRuleId === rule.id &&
+      (!sourceType ||
+        sourceType === 'recurring' ||
+        sourceType === 'recurring_transaction' ||
+        Boolean(transaction?.recurring_transaction_id));
+
+    if (!isRecurringSource || !transaction?.date) return false;
+
+    try {
+      return isSameMonth(parseISO(transaction.date), dueDate);
+    } catch {
+      return false;
+    }
+  });
+}
+
 function RuleAmount({ rule, formatCurrency }) {
   const amount = Math.abs(Number(rule.amount || 0));
 
@@ -64,12 +104,14 @@ export default function UpcomingBillsPreview({
   recurringTransactions = [],
   accounts = [],
   categories = [],
+  transactions = [],
   formatCurrency,
   limit = 3,
   className,
 }) {
   const previewRules = sortRecurringByDueDate(recurringTransactions)
     .filter((rule) => rule.is_active !== false)
+    .filter((rule) => !hasPostedCurrentOccurrence(rule, transactions))
     .slice(0, limit);
 
   return (
@@ -79,7 +121,7 @@ export default function UpcomingBillsPreview({
         className
       )}
     >
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -96,7 +138,7 @@ export default function UpcomingBillsPreview({
           </div>
         </div>
 
-        <Button asChild variant="ghost" size="sm" className="w-fit shrink-0 gap-1 text-xs">
+        <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 text-xs">
           <Link to="/transactions?tab=scheduled">
             View Scheduled
             <ArrowRight className="h-3.5 w-3.5" />
@@ -126,9 +168,9 @@ export default function UpcomingBillsPreview({
             return (
               <div
                 key={rule.id}
-                className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-3"
+                className="rounded-2xl border border-border/60 bg-background/35 p-3"
               >
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex items-start gap-3">
                   <span
                     className={cn(
                       'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl',
@@ -143,7 +185,7 @@ export default function UpcomingBillsPreview({
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate text-sm font-bold text-foreground">{rule.name}</p>
                       <Badge
                         variant="outline"
@@ -162,13 +204,9 @@ export default function UpcomingBillsPreview({
                         ? `${account?.name || 'Account'} → ${toAccount?.name || 'Account'}`
                         : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
                     </p>
-
-                    <div className="mt-2 min-[421px]:hidden">
-                      <RuleAmount rule={rule} formatCurrency={formatCurrency} />
-                    </div>
                   </div>
 
-                  <div className="shrink-0 text-right max-[420px]:hidden">
+                  <div className="shrink-0 text-right">
                     <RuleAmount rule={rule} formatCurrency={formatCurrency} />
                   </div>
                 </div>
