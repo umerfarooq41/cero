@@ -164,6 +164,54 @@ function isSourceLinkedTransaction(transaction) {
   );
 }
 
+function getRegularPlannedForCategoryFromAllocations(allocations, categoryId) {
+  return allocations
+    .filter((allocation) => {
+      const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+      return allocation.category_id === categoryId && sourceType === 'category';
+    })
+    .reduce((sum, allocation) => sum + Number(allocation.planned_amount || 0), 0);
+}
+
+function getSourceRowKey(allocation) {
+  const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+
+  if (allocation.source_id) {
+    return `${sourceType}:${allocation.source_id}`;
+  }
+
+  return [
+    sourceType,
+    allocation.category_id || 'no-category',
+    allocation.budget_type || 'no-type',
+    allocation.label || allocation.id,
+  ].join(':');
+}
+
+function dedupeSourceAllocations(allocations = []) {
+  const rows = new Map();
+
+  allocations.forEach((allocation) => {
+    const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+    if (sourceType === 'category') return;
+
+    const key = getSourceRowKey(allocation);
+    const existing = rows.get(key);
+
+    if (!existing) {
+      rows.set(key, allocation);
+      return;
+    }
+
+    const existingAmount = Number(existing.planned_amount || 0);
+    const nextAmount = Number(allocation.planned_amount || 0);
+
+    rows.set(key, nextAmount >= existingAmount ? allocation : existing);
+  });
+
+  return Array.from(rows.values());
+}
+
 function Money({ amount, currency, compact = false, className = '' }) {
   const code = getCurrencyCode(currency);
   const symbol = getCurrencySymbol(currency);
@@ -302,6 +350,11 @@ function PlanOverview({
 }) {
   const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
 
+  const sourceAllocations = useMemo(
+    () => dedupeSourceAllocations(allocations),
+    [allocations]
+  );
+
   const getTrackedForSource = (sourceType, sourceId, categoryId) => {
     const normalizedSourceType = normalizeSourceType(sourceType);
 
@@ -315,6 +368,7 @@ function PlanOverview({
       if (normalizedSourceType === 'recurring') {
         const matchesRule = sourceId && transaction.recurring_transaction_id === sourceId;
         const matchesCategoryGroup =
+          !sourceId &&
           categoryId &&
           transaction.category_id === categoryId &&
           Boolean(transaction.recurring_transaction_id || transaction.recurring_posted_for_date);
@@ -330,29 +384,19 @@ function PlanOverview({
 
   const getTrackedForCategory = (categoryId) => {
     return transactions
-      .filter((transaction) => transaction.category_id === categoryId && !isSourceLinkedTransaction(transaction))
+      .filter(
+        (transaction) =>
+          transaction.category_id === categoryId && !isSourceLinkedTransaction(transaction)
+      )
       .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
   };
 
-  const getRegularPlannedForCategory = (categoryId) => {
-    return allocations
-      .filter((allocation) => {
-        const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
-        return allocation.category_id === categoryId && sourceType === 'category';
-      })
-      .reduce((sum, allocation) => sum + Number(allocation.planned_amount || 0), 0);
-  };
+  const getRegularPlannedForCategory = (categoryId) =>
+    getRegularPlannedForCategoryFromAllocations(allocations, categoryId);
 
   const extraPlanRows = useMemo(() => {
-    return allocations
-      .filter((allocation) => {
-        const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
-
-        return (
-          sourceType !== 'category' &&
-          normalizeType(allocation.budget_type) === activeTab
-        );
-      })
+    return sourceAllocations
+      .filter((allocation) => normalizeType(allocation.budget_type) === activeTab)
       .map((allocation, index) => {
         const planned = Number(allocation.planned_amount || 0);
         const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
@@ -363,7 +407,7 @@ function PlanOverview({
         );
 
         return {
-          id: `${sourceType}:${allocation.source_id || allocation.id}`,
+          id: getSourceRowKey(allocation),
           name:
             allocation.label ||
             (sourceType === 'goal' ? 'Savings goal' : 'Recurring item'),
@@ -378,8 +422,8 @@ function PlanOverview({
           sourceType,
         };
       })
-      .filter((item) => item.planned > 0);
-  }, [activeTab, allocations, tab, transactions]);
+      .filter((item) => item.planned > 0 || item.tracked > 0);
+  }, [activeTab, sourceAllocations, tab, transactions]);
 
   const sectionCategories = categories.filter(
     (category) => getCategoryType(category, categories) === activeTab && !category.parent_id
@@ -656,7 +700,18 @@ export default function Plan() {
       debt: 0,
     };
 
+    const sourceAllocations = dedupeSourceAllocations(allocations);
+    const countedSourceKeys = new Set(sourceAllocations.map(getSourceRowKey));
+
     allocations.forEach((allocation) => {
+      const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+
+      if (sourceType !== 'category' && !countedSourceKeys.has(getSourceRowKey(allocation))) {
+        return;
+      }
+
+      if (sourceType !== 'category') return;
+
       let type = allocation.budget_type ? normalizeType(allocation.budget_type) : null;
 
       if (!type && allocation.category_id) {
@@ -666,6 +721,12 @@ export default function Plan() {
 
       if (!type || !Object.prototype.hasOwnProperty.call(totals, type)) return;
 
+      totals[type] += Number(allocation.planned_amount || 0);
+    });
+
+    sourceAllocations.forEach((allocation) => {
+      const type = normalizeType(allocation.budget_type);
+      if (!Object.prototype.hasOwnProperty.call(totals, type)) return;
       totals[type] += Number(allocation.planned_amount || 0);
     });
 
