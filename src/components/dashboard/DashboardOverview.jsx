@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
+  ArrowLeftRight,
   ArrowRight,
   Landmark,
   ListPlus,
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react';
 
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
-import TransactionRow from '@/components/transactions/TransactionRow';
+import CategoryIcon from '@/components/shared/CategoryIcon';
 import SpendingVelocityWidget from '@/components/dashboard/SpendingVelocityWidget';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TopGoalPreview from '@/components/dashboard/TopGoalPreview';
@@ -41,11 +42,11 @@ function DashboardCard({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5',
+        'min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
         className
       )}
     >
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {Icon && (
@@ -64,7 +65,7 @@ function DashboardCard({
           )}
         </div>
 
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="shrink-0 self-start">{action}</div>}
       </div>
 
       {children}
@@ -74,7 +75,7 @@ function DashboardCard({
 
 function EmptyDashboardState({ icon: Icon, title, description, action }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-4 py-6 text-center">
+    <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-3 py-6 text-center sm:px-4">
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
         <Icon className="h-5 w-5" />
       </div>
@@ -94,17 +95,17 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
   return (
     <Link
       to={to}
-      className="group rounded-2xl border border-border/60 bg-background/40 p-4 transition-all hover:-translate-y-0.5 hover:bg-background/70 hover:shadow-sm"
+      className="group block min-w-0 rounded-2xl border border-border/60 bg-background/40 p-3 transition-all hover:-translate-y-0.5 hover:bg-background/70 hover:shadow-sm sm:p-4"
     >
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-          <Icon className="h-5 w-5" />
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-10 sm:w-10">
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </span>
 
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-foreground">{title}</p>
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-sm font-bold leading-5 text-foreground">{title}</p>
 
-          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+          <p className="mt-0.5 break-words text-xs leading-5 text-muted-foreground">
             {subtitle}
           </p>
         </div>
@@ -137,7 +138,7 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
         )}
       </div>
 
-      <div className="mt-2 text-lg font-bold tracking-tight text-foreground tabular-nums">
+      <div className="mt-2 min-w-0 break-words text-base font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
         {value}
       </div>
     </div>
@@ -154,6 +155,165 @@ function getTransactionAccount(transaction, accounts) {
 
 function getTransactionToAccount(transaction, accounts) {
   return accounts.find((account) => account.id === transaction.to_account_id);
+}
+
+
+function cleanGeneratedNote(note = '') {
+  return String(note)
+    .replace(/\s*·\s*Recurring\s*$/i, '')
+    .replace(/^Contribution to\s+/i, '')
+    .trim();
+}
+
+function formatTransactionType(type) {
+  if (!type) return 'Transaction';
+
+  return type
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function getTransferLabel(account, toAccount) {
+  return [account?.name || 'Account', toAccount?.name]
+    .filter(Boolean)
+    .join(' → ');
+}
+
+function getTransactionDisplay(transaction, category, account, toAccount) {
+  const isTransfer = transaction.type === 'transfer';
+  const isGoalContribution = Boolean(
+    transaction.source_type === 'goal' ||
+      transaction.source_type === 'savings_goal' ||
+      transaction.savings_goal_id ||
+      transaction.goal_contribution_id
+  );
+  const isRecurring = Boolean(
+    transaction.source_type === 'recurring' ||
+      transaction.recurring_transaction_id ||
+      transaction.recurring_posted_for_date
+  );
+
+  const goalName =
+    transaction.goal_name ||
+    transaction.savings_goal_name ||
+    transaction.goal?.name ||
+    transaction.savings_goal?.name ||
+    cleanGeneratedNote(transaction.note) ||
+    category?.name ||
+    'Goal';
+
+  const title = isTransfer
+    ? getTransferLabel(account, toAccount) || 'Transfer'
+    : category?.name || cleanGeneratedNote(transaction.note) || 'Uncategorized';
+
+  const subtitle = isTransfer
+    ? `Transfer - ${isGoalContribution ? goalName : category?.name || cleanGeneratedNote(transaction.note) || 'Transfer'}`
+    : `${formatTransactionType(transaction.type)} - ${account?.name || 'Account'}`;
+
+  return {
+    title,
+    subtitle,
+    isTransfer,
+    badge: isGoalContribution ? 'Goal' : isRecurring ? 'Recurring' : null,
+  };
+}
+
+function SourceBadge({ type }) {
+  if (!type) return null;
+
+  const isGoal = type === 'Goal';
+
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[9px] font-bold leading-none',
+        isGoal
+          ? 'border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+          : 'border-primary/15 bg-primary/10 text-primary'
+      )}
+    >
+      {type}
+    </span>
+  );
+}
+
+function DashboardTransactionPreview({
+  transaction,
+  category,
+  account,
+  toAccount,
+  formatCurrency,
+  onClick,
+}) {
+  const amount = Math.abs(Number(transaction.amount || 0));
+  const isIncome = transaction.type === 'income';
+  const isExpense = transaction.type === 'expense';
+  const display = getTransactionDisplay(transaction, category, account, toAccount);
+
+  const amountClass = isIncome
+    ? 'text-[hsl(var(--success))]'
+    : isExpense
+      ? 'text-destructive'
+      : 'text-primary';
+  const sign = isIncome ? '+' : isExpense ? '-' : '';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="block w-full min-w-0 px-3 py-3 text-left transition-colors hover:bg-accent/50 sm:px-4"
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        {display.isTransfer ? (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <ArrowLeftRight className="h-4 w-4 stroke-[2.2]" />
+          </div>
+        ) : (
+          <CategoryIcon
+            icon={category?.icon || 'tag'}
+            color={category?.color}
+            size="sm"
+          />
+        )}
+
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <p className="min-w-0 max-w-full break-words text-sm font-semibold leading-5 text-foreground">
+              {display.title}
+            </p>
+            <SourceBadge type={display.badge} />
+          </div>
+
+          {display.subtitle && (
+            <p className="mt-0.5 min-w-0 break-words text-xs leading-5 text-muted-foreground">
+              {display.subtitle}
+            </p>
+          )}
+
+          <p
+            className={cn(
+              'mt-2 inline-flex max-w-full flex-wrap items-center gap-1 break-words text-sm font-bold leading-5 tabular-nums sm:hidden',
+              amountClass
+            )}
+          >
+            {sign && <span>{sign}</span>}
+            {formatCurrency(amount)}
+          </p>
+        </div>
+
+        <div
+          className={cn(
+            'hidden shrink-0 text-right text-sm font-bold tabular-nums sm:inline-flex sm:items-center sm:gap-1',
+            amountClass
+          )}
+        >
+          {sign && <span>{sign}</span>}
+          {formatCurrency(amount)}
+        </div>
+      </div>
+    </button>
+  );
 }
 
 export default function DashboardOverview() {
@@ -295,10 +455,10 @@ export default function DashboardOverview() {
                 }
               />
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/35">
-                <div className="divide-y divide-border/50">
+              <div className="min-w-0 overflow-hidden rounded-2xl border border-border/60 bg-background/35">
+                <div className="min-w-0 divide-y divide-border/50">
                   {recentTransactions.map((transaction) => (
-                    <TransactionRow
+                    <DashboardTransactionPreview
                       key={transaction.id}
                       transaction={transaction}
                       category={getTransactionCategory(transaction, categories)}
@@ -321,7 +481,7 @@ export default function DashboardOverview() {
             icon={ListPlus}
             className="animate-child"
           >
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <QuickAction
                 to="/add-transaction"
                 icon={Plus}
