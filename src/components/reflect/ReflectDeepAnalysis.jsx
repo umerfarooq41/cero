@@ -134,13 +134,15 @@ function MiniMetric({ label, value, subtext, tone = 'default' }) {
   );
 }
 
-function isContributionInPeriod(contribution, { selectedYear, selectedMonth, isYear }) {
-  const date = contribution?.contribution_date || contribution?.created_at?.slice(0, 10);
-  if (!date) return false;
-
-  if (isYear) return date.startsWith(`${selectedYear}-`);
-
-  return date.startsWith(`${selectedYear}-${selectedMonth}`);
+function isGoalTransferTransaction(transaction) {
+  return (
+    transaction?.type === 'transfer' &&
+    Boolean(
+      transaction.savings_goal_id ||
+        transaction.goal_id ||
+        transaction.goal_contribution_id
+    )
+  );
 }
 
 function getGoalTrackState(goal) {
@@ -175,9 +177,9 @@ function getGoalTrackState(goal) {
   return { label: 'Behind pace', tone: 'warning' };
 }
 
-function GoalProgressAnalysis({ goals, contributions, selectedYear, selectedMonth, isYear, currency }) {
+function GoalProgressAnalysis({ goals, goalTransactions, currency }) {
   const activeGoals = Array.isArray(goals) ? goals : [];
-  const safeContributions = Array.isArray(contributions) ? contributions : [];
+  const safeGoalTransactions = Array.isArray(goalTransactions) ? goalTransactions : [];
 
   const stats = useMemo(() => {
     const totalSaved = activeGoals.reduce(
@@ -188,11 +190,9 @@ function GoalProgressAnalysis({ goals, contributions, selectedYear, selectedMont
       (sum, goal) => sum + safeNumber(goal.target_amount),
       0
     );
-    const periodContribution = safeContributions
-      .filter((contribution) =>
-        isContributionInPeriod(contribution, { selectedYear, selectedMonth, isYear })
-      )
-      .reduce((sum, contribution) => sum + safeNumber(contribution.amount), 0);
+    const periodContribution = safeGoalTransactions
+      .filter(isGoalTransferTransaction)
+      .reduce((sum, transaction) => sum + Math.max(0, safeNumber(transaction.amount)), 0);
     const monthlyRequired = activeGoals.reduce((sum, goal) => {
       const required = getMonthlyRequiredSaving(goal);
       return sum + (required === null ? 0 : safeNumber(required));
@@ -207,7 +207,7 @@ function GoalProgressAnalysis({ goals, contributions, selectedYear, selectedMont
       completed,
       overallProgress: totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0,
     };
-  }, [activeGoals, safeContributions, selectedYear, selectedMonth, isYear]);
+  }, [activeGoals, safeGoalTransactions]);
 
   const priorityGoals = useMemo(
     () => sortGoalsByPriority(activeGoals).slice(0, 4),
@@ -522,7 +522,7 @@ export default function ReflectDeepAnalysis({
   selectedYear,
   selectedMonth,
   goals = [],
-  goalContributions = [],
+  goalTransactions = [],
   currency,
 }) {
   return (
@@ -534,10 +534,7 @@ export default function ReflectDeepAnalysis({
 
       <GoalProgressAnalysis
         goals={goals}
-        contributions={goalContributions}
-        selectedYear={selectedYear}
-        selectedMonth={selectedMonth}
-        isYear={isYear}
+        goalTransactions={goalTransactions}
         currency={currency}
       />
     </section>
