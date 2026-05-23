@@ -250,6 +250,7 @@ export default function DashboardOverview() {
             recurringTransactions={recurringTransactions}
             categories={categories}
             accounts={accounts}
+            transactions={transactions}
             formatCurrency={formatCurrency}
             limit={3}
             className="animate-child"
