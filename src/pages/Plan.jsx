@@ -302,19 +302,6 @@ function PlanOverview({
 }) {
   const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
 
-  const sourceAllocationByCategory = useMemo(() => {
-    const result = new Map();
-
-    allocations.forEach((allocation) => {
-      const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
-
-      if (sourceType === 'category' || !allocation.category_id) return;
-      result.set(allocation.category_id, { ...allocation, sourceType });
-    });
-
-    return result;
-  }, [allocations]);
-
   const getTrackedForSource = (sourceType, sourceId, categoryId) => {
     const normalizedSourceType = normalizeSourceType(sourceType);
 
@@ -347,6 +334,15 @@ function PlanOverview({
       .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
   };
 
+  const getRegularPlannedForCategory = (categoryId) => {
+    return allocations
+      .filter((allocation) => {
+        const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+        return allocation.category_id === categoryId && sourceType === 'category';
+      })
+      .reduce((sum, allocation) => sum + Number(allocation.planned_amount || 0), 0);
+  };
+
   const extraPlanRows = useMemo(() => {
     return allocations
       .filter((allocation) => {
@@ -354,7 +350,6 @@ function PlanOverview({
 
         return (
           sourceType !== 'category' &&
-          !allocation.category_id &&
           normalizeType(allocation.budget_type) === activeTab
         );
       })
@@ -394,19 +389,13 @@ function PlanOverview({
       const planned =
         childCategories.length > 0
           ? childCategories.reduce(
-              (sum, child) =>
-                sum + Number(budget.getCategoryPlanned(child.id) || 0),
+              (sum, child) => sum + getRegularPlannedForCategory(child.id),
               0
             )
-          : Number(budget.getCategoryPlanned(category.id) || 0);
+          : getRegularPlannedForCategory(category.id);
 
-      const sourceAllocation = sourceAllocationByCategory.get(category.id);
-      const sourceType = sourceAllocation?.sourceType || null;
-      const sourceId = sourceAllocation?.source_id || null;
-
-      const tracked = sourceType
-        ? getTrackedForSource(sourceType, sourceId, category.id)
-        : childCategories.length > 0
+      const tracked =
+        childCategories.length > 0
           ? childCategories.reduce(
               (sum, child) => sum + getTrackedForCategory(child.id),
               0
@@ -415,15 +404,14 @@ function PlanOverview({
 
       return {
         id: category.id,
-        name: sourceAllocation?.label || category.name,
+        name: category.name,
         category,
         planned,
         tracked,
         remaining: planned - tracked,
-        color: sourceAllocation?.color || tab.shades[index % tab.shades.length],
+        color: tab.shades[index % tab.shades.length],
         categoryColor: category.color,
-        icon: sourceAllocation?.icon || category.icon,
-        sourceType,
+        icon: category.icon,
       };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);
@@ -657,29 +645,27 @@ export default function Plan() {
 
   const plannedTotals = useMemo(() => {
     const totals = {
-      income: Number(budget.totalPlannedIncome || 0),
-      expense: Number(budget.totalPlannedExpenses || 0),
-      savings: Number(budget.totalPlannedSavings || 0),
-      debt: Number(budget.totalPlannedDebt || 0),
+      income: 0,
+      expense: 0,
+      savings: 0,
+      debt: 0,
     };
 
     allocations.forEach((allocation) => {
-      const sourceType = getAllocationSourceType(allocation);
+      let type = allocation.budget_type ? normalizeType(allocation.budget_type) : null;
 
-      if (normalizeSourceType(sourceType) === 'category' || allocation.category_id) return;
+      if (!type && allocation.category_id) {
+        const category = categories.find((item) => item.id === allocation.category_id);
+        type = getCategoryType(category, categories);
+      }
 
-      const type = normalizeType(allocation.budget_type);
+      if (!type || !Object.prototype.hasOwnProperty.call(totals, type)) return;
+
       totals[type] += Number(allocation.planned_amount || 0);
     });
 
     return totals;
-  }, [
-    allocations,
-    budget.totalPlannedDebt,
-    budget.totalPlannedExpenses,
-    budget.totalPlannedIncome,
-    budget.totalPlannedSavings,
-  ]);
+  }, [allocations, categories]);
 
   const leftToAllocate =
     plannedTotals.income -
