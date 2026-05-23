@@ -55,6 +55,36 @@ function getCategoryType(categories, categoryId) {
   return parent?.type || null;
 }
 
+
+function getGoalTransactionId(transaction) {
+  return transaction?.savings_goal_id || transaction?.goal_id || null;
+}
+
+function isGoalTransfer(transaction) {
+  return Boolean(
+    transaction?.type === 'transfer' &&
+      (getGoalTransactionId(transaction) || transaction?.goal_contribution_id)
+  );
+}
+
+function getAccountsById(accounts = []) {
+  return new Map(accounts.map((account) => [account.id, account]));
+}
+
+function isDebtTransfer(transaction, accountsById) {
+  if (transaction?.type !== 'transfer') return false;
+  if (isGoalTransfer(transaction)) return false;
+
+  const destinationAccount = accountsById.get(transaction?.to_account_id);
+  const destinationCategory = String(destinationAccount?.category || '').toLowerCase();
+  const destinationType = String(destinationAccount?.type || '').toLowerCase();
+
+  return (
+    destinationCategory === 'liability' ||
+    ['loan', 'credit_card', 'debt'].includes(destinationType)
+  );
+}
+
 function getCategoryColor(categories, categoryId) {
   const category = categories.find((item) => item.id === categoryId);
 
@@ -178,23 +208,25 @@ export default function useReflectAnalysis({
       .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
   }, [periodTransactions]);
 
+  const accountsById = useMemo(() => getAccountsById(accounts), [accounts]);
+
   const trackedSavings = useMemo(() => {
     return periodTransactions
-      .filter(
-        (transaction) =>
-          getCategoryType(categories, transaction.category_id) === 'savings'
-      )
+      .filter((transaction) => {
+        if (isGoalTransfer(transaction)) return true;
+        return getCategoryType(categories, transaction.category_id) === 'savings';
+      })
       .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
   }, [periodTransactions, categories]);
 
   const trackedDebt = useMemo(() => {
     return periodTransactions
-      .filter(
-        (transaction) =>
-          getCategoryType(categories, transaction.category_id) === 'debt'
-      )
+      .filter((transaction) => {
+        if (isDebtTransfer(transaction, accountsById)) return true;
+        return getCategoryType(categories, transaction.category_id) === 'debt';
+      })
       .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-  }, [periodTransactions, categories]);
+  }, [periodTransactions, categories, accountsById]);
 
   const plannedExpenses = Number(budget?.totalPlannedExpenses) || 0;
   const plannedIncome = Number(budget?.totalPlannedIncome) || 0;
@@ -226,7 +258,13 @@ export default function useReflectAnalysis({
       .reduce((sum, account) => sum + Math.abs(Number(account.balance) || 0), 0);
   }, [accounts]);
 
-  const savingsRate = income > 0 ? Math.round((netCashFlow / income) * 100) : 0;
+  const cashFlowRate = income > 0 ? Math.round((netCashFlow / income) * 100) : 0;
+  const savingsDebtRate =
+    income > 0 ? Math.round(((trackedSavings + trackedDebt) / income) * 100) : 0;
+
+  // Keep the old property name for existing Reflect components, but make it
+  // represent actual savings/debt allocations instead of net cash flow.
+  const savingsRate = savingsDebtRate;
 
   const efficiency = useMemo(() => {
     if (isYear || plannedExpenses === 0) return null;
@@ -356,6 +394,8 @@ export default function useReflectAnalysis({
     totalAssets,
     totalLiabilities,
     savingsRate,
+    savingsDebtRate,
+    cashFlowRate,
     efficiency,
     spendingBreakdown,
     cashFlow,
