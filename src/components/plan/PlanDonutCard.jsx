@@ -52,7 +52,9 @@ export default function PlanDonutCard({
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">Tracked</p>
 
-          <h2 className="mt-1 truncate text-base font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
+          <h2 className="mt-1 truncate text-base font-bold tracking-tight text-foreground tabular-nums sm:text-lg"
+style={{ color: tab.color }}
+>
             <PlanMoney amount={totalTracked} currency={currency} />
           </h2>
 
