@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import { useSpendingVelocity } from '@/hooks/useSpendingVelocity';
 
@@ -14,19 +14,16 @@ const STATUS = {
     label: 'Under budget pace',
     color: 'text-[hsl(var(--success))]',
     barColor: 'bg-[hsl(var(--success))]',
-    Icon: TrendingDown,
   },
   'on-track': {
     label: 'On track',
     color: 'text-primary',
     barColor: 'bg-primary',
-    Icon: Minus,
   },
   behind: {
     label: 'Spending too fast',
     color: 'text-destructive',
     barColor: 'bg-destructive',
-    Icon: TrendingUp,
   },
 };
 
@@ -48,8 +45,7 @@ export default function SpendingVelocityWidget({
 
   if (!plannedExpenses || plannedExpenses === 0) return null;
 
-  const cfg = STATUS[status];
-  const { Icon } = cfg;
+  const cfg = STATUS[status] || STATUS['on-track'];
 
   const fmt =
     formatCurrency ||
@@ -61,8 +57,7 @@ export default function SpendingVelocityWidget({
 
   return (
     <div className="min-w-0">
-      <div className="mb-4 flex min-w-0 items-center gap-2">
-        <Icon className={cn('h-4 w-4 shrink-0', cfg.color)} />
+      <div className="mb-4 min-w-0">
         <p className={cn('min-w-0 truncate text-lg font-bold leading-6', cfg.color)}>
           {cfg.label}
         </p>
@@ -73,14 +68,21 @@ export default function SpendingVelocityWidget({
           <span className="w-10 shrink-0 text-right text-sm font-medium text-muted-foreground">
             Time
           </span>
+
           <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
-              transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 0.1 }}
+              transition={{
+                type: 'spring',
+                stiffness: 100,
+                damping: 18,
+                delay: 0.1,
+              }}
             />
           </div>
+
           <span className="w-9 shrink-0 text-right text-sm text-muted-foreground tabular-nums">
             {progressPercent}%
           </span>
@@ -90,15 +92,27 @@ export default function SpendingVelocityWidget({
           <span className="w-10 shrink-0 text-right text-sm font-medium text-muted-foreground">
             Spent
           </span>
+
           <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
             <motion.div
               className={cn('absolute inset-y-0 left-0 rounded-full', cfg.barColor)}
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(velocityPercent, 100)}%` }}
-              transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 0.2 }}
+              transition={{
+                type: 'spring',
+                stiffness: 100,
+                damping: 18,
+                delay: 0.2,
+              }}
             />
           </div>
-          <span className={cn('w-9 shrink-0 text-right text-sm font-bold tabular-nums', cfg.color)}>
+
+          <span
+            className={cn(
+              'w-9 shrink-0 text-right text-sm font-bold tabular-nums',
+              cfg.color
+            )}
+          >
             {velocityPercent}%
           </span>
         </div>
@@ -111,18 +125,22 @@ export default function SpendingVelocityWidget({
             {daysIntoMonth}/{daysInMonth}
           </div>
         </div>
+
         <div className="min-w-0 text-center">
           <div className="mb-0.5 text-xs text-muted-foreground">Daily avg</div>
           <div className="truncate text-sm font-bold tabular-nums text-foreground">
             {fmt(dailyAverage)}
           </div>
         </div>
+
         <div className="min-w-0 text-center">
           <div className="mb-0.5 text-xs text-muted-foreground">Projected</div>
           <div
             className={cn(
               'truncate text-sm font-bold tabular-nums',
-              projectedTotal > plannedExpenses ? 'text-destructive' : 'text-foreground'
+              projectedTotal > plannedExpenses
+                ? 'text-destructive'
+                : 'text-foreground'
             )}
           >
             {fmt(projectedTotal)}
