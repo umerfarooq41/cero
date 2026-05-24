@@ -1,6 +1,12 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+/**
+ * ReflectCard — visual chrome matching DashboardSectionCard:
+ *   rounded-3xl, border/60, bg-card/70, backdrop-blur-xl, shadow-sm
+ * Used inside RevealChartCard (animation) in ReflectCharts, and
+ * directly in ReflectSummaryCard.
+ */
 export default function ReflectCard({ children, className }) {
   return (
     <motion.div
@@ -8,7 +14,7 @@ export default function ReflectCard({ children, className }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className={cn(
-        'rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm overflow-hidden',
+        'overflow-hidden rounded-3xl border border-border/60 bg-card/70 backdrop-blur-xl shadow-sm',
         'focus:outline-none focus-visible:outline-none',
         className
       )}

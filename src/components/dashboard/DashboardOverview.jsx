@@ -77,32 +77,35 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
 }
 
 function StatPill({ label, value, icon: Icon, tone = 'default' }) {
-  const toneClass =
+  const iconClass =
     tone === 'good'
       ? 'text-[hsl(var(--success))] bg-[hsl(var(--success)/0.08)]'
       : tone === 'danger'
         ? 'text-destructive bg-destructive/10'
         : tone === 'warning'
-          ? 'text-amber-600 bg-amber-500/10 dark:text-amber-400'
+          ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10'
           : 'text-primary bg-primary/10';
 
-  return (
-    <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </span>
+  const valueClass =
+    tone === 'good'
+      ? 'text-[hsl(var(--success))]'
+      : tone === 'danger'
+        ? 'text-destructive'
+        : 'text-foreground';
 
+  return (
+    <div className="flex items-center justify-between gap-2 py-1.5">
+      <div className="flex min-w-0 items-center gap-2">
         {Icon && (
-          <span className={cn('rounded-xl p-1.5', toneClass)}>
+          <span className={cn('rounded-lg p-1', iconClass)}>
             <Icon className="h-3.5 w-3.5" />
           </span>
         )}
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
       </div>
-
-      <div className="mt-2 text-lg font-bold tracking-tight text-foreground tabular-nums">
+      <span className={cn('text-sm font-bold tabular-nums tracking-tight', valueClass)}>
         {value}
-      </div>
+      </span>
     </div>
   );
 }
@@ -177,7 +180,7 @@ export default function DashboardOverview() {
             icon={Landmark}
             className="animate-child"
           >
-            <div className="grid grid-cols-2 gap-3">
+            <div className="divide-y divide-border/40">
               <StatPill
                 label="Income"
                 value={formatCurrency(budget.totalIncome || 0)}

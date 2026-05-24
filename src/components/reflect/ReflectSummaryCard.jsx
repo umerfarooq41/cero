@@ -138,25 +138,25 @@ function getSelectedPeriodProgress({ selectedYear, selectedMonth, isYear }) {
 function getToneClasses(tone = 'default') {
   if (tone === 'good') {
     return {
-      text: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      ring: 'ring-emerald-500/15',
-      glow: 'bg-emerald-500/10',
+      text: 'text-[hsl(var(--success))]',
+      bg: 'bg-[hsl(var(--success)/0.1)]',
+      ring: 'ring-[hsl(var(--success)/0.15)]',
+      glow: 'bg-[hsl(var(--success)/0.1)]',
     };
   }
 
   if (tone === 'bad') {
     return {
-      text: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-500/10',
-      ring: 'ring-red-500/15',
-      glow: 'bg-red-500/10',
+      text: 'text-destructive',
+      bg: 'bg-destructive/10',
+      ring: 'ring-destructive/15',
+      glow: 'bg-destructive/10',
     };
   }
 
   if (tone === 'warning') {
     return {
-      text: 'text-amber-600 dark:text-amber-400',
+      text: 'text-amber-500 dark:text-amber-400',
       bg: 'bg-amber-500/10',
       ring: 'ring-amber-500/15',
       glow: 'bg-amber-500/10',
@@ -165,10 +165,10 @@ function getToneClasses(tone = 'default') {
 
   if (tone === 'info') {
     return {
-      text: 'text-cyan-600 dark:text-cyan-400',
-      bg: 'bg-cyan-500/10',
-      ring: 'ring-cyan-500/15',
-      glow: 'bg-cyan-500/10',
+      text: 'text-primary',
+      bg: 'bg-primary/10',
+      ring: 'ring-primary/15',
+      glow: 'bg-muted/40',
     };
   }
 
@@ -260,7 +260,7 @@ function HeroCashFlowCard({
     income > 0 ? Math.min((Math.max(expenses, 0) / income) * 100, 100) : 0;
 
   return (
-    <ReflectCard className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:col-span-2 sm:p-4">
+    <ReflectCard className="relative overflow-hidden p-3 sm:col-span-2 sm:p-4">
       <div className="relative flex h-full flex-col justify-between gap-3">
         <div className="space-y-1.5">
           <CardHeading
@@ -272,8 +272,8 @@ function HeroCashFlowCard({
                 className={cn(
                   'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
                   positive
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
+                    : 'bg-destructive/10 text-destructive'
                 )}
               >
                 {positive ? 'Positive' : 'Negative'}
@@ -283,10 +283,10 @@ function HeroCashFlowCard({
 
           <div
             className={cn(
-              'pt-2 text-lg font-bold tracking-tight tabular-nums sm:text-xl',
+              'pt-2 text-base font-bold tracking-tight tabular-nums sm:text-lg',
               positive
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-red-600 dark:text-red-400'
+                ? 'text-[hsl(var(--success))]'
+                : 'text-destructive'
             )}
           >
             <CurrencyAmount amount={netCashFlow} currency={currency} />
@@ -299,21 +299,21 @@ function HeroCashFlowCard({
               label="Income"
               amount={income}
               currency={currency}
-              tone="text-emerald-600 dark:text-emerald-400"
+              tone="text-[hsl(var(--success))]"
             />
 
             <MoneyRow
               label="Expenses"
               amount={expenses}
               currency={currency}
-              tone="text-red-600 dark:text-red-400"
+              tone="text-destructive"
             />
           </div>
 
           <div className="space-y-1.5">
             <AnimatedBar
               value={savedProgress}
-              className={positive ? 'bg-emerald-400' : 'bg-red-400'}
+              className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
             />
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -337,7 +337,7 @@ function SecondaryCard({
   const toneClasses = getToneClasses(tone);
 
   return (
-    <ReflectCard className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4">
+    <ReflectCard className="relative overflow-hidden p-3 sm:p-4">
       <div
         className={cn(
           'pointer-events-none absolute -right-10 -top-10 h-20 w-20 rounded-full blur-3xl',
@@ -351,7 +351,7 @@ function SecondaryCard({
 
           <div
             className={cn(
-              'mt-2 text-lg font-bold tracking-tight tabular-nums sm:text-xl',
+              'mt-2 text-base font-bold tracking-tight tabular-nums',
               toneClasses.text
             )}
           >
@@ -509,14 +509,14 @@ export default function ReflectSummaryCard({
             label="Assets"
             amount={totalAssets}
             currency={currency}
-            tone="text-emerald-600 dark:text-emerald-400"
+            tone="text-[hsl(var(--success))]"
           />
 
           <MoneyRow
             label="Liabilities"
             amount={totalLiabilities}
             currency={currency}
-            tone="text-red-600 dark:text-red-400"
+            tone="text-destructive"
           />
 
           <div className="space-y-1.5">
@@ -546,7 +546,7 @@ export default function ReflectSummaryCard({
                 <p className="text-xs font-medium text-muted-foreground">
                   Total YTD
                 </p>
-                <div className="mt-1 text-base font-bold tracking-tight tabular-nums text-foreground sm:text-lg">
+                <div className="mt-1 text-base font-bold tracking-tight tabular-nums text-foreground">
                   <CurrencyAmount
                     amount={computed.yearlyTotalYtd}
                     currency={currency}
@@ -611,10 +611,10 @@ export default function ReflectSummaryCard({
 
                 <div
                   className={cn(
-                    'mt-1 text-xl font-bold tracking-tight tabular-nums',
+                    'mt-1 text-base font-bold tracking-tight tabular-nums',
                     computed.monthlyBudgetDifference >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
+                      ? 'text-[hsl(var(--success))]'
+                      : 'text-destructive'
                   )}
                 >
                   <CurrencyAmount
@@ -639,8 +639,8 @@ export default function ReflectSummaryCard({
                   currency={currency}
                   tone={
                     computed.monthlyBudgetDifference >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
+                      ? 'text-[hsl(var(--success))]'
+                      : 'text-destructive'
                   }
                 />
               </div>

@@ -114,9 +114,9 @@ function Money({ value, currency, className, signed = false }) {
 function MiniMetric({ label, value, subtext, tone = 'default' }) {
   const toneClass =
     tone === 'good'
-      ? 'text-emerald-600 dark:text-emerald-400'
+      ? 'text-[hsl(var(--success))]'
       : tone === 'bad'
-        ? 'text-red-600 dark:text-red-400'
+        ? 'text-destructive'
         : tone === 'warning'
           ? 'text-yellow-600 dark:text-yellow-400'
           : 'text-foreground';
@@ -219,7 +219,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   );
 
   return (
-    <ReflectCard className="rounded-3xl p-3 sm:p-4">
+    <ReflectCard className="p-3 sm:p-4">
       <SectionHeading
         icon={Target}
         title="Goal Progress Analysis"
@@ -236,7 +236,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
           <div className="flex min-w-0 flex-[1.05] items-center gap-2 rounded-2xl border border-border/60 bg-background/35 p-2.5 sm:p-3">
             <ProgressRing value={stats.overallProgress}>
               <div>
-                <p className="text-lg font-bold leading-none tabular-nums">
+                <p className="text-base font-bold leading-none tabular-nums">
                   {Math.round(clampPercent(stats.overallProgress))}%
                 </p>
                 <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -287,7 +287,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                       className={cn(
                         'shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold sm:text-[10px]',
                         track.tone === 'good'
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
                           : track.tone === 'warning'
                             ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
                             : 'bg-muted text-muted-foreground'
@@ -343,7 +343,7 @@ function BudgetVsActual({ rows, currency }) {
   const variance = totals.planned - totals.actual;
 
   return (
-    <ReflectCard className="rounded-3xl p-3 sm:p-4">
+    <ReflectCard className="p-3 sm:p-4">
       <SectionHeading
         icon={BarChart3}
         title="Budget vs Actual"
@@ -401,8 +401,8 @@ function BudgetVsActual({ rows, currency }) {
                       className={cn(
                         'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums sm:text-[11px]',
                         good
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                          ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
+                          : 'bg-destructive/10 text-destructive'
                       )}
                     >
                       {row.variance >= 0 ? 'Left ' : 'Over '}
@@ -439,7 +439,7 @@ function CategoryTrends({ rows, comparablePeriodLabel, isYear, currency }) {
   const visibleRows = safeRows.slice(0, 6);
 
   return (
-    <ReflectCard className="rounded-3xl p-3 sm:p-4">
+    <ReflectCard className="p-3 sm:p-4">
       <SectionHeading
         icon={TrendingUp}
         title="Category Trends"
@@ -486,9 +486,9 @@ function CategoryTrends({ rows, comparablePeriodLabel, isYear, currency }) {
                     className={cn(
                       'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums sm:text-[11px]',
                       positive
-                        ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                        ? 'bg-destructive/10 text-destructive'
                         : negative
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
                           : 'bg-muted text-muted-foreground'
                     )}
                   >

@@ -230,7 +230,7 @@ export default function ReflectCharts({
       <div className="mb-4 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="rounded-3xl p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4">
               <ChartHeading
                 icon={BarChart3}
                 tone="info"
@@ -330,7 +330,7 @@ export default function ReflectCharts({
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="rounded-3xl p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4">
               <ChartHeading
                 icon={Target}
                 tone={isYear ? 'warning' : 'good'}
@@ -429,7 +429,7 @@ export default function ReflectCharts({
       <div className="mb-4 grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="rounded-3xl p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4">
               <ChartHeading
                 icon={ChartPie}
                 tone="warning"
@@ -558,7 +558,7 @@ export default function ReflectCharts({
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="rounded-3xl p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4">
               <ChartHeading
                 icon={LineChart}
                 tone="info"
