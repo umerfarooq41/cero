@@ -94,16 +94,18 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
         : 'text-foreground';
 
   return (
-    <div className="flex items-center justify-between gap-2 py-1.5">
-      <div className="flex min-w-0 items-center gap-2">
+    <div className="flex items-center justify-between gap-3 py-2">
+      <div className="flex min-w-0 items-center gap-2.5">
         {Icon && (
-          <span className={cn('rounded-lg p-1', iconClass)}>
-            <Icon className="h-3.5 w-3.5" />
+          <span className={cn('rounded-xl p-1.5', iconClass)}>
+            <Icon className="h-4 w-4" />
           </span>
         )}
-        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+        <span className="truncate text-sm font-semibold text-muted-foreground sm:text-base">
+          {label}
+        </span>
       </div>
-      <span className={cn('text-sm font-bold tabular-nums tracking-tight', valueClass)}>
+      <span className={cn('shrink-0 text-lg font-bold tabular-nums tracking-tight sm:text-xl', valueClass)}>
         {value}
       </span>
     </div>

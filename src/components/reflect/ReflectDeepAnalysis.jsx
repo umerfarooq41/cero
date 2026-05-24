@@ -1,13 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  BarChart3,
-  CircleDot,
-  Target,
-  TrendingUp,
-} from 'lucide-react';
+import { Target } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import {
@@ -29,19 +22,16 @@ const safeNumber = (value) => Number(value || 0);
 
 function SectionHeading({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-3 min-w-0">
+    <div className="mb-4 min-w-0">
       <div className="flex min-w-0 items-center gap-2">
-        {Icon ? (
-          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-        ) : null}
-
-        <h3 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground">
+        {Icon ? <Icon className="h-4 w-4 shrink-0 text-muted-foreground" /> : null}
+        <h3 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground sm:text-base">
           {title}
         </h3>
       </div>
 
       {subtitle ? (
-        <p className="mt-1 truncate text-xs leading-4 text-muted-foreground">
+        <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
           {subtitle}
         </p>
       ) : null}
@@ -60,9 +50,9 @@ function EmptyBlock({ title, text }) {
   );
 }
 
-function ProgressRing({ value, children, size = 58 }) {
+function ProgressRing({ value, children, size = 74 }) {
   const safeValue = clampPercent(value);
-  const stroke = 7;
+  const stroke = 8;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (safeValue / 100) * circumference;
@@ -111,14 +101,19 @@ function Money({ value, currency, className, signed = false }) {
   const sign = signed && amount > 0 ? '+' : signed && amount < 0 ? '-' : '';
 
   return (
-    <span className={cn('inline-flex items-center gap-0.5 whitespace-nowrap tabular-nums', className)}>
+    <span
+      className={cn(
+        'inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap tabular-nums',
+        className
+      )}
+    >
       {sign ? <span>{sign}</span> : null}
       <CurrencyAmount amount={Math.abs(amount)} currency={currency} compact />
     </span>
   );
 }
 
-function MiniMetric({ label, value, subtext, tone = 'default' }) {
+function MetricLine({ label, value, subtext, tone = 'default', delay = 0 }) {
   const toneClass =
     tone === 'good'
       ? 'text-[hsl(var(--success))]'
@@ -130,22 +125,25 @@ function MiniMetric({ label, value, subtext, tone = 'default' }) {
 
   return (
     <motion.div
-      className="min-w-0 rounded-xl border border-border/50 bg-background/30 px-2 py-1.5"
+      className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-border/45 bg-background/25 px-2.5 py-2"
       initial={{ y: 6, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 20, delay }}
     >
-      <p className="truncate text-[8px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[10px]">
-        {label}
-      </p>
-      <div className={cn('mt-0.5 truncate text-[10px] font-bold tabular-nums sm:text-xs', toneClass)}>
+      <div className="min-w-0">
+        <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        {subtext ? (
+          <p className="mt-0.5 truncate text-[10px] leading-3 text-muted-foreground">
+            {subtext}
+          </p>
+        ) : null}
+      </div>
+
+      <div className={cn('min-w-0 text-right text-sm font-bold tabular-nums', toneClass)}>
         {value}
       </div>
-      {subtext ? (
-        <p className="mt-0.5 truncate text-[8px] leading-3 text-muted-foreground sm:text-[10px]">
-          {subtext}
-        </p>
-      ) : null}
     </motion.div>
   );
 }
@@ -173,7 +171,10 @@ function getGoalTrackState(goal) {
     return { label: 'No deadline', tone: 'default' };
   }
 
-  const start = new Date(`${goal.start_date || goal.created_at?.slice(0, 10) || new Date().toISOString().slice(0, 10)}T00:00:00`);
+  const fallbackStart = new Date().toISOString().slice(0, 10);
+  const start = new Date(
+    `${goal.start_date || goal.created_at?.slice(0, 10) || fallbackStart}T00:00:00`
+  );
   const targetDate = new Date(`${goal.target_date}T00:00:00`);
   const today = new Date();
 
@@ -226,7 +227,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   }, [activeGoals, safeGoalTransactions]);
 
   const priorityGoals = useMemo(
-    () => sortGoalsByPriority(activeGoals).slice(0, 4),
+    () => sortGoalsByPriority(activeGoals).slice(0, 3),
     [activeGoals]
   );
 
@@ -235,7 +236,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
       <SectionHeading
         icon={Target}
         title="Goal Progress Analysis"
-        subtitle="Savings goal progress, current-period contributions, and required monthly pace."
+        subtitle="Goals, contributions, and required monthly pace."
       />
 
       {activeGoals.length === 0 ? (
@@ -245,7 +246,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
         />
       ) : (
         <motion.div
-          className="min-w-0 space-y-2.5"
+          className="min-w-0 space-y-3"
           initial="hidden"
           animate="show"
           variants={{
@@ -257,43 +258,50 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
           }}
         >
           <motion.div
-            className="grid min-w-0 grid-cols-[58px_minmax(0,1fr)] items-center gap-2"
+            className="grid min-w-0 grid-cols-[74px_minmax(0,1fr)] items-center gap-3"
             variants={{
               hidden: { y: 8, opacity: 0 },
-              show: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 210, damping: 20 } },
+              show: {
+                y: 0,
+                opacity: 1,
+                transition: { type: 'spring', stiffness: 210, damping: 20 },
+              },
             }}
           >
             <ProgressRing value={stats.overallProgress}>
               <div>
-                <p className="text-sm font-bold leading-none tabular-nums sm:text-base">
+                <p className="text-base font-bold leading-none tabular-nums">
                   {Math.round(clampPercent(stats.overallProgress))}%
                 </p>
-                <p className="mt-0.5 text-[8px] font-medium uppercase tracking-wide text-muted-foreground sm:text-[10px]">
+                <p className="mt-0.5 text-[9px] font-medium uppercase tracking-wide text-muted-foreground">
                   Saved
                 </p>
               </div>
             </ProgressRing>
 
-            <div className="grid min-w-0 grid-cols-3 gap-1.5 sm:gap-2">
-              <MiniMetric
+            <div className="min-w-0 space-y-1.5">
+              <MetricLine
                 label="Saved"
                 value={<Money value={stats.totalSaved} currency={currency} />}
                 subtext={`Target ${formatCurrencyText(stats.totalTarget, currency)}`}
                 tone="good"
+                delay={0.04}
               />
-              <MiniMetric
+              <MetricLine
                 label={isYear ? 'This year' : 'This month'}
                 value={<Money value={stats.periodContribution} currency={currency} />}
+                delay={0.08}
               />
-              <MiniMetric
+              <MetricLine
                 label="Required/mo"
                 value={<Money value={stats.monthlyRequired} currency={currency} />}
                 subtext={`${stats.completed}/${activeGoals.length} funded`}
+                delay={0.12}
               />
             </div>
           </motion.div>
 
-          <div className="min-w-0 space-y-2">
+          <div className="min-w-0 space-y-2.5 border-t border-border/45 pt-3">
             {priorityGoals.map((goal, index) => {
               const progress = getGoalProgress(goal);
               const track = getGoalTrackState(goal);
@@ -302,22 +310,27 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
               return (
                 <motion.div
                   key={goal.id}
-                  className="min-w-0 border-t border-border/45 pt-2 first:border-t-0 first:pt-0"
+                  className="min-w-0"
                   variants={{
                     hidden: { y: 8, opacity: 0 },
                     show: {
                       y: 0,
                       opacity: 1,
-                      transition: { type: 'spring', stiffness: 220, damping: 22, delay: index * 0.02 },
+                      transition: {
+                        type: 'spring',
+                        stiffness: 220,
+                        damping: 22,
+                        delay: index * 0.02,
+                      },
                     },
                   }}
                 >
                   <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-bold text-foreground sm:text-sm">
+                      <p className="truncate text-sm font-bold text-foreground">
                         {goal.name}
                       </p>
-                      <p className="mt-0.5 truncate text-[10px] text-muted-foreground sm:text-[11px]">
+                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                         <Money value={goal.current_amount} currency={currency} /> of{' '}
                         <Money value={goal.target_amount} currency={currency} /> ·{' '}
                         {Math.round(progress)}%
@@ -332,7 +345,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                       </span>
                       <span
                         className={cn(
-                          'rounded-full px-1.5 py-0.5 text-[9px] font-semibold sm:text-[10px]',
+                          'rounded-full px-2 py-0.5 text-[10px] font-semibold',
                           track.tone === 'good'
                             ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
                             : track.tone === 'warning'
@@ -350,7 +363,12 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                       className="h-full rounded-full bg-primary"
                       initial={{ width: 0 }}
                       animate={{ width: `${clampPercent(progress)}%` }}
-                      transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 0.1 + index * 0.03 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 100,
+                        damping: 18,
+                        delay: 0.1 + index * 0.03,
+                      }}
                     />
                   </div>
                 </motion.div>
@@ -363,211 +381,8 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   );
 }
 
-function typeLabel(type) {
-  if (type === 'expense') return 'Expense';
-  if (type === 'income') return 'Income';
-  if (type === 'savings') return 'Savings';
-  if (type === 'debt') return 'Debt';
-  return 'Other';
-}
-
-function BudgetVsActual({ rows, currency }) {
-  const safeRows = Array.isArray(rows) ? rows : [];
-  const visibleRows = safeRows.slice(0, 8);
-
-  const totals = safeRows.reduce(
-    (sum, row) => ({
-      planned: sum.planned + safeNumber(row.planned),
-      actual: sum.actual + safeNumber(row.actual),
-    }),
-    { planned: 0, actual: 0 }
-  );
-
-  const variance = totals.planned - totals.actual;
-
-  return (
-    <ReflectCard className="p-3 sm:p-4">
-      <SectionHeading
-        icon={BarChart3}
-        title="Budget vs Actual"
-        subtitle="Planned category amounts compared with what was actually tracked."
-      />
-
-      {visibleRows.length === 0 ? (
-        <EmptyBlock
-          title="No plan comparison yet"
-          text="Add planned category amounts and transactions to see budget variance here."
-        />
-      ) : (
-        <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            <MiniMetric
-              label="Planned"
-              value={<Money value={totals.planned} currency={currency} />}
-            />
-            <MiniMetric
-              label="Actual"
-              value={<Money value={totals.actual} currency={currency} />}
-            />
-            <MiniMetric
-              label={variance >= 0 ? 'Remaining' : 'Over plan'}
-              value={<Money value={variance} currency={currency} signed />}
-              tone={variance >= 0 ? 'good' : 'bad'}
-            />
-          </div>
-
-          <div className="space-y-3">
-            {visibleRows.map((row) => {
-              const used = clampPercent(row.usedPercent);
-              const isIncome = row.type === 'income';
-              const good = isIncome ? row.actual >= row.planned : !row.isOver;
-
-              return (
-                <div key={row.id} className="rounded-2xl border border-border/60 bg-background/35 p-2.5">
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: row.color }}
-                        />
-                        <p className="truncate text-xs font-bold text-foreground">{row.name}</p>
-                      </div>
-                      <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">
-                        {typeLabel(row.type)} · Planned{' '}
-                        <Money value={row.planned} currency={currency} /> · Actual{' '}
-                        <Money value={row.actual} currency={currency} />
-                      </p>
-                    </div>
-
-                    <span
-                      className={cn(
-                        'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums sm:text-[11px]',
-                        good
-                          ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
-                          : 'bg-destructive/10 text-destructive'
-                      )}
-                    >
-                      {row.variance >= 0 ? 'Left ' : 'Over '}
-                      {formatCurrencyText(Math.abs(row.variance), currency)}
-                    </span>
-                  </div>
-
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={cn(
-                        'h-full rounded-full transition-all duration-700 ease-out',
-                        row.isOver ? 'bg-red-500' : 'bg-primary'
-                      )}
-                      style={{ width: `${used}%` }}
-                    />
-                  </div>
-
-                  <div className="mt-2 flex justify-between text-[10px] text-muted-foreground sm:text-[11px]">
-                    <span>{Math.round(row.usedPercent)}% used</span>
-                    <span>{row.isOver ? 'Above plan' : 'Within plan'}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </ReflectCard>
-  );
-}
-
-function CategoryTrends({ rows, comparablePeriodLabel, isYear, currency }) {
-  const safeRows = Array.isArray(rows) ? rows : [];
-  const visibleRows = safeRows.slice(0, 6);
-
-  return (
-    <ReflectCard className="p-3 sm:p-4">
-      <SectionHeading
-        icon={TrendingUp}
-        title="Category Trends"
-        subtitle={
-          isYear
-            ? `Expense categories compared with ${comparablePeriodLabel}.`
-            : `Expense categories compared with ${comparablePeriodLabel}.`
-        }
-      />
-
-      {visibleRows.length === 0 ? (
-        <EmptyBlock
-          title="No trend data yet"
-          text="Add expenses in this and the previous period to compare category movement."
-        />
-      ) : (
-        <div className="space-y-3">
-          {visibleRows.map((row) => {
-            const positive = row.change > 0;
-            const negative = row.change < 0;
-            const Icon = positive ? ArrowUpRight : negative ? ArrowDownRight : CircleDot;
-            const maxAmount = Math.max(row.current, row.previous, 1);
-            const currentWidth = clampPercent((row.current / maxAmount) * 100);
-            const previousWidth = clampPercent((row.previous / maxAmount) * 100);
-
-            return (
-              <div key={row.id} className="rounded-2xl border border-border/60 bg-background/35 p-2.5">
-                <div className="flex min-w-0 items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: row.color }}
-                      />
-                      <p className="truncate text-xs font-bold text-foreground">{row.name}</p>
-                    </div>
-                    <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">
-                      Current <Money value={row.current} currency={currency} /> · Previous{' '}
-                      <Money value={row.previous} currency={currency} />
-                    </p>
-                  </div>
-
-                  <span
-                    className={cn(
-                      'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums sm:text-[11px]',
-                      positive
-                        ? 'bg-destructive/10 text-destructive'
-                        : negative
-                          ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
-                          : 'bg-muted text-muted-foreground'
-                    )}
-                  >
-                    <Icon className="h-3 w-3" />
-                    {negative ? '-' : positive ? '+' : ''}
-                    {Math.abs(Math.round(row.changePercent))}%
-                  </span>
-                </div>
-
-                <div className="mt-3 space-y-1.5">
-                  <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
-                      style={{ width: `${currentWidth}%` }}
-                    />
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted/70">
-                    <div
-                      className="h-full rounded-full bg-muted-foreground/45 transition-all duration-700 ease-out"
-                      style={{ width: `${previousWidth}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </ReflectCard>
-  );
-}
-
 export default function ReflectDeepAnalysis({
   isYear,
-  selectedYear,
-  selectedMonth,
   goals = [],
   goalTransactions = [],
   currency,
