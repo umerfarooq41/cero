@@ -1,12 +1,21 @@
 import { cn } from '@/lib/utils';
 import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard.jsx';
 
+const accentClasses = [
+  'after:bg-red-500',
+  'after:bg-amber-400',
+  'after:bg-blue-500',
+  'after:bg-emerald-500',
+  'after:bg-purple-500',
+];
+
 export default function ReflectInsightCard({
   icon: Icon,
   title,
   text,
   tone = 'default',
   metric,
+  accentIndex = 0,
 }) {
   const metricClass =
     tone === 'good'
@@ -19,10 +28,16 @@ export default function ReflectInsightCard({
             ? 'text-primary bg-primary/10'
             : 'text-primary bg-primary/10';
 
+  const accentClass = accentClasses[accentIndex % accentClasses.length];
+
   return (
     <DashboardSectionCard
       title={title}
       icon={Icon}
+      className={cn(
+        'relative pr-5 after:absolute after:right-0 after:top-6 after:h-10 after:w-1 after:rounded-l-full after:content-[""] sm:pr-6',
+        accentClass
+      )}
       action={
         metric ? (
           <span

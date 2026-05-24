@@ -454,7 +454,7 @@ export default function DashboardReflect() {
 
         <div className="animate-child">
           <div className="grid gap-3 md:grid-cols-2">
-            {insights.map((insight) => (
+            {insights.map((insight, index) => (
               <ReflectInsightCard
                 key={`${isYear ? 'year' : 'month'}-${insight.title}`}
                 icon={insight.icon}
@@ -462,6 +462,7 @@ export default function DashboardReflect() {
                 text={insight.text}
                 tone={insight.tone}
                 metric={insight.metric}
+                accentIndex={index}
               />
             ))}
           </div>
