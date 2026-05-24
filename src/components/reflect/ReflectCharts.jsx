@@ -126,7 +126,8 @@ export default function ReflectCharts({
   spendingBreakdown,
   spendingTrend,
   efficiency,
-  leftToAllocate,
+  expenses = 0,
+  plannedExpenses = 0,
   currency,
   tooltipStyle,
 }) {
@@ -138,6 +139,11 @@ export default function ReflectCharts({
 
   const safeEfficiency = Number.isFinite(Number(efficiency))
     ? Number(efficiency)
+    : 0;
+
+  const safeExpenses = Number.isFinite(Number(expenses)) ? Number(expenses) : 0;
+  const safePlannedExpenses = Number.isFinite(Number(plannedExpenses))
+    ? Number(plannedExpenses)
     : 0;
 
   const totalTrackedIncome = useMemo(
@@ -236,8 +242,8 @@ export default function ReflectCharts({
                 tone="info"
                 title={
                   isYear
-                    ? 'Cash Flow — Year by Quarter'
-                    : 'Cash Flow — Recent 3 Months'
+                    ? 'Cash Flow 鈥� Year by Quarter'
+                    : 'Cash Flow 鈥� Recent 3 Months'
                 }
                 subtitle={
                   isYear
@@ -334,11 +340,11 @@ export default function ReflectCharts({
               <ChartHeading
                 icon={Target}
                 tone={isYear ? 'warning' : 'good'}
-                title={isYear ? 'Yearly Spending Pace' : 'Budget Efficiency'}
+                title={isYear ? 'Yearly Spending Pace' : 'Budget Usage'}
                 subtitle={
                   isYear
                     ? 'Tracked expenses compared with tracked income'
-                    : 'How closely spending follows your plan'
+                    : 'How much of your planned expense budget is already tracked'
                 }
               />
 
@@ -373,7 +379,7 @@ export default function ReflectCharts({
                       {isYear ? `${yearSpendingRatio}%` : `${safeEfficiency}%`}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {isYear ? 'used' : 'score'}
+                      used
                     </span>
                   </div>
                 </div>
@@ -399,25 +405,24 @@ export default function ReflectCharts({
                   ) : (
                     'Add income transactions to calculate yearly spending pace.'
                   )
-                ) : leftToAllocate === 0 ? (
-                  'Every planned amount is allocated.'
-                ) : leftToAllocate > 0 ? (
+                ) : safePlannedExpenses > 0 ? (
                   <>
                     <CurrencyAmount
-                      amount={leftToAllocate}
+                      amount={safeExpenses}
                       currency={currency}
                       compact
                     />
-                    <span>still left to allocate.</span>
+                    <span>of</span>
+                    <CurrencyAmount
+                      amount={safePlannedExpenses}
+                      currency={currency}
+                      compact
+                    />
+                    <span>expense budget tracked.</span>
                   </>
                 ) : (
                   <>
-                    <CurrencyAmount
-                      amount={Math.abs(leftToAllocate)}
-                      currency={currency}
-                      compact
-                    />
-                    <span>over-allocated.</span>
+                    <span>{safeEfficiency}% of planned expense budget tracked.</span>
                   </>
                 )}
               </div>
