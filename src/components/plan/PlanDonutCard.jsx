@@ -49,29 +49,35 @@ export default function PlanDonutCard({
   return (
     <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight tabular-nums">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-muted-foreground">Tracked</p>
+
+          <h2 className="mt-1 truncate text-base font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
             <PlanMoney amount={totalTracked} currency={currency} />
           </h2>
 
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             {tab.label} of{' '}
             <PlanMoney amount={totalPlanned} currency={currency} compact />
           </p>
         </div>
 
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">
+        <div className="shrink-0 text-right">
+          <p className="text-xs font-medium text-muted-foreground">
             {totalRemaining >= 0 ? 'Left' : 'Over'}
           </p>
 
           <p
             className={cn(
-              'text-sm font-bold tabular-nums',
+              'mt-1 text-base font-bold tracking-tight tabular-nums sm:text-lg',
               totalRemaining < 0 ? 'text-red-600' : 'text-foreground'
             )}
           >
-            <PlanMoney amount={Math.abs(totalRemaining)} currency={currency} compact />
+            <PlanMoney
+              amount={Math.abs(totalRemaining)}
+              currency={currency}
+              compact
+            />
           </p>
         </div>
       </div>
