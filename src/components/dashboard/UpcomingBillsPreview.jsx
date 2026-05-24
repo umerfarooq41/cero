@@ -78,7 +78,7 @@ function RuleAmount({ rule, formatCurrency }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 whitespace-nowrap text-xs font-bold tabular-nums sm:text-sm',
+        'inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] font-bold tabular-nums sm:text-sm',
         rule.type === 'income'
           ? 'text-[hsl(var(--success))]'
           : rule.type === 'expense'
@@ -132,7 +132,7 @@ export default function UpcomingBillsPreview({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="min-w-0 divide-y divide-border/50">
           {previewRules.map((rule) => {
             const status = getRecurringStatus(rule);
             const Icon = getTypeIcon(rule.type);
@@ -143,12 +143,12 @@ export default function UpcomingBillsPreview({
             return (
               <div
                 key={rule.id}
-                className="rounded-2xl border border-border/60 bg-background/35 p-3"
+                className="min-w-0 py-2.5 first:pt-0 last:pb-0 sm:py-3"
               >
-                <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                   <span
                     className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9 sm:rounded-2xl',
+                      'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9 sm:rounded-2xl',
                       rule.type === 'income'
                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                         : rule.type === 'expense'
@@ -156,12 +156,12 @@ export default function UpcomingBillsPreview({
                           : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </span>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 items-center gap-1.5">
-                      <p className="min-w-0 truncate text-sm font-bold text-foreground">
+                      <p className="min-w-0 truncate text-xs font-bold text-foreground sm:text-sm">
                         {rule.name}
                       </p>
                       <Badge

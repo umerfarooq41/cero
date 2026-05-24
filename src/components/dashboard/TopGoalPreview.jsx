@@ -11,7 +11,6 @@ import {
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
 } from '@/lib/goals';
-import { cn } from '@/lib/utils';
 
 function getTopGoal(goals = []) {
   return sortGoalsByPriority(goals.filter((goal) => !goal.is_archived))[0] || null;
@@ -19,7 +18,7 @@ function getTopGoal(goals = []) {
 
 function SmallMetric({ label, value }) {
   return (
-    <div className="min-w-0 rounded-2xl border border-border/50 bg-card/45 p-3">
+    <div className="min-w-0 rounded-2xl bg-background/35 p-2.5 sm:p-3">
       <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[11px]">
         {label}
       </p>
@@ -49,13 +48,13 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
       }
     >
       {topGoal ? (
-        <div className="rounded-2xl border border-border/60 bg-background/35 p-3 sm:p-4">
+        <div className="min-w-0">
           <div className="flex min-w-0 items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold tracking-tight text-foreground sm:text-base">
+              <p className="truncate text-sm font-bold tracking-tight text-foreground">
                 {topGoal.name}
               </p>
-              <p className="mt-1 truncate text-xs font-semibold text-muted-foreground tabular-nums sm:text-sm">
+              <p className="mt-1 truncate text-[11px] font-semibold text-muted-foreground tabular-nums sm:text-sm">
                 {formatCurrency(Number(topGoal.current_amount || 0))} /{' '}
                 {formatCurrency(Number(topGoal.target_amount || 0))}
               </p>
@@ -67,14 +66,14 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
             </span>
           </div>
 
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-secondary">
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary sm:mt-4">
             <div
               className="h-full rounded-full bg-primary transition-all"
               style={{ width: `${getGoalProgress(topGoal)}%` }}
             />
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">
             <SmallMetric
               label="Required monthly"
               value={

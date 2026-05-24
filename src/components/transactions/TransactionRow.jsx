@@ -96,6 +96,7 @@ export default function TransactionRow({
   formatCurrency,
   onClick,
   compactSourceBadges = false,
+  flush = false,
 }) {
   const typeConfig = {
     income: {
@@ -148,7 +149,10 @@ export default function TransactionRow({
   return (
     <div
       onClick={onClick}
-      className="flex min-w-0 items-center gap-2.5 px-2.5 py-2.5 min-h-[56px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:px-3 sm:py-3 sm:min-h-[64px]"
+      className={cn(
+        'flex min-w-0 items-center gap-2 py-2.5 min-h-[56px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:py-3 sm:min-h-[64px]',
+        flush ? 'px-0' : 'px-2.5 sm:px-3'
+      )}
     >
       {isTransfer ? (
         <div className="h-7 w-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0 sm:h-8 sm:w-8">
@@ -178,7 +182,7 @@ export default function TransactionRow({
       <div className="shrink-0 text-right">
         <div
           className={cn(
-            'inline-flex items-center gap-0.5 whitespace-nowrap text-xs font-semibold tabular-nums sm:gap-1 sm:text-sm',
+            'inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] font-semibold tabular-nums sm:gap-1 sm:text-sm',
             config.color
           )}
         >

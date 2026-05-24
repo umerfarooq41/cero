@@ -13,11 +13,11 @@ export default function DashboardSectionCard({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5',
+        'overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
         className
       )}
     >
-      <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
+      <div className="mb-3 flex min-w-0 items-start justify-between gap-2.5 sm:mb-4 sm:gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
             {Icon ? (
@@ -39,7 +39,7 @@ export default function DashboardSectionCard({
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
 
-      <div className={contentClassName}>{children}</div>
+      <div className={cn('min-w-0', contentClassName)}>{children}</div>
     </section>
   );
 }

@@ -258,8 +258,7 @@ export default function DashboardOverview() {
                 }
               />
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/35">
-                <div className="divide-y divide-border/50">
+              <div className="min-w-0 divide-y divide-border/50">
                   {recentTransactions.map((transaction) => (
                     <TransactionRow
                       key={transaction.id}
@@ -269,12 +268,12 @@ export default function DashboardOverview() {
                       toAccount={getTransactionToAccount(transaction, accounts)}
                       formatCurrency={formatCurrency}
                       compactSourceBadges
+                      flush
                       onClick={() =>
                         navigate(`/transactions/${transaction.id}/edit`)
                       }
                     />
                   ))}
-                </div>
               </div>
             )}
           </DashboardCard>
