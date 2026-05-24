@@ -100,7 +100,7 @@ async function deleteLinkedGoalContributions(transaction) {
   );
 }
 
-async function recalculateGoalCurrentAmount(goalId, savingsGoals = []) {
+export async function recalculateGoalCurrentAmount(goalId, savingsGoals = []) {
   if (!goalId) return;
 
   const goals = savingsGoals.length ? savingsGoals : await savingsGoalsApi.list();

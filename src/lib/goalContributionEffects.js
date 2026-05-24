@@ -1,0 +1,157 @@
+import {
+  accountsApi,
+  budgetPlansApi,
+  goalContributionsApi,
+  transactionsApi,
+} from '@/lib/budgetData';
+import { getDefaultSavingsCategory } from '@/lib/goals';
+import {
+  getTransactionDeltas,
+  recalculateGoalCurrentAmount,
+} from '@/lib/transactionEffects';
+
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function monthKeyFromDate(dateValue) {
+  return String(dateValue || todayIsoDate()).slice(0, 7);
+}
+
+function safeAmount(value) {
+  return Math.max(0, Number(value || 0));
+}
+
+function findGoalPlanRow(goal, allocations = []) {
+  return allocations.find((allocation) => {
+    const sourceType = String(allocation?.source_type || '').toLowerCase();
+
+    return (
+      (sourceType === 'goal' || sourceType === 'savings_goal') &&
+      allocation?.source_id === goal?.id
+    );
+  });
+}
+
+async function applyAccountBalanceDeltas(transactionPayload, accounts = []) {
+  const deltas = getTransactionDeltas(transactionPayload, accounts);
+
+  await Promise.all(
+    Object.entries(deltas).map(([accountId, delta]) => {
+      const account = accounts.find((item) => item.id === accountId);
+
+      if (!account) return Promise.resolve();
+
+      return accountsApi.update(accountId, {
+        balance: (Number(account.balance) || 0) + delta,
+      });
+    })
+  );
+}
+
+export async function postGoalContribution({
+  goal,
+  amount,
+  date,
+  note,
+  accounts = [],
+  categories = [],
+  allocations = [],
+  month,
+}) {
+  if (!goal?.id) {
+    throw new Error('Goal not found');
+  }
+
+  const contributionAmount = safeAmount(amount);
+
+  if (!contributionAmount) {
+    throw new Error('Enter a valid contribution amount');
+  }
+
+  const fromAccount = accounts.find((account) => account.id === goal.from_account_id);
+  const toAccount = accounts.find((account) => account.id === goal.to_account_id);
+
+  if (!fromAccount || !toAccount) {
+    throw new Error('This goal is missing its from/to accounts');
+  }
+
+  if (fromAccount.id === toAccount.id) {
+    throw new Error('Goal from/to accounts must be different');
+  }
+
+  const contributionDate = date || todayIsoDate();
+  const contributionMonth = month || monthKeyFromDate(contributionDate);
+  const contributionNote = note || `Contribution to ${goal.name}`;
+  const savingsCategory = getDefaultSavingsCategory(categories);
+  const existingGoalPlan = findGoalPlanRow(goal, allocations);
+  const plannedAmountSnapshot = safeAmount(goal.month_planned_amount);
+
+  if (!existingGoalPlan && plannedAmountSnapshot > 0) {
+    await budgetPlansApi.upsert({
+      category_id: null,
+      month: contributionMonth,
+      planned_amount: plannedAmountSnapshot,
+      source_type: 'goal',
+      source_id: goal.id,
+      budget_type: 'savings',
+      label: goal.name,
+      icon: goal.icon_key || 'target',
+      color: goal.color_key || '#276FE4',
+    });
+  }
+
+  const contribution = await goalContributionsApi.create({
+    goal_id: goal.id,
+    account_id: fromAccount.id,
+    amount: contributionAmount,
+    contribution_date: contributionDate,
+    note: contributionNote,
+  });
+
+  const transactionPayload = {
+    amount: contributionAmount,
+    type: 'transfer',
+    date: contributionDate,
+    note: contributionNote,
+    category_id: savingsCategory?.id || null,
+    account_id: fromAccount.id,
+    to_account_id: toAccount.id,
+    savings_goal_id: goal.id,
+    goal_contribution_id: contribution.id,
+  };
+
+  const transaction = await transactionsApi.create(transactionPayload);
+
+  await applyAccountBalanceDeltas(transactionPayload, accounts);
+
+  await goalContributionsApi.update(contribution.id, {
+    transaction_id: transaction.id,
+  });
+
+  const updatedGoal = await recalculateGoalCurrentAmount(goal.id);
+
+  return {
+    contribution,
+    transaction,
+    updatedGoal,
+  };
+}
+
+export function invalidateGoalContributionQueries(queryClient) {
+  if (!queryClient) return;
+
+  [
+    ['transactions'],
+    ['all-transactions'],
+    ['accounts'],
+    ['savings-goals'],
+    ['manage-savings-goals'],
+    ['goal-contributions'],
+    ['allocations'],
+    ['all-allocations'],
+    ['budget-summary'],
+  ].forEach((queryKey) => {
+    queryClient.invalidateQueries({ queryKey });
+  });
+}

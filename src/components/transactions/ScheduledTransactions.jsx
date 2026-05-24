@@ -37,10 +37,7 @@ import {
 import { useCurrency } from '@/hooks/useCurrency';
 import {
   accountsApi,
-  budgetPlansApi,
-  goalContributionsApi,
   recurringTransactionsApi,
-  savingsGoalsApi,
   transactionsApi,
 } from '@/lib/budgetData';
 import {
@@ -52,8 +49,6 @@ import {
   todayIsoDate as recurringTodayIsoDate,
 } from '@/lib/recurringTransactions';
 import {
-  formatGoalDate,
-  getDefaultSavingsCategory,
   getGoalProgress,
   getGoalRemaining,
   getGoalStatus,
@@ -61,6 +56,10 @@ import {
   sortGoalsByPriority,
   todayIsoDate as goalTodayIsoDate,
 } from '@/lib/goals';
+import {
+  invalidateGoalContributionQueries,
+  postGoalContribution,
+} from '@/lib/goalContributionEffects';
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
@@ -958,80 +957,21 @@ export default function ScheduledTransactions() {
   const handleGoalContribution = async ({ amount, date, note }) => {
     if (!selectedGoal) return;
 
-    const fromAccount = accounts.find((account) => account.id === selectedGoal.from_account_id);
-    const toAccount = accounts.find((account) => account.id === selectedGoal.to_account_id);
-    const savingsCategory = getDefaultSavingsCategory(categories);
-
-    if (!amount || amount <= 0) {
-      toast.error('Enter a valid contribution amount');
-      return;
-    }
-
-    if (!fromAccount || !toAccount) {
-      toast.error('This goal is missing its from/to accounts');
-      return;
-    }
-
-    if (fromAccount.id === toAccount.id) {
-      toast.error('Goal from/to accounts must be different');
-      return;
-    }
-
     setSavingGoalId(selectedGoal.id);
 
     try {
-      const contributionDate = date || goalTodayIsoDate();
-      const contributionNote = note || `Contribution to ${selectedGoal.name}`;
-
-      const existingGoalPlan = getGoalPlanRow(selectedGoal, allocations);
-      const plannedAmountSnapshot = Number(selectedGoal.month_planned_amount || 0);
-
-      if (!existingGoalPlan && plannedAmountSnapshot > 0) {
-        await budgetPlansApi.upsert({
-          category_id: null,
-          month: currentMonth,
-          planned_amount: plannedAmountSnapshot,
-          source_type: 'goal',
-          source_id: selectedGoal.id,
-          budget_type: 'savings',
-          label: selectedGoal.name,
-          icon: selectedGoal.icon_key || 'target',
-          color: selectedGoal.color_key || '#276FE4',
-        });
-      }
-
-      const contribution = await goalContributionsApi.create({
-        goal_id: selectedGoal.id,
-        account_id: fromAccount.id,
+      await postGoalContribution({
+        goal: selectedGoal,
         amount,
-        contribution_date: contributionDate,
-        note: contributionNote,
+        date,
+        note,
+        accounts,
+        categories,
+        allocations,
+        month: currentMonth,
       });
 
-      const transactionPayload = {
-        amount,
-        type: 'transfer',
-        date: contributionDate,
-        note: contributionNote,
-        category_id: savingsCategory?.id || null,
-        account_id: fromAccount.id,
-        to_account_id: toAccount.id,
-        savings_goal_id: selectedGoal.id,
-        goal_contribution_id: contribution.id,
-      };
-
-      const transaction = await transactionsApi.create(transactionPayload);
-      await updateAccountBalances(transactionPayload);
-
-      await goalContributionsApi.update(contribution.id, {
-        transaction_id: transaction.id,
-      });
-
-      await savingsGoalsApi.update(selectedGoal.id, {
-        current_amount: Math.max(0, Number(selectedGoal.current_amount || 0)) + Number(amount || 0),
-      });
-
-      invalidateData();
+      invalidateGoalContributionQueries(queryClient);
       setSelectedGoal(null);
       toast.success('Goal contribution posted');
     } catch (error) {
