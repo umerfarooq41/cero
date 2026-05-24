@@ -214,6 +214,7 @@ export default function DashboardOverview() {
                 label="Planned"
                 value={formatCurrency(plannedOutflow || 0)}
                 icon={Receipt}
+                tone="info"
               />
 
               <StatPill
