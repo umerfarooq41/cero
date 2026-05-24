@@ -182,11 +182,11 @@ function getToneClasses(tone = 'default') {
 
 function CardHeading({ icon: Icon, title, badge }) {
   return (
-    <div className="flex items-start justify-between gap-3">
+    <div className="flex items-start justify-between gap-2">
       <div className="flex min-w-0 items-center gap-2">
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
-        <p className="min-w-0 text-sm font-semibold leading-5 text-foreground">
+        <p className="min-w-0 text-sm font-bold leading-5 text-foreground">
           {title}
         </p>
       </div>
@@ -198,7 +198,7 @@ function CardHeading({ icon: Icon, title, badge }) {
 
 function MoneyRow({ label, amount, currency, tone }) {
   return (
-    <div className="flex items-center justify-between gap-3 text-sm">
+    <div className="flex items-center justify-between gap-2 text-xs sm:text-sm">
       <span className="text-muted-foreground">{label}</span>
 
       <span className={cn('font-semibold tabular-nums', tone)}>
@@ -260,9 +260,9 @@ function HeroCashFlowCard({
     income > 0 ? Math.min((Math.max(expenses, 0) / income) * 100, 100) : 0;
 
   return (
-    <ReflectCard className="relative min-h-[220px] overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-5 shadow-md backdrop-blur-xl sm:col-span-2">
-      <div className="relative flex h-full flex-col justify-between gap-6">
-        <div className="space-y-2">
+    <ReflectCard className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:col-span-2 sm:p-4">
+      <div className="relative flex h-full flex-col justify-between gap-3">
+        <div className="space-y-1.5">
           <CardHeading
             icon={BarChart3}
             title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
@@ -283,7 +283,7 @@ function HeroCashFlowCard({
 
           <div
             className={cn(
-              'pt-3 text-2xl font-bold tracking-tight tabular-nums',
+              'pt-2 text-lg font-bold tracking-tight tabular-nums sm:text-xl',
               positive
                 ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-red-600 dark:text-red-400'
@@ -293,7 +293,7 @@ function HeroCashFlowCard({
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="grid gap-2">
             <MoneyRow
               label="Income"
@@ -310,7 +310,7 @@ function HeroCashFlowCard({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <AnimatedBar
               value={savedProgress}
               className={positive ? 'bg-emerald-400' : 'bg-red-400'}
@@ -337,21 +337,21 @@ function SecondaryCard({
   const toneClasses = getToneClasses(tone);
 
   return (
-    <ReflectCard className="relative min-h-[160px] overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-4 shadow-md backdrop-blur-xl">
+    <ReflectCard className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4">
       <div
         className={cn(
-          'pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl',
+          'pointer-events-none absolute -right-10 -top-10 h-20 w-20 rounded-full blur-3xl',
           toneClasses.glow
         )}
       />
 
-      <div className="relative flex h-full flex-col justify-between gap-5">
+      <div className="relative flex h-full flex-col justify-between gap-3">
         <div>
           <CardHeading icon={Icon} title={title} tone={tone} />
 
           <div
             className={cn(
-              'mt-3 text-2xl font-bold tracking-tight tabular-nums',
+              'mt-2 text-lg font-bold tracking-tight tabular-nums sm:text-xl',
               toneClasses.text
             )}
           >
@@ -546,7 +546,7 @@ export default function ReflectSummaryCard({
                 <p className="text-xs font-medium text-muted-foreground">
                   Total YTD
                 </p>
-                <div className="mt-1 text-xl font-bold tracking-tight tabular-nums text-foreground">
+                <div className="mt-1 text-base font-bold tracking-tight tabular-nums text-foreground sm:text-lg">
                   <CurrencyAmount
                     amount={computed.yearlyTotalYtd}
                     currency={currency}
@@ -554,7 +554,7 @@ export default function ReflectSummaryCard({
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <MoneyRow
                   label="Monthly Avg"
                   amount={computed.monthlyAverage}
@@ -594,7 +594,7 @@ export default function ReflectSummaryCard({
                 />
               </div>
 
-              <p className="text-xs leading-snug text-muted-foreground">
+              <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
                 {computed.yearlyPlanCap === 0
                   ? 'Add yearly or monthly plans to compare usage against the year.'
                   : computed.paceDifference >= 0
@@ -625,7 +625,7 @@ export default function ReflectSummaryCard({
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <MoneyRow
                   label="Planned"
                   amount={plannedExpenses}
@@ -659,7 +659,7 @@ export default function ReflectSummaryCard({
                     delay="delay-500"
                   />
 
-                  <p className="text-xs leading-snug text-muted-foreground">
+                  <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
                     Daily Limit:{' '}
                     <span className="font-semibold text-foreground">
                       <CurrencyAmount
@@ -674,7 +674,7 @@ export default function ReflectSummaryCard({
               )}
 
               {plannedExpenses === 0 && (
-                <p className="text-xs leading-snug text-muted-foreground">
+                <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
                   No planned expense budget for this month.
                 </p>
               )}

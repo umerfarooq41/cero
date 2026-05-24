@@ -29,19 +29,19 @@ const safeNumber = (value) => Number(value || 0);
 
 function SectionHeading({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-4 min-w-0">
+    <div className="mb-3 min-w-0">
       <div className="flex min-w-0 items-center gap-2">
         {Icon ? (
           <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
         ) : null}
 
-        <h3 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground md:text-base">
+        <h3 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground">
           {title}
         </h3>
       </div>
 
       {subtitle ? (
-        <p className="mt-1 truncate text-xs leading-5 text-muted-foreground sm:whitespace-normal">
+        <p className="mt-1 truncate text-xs leading-4 text-muted-foreground">
           {subtitle}
         </p>
       ) : null}
@@ -51,7 +51,7 @@ function SectionHeading({ icon: Icon, title, subtitle }) {
 
 function EmptyBlock({ title, text }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-center">
+    <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-3 py-5 text-center">
       <p className="text-sm font-semibold text-foreground">{title}</p>
       <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
         {text}
@@ -60,7 +60,7 @@ function EmptyBlock({ title, text }) {
   );
 }
 
-function ProgressRing({ value, children, size = 78 }) {
+function ProgressRing({ value, children, size = 64 }) {
   const safeValue = clampPercent(value);
   const stroke = 8;
   const radius = (size - stroke) / 2;
@@ -122,15 +122,15 @@ function MiniMetric({ label, value, subtext, tone = 'default' }) {
           : 'text-foreground';
 
   return (
-    <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-2.5 sm:p-3">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[11px]">
+    <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-2">
+      <p className="truncate text-[9px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[10px]">
         {label}
       </p>
-      <div className={cn('mt-1 truncate text-xs font-bold tabular-nums sm:text-sm', toneClass)}>
+      <div className={cn('mt-1 truncate text-[11px] font-bold tabular-nums sm:text-xs', toneClass)}>
         {value}
       </div>
       {subtext ? (
-        <p className="mt-1 truncate text-[10px] leading-4 text-muted-foreground sm:text-[11px]">
+        <p className="mt-0.5 truncate text-[9px] leading-3 text-muted-foreground sm:text-[10px]">
           {subtext}
         </p>
       ) : null}
@@ -219,7 +219,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   );
 
   return (
-    <ReflectCard className="p-5">
+    <ReflectCard className="rounded-3xl p-3 sm:p-4">
       <SectionHeading
         icon={Target}
         title="Goal Progress Analysis"
@@ -233,7 +233,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
         />
       ) : (
         <div className="flex min-w-0 gap-3">
-          <div className="flex min-w-0 flex-[1.05] items-center gap-3 rounded-2xl border border-border/60 bg-background/35 p-3 sm:rounded-3xl sm:p-4">
+          <div className="flex min-w-0 flex-[1.05] items-center gap-2 rounded-2xl border border-border/60 bg-background/35 p-2.5 sm:p-3">
             <ProgressRing value={stats.overallProgress}>
               <div>
                 <p className="text-lg font-bold leading-none tabular-nums">
@@ -266,18 +266,18 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
             </div>
           </div>
 
-          <div className="min-w-0 flex-[1.15] space-y-3">
+          <div className="min-w-0 flex-[1.15] space-y-2">
             {priorityGoals.map((goal) => {
               const progress = getGoalProgress(goal);
               const track = getGoalTrackState(goal);
               const monthlyRequired = getMonthlyRequiredSaving(goal);
 
               return (
-                <div key={goal.id} className="rounded-2xl border border-border/60 bg-background/35 p-3">
+                <div key={goal.id} className="rounded-2xl border border-border/60 bg-background/35 p-2.5">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-foreground sm:text-sm">{goal.name}</p>
-                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground sm:text-xs">
+                      <p className="truncate text-xs font-bold text-foreground">{goal.name}</p>
+                      <p className="mt-0.5 truncate text-[10px] text-muted-foreground sm:text-[11px]">
                         <Money value={goal.current_amount} currency={currency} /> of{' '}
                         <Money value={goal.target_amount} currency={currency} />
                       </p>
@@ -285,7 +285,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
 
                     <span
                       className={cn(
-                        'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold sm:text-[11px]',
+                        'shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold sm:text-[10px]',
                         track.tone === 'good'
                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                           : track.tone === 'warning'
@@ -297,14 +297,14 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                     </span>
                   </div>
 
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
                       style={{ width: `${clampPercent(progress)}%` }}
                     />
                   </div>
 
-                  <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground sm:text-xs">
+                  <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-muted-foreground sm:text-[11px]">
                     <span>{Math.round(progress)}% complete</span>
                     <span>
                       {monthlyRequired === null ? 'No deadline' : `${formatCurrencyText(monthlyRequired, currency)}/mo`}
@@ -343,7 +343,7 @@ function BudgetVsActual({ rows, currency }) {
   const variance = totals.planned - totals.actual;
 
   return (
-    <ReflectCard className="p-5">
+    <ReflectCard className="rounded-3xl p-3 sm:p-4">
       <SectionHeading
         icon={BarChart3}
         title="Budget vs Actual"
@@ -356,7 +356,7 @@ function BudgetVsActual({ rows, currency }) {
           text="Add planned category amounts and transactions to see budget variance here."
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
             <MiniMetric
               label="Planned"
@@ -380,7 +380,7 @@ function BudgetVsActual({ rows, currency }) {
               const good = isIncome ? row.actual >= row.planned : !row.isOver;
 
               return (
-                <div key={row.id} className="rounded-2xl border border-border/60 bg-background/35 p-3">
+                <div key={row.id} className="rounded-2xl border border-border/60 bg-background/35 p-2.5">
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex min-w-0 items-center gap-2">
@@ -388,7 +388,7 @@ function BudgetVsActual({ rows, currency }) {
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ backgroundColor: row.color }}
                         />
-                        <p className="truncate text-xs font-semibold text-foreground sm:text-sm">{row.name}</p>
+                        <p className="truncate text-xs font-bold text-foreground">{row.name}</p>
                       </div>
                       <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">
                         {typeLabel(row.type)} · Planned{' '}
@@ -410,7 +410,7 @@ function BudgetVsActual({ rows, currency }) {
                     </span>
                   </div>
 
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn(
                         'h-full rounded-full transition-all duration-700 ease-out',
@@ -420,7 +420,7 @@ function BudgetVsActual({ rows, currency }) {
                     />
                   </div>
 
-                  <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                  <div className="mt-2 flex justify-between text-[10px] text-muted-foreground sm:text-[11px]">
                     <span>{Math.round(row.usedPercent)}% used</span>
                     <span>{row.isOver ? 'Above plan' : 'Within plan'}</span>
                   </div>
@@ -439,7 +439,7 @@ function CategoryTrends({ rows, comparablePeriodLabel, isYear, currency }) {
   const visibleRows = safeRows.slice(0, 6);
 
   return (
-    <ReflectCard className="p-5">
+    <ReflectCard className="rounded-3xl p-3 sm:p-4">
       <SectionHeading
         icon={TrendingUp}
         title="Category Trends"
@@ -466,7 +466,7 @@ function CategoryTrends({ rows, comparablePeriodLabel, isYear, currency }) {
             const previousWidth = clampPercent((row.previous / maxAmount) * 100);
 
             return (
-              <div key={row.id} className="rounded-2xl border border-border/60 bg-background/35 p-3">
+              <div key={row.id} className="rounded-2xl border border-border/60 bg-background/35 p-2.5">
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex min-w-0 items-center gap-2">
@@ -474,7 +474,7 @@ function CategoryTrends({ rows, comparablePeriodLabel, isYear, currency }) {
                         className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: row.color }}
                       />
-                      <p className="truncate text-xs font-semibold text-foreground sm:text-sm">{row.name}</p>
+                      <p className="truncate text-xs font-bold text-foreground">{row.name}</p>
                     </div>
                     <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">
                       Current <Money value={row.current} currency={currency} /> · Previous{' '}
@@ -530,7 +530,7 @@ export default function ReflectDeepAnalysis({
   currency,
 }) {
   return (
-    <section className="mb-5 space-y-4">
+    <section className="mb-5 space-y-3">
       <GoalProgressAnalysis
         isYear={isYear}
         goals={goals}

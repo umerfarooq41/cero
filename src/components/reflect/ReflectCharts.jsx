@@ -102,17 +102,17 @@ function ChartShell({ className = '' }) {
 
 function ChartHeading({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-5 min-w-0">
+    <div className="mb-3 min-w-0">
       <div className="flex min-w-0 items-center gap-2">
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
-        <h3 className="min-w-0 text-sm font-semibold leading-5 tracking-tight text-foreground">
+        <h3 className="min-w-0 text-sm font-bold leading-5 tracking-tight text-foreground">
           {title}
         </h3>
       </div>
 
       {subtitle ? (
-        <p className="mt-1 text-left text-xs leading-5 text-muted-foreground">
+        <p className="mt-1 truncate text-left text-xs leading-4 text-muted-foreground">
           {subtitle}
         </p>
       ) : null}
@@ -227,10 +227,10 @@ export default function ReflectCharts({
 
   return (
     <>
-      <div className="mb-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mb-4 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="rounded-3xl p-3 sm:p-4">
               <ChartHeading
                 icon={BarChart3}
                 tone="info"
@@ -246,7 +246,7 @@ export default function ReflectCharts({
                 }
               />
 
-              <div className={`${CHART_WRAP_CLASS} h-64 min-h-[256px]`}>
+              <div className={`${CHART_WRAP_CLASS} h-52 min-h-[208px] sm:h-56 sm:min-h-[224px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -330,7 +330,7 @@ export default function ReflectCharts({
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="rounded-3xl p-3 sm:p-4">
               <ChartHeading
                 icon={Target}
                 tone={isYear ? 'warning' : 'good'}
@@ -369,7 +369,7 @@ export default function ReflectCharts({
                   </svg>
 
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold tabular-nums">
+                    <span className="text-lg font-bold tabular-nums sm:text-xl">
                       {isYear ? `${yearSpendingRatio}%` : `${safeEfficiency}%`}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -379,7 +379,7 @@ export default function ReflectCharts({
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-x-1 gap-y-1 text-center text-sm font-medium tabular-nums">
+              <div className="flex flex-wrap justify-center gap-x-1 gap-y-1 text-center text-xs font-medium tabular-nums sm:text-sm">
                 {isYear ? (
                   totalTrackedIncome > 0 ? (
                     <>
@@ -426,10 +426,10 @@ export default function ReflectCharts({
         </RevealChartCard>
       </div>
 
-      <div className="mb-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mb-4 grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="rounded-3xl p-3 sm:p-4">
               <ChartHeading
                 icon={ChartPie}
                 tone="warning"
@@ -438,9 +438,9 @@ export default function ReflectCharts({
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="flex flex-col items-center gap-6 md:flex-row lg:flex-col xl:flex-row">
-                  <div className="relative h-44 w-44 shrink-0">
-                    <div className={`${CHART_WRAP_CLASS} h-44 w-44`}>
+                <div className="flex flex-col items-center gap-3 md:flex-row lg:flex-col xl:flex-row">
+                  <div className="relative h-32 w-32 sm:h-36 sm:w-36 shrink-0">
+                    <div className={`${CHART_WRAP_CLASS} h-32 w-32 sm:h-36 sm:w-36`}>
                       {isVisible ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart
@@ -455,8 +455,8 @@ export default function ReflectCharts({
                               data={groupedSpendingBreakdown}
                               cx="50%"
                               cy="50%"
-                              innerRadius={45}
-                              outerRadius={72}
+                              innerRadius={34}
+                              outerRadius={56}
                               paddingAngle={3}
                               dataKey="value"
                               stroke="hsl(var(--card))"
@@ -510,21 +510,21 @@ export default function ReflectCharts({
                     </div>
                   </div>
 
-                  <div className="w-full flex-1 space-y-3">
+                  <div className="w-full flex-1 space-y-2">
                     {groupedSpendingBreakdown.map((category) => {
                       const categoryColor = getCategoryColor(category);
 
                       return (
                         <div
                           key={category.id || category.name}
-                          className="flex items-center gap-3"
+                          className="flex min-w-0 items-center gap-2"
                         >
                           <div
-                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            className="h-2 w-2 shrink-0 rounded-full"
                             style={{ backgroundColor: categoryColor }}
                           />
 
-                          <span className="min-w-0 flex-1 truncate text-sm">
+                          <span className="min-w-0 flex-1 truncate text-xs sm:text-sm">
                             {category.name}
                           </span>
 
@@ -532,7 +532,7 @@ export default function ReflectCharts({
                             {formatPercent(category.percent)}
                           </span>
 
-                          <span className="text-sm font-medium tabular-nums">
+                          <span className="text-xs font-medium tabular-nums sm:text-sm">
                             <CurrencyAmount
                               amount={category.value}
                               currency={currency}
@@ -545,7 +545,7 @@ export default function ReflectCharts({
                   </div>
                 </div>
               ) : (
-                <div className="py-12 text-center">
+                <div className="py-8 text-center">
                   <p className="text-sm font-medium">No expense data yet</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Add expenses to see category breakdown.
@@ -558,7 +558,7 @@ export default function ReflectCharts({
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-5">
+            <ReflectCard className="rounded-3xl p-3 sm:p-4">
               <ChartHeading
                 icon={LineChart}
                 tone="info"
@@ -575,7 +575,7 @@ export default function ReflectCharts({
               />
 
               {safeSpendingTrend.length > 0 ? (
-                <div className={`${CHART_WRAP_CLASS} h-56 min-h-[224px]`}>
+                <div className={`${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px]`}>
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
@@ -647,7 +647,7 @@ export default function ReflectCharts({
                   )}
                 </div>
               ) : (
-                <div className="py-12 text-center">
+                <div className="py-8 text-center">
                   <p className="text-sm font-medium">No spending data yet</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Expense transactions will appear here.
