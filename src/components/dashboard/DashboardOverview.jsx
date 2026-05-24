@@ -95,19 +95,21 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
 
   return (
     <div className="flex items-center justify-between gap-2 py-2">
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex min-w-0 items-center gap-2">
         {Icon && (
-          <span className={cn('rounded-xl p-1.5', iconClass)}>
-            <Icon className="h-4 w-4" />
+          <span className={cn('rounded-lg p-1.5', iconClass)}>
+            <Icon className="h-3.5 w-3.5" />
           </span>
         )}
-        <span className="truncate text-base font-bold tracking-tight text-muted-foreground sm:text-lg">
+
+        <span className="truncate text-sm font-bold tracking-tight text-muted-foreground sm:text-base">
           {label}
         </span>
       </div>
+
       <span
         className={cn(
-          'shrink-0 text-base font-bold tabular-nums tracking-tight sm:text-lg',
+          'shrink-0 text-sm font-bold tabular-nums tracking-tight sm:text-base',
           valueClass
         )}
       >
