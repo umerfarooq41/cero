@@ -155,14 +155,12 @@ function buildReflectInsights({
       text: cashFlowPositive ? (
         <>
           Income was higher than expenses by{' '}
-          <MoneyText amount={netCashFlow} currency={currency} /> this {periodName},
-          so the period ended with positive net cash flow.
+          <MoneyText amount={netCashFlow} currency={currency} /> this {periodName}, so the period ended with positive net cash flow.
         </>
       ) : (
         <>
           Expenses were higher than income by{' '}
-          <MoneyText amount={Math.abs(netCashFlow)} currency={currency} /> this{' '}
-          {periodName}, so review the largest spending areas.
+          <MoneyText amount={Math.abs(netCashFlow)} currency={currency} /> this {periodName}, so review the largest spending areas.
         </>
       ),
       tone: cashFlowPositive ? 'good' : 'bad',
@@ -178,9 +176,7 @@ function buildReflectInsights({
           text:
             totalPlannedOutflow > 0 ? (
               <>
-                You have tracked{' '}
-                <MoneyText amount={totalTrackedOutflow} currency={currency} /> from
-                a planned yearly outflow of{' '}
+                You have tracked <MoneyText amount={totalTrackedOutflow} currency={currency} /> from a planned yearly outflow of{' '}
                 <MoneyText amount={totalPlannedOutflow} currency={currency} />.
               </>
             ) : (
@@ -205,19 +201,13 @@ function buildReflectInsights({
             plannedExpenses > 0 ? (
               monthlyBudgetRemaining >= 0 ? (
                 <>
-                  You still have{' '}
-                  <MoneyText amount={monthlyBudgetRemaining} currency={currency} />{' '}
-                  left from the planned expense budget of{' '}
+                  You still have <MoneyText amount={monthlyBudgetRemaining} currency={currency} /> left from the planned expense budget of{' '}
                   <MoneyText amount={plannedExpenses} currency={currency} />.
                 </>
               ) : (
                 <>
                   Expenses are over the planned budget by{' '}
-                  <MoneyText
-                    amount={Math.abs(monthlyBudgetRemaining)}
-                    currency={currency}
-                  />
-                  , so optional spending needs attention.
+                  <MoneyText amount={Math.abs(monthlyBudgetRemaining)} currency={currency} />, so optional spending needs attention.
                 </>
               )
             ) : (
@@ -235,8 +225,7 @@ function buildReflectInsights({
       ),
       text: topCategory ? (
         <>
-          {topCategory.name} is the largest category, using {topCategoryPercent}% of
-          total expenses this {periodName}.
+          {topCategory.name} is the largest category, using {topCategoryPercent}% of total expenses this {periodName}.
         </>
       ) : (
         `No expense category has been recorded for this ${periodName} yet; category insights will appear after transactions are added.`
@@ -252,25 +241,24 @@ function buildReflectInsights({
     },
     {
       icon: PiggyBank,
-      title: `${periodLabel} Savings / Debt Rate`,
+      title: `${periodLabel} Savings & Debt Rate`,
       metric: hasIncome ? formatPercent(savingsRate) : 'No income',
       text: hasIncome ? (
         isYear ? (
           <>
-            Your savings/debt rate is {formatPercent(savingsRate)}; this includes{' '}
+            Your savings and debt rate is {formatPercent(savingsRate)}; this includes{' '}
             <MoneyText amount={trackedSavings} currency={currency} /> saved and{' '}
             <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt.
           </>
         ) : (
           <>
-            Your savings/debt rate is {formatPercent(savingsRate)} with{' '}
+            Your savings and debt rate is {formatPercent(savingsRate)}; this includes{' '}
             <MoneyText amount={trackedSavings} currency={currency} /> saved and{' '}
-            <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt
-            this month.
+            <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt.
           </>
         )
       ) : (
-        `Add income transactions to calculate the ${periodName} savings/debt rate and cash-flow margin.`
+        `Add income transactions to calculate the ${periodName} savings and debt allocation rate.`
       ),
       tone: hasIncome ? getToneFromSavingsRate(savingsRate) : 'info',
     },
@@ -285,8 +273,7 @@ function buildReflectInsights({
       text: isYear ? (
         totalPlannedOutflow > 0 ? (
           <>
-            The year is {Math.round(progressPercent)}% complete and plan usage is{' '}
-            {Math.round(yearlyPlanUsedPercent)}%; remaining planned room is{' '}
+            The year is {Math.round(progressPercent)}% complete and plan usage is {Math.round(yearlyPlanUsedPercent)}%; remaining planned room is{' '}
             <MoneyText amount={yearlyPlanRemaining} currency={currency} />.
           </>
         ) : (
@@ -294,9 +281,7 @@ function buildReflectInsights({
         )
       ) : plannedExpenses > 0 ? (
         <>
-          The month is {Math.round(progressPercent)}% complete while expense usage is{' '}
-          {Math.round(monthlyBudgetUsedPercent)}%, showing whether spending pace is
-          comfortable or tight.
+          The month is {Math.round(progressPercent)}% complete while expense usage is {Math.round(monthlyBudgetUsedPercent)}%, showing whether spending pace is comfortable or tight.
         </>
       ) : (
         'Monthly pace tracking starts after adding an expense plan for the selected month.'
@@ -304,40 +289,6 @@ function buildReflectInsights({
       tone: isYear ? budgetTone : plannedExpenses > 0 ? budgetTone : 'info',
     },
   ];
-}
-
-function isGoalTransfer(transaction) {
-  return Boolean(
-    transaction?.savings_goal_id ||
-      transaction?.goal_id ||
-      transaction?.goal_contribution_id ||
-      transaction?.source_type === 'goal' ||
-      transaction?.source_type === 'savings_goal'
-  );
-}
-
-function getTransactionPeriodKey(transaction) {
-  const value =
-    transaction?.date ||
-    transaction?.transaction_date ||
-    transaction?.created_at ||
-    transaction?.posted_at;
-
-  if (!value) return '';
-
-  return String(value).slice(0, 7);
-}
-
-function getTransactionYear(transaction) {
-  const value =
-    transaction?.date ||
-    transaction?.transaction_date ||
-    transaction?.created_at ||
-    transaction?.posted_at;
-
-  if (!value) return '';
-
-  return String(value).slice(0, 4);
 }
 
 export default function DashboardReflect() {
@@ -377,6 +328,7 @@ export default function DashboardReflect() {
 
   const {
     isYear,
+    periodTransactions,
     income,
     expenses,
     trackedSavings,
@@ -398,18 +350,7 @@ export default function DashboardReflect() {
     cashFlow,
     spendingTrend,
     topCategory,
-    periodTransactions,
   } = analysis;
-
-  const goalTransactions = useMemo(() => {
-    const safeTransactions = Array.isArray(periodTransactions)
-      ? periodTransactions
-      : [];
-
-    return safeTransactions.filter(
-      (transaction) => transaction?.type === 'transfer' && isGoalTransfer(transaction)
-    );
-  }, [periodTransactions]);
 
   const insights = useMemo(
     () =>
@@ -451,79 +392,80 @@ export default function DashboardReflect() {
 
   return (
     <>
-      <div className="animate-child">
-        <ReflectPeriodSelector
-          year={selectedYear}
-          month={analysisMonth}
-          periodMode={periodMode}
-          onPeriodModeChange={setPeriodMode}
-          onYearChange={setSelectedYear}
-          onMonthChange={setSelectedMonth}
-        />
-      </div>
-
-      <div className="animate-child">
-        <ReflectSummaryCards
-          isYear={isYear}
-          selectedYear={selectedYear}
-          selectedMonth={analysisMonth}
-          income={income}
-          expenses={expenses}
-          trackedSavings={trackedSavings}
-          trackedDebt={trackedDebt}
-          plannedIncome={plannedIncome}
-          plannedExpenses={plannedExpenses}
-          plannedSavings={plannedSavings}
-          plannedDebt={plannedDebt}
-          totalPlannedOutflow={totalPlannedOutflow}
-          totalTrackedOutflow={totalTrackedOutflow}
-          netCashFlow={netCashFlow}
-          netWorth={netWorth}
-          totalAssets={totalAssets}
-          totalLiabilities={totalLiabilities}
-          savingsRate={savingsRate}
-          currency={currency}
-        />
-      </div>
-
-      <div className="animate-child">
-        <ReflectCharts
-          isYear={isYear}
-          cashFlow={cashFlow}
-          spendingBreakdown={spendingBreakdown}
-          spendingTrend={spendingTrend}
-          efficiency={efficiency}
-          leftToAllocate={leftToAllocate}
-          currency={currency}
-          tooltipStyle={tooltipStyle}
-        />
-      </div>
-
-      <div className="animate-child">
-        <ReflectDeepAnalysis
-          isYear={isYear}
-          selectedYear={selectedYear}
-          selectedMonth={isYear ? selectedMonth : analysisMonth}
-          goals={savingsGoals}
-          goalTransactions={goalTransactions}
-          currency={currency}
-        />
-      </div>
-
-      <div className="animate-child">
-        <div className="grid gap-3 md:grid-cols-2">
-          {insights.map((insight) => (
-            <ReflectInsightCard
-              key={`${isYear ? 'year' : 'month'}-${insight.title}`}
-              icon={insight.icon}
-              title={insight.title}
-              text={insight.text}
-              tone={insight.tone}
-              metric={insight.metric}
-            />
-          ))}
+        <div className="animate-child">
+          <ReflectPeriodSelector
+            year={selectedYear}
+            month={analysisMonth}
+            periodMode={periodMode}
+            onPeriodModeChange={setPeriodMode}
+            onYearChange={setSelectedYear}
+            onMonthChange={setSelectedMonth}
+          />
         </div>
-      </div>
+
+        <div className="animate-child">
+          <ReflectSummaryCards
+            isYear={isYear}
+            selectedYear={selectedYear}
+            selectedMonth={analysisMonth}
+            income={income}
+            expenses={expenses}
+            trackedSavings={trackedSavings}
+            trackedDebt={trackedDebt}
+            plannedIncome={plannedIncome}
+            plannedExpenses={plannedExpenses}
+            plannedSavings={plannedSavings}
+            plannedDebt={plannedDebt}
+            totalPlannedOutflow={totalPlannedOutflow}
+            totalTrackedOutflow={totalTrackedOutflow}
+            netCashFlow={netCashFlow}
+            netWorth={netWorth}
+            totalAssets={totalAssets}
+            totalLiabilities={totalLiabilities}
+            savingsRate={savingsRate}
+            currency={currency}
+          />
+        </div>
+
+        <div className="animate-child">
+          <ReflectCharts
+            isYear={isYear}
+            cashFlow={cashFlow}
+            spendingBreakdown={spendingBreakdown}
+            spendingTrend={spendingTrend}
+            efficiency={efficiency}
+            leftToAllocate={leftToAllocate}
+            currency={currency}
+            tooltipStyle={tooltipStyle}
+          />
+        </div>
+
+
+        <div className="animate-child">
+          <ReflectDeepAnalysis
+            isYear={isYear}
+            selectedYear={selectedYear}
+            selectedMonth={isYear ? selectedMonth : analysisMonth}
+            goals={savingsGoals}
+            goalTransactions={periodTransactions}
+            currency={currency}
+          />
+        </div>
+
+        <div className="animate-child">
+          <div className="grid gap-3 md:grid-cols-2">
+            {insights.map((insight) => (
+              <ReflectInsightCard
+                key={`${isYear ? 'year' : 'month'}-${insight.title}`}
+                icon={insight.icon}
+                title={insight.title}
+                text={insight.text}
+                tone={insight.tone}
+                metric={insight.metric}
+              />
+            ))}
+          </div>
+        </div>
     </>
   );
 }

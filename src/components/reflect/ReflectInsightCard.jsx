@@ -20,41 +20,34 @@ export default function ReflectInsightCard({
             : 'text-primary';
 
   return (
-    <ReflectCard
-      className="
-        relative overflow-hidden rounded-2xl border border-border/60 bg-card/85 p-4 shadow-sm backdrop-blur-xl transition-colors
-        [&:nth-child(5n+1)_.insight-accent-bar]:bg-red-500
-        [&:nth-child(5n+2)_.insight-accent-bar]:bg-yellow-500
-        [&:nth-child(5n+3)_.insight-accent-bar]:bg-blue-500
-        [&:nth-child(5n+4)_.insight-accent-bar]:bg-emerald-500
-        [&:nth-child(5n+5)_.insight-accent-bar]:bg-purple-500
-      "
-    >
-      <div className="insight-accent-bar absolute left-0 top-4 h-11 w-1 rounded-r-full bg-red-500" />
+    <ReflectCard className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-2">
+            {Icon ? (
+              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+            ) : null}
 
-      <div className="relative pl-2.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <h4 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground md:text-base">
+              {title}
+            </h4>
+          </div>
 
-          <h4 className="min-w-0 flex-1 text-[15px] font-semibold leading-5 tracking-tight text-foreground">
-            {title}
-          </h4>
-
-          {metric ? (
-            <span
-              className={cn(
-                'shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold leading-5 tabular-nums',
-                metricClass
-              )}
-            >
-              {metric}
-            </span>
-          ) : null}
+          <p className="mt-1 line-clamp-2 text-left text-xs leading-5 text-muted-foreground sm:line-clamp-none">
+            {text}
+          </p>
         </div>
 
-        <p className="mt-1 text-left text-[13px] leading-5 text-muted-foreground">
-          {text}
-        </p>
+        {metric ? (
+          <span
+            className={cn(
+              'shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold leading-5 tabular-nums sm:text-[11px]',
+              metricClass
+            )}
+          >
+            {metric}
+          </span>
+        ) : null}
       </div>
     </ReflectCard>
   );

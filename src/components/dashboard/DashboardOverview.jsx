@@ -19,6 +19,7 @@ import SpendingVelocityWidget from '@/components/dashboard/SpendingVelocityWidge
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TopGoalPreview from '@/components/dashboard/TopGoalPreview';
 import { Button } from '@/components/ui/button';
+import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard';
 import {
   useAccounts,
   useBudgetSummary,
@@ -30,53 +31,15 @@ import {
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 
-function DashboardCard({
-  title,
-  subtitle,
-  icon: Icon,
-  action,
-  children,
-  className,
-}) {
-  return (
-    <section
-      className={cn(
-        'rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5',
-        className
-      )}
-    >
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            {Icon && (
-              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-            )}
-
-            <h2 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground md:text-base">
-              {title}
-            </h2>
-          </div>
-
-          {subtitle && (
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              {subtitle}
-            </p>
-          )}
-        </div>
-
-        {action && <div className="shrink-0">{action}</div>}
-      </div>
-
-      {children}
-    </section>
-  );
+function DashboardCard(props) {
+  return <DashboardSectionCard {...props} />;
 }
 
 function EmptyDashboardState({ icon: Icon, title, description, action }) {
   return (
     <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-4 py-6 text-center">
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
-        <Icon className="h-5 w-5" />
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
 
       <p className="mt-3 text-sm font-semibold text-foreground">{title}</p>
@@ -96,15 +59,15 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
       to={to}
       className="group rounded-2xl border border-border/60 bg-background/40 p-3 transition-all hover:-translate-y-0.5 hover:bg-background/70 hover:shadow-sm sm:p-4"
     >
-      <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-10 sm:w-10">
+      <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-10 sm:w-10 sm:rounded-2xl">
           <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </span>
 
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-bold text-foreground sm:text-sm">{title}</p>
+          <p className="truncate text-xs font-bold text-foreground sm:text-sm">{title}</p>
 
-          <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-5">
+          <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-5">
             {subtitle}
           </p>
         </div>
@@ -124,7 +87,7 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
           : 'text-primary bg-primary/10';
 
   return (
-    <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-2.5 sm:p-3">
+    <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
@@ -137,7 +100,7 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
         )}
       </div>
 
-      <div className="mt-2 min-w-0 truncate text-base font-bold tracking-tight text-foreground tabular-nums sm:text-lg">
+      <div className="mt-2 text-lg font-bold tracking-tight text-foreground tabular-nums">
         {value}
       </div>
     </div>
@@ -322,7 +285,7 @@ export default function DashboardOverview() {
             icon={ListPlus}
             className="animate-child"
           >
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <QuickAction
                 to="/add-transaction"
                 icon={Plus}
