@@ -429,15 +429,17 @@ export default function DashboardReflect() {
 
         <div className="animate-child">
           <ReflectCharts
-            isYear={isYear}
-            cashFlow={cashFlow}
-            spendingBreakdown={spendingBreakdown}
-            spendingTrend={spendingTrend}
-            efficiency={efficiency}
-            leftToAllocate={leftToAllocate}
-            currency={currency}
-            tooltipStyle={tooltipStyle}
-          />
+  isYear={isYear}
+  cashFlow={cashFlow}
+  spendingBreakdown={spendingBreakdown}
+  spendingTrend={spendingTrend}
+  efficiency={efficiency}
+  expenses={expenses}
+  plannedExpenses={plannedExpenses}
+  leftToAllocate={leftToAllocate}
+  currency={currency}
+  tooltipStyle={tooltipStyle}
+/>
         </div>
 
 
