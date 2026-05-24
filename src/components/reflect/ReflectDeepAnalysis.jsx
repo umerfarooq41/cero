@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import {
   ArrowDownRight,
   ArrowUpRight,
   BarChart3,
   CircleDot,
   Target,
-  TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 
@@ -60,15 +60,21 @@ function EmptyBlock({ title, text }) {
   );
 }
 
-function ProgressRing({ value, children, size = 64 }) {
+function ProgressRing({ value, children, size = 58 }) {
   const safeValue = clampPercent(value);
-  const stroke = 8;
+  const stroke = 7;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (safeValue / 100) * circumference;
 
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <motion.div
+      className="relative shrink-0"
+      initial={{ scale: 0.92, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+      style={{ width: size, height: size }}
+    >
       <svg className="h-full w-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
         <circle
           cx={size / 2}
@@ -78,7 +84,7 @@ function ProgressRing({ value, children, size = 64 }) {
           stroke="hsl(var(--muted))"
           strokeWidth={stroke}
         />
-        <circle
+        <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -87,15 +93,16 @@ function ProgressRing({ value, children, size = 64 }) {
           strokeLinecap="round"
           strokeWidth={stroke}
           strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-          className="transition-all duration-700 ease-out"
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: dashOffset }}
+          transition={{ type: 'spring', stiffness: 90, damping: 18, delay: 0.1 }}
         />
       </svg>
 
       <div className="absolute inset-0 flex items-center justify-center text-center">
         {children}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -122,19 +129,24 @@ function MiniMetric({ label, value, subtext, tone = 'default' }) {
           : 'text-foreground';
 
   return (
-    <div className="min-w-0 rounded-2xl border border-border/60 bg-background/35 p-2">
-      <p className="truncate text-[9px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[10px]">
+    <motion.div
+      className="min-w-0 rounded-xl border border-border/50 bg-background/30 px-2 py-1.5"
+      initial={{ y: 6, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+    >
+      <p className="truncate text-[8px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[10px]">
         {label}
       </p>
-      <div className={cn('mt-1 truncate text-[11px] font-bold tabular-nums sm:text-xs', toneClass)}>
+      <div className={cn('mt-0.5 truncate text-[10px] font-bold tabular-nums sm:text-xs', toneClass)}>
         {value}
       </div>
       {subtext ? (
-        <p className="mt-0.5 truncate text-[9px] leading-3 text-muted-foreground sm:text-[10px]">
+        <p className="mt-0.5 truncate text-[8px] leading-3 text-muted-foreground sm:text-[10px]">
           {subtext}
         </p>
       ) : null}
-    </div>
+    </motion.div>
   );
 }
 
@@ -219,7 +231,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   );
 
   return (
-    <ReflectCard className="p-3 sm:p-4">
+    <ReflectCard className="overflow-hidden p-3 sm:p-4">
       <SectionHeading
         icon={Target}
         title="Goal Progress Analysis"
@@ -229,92 +241,123 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
       {activeGoals.length === 0 ? (
         <EmptyBlock
           title="No savings goals yet"
-          text="Create savings goals from Plan or Dashboard, then Reflect will show progress and pace analysis here."
+          text="Create savings goals from Manage Plan, then Reflect will show progress and pace analysis here."
         />
       ) : (
-        <div className="flex min-w-0 gap-3">
-          <div className="flex min-w-0 flex-[1.05] items-center gap-2 rounded-2xl border border-border/60 bg-background/35 p-2.5 sm:p-3">
+        <motion.div
+          className="min-w-0 space-y-2.5"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+            },
+          }}
+        >
+          <motion.div
+            className="grid min-w-0 grid-cols-[58px_minmax(0,1fr)] items-center gap-2"
+            variants={{
+              hidden: { y: 8, opacity: 0 },
+              show: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 210, damping: 20 } },
+            }}
+          >
             <ProgressRing value={stats.overallProgress}>
               <div>
-                <p className="text-base font-bold leading-none tabular-nums">
+                <p className="text-sm font-bold leading-none tabular-nums sm:text-base">
                   {Math.round(clampPercent(stats.overallProgress))}%
                 </p>
-                <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="mt-0.5 text-[8px] font-medium uppercase tracking-wide text-muted-foreground sm:text-[10px]">
                   Saved
                 </p>
               </div>
             </ProgressRing>
 
-            <div className="min-w-0 flex-1 space-y-2">
+            <div className="grid min-w-0 grid-cols-3 gap-1.5 sm:gap-2">
               <MiniMetric
-                label="Saved toward goals"
+                label="Saved"
                 value={<Money value={stats.totalSaved} currency={currency} />}
                 subtext={`Target ${formatCurrencyText(stats.totalTarget, currency)}`}
                 tone="good"
               />
-              <div className="grid grid-cols-2 gap-2">
-                <MiniMetric
-                  label={isYear ? 'Contributed this year' : 'Contributed this month'}
-                  value={<Money value={stats.periodContribution} currency={currency} />}
-                />
-                <MiniMetric
-                  label="Required monthly"
-                  value={<Money value={stats.monthlyRequired} currency={currency} />}
-                  subtext={`${stats.completed}/${activeGoals.length} goals funded`}
-                />
-              </div>
+              <MiniMetric
+                label={isYear ? 'This year' : 'This month'}
+                value={<Money value={stats.periodContribution} currency={currency} />}
+              />
+              <MiniMetric
+                label="Required/mo"
+                value={<Money value={stats.monthlyRequired} currency={currency} />}
+                subtext={`${stats.completed}/${activeGoals.length} funded`}
+              />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="min-w-0 flex-[1.15] space-y-2">
-            {priorityGoals.map((goal) => {
+          <div className="min-w-0 space-y-2">
+            {priorityGoals.map((goal, index) => {
               const progress = getGoalProgress(goal);
               const track = getGoalTrackState(goal);
               const monthlyRequired = getMonthlyRequiredSaving(goal);
 
               return (
-                <div key={goal.id} className="rounded-2xl border border-border/60 bg-background/35 p-2.5">
-                  <div className="flex items-center justify-between gap-3">
+                <motion.div
+                  key={goal.id}
+                  className="min-w-0 border-t border-border/45 pt-2 first:border-t-0 first:pt-0"
+                  variants={{
+                    hidden: { y: 8, opacity: 0 },
+                    show: {
+                      y: 0,
+                      opacity: 1,
+                      transition: { type: 'spring', stiffness: 220, damping: 22, delay: index * 0.02 },
+                    },
+                  }}
+                >
+                  <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-bold text-foreground">{goal.name}</p>
+                      <p className="truncate text-xs font-bold text-foreground sm:text-sm">
+                        {goal.name}
+                      </p>
                       <p className="mt-0.5 truncate text-[10px] text-muted-foreground sm:text-[11px]">
                         <Money value={goal.current_amount} currency={currency} /> of{' '}
-                        <Money value={goal.target_amount} currency={currency} />
+                        <Money value={goal.target_amount} currency={currency} /> ·{' '}
+                        {Math.round(progress)}%
                       </p>
                     </div>
 
-                    <span
-                      className={cn(
-                        'shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold sm:text-[10px]',
-                        track.tone === 'good'
-                          ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
-                          : track.tone === 'warning'
-                            ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
-                            : 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {track.label}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="hidden text-[10px] text-muted-foreground sm:inline">
+                        {monthlyRequired === null
+                          ? 'No deadline'
+                          : `${formatCurrencyText(monthlyRequired, currency)}/mo`}
+                      </span>
+                      <span
+                        className={cn(
+                          'rounded-full px-1.5 py-0.5 text-[9px] font-semibold sm:text-[10px]',
+                          track.tone === 'good'
+                            ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
+                            : track.tone === 'warning'
+                              ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
+                              : 'bg-muted text-muted-foreground'
+                        )}
+                      >
+                        {track.label}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
-                      style={{ width: `${clampPercent(progress)}%` }}
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                    <motion.div
+                      className="h-full rounded-full bg-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${clampPercent(progress)}%` }}
+                      transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 0.1 + index * 0.03 }}
                     />
                   </div>
-
-                  <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-muted-foreground sm:text-[11px]">
-                    <span>{Math.round(progress)}% complete</span>
-                    <span>
-                      {monthlyRequired === null ? 'No deadline' : `${formatCurrencyText(monthlyRequired, currency)}/mo`}
-                    </span>
-                  </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
-        </div>
+        </motion.div>
       )}
     </ReflectCard>
   );

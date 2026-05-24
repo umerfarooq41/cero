@@ -68,25 +68,25 @@ export default function SpendingVelocityWidget({
   const fmt = formatCurrency || ((n) => n.toLocaleString('en-US', { minimumFractionDigits: 2 }));
 
   return (
-    <div className={cn('rounded-2xl border p-4', cfg.bg, cfg.borderColor)}>
+    <div className="min-w-0">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/50 dark:bg-white/[0.06]">
+      <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/45">
             <Zap className="h-3.5 w-3.5 text-muted-foreground" />
-          </div>
-          <span className="text-xs font-semibold text-foreground tracking-wide">
+          </span>
+          <span className="truncate text-xs font-semibold tracking-wide text-foreground">
             Spending Velocity
           </span>
         </div>
-        <div className={cn('flex items-center gap-1.5 text-xs font-bold', cfg.color)}>
+        <div className={cn('flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold sm:text-xs', cfg.bg, cfg.color)}>
           <Icon className="h-3.5 w-3.5" />
           {cfg.label}
         </div>
       </div>
 
       {/* Dual track bars */}
-      <div className="space-y-2 mb-4">
+      <div className="mb-3 space-y-2">
         {/* Time track */}
         <div className="flex items-center gap-3">
           <span className="w-10 text-right text-[10px] text-muted-foreground font-medium shrink-0">
@@ -132,21 +132,21 @@ export default function SpendingVelocityWidget({
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.06]">
+      <div className="grid grid-cols-3 gap-2 border-t border-border/45 pt-3">
         <div className="text-center">
-          <div className="text-[10px] text-muted-foreground mb-0.5">Day</div>
+          <div className="mb-0.5 text-[10px] text-muted-foreground">Day</div>
           <div className="text-xs font-bold tabular-nums text-foreground">
             {daysIntoMonth}/{daysInMonth}
           </div>
         </div>
         <div className="text-center">
-          <div className="text-[10px] text-muted-foreground mb-0.5">Daily avg</div>
+          <div className="mb-0.5 truncate text-[10px] text-muted-foreground">Daily avg</div>
           <div className="text-xs font-bold tabular-nums text-foreground">
             {fmt(dailyAverage)}
           </div>
         </div>
         <div className="text-center">
-          <div className="text-[10px] text-muted-foreground mb-0.5">Projected</div>
+          <div className="mb-0.5 text-[10px] text-muted-foreground">Projected</div>
           <div className={cn('text-xs font-bold tabular-nums', 
             projectedTotal > plannedExpenses ? 'text-destructive' : 'text-foreground'
           )}>
