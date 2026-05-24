@@ -78,26 +78,26 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
 
 function StatPill({ label, value, icon: Icon, tone = 'default' }) {
   const iconClass =
-    tone === 'good'
-      ? 'text-[hsl(var(--success))] bg-[hsl(var(--success)/0.08)]'
-      : tone === 'danger'
-        ? 'text-destructive bg-destructive/10'
-        : tone === 'warning'
-          ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10'
-          : tone === 'info'
-            ? 'text-primary bg-primary/10'
-            : 'text-foreground bg-secondary';
+  tone === 'good'
+    ? 'text-[hsl(var(--success))] bg-[hsl(var(--success)/0.08)]'
+    : tone === 'danger'
+      ? 'text-destructive bg-destructive/10'
+      : tone === 'warning'
+        ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10'
+        : tone === 'info'
+          ? 'text-blue-600 bg-blue-500/10 dark:text-blue-400'
+          : 'text-foreground bg-secondary';
 
-  const valueClass =
-    tone === 'good'
-      ? 'text-[hsl(var(--success))]'
-      : tone === 'danger'
-        ? 'text-destructive'
-        : tone === 'warning'
-          ? 'text-amber-500 dark:text-amber-400'
-          : tone === 'info'
-            ? 'text-primary'
-            : 'text-foreground';
+const valueClass =
+  tone === 'good'
+    ? 'text-[hsl(var(--success))]'
+    : tone === 'danger'
+      ? 'text-destructive'
+      : tone === 'warning'
+        ? 'text-amber-500 dark:text-amber-400'
+        : tone === 'info'
+          ? 'text-blue-600 dark:text-blue-400'
+          : 'text-foreground';
 
   return (
     <div className="flex items-center justify-between gap-2 py-2">
