@@ -35,7 +35,7 @@ export default function ReflectInsightCard({
       title={title}
       icon={Icon}
       className={cn(
-        'relative pr-5 after:absolute after:right-0 after:top-6 after:h-10 after:w-1 after:rounded-l-full after:content-[""] sm:pr-6',
+        'relative pl-5 after:absolute after:left-0 after:top-6 after:h-10 after:w-1 after:rounded-r-full after:content-[""] sm:pl-6',
         accentClass
       )}
       action={
