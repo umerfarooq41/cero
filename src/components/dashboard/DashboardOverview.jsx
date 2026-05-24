@@ -7,7 +7,7 @@ import {
   Plus,
   Receipt,
   SlidersHorizontal,
-  Sparkles,
+  TrendingUp,
   Target,
   TrendingDown,
   WalletCards,
@@ -84,14 +84,20 @@ function StatPill({ label, value, icon: Icon, tone = 'default' }) {
         ? 'text-destructive bg-destructive/10'
         : tone === 'warning'
           ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10'
-          : 'text-primary bg-primary/10';
+          : tone === 'info'
+            ? 'text-primary bg-primary/10'
+            : 'text-foreground bg-secondary';
 
   const valueClass =
     tone === 'good'
       ? 'text-[hsl(var(--success))]'
       : tone === 'danger'
         ? 'text-destructive'
-        : 'text-foreground';
+        : tone === 'warning'
+          ? 'text-amber-500 dark:text-amber-400'
+          : tone === 'info'
+            ? 'text-primary'
+            : 'text-foreground';
 
   return (
     <div className="flex items-center justify-between gap-2 py-2">
@@ -193,7 +199,7 @@ export default function DashboardOverview() {
               <StatPill
                 label="Income"
                 value={formatCurrency(budget.totalIncome || 0)}
-                icon={Sparkles}
+                icon={TrendingUp}
                 tone="good"
               />
 
