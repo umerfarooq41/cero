@@ -243,8 +243,8 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 tone="info"
                 title={
                   isYear
-                    ? 'Cash Flow 鈥� Year by Quarter'
-                    : 'Cash Flow 鈥� Recent 3 Months'
+                    ? 'Cash Flow - Year by Quarter'
+                    : 'Cash Flow - Recent 3 Months'
                 }
                 subtitle={
                   isYear
