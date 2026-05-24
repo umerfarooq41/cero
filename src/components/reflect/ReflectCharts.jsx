@@ -172,7 +172,8 @@ export default function ReflectCharts({
         )
       : 0;
 
-  const ringScore = isYear ? yearSpendingRatio : safeEfficiency;
+ const roundedBudgetUsage = Math.round(safeEfficiency);
+const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
   const ringColor = isYear
     ? yearSpendingRatio <= 65
@@ -376,7 +377,7 @@ export default function ReflectCharts({
 
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-lg font-bold tabular-nums sm:text-xl">
-                      {isYear ? `${yearSpendingRatio}%` : `${safeEfficiency}%`}
+                      {isYear ? `${yearSpendingRatio}%` : `${roundedBudgetUsage}%`}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       used
