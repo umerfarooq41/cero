@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Settings2 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import ManagePlanTabs, { managePlanTabs } from '@/components/manage-plan/ManagePlanTabs';
 import MonthlyPlanPanel from '@/components/manage-plan/MonthlyPlanPanel';
 import ManageCategoriesPanel from '@/components/manage-plan/ManageCategoriesPanel';
@@ -91,7 +93,11 @@ export default function ManagePlan() {
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>
 
-        <div className="animate-child">{renderPanel()}</div>
+        <AnimatePresence mode="wait" initial={false}>
+          <AppTabPanel key={activeTab} className="animate-child">
+            {renderPanel()}
+          </AppTabPanel>
+        </AnimatePresence>
       </main>
     </div>
   );
