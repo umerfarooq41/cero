@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import ReflectCard from './ReflectCard.jsx';
+import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard.jsx';
 
 const MONTHS = [
   { value: '01', label: 'January', shortLabel: 'Jan' },
@@ -80,28 +80,27 @@ export default function ReflectPeriodSelector({
       : `${selectedMonth.label} ${year}`;
 
   return (
-    <ReflectCard className="mb-4 p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <span>Reporting Period</span>
-        </h3>
-
+    <DashboardSectionCard
+      className="mb-4"
+      icon={CalendarDays}
+      title="Reporting Period"
+      action={
         <AnimatePresence mode="wait">
-          <motion.h3
+          <motion.span
             key={heading}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className="shrink-0 text-sm font-semibold"
+            className="block shrink-0 text-sm font-semibold text-foreground"
           >
             {heading}
-          </motion.h3>
+          </motion.span>
         </AnimatePresence>
-      </div>
-
-      <div className="mb-3 grid grid-cols-2 rounded-2xl border border-border/60 bg-card/60 p-1 backdrop-blur-xl">
+      }
+      contentClassName="space-y-3"
+    >
+      <div className="grid grid-cols-2 rounded-2xl border border-border/60 bg-card/60 p-1 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => changeMode('month')}
@@ -167,6 +166,6 @@ export default function ReflectPeriodSelector({
           </Select>
         )}
       </div>
-    </ReflectCard>
+    </DashboardSectionCard>
   );
 }
