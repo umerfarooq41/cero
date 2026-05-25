@@ -251,10 +251,15 @@ function SummaryCard({
       icon={Icon}
       title={title}
       action={action}
-      className={cn('relative p-3 sm:p-4', className)}
-      contentClassName="space-y-3"
+      className={cn('relative self-start !h-auto p-3 sm:p-4', className)}
+      contentClassName="space-y-2.5"
     >
-      <div className={cn('text-lg font-bold tracking-tight tabular-nums sm:text-xl', toneClasses.text)}>
+      <div
+        className={cn(
+          'text-lg font-bold tracking-tight tabular-nums sm:text-xl',
+          toneClasses.text
+        )}
+      >
         {value}
       </div>
 
@@ -447,7 +452,7 @@ export default function ReflectSummaryCard({
   const monthlyBudgetIsPositive = computed.monthlyBudgetDifference >= 0;
 
   return (
-    <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="mb-4 grid grid-cols-1 items-start gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
       <HeroCashFlowCard
         isYear={isYear}
         income={income}
@@ -578,25 +583,23 @@ export default function ReflectSummaryCard({
             </div>
 
             {plannedExpenses > 0 ? (
-              <>
-                <div className="space-y-1">
-                  <AnimatedBar
-                    value={computed.monthlyBudgetUsed}
-                    className={healthToneClasses.bar}
-                    delay="delay-500"
-                  />
+              <div className="space-y-1">
+                <AnimatedBar
+                  value={computed.monthlyBudgetUsed}
+                  className={healthToneClasses.bar}
+                  delay="delay-500"
+                />
 
-                  <div className="flex items-center justify-between text-[11px] leading-4 text-muted-foreground">
-                    <span className="tabular-nums">{Math.round(computed.monthlyBudgetUsed)}% used</span>
-                    <span>
-                      Daily{' '}
-                      <span className="font-semibold text-foreground">
-                        <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />
-                      </span>
+                <div className="flex items-center justify-between text-[11px] leading-4 text-muted-foreground">
+                  <span className="tabular-nums">{Math.round(computed.monthlyBudgetUsed)}% used</span>
+                  <span>
+                    Daily{' '}
+                    <span className="font-semibold text-foreground">
+                      <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />
                     </span>
-                  </div>
+                  </span>
                 </div>
-              </>
+              </div>
             ) : (
               <p className="text-[11px] leading-4 text-muted-foreground">
                 No planned expense budget for this month.
