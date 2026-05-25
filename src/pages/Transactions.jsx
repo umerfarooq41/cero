@@ -1,43 +1,28 @@
+import { AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { CalendarClock, Clock3 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import ScheduledTransactions from '@/components/transactions/ScheduledTransactions';
+import AppTabs, { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import TransactionHistory from '@/components/transactions/TransactionHistory';
 import { usePageEntrance } from '@/hooks/usePageTransition';
-import { cn } from '@/lib/utils';
 
 const tabs = [
-  { value: 'history', label: 'History', icon: Clock3 },
-  { value: 'scheduled', label: 'Scheduled', icon: CalendarClock },
+  { value: 'history', label: 'History', icon: Clock3, tone: 'blue' },
+  { value: 'scheduled', label: 'Scheduled', icon: CalendarClock, tone: 'amber' },
 ];
 
 function TransactionsSegmentedControl({ value, onChange }) {
   return (
     <div className="mb-5 animate-child">
-      <div className="grid w-full grid-cols-2 gap-1 rounded-2xl border border-white/40 bg-white/35 p-1.5 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {tabs.map((tab) => {
-          const active = value === tab.value;
-          const Icon = tab.icon;
-
-          return (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => onChange(tab.value)}
-              className={cn(
-                'flex min-w-0 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold leading-none transition-all duration-200',
-                active
-                  ? 'border border-border/60 bg-card/85 text-foreground shadow-sm backdrop-blur-xl'
-                  : 'text-muted-foreground hover:bg-background/45 hover:text-foreground'
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <AppTabs
+        tabs={tabs}
+        value={value}
+        onChange={onChange}
+        size="md"
+        layoutId="transactions-tab-highlight"
+      />
     </div>
   );
 }
@@ -70,11 +55,15 @@ export default function Transactions() {
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
         <TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} />
 
-        {activeTab === 'history' ? (
-          <TransactionHistory />
-        ) : (
-          <ScheduledTransactions />
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <AppTabPanel key={activeTab}>
+            {activeTab === 'history' ? (
+              <TransactionHistory />
+            ) : (
+              <ScheduledTransactions />
+            )}
+          </AppTabPanel>
+        </AnimatePresence>
       </main>
     </div>
   );
