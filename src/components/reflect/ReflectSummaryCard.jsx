@@ -141,7 +141,7 @@ function getToneClasses(tone = 'default') {
       text: 'text-[hsl(var(--success))]',
       bg: 'bg-[hsl(var(--success)/0.1)]',
       ring: 'ring-[hsl(var(--success)/0.15)]',
-      glow: 'bg-[hsl(var(--success)/0.1)]',
+      bar: 'bg-[hsl(var(--success))]',
     };
   }
 
@@ -150,7 +150,7 @@ function getToneClasses(tone = 'default') {
       text: 'text-destructive',
       bg: 'bg-destructive/10',
       ring: 'ring-destructive/15',
-      glow: 'bg-destructive/10',
+      bar: 'bg-destructive',
     };
   }
 
@@ -159,16 +159,7 @@ function getToneClasses(tone = 'default') {
       text: 'text-amber-500 dark:text-amber-400',
       bg: 'bg-amber-500/10',
       ring: 'ring-amber-500/15',
-      glow: 'bg-amber-500/10',
-    };
-  }
-
-  if (tone === 'info') {
-    return {
-      text: 'text-primary',
-      bg: 'bg-primary/10',
-      ring: 'ring-primary/15',
-      glow: 'bg-muted/40',
+      bar: 'bg-amber-400',
     };
   }
 
@@ -176,16 +167,33 @@ function getToneClasses(tone = 'default') {
     text: 'text-primary',
     bg: 'bg-primary/10',
     ring: 'ring-primary/15',
-    glow: 'bg-muted/40',
+    bar: 'bg-primary',
   };
+}
+
+function StatusPill({ children, tone = 'default' }) {
+  const toneClasses = getToneClasses(tone);
+
+  return (
+    <span
+      className={cn(
+        'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold leading-none ring-1',
+        toneClasses.bg,
+        toneClasses.text,
+        toneClasses.ring
+      )}
+    >
+      {children}
+    </span>
+  );
 }
 
 function MoneyRow({ label, amount, currency, tone }) {
   return (
-    <div className="flex items-center justify-between gap-2 text-xs sm:text-sm">
-      <span className="text-muted-foreground">{label}</span>
+    <div className="flex items-center justify-between gap-3 text-sm leading-5">
+      <span className="min-w-0 truncate text-muted-foreground">{label}</span>
 
-      <span className={cn('font-semibold tabular-nums', tone)}>
+      <span className={cn('shrink-0 font-semibold tabular-nums', tone)}>
         <CurrencyAmount amount={amount} currency={currency} compact />
       </span>
     </div>
@@ -197,10 +205,10 @@ function AnimatedBar({ value, className, delay = 'delay-150' }) {
   const scaleX = safeValue / 100;
 
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-muted">
+    <div className="h-2 overflow-hidden rounded-full bg-muted/70">
       <div
         className={cn(
-          'h-full rounded-full origin-left transition-transform duration-700 ease-out will-change-transform',
+          'h-full origin-left rounded-full transition-transform duration-700 ease-out will-change-transform',
           delay,
           className
         )}
@@ -218,12 +226,40 @@ function PercentBar({ label, value, className, delay }) {
       <div className="flex items-center justify-between gap-3 text-xs font-medium">
         <span className="text-muted-foreground">{label}</span>
         <span className="tabular-nums text-foreground">
-          <span className="tabular-nums">{Math.round(safeValue)}%</span>
+          {Math.round(safeValue)}%
         </span>
       </div>
 
       <AnimatedBar value={safeValue} className={className} delay={delay} />
     </div>
+  );
+}
+
+function SummaryCard({
+  icon: Icon,
+  title,
+  action,
+  value,
+  valueTone = 'default',
+  children,
+  className,
+}) {
+  const toneClasses = getToneClasses(valueTone);
+
+  return (
+    <DashboardSectionCard
+      icon={Icon}
+      title={title}
+      action={action}
+      className={cn('relative', className)}
+      contentClassName="space-y-4"
+    >
+      <div className={cn('text-xl font-bold tracking-tight tabular-nums', toneClasses.text)}>
+        {value}
+      </div>
+
+      {children}
+    </DashboardSectionCard>
   );
 }
 
@@ -244,100 +280,42 @@ function HeroCashFlowCard({
     income > 0 ? Math.min((Math.max(expenses, 0) / income) * 100, 100) : 0;
 
   return (
-    <DashboardSectionCard
+    <SummaryCard
       icon={BarChart3}
       title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-      className="relative sm:col-span-2"
-      contentClassName="relative flex h-full flex-col justify-between gap-3"
-      action={
-        <span
-          className={cn(
-            'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
-            positive
-              ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
-              : 'bg-destructive/10 text-destructive'
-          )}
-        >
-          {positive ? 'Positive' : 'Negative'}
-        </span>
-      }
+      value={<CurrencyAmount amount={netCashFlow} currency={currency} />}
+      valueTone={tone}
+      className="sm:col-span-2"
+      action={<StatusPill tone={tone}>{positive ? 'Positive' : 'Negative'}</StatusPill>}
     >
-      <div
-        className={cn(
-          'text-base font-bold tracking-tight tabular-nums sm:text-lg',
-          positive ? 'text-[hsl(var(--success))]' : 'text-destructive'
-        )}
-      >
-        <CurrencyAmount amount={netCashFlow} currency={currency} />
+      <div className="space-y-2">
+        <MoneyRow
+          label="Income"
+          amount={income}
+          currency={currency}
+          tone="text-[hsl(var(--success))]"
+        />
+
+        <MoneyRow
+          label="Expenses"
+          amount={expenses}
+          currency={currency}
+          tone="text-destructive"
+        />
       </div>
 
-      <div className="space-y-3">
-        <div className="grid gap-2">
-          <MoneyRow
-            label="Income"
-            amount={income}
-            currency={currency}
-            tone="text-[hsl(var(--success))]"
-          />
+      <div className="space-y-1.5">
+        <AnimatedBar
+          value={savedProgress}
+          className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
+        />
 
-          <MoneyRow
-            label="Expenses"
-            amount={expenses}
-            currency={currency}
-            tone="text-destructive"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <AnimatedBar
-            value={savedProgress}
-            className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
-          />
-
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="tabular-nums">{Math.round(savedProgress)}% saved</span>
-            <span className="tabular-nums">{Math.round(expenseProgress)}% spent</span>
-          </div>
+        <div className="flex items-center justify-between text-[11px] leading-4 text-muted-foreground">
+          <span className="tabular-nums">{Math.round(savedProgress)}% saved</span>
+          <span className="tabular-nums">{Math.round(expenseProgress)}% spent</span>
         </div>
       </div>
-    </DashboardSectionCard>
-  );
-}
-
-function SecondaryCard({
-  icon: Icon,
-  title,
-  value,
-  children,
-  tone = 'default',
-}) {
-  const toneClasses = getToneClasses(tone);
-
-  return (
-    <DashboardSectionCard
-      icon={Icon}
-      title={title}
-      className="relative"
-      contentClassName="relative flex h-full flex-col justify-between gap-3"
-    >
-      <div
-        className={cn(
-          'pointer-events-none absolute -right-10 -top-10 h-20 w-20 rounded-full blur-3xl',
-          toneClasses.glow
-        )}
-      />
-
-      <div
-        className={cn(
-          'text-base font-bold tracking-tight tabular-nums',
-          toneClasses.text
-        )}
-      >
-        {value}
-      </div>
-
-      {children}
-    </DashboardSectionCard>
+    </SummaryCard>
   );
 }
 
@@ -464,6 +442,11 @@ export default function ReflectSummaryCard({
     totalTrackedOutflow,
   ]);
 
+  const netWorthTone = netWorth >= 0 ? 'info' : 'bad';
+  const healthTone = isYear ? computed.yearlyTone : computed.monthlyTone;
+  const healthToneClasses = getToneClasses(healthTone);
+  const monthlyBudgetIsPositive = computed.monthlyBudgetDifference >= 0;
+
   return (
     <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
       <HeroCashFlowCard
@@ -474,13 +457,13 @@ export default function ReflectSummaryCard({
         currency={currency}
       />
 
-      <SecondaryCard
+      <SummaryCard
         icon={Wallet}
         title="Net Worth"
         value={<CurrencyAmount amount={netWorth} currency={currency} />}
-        tone={netWorth >= 0 ? 'info' : 'bad'}
+        valueTone={netWorthTone}
       >
-        <div className="space-y-3">
+        <div className="space-y-2">
           <MoneyRow
             label="Assets"
             amount={totalAssets}
@@ -494,170 +477,135 @@ export default function ReflectSummaryCard({
             currency={currency}
             tone="text-destructive"
           />
-
-          <div className="space-y-1.5">
-            <AnimatedBar
-              value={computed.netWorthHealth}
-              className="bg-cyan-400"
-              delay="delay-300"
-            />
-
-            <p className="text-xs text-muted-foreground">
-              <span className="tabular-nums">{Math.round(computed.netWorthHealth)}% asset-backed</span>
-            </p>
-          </div>
         </div>
-      </SecondaryCard>
 
-      <SecondaryCard
+        <div className="space-y-1.5">
+          <AnimatedBar
+            value={computed.netWorthHealth}
+            className="bg-cyan-400"
+            delay="delay-300"
+          />
+
+          <p className="text-[11px] leading-4 text-muted-foreground">
+            <span className="tabular-nums">{Math.round(computed.netWorthHealth)}%</span>{' '}
+            asset-backed
+          </p>
+        </div>
+      </SummaryCard>
+
+      <SummaryCard
         icon={Activity}
         title={isYear ? 'Yearly Performance' : 'Budget Health'}
-        value={isYear ? computed.yearlyStatus : computed.monthlyStatus}
-        tone={isYear ? computed.yearlyTone : computed.monthlyTone}
-      >
-        <div className="space-y-3">
-          {isYear ? (
-            <>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Total YTD
-                </p>
-                <div className="mt-1 text-base font-bold tracking-tight tabular-nums text-foreground">
-                  <CurrencyAmount
-                    amount={computed.yearlyTotalYtd}
-                    currency={currency}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <MoneyRow
-                  label="Monthly Avg"
-                  amount={computed.monthlyAverage}
-                  currency={currency}
-                  tone="text-muted-foreground"
-                />
-
-                <MoneyRow
-                  label="Annual Cap"
-                  amount={computed.yearlyPlanCap}
-                  currency={currency}
-                  tone="text-muted-foreground"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <PercentBar
-                  label="Year Passed"
-                  value={computed.yearElapsedPercent}
-                  className="bg-cyan-400"
-                  delay="delay-300"
-                />
-
-                <PercentBar
-                  label="Plan Used"
-                  value={computed.yearlyPlanUsedPercent}
-                  className={
-                    computed.yearlyTone === 'good'
-                      ? 'bg-emerald-400'
-                      : computed.yearlyTone === 'warning'
-                        ? 'bg-amber-400'
-                        : computed.yearlyTone === 'bad'
-                          ? 'bg-red-400'
-                          : 'bg-cyan-400'
-                  }
-                  delay="delay-500"
-                />
-              </div>
-
-              <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
-                {computed.yearlyPlanCap === 0
-                  ? 'Add yearly or monthly plans to compare usage against the year.'
-                  : computed.paceDifference >= 0
-                    ? `${Math.round(computed.paceDifference)}% ahead of yearly pace.`
-                    : `${Math.abs(Math.round(computed.paceDifference))}% behind yearly pace.`}
-              </p>
-            </>
+        value={
+          isYear ? (
+            <CurrencyAmount amount={computed.yearlyTotalYtd} currency={currency} />
           ) : (
             <>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Budget left
-                </p>
+              <CurrencyAmount
+                amount={Math.abs(computed.monthlyBudgetDifference)}
+                currency={currency}
+              />{' '}
+              <span className="text-[0.72em] font-semibold">
+                {monthlyBudgetIsPositive ? 'Left' : 'Over'}
+              </span>
+            </>
+          )
+        }
+        valueTone={healthTone}
+        action={
+          <StatusPill tone={healthTone}>
+            {isYear ? computed.yearlyStatus : computed.monthlyStatus}
+          </StatusPill>
+        }
+      >
+        {isYear ? (
+          <>
+            <div className="space-y-2">
+              <MoneyRow
+                label="Monthly Avg"
+                amount={computed.monthlyAverage}
+                currency={currency}
+                tone="text-muted-foreground"
+              />
 
-                <div
-                  className={cn(
-                    'mt-1 text-base font-bold tracking-tight tabular-nums',
-                    computed.monthlyBudgetDifference >= 0
-                      ? 'text-[hsl(var(--success))]'
-                      : 'text-destructive'
-                  )}
-                >
-                  <CurrencyAmount
-                    amount={Math.abs(computed.monthlyBudgetDifference)}
-                    currency={currency}
-                  />{' '}
-                  {computed.monthlyBudgetDifference >= 0 ? 'Left' : 'Over'}
-                </div>
-              </div>
+              <MoneyRow
+                label="Annual Cap"
+                amount={computed.yearlyPlanCap}
+                currency={currency}
+                tone="text-muted-foreground"
+              />
+            </div>
 
-              <div className="space-y-1.5">
-                <MoneyRow
-                  label="Planned"
-                  amount={plannedExpenses}
-                  currency={currency}
-                  tone="text-muted-foreground"
-                />
+            <div className="space-y-3">
+              <PercentBar
+                label="Year Passed"
+                value={computed.yearElapsedPercent}
+                className="bg-cyan-400"
+                delay="delay-300"
+              />
 
-                <MoneyRow
-                  label="Tracked"
-                  amount={expenses}
-                  currency={currency}
-                  tone={
-                    computed.monthlyBudgetDifference >= 0
-                      ? 'text-[hsl(var(--success))]'
-                      : 'text-destructive'
-                  }
-                />
-              </div>
+              <PercentBar
+                label="Plan Used"
+                value={computed.yearlyPlanUsedPercent}
+                className={healthToneClasses.bar}
+                delay="delay-500"
+              />
+            </div>
 
-              {plannedExpenses > 0 && (
-                <>
+            <p className="text-[11px] leading-4 text-muted-foreground sm:text-xs">
+              {computed.yearlyPlanCap === 0
+                ? 'Add plans to compare usage against the year.'
+                : computed.paceDifference >= 0
+                  ? `${Math.round(computed.paceDifference)}% ahead of yearly pace.`
+                  : `${Math.abs(Math.round(computed.paceDifference))}% behind yearly pace.`}
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <MoneyRow
+                label="Planned"
+                amount={plannedExpenses}
+                currency={currency}
+                tone="text-muted-foreground"
+              />
+
+              <MoneyRow
+                label="Tracked"
+                amount={expenses}
+                currency={currency}
+                tone={monthlyBudgetIsPositive ? 'text-[hsl(var(--success))]' : 'text-destructive'}
+              />
+            </div>
+
+            {plannedExpenses > 0 ? (
+              <>
+                <div className="space-y-1.5">
                   <AnimatedBar
                     value={computed.monthlyBudgetUsed}
-                    className={
-                      computed.monthlyTone === 'good'
-                        ? 'bg-emerald-400'
-                        : computed.monthlyTone === 'warning'
-                          ? 'bg-amber-400'
-                          : 'bg-red-400'
-                    }
+                    className={healthToneClasses.bar}
                     delay="delay-500"
                   />
 
-                  <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
-                    Daily Limit:{' '}
-                    <span className="font-semibold text-foreground">
-                      <CurrencyAmount
-                        amount={computed.dailyLimit}
-                        currency={currency}
-                        compact
-                      />{' '}
-                      / day
+                  <div className="flex items-center justify-between text-[11px] leading-4 text-muted-foreground">
+                    <span className="tabular-nums">{Math.round(computed.monthlyBudgetUsed)}% used</span>
+                    <span>
+                      Daily{' '}
+                      <span className="font-semibold text-foreground">
+                        <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />
+                      </span>
                     </span>
-                  </p>
-                </>
-              )}
-
-              {plannedExpenses === 0 && (
-                <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
-                  No planned expense budget for this month.
-                </p>
-              )}
-            </>
-          )}
-        </div>
-      </SecondaryCard>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-[11px] leading-4 text-muted-foreground sm:text-xs">
+                No planned expense budget for this month.
+              </p>
+            )}
+          </>
+        )}
+      </SummaryCard>
     </div>
   );
 }
