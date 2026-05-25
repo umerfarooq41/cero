@@ -1,18 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  AlertTriangle,
+  BadgeCheck,
+  Brush,
+  Calculator,
+  Check,
+  ChevronRight,
+  CircleDollarSign,
+  Download,
+  Fingerprint,
+  FolderOpen,
+  Globe,
+  LayoutGrid,
+  LogOut,
   Monitor,
   Moon,
+  Palette,
+  ShieldCheck,
+  Sparkles,
   Sun,
-  Globe,
-  Calculator,
-  Download,
   Trash2,
   User,
-  LogOut,
-  FolderOpen,
-  ChevronRight,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -43,39 +53,89 @@ import PageHeader from '@/components/layout/PageHeader';
 import { useTheme } from '@/components/theme-provider';
 import { currencies } from '@/lib/currencies';
 import { usePageEntrance } from '@/hooks/usePageTransition';
+import { cn } from '@/lib/utils';
 
-const SettingRow = ({
-  icon: Icon,
-  label,
-  description,
-  children,
-  stackOnMobile = false,
-}) => (
-  <div
-    className={
-      stackOnMobile
-        ? 'flex flex-col gap-3 px-1 py-3 sm:flex-row sm:items-center sm:gap-4'
-        : 'flex items-center gap-4 px-1 py-3'
-    }
-  >
-    <div className="flex min-w-0 flex-1 items-center gap-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
+const toneClasses = {
+  blue: {
+    tile: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-blue-500/15',
+    selected: 'border-blue-500/30 bg-blue-500/10 text-blue-700 shadow-blue-500/10 dark:text-blue-300',
+    dot: 'bg-blue-500',
+  },
+  emerald: {
+    tile: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-emerald-500/15',
+    selected: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 shadow-emerald-500/10 dark:text-emerald-300',
+    dot: 'bg-emerald-500',
+  },
+  amber: {
+    tile: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/15',
+    selected: 'border-amber-500/30 bg-amber-500/10 text-amber-700 shadow-amber-500/10 dark:text-amber-300',
+    dot: 'bg-amber-500',
+  },
+  purple: {
+    tile: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-purple-500/15',
+    selected: 'border-purple-500/30 bg-purple-500/10 text-purple-700 shadow-purple-500/10 dark:text-purple-300',
+    dot: 'bg-purple-500',
+  },
+  cyan: {
+    tile: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 ring-cyan-500/15',
+    selected: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-700 shadow-cyan-500/10 dark:text-cyan-300',
+    dot: 'bg-cyan-500',
+  },
+  rose: {
+    tile: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 ring-rose-500/15',
+    selected: 'border-rose-500/30 bg-rose-500/10 text-rose-700 shadow-rose-500/10 dark:text-rose-300',
+    dot: 'bg-rose-500',
+  },
+  slate: {
+    tile: 'bg-slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
+    selected: 'border-slate-500/30 bg-slate-500/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
+    dot: 'bg-slate-500',
+  },
+};
 
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium">{label}</div>
-        {description && (
-          <div className="mt-0.5 break-words text-xs text-muted-foreground">
-            {description}
-          </div>
-        )}
-      </div>
-    </div>
+const themeOptions = [
+  { value: 'system', label: 'System', icon: Monitor },
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+];
 
-    <div className="shrink-0 self-start sm:self-center">{children}</div>
-  </div>
-);
+const themeStyleOptions = [
+  {
+    value: 'cero',
+    label: 'Cero',
+    description: 'Current blue, pink, and teal gradient.',
+    tone: 'blue',
+    preview: 'from-blue-400/60 via-fuchsia-300/45 to-teal-300/50',
+  },
+  {
+    value: 'ocean',
+    label: 'Ocean',
+    description: 'Clean blue and aqua finance workspace.',
+    tone: 'cyan',
+    preview: 'from-sky-400/60 via-cyan-300/50 to-teal-300/55',
+  },
+  {
+    value: 'sunset',
+    label: 'Sunset',
+    description: 'Warm orange, rose, and gold background.',
+    tone: 'amber',
+    preview: 'from-orange-400/60 via-rose-300/50 to-yellow-300/55',
+  },
+  {
+    value: 'forest',
+    label: 'Forest',
+    description: 'Calm green and mint productivity tone.',
+    tone: 'emerald',
+    preview: 'from-emerald-400/60 via-lime-300/45 to-teal-300/50',
+  },
+  {
+    value: 'minimal',
+    label: 'Minimal',
+    description: 'Neutral, quieter version of the app.',
+    tone: 'slate',
+    preview: 'from-slate-300/70 via-slate-100/80 to-white/80 dark:from-slate-700/70 dark:via-slate-900/80 dark:to-slate-950/90',
+  },
+];
 
 const SarIcon = () => (
   <img
@@ -85,7 +145,7 @@ const SarIcon = () => (
   />
 );
 
-const getSavedTwentyFifthRule = (saved = {}, fallback = false) => {
+function getSavedTwentyFifthRule(saved = {}, fallback = false) {
   return (
     saved?.budgetLogic?.twentyFifthRule ??
     saved?.budget_logic?.twenty_fifth_rule ??
@@ -93,9 +153,9 @@ const getSavedTwentyFifthRule = (saved = {}, fallback = false) => {
     saved?.shift25th ??
     fallback
   );
-};
+}
 
-const getSavedAutoSweepSurplus = (saved = {}, fallback = false) => {
+function getSavedAutoSweepSurplus(saved = {}, fallback = false) {
   return (
     saved?.budgetLogic?.autoSweepSurplus ??
     saved?.budget_logic?.auto_sweep_surplus ??
@@ -103,7 +163,158 @@ const getSavedAutoSweepSurplus = (saved = {}, fallback = false) => {
     saved?.auto_sweep ??
     fallback
   );
-};
+}
+
+function IconTile({ icon: Icon, tone = 'blue', className }) {
+  return (
+    <div
+      className={cn(
+        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1',
+        toneClasses[tone]?.tile || toneClasses.blue.tile,
+        className
+      )}
+    >
+      <Icon className="h-[18px] w-[18px]" />
+    </div>
+  );
+}
+
+function SettingsSection({ title, description, children, tone = 'blue' }) {
+  return (
+    <section className="settings-section animate-child mb-4 overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+      <div className="settings-section-header flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4">
+        <div className="min-w-0">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {title}
+          </h3>
+          {description && (
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              {description}
+            </p>
+          )}
+        </div>
+
+        <span
+          className={cn(
+            'mt-1 h-2 w-2 shrink-0 rounded-full',
+            toneClasses[tone]?.dot || toneClasses.blue.dot
+          )}
+        />
+      </div>
+
+      <div className="divide-y divide-border/50 px-4">{children}</div>
+    </section>
+  );
+}
+
+function SettingRow({
+  icon,
+  tone = 'blue',
+  label,
+  description,
+  children,
+  onClick,
+  danger = false,
+  stackOnMobile = false,
+}) {
+  const Wrapper = onClick ? 'button' : 'div';
+
+  return (
+    <Wrapper
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className={cn(
+        'settings-row w-full px-1 py-3 text-left transition-colors',
+        onClick && 'rounded-2xl hover:bg-background/55',
+        stackOnMobile
+          ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'
+          : 'flex items-center gap-4'
+      )}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <IconTile icon={icon} tone={danger ? 'rose' : tone} />
+
+        <div className="min-w-0 flex-1">
+          <div
+            className={cn(
+              'truncate text-sm font-semibold',
+              danger && 'text-destructive'
+            )}
+          >
+            {label}
+          </div>
+          {description && (
+            <div className="mt-0.5 break-words text-xs leading-5 text-muted-foreground">
+              {description}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="shrink-0 self-start sm:self-center">{children}</div>
+    </Wrapper>
+  );
+}
+
+function SegmentedOption({ active, onClick, icon: Icon, label }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2 text-xs font-bold transition-all',
+        active
+          ? 'bg-background text-foreground shadow-sm ring-1 ring-border/60'
+          : 'text-muted-foreground hover:bg-background/55 hover:text-foreground'
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {label}
+    </button>
+  );
+}
+
+function ThemeStyleCard({ option, active, onSelect }) {
+  const selectedClass = toneClasses[option.tone]?.selected || toneClasses.blue.selected;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(option.value)}
+      className={cn(
+        'group rounded-3xl border bg-background/35 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:bg-background/55 hover:shadow-md',
+        active ? selectedClass : 'border-border/60 text-foreground'
+      )}
+    >
+      <div
+        className={cn(
+          'mb-3 h-16 rounded-2xl bg-gradient-to-br ring-1 ring-white/45 dark:ring-white/10',
+          option.preview
+        )}
+      />
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-bold">{option.label}</div>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {option.description}
+          </p>
+        </div>
+
+        <span
+          className={cn(
+            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border',
+            active
+              ? 'border-current bg-current/10 text-current'
+              : 'border-border text-transparent'
+          )}
+        >
+          <Check className="h-3.5 w-3.5" />
+        </span>
+      </div>
+    </button>
+  );
+}
 
 export default function Settings() {
   const scope = usePageEntrance();
@@ -111,7 +322,18 @@ export default function Settings() {
   const queryClient = useQueryClient();
 
   const { user, isAuthenticated, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const {
+    theme,
+    setTheme,
+    themeStyle,
+    setThemeStyle,
+    compactMode,
+    setCompactMode,
+    showDecimals,
+    setShowDecimals,
+    hapticsEnabled,
+    setHapticsEnabled,
+  } = useTheme();
 
   const [settings, setSettings] = useState({
     theme: 'system',
@@ -128,6 +350,11 @@ export default function Settings() {
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [exporting, setExporting] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  const selectedCurrency = useMemo(
+    () => currencies.find((item) => item.code === settings.currency) || currencies[0],
+    [settings.currency]
+  );
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -163,6 +390,7 @@ export default function Settings() {
     };
 
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveSettings = async (newSettings) => {
@@ -180,11 +408,7 @@ export default function Settings() {
 
   const updateSetting = async (key, value) => {
     const previousSettings = settings;
-
-    const newSettings = {
-      ...settings,
-      [key]: value,
-    };
+    const newSettings = { ...settings, [key]: value };
 
     setSettings(newSettings);
 
@@ -200,7 +424,6 @@ export default function Settings() {
 
   const updateBudgetLogicSetting = async (key, value) => {
     const previousSettings = settings;
-
     const newSettings = {
       ...settings,
       budgetLogic: {
@@ -219,6 +442,16 @@ export default function Settings() {
       setSettings(previousSettings);
       toast.error(error.message || 'Could not save budget logic setting');
     }
+  };
+
+  const handleThemeChange = async (nextTheme) => {
+    setTheme(nextTheme);
+    await updateSetting('theme', nextTheme);
+  };
+
+  const handleThemeStyleChange = (nextStyle) => {
+    setThemeStyle(nextStyle);
+    toast.success('Theme style updated');
   };
 
   const handleSignOut = async () => {
@@ -267,13 +500,17 @@ export default function Settings() {
         auto_sweep: false,
       });
 
+      setTheme('system');
+      setThemeStyle('cero');
+      setCompactMode(false);
+      setShowDecimals(true);
+      setHapticsEnabled(false);
+
       queryClient.clear();
 
       toast.success('All Cero data has been deleted');
-
       setShowResetDialog(false);
       setResetConfirmText('');
-
       navigate('/onboarding', { replace: true });
     } catch (error) {
       console.error('Reset database failed:', error);
@@ -287,357 +524,368 @@ export default function Settings() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title="Settings"
-        subtitle="Preferences, categories, and app settings"
+        subtitle="Personalize Cero, manage budget behavior, and control your data"
       />
 
       <main className="mx-auto w-full max-w-4xl px-4 py-3 pb-24 lg:py-8">
-        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-          <div className="border-b border-border px-5 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Account
-            </h3>
-          </div>
-
-          <div className="px-4">
-            {isAuthenticated && user ? (
-              <SettingRow
-                icon={User}
-                label={user.user_metadata?.full_name || user.email}
-                description={user.email}
-                stackOnMobile
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out
-                </Button>
-              </SettingRow>
-            ) : (
-              <SettingRow
-                icon={User}
-                label="Not signed in"
-                description="Sign in to sync your data"
-              >
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    navigate('/login', { replace: true });
-                  }}
-                >
-                  Sign in
-                </Button>
-              </SettingRow>
-            )}
-          </div>
-        </div>
-
-        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-          <div className="border-b border-border px-5 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              App Management
-            </h3>
-          </div>
-
-          <div className="px-4">
-            <Link
-              to="/categories"
-              className="flex items-center justify-between rounded-lg px-1 py-3 transition-colors hover:bg-accent/50"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary">
-                  <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                </div>
-
-                <div>
-                  <div className="text-sm font-medium">Categories</div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">
-                    Manage income, expense, savings, and debt categories
-                  </div>
-                </div>
+        <section className="animate-child mb-4 overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-xl">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                <Sparkles className="h-6 w-6" />
               </div>
 
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-          </div>
-        </div>
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-bold tracking-tight">
+                  Cero Control Center
+                </h2>
+                <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                  Appearance, currency, automation, reports, and safety controls.
+                </p>
+              </div>
+            </div>
 
-        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-          <div className="border-b border-border px-5 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Appearance
-            </h3>
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/45 px-3 py-2 text-xs font-semibold text-muted-foreground">
+              <BadgeCheck className="h-4 w-4 text-[hsl(var(--success))]" />
+              Settings synced
+            </div>
           </div>
+        </section>
 
-          <div className="divide-y divide-border/50 px-4">
+        <SettingsSection
+          title="Account"
+          description="Manage sign-in status and account access."
+          tone="blue"
+        >
+          {isAuthenticated && user ? (
             <SettingRow
-              icon={theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor}
-              label="Theme"
-              description="Choose system, light, or dark appearance"
-            >
-              <Select
-                value={theme}
-                onValueChange={(nextTheme) => {
-                  setTheme(nextTheme);
-                  updateSetting('theme', nextTheme);
-                }}
-              >
-                <SelectTrigger className="h-9 w-[132px] rounded-xl px-3">
-                  <SelectValue placeholder="Theme" />
-                </SelectTrigger>
-
-                <SelectContent align="end">
-                  <SelectItem value="system">
-                    <span className="flex items-center gap-2">
-                      <Monitor className="h-4 w-4" />
-                      System
-                    </span>
-                  </SelectItem>
-
-                  <SelectItem value="light">
-                    <span className="flex items-center gap-2">
-                      <Sun className="h-4 w-4" />
-                      Light
-                    </span>
-                  </SelectItem>
-
-                  <SelectItem value="dark">
-                    <span className="flex items-center gap-2">
-                      <Moon className="h-4 w-4" />
-                      Dark
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingRow>
-          </div>
-        </div>
-
-        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-          <div className="border-b border-border px-5 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Regional
-            </h3>
-          </div>
-
-          <div className="divide-y divide-border/50 px-4">
-            <SettingRow
-              icon={Globe}
-              label="Currency"
-              description="Select your display currency"
-            >
-              <Select
-                value={settings.currency}
-                onValueChange={(value) => updateSetting('currency', value)}
-              >
-                <SelectTrigger className="h-9 w-auto min-w-[92px] gap-2 rounded-xl px-3">
-                  <SelectValue />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {currencies.map((item) => (
-                    <SelectItem key={item.code} value={item.code}>
-                      {item.code === 'SAR' ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <SarIcon />
-                          {item.shortDisplay}
-                        </span>
-                      ) : (
-                        item.shortDisplay
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </SettingRow>
-          </div>
-        </div>
-
-        <div className="animate-child mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-          <div className="border-b border-border px-5 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Budget Logic
-            </h3>
-          </div>
-
-          <div className="divide-y divide-border/50 px-4">
-            <SettingRow
-              icon={Calculator}
-              label="25th Rule"
-              description="Income on/after 25th moves to next month's pool"
-            >
-              <Switch
-                checked={settings.budgetLogic.twentyFifthRule}
-                onCheckedChange={(value) =>
-                  updateBudgetLogicSetting('twentyFifthRule', value)
-                }
-              />
-            </SettingRow>
-
-            <SettingRow
-              icon={Calculator}
-              label="Auto-Sweep Surplus"
-              description="Unspent balances become savings automatically"
-            >
-              <Switch
-                checked={settings.budgetLogic.autoSweepSurplus}
-                onCheckedChange={(value) =>
-                  updateBudgetLogicSetting('autoSweepSurplus', value)
-                }
-              />
-            </SettingRow>
-          </div>
-        </div>
-
-        <div className="animate-child overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
-          <div className="border-b border-border px-5 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Data & Privacy
-            </h3>
-          </div>
-
-          <div className="divide-y divide-border/50 px-4">
-            <SettingRow
-              icon={Download}
-              label="Export Report"
-              description="Download a polished HTML financial report"
+              icon={User}
+              tone="blue"
+              label={user.user_metadata?.full_name || user.email}
+              description={user.email}
+              stackOnMobile
             >
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowExportDialog(true)}
+                className="gap-2 rounded-2xl"
+                onClick={handleSignOut}
               >
-                Export
+                <LogOut className="h-4 w-4" />
+                Sign out
               </Button>
             </SettingRow>
-
+          ) : (
             <SettingRow
-              icon={Trash2}
-              label="Reset Everything"
-              description="Permanently delete all Cero data from your account"
+              icon={User}
+              tone="blue"
+              label="Not signed in"
+              description="Sign in to sync your data."
             >
               <Button
-                variant="destructive"
                 size="sm"
-                onClick={() => setShowResetDialog(true)}
+                className="rounded-2xl"
+                onClick={() => navigate('/login', { replace: true })}
               >
-                Reset
+                Sign in
               </Button>
             </SettingRow>
+          )}
+        </SettingsSection>
+
+        <SettingsSection
+          title="Preferences"
+          description="Control how Cero looks and how money is displayed."
+          tone="purple"
+        >
+          <SettingRow
+            icon={Palette}
+            tone="purple"
+            label="Appearance"
+            description="Choose system, light, or dark mode."
+            stackOnMobile
+          >
+            <div className="grid grid-cols-3 gap-1 rounded-2xl border border-border/60 bg-background/40 p-1">
+              {themeOptions.map((option) => (
+                <SegmentedOption
+                  key={option.value}
+                  active={theme === option.value}
+                  onClick={() => handleThemeChange(option.value)}
+                  icon={option.icon}
+                  label={option.label}
+                />
+              ))}
+            </div>
+          </SettingRow>
+
+          <SettingRow
+            icon={Brush}
+            tone="cyan"
+            label="Theme Style"
+            description="Each style has a dedicated light and dark background."
+            stackOnMobile
+          >
+            <span className="rounded-full bg-cyan-500/10 px-2.5 py-1 text-xs font-bold text-cyan-700 ring-1 ring-cyan-500/15 dark:text-cyan-300">
+              {themeStyleOptions.find((item) => item.value === themeStyle)?.label || 'Cero'}
+            </span>
+          </SettingRow>
+
+          <div className="grid gap-3 py-3 sm:grid-cols-2 lg:grid-cols-3">
+            {themeStyleOptions.map((option) => (
+              <ThemeStyleCard
+                key={option.value}
+                option={option}
+                active={themeStyle === option.value}
+                onSelect={handleThemeStyleChange}
+              />
+            ))}
           </div>
-        </div>
+
+          <SettingRow
+            icon={Globe}
+            tone="emerald"
+            label="Currency"
+            description={`Currently using ${selectedCurrency?.name || 'Saudi Riyal'}.`}
+          >
+            <Select
+              value={settings.currency}
+              onValueChange={(value) => updateSetting('currency', value)}
+            >
+              <SelectTrigger className="h-10 w-auto min-w-[112px] gap-2 rounded-2xl px-3">
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                {currencies.map((item) => (
+                  <SelectItem key={item.code} value={item.code}>
+                    {item.code === 'SAR' ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <SarIcon />
+                        {item.shortDisplay}
+                      </span>
+                    ) : (
+                      item.shortDisplay
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </SettingRow>
+
+          <SettingRow
+            icon={CircleDollarSign}
+            tone="amber"
+            label="Show Decimals"
+            description="Turn off to show whole-number money values in supported amount displays."
+          >
+            <Switch checked={showDecimals} onCheckedChange={setShowDecimals} />
+          </SettingRow>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Budget Behavior"
+          description="Automation and rules that affect budget calculations."
+          tone="amber"
+        >
+          <SettingRow
+            icon={Calculator}
+            tone="amber"
+            label="25th Rule"
+            description="Transactions dated on or after the 25th count toward the next budget month."
+          >
+            <Switch
+              checked={settings.budgetLogic.twentyFifthRule}
+              onCheckedChange={(value) =>
+                updateBudgetLogicSetting('twentyFifthRule', value)
+              }
+            />
+          </SettingRow>
+
+          <SettingRow
+            icon={ShieldCheck}
+            tone="emerald"
+            label="Auto-Sweep Surplus"
+            description="At month close, Cero can move leftover surplus into savings when accounts and categories are available."
+          >
+            <Switch
+              checked={settings.budgetLogic.autoSweepSurplus}
+              onCheckedChange={(value) =>
+                updateBudgetLogicSetting('autoSweepSurplus', value)
+              }
+            />
+          </SettingRow>
+        </SettingsSection>
+
+        <SettingsSection
+          title="App Experience"
+          description="Device-level preferences stored safely on this browser."
+          tone="cyan"
+        >
+          <SettingRow
+            icon={LayoutGrid}
+            tone="cyan"
+            label="Compact Mode"
+            description="Tightens supported Settings sections and prepares the app for denser layouts."
+          >
+            <Switch checked={compactMode} onCheckedChange={setCompactMode} />
+          </SettingRow>
+
+          <SettingRow
+            icon={Fingerprint}
+            tone="purple"
+            label="Haptic Feedback"
+            description="Adds a light vibration on supported mobile devices when tapping buttons."
+          >
+            <Switch checked={hapticsEnabled} onCheckedChange={setHapticsEnabled} />
+          </SettingRow>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Manage Plan"
+          description="Open the configuration area without using a separate broken categories route."
+          tone="emerald"
+        >
+          <SettingRow
+            icon={FolderOpen}
+            tone="emerald"
+            label="Categories, Recurring Rules, and Goals"
+            description="Manage setup items in Manage Plan."
+            onClick={() => navigate('/manage-plan?tab=category')}
+          >
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </SettingRow>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Data & Reports"
+          description="Export your information and keep a backup outside Cero."
+          tone="blue"
+        >
+          <SettingRow
+            icon={Download}
+            tone="blue"
+            label="Export Report"
+            description="Download a polished HTML financial report."
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-2xl"
+              onClick={() => setShowExportDialog(true)}
+            >
+              Export
+            </Button>
+          </SettingRow>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Danger Zone"
+          description="Permanent actions that cannot be undone."
+          tone="rose"
+        >
+          <SettingRow
+            icon={Trash2}
+            label="Reset Everything"
+            description="Permanently delete accounts, transactions, plans, recurring rules, goals, and app settings."
+            danger
+          >
+            <Button
+              variant="destructive"
+              size="sm"
+              className="rounded-2xl"
+              onClick={() => setShowResetDialog(true)}
+            >
+              Reset
+            </Button>
+          </SettingRow>
+        </SettingsSection>
 
         <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-          <DialogContent className="overflow-hidden rounded-3xl border border-border/60 bg-card/80 p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+          <DialogContent className="overflow-hidden rounded-3xl border border-border/60 bg-card/90 p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
             <DialogHeader className="border-b border-border/50 px-6 py-5">
-              <DialogTitle className="text-lg font-semibold tracking-tight">
+              <DialogTitle className="flex items-center gap-3 text-lg font-bold">
+                <IconTile icon={Download} tone="blue" />
                 Export Financial Report
               </DialogTitle>
-              <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Download a polished HTML report that opens in any browser and
-                can be printed or saved as PDF.
+              <DialogDescription className="pt-2 text-sm leading-6">
+                This downloads your current Cero data as an HTML report you can save,
+                print, or share for review.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="px-6 py-5">
-              <div className="rounded-2xl border border-border/50 bg-background/40 p-5 text-sm backdrop-blur-xl">
-                <div className="text-sm font-semibold tracking-tight">
-                  Report includes
-                </div>
-
-                <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-muted-foreground">
-                  <li>Net worth and account balances</li>
-                  <li>Income, expenses, savings, and debt totals</li>
-                  <li>Monthly cash-flow summary</li>
-                  <li>Budget category performance</li>
-                  <li>Latest 250 transactions</li>
-                </ul>
-              </div>
+            <div className="px-6 py-5 text-sm text-muted-foreground">
+              The export includes accounts, transactions, categories, budgets,
+              recurring rules, goals, and a summary of your current settings.
             </div>
 
             <DialogFooter className="border-t border-border/50 px-6 py-4">
               <Button
                 variant="outline"
-                className="rounded-xl border-border/60 bg-background/40 backdrop-blur-xl"
+                className="rounded-2xl"
                 onClick={() => setShowExportDialog(false)}
                 disabled={exporting}
               >
                 Cancel
               </Button>
-
               <Button
-                className="rounded-xl"
+                className="rounded-2xl"
                 onClick={handleExportReport}
                 disabled={exporting}
               >
-                {exporting ? 'Preparing…' : 'Download Report'}
+                {exporting ? 'Exporting…' : 'Download Report'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={showResetDialog}
-          onOpenChange={(open) => {
-            setShowResetDialog(open);
-            if (!open) setResetConfirmText('');
-          }}
-        >
-          <DialogContent className="overflow-hidden rounded-3xl border border-border/60 bg-card/80 p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
-            <DialogHeader className="border-b border-border/50 px-6 py-5">
-              <DialogTitle className="text-lg font-semibold tracking-tight">
-                Reset Everything?
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent className="overflow-hidden rounded-3xl border border-destructive/25 bg-card/90 p-0 shadow-[0_24px_80px_rgba(127,29,29,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+            <DialogHeader className="border-b border-destructive/20 px-6 py-5">
+              <DialogTitle className="flex items-center gap-3 text-lg font-bold text-destructive">
+                <IconTile icon={AlertTriangle} tone="rose" />
+                Reset Everything
               </DialogTitle>
-              <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                This permanently deletes your transactions, accounts, categories,
-                budget plans, and app settings.
+              <DialogDescription className="pt-2 text-sm leading-6">
+                This permanently deletes all Cero data for this account. This action
+                cannot be undone.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="px-6 py-5">
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 backdrop-blur-xl">
-                <div className="text-sm font-semibold tracking-tight text-red-500">
-                  This action is permanent.
-                </div>
+            <div className="space-y-4 px-6 py-5">
+              <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm leading-6 text-muted-foreground">
+                This deletes accounts, transactions, monthly plans, categories,
+                recurring rules, savings goals, and stored settings.
+              </div>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Type{' '}
-                  <span className="font-bold text-foreground">RESET</span>{' '}
-                  below to confirm deletion.
-                </p>
-
+              <label className="block space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Type RESET to confirm
+                </span>
                 <input
                   value={resetConfirmText}
                   onChange={(event) => setResetConfirmText(event.target.value)}
-                  placeholder="Type RESET"
-                  className="mt-4 h-11 w-full rounded-2xl border border-border/60 bg-background/60 px-4 text-sm shadow-sm outline-none transition-all focus:border-red-500/40 focus:ring-4 focus:ring-red-500/10"
+                  className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm font-semibold outline-none ring-offset-background transition focus:ring-2 focus:ring-destructive/30"
+                  placeholder="RESET"
                 />
-              </div>
+              </label>
             </div>
 
             <DialogFooter className="border-t border-border/50 px-6 py-4">
               <Button
                 variant="outline"
-                className="rounded-xl border-border/60 bg-background/40 backdrop-blur-xl"
-                onClick={() => {
-                  setShowResetDialog(false);
-                  setResetConfirmText('');
-                }}
+                className="rounded-2xl"
+                onClick={() => setShowResetDialog(false)}
                 disabled={resetting}
               >
                 Cancel
               </Button>
-
               <Button
                 variant="destructive"
-                className="rounded-xl bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600"
+                className="rounded-2xl"
                 onClick={handleResetEverything}
                 disabled={resetting || resetConfirmText !== 'RESET'}
               >
-                {resetting ? 'Deleting…' : 'Delete Everything'}
+                {resetting ? 'Resetting…' : 'Delete Everything'}
               </Button>
             </DialogFooter>
           </DialogContent>
