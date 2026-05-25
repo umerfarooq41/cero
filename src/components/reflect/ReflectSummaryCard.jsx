@@ -177,7 +177,7 @@ function StatusPill({ children, tone = 'default' }) {
   return (
     <span
       className={cn(
-        'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold leading-none ring-1',
+        'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-none ring-1',
         toneClasses.bg,
         toneClasses.text,
         toneClasses.ring
@@ -190,7 +190,7 @@ function StatusPill({ children, tone = 'default' }) {
 
 function MoneyRow({ label, amount, currency, tone }) {
   return (
-    <div className="flex items-center justify-between gap-3 text-sm leading-5">
+    <div className="flex items-center justify-between gap-3 text-xs leading-5">
       <span className="min-w-0 truncate text-muted-foreground">{label}</span>
 
       <span className={cn('shrink-0 font-semibold tabular-nums', tone)}>
@@ -205,7 +205,7 @@ function AnimatedBar({ value, className, delay = 'delay-150' }) {
   const scaleX = safeValue / 100;
 
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-muted/70">
+    <div className="h-1.5 overflow-hidden rounded-full bg-muted/70">
       <div
         className={cn(
           'h-full origin-left rounded-full transition-transform duration-700 ease-out will-change-transform',
@@ -222,8 +222,8 @@ function PercentBar({ label, value, className, delay }) {
   const safeValue = clampPercent(value);
 
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between gap-3 text-xs font-medium">
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-3 text-[11px] font-medium">
         <span className="text-muted-foreground">{label}</span>
         <span className="tabular-nums text-foreground">
           {Math.round(safeValue)}%
@@ -251,10 +251,10 @@ function SummaryCard({
       icon={Icon}
       title={title}
       action={action}
-      className={cn('relative', className)}
-      contentClassName="space-y-4"
+      className={cn('relative p-3 sm:p-4', className)}
+      contentClassName="space-y-3"
     >
-      <div className={cn('text-xl font-bold tracking-tight tabular-nums', toneClasses.text)}>
+      <div className={cn('text-lg font-bold tracking-tight tabular-nums sm:text-xl', toneClasses.text)}>
         {value}
       </div>
 
@@ -285,10 +285,9 @@ function HeroCashFlowCard({
       title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
       value={<CurrencyAmount amount={netCashFlow} currency={currency} />}
       valueTone={tone}
-      className="sm:col-span-2"
       action={<StatusPill tone={tone}>{positive ? 'Positive' : 'Negative'}</StatusPill>}
     >
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <MoneyRow
           label="Income"
           amount={income}
@@ -304,7 +303,7 @@ function HeroCashFlowCard({
         />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <AnimatedBar
           value={savedProgress}
           className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
@@ -448,7 +447,7 @@ export default function ReflectSummaryCard({
   const monthlyBudgetIsPositive = computed.monthlyBudgetDifference >= 0;
 
   return (
-    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
       <HeroCashFlowCard
         isYear={isYear}
         income={income}
@@ -463,7 +462,7 @@ export default function ReflectSummaryCard({
         value={<CurrencyAmount amount={netWorth} currency={currency} />}
         valueTone={netWorthTone}
       >
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <MoneyRow
             label="Assets"
             amount={totalAssets}
@@ -479,7 +478,7 @@ export default function ReflectSummaryCard({
           />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <AnimatedBar
             value={computed.netWorthHealth}
             className="bg-cyan-400"
@@ -520,7 +519,7 @@ export default function ReflectSummaryCard({
       >
         {isYear ? (
           <>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <MoneyRow
                 label="Monthly Avg"
                 amount={computed.monthlyAverage}
@@ -536,7 +535,7 @@ export default function ReflectSummaryCard({
               />
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <PercentBar
                 label="Year Passed"
                 value={computed.yearElapsedPercent}
@@ -552,7 +551,7 @@ export default function ReflectSummaryCard({
               />
             </div>
 
-            <p className="text-[11px] leading-4 text-muted-foreground sm:text-xs">
+            <p className="text-[11px] leading-4 text-muted-foreground">
               {computed.yearlyPlanCap === 0
                 ? 'Add plans to compare usage against the year.'
                 : computed.paceDifference >= 0
@@ -562,7 +561,7 @@ export default function ReflectSummaryCard({
           </>
         ) : (
           <>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <MoneyRow
                 label="Planned"
                 amount={plannedExpenses}
@@ -580,7 +579,7 @@ export default function ReflectSummaryCard({
 
             {plannedExpenses > 0 ? (
               <>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <AnimatedBar
                     value={computed.monthlyBudgetUsed}
                     className={healthToneClasses.bar}
@@ -599,7 +598,7 @@ export default function ReflectSummaryCard({
                 </div>
               </>
             ) : (
-              <p className="text-[11px] leading-4 text-muted-foreground sm:text-xs">
+              <p className="text-[11px] leading-4 text-muted-foreground">
                 No planned expense budget for this month.
               </p>
             )}
