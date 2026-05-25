@@ -5,7 +5,7 @@ import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
 } from '@/lib/currencies';
-import ReflectCard from './ReflectCard.jsx';
+import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard.jsx';
 
 export const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
@@ -180,22 +180,6 @@ function getToneClasses(tone = 'default') {
   };
 }
 
-function CardHeading({ icon: Icon, title, badge }) {
-  return (
-    <div className="flex items-start justify-between gap-2">
-      <div className="flex min-w-0 items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-
-        <p className="min-w-0 text-sm font-bold leading-5 text-foreground">
-          {title}
-        </p>
-      </div>
-
-      {badge}
-    </div>
-  );
-}
-
 function MoneyRow({ label, amount, currency, tone }) {
   return (
     <div className="flex items-center justify-between gap-2 text-xs sm:text-sm">
@@ -260,70 +244,63 @@ function HeroCashFlowCard({
     income > 0 ? Math.min((Math.max(expenses, 0) / income) * 100, 100) : 0;
 
   return (
-    <ReflectCard className="relative overflow-hidden p-3 sm:col-span-2 sm:p-4">
-      <div className="relative flex h-full flex-col justify-between gap-3">
-        <div className="space-y-1.5">
-          <CardHeading
-            icon={BarChart3}
-            title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-            tone={tone}
-            badge={
-              <span
-                className={cn(
-                  'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
-                  positive
-                    ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
-                    : 'bg-destructive/10 text-destructive'
-                )}
-              >
-                {positive ? 'Positive' : 'Negative'}
-              </span>
-            }
+    <DashboardSectionCard
+      icon={BarChart3}
+      title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
+      className="relative sm:col-span-2"
+      contentClassName="relative flex h-full flex-col justify-between gap-3"
+      action={
+        <span
+          className={cn(
+            'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
+            positive
+              ? 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
+              : 'bg-destructive/10 text-destructive'
+          )}
+        >
+          {positive ? 'Positive' : 'Negative'}
+        </span>
+      }
+    >
+      <div
+        className={cn(
+          'text-base font-bold tracking-tight tabular-nums sm:text-lg',
+          positive ? 'text-[hsl(var(--success))]' : 'text-destructive'
+        )}
+      >
+        <CurrencyAmount amount={netCashFlow} currency={currency} />
+      </div>
+
+      <div className="space-y-3">
+        <div className="grid gap-2">
+          <MoneyRow
+            label="Income"
+            amount={income}
+            currency={currency}
+            tone="text-[hsl(var(--success))]"
           />
 
-          <div
-            className={cn(
-              'pt-2 text-base font-bold tracking-tight tabular-nums sm:text-lg',
-              positive
-                ? 'text-[hsl(var(--success))]'
-                : 'text-destructive'
-            )}
-          >
-            <CurrencyAmount amount={netCashFlow} currency={currency} />
-          </div>
+          <MoneyRow
+            label="Expenses"
+            amount={expenses}
+            currency={currency}
+            tone="text-destructive"
+          />
         </div>
 
-        <div className="space-y-3">
-          <div className="grid gap-2">
-            <MoneyRow
-              label="Income"
-              amount={income}
-              currency={currency}
-              tone="text-[hsl(var(--success))]"
-            />
+        <div className="space-y-1.5">
+          <AnimatedBar
+            value={savedProgress}
+            className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
+          />
 
-            <MoneyRow
-              label="Expenses"
-              amount={expenses}
-              currency={currency}
-              tone="text-destructive"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <AnimatedBar
-              value={savedProgress}
-              className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
-            />
-
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="tabular-nums">{Math.round(savedProgress)}% saved</span>
-              <span className="tabular-nums">{Math.round(expenseProgress)}% spent</span>
-            </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span className="tabular-nums">{Math.round(savedProgress)}% saved</span>
+            <span className="tabular-nums">{Math.round(expenseProgress)}% spent</span>
           </div>
         </div>
       </div>
-    </ReflectCard>
+    </DashboardSectionCard>
   );
 }
 
@@ -337,7 +314,12 @@ function SecondaryCard({
   const toneClasses = getToneClasses(tone);
 
   return (
-    <ReflectCard className="relative overflow-hidden p-3 sm:p-4">
+    <DashboardSectionCard
+      icon={Icon}
+      title={title}
+      className="relative"
+      contentClassName="relative flex h-full flex-col justify-between gap-3"
+    >
       <div
         className={cn(
           'pointer-events-none absolute -right-10 -top-10 h-20 w-20 rounded-full blur-3xl',
@@ -345,23 +327,17 @@ function SecondaryCard({
         )}
       />
 
-      <div className="relative flex h-full flex-col justify-between gap-3">
-        <div>
-          <CardHeading icon={Icon} title={title} tone={tone} />
-
-          <div
-            className={cn(
-              'mt-2 text-base font-bold tracking-tight tabular-nums',
-              toneClasses.text
-            )}
-          >
-            {value}
-          </div>
-        </div>
-
-        {children}
+      <div
+        className={cn(
+          'text-base font-bold tracking-tight tabular-nums',
+          toneClasses.text
+        )}
+      >
+        {value}
       </div>
-    </ReflectCard>
+
+      {children}
+    </DashboardSectionCard>
   );
 }
 
