@@ -424,3 +424,98 @@ main,
     -webkit-backdrop-filter: blur(18px) saturate(140%);
   }
 }
+/* ============================= */
+/* 🎨 CERO THEME STYLES */
+/* ============================= */
+
+@layer base {
+  html.theme-style-ocean body {
+    background:
+      radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.25), transparent 32%),
+      radial-gradient(circle at 95% 8%, rgba(45, 212, 191, 0.22), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(59, 130, 246, 0.16), transparent 34%),
+      linear-gradient(135deg, rgba(240, 249, 255, 1) 0%, rgba(236, 253, 245, 1) 48%, rgba(239, 246, 255, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-ocean.dark body {
+    background:
+      radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.27), transparent 32%),
+      radial-gradient(circle at 95% 8%, rgba(20, 184, 166, 0.23), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(37, 99, 235, 0.16), transparent 34%),
+      linear-gradient(135deg, rgba(4, 18, 33, 1) 0%, rgba(6, 30, 43, 1) 50%, rgba(3, 7, 18, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-sunset body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(251, 146, 60, 0.25), transparent 32%),
+      radial-gradient(circle at 100% 5%, rgba(244, 114, 182, 0.22), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(250, 204, 21, 0.14), transparent 34%),
+      linear-gradient(135deg, rgba(255, 247, 237, 1) 0%, rgba(255, 241, 242, 1) 48%, rgba(255, 251, 235, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-sunset.dark body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.25), transparent 32%),
+      radial-gradient(circle at 100% 5%, rgba(236, 72, 153, 0.21), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(245, 158, 11, 0.14), transparent 34%),
+      linear-gradient(135deg, rgba(24, 10, 9, 1) 0%, rgba(30, 16, 30, 1) 48%, rgba(3, 7, 18, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-forest body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22), transparent 32%),
+      radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.18), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 34%),
+      linear-gradient(135deg, rgba(240, 253, 244, 1) 0%, rgba(247, 254, 231, 1) 46%, rgba(236, 253, 245, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-forest.dark body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22), transparent 32%),
+      radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.16), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.12), transparent 34%),
+      linear-gradient(135deg, rgba(5, 20, 13, 1) 0%, rgba(9, 24, 18, 1) 48%, rgba(3, 7, 18, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-minimal body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.13), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(203, 213, 225, 0.16), transparent 28%),
+      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  html.theme-style-minimal.dark body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(71, 85, 105, 0.18), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(100, 116, 139, 0.12), transparent 28%),
+      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(15, 23, 42, 1) 58%, rgba(3, 7, 18, 1) 100%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  html.compact-mode main {
+    letter-spacing: -0.006em;
+  }
+
+  html.compact-mode .settings-section {
+    margin-bottom: 0.75rem;
+  }
+
+  html.compact-mode .settings-row {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+  }
+
+  html.compact-mode .settings-section-header {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+}
