@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
-import PlanMoney, { formatPlanNumber } from './PlanMoney';
+import PlanMoney from './PlanMoney';
 
 const SOURCE_BADGE_CLASS = {
   recurring:
@@ -9,24 +9,39 @@ const SOURCE_BADGE_CLASS = {
   goal: 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400',
 };
 
-function getProgressColor(item) {
-  if (item.remaining < 0) return '#DC2626';
-  if (item.planned > 0 && item.tracked >= item.planned) return '#F59E0B';
+function getProgressColor(item, rawPercent) {
+  if (item.remaining < 0 || rawPercent > 100) return '#DC2626';
+  if (rawPercent >= 100) return '#F59E0B';
   return item.color || item.categoryColor || 'hsl(var(--primary))';
+}
+
+function getTrackedVerb(item) {
+  const type =
+    item.budgetType ||
+    item.budget_type ||
+    item.type ||
+    item.category?.type ||
+    item.category?.budget_type;
+
+  if (type === 'income') return 'received';
+  if (type === 'savings') return 'saved';
+  if (type === 'debt') return 'paid';
+
+  return 'spent';
 }
 
 export default function PlanBreakdownRow({ item, currency }) {
   const isSourceRow = Boolean(item.sourceType);
-  const percent =
-    item.planned > 0 ? Math.min((item.tracked / item.planned) * 100, 100) : 0;
 
-  const rightAmount = isSourceRow ? item.planned : item.tracked;
-  const progressColor = getProgressColor(item);
+  const rawPercent = item.planned > 0 ? (item.tracked / item.planned) * 100 : 0;
+  const percent = Math.min(rawPercent, 100);
+  const progressColor = getProgressColor(item, rawPercent);
+  const trackedVerb = getTrackedVerb(item);
 
   return (
     <div
       className={cn(
-        'px-3 py-3.5 transition-colors sm:px-4',
+        'px-3 py-3 transition-colors sm:px-4',
         isSourceRow && 'bg-white/10 dark:bg-white/[0.015]'
       )}
     >
@@ -57,14 +72,6 @@ export default function PlanBreakdownRow({ item, currency }) {
                   </Badge>
                 )}
               </div>
-
-              <div className="mt-1 flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums">
-                <PlanMoney amount={item.tracked} currency={currency} compact />
-                <span>of</span>
-                <PlanMoney amount={item.planned} currency={currency} compact />
-                <span>·</span>
-                <span>{Math.round(percent)}% used</span>
-              </div>
             </div>
 
             <p
@@ -73,7 +80,7 @@ export default function PlanBreakdownRow({ item, currency }) {
                 item.remaining < 0 ? 'text-red-600' : 'text-foreground'
               )}
             >
-              <PlanMoney amount={rightAmount} currency={currency} compact />
+              <PlanMoney amount={item.planned} currency={currency} compact />
             </p>
           </div>
 
@@ -89,38 +96,21 @@ export default function PlanBreakdownRow({ item, currency }) {
 
           <div className="mt-1.5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground tabular-nums">
             <span className="truncate">
-              {item.remaining >= 0 ? 'Remaining' : 'Over plan'}
+              <PlanMoney amount={item.tracked} currency={currency} compact />{' '}
+              {trackedVerb}
             </span>
 
             <span
               className={cn(
-                'shrink-0 font-medium',
-                item.remaining < 0
+                'shrink-0 font-semibold',
+                item.remaining < 0 || rawPercent > 100
                   ? 'text-red-600'
-                  : item.remaining === 0
+                  : rawPercent >= 100
                     ? 'text-amber-600 dark:text-amber-400'
                     : 'text-muted-foreground'
               )}
             >
-              {item.remaining >= 0 ? (
-                <>
-                  <PlanMoney
-                    amount={item.remaining}
-                    currency={currency}
-                    compact
-                  />{' '}
-                  left
-                </>
-              ) : (
-                <>
-                  <PlanMoney
-                    amount={Math.abs(item.remaining)}
-                    currency={currency}
-                    compact
-                  />{' '}
-                  over
-                </>
-              )}
+              {Math.round(rawPercent)}%
             </span>
           </div>
         </div>
