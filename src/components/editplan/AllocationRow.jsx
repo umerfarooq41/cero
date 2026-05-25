@@ -2,6 +2,7 @@ import React from 'react';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 
 export default function AllocationRow({
   category,
@@ -47,10 +48,7 @@ export default function AllocationRow({
             Last month:
             {formatCurrency
               ? formatCurrency(lastMonthHint)
-              : Number(lastMonthHint || 0).toLocaleString('en-US', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+              : formatCurrencyNumberText(lastMonthHint)}
           </span>
         )}
       </div>
