@@ -391,8 +391,6 @@ export default function AddTransaction() {
     }
   };
 
-  const amountWidth = `${Math.max(4, String(amount || '0.00').length)}ch`;
-
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
@@ -416,55 +414,55 @@ export default function AddTransaction() {
         </Button>
 
         <div className="animate-child mb-6 rounded-3xl border border-border/60 bg-card/75 p-6 shadow-md backdrop-blur-xl md:p-8">
-  <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-    Amount
-  </div>
+          <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Amount
+          </div>
 
-  <div className="flex justify-center overflow-hidden">
-    <div className="inline-flex max-w-full items-center gap-3 text-5xl font-bold leading-none text-foreground tabular-nums">
-      <CurrencyPrefix currency={currency} />
+          <div className="flex justify-center overflow-hidden">
+            <div className="inline-flex max-w-full items-center gap-3 text-5xl font-bold leading-none text-foreground tabular-nums">
+              <CurrencyPrefix currency={currency} />
 
-      <input
-        type="text"
-        value={amount}
-        onChange={(e) => {
-          const nextValue = e.target.value
-            .replace(/[^0-9.]/g, '')
-            .replace(/(\..*)\./g, '$1');
+              <input
+                type="text"
+                value={amount}
+                onChange={(e) => {
+                  const nextValue = e.target.value
+                    .replace(/[^0-9.]/g, '')
+                    .replace(/(\..*)\./g, '$1');
 
-          setAmount(nextValue);
-        }}
-        placeholder="0.00"
-        autoFocus
-        inputMode="decimal"
-        className="
-          min-w-[4ch]
-          max-w-[8ch]
-          border-none
-          bg-transparent
-          p-0
-          text-left
-          text-5xl
-          font-bold
-          leading-none
-          tabular-nums
-          text-foreground
-          outline-none
-          placeholder:text-muted-foreground/30
-          [appearance:textfield]
-          [&::-webkit-inner-spin-button]:appearance-none
-          [&::-webkit-outer-spin-button]:appearance-none
-        "
-        style={{
-          width: `${Math.min(
-            8,
-            Math.max(4, String(amount || '0.00').length)
-          )}ch`,
-        }}
-      />
-    </div>
-  </div>
-</div>
+                  setAmount(nextValue);
+                }}
+                placeholder="0.00"
+                autoFocus
+                inputMode="decimal"
+                className="
+                  min-w-[4ch]
+                  max-w-[8ch]
+                  border-none
+                  bg-transparent
+                  p-0
+                  text-left
+                  text-5xl
+                  font-bold
+                  leading-none
+                  tabular-nums
+                  text-foreground
+                  outline-none
+                  placeholder:text-muted-foreground/30
+                  [appearance:textfield]
+                  [&::-webkit-inner-spin-button]:appearance-none
+                  [&::-webkit-outer-spin-button]:appearance-none
+                "
+                style={{
+                  width: `${Math.min(
+                    8,
+                    Math.max(4, String(amount || '0.00').length)
+                  )}ch`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
         <TransactionTypeTabs
           value={type}
@@ -477,9 +475,9 @@ export default function AddTransaction() {
           className="mb-6 animate-child"
         />
 
-        <div className="animate-child space-y-4 rounded-2xl border border-border/60 bg-card/70 p-5 shadow-sm backdrop-blur-xl">
+        <div className="animate-child space-y-5 rounded-2xl border border-border/60 bg-card/70 p-5 shadow-sm backdrop-blur-xl">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {type === 'transfer' ? 'From Account' : 'Account'}
             </label>
 
@@ -513,7 +511,7 @@ export default function AddTransaction() {
 
           {type === 'transfer' && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 To Account
               </label>
 
@@ -543,7 +541,7 @@ export default function AddTransaction() {
 
           {shouldShowCategory && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Category
               </label>
 
@@ -582,7 +580,7 @@ export default function AddTransaction() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Date
             </label>
 
@@ -594,7 +592,7 @@ export default function AddTransaction() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Note
             </label>
 
