@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 
 export default function StatCard({ label, amount, planned, type = 'neutral', icon: Icon, className }) {
   const percentage = planned && planned > 0 ? Math.min((Math.abs(amount) / planned) * 100, 100) : 0;
@@ -32,7 +33,7 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
         {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
       </div>
       <div className={cn("text-2xl font-bold tracking-tight tabular-nums", colorMap[type])}>
-        {typeof amount === 'string' ? amount : amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {typeof amount === 'string' ? amount : formatCurrencyNumberText(amount)}
       </div>
       {planned !== undefined && (
         <div className="space-y-1.5">
@@ -59,8 +60,8 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
-            <span>{Math.abs(amount)?.toLocaleString('en-US', { minimumFractionDigits: 2 })} spent</span>
-            <span>{planned?.toLocaleString('en-US', { minimumFractionDigits: 2 })} planned</span>
+            <span>{formatCurrencyNumberText(Math.abs(amount))} spent</span>
+            <span>{formatCurrencyNumberText(planned)} planned</span>
           </div>
         </div>
       )}
