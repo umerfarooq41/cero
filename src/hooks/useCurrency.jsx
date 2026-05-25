@@ -1,7 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { getUserSettings } from '@/lib/budgetData';
 import { useAuth } from '@/lib/AuthContext';
-import { getCurrencyCode, getCurrencySymbol } from '@/lib/currencies';
+import {
+  formatCurrencyNumberText,
+  getCurrencyCode,
+  getCurrencySymbol,
+} from '@/lib/currencies';
 
 export function useCurrency() {
   const { session } = useAuth();
@@ -28,11 +32,7 @@ export function useCurrencyFormatter() {
 export function formatCurrency(amount, currency = 'SAR') {
   const code = getCurrencyCode(currency);
   const symbol = getCurrencySymbol(code);
-
-  const value = Math.abs(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const value = formatCurrencyNumberText(Math.abs(amount || 0));
 
   if (code === 'SAR') {
     return (
