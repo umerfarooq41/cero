@@ -7,6 +7,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 import { useSpendingVelocity } from '@/hooks/useSpendingVelocity';
 
 const STATUS = {
@@ -49,11 +50,7 @@ export default function SpendingVelocityWidget({
 
   const fmt =
     formatCurrency ||
-    ((n) =>
-      n.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }));
+    ((n) => formatCurrencyNumberText(n));
 
   return (
     <div className="min-w-0">
