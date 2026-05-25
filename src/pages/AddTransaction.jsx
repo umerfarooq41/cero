@@ -425,12 +425,16 @@ export default function AddTransaction() {
       <CurrencyPrefix currency={currency} />
 
       <input
-        type="number"
+        type="text"
         value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        onChange={(e) => {
+          const nextValue = e.target.value
+            .replace(/[^0-9.]/g, '')
+            .replace(/(\..*)\./g, '$1');
+
+          setAmount(nextValue);
+        }}
         placeholder="0.00"
-        step="0.01"
-        min="0"
         autoFocus
         inputMode="decimal"
         className="
@@ -447,6 +451,9 @@ export default function AddTransaction() {
           text-foreground
           outline-none
           placeholder:text-muted-foreground/30
+          [appearance:textfield]
+          [&::-webkit-inner-spin-button]:appearance-none
+          [&::-webkit-outer-spin-button]:appearance-none
         "
         style={{
           width: `${Math.min(
