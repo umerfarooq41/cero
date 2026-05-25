@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
+  formatCurrencyNumberText,
 } from '@/lib/currencies';
 import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard.jsx';
 
@@ -14,10 +15,7 @@ export const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency)
 export const formatNumber = (value = 0) => {
   const number = Number(value || 0);
 
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: number % 1 === 0 ? 0 : 2,
-  }).format(number);
+  return formatCurrencyNumberText(number, { smart: true });
 };
 
 export const formatCurrencyText = (value, currency) => {
