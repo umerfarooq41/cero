@@ -25,6 +25,7 @@ import {
   getMonthlyRequiredSaving,
 } from '@/lib/goals';
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 
 const sectionConfig = {
   income: {
@@ -138,10 +139,7 @@ function getRecurringPlanDescription(rule) {
 }
 
 function formatMoneyText(amount) {
-  return Number(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
+  return formatCurrencyNumberText(amount, { smart: true });
 }
 
 function getGoalPlanDescription(goal) {
