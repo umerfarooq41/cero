@@ -130,3 +130,28 @@ export function getCurrencyDisplay(currency = 'SAR') {
 export function getCurrencyShortDisplay(currency = 'SAR') {
   return getCurrencyByCode(currency).shortDisplay;
 }
+
+export function shouldShowCurrencyDecimals() {
+  if (typeof window === 'undefined') return true;
+  return localStorage.getItem('cero.showDecimals') !== 'false';
+}
+
+export function formatCurrencyNumberText(value = 0, options = {}) {
+  const number = Number(value || 0);
+  const showDecimals = options.showDecimals ?? shouldShowCurrencyDecimals();
+  const forceDecimals = options.forceDecimals ?? showDecimals;
+  const smart = options.smart ?? false;
+
+  let minimumFractionDigits = forceDecimals ? 2 : 0;
+  let maximumFractionDigits = showDecimals ? 2 : 0;
+
+  if (smart && showDecimals) {
+    minimumFractionDigits = number % 1 === 0 ? 0 : 2;
+    maximumFractionDigits = 2;
+  }
+
+  return number.toLocaleString('en-US', {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  });
+}
