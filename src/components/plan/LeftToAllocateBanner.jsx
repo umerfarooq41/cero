@@ -1,12 +1,10 @@
 import React from 'react';
 import { Check, AlertTriangle, CircleDollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 
 const fallbackFormatCurrency = (amount) =>
-  Math.abs(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  formatCurrencyNumberText(Math.abs(amount || 0));
 
 export default function LeftToAllocateBanner({
   leftToAllocate,
