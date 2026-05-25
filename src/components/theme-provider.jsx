@@ -3,21 +3,35 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 const ThemeContext = createContext(null);
 
 const THEME_STORAGE_KEY = 'theme';
+const THEME_STYLE_STORAGE_KEY = 'cero.themeStyle';
+const COMPACT_MODE_STORAGE_KEY = 'cero.compactMode';
+const SHOW_DECIMALS_STORAGE_KEY = 'cero.showDecimals';
+const HAPTICS_STORAGE_KEY = 'cero.hapticsEnabled';
+
+const VALID_THEMES = ['system', 'light', 'dark'];
+const VALID_THEME_STYLES = ['cero', 'ocean', 'sunset', 'forest', 'minimal'];
 
 function getStoredTheme() {
   if (typeof window === 'undefined') return 'system';
 
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  return VALID_THEMES.includes(savedTheme) ? savedTheme : 'system';
+}
 
-  if (
-    savedTheme === 'system' ||
-    savedTheme === 'light' ||
-    savedTheme === 'dark'
-  ) {
-    return savedTheme;
-  }
+function getStoredThemeStyle() {
+  if (typeof window === 'undefined') return 'cero';
 
-  return 'system';
+  const savedThemeStyle = localStorage.getItem(THEME_STYLE_STORAGE_KEY);
+  return VALID_THEME_STYLES.includes(savedThemeStyle) ? savedThemeStyle : 'cero';
+}
+
+function getStoredBoolean(key, fallback = false) {
+  if (typeof window === 'undefined') return fallback;
+
+  const value = localStorage.getItem(key);
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return fallback;
 }
 
 function getSystemTheme() {
@@ -59,8 +73,38 @@ function applyTheme(mode) {
   return resolvedTheme;
 }
 
+function applyThemeStyle(style) {
+  if (typeof window === 'undefined') return;
+
+  const root = document.documentElement;
+  const safeStyle = VALID_THEME_STYLES.includes(style) ? style : 'cero';
+
+  VALID_THEME_STYLES.forEach((item) => {
+    root.classList.remove(`theme-style-${item}`);
+  });
+
+  root.classList.add(`theme-style-${safeStyle}`);
+  root.dataset.themeStyle = safeStyle;
+}
+
+function applyBooleanClass(className, enabled) {
+  if (typeof window === 'undefined') return;
+
+  document.documentElement.classList.toggle(className, Boolean(enabled));
+}
+
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(getStoredTheme);
+  const [themeStyle, setThemeStyleState] = useState(getStoredThemeStyle);
+  const [compactMode, setCompactModeState] = useState(() =>
+    getStoredBoolean(COMPACT_MODE_STORAGE_KEY, false)
+  );
+  const [showDecimals, setShowDecimalsState] = useState(() =>
+    getStoredBoolean(SHOW_DECIMALS_STORAGE_KEY, true)
+  );
+  const [hapticsEnabled, setHapticsEnabledState] = useState(() =>
+    getStoredBoolean(HAPTICS_STORAGE_KEY, false)
+  );
   const [resolvedTheme, setResolvedTheme] = useState(() =>
     applyTheme(getStoredTheme())
   );
@@ -70,6 +114,30 @@ export function ThemeProvider({ children }) {
     setResolvedTheme(resolved);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
+
+  useEffect(() => {
+    applyThemeStyle(themeStyle);
+    localStorage.setItem(THEME_STYLE_STORAGE_KEY, themeStyle);
+  }, [themeStyle]);
+
+  useEffect(() => {
+    applyBooleanClass('compact-mode', compactMode);
+    localStorage.setItem(COMPACT_MODE_STORAGE_KEY, String(compactMode));
+  }, [compactMode]);
+
+  useEffect(() => {
+    applyBooleanClass('show-decimals', showDecimals);
+    localStorage.setItem(SHOW_DECIMALS_STORAGE_KEY, String(showDecimals));
+    window.dispatchEvent(
+      new CustomEvent('cero-preferences-change', {
+        detail: { showDecimals },
+      })
+    );
+  }, [showDecimals]);
+
+  useEffect(() => {
+    localStorage.setItem(HAPTICS_STORAGE_KEY, String(hapticsEnabled));
+  }, [hapticsEnabled]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -88,16 +156,37 @@ export function ThemeProvider({ children }) {
     };
   }, [theme]);
 
-  const setTheme = (newTheme) => {
-    if (
-      newTheme !== 'system' &&
-      newTheme !== 'light' &&
-      newTheme !== 'dark'
-    ) {
-      return;
-    }
+  useEffect(() => {
+    if (!hapticsEnabled || typeof window === 'undefined') return undefined;
 
+    const handleHapticClick = (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const interactiveElement = target.closest(
+        'button, a, [role="button"], [data-haptic="true"]'
+      );
+
+      if (!interactiveElement || typeof navigator?.vibrate !== 'function') return;
+
+      navigator.vibrate(8);
+    };
+
+    document.addEventListener('click', handleHapticClick, { passive: true });
+
+    return () => {
+      document.removeEventListener('click', handleHapticClick);
+    };
+  }, [hapticsEnabled]);
+
+  const setTheme = (newTheme) => {
+    if (!VALID_THEMES.includes(newTheme)) return;
     setThemeState(newTheme);
+  };
+
+  const setThemeStyle = (newThemeStyle) => {
+    if (!VALID_THEME_STYLES.includes(newThemeStyle)) return;
+    setThemeStyleState(newThemeStyle);
   };
 
   const value = useMemo(
@@ -105,9 +194,24 @@ export function ThemeProvider({ children }) {
       theme,
       resolvedTheme,
       setTheme,
+      themeStyle,
+      setThemeStyle,
+      compactMode,
+      setCompactMode: setCompactModeState,
+      showDecimals,
+      setShowDecimals: setShowDecimalsState,
+      hapticsEnabled,
+      setHapticsEnabled: setHapticsEnabledState,
       isDark: resolvedTheme === 'dark',
     }),
-    [theme, resolvedTheme]
+    [
+      theme,
+      resolvedTheme,
+      themeStyle,
+      compactMode,
+      showDecimals,
+      hapticsEnabled,
+    ]
   );
 
   return (
