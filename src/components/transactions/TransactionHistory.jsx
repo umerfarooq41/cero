@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
@@ -17,6 +18,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
+import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -572,54 +574,59 @@ export default function TransactionHistory() {
         </div>
       )}
 
-      {!hasTransactions ? (
-        <div className="animate-child">
-          <EmptyState
-            icon={ArrowLeftRight}
-            title="No transactions found"
-            description="Try changing the month, search, type, or advanced filters."
-            actionLabel="Add Transaction"
-            onAction={() => navigate(ADD_TRANSACTION_ROUTE)}
-          />
-        </div>
-      ) : (
-        <div className="animate-child space-y-4">
-          {sortedDates.map((date) => (
-            <div
-              key={date}
-              className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl"
-            >
-              <div className="border-b border-border/50 bg-card/50 px-4 py-2.5 backdrop-blur-xl">
-                <span className="text-xs font-semibold text-muted-foreground">
-                  {date !== 'No Date'
-                    ? format(new Date(date), 'EEEE, MMM d')
-                    : 'No Date'}
-                </span>
-              </div>
+      <AnimatePresence mode="wait" initial={false}>
+        <AppTabPanel
+          key={`${filterType}-${sourceFilter}-${accountFilter}-${categoryFilter}-${selectedDate}-${sortBy}-${currentMonth}`}
+          className="animate-child"
+        >
+          {!hasTransactions ? (
+            <EmptyState
+              icon={ArrowLeftRight}
+              title="No transactions found"
+              description="Try changing the month, search, type, or advanced filters."
+              actionLabel="Add Transaction"
+              onAction={() => navigate(ADD_TRANSACTION_ROUTE)}
+            />
+          ) : (
+            <div className="space-y-4">
+              {sortedDates.map((date) => (
+                <div
+                  key={date}
+                  className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl"
+                >
+                  <div className="border-b border-border/50 bg-card/50 px-4 py-2.5 backdrop-blur-xl">
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {date !== 'No Date'
+                        ? format(new Date(date), 'EEEE, MMM d')
+                        : 'No Date'}
+                    </span>
+                  </div>
 
-              <div className="divide-y divide-border/50">
-                {grouped[date].map((transaction) => (
-                  <TransactionRow
-                    key={transaction.id}
-                    transaction={transaction}
-                    category={categories.find(
-                      (category) => category.id === transaction.category_id
-                    )}
-                    account={accounts.find(
-                      (account) => account.id === transaction.account_id
-                    )}
-                    toAccount={accounts.find(
-                      (account) => account.id === transaction.to_account_id
-                    )}
-                    formatCurrency={formatCurrency}
-                    onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
-                  />
-                ))}
-              </div>
+                  <div className="divide-y divide-border/50">
+                    {grouped[date].map((transaction) => (
+                      <TransactionRow
+                        key={transaction.id}
+                        transaction={transaction}
+                        category={categories.find(
+                          (category) => category.id === transaction.category_id
+                        )}
+                        account={accounts.find(
+                          (account) => account.id === transaction.account_id
+                        )}
+                        toAccount={accounts.find(
+                          (account) => account.id === transaction.to_account_id
+                        )}
+                        formatCurrency={formatCurrency}
+                        onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
+        </AppTabPanel>
+      </AnimatePresence>
 
       {hasTransactions && (
         <FloatingActionButton
