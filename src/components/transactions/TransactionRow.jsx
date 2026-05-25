@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 
 function CurrencyAmount({ value, formatCurrency }) {
   if (formatCurrency) {
@@ -20,10 +21,7 @@ function CurrencyAmount({ value, formatCurrency }) {
         className="h-4 w-4 inline-block dark:invert"
       />
       <span className="tabular-nums">
-        {Number(Math.abs(value || 0)).toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
+        {formatCurrencyNumberText(Math.abs(value || 0))}
       </span>
     </span>
   );
