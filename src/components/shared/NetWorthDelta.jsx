@@ -8,6 +8,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, ArrowDownRight, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatCurrencyNumberText } from '@/lib/currencies';
 import { useCountUp } from '@/hooks/useCountUp';
 
 export default function NetWorthDelta({
@@ -18,10 +19,7 @@ export default function NetWorthDelta({
 }) {
   const fmt =
     formatCurrency ||
-    ((n) =>
-      Math.abs(n).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-      }));
+    ((n) => formatCurrencyNumberText(Math.abs(n)));
 
   const animatedNW = useCountUp(Math.abs(netWorth), 750);
   const animatedAssets = useCountUp(totalAssets, 650);
