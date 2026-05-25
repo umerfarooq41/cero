@@ -1,16 +1,14 @@
 import {
   getCurrencyCode,
   getCurrencySymbol,
+  formatCurrencyNumberText,
 } from '@/lib/currencies';
 import { cn } from '@/lib/utils';
 
 export function formatPlanNumber(value = 0) {
   const number = Number(value || 0);
 
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: number % 1 === 0 ? 0 : 2,
-  }).format(number);
+  return formatCurrencyNumberText(number, { smart: true });
 }
 
 export default function PlanMoney({ amount, currency, compact = false, className = '' }) {
