@@ -63,6 +63,7 @@ import {
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
+  formatCurrencyNumberText,
 } from '@/lib/currencies';
 import { cn } from '@/lib/utils';
 
@@ -72,10 +73,7 @@ const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
 function formatNumber(value = 0) {
   const number = Number(value || 0);
 
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(number);
+  return formatCurrencyNumberText(number);
 }
 
 function CurrencyAmount({ amount, currency, className = '' }) {
