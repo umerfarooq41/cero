@@ -1,174 +1,822 @@
-/* ==========================================
-   GENERAL & SHARED RESET
-   ========================================== */
-*, *::before, *::after {
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================= */
+/* 🌍 CERO DESIGN TOKENS */
+/* Soft Fluent / Premium Finance UI */
+/* ============================= */
+
+@layer base {
+  :root {
+    --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'DM Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* 🎨 Base Colors */
+    --background: 218 42% 97%;
+    --foreground: 222 47% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 9%;
+
+    --primary: 217 91% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 25% 95%;
+    --secondary-foreground: 222 47% 12%;
+
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 9% 43%;
+
+    --accent: 220 24% 93%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 78% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 145 63% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
+
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 217 91% 53%;
+
+    /* 📊 Charts */
+    --chart-1: 217 91% 53%;
+    --chart-2: 145 63% 38%;
+    --chart-3: 0 78% 56%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 267 84% 63%;
+
+    --radius: 1.125rem;
+
+    /* 📱 Sidebar / Navigation */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 9% 35%;
+    --sidebar-primary: 217 91% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 95%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 220 20% 90%;
+    --sidebar-ring: 217 91% 53%;
+
+    /* 💰 Financial Mood */
+    --mood-positive: 145 63% 38%;
+    --mood-negative: 0 78% 56%;
+    --mood-neutral: 220 9% 46%;
+  }
+
+  .dark {
+    --background: 222 47% 5%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 38% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 38% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 13%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 13%;
+    --muted-foreground: 215 20% 67%;
+
+    --accent: 217 33% 16%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 63%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 145 70% 48%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 43 96% 56%;
+    --warning-foreground: 222 47% 11%;
+
+    --border: 217 30% 17%;
+    --input: 217 30% 17%;
+    --ring: 217 91% 60%;
+
+    --chart-1: 217 91% 60%;
+    --chart-2: 145 70% 48%;
+    --chart-3: 0 84% 63%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 267 90% 70%;
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 30% 17%;
+    --sidebar-ring: 217 91% 60%;
+
+    --mood-positive: 145 70% 50%;
+    --mood-negative: 0 84% 64%;
+    --mood-neutral: 215 20% 68%;
+  }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* ============================= */
+/* 🧠 BASE STYLES */
+/* ============================= */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    min-height: 100%;
+    background: hsl(var(--background));
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-foreground font-sans antialiased;
+    min-height: 100vh;
+
+    background:
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.18), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%);
+
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%),
+      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%);
+
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
 }
 
-/* ==========================================
-   1. WARM AURORA THEME
-   ========================================== */
-:root, html.light {
-  --aurora-bg: #f9f9f9;
-  --aurora-orb-1: rgba(212, 163, 89, 0.35);
-  --aurora-orb-2: rgba(40, 45, 55, 0.12);
-  --aurora-blend: multiply;
+/* ============================= */
+/* 🖱️ GLOBAL SCROLL POLISH */
+/* Hide visible scrollbars everywhere while keeping scrolling active */
+/* ============================= */
+
+html,
+body,
+#root,
+main,
+[data-scroll],
+.app-main-scroll,
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Legacy Edge / IE */
 }
 
-html.dark {
-  --aurora-bg: #121316;
-  --aurora-orb-1: rgba(212, 163, 89, 0.2);
-  --aurora-orb-2: rgba(140, 155, 175, 0.08);
-  --aurora-blend: screen;
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+main::-webkit-scrollbar,
+[data-scroll]::-webkit-scrollbar,
+.app-main-scroll::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
 
-.warm-aurora-bg {
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--aurora-bg);
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
+main,
+[data-scroll],
+.app-main-scroll {
+  -webkit-overflow-scrolling: touch;
 }
 
-.warm-aurora-bg::before,
-.warm-aurora-bg::after {
-  content: "";
-  position: absolute;
-  top: -40%; left: -40%; width: 180%; height: 180%;
-  mix-blend-mode: var(--aurora-blend);
-  pointer-events: none;
-  z-index: -1;
-  transition: background 0.5s ease;
+/* ============================= */
+/* 🔢 PREMIUM FINANCE NUMBERS */
+/* ============================= */
+
+@layer utilities {
+  .tabular-nums {
+    font-family: var(--font-mono);
+    font-feature-settings: 'tnum' 1, 'zero' 1;
+    font-variant-numeric: tabular-nums slashed-zero;
+    letter-spacing: -0.02em;
+  }
 }
 
-.warm-aurora-bg::before {
-  background: radial-gradient(circle at 65% 35%, var(--aurora-orb-1) 0%, rgba(255,255,255,0) 55%);
-  animation: floatOrbOne 28s infinite alternate ease-in-out;
+/* ============================= */
+/* ✨ SMOOTH TRANSITIONS */
+/* ============================= */
+
+* {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    fill 0.25s ease,
+    stroke 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.warm-aurora-bg::after {
-  background: radial-gradient(circle at 35% 65%, var(--aurora-orb-2) 0%, rgba(255,255,255,0) 50%);
-  animation: floatOrbTwo 22s infinite alternate ease-in-out;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* ==========================================
-   2. VIBRANT FLUID HUE THEME
-   ========================================== */
-:root, html.light {
-  --vibrant-bg: #df8569;
-  --vibrant-1: hsla(14, 93%, 69%, 1);
-  --vibrant-2: hsla(184, 83%, 63%, 1);
-  --vibrant-3: hsla(27, 88%, 65%, 1);
-  --vibrant-4: hsla(210, 85%, 70%, 1);
+/* ============================= */
+/* 🧊 GLASS / MODERN UI */
+/* ============================= */
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.52);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(200, 215, 240, 0.38);
+  }
+
+  .dark .glass {
+    background: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(120, 160, 220, 0.12);
+  }
+
+  .surface {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.82));
+    border: 1px solid rgba(180, 200, 230, 0.30);
+  }
+
+  .dark .surface {
+    background:
+      linear-gradient(180deg, rgba(17, 24, 39, 0.60), rgba(8, 13, 28, 0.68));
+    border: 1px solid rgba(100, 140, 200, 0.10);
+  }
+
+  .surface-card {
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.60),
+        rgba(255, 255, 255, 0.76)
+      );
+    backdrop-filter: blur(20px) saturate(155%);
+    -webkit-backdrop-filter: blur(20px) saturate(155%);
+    border-color: rgba(180, 200, 230, 0.28);
+  }
+
+  .dark .surface-card {
+    background: rgba(18, 24, 38, 0.48);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-color: rgba(100, 140, 200, 0.10);
+  }
+
+  .card-elevated {
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 8px 22px rgba(15, 23, 42, 0.07),
+      0 20px 48px rgba(15, 23, 42, 0.05);
+    border: 1px solid rgba(180, 200, 230, 0.32);
+  }
+
+  .dark .card-elevated {
+    box-shadow:
+      0 8px 22px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(100, 140, 200, 0.12);
+  }
+
+  .card-soft {
+    background: hsl(var(--card) / 0.86);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.03),
+      0 6px 18px rgba(15, 23, 42, 0.05);
+  }
+
+  .dark .card-soft {
+    background: hsl(var(--card) / 0.44);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.20);
+  }
+
+  .hover-lift {
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.22s ease,
+      border-color 0.22s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.04),
+      0 12px 32px rgba(15, 23, 42, 0.10),
+      0 0 0 1px rgba(255, 255, 255, 0.6);
+  }
+
+  .dark .hover-lift:hover {
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.22),
+      0 0 0 1px rgba(100, 140, 200, 0.14);
+  }
+
+  .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    transform: scale(2.5);
+    pointer-events: none;
+  }
+
+  .btn-ripple:active::after {
+    opacity: 1;
+    transition: none;
+  }
+
+  .finance-positive {
+    color: hsl(var(--mood-positive));
+  }
+
+  .finance-negative {
+    color: hsl(var(--mood-negative));
+  }
+
+  .finance-muted {
+    color: hsl(var(--mood-neutral));
+  }
 }
 
-html.dark {
-  --vibrant-bg: #1a0f2e;
-  --vibrant-1: hsla(260, 85%, 20%, 1);
-  --vibrant-2: hsla(320, 75%, 25%, 1);
-  --vibrant-3: hsla(190, 90%, 15%, 1);
-  --vibrant-4: hsla(280, 80%, 30%, 1);
+@layer utilities {
+  .app-gradient-surface {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.18), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  .dark .app-gradient-surface {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%),
+      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  .app-fixed-surface {
+    @apply app-gradient-surface;
+    border: 0;
+    box-shadow: none;
+    outline: 0;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .dark .app-fixed-surface {
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+  }
 }
 
-.vibrant-mesh-bg {
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--vibrant-bg);
-  background-image:
-    radial-gradient(at 90% 10%, var(--vibrant-1) 0px, rgba(255,255,255,0) 55%),
-    radial-gradient(at 10% 80%, var(--vibrant-2) 0px, rgba(255,255,255,0) 55%),
-    radial-gradient(at 90% 80%, var(--vibrant-3) 0px, rgba(255,255,255,0) 55%),
-    radial-gradient(at 20% 20%, var(--vibrant-4) 0px, rgba(255,255,255,0) 55%);
-  background-size: 150% 150%;
-  animation: meshShift 20s infinite alternate ease-in-out;
+/* ============================= */
+/* 🎨 CERO THEMES + GLOBAL SURFACES */
+/* Centralized theme system. Only the app/page canvas uses gradients. */
+/* ============================= */
+
+@layer base {
+  html {
+    --app-system-bar-bg: #0a0a1a;
+    --app-safe-area-top: env(safe-area-inset-top, 0px);
+    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+    --background: 218 42% 97%;
+    --foreground: 222 47% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 10%;
+    --primary: 180 84% 32%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 180 84% 32%;
+    --border: 222 28% 78%;
+    --input: 222 28% 78%;
+    --muted: 220 20% 93%;
+    --muted-foreground: 222 16% 40%;
+    --accent: 220 24% 92%;
+    --accent-foreground: 222 47% 12%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 16% 34%;
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: 220 25% 95%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 220 20% 86%;
+    --sidebar-ring: var(--primary);
+
+    --chart-1: var(--primary);
+
+    /* Default = Aurora Teal */
+    --app-page-gradient: linear-gradient(135deg, #e6fffb 0%, #eaf6ff 100%);
+    --app-canvas-start: #e6fffb;
+    --app-canvas-end: #eaf6ff;
+
+    --app-surface-main-alpha: 0.72;
+    --app-surface-strong-alpha: 0.86;
+    --app-surface-soft-alpha: 0.54;
+    --app-surface-floating-alpha: 0.97;
+    --app-control-alpha: 0.68;
+
+    --app-surface-border-alpha: 0.14;
+    --app-surface-border-strong-alpha: 0.18;
+    --app-surface-border-soft-alpha: 0.11;
+    --app-control-border-alpha: 0.18;
+
+    --app-surface-shadow-color: 222 47% 9%;
+    --app-surface-shadow-alpha: 0.075;
+    --app-surface-shadow-strong-alpha: 0.12;
+    --app-surface-blur: 22px;
+    --app-surface-saturate: 145%;
+
+    --app-recharts-tooltip-bg: hsl(var(--popover) / var(--app-surface-floating-alpha));
+    --app-recharts-tooltip-border: hsl(var(--primary) / var(--app-surface-border-strong-alpha));
+    --app-recharts-tooltip-shadow: 0 16px 40px hsl(var(--app-surface-shadow-color) / 0.14);
+  }
+
+  html.dark {
+    --background: 222 47% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 38% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 38% 9%;
+    --popover-foreground: 210 40% 98%;
+    --border: 217 30% 20%;
+    --input: 217 30% 20%;
+    --muted: 217 33% 13%;
+    --muted-foreground: 215 20% 72%;
+    --accent: 217 33% 16%;
+    --accent-foreground: 210 40% 98%;
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 215 20% 78%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 30% 18%;
+
+    --app-page-gradient: linear-gradient(135deg, #041f1e 0%, #082f49 100%);
+    --app-canvas-start: #041f1e;
+    --app-canvas-end: #082f49;
+
+    --app-surface-main-alpha: 0.58;
+    --app-surface-strong-alpha: 0.72;
+    --app-surface-soft-alpha: 0.40;
+    --app-surface-floating-alpha: 0.98;
+    --app-control-alpha: 0.56;
+
+    --app-surface-border-alpha: 0.14;
+    --app-surface-border-strong-alpha: 0.18;
+    --app-surface-border-soft-alpha: 0.11;
+    --app-control-border-alpha: 0.17;
+
+    --app-surface-shadow-color: 222 47% 2%;
+    --app-surface-shadow-alpha: 0.28;
+    --app-surface-shadow-strong-alpha: 0.38;
+    --app-surface-saturate: 140%;
+  }
+
+  html.theme-style-cyber {
+    --primary: 239 84% 62%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 239 84% 62%;
+    --chart-1: 239 84% 62%;
+    --sidebar-primary: 239 84% 62%;
+    --sidebar-ring: 239 84% 62%;
+    --app-page-gradient: linear-gradient(135deg, #eef4ff 0%, #f5efff 100%);
+    --app-canvas-start: #eef4ff;
+    --app-canvas-end: #f5efff;
+  }
+
+  html.theme-style-cyber.dark {
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 239 84% 67%;
+    --chart-1: 239 84% 67%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-ring: 239 84% 67%;
+    --app-page-gradient: linear-gradient(135deg, #070b1f 0%, #1e1b4b 100%);
+    --app-canvas-start: #070b1f;
+    --app-canvas-end: #1e1b4b;
+  }
+
+  html.theme-style-aurora {
+    --primary: 180 84% 32%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 180 84% 32%;
+    --chart-1: 180 84% 32%;
+    --sidebar-primary: 180 84% 32%;
+    --sidebar-ring: 180 84% 32%;
+    --app-page-gradient: linear-gradient(135deg, #e6fffb 0%, #eaf6ff 100%);
+    --app-canvas-start: #e6fffb;
+    --app-canvas-end: #eaf6ff;
+  }
+
+  html.theme-style-aurora.dark {
+    --primary: 174 72% 56%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 174 72% 56%;
+    --chart-1: 174 72% 56%;
+    --sidebar-primary: 174 72% 56%;
+    --sidebar-ring: 174 72% 56%;
+    --app-page-gradient: linear-gradient(135deg, #041f1e 0%, #082f49 100%);
+    --app-canvas-start: #041f1e;
+    --app-canvas-end: #082f49;
+  }
+
+  html.theme-style-sunset {
+    --primary: 349 89% 60%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 349 89% 60%;
+    --chart-1: 349 89% 60%;
+    --sidebar-primary: 349 89% 60%;
+    --sidebar-ring: 349 89% 60%;
+    --app-page-gradient: linear-gradient(135deg, #fff1f2 0%, #fff7ed 100%);
+    --app-canvas-start: #fff1f2;
+    --app-canvas-end: #fff7ed;
+  }
+
+  html.theme-style-sunset.dark {
+    --primary: 349 89% 68%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 349 89% 68%;
+    --chart-1: 349 89% 68%;
+    --sidebar-primary: 349 89% 68%;
+    --sidebar-ring: 349 89% 68%;
+    --app-page-gradient: linear-gradient(135deg, #2b0712 0%, #3a1205 100%);
+    --app-canvas-start: #2b0712;
+    --app-canvas-end: #3a1205;
+  }
+
+  html.theme-style-emerald {
+    --primary: 158 64% 37%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 158 64% 37%;
+    --chart-1: 158 64% 37%;
+    --sidebar-primary: 158 64% 37%;
+    --sidebar-ring: 158 64% 37%;
+    --app-page-gradient: linear-gradient(135deg, #ecfdf5 0%, #e6fffb 100%);
+    --app-canvas-start: #ecfdf5;
+    --app-canvas-end: #e6fffb;
+  }
+
+  html.theme-style-emerald.dark {
+    --primary: 160 84% 48%;
+    --primary-foreground: 145 45% 8%;
+    --ring: 160 84% 48%;
+    --chart-1: 160 84% 48%;
+    --sidebar-primary: 160 84% 48%;
+    --sidebar-ring: 160 84% 48%;
+    --app-page-gradient: linear-gradient(135deg, #041c12 0%, #052e2b 100%);
+    --app-canvas-start: #041c12;
+    --app-canvas-end: #052e2b;
+  }
+
+  html.theme-style-obsidian {
+    --primary: 215 20% 48%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 215 20% 48%;
+    --chart-1: 215 20% 48%;
+    --sidebar-primary: 215 20% 48%;
+    --sidebar-ring: 215 20% 48%;
+    --app-page-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --app-canvas-start: #f8fafc;
+    --app-canvas-end: #e2e8f0;
+  }
+
+  html.theme-style-obsidian.dark {
+    --primary: 215 20% 74%;
+    --primary-foreground: 222 47% 8%;
+    --ring: 215 20% 74%;
+    --chart-1: 215 20% 74%;
+    --sidebar-primary: 215 20% 74%;
+    --sidebar-ring: 215 20% 74%;
+    --app-page-gradient: linear-gradient(135deg, #05070d 0%, #020617 100%);
+    --app-canvas-start: #05070d;
+    --app-canvas-end: #020617;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    background: var(--app-system-bar-bg) !important;
+    background-color: var(--app-system-bar-bg) !important;
+    color-scheme: light dark;
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
+  #root {
+    min-height: 100dvh;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
 }
 
-/* ==========================================
-   3. SLEEK TECH / AI MINIMAL THEME
-   ========================================== */
-:root, html.light {
-  --tech-bg: #ffffff;
-  --tech-glow-1: rgba(0, 180, 216, 0.12);
-  --tech-glow-2: rgba(114, 9, 183, 0.08);
-  --tech-blend: multiply;
-}
+@layer utilities {
+  .app-page-surface,
+  .app-gradient-surface,
+  .app-fixed-surface,
+  .app-main-scroll,
+  .app-bottom-nav {
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
 
-html.dark {
-  --tech-bg: #090d16;
-  --tech-glow-1: rgba(0, 180, 216, 0.25);
-  --tech-glow-2: rgba(114, 9, 183, 0.2);
-  --tech-blend: screen;
-}
+  .app-fixed-surface,
+  .app-gradient-surface {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    backdrop-filter: blur(18px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+  }
 
-.dark-ai-bg {
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--tech-bg);
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
+  .app-card-surface,
+  .surface,
+  .surface-card,
+  .card-soft,
+  .glass,
+  :where(
+    [class*='rounded-2xl'][class*='bg-card'],
+    [class*='rounded-3xl'][class*='bg-card'],
+    [class*='rounded-xl'][class*='bg-card']
+  ) {
+    background: hsl(var(--card) / var(--app-surface-main-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-surface-border-alpha)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    box-shadow:
+      0 12px 30px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)),
+      inset 0 1px 0 hsl(var(--foreground) / 0.035) !important;
+    backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
+    -webkit-backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
+  }
 
-.dark-ai-bg::before {
-  content: "";
-  position: absolute;
-  top: -20%; left: -10%; width: 120%; height: 120%;
-  background: 
-    radial-gradient(circle at 50% 0%, var(--tech-glow-1) 0%, rgba(255,255,255,0) 60%),
-    radial-gradient(circle at 80% 40%, var(--tech-glow-2) 0%, rgba(255,255,255,0) 50%);
-  mix-blend-mode: var(--tech-blend);
-  pointer-events: none;
-  z-index: -1;
-  animation: gentlePulse 12s infinite alternate ease-in-out;
-}
+  .app-card-surface-strong {
+    background: hsl(var(--card) / var(--app-surface-strong-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    box-shadow:
+      0 18px 48px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-strong-alpha)),
+      inset 0 1px 0 hsl(var(--foreground) / 0.04) !important;
+    backdrop-filter: blur(calc(var(--app-surface-blur) + 2px)) saturate(var(--app-surface-saturate)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--app-surface-blur) + 2px)) saturate(var(--app-surface-saturate)) !important;
+  }
 
-/* ==========================================
-   4. HIGH-ENERGY ACTION THEME
-   ========================================== */
-:root, html.light {
-  --energy-bg: #fdfdfd;
-  --energy-grad-1: #ffefe9;
-  --energy-grad-2: #e0e0e0;
-}
+  .app-card-surface-soft,
+  :where(
+    [class*='rounded-2xl'][class*='bg-background'],
+    [class*='rounded-3xl'][class*='bg-background'],
+    [class*='rounded-xl'][class*='bg-background']
+  ) {
+    background: hsl(var(--card) / var(--app-surface-soft-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-surface-border-soft-alpha)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    box-shadow:
+      0 8px 22px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.55)),
+      inset 0 1px 0 hsl(var(--foreground) / 0.03) !important;
+    backdrop-filter: blur(calc(var(--app-surface-blur) - 4px)) saturate(var(--app-surface-saturate)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--app-surface-blur) - 4px)) saturate(var(--app-surface-saturate)) !important;
+  }
 
-html.dark {
-  --energy-bg: #121212;
-  --energy-grad-1: #d84315;
-  --energy-grad-2: #1f1f1f;
-}
+  .app-floating-surface,
+  .app-chart-tooltip-surface,
+  [data-radix-popper-content-wrapper] :where([role='dialog'], [role='menu'], [role='listbox'], [data-radix-select-content]) {
+    background: hsl(var(--popover) / var(--app-surface-floating-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+    color: hsl(var(--popover-foreground)) !important;
+    box-shadow: var(--app-recharts-tooltip-shadow) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 
-.sports-energy-bg {
-  width: 100%;
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--energy-grad-1) 0%, var(--energy-grad-2) 65%, var(--energy-bg) 100%);
-}
+  :where(
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(.app-amount-input),
+    textarea,
+    [role='combobox']
+  ) {
+    background: hsl(var(--card) / var(--app-control-alpha)) !important;
+    border-color: hsl(var(--primary) / var(--app-control-border-alpha)) !important;
+    color: hsl(var(--foreground)) !important;
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.035) !important;
+    backdrop-filter: blur(12px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(135%) !important;
+  }
 
-/* ==========================================
-   ANIMATIONS
-   ========================================== */
-@keyframes floatOrbOne {
-  0% { transform: translate(0%, 0%) scale(1); }
-  50% { transform: translate(10%, -8%) scale(1.15); }
-  100% { transform: translate(-5%, 10%) scale(0.95); }
-}
-@keyframes floatOrbTwo {
-  0% { transform: translate(5%, 10%) scale(0.9); }
-  50% { transform: translate(-8%, -5%) scale(1.1); }
-  100% { transform: translate(3%, -10%) scale(1); }
-}
-@keyframes meshShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-@keyframes gentlePulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.05); opacity: 1; }
+  :where(
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(.app-amount-input):focus,
+    textarea:focus,
+    [role='combobox'][data-state='open'],
+    [role='combobox']:focus
+  ) {
+    border-color: hsl(var(--primary) / 0.34) !important;
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.035),
+      0 0 0 1px hsl(var(--primary) / 0.18) !important;
+  }
+
+  .app-amount-input {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    caret-color: hsl(var(--primary)) !important;
+  }
+
+  .app-amount-input::placeholder {
+    color: hsl(var(--muted-foreground) / 0.34) !important;
+  }
+
+  /* Keep gradients reserved for the page canvas only. Tailwind gradient utilities
+     inside components are flattened into solid theme color. */
+  [class*='bg-gradient-to-']:not(.app-page-surface):not(.app-gradient-surface):not(.app-fixed-surface):not(.app-main-scroll):not(.app-bottom-nav) {
+    background-image: none !important;
+    background-color: hsl(var(--primary)) !important;
+  }
+
+  /* Global compact mode */
+  html.compact-mode main {
+    letter-spacing: -0.006em;
+  }
+
+  html.compact-mode .animate-child,
+  html.compact-mode .settings-section {
+    margin-bottom: 0.75rem !important;
+  }
+
+  html.compact-mode .settings-row {
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+  }
+
+  html.compact-mode .settings-section-header {
+    padding-top: 0.7rem !important;
+    padding-bottom: 0.7rem !important;
+  }
+
+  html.compact-mode .app-card-surface,
+  html.compact-mode .app-card-surface-strong {
+    border-radius: 1.25rem;
+  }
+
+  html.compact-mode :where(.app-card-surface, .app-card-surface-strong, .app-card-surface-soft) {
+    --tw-space-y-reverse: 0;
+  }
+
+  html.compact-mode :where(section, article, form, [role='dialog']) {
+    --compact-padding-shift: 0.88;
+  }
 }
