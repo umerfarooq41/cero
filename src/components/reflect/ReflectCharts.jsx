@@ -267,7 +267,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 }
                 subtitle={
                   isYear
-                    ? 'Income and expenses grouped by quarter'
+                    ? 'Income and outflow grouped by quarter'
                     : 'Selected month with the previous two months'
                 }
               />
@@ -323,6 +323,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                       <Bar
                         dataKey="income"
+                        name="Income"
                         fill="hsl(var(--primary))"
                         radius={[8, 8, 0, 0]}
                         activeBar={false}
@@ -335,6 +336,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                       <Bar
                         dataKey="expenses"
+                        name="Outflow"
                         fill="hsl(var(--primary) / 0.45)"
                         radius={[8, 8, 0, 0]}
                         activeBar={false}
@@ -363,7 +365,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 title={isYear ? 'Yearly Spending Pace' : 'Budget Usage'}
                 subtitle={
                   isYear
-                    ? 'Tracked expenses compared with tracked income'
+                    ? 'Tracked outflow compared with tracked income'
                     : 'How much of your planned expense budget is already tracked'
                 }
               />

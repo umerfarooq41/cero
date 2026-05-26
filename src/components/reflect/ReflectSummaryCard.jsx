@@ -244,23 +244,23 @@ function MetricProgressRow({
   const safeValue = clampPercent(value);
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <span className="w-12 shrink-0 text-right text-xs font-medium text-muted-foreground">
-        {label}
-      </span>
+    <div className="min-w-0 space-y-1.5">
+      <div className="flex min-w-0 items-center justify-between gap-3 text-xs font-medium">
+        <span className="min-w-0 truncate text-left text-muted-foreground">
+          {label}
+        </span>
 
-      <div className="min-w-0 flex-1">
-        <AnimatedBar value={safeValue} className={className} delay={delay} />
+        <span
+          className={cn(
+            'shrink-0 text-right font-bold tabular-nums',
+            valueClassName
+          )}
+        >
+          {valueText ?? `${Math.round(safeValue)}%`}
+        </span>
       </div>
 
-      <span
-        className={cn(
-          'w-14 shrink-0 text-right text-xs font-bold tabular-nums',
-          valueClassName
-        )}
-      >
-        {valueText ?? `${Math.round(safeValue)}%`}
-      </span>
+      <AnimatedBar value={safeValue} className={className} delay={delay} />
     </div>
   );
 }
@@ -304,59 +304,54 @@ function HeroCashFlowCard({
   isYear,
   income,
   expenses,
+  trackedSavings = 0,
+  trackedDebt = 0,
   netCashFlow,
   currency,
 }) {
+  const totalOutflow = Number(expenses || 0) + Number(trackedSavings || 0) + Number(trackedDebt || 0);
   const positive = netCashFlow >= 0;
   const tone = positive ? 'good' : 'bad';
-
-  const savedProgress =
-    income > 0 ? Math.min((Math.max(netCashFlow, 0) / income) * 100, 100) : 0;
-
-  const expenseProgress =
-    income > 0 ? Math.min((Math.max(expenses, 0) / income) * 100, 100) : 0;
+  const outflowProgress =
+    income > 0 ? Math.min((Math.max(totalOutflow, 0) / income) * 100, 100) : 0;
 
   return (
     <SummaryCard
       icon={BarChart3}
       title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
-      subtitle={isYear ? 'Income minus expenses across the selected year.' : 'Income minus expenses for the selected month.'}
+      subtitle={
+        isYear
+          ? 'Actual income minus expenses, savings, and debt.'
+          : 'Actual income minus expenses, savings, and debt.'
+      }
       value={<CurrencyAmount amount={netCashFlow} currency={currency} />}
       valueTone={tone}
       action={<StatusPill tone={tone}>{positive ? 'Positive' : 'Negative'}</StatusPill>}
     >
       <div className="space-y-1.5">
         <MoneyRow
-          label="Income"
+          label="Actual Income"
           amount={income}
           currency={currency}
           tone="text-[hsl(var(--success))]"
         />
 
         <MoneyRow
-          label="Expenses"
-          amount={expenses}
+          label="Expenses + Savings + Debt"
+          amount={totalOutflow}
           currency={currency}
-          tone="text-destructive"
+          tone={positive ? 'text-muted-foreground' : 'text-destructive'}
         />
       </div>
 
       <div className="space-y-2.5 pt-1">
         <MetricProgressRow
-          label="Saved"
-          value={savedProgress}
-          valueText={`${Math.round(savedProgress)}%`}
-          className="bg-primary"
-          valueClassName="text-primary"
-        />
-
-        <MetricProgressRow
-          label="Spent"
-          value={expenseProgress}
-          valueText={`${Math.round(expenseProgress)}%`}
+          label="Outflow"
+          value={outflowProgress}
+          valueText={`${Math.round(outflowProgress)}%`}
           className="bg-primary"
           delay="delay-300"
-          valueClassName="text-primary"
+          valueClassName={positive ? 'text-primary' : 'text-destructive'}
         />
       </div>
     </SummaryCard>
@@ -497,6 +492,8 @@ export default function ReflectSummaryCard({
         isYear={isYear}
         income={income}
         expenses={expenses}
+        trackedSavings={trackedSavings}
+        trackedDebt={trackedDebt}
         netCashFlow={netCashFlow}
         currency={currency}
       />
@@ -633,7 +630,7 @@ export default function ReflectSummaryCard({
                   valueClassName="text-primary"
                 />
 
-                <p className="text-right text-[11px] leading-4 text-muted-foreground">
+                <p className="text-left text-[11px] leading-4 text-muted-foreground">
                   Daily{' '}
                   <span className="font-semibold text-foreground">
                     <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />

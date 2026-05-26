@@ -112,7 +112,13 @@ function getCategoryName(categories, categoryId) {
   return category?.name || 'Uncategorized';
 }
 
-function getMonthTotals(allTransactions, month, settings) {
+function getMonthTotals(
+  allTransactions,
+  month,
+  settings,
+  categories = [],
+  accountsById = new Map()
+) {
   const txns = filterTransactionsByBudgetMonth(
     allTransactions,
     month,
@@ -127,10 +133,29 @@ function getMonthTotals(allTransactions, month, settings) {
     .filter((transaction) => transaction.type === 'expense')
     .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
 
+  const savings = txns
+    .filter((transaction) => {
+      if (isGoalTransfer(transaction)) return true;
+      return getCategoryType(categories, transaction.category_id) === 'savings';
+    })
+    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+
+  const debt = txns
+    .filter((transaction) => {
+      if (isDebtTransfer(transaction, accountsById)) return true;
+      return getCategoryType(categories, transaction.category_id) === 'debt';
+    })
+    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+
+  const totalOutflow = expenses + savings + debt;
+
   return {
     income,
     expenses,
-    net: income - expenses,
+    savings,
+    debt,
+    totalOutflow,
+    net: income - totalOutflow,
   };
 }
 
@@ -148,21 +173,34 @@ function getRollingMonthKeys(monthKey, count = 3) {
   });
 }
 
-function getQuarterTotals(allTransactions, selectedYear, quarter, settings) {
+function getQuarterTotals(
+  allTransactions,
+  selectedYear,
+  quarter,
+  settings,
+  categories = [],
+  accountsById = new Map()
+) {
   return quarter.months.reduce(
     (sum, month) => {
       const monthTotals = getMonthTotals(
         allTransactions,
         `${selectedYear}-${month}`,
-        settings
+        settings,
+        categories,
+        accountsById
       );
 
       return {
         income: sum.income + monthTotals.income,
         expenses: sum.expenses + monthTotals.expenses,
+        savings: sum.savings + monthTotals.savings,
+        debt: sum.debt + monthTotals.debt,
+        totalOutflow: sum.totalOutflow + monthTotals.totalOutflow,
+        net: sum.net + monthTotals.net,
       };
     },
-    { income: 0, expenses: 0 }
+    { income: 0, expenses: 0, savings: 0, debt: 0, totalOutflow: 0, net: 0 }
   );
 }
 
@@ -237,7 +275,7 @@ export default function useReflectAnalysis({
   const totalPlannedOutflow = plannedExpenses + plannedSavings + plannedDebt;
   const totalTrackedOutflow = expenses + trackedSavings + trackedDebt;
 
-  const netCashFlow = income - expenses;
+  const netCashFlow = income - totalTrackedOutflow;
 
   const netWorth = useMemo(() => {
     return accounts.reduce((sum, account) => {
@@ -310,29 +348,37 @@ export default function useReflectAnalysis({
           allTransactions,
           selectedYear,
           quarter,
-          settings
+          settings,
+          categories,
+          accountsById
         );
 
         return {
           month: quarter.label,
           income: totals.income,
-          expenses: totals.expenses,
-          net: totals.income - totals.expenses,
+          expenses: totals.totalOutflow,
+          net: totals.net,
         };
       });
     }
 
     return getRollingMonthKeys(monthKey, 3).map(({ key, label }) => {
-      const totals = getMonthTotals(allTransactions, key, settings);
+      const totals = getMonthTotals(
+        allTransactions,
+        key,
+        settings,
+        categories,
+        accountsById
+      );
 
       return {
         month: label,
         income: totals.income,
-        expenses: totals.expenses,
+        expenses: totals.totalOutflow,
         net: totals.net,
       };
     });
-  }, [isYear, selectedYear, monthKey, allTransactions, settings]);
+  }, [isYear, selectedYear, monthKey, allTransactions, settings, categories, accountsById]);
 
   const spendingTrend = useMemo(() => {
     if (isYear) {

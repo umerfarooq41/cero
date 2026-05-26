@@ -61,12 +61,18 @@ export default function SpendingVelocityWidget({
       </div>
 
       <div className="mb-4 space-y-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="w-10 shrink-0 text-right text-sm font-medium text-muted-foreground">
-            Time
-          </span>
+        <div className="space-y-1.5">
+          <div className="flex min-w-0 items-center justify-between gap-3 text-sm font-medium">
+            <span className="min-w-0 truncate text-left text-muted-foreground">
+              Time
+            </span>
 
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-primary/10 ">
+            <span className="shrink-0 text-right text-muted-foreground tabular-nums">
+              {progressPercent}%
+            </span>
+          </div>
+
+          <div className="relative h-2 overflow-hidden rounded-full bg-primary/10">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-primary/30"
               initial={{ width: 0 }}
@@ -79,18 +85,25 @@ export default function SpendingVelocityWidget({
               }}
             />
           </div>
-
-          <span className="w-9 shrink-0 text-right text-sm text-muted-foreground tabular-nums">
-            {progressPercent}%
-          </span>
         </div>
 
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="w-10 shrink-0 text-right text-sm font-medium text-muted-foreground">
-            Spent
-          </span>
+        <div className="space-y-1.5">
+          <div className="flex min-w-0 items-center justify-between gap-3 text-sm font-medium">
+            <span className="min-w-0 truncate text-left text-muted-foreground">
+              Spent
+            </span>
 
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-primary/10 ">
+            <span
+              className={cn(
+                'shrink-0 text-right font-bold tabular-nums',
+                cfg.color
+              )}
+            >
+              {velocityPercent}%
+            </span>
+          </div>
+
+          <div className="relative h-2 overflow-hidden rounded-full bg-primary/10">
             <motion.div
               className={cn('absolute inset-y-0 left-0 rounded-full', cfg.barColor)}
               initial={{ width: 0 }}
@@ -103,15 +116,6 @@ export default function SpendingVelocityWidget({
               }}
             />
           </div>
-
-          <span
-            className={cn(
-              'w-9 shrink-0 text-right text-sm font-bold tabular-nums',
-              cfg.color
-            )}
-          >
-            {velocityPercent}%
-          </span>
         </div>
       </div>
 
