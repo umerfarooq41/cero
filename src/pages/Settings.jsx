@@ -1,5 +1,5 @@
 import React from "react";
-import { useTheme } from "./theme-provider";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
