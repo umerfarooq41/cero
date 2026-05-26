@@ -15,7 +15,7 @@ const HoverCardContent = React.forwardRef(({ className, align = "center", sideOf
     align={align}
     sideOffset={sideOffset}
     className={cn(
-      "z-50 w-64 rounded-2xl app-card-surface-strong p-4 text-popover-foreground shadow-2xl backdrop-blur-2xl outline-none origin-[var(--radix-hover-card-content-transform-origin)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-out",
+      "z-50 w-64 rounded-2xl app-floating-surface p-4 text-popover-foreground shadow-2xl outline-none origin-[var(--radix-hover-card-content-transform-origin)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-out",
       className
     )}
     {...props} />

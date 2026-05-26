@@ -33,12 +33,15 @@ import { useCurrency } from '@/hooks/useCurrency';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
 
 const tooltipStyle = {
+  background: 'hsl(var(--popover))',
   backgroundColor: 'hsl(var(--popover))',
   border: '1px solid hsl(var(--border))',
   borderRadius: '14px',
   boxShadow: '0 14px 40px rgb(0 0 0 / 0.18)',
   color: 'hsl(var(--popover-foreground))',
   fontSize: '12px',
+  opacity: 1,
+  backdropFilter: 'none',
 };
 
 const safeNumber = (value) => Number(value || 0);

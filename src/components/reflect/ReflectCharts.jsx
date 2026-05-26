@@ -43,6 +43,18 @@ const getCategoryColor = (item) =>
   item?.hex_color ||
   'hsl(var(--muted-foreground))';
 
+const SOLID_RECHARTS_TOOLTIP_STYLE = {
+  background: 'hsl(var(--popover))',
+  backgroundColor: 'hsl(var(--popover))',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '14px',
+  boxShadow: '0 14px 40px rgb(0 0 0 / 0.18)',
+  color: 'hsl(var(--popover-foreground))',
+  fontSize: '12px',
+  opacity: 1,
+  backdropFilter: 'none',
+};
+
 const tooltipProps = {
   cursor: false,
   allowEscapeViewBox: { x: false, y: false },
@@ -129,7 +141,7 @@ export default function ReflectCharts({
   expenses = 0,
   plannedExpenses = 0,
   currency,
-  tooltipStyle,
+  tooltipStyle = SOLID_RECHARTS_TOOLTIP_STYLE,
 }) {
   const safeCashFlow = Array.isArray(cashFlow) ? cashFlow : [];
   const safeSpendingBreakdown = Array.isArray(spendingBreakdown)
