@@ -242,48 +242,48 @@ main,
 
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.68);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: rgba(255, 255, 255, 0.52);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(200, 215, 240, 0.38);
   }
 
   .dark .glass {
-    background: rgba(15, 23, 42, 0.62);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(120, 160, 220, 0.12);
   }
 
   .surface {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.96));
-    border: 1px solid rgba(255, 255, 255, 0.7);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.82));
+    border: 1px solid rgba(180, 200, 230, 0.30);
   }
 
   .dark .surface {
     background:
-      linear-gradient(180deg, rgba(17, 24, 39, 0.72), rgba(8, 13, 28, 0.78));
-    border: 1px solid rgba(255, 255, 255, 0.06);
+      linear-gradient(180deg, rgba(17, 24, 39, 0.60), rgba(8, 13, 28, 0.68));
+    border: 1px solid rgba(100, 140, 200, 0.10);
   }
 
   .surface-card {
     background:
       linear-gradient(
         to bottom,
-        rgba(255, 255, 255, 0.78),
-        rgba(255, 255, 255, 0.92)
+        rgba(255, 255, 255, 0.60),
+        rgba(255, 255, 255, 0.76)
       );
-    backdrop-filter: blur(20px) saturate(145%);
-    -webkit-backdrop-filter: blur(20px) saturate(145%);
-    border-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px) saturate(155%);
+    -webkit-backdrop-filter: blur(20px) saturate(155%);
+    border-color: rgba(180, 200, 230, 0.28);
   }
 
   .dark .surface-card {
-    background: rgba(18, 24, 38, 0.58);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(18, 24, 38, 0.48);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-color: rgba(100, 140, 200, 0.10);
   }
 
   .card-elevated {
@@ -291,14 +291,13 @@ main,
       0 1px 2px rgba(15, 23, 42, 0.04),
       0 8px 22px rgba(15, 23, 42, 0.07),
       0 20px 48px rgba(15, 23, 42, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(180, 200, 230, 0.32);
   }
 
   .dark .card-elevated {
     box-shadow:
-      0 8px 22px rgba(0, 0, 0, 0.10),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+      0 8px 22px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(100, 140, 200, 0.12);
   }
 
   .card-soft {
@@ -311,12 +310,11 @@ main,
   }
 
   .dark .card-soft {
-    background: hsl(var(--card) / 0.50);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: hsl(var(--card) / 0.44);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
     box-shadow:
-      0 8px 20px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      0 8px 20px rgba(0, 0, 0, 0.20);
   }
 
   .hover-lift {
@@ -336,24 +334,26 @@ main,
 
   .dark .hover-lift:hover {
     box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.10),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
+      0 8px 24px rgba(0, 0, 0, 0.22),
+      0 0 0 1px rgba(100, 140, 200, 0.14);
   }
 
+  /* Bottom nav theme colors are handled by the authoritative block below;
+     these older utility stubs are kept as fallback only. */
   .app-bottom-nav {
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    border: 0;
-    box-shadow: none;
+    background: hsl(var(--card) / 0.82);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-top: 1px solid hsl(var(--border) / 0.50);
+    box-shadow: 0 -4px 24px hsl(var(--background) / 0.60);
   }
 
   .dark .app-bottom-nav {
-    background: rgba(2, 6, 23, 0.56);
-    backdrop-filter: blur(22px) saturate(140%);
-    -webkit-backdrop-filter: blur(22px) saturate(140%);
-    border: 0;
-    box-shadow: none;
+    background: hsl(var(--card) / 0.82);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-top: 1px solid hsl(var(--border) / 0.50);
+    box-shadow: 0 -4px 24px hsl(var(--background) / 0.80);
   }
 
   .btn-ripple {
@@ -695,29 +695,31 @@ main,
     --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
     --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
 
-    /* Light mode: glassy but not pure white */
-    --app-card-alpha: 0.54;
-    --app-card-alpha-strong: 0.68;
-    --app-card-alpha-soft: 0.30;
-    --app-card-border-alpha: 0.18;
-    --app-card-shadow-alpha: 0.055;
+    /* Light mode: translucent glass — background gradient shows through */
+    --app-card-alpha: 0.46;
+    --app-card-alpha-strong: 0.58;
+    --app-card-alpha-soft: 0.26;
+    --app-card-border-alpha: 0.20;
+    --app-card-shadow-alpha: 0.045;
     --app-card-blur: 22px;
     --app-card-saturate: 165%;
     --app-card-shadow-color: 222 47% 9%;
     --app-card-border-color: 222 47% 9%;
-    --app-card-highlight-color: 0 0% 100%;
+    /* Warm cream highlight instead of stark white */
+    --app-card-highlight-color: 220 60% 96%;
   }
 
   html.dark {
-    /* Dark mode: transparent matte cards, not smoky glass */
-    --app-card-alpha: 0.54;
-    --app-card-alpha-strong: 0.62;
-    --app-card-alpha-soft: 0.34;
-    --app-card-border-alpha: 0.13;
-    --app-card-shadow-alpha: 0.08;
-    --app-card-shadow-color: 0 0% 0%;
-    --app-card-border-color: 0 0% 100%;
-    --app-card-highlight-color: 0 0% 100%;
+    /* Dark mode: transparent glass cards — no white highlights/shadows */
+    --app-card-alpha: 0.48;
+    --app-card-alpha-strong: 0.56;
+    --app-card-alpha-soft: 0.28;
+    --app-card-border-alpha: 0.12;
+    --app-card-shadow-alpha: 0.28;
+    --app-card-shadow-color: 222 47% 3%;
+    /* Use a primary-tinted subtle color instead of white for borders/highlights */
+    --app-card-border-color: 217 60% 70%;
+    --app-card-highlight-color: 217 80% 65%;
   }
 
   html,
@@ -794,33 +796,37 @@ main,
     -webkit-backdrop-filter: blur(calc(var(--app-card-blur) - 4px)) saturate(var(--app-card-saturate));
   }
 
-  /* Dark mode: transparent cards without frosted/glassy effect */
+  /* Dark mode: soft glass cards — background colors bleed through */
   html.dark .app-card-surface {
-    background: hsl(var(--card) / var(--app-card-alpha)) !important;
+    background:
+      linear-gradient(135deg, hsl(var(--app-card-highlight-color) / 0.06), transparent 50%),
+      hsl(var(--card) / var(--app-card-alpha)) !important;
     border: 1px solid hsl(var(--app-card-border-color) / var(--app-card-border-alpha)) !important;
     box-shadow:
-      0 10px 26px hsl(var(--app-card-shadow-color) / var(--app-card-shadow-alpha)),
-      inset 0 1px 0 hsl(0 0% 100% / 0.04) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+      0 10px 30px hsl(var(--app-card-shadow-color) / var(--app-card-shadow-alpha)),
+      0 1px 0 hsl(var(--app-card-border-color) / 0.08) !important;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
   }
 
   html.dark .app-card-surface-strong {
-    background: hsl(var(--card) / var(--app-card-alpha-strong)) !important;
-    border: 1px solid hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) + 0.03)) !important;
+    background:
+      linear-gradient(135deg, hsl(var(--app-card-highlight-color) / 0.08), transparent 48%),
+      hsl(var(--card) / var(--app-card-alpha-strong)) !important;
+    border: 1px solid hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) + 0.04)) !important;
     box-shadow:
-      0 12px 30px hsl(var(--app-card-shadow-color) / calc(var(--app-card-shadow-alpha) + 0.03)),
-      inset 0 1px 0 hsl(0 0% 100% / 0.05) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+      0 12px 34px hsl(var(--app-card-shadow-color) / calc(var(--app-card-shadow-alpha) + 0.06)),
+      0 1px 0 hsl(var(--app-card-border-color) / 0.10) !important;
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
   }
 
   html.dark .app-card-surface-soft {
     background: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
     border: 1px solid hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) * 0.7)) !important;
-    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.035) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 4px 14px hsl(var(--app-card-shadow-color) / calc(var(--app-card-shadow-alpha) * 0.7)) !important;
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
   }
 
   /* Keep older hardcoded card classes on the same glass surface system. */
@@ -842,10 +848,9 @@ main,
     background-color: hsl(var(--card) / var(--app-card-alpha)) !important;
     border-color: hsl(var(--app-card-border-color) / var(--app-card-border-alpha)) !important;
     box-shadow:
-      0 8px 22px hsl(0 0% 0% / 0.08),
-      inset 0 1px 0 hsl(0 0% 100% / 0.04) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+      0 8px 24px hsl(var(--app-card-shadow-color) / var(--app-card-shadow-alpha)) !important;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
   }
 
   [class*='rounded-2xl'][class*='bg-background'],
@@ -860,33 +865,37 @@ main,
   html.dark [class*='rounded-xl'][class*='bg-background'] {
     background-color: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
     border-color: hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) * 0.7)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
   }
 
   .app-bottom-nav {
     height: var(--app-bottom-nav-height);
     padding-bottom: var(--app-safe-area-bottom);
     border: 0 !important;
+    border-top: 1px solid hsl(var(--border) / 0.45) !important;
     outline: 0 !important;
+    /* Solid base layer first so content NEVER bleeds through,
+       then primary-tinted radial glow on top for theme color */
     background:
-      radial-gradient(circle at 9% 0%, hsl(var(--primary) / 0.20), transparent 30%),
-      radial-gradient(circle at 92% 0%, hsl(var(--primary) / 0.10), transparent 34%),
-      linear-gradient(to bottom, hsl(var(--card) / 0.46), hsl(var(--card) / 0.64)) !important;
+      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.16), transparent 35%),
+      radial-gradient(circle at 88% 0%, hsl(var(--primary) / 0.10), transparent 35%),
+      hsl(var(--card) / 0.88) !important;
     box-shadow:
-      inset 0 1px 0 hsl(var(--app-card-highlight-color) / 0.12) !important;
+      0 -6px 28px hsl(var(--background) / 0.55) !important;
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
   }
 
   html.dark .app-bottom-nav {
+    border-top: 1px solid hsl(var(--border) / 0.55) !important;
     background:
-      radial-gradient(circle at 9% 0%, hsl(var(--primary) / 0.18), transparent 30%),
-      radial-gradient(circle at 92% 0%, hsl(var(--primary) / 0.10), transparent 34%),
-      linear-gradient(to bottom, hsl(var(--card) / 0.40), hsl(var(--card) / 0.58)) !important;
+      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.20), transparent 35%),
+      radial-gradient(circle at 88% 0%, hsl(var(--primary) / 0.12), transparent 35%),
+      hsl(var(--card) / 0.90) !important;
     box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.06) !important;
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
+      0 -6px 28px hsl(var(--background) / 0.80) !important;
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
   }
 }
