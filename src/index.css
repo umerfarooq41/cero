@@ -477,7 +477,7 @@ main,
     --app-surface-saturate: 145%;
 
     --app-recharts-tooltip-bg: hsl(var(--popover) / var(--app-surface-floating-alpha));
-    --app-recharts-tooltip-border: hsl(var(--primary) / var(--app-surface-border-strong-alpha));
+    --app-recharts-tooltip-border: hsl(var(--border) / 0.72);
     --app-recharts-tooltip-shadow: 0 16px 40px hsl(var(--app-surface-shadow-color) / 0.14);
   }
 
@@ -525,100 +525,181 @@ main,
     --app-surface-saturate: 140%;
   }
 
-  html:not(.dark).theme-style-cyber {
-    --primary: 243 75% 59%;
-    --ring: 243 75% 59%;
-    --background: 235 100% 98%;
-    --app-page-gradient: linear-gradient(135deg, #f7f8ff 0%, #eeedff 48%, #e6eaff 100%);
+  html:not(.dark).theme-style-cyber-indigo {
+    --primary: 243 75% 55%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 243 75% 55%;
+    --chart-1: 243 75% 55%;
+    --sidebar-primary: 243 75% 55%;
+    --sidebar-ring: 243 75% 55%;
+    --app-page-gradient:
+      radial-gradient(circle at 16% 10%, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0) 48%),
+      radial-gradient(circle at 90% 86%, rgba(124, 58, 237, 0.16) 0%, rgba(124, 58, 237, 0) 52%),
+      linear-gradient(135deg, #f4f5ff 0%, #eae8ff 48%, #e0e4ff 100%);
+    --app-canvas-start: #f4f5ff;
+    --app-canvas-end: #e0e4ff;
   }
 
-  html.dark.theme-style-cyber {
+  html.dark.theme-style-cyber-indigo {
     --primary: 245 94% 68%;
+    --primary-foreground: 222 47% 7%;
     --ring: 245 94% 68%;
-    --background: 247 54% 5%;
-    --card: 247 36% 9%;
-    --popover: 247 36% 9%;
-    --app-page-gradient: radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.24), rgba(67, 56, 202, 0) 35%), radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.20), rgba(49, 46, 129, 0) 42%), linear-gradient(135deg, #030211 0%, #080721 100%);
+    --chart-1: 245 94% 68%;
+    --sidebar-primary: 245 94% 68%;
+    --sidebar-ring: 245 94% 68%;
+    --app-page-gradient:
+      radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.25) 0%, rgba(67, 56, 202, 0) 38%),
+      radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.22) 0%, rgba(49, 46, 129, 0) 42%),
+      linear-gradient(135deg, #030211 0%, #080721 100%);
+    --app-canvas-start: #030211;
+    --app-canvas-end: #080721;
   }
 
-  html:not(.dark).theme-style-aurora {
-    --primary: 184 90% 36%;
-    --ring: 184 90% 36%;
-    --background: 205 60% 98%;
-    --app-page-gradient: radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0) 30%), radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.14), rgba(20, 184, 166, 0) 32%), linear-gradient(135deg, #f8fafc 0%, #eef8ff 45%, #effdfa 100%);
+  html:not(.dark).theme-style-aurora-bloom {
+    --primary: 199 88% 42%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 199 88% 42%;
+    --chart-1: 199 88% 42%;
+    --sidebar-primary: 199 88% 42%;
+    --sidebar-ring: 199 88% 42%;
+    --app-page-gradient:
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.20) 0%, rgba(96, 165, 250, 0) 34%),
+      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.14) 0%, rgba(244, 114, 182, 0) 32%),
+      linear-gradient(135deg, #f8fafc 0%, #f1f6ff 48%, #fff7fb 100%);
+    --app-canvas-start: #f8fafc;
+    --app-canvas-end: #fff7fb;
   }
 
-  html.dark.theme-style-aurora {
-    --primary: 184 90% 48%;
-    --ring: 184 90% 48%;
-    --background: 222 47% 5%;
-    --card: 222 36% 9%;
-    --popover: 222 36% 9%;
-    --app-page-gradient: radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0) 35%), radial-gradient(circle at 100% 8%, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0) 35%), linear-gradient(135deg, #020617 0%, #07111d 48%, #031018 100%);
+  html.dark.theme-style-aurora-bloom {
+    --primary: 184 90% 56%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 184 90% 56%;
+    --chart-1: 184 90% 56%;
+    --sidebar-primary: 184 90% 56%;
+    --sidebar-ring: 184 90% 56%;
+    --app-page-gradient:
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.24) 0%, rgba(37, 99, 235, 0) 38%),
+      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.20) 0%, rgba(147, 51, 234, 0) 34%),
+      linear-gradient(135deg, #020617 0%, #080d1c 48%, #030712 100%);
+    --app-canvas-start: #020617;
+    --app-canvas-end: #030712;
   }
 
-  html:not(.dark).theme-style-sunset {
+  html:not(.dark).theme-style-sunset-rose {
     --primary: 343 81% 50%;
+    --primary-foreground: 0 0% 100%;
     --ring: 343 81% 50%;
-    --background: 355 100% 98%;
-    --app-page-gradient: linear-gradient(135deg, #fff8f7 0%, #ffecef 50%, #fff0df 100%);
+    --chart-1: 343 81% 50%;
+    --sidebar-primary: 343 81% 50%;
+    --sidebar-ring: 343 81% 50%;
+    --app-page-gradient:
+      radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.16) 0%, rgba(225, 29, 72, 0) 48%),
+      radial-gradient(circle at 12% 90%, rgba(234, 88, 12, 0.12) 0%, rgba(234, 88, 12, 0) 52%),
+      linear-gradient(135deg, #fff5f5 0%, #ffe8ed 50%, #ffdbe3 100%);
+    --app-canvas-start: #fff5f5;
+    --app-canvas-end: #ffdbe3;
   }
 
-  html.dark.theme-style-sunset {
+  html.dark.theme-style-sunset-rose {
     --primary: 345 88% 64%;
+    --primary-foreground: 222 47% 7%;
     --ring: 345 88% 64%;
-    --background: 346 72% 5%;
-    --card: 346 44% 9%;
-    --popover: 346 44% 9%;
-    --app-page-gradient: radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.22), rgba(225, 29, 72, 0) 40%), radial-gradient(circle at 12% 92%, rgba(234, 88, 12, 0.14), rgba(234, 88, 12, 0) 42%), linear-gradient(135deg, #100207 0%, #1b050f 100%);
+    --chart-1: 345 88% 64%;
+    --sidebar-primary: 345 88% 64%;
+    --sidebar-ring: 345 88% 64%;
+    --app-page-gradient:
+      radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.22) 0%, rgba(225, 29, 72, 0) 42%),
+      linear-gradient(135deg, #120309 0%, #1c0510 100%);
+    --app-canvas-start: #120309;
+    --app-canvas-end: #1c0510;
   }
 
-  html:not(.dark).theme-style-emerald {
+  html:not(.dark).theme-style-emerald-forest {
     --primary: 160 84% 33%;
+    --primary-foreground: 0 0% 100%;
     --ring: 160 84% 33%;
-    --background: 150 60% 98%;
-    --app-page-gradient: linear-gradient(135deg, #f4fdf7 0%, #e6fbf1 54%, #d9f8ec 100%);
+    --chart-1: 160 84% 33%;
+    --sidebar-primary: 160 84% 33%;
+    --sidebar-ring: 160 84% 33%;
+    --app-page-gradient:
+      radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.16) 0%, rgba(13, 148, 136, 0) 48%),
+      radial-gradient(circle at 12% 88%, rgba(21, 128, 61, 0.12) 0%, rgba(21, 128, 61, 0) 52%),
+      linear-gradient(135deg, #f0fdf4 0%, #e1fbf0 55%, #d1fae5 100%);
+    --app-canvas-start: #f0fdf4;
+    --app-canvas-end: #d1fae5;
   }
 
-  html.dark.theme-style-emerald {
-    --primary: 160 84% 44%;
-    --ring: 160 84% 44%;
-    --background: 154 48% 4%;
-    --card: 154 36% 8%;
-    --popover: 154 36% 8%;
-    --app-page-gradient: radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.18), rgba(4, 120, 87, 0) 45%), linear-gradient(135deg, #020805 0%, #04140e 100%);
+  html.dark.theme-style-emerald-forest {
+    --primary: 160 84% 48%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 160 84% 48%;
+    --chart-1: 160 84% 48%;
+    --sidebar-primary: 160 84% 48%;
+    --sidebar-ring: 160 84% 48%;
+    --app-page-gradient:
+      radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.20) 0%, rgba(4, 120, 87, 0) 48%),
+      linear-gradient(135deg, #020805 0%, #04140e 100%);
+    --app-canvas-start: #020805;
+    --app-canvas-end: #04140e;
   }
 
-  html:not(.dark).theme-style-quartz {
+  html:not(.dark).theme-style-desert-quartz {
     --primary: 25 82% 51%;
+    --primary-foreground: 0 0% 100%;
     --ring: 25 82% 51%;
-    --background: 33 70% 98%;
-    --app-page-gradient: linear-gradient(135deg, #fffdf9 0%, #fdf3e8 54%, #fae8d4 100%);
+    --chart-1: 25 82% 51%;
+    --sidebar-primary: 25 82% 51%;
+    --sidebar-ring: 25 82% 51%;
+    --app-page-gradient:
+      radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.18) 0%, rgba(230, 137, 72, 0) 46%),
+      radial-gradient(circle at 85% 85%, rgba(120, 53, 15, 0.08) 0%, rgba(120, 53, 15, 0) 52%),
+      linear-gradient(135deg, #fffbf7 0%, #fdf2e4 55%, #f9e6cf 100%);
+    --app-canvas-start: #fffbf7;
+    --app-canvas-end: #f9e6cf;
   }
 
-  html.dark.theme-style-quartz {
+  html.dark.theme-style-desert-quartz {
     --primary: 27 88% 64%;
+    --primary-foreground: 222 47% 7%;
     --ring: 27 88% 64%;
-    --background: 25 34% 5%;
-    --card: 25 28% 9%;
-    --popover: 25 28% 9%;
-    --app-page-gradient: radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.20), rgba(230, 137, 72, 0) 40%), linear-gradient(135deg, #0e0a07 0%, #21150d 100%);
+    --chart-1: 27 88% 64%;
+    --sidebar-primary: 27 88% 64%;
+    --sidebar-ring: 27 88% 64%;
+    --app-page-gradient:
+      radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.22) 0%, rgba(230, 137, 72, 0) 42%),
+      linear-gradient(135deg, #0e0a07 0%, #22150d 100%);
+    --app-canvas-start: #0e0a07;
+    --app-canvas-end: #22150d;
   }
 
-  html:not(.dark).theme-style-horizon {
+  html:not(.dark).theme-style-cyberpunk-horizon {
     --primary: 316 82% 50%;
+    --primary-foreground: 0 0% 100%;
     --ring: 187 88% 42%;
-    --background: 292 80% 98%;
-    --app-page-gradient: linear-gradient(135deg, #fffbff 0%, #f5eaff 44%, #e5f7ff 100%);
+    --chart-1: 316 82% 50%;
+    --sidebar-primary: 316 82% 50%;
+    --sidebar-ring: 187 88% 42%;
+    --app-page-gradient:
+      radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.18) 0%, rgba(217, 70, 239, 0) 48%),
+      radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0) 50%),
+      linear-gradient(135deg, #fdf8ff 0%, #f3e8ff 45%, #e0f2fe 100%);
+    --app-canvas-start: #fdf8ff;
+    --app-canvas-end: #e0f2fe;
   }
 
-  html.dark.theme-style-horizon {
-    --primary: 314 91% 64%;
+  html.dark.theme-style-cyberpunk-horizon {
+    --primary: 314 91% 66%;
+    --primary-foreground: 222 47% 7%;
     --ring: 186 93% 48%;
-    --background: 275 62% 4%;
-    --card: 275 40% 8%;
-    --popover: 275 40% 8%;
-    --app-page-gradient: radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.24), rgba(217, 70, 239, 0) 45%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.20), rgba(6, 182, 212, 0) 45%), linear-gradient(135deg, #04010a 0%, #0c0217 100%);
+    --chart-1: 314 91% 66%;
+    --sidebar-primary: 314 91% 66%;
+    --sidebar-ring: 186 93% 48%;
+    --app-page-gradient:
+      radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.28) 0%, rgba(217, 70, 239, 0) 46%),
+      radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.22) 0%, rgba(6, 182, 212, 0) 46%),
+      linear-gradient(135deg, #04010a 0%, #0c0217 100%);
+    --app-canvas-start: #04010a;
+    --app-canvas-end: #0c0217;
   }
 
   html,
@@ -711,7 +792,7 @@ main,
     [class*='rounded-xl'][class*='bg-card']
   ) {
     background: hsl(var(--card) / var(--app-surface-main-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-alpha)) !important;
+    border: 1px solid hsl(var(--border) / var(--app-surface-border-alpha)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow:
       0 12px 30px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)),
@@ -722,7 +803,7 @@ main,
 
   .app-card-surface-strong {
     background: hsl(var(--card) / var(--app-surface-strong-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+    border: 1px solid hsl(var(--border) / var(--app-surface-border-strong-alpha)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow:
       0 18px 48px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-strong-alpha)),
@@ -738,7 +819,7 @@ main,
     [class*='rounded-xl'][class*='bg-background']
   ) {
     background: hsl(var(--card) / var(--app-surface-soft-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-soft-alpha)) !important;
+    border: 1px solid hsl(var(--border) / var(--app-surface-border-soft-alpha)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow:
       0 8px 22px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.55)),
@@ -751,7 +832,7 @@ main,
   .app-chart-tooltip-surface,
   [data-radix-popper-content-wrapper] :where([role='dialog'], [role='menu'], [role='listbox'], [data-radix-select-content]) {
     background: hsl(var(--popover) / var(--app-surface-floating-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+    border: 1px solid hsl(var(--border) / var(--app-surface-border-strong-alpha)) !important;
     color: hsl(var(--popover-foreground)) !important;
     box-shadow: var(--app-recharts-tooltip-shadow) !important;
     backdrop-filter: none !important;
@@ -764,7 +845,7 @@ main,
     [role='combobox']
   ) {
     background: hsl(var(--card) / var(--app-control-alpha)) !important;
-    border-color: hsl(var(--primary) / var(--app-control-border-alpha)) !important;
+    border-color: hsl(var(--border) / 0.62) !important;
     color: hsl(var(--foreground)) !important;
     box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.035) !important;
     backdrop-filter: blur(12px) saturate(135%) !important;
@@ -777,10 +858,10 @@ main,
     [role='combobox'][data-state='open'],
     [role='combobox']:focus
   ) {
-    border-color: hsl(var(--primary) / 0.34) !important;
+    border-color: hsl(var(--border) / 0.82) !important;
     box-shadow:
       inset 0 1px 0 hsl(var(--foreground) / 0.035),
-      0 0 0 1px hsl(var(--primary) / 0.18) !important;
+      0 0 0 1px hsl(var(--primary) / 0.13) !important;
   }
 
   .app-amount-input {
@@ -874,36 +955,5 @@ main,
   .app-main-scroll::before,
   .app-main-scroll::after {
     animation: none !important;
-  }
-}
-
-/* ============================= */
-/* Unified canvas header/nav polish */
-/* Header, sidebar, and bottom nav inherit the same page canvas instead of
-   drawing separate glass blocks. */
-/* ============================= */
-@layer utilities {
-  .app-fixed-surface,
-  .app-gradient-surface,
-  .app-bottom-nav,
-  .app-sidebar-dock {
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-    background-size: var(--app-canvas-bg-size, cover) !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    outline: 0 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .app-fixed-surface::before,
-  .app-fixed-surface::after,
-  .app-bottom-nav::before,
-  .app-bottom-nav::after,
-  .app-sidebar-dock::before,
-  .app-sidebar-dock::after {
-    display: none !important;
-    content: none !important;
   }
 }

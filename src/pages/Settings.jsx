@@ -97,58 +97,58 @@ const themeOptions = [
 
 const themeStyleOptions = [
   {
-    value: 'cyber',
+    value: 'cyber-indigo',
     label: 'Cyber Indigo',
-    description: 'Clean blue-violet SaaS theme with a modern command-center feel.',
-    tone: 'purple',
+    description: 'Modern SaaS blue and violet canvas with a crisp technical feel.',
+    tone: 'blue',
     swatch: '#6366f1',
-    canvasLight: 'linear-gradient(135deg, #f7f8ff 0%, #eeedff 48%, #e6eaff 100%)',
-    canvasDark: 'radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.62), transparent 42%), radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.56), transparent 45%), linear-gradient(135deg, #030211 0%, #080721 100%)',
+    lightCanvas: 'radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.36), transparent 46%), radial-gradient(circle at 88% 14%, rgba(124, 58, 237, 0.32), transparent 48%), radial-gradient(circle at 56% 100%, rgba(14, 165, 233, 0.18), transparent 48%), linear-gradient(135deg, #eef2ff 0%, #e0e7ff 46%, #ddd6fe 100%)',
+    darkCanvas: 'radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.58), transparent 38%), radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.52), transparent 42%), linear-gradient(135deg, #030211 0%, #080721 100%)',
   },
   {
-    value: 'aurora',
-    label: 'Aurora Teal',
-    description: 'Fresh teal and sky finance theme for analytics and balance views.',
+    value: 'aurora-bloom',
+    label: 'Aurora Bloom',
+    description: 'Airy blue, lavender, and rose mist for a clean premium dashboard.',
     tone: 'cyan',
-    swatch: '#0891b2',
-    canvasLight: 'radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.42), transparent 36%), radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.34), transparent 38%), linear-gradient(135deg, #f8fafc 0%, #eef8ff 45%, #effdfa 100%)',
-    canvasDark: 'radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.52), transparent 40%), radial-gradient(circle at 100% 8%, rgba(20, 184, 166, 0.42), transparent 40%), linear-gradient(135deg, #020617 0%, #07111d 48%, #031018 100%)',
+    swatch: '#38bdf8',
+    lightCanvas: 'radial-gradient(circle at 2% 12%, rgba(14, 165, 233, 0.36), transparent 42%), radial-gradient(circle at 92% 4%, rgba(20, 184, 166, 0.34), transparent 44%), radial-gradient(circle at 54% 100%, rgba(244, 114, 182, 0.16), transparent 42%), linear-gradient(135deg, #ecfeff 0%, #dbeafe 46%, #ccfbf1 100%)',
+    darkCanvas: 'radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.56), transparent 38%), radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.46), transparent 34%), linear-gradient(135deg, #020617 0%, #080d1c 48%, #030712 100%)',
   },
   {
-    value: 'sunset',
+    value: 'sunset-rose',
     label: 'Sunset Rose',
-    description: 'Warm rose and orange theme for a softer consumer-app personality.',
+    description: 'Warm rose and orange glow for a softer expressive theme.',
     tone: 'rose',
     swatch: '#e11d48',
-    canvasLight: 'linear-gradient(135deg, #fff8f7 0%, #ffecef 50%, #fff0df 100%)',
-    canvasDark: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.56), transparent 42%), radial-gradient(circle at 12% 92%, rgba(234, 88, 12, 0.36), transparent 42%), linear-gradient(135deg, #100207 0%, #1b050f 100%)',
+    lightCanvas: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.34), transparent 46%), radial-gradient(circle at 14% 88%, rgba(234, 88, 12, 0.34), transparent 48%), radial-gradient(circle at 48% 22%, rgba(251, 191, 36, 0.16), transparent 42%), linear-gradient(135deg, #fff1f2 0%, #ffedd5 50%, #fee2e2 100%)',
+    darkCanvas: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.52), transparent 42%), linear-gradient(135deg, #120309 0%, #1c0510 100%)',
   },
   {
-    value: 'emerald',
+    value: 'emerald-forest',
     label: 'Emerald Forest',
-    description: 'Secure green-teal theme for savings, stability, and trust.',
+    description: 'Stable green and teal canvas for savings, safety, and calm focus.',
     tone: 'emerald',
-    swatch: '#059669',
-    canvasLight: 'linear-gradient(135deg, #f4fdf7 0%, #e6fbf1 54%, #d9f8ec 100%)',
-    canvasDark: 'radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.46), transparent 45%), linear-gradient(135deg, #020805 0%, #04140e 100%)',
+    swatch: '#10b981',
+    lightCanvas: 'radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.36), transparent 46%), radial-gradient(circle at 8% 86%, rgba(22, 163, 74, 0.30), transparent 48%), radial-gradient(circle at 92% 78%, rgba(132, 204, 22, 0.14), transparent 44%), linear-gradient(135deg, #ecfdf5 0%, #d1fae5 52%, #ccfbf1 100%)',
+    darkCanvas: 'radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.48), transparent 48%), linear-gradient(135deg, #020805 0%, #04140e 100%)',
   },
   {
-    value: 'quartz',
+    value: 'desert-quartz',
     label: 'Desert Quartz',
-    description: 'Warm sand and amber theme with a calm premium feel.',
+    description: 'Warm sand and copper tones with a polished Saudi-inspired warmth.',
     tone: 'amber',
     swatch: '#ea580c',
-    canvasLight: 'linear-gradient(135deg, #fffdf9 0%, #fdf3e8 54%, #fae8d4 100%)',
-    canvasDark: 'radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.48), transparent 42%), linear-gradient(135deg, #0e0a07 0%, #21150d 100%)',
+    lightCanvas: 'radial-gradient(circle at 22% 14%, rgba(234, 88, 12, 0.34), transparent 46%), radial-gradient(circle at 84% 82%, rgba(217, 119, 6, 0.30), transparent 48%), radial-gradient(circle at 52% 54%, rgba(251, 191, 36, 0.18), transparent 44%), linear-gradient(135deg, #fff7ed 0%, #fed7aa 54%, #fde68a 100%)',
+    darkCanvas: 'radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.48), transparent 42%), linear-gradient(135deg, #0e0a07 0%, #22150d 100%)',
   },
   {
-    value: 'horizon',
+    value: 'cyberpunk-horizon',
     label: 'Cyberpunk Horizon',
-    description: 'Magenta and cyan contrast for users who want a vivid app canvas.',
+    description: 'Distinct magenta and cyan energy without matching the calmer themes.',
     tone: 'purple',
     swatch: '#d946ef',
-    canvasLight: 'linear-gradient(135deg, #fffbff 0%, #f5eaff 44%, #e5f7ff 100%)',
-    canvasDark: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.58), transparent 45%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.48), transparent 45%), linear-gradient(135deg, #04010a 0%, #0c0217 100%)',
+    lightCanvas: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.40), transparent 46%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.38), transparent 48%), radial-gradient(circle at 42% 10%, rgba(99, 102, 241, 0.20), transparent 42%), linear-gradient(135deg, #fae8ff 0%, #cffafe 48%, #e0e7ff 100%)',
+    darkCanvas: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.58), transparent 46%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.48), transparent 46%), linear-gradient(135deg, #04010a 0%, #0c0217 100%)',
   },
 ];
 
@@ -282,8 +282,8 @@ function SegmentedOption({ active, onClick, icon: Icon, label }) {
   );
 }
 
-function ThemeStyleSwatch({ option, active, onSelect, isDark }) {
-  const selectedClass = toneClasses[option.tone]?.selected || toneClasses.blue.selected;
+function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
+  const canvas = resolvedTheme === 'dark' ? option.darkCanvas : option.lightCanvas;
 
   return (
     <button
@@ -292,12 +292,12 @@ function ThemeStyleSwatch({ option, active, onSelect, isDark }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
-          ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
+          ? 'scale-105 border-border/80 bg-card/25 ring-2 ring-border/80 ring-offset-2 ring-offset-background'
           : 'border-border/60 ring-1 ring-border/40'
       )}
-      style={{ background: (isDark ? option.canvasDark : option.canvasLight) || option.swatch }}
+      style={{ background: canvas || option.swatch }}
     >
       {active && (
         <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">
@@ -319,13 +319,13 @@ export default function Settings() {
     setTheme,
     themeStyle,
     setThemeStyle,
+    resolvedTheme,
     compactMode,
     setCompactMode,
     showDecimals,
     setShowDecimals,
     hapticsEnabled,
     setHapticsEnabled,
-    isDark,
   } = useTheme();
 
   const [settings, setSettings] = useState({
@@ -494,7 +494,7 @@ export default function Settings() {
       });
 
       setTheme('system');
-      setThemeStyle('warm-aurora');
+      setThemeStyle('aurora-bloom');
       setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
@@ -601,7 +601,7 @@ export default function Settings() {
                   option={option}
                   active={themeStyle === option.value}
                   onSelect={handleThemeStyleChange}
-                  isDark={isDark}
+                  resolvedTheme={resolvedTheme}
                 />
               ))}
             </div>
