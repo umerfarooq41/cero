@@ -124,7 +124,7 @@ export default function BottomNav() {
                   className={cn(
                     `
                     relative z-10 flex min-w-0 flex-col items-center justify-center
-                    gap-1.5 px-1 py-1.5 text-center
+                    gap-1 px-0.5 py-1 text-center
                     transition-colors duration-200
                     `,
                     isActive
@@ -134,7 +134,7 @@ export default function BottomNav() {
                 >
                   <motion.div
                     animate={{
-                      scale: isActive ? 1.06 : 1,
+                      scale: isActive ? 1.04 : 1,
                       y: isActive ? -1 : 0,
                     }}
                     transition={{
@@ -142,7 +142,7 @@ export default function BottomNav() {
                       stiffness: 400,
                       damping: 25,
                     }}
-                    className="relative flex h-11 w-11 items-center justify-center"
+                    className="relative flex h-9 w-9 items-center justify-center"
                   >
                     {isActive && (
                       <motion.div
@@ -151,7 +151,7 @@ export default function BottomNav() {
                           absolute inset-0 rounded-full
                           bg-primary/10
                           ring-1 ring-primary/25
-                          shadow-[0_0_26px_hsl(var(--primary)/0.22)]
+                          shadow-[0_0_22px_hsl(var(--primary)/0.20)]
                         "
                         transition={{
                           type: 'spring',
@@ -163,20 +163,20 @@ export default function BottomNav() {
 
                     <Icon
                       className={cn(
-                        'relative z-10 h-6 w-6 transition-all duration-200',
+                        'relative z-10 h-5 w-5 transition-all duration-200',
                         isActive
-                          ? 'text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.65)] stroke-[2.6]'
-                          : 'text-muted-foreground/80 stroke-[2.4]'
+                          ? 'text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)] stroke-[2.5]'
+                          : 'text-muted-foreground/80 stroke-[2.35]'
                       )}
                     />
                   </motion.div>
 
                   <motion.span
-                    animate={{ opacity: isActive ? 1 : 0.62 }}
+                    animate={{ opacity: isActive ? 1 : 0.66 }}
                     className={cn(
-                      'block max-w-full truncate text-[12px] leading-none transition-all duration-200',
+                      'block max-w-full whitespace-nowrap text-[10px] leading-none transition-all duration-200',
                       isActive
-                        ? 'font-bold text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.35)]'
+                        ? 'font-bold text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.30)]'
                         : 'font-medium text-muted-foreground'
                     )}
                   >
