@@ -99,37 +99,42 @@ const themeStyleOptions = [
   {
     value: 'cyber',
     label: 'Cyber Indigo',
-    description: 'Modern blue and purple SaaS tone.',
+    description: 'Modern SaaS blue and purple personality.',
     tone: 'purple',
-    swatch: 'bg-indigo-600',
+    swatch: '#2563EB',
+    swatchEnd: '#7C3AED',
   },
   {
     value: 'aurora',
     label: 'Aurora Teal',
-    description: 'Clean teal and sky fintech workspace.',
+    description: 'Fintech teal and sky workspace.',
     tone: 'cyan',
-    swatch: 'bg-teal-600',
+    swatch: '#0F766E',
+    swatchEnd: '#0284C7',
   },
   {
     value: 'sunset',
     label: 'Sunset Rose',
-    description: 'Warm rose and orange consumer tone.',
+    description: 'Warm rose and orange personality.',
     tone: 'rose',
-    swatch: 'bg-rose-600',
+    swatch: '#E11D48',
+    swatchEnd: '#EA580C',
   },
   {
     value: 'emerald',
     label: 'Emerald Forest',
-    description: 'Stable green and teal finance tone.',
+    description: 'Stable green and teal personality.',
     tone: 'emerald',
-    swatch: 'bg-emerald-700',
+    swatch: '#15803D',
+    swatchEnd: '#0D9488',
   },
   {
     value: 'obsidian',
     label: 'Midnight Obsidian',
-    description: 'Quiet slate structure with premium contrast.',
+    description: 'Minimal slate and luxury neutral style.',
     tone: 'slate',
-    swatch: 'bg-slate-700 dark:bg-slate-300',
+    swatch: '#64748B',
+    swatchEnd: '#0F172A',
   },
 ];
 
@@ -271,16 +276,19 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
       type="button"
       onClick={() => onSelect(option.value)}
       aria-label={`Apply ${option.label} theme style`}
-      title={option.label}
+      title={`${option.label} — ${option.description}`}
       className={cn(
         'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
-        option.swatch,
         active
           ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
           : 'border-white/60 ring-1 ring-border/50 dark:border-white/10'
       )}
+      style={{ backgroundColor: option.swatch }}
     >
-      <span className="absolute inset-[3px] rounded-full border border-white/20 bg-white/10 dark:bg-black/15" />
+      <span
+        className="absolute bottom-1 right-1 h-3 w-3 rounded-full border border-white/60 shadow-sm dark:border-white/20"
+        style={{ backgroundColor: option.swatchEnd }}
+      />
 
       {active && (
         <span className="relative flex h-4 w-4 items-center justify-center rounded-full app-card-surface-strong text-foreground shadow-sm">
@@ -290,6 +298,7 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
     </button>
   );
 }
+
 
 export default function Settings() {
   const scope = usePageEntrance();
@@ -476,7 +485,7 @@ export default function Settings() {
       });
 
       setTheme('system');
-      setThemeStyle('cero');
+      setThemeStyle('aurora');
       setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
@@ -573,7 +582,7 @@ export default function Settings() {
             icon={Brush}
             tone="cyan"
             label="Theme Style"
-            description="Pick a standalone app theme for both light and dark mode."
+            description="Pick a standalone app theme. Backgrounds use dual-tone gradients; components stay solid glass."
             stackOnMobile
           >
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -672,7 +681,7 @@ export default function Settings() {
             icon={LayoutGrid}
             tone="cyan"
             label="Compact Mode"
-            description="Tightens supported Settings sections and prepares the app for denser layouts."
+            description="Tightens spacing across pages, cards, rows, forms, and dialogs globally."
           >
             <Switch checked={compactMode} onCheckedChange={setCompactMode} />
           </SettingRow>
