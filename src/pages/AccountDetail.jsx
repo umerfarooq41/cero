@@ -5,13 +5,6 @@ import {
   PencilLine,
   Trash2,
   AlertTriangle,
-  Wallet,
-  Landmark,
-  PiggyBank,
-  CreditCard,
-  Banknote,
-  TrendingUp,
-  Building,
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
@@ -45,7 +38,10 @@ import EmptyState from '@/components/shared/EmptyState';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
-import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
+import {
+  deleteTransactionWithEffects,
+  getTransactionDeltas,
+} from '@/lib/transactionEffects';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -55,17 +51,6 @@ import {
   getCurrencySymbol as getSharedCurrencySymbol,
   formatCurrencyNumberText,
 } from '@/lib/currencies';
-
-const typeIcons = {
-  checking: Landmark,
-  savings: PiggyBank,
-  credit_card: CreditCard,
-  cash: Banknote,
-  investment: TrendingUp,
-  loan: Building,
-  other: Wallet,
-};
-
 
 const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 
@@ -108,6 +93,78 @@ function CurrencyAmount({ amount, currency, compact = false, className = '' }) {
   );
 }
 
+function getExplicitStartingBalance(account) {
+  const value =
+    account?.starting_balance ??
+    account?.opening_balance ??
+    account?.initial_balance;
+
+  if (value === undefined || value === null || value === '') return null;
+
+  return Number(value) || 0;
+}
+
+function getDerivedStartingBalance({ account, accountId, accountTransactions, accounts }) {
+  const explicitStartingBalance = getExplicitStartingBalance(account);
+
+  if (explicitStartingBalance !== null) {
+    return explicitStartingBalance;
+  }
+
+  const currentBalance = Number(account?.balance) || 0;
+  const transactionDelta = accountTransactions.reduce((sum, transaction) => {
+    const deltas = getTransactionDeltas(transaction, accounts);
+    return sum + (Number(deltas[accountId]) || 0);
+  }, 0);
+
+  return currentBalance - transactionDelta;
+}
+
+function AccountBalanceHero({ account, startingBalance, balance, isLiability, formatCurrency }) {
+  const typeLabel = account.type?.replace('_', ' ') || 'Account';
+  const categoryLabel = account.category || 'asset';
+
+  return (
+    <section className="animate-child mb-6 overflow-hidden rounded-3xl app-card-surface shadow-md">
+      <div
+        className={cn(
+          'p-5 sm:p-6',
+          isLiability
+            ? 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent'
+            : 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent'
+        )}
+      >
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Current Balance
+        </div>
+
+        <div
+          className={cn(
+            'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums sm:text-5xl',
+            isLiability ? 'text-red-600 dark:text-red-400' : 'text-foreground'
+          )}
+        >
+          {isLiability && <span>-</span>}
+          {formatCurrency(balance)}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+          <span className="capitalize">{typeLabel}</span>
+          <span>·</span>
+          <span className="capitalize">{categoryLabel}</span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            Starting balance
+            <span className="inline-flex items-center gap-0.5 font-semibold text-foreground">
+              {isLiability && <span>-</span>}
+              {formatCurrency(Math.abs(startingBalance))}
+            </span>
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function AccountDetail() {
   const scope = usePageEntrance();
@@ -237,10 +294,14 @@ export default function AccountDetail() {
     );
   }
 
-  const Icon = typeIcons[account.type] || Wallet;
   const isLiability = account.category === 'liability';
-  const color = account.color || (isLiability ? '#DC2626' : '#059669');
   const balance = Math.abs(Number(account.balance) || 0);
+  const startingBalance = getDerivedStartingBalance({
+    account,
+    accountId,
+    accountTransactions,
+    accounts,
+  });
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
@@ -266,6 +327,7 @@ export default function AccountDetail() {
               variant="ghost"
               size="icon"
               onClick={() => navigate(`/accounts/${accountId}/edit`)}
+              aria-label="Edit account"
             >
               <PencilLine className="h-4 w-4" />
             </Button>
@@ -275,76 +337,20 @@ export default function AccountDetail() {
               size="icon"
               onClick={() => setDeleteOpen(true)}
               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Delete account"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <section className="animate-child mb-6 overflow-hidden rounded-3xl app-card-surface shadow-md backdrop-blur-xl">
-          <div
-            className={cn(
-              'p-6',
-              isLiability
-                ? 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent'
-                : 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent'
-            )}
-          >
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Balance
-                </div>
-
-                <div
-                  className={cn(
-                    'mt-2 flex items-center gap-1 text-4xl font-bold tracking-tight tabular-nums',
-                    isLiability
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-foreground'
-                  )}
-                >
-                  {isLiability && <span>-</span>}
-                  {formatCurrency(balance)}
-                </div>
-              </div>
-
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: `${color}18` }}
-              >
-                <Icon className="h-7 w-7" style={{ color }} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl app-card-surface p-4 backdrop-blur-xl">
-                <div className="text-xs text-muted-foreground">
-                  Type
-                </div>
-                <div className="mt-1 text-sm font-semibold capitalize">
-                  {account.type?.replace('_', ' ') || 'Account'}
-                </div>
-              </div>
-
-              <div className="rounded-2xl app-card-surface p-4 backdrop-blur-xl">
-                <div className="text-xs text-muted-foreground">
-                  Category
-                </div>
-                <div
-                  className={cn(
-                    'mt-1 text-sm font-semibold capitalize',
-                    isLiability
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-emerald-600 dark:text-emerald-400'
-                  )}
-                >
-                  {account.category || 'asset'}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AccountBalanceHero
+          account={account}
+          startingBalance={startingBalance}
+          balance={balance}
+          isLiability={isLiability}
+          formatCurrency={formatCurrency}
+        />
 
         <div className="mb-3 flex items-center justify-between animate-child">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -360,7 +366,7 @@ export default function AccountDetail() {
           <div className="animate-child">
             <EmptyState
               title="No transactions"
-            description="No transactions for this account yet."
+              description="No transactions for this account yet."
             />
           </div>
         ) : (

@@ -36,6 +36,63 @@ function InlineMoney({ children }) {
   );
 }
 
+function normalizeType(type = '') {
+  return String(type).toLowerCase().replace(/\s+/g, '_');
+}
+
+function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurrency }) {
+  const items = [
+    {
+      label: 'Cash Available',
+      value: cashAvailable,
+      Icon: Banknote,
+      tone: 'text-emerald-600 dark:text-emerald-400',
+      iconClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    },
+    {
+      label: 'Savings',
+      value: savingsTotal,
+      Icon: PiggyBank,
+      tone: 'text-blue-600 dark:text-blue-400',
+      iconClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    },
+    {
+      label: 'Debt',
+      value: debtTotal,
+      Icon: CreditCard,
+      tone: 'text-red-600 dark:text-red-400',
+      iconClass: 'bg-red-500/10 text-red-600 dark:text-red-400',
+    },
+  ];
+
+  return (
+    <section className="grid grid-cols-3 divide-x divide-border/40 overflow-hidden rounded-2xl app-card-surface">
+      {items.map(({ label, value, Icon, tone, iconClass }) => (
+        <div key={label} className="min-w-0 px-3 py-3.5 sm:px-4">
+          <div className="mb-2 flex items-center gap-2">
+            <span
+              className={cn(
+                'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl',
+                iconClass
+              )}
+            >
+              <Icon className="h-3.5 w-3.5" />
+            </span>
+
+            <span className="min-w-0 truncate text-[11px] font-medium text-muted-foreground sm:text-xs">
+              {label}
+            </span>
+          </div>
+
+          <div className={cn('text-sm font-bold tabular-nums sm:text-base', tone)}>
+            <InlineMoney>{formatCurrency(Math.abs(value))}</InlineMoney>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export default function Accounts() {
   const scope = usePageEntrance();
   const formatCurrency = useCurrencyFormatter();
@@ -60,6 +117,22 @@ export default function Accounts() {
     (sum, account) => sum + Math.abs(Number(account.balance) || 0),
     0
   );
+
+  const cashAvailable = assets.reduce((sum, account) => {
+    const type = normalizeType(account.type);
+
+    if (type === 'checking' || type === 'cash') {
+      return sum + (Number(account.balance) || 0);
+    }
+
+    return sum;
+  }, 0);
+
+  const savingsTotal = assets.reduce((sum, account) => {
+    return normalizeType(account.type) === 'savings'
+      ? sum + (Number(account.balance) || 0)
+      : sum;
+  }, 0);
 
   const netWorth = totalAssets - totalLiabilities;
 
@@ -136,39 +209,46 @@ export default function Accounts() {
             {accs.map((account) => {
               const Icon = typeIcons[account.type] || Wallet;
               const balance = Math.abs(Number(account.balance) || 0);
+              const accountColor = account.color || '#0078D4';
+              const typeLabel = account.type?.replace('_', ' ') || 'Account';
 
               return (
                 <Link
                   key={account.id}
                   to={`/accounts/${account.id}`}
-                  className="grid min-h-[4.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:brightness-105"
+                  className="flex min-h-[4.75rem] items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/20"
                 >
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                     style={{
-                      backgroundColor: `${account.color || '#0078D4'}15`,
+                      backgroundColor: `${accountColor}15`,
                     }}
                   >
                     <Icon
                       className="h-4 w-4"
                       style={{
-                        color: account.color || '#0078D4',
+                        color: accountColor,
                       }}
                     />
                   </div>
 
-                  <div className="flex min-w-0 flex-col justify-center">
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
                     <div className="truncate text-sm font-medium leading-tight text-foreground">
                       {account.name}
                     </div>
 
-                    <div className="mt-1 text-xs capitalize leading-none text-muted-foreground">
-                      {account.type?.replace('_', ' ') || 'Account'}
+                    <div className="mt-1 truncate text-xs capitalize leading-none text-muted-foreground">
+                      {typeLabel} · {isLiability ? 'Liability' : 'Asset'}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end text-right">
-                    <div className="text-sm font-medium tabular-nums text-foreground">
+                  <div className="flex min-w-[5.75rem] shrink-0 items-center justify-end self-stretch text-right">
+                    <div
+                      className={cn(
+                        'text-sm font-semibold tabular-nums',
+                        isLiability ? 'text-destructive' : 'text-foreground'
+                      )}
+                    >
                       <InlineMoney>{formatCurrency(balance)}</InlineMoney>
                     </div>
                   </div>
@@ -186,11 +266,20 @@ export default function Accounts() {
       <PageHeader title="Accounts" subtitle="Your financial overview" />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 md:py-6">
-        <div className="animate-child mb-6">
+        <div className="animate-child mb-4">
           <NetWorthDelta
             netWorth={netWorth}
             totalAssets={totalAssets}
             totalLiabilities={totalLiabilities}
+            formatCurrency={formatCurrency}
+          />
+        </div>
+
+        <div className="animate-child mb-6">
+          <AccountSummaryCard
+            cashAvailable={cashAvailable}
+            savingsTotal={savingsTotal}
+            debtTotal={totalLiabilities}
             formatCurrency={formatCurrency}
           />
         </div>
