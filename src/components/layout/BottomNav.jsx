@@ -55,15 +55,12 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-
+    <nav className="fixed inset-x-0 bottom-0 z-50 overflow-hidden app-fixed-surface app-bottom-nav lg:hidden">
       <div
         className="
-          relative mx-auto mb-2 mt-2
-          grid h-[4.35rem] max-w-3xl grid-cols-5
-          overflow-hidden
-          app-bottom-nav
-          px-1.5 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1.5
+          mx-auto
+          grid h-[calc(4rem+env(safe-area-inset-bottom))] max-w-3xl grid-cols-5
+          pb-[env(safe-area-inset-bottom)]
         "
       >
         {navItems.map((item) => {
@@ -76,13 +73,13 @@ export default function BottomNav() {
               to={item.path}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="relative flex min-w-0 items-center justify-center rounded-2xl"
+              className="relative flex min-w-0 items-center justify-center"
             >
               <div
                 className={cn(
                   `
                   relative z-10 flex min-w-0 flex-col items-center justify-center
-                  gap-1 rounded-2xl px-1 py-1.5 text-center
+                  gap-1 px-1 py-1.5 text-center
                   transition-colors duration-200
                   `,
                   isActive
@@ -101,7 +98,7 @@ export default function BottomNav() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-icon-highlight"
-                      className="absolute inset-0 rounded-2xl bg-primary/12 shadow-[0_8px_22px_hsl(var(--primary)/0.16)] ring-1 ring-primary/15"
+                      className="absolute inset-0 rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -115,7 +112,7 @@ export default function BottomNav() {
                 </motion.div>
 
                 <motion.span
-                  animate={{ opacity: isActive ? 1 : 0.68 }}
+                  animate={{ opacity: isActive ? 1 : 0.6 }}
                   className={cn(
                     'block max-w-full truncate text-[10px] leading-none transition-all duration-200 sm:text-[11px]',
                     isActive ? 'font-semibold' : 'font-medium'

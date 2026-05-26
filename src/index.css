@@ -686,117 +686,57 @@ main,
 }
 
 /* ============================= */
-/* 🧊 GLOBAL TRANSPARENT CARD SYSTEM */
-/* Tune these variables here once; existing bg-card/bg-background card utilities update app-wide. */
+/* 📱 EDGE-TO-EDGE MOBILE SURFACES */
 /* ============================= */
 
-@layer base {
-  html {
-    --app-card-alpha: 0.66;
-    --app-card-alpha-strong: 0.78;
-    --app-card-alpha-soft: 0.42;
-    --app-card-border-alpha: 0.50;
-    --app-card-blur: 18px;
-    --app-card-saturate: 145%;
-    --app-card-shadow: 0 14px 36px hsl(var(--foreground) / 0.055);
-    --app-card-inset: inset 0 1px 0 hsl(var(--background) / 0.46);
-  }
-
-  html.dark {
-    --app-card-alpha: 0.52;
-    --app-card-alpha-strong: 0.64;
-    --app-card-alpha-soft: 0.32;
-    --app-card-border-alpha: 0.34;
-    --app-card-blur: 20px;
-    --app-card-saturate: 150%;
-    --app-card-shadow: 0 16px 40px hsl(0 0% 0% / 0.22);
-    --app-card-inset: inset 0 1px 0 hsl(0 0% 100% / 0.06);
-  }
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+  background: var(--app-page-gradient) !important;
+  background-attachment: fixed !important;
 }
 
-@layer utilities {
-  .app-card-surface {
-    background-color: hsl(var(--card) / var(--app-card-alpha)) !important;
-    border-color: hsl(var(--border) / var(--app-card-border-alpha)) !important;
-    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    box-shadow: var(--app-card-shadow), var(--app-card-inset);
-  }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
 
-  .app-card-surface-strong {
-    background-color: hsl(var(--card) / var(--app-card-alpha-strong)) !important;
-    border-color: hsl(var(--border) / var(--app-card-border-alpha)) !important;
-    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    box-shadow: var(--app-card-shadow), var(--app-card-inset);
-  }
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
 
-  .app-card-surface-soft {
-    background-color: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
-    border-color: hsl(var(--border) / calc(var(--app-card-border-alpha) * 0.75)) !important;
-    backdrop-filter: blur(calc(var(--app-card-blur) * 0.75)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(calc(var(--app-card-blur) * 0.75)) saturate(var(--app-card-saturate));
-  }
+.app-page-surface,
+.app-gradient-surface,
+.app-fixed-surface,
+.app-bottom-nav {
+  background: var(--app-page-gradient) !important;
+  background-attachment: fixed !important;
+}
 
-  /* Existing card utilities: normal card surfaces */
-  :where(
-    .bg-card,
-    [class~='bg-card/40'],
-    [class~='bg-card/45'],
-    [class~='bg-card/50'],
-    [class~='bg-card/60'],
-    [class~='bg-card/70'],
-    [class~='bg-card/75'],
-    [class~='bg-card/80'],
-    [class~='bg-card/85']
-  ) {
-    background-color: hsl(var(--card) / var(--app-card-alpha)) !important;
-    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-  }
+.app-bottom-nav {
+  border: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  padding-bottom: 0 !important;
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+}
 
-  /* Existing card utilities: stronger surfaces for dialogs, popovers, selectors */
-  :where(
-    [class~='bg-card/90'],
-    [class~='bg-card/95'],
-    [class~='bg-popover'],
-    [class~='bg-popover/90'],
-    [class~='bg-popover/95']
-  ) {
-    background-color: hsl(var(--card) / var(--app-card-alpha-strong)) !important;
-    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-  }
+.app-fixed-surface {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
 
-  /* Existing inner-block utilities: softer transparent rows/cards */
-  :where(
-    [class~='bg-background/25'],
-    [class~='bg-background/30'],
-    [class~='bg-background/35'],
-    [class~='bg-background/40'],
-    [class~='bg-background/45'],
-    [class~='bg-background/50'],
-    [class~='bg-background/55'],
-    [class~='bg-background/70'],
-    [class~='bg-muted/20'],
-    [class~='bg-muted/30'],
-    [class~='bg-muted/40'],
-    [class~='bg-muted/50'],
-    [class~='bg-muted/70']
-  ) {
-    background-color: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
-    backdrop-filter: blur(calc(var(--app-card-blur) * 0.75)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(calc(var(--app-card-blur) * 0.75)) saturate(var(--app-card-saturate));
-  }
-
-  /* Existing shared custom surface helpers now follow the same single source of truth. */
-  .surface,
-  .surface-card,
-  .card-soft,
-  .settings-section {
-    background: hsl(var(--card) / var(--app-card-alpha)) !important;
-    border-color: hsl(var(--border) / var(--app-card-border-alpha)) !important;
-    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
-    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
+@supports (height: 100dvh) {
+  .app-page-surface {
+    min-height: 100dvh;
   }
 }
