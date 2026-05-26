@@ -83,9 +83,9 @@ const toneClasses = {
     dot: 'bg-rose-500',
   },
   slate: {
-    tile: 'app-card-surface-soft0/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
-    selected: 'border-slate-500/30 app-card-surface-soft0/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
-    dot: 'app-card-surface-soft0',
+    tile: 'slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
+    selected: 'border-slate-500/30 slate-500/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
+    dot: 'bg-slate-500',
   },
 };
 
@@ -99,42 +99,37 @@ const themeStyleOptions = [
   {
     value: 'cyber',
     label: 'Cyber Indigo',
-    description: 'Modern SaaS blue and purple personality.',
-    tone: 'purple',
-    swatch: '#2563EB',
-    swatchEnd: '#7C3AED',
+    description: 'Modern blue and indigo workspace.',
+    tone: 'blue',
+    color: '#4F46E5',
   },
   {
     value: 'aurora',
     label: 'Aurora Teal',
-    description: 'Fintech teal and sky workspace.',
+    description: 'Clean teal and sky finance workspace.',
     tone: 'cyan',
-    swatch: '#0F766E',
-    swatchEnd: '#0284C7',
+    color: '#0891B2',
   },
   {
     value: 'sunset',
     label: 'Sunset Rose',
-    description: 'Warm rose and orange personality.',
+    description: 'Warm rose and orange workspace.',
     tone: 'rose',
-    swatch: '#E11D48',
-    swatchEnd: '#EA580C',
+    color: '#E11D48',
   },
   {
     value: 'emerald',
     label: 'Emerald Forest',
-    description: 'Stable green and teal personality.',
+    description: 'Calm green and teal workspace.',
     tone: 'emerald',
-    swatch: '#15803D',
-    swatchEnd: '#0D9488',
+    color: '#059669',
   },
   {
     value: 'obsidian',
     label: 'Midnight Obsidian',
-    description: 'Minimal slate and luxury neutral style.',
+    description: 'Neutral slate workspace.',
     tone: 'slate',
-    swatch: '#64748B',
-    swatchEnd: '#0F172A',
+    color: '#64748B',
   },
 ];
 
@@ -276,29 +271,23 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
       type="button"
       onClick={() => onSelect(option.value)}
       aria-label={`Apply ${option.label} theme style`}
-      title={`${option.label} — ${option.description}`}
+      title={option.label}
+      style={{ backgroundColor: option.color }}
       className={cn(
         'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
           ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
-          : 'border-white/60 ring-1 ring-border/50 dark:border-white/10'
+          : 'border-white/70 ring-1 ring-border/45 dark:border-white/15'
       )}
-      style={{ backgroundColor: option.swatch }}
     >
-      <span
-        className="absolute bottom-1 right-1 h-3 w-3 rounded-full border border-white/60 shadow-sm dark:border-white/20"
-        style={{ backgroundColor: option.swatchEnd }}
-      />
-
       {active && (
-        <span className="relative flex h-4 w-4 items-center justify-center rounded-full app-card-surface-strong text-foreground shadow-sm">
+        <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-sm dark:bg-slate-950/90 dark:text-white">
           <Check className="h-3 w-3" />
         </span>
       )}
     </button>
   );
 }
-
 
 export default function Settings() {
   const scope = usePageEntrance();
@@ -485,7 +474,7 @@ export default function Settings() {
       });
 
       setTheme('system');
-      setThemeStyle('aurora');
+      setThemeStyle('cero');
       setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
@@ -681,7 +670,7 @@ export default function Settings() {
             icon={LayoutGrid}
             tone="cyan"
             label="Compact Mode"
-            description="Tightens spacing across pages, cards, rows, forms, and dialogs globally."
+            description="Tightens spacing across the whole app for denser layouts."
           >
             <Switch checked={compactMode} onCheckedChange={setCompactMode} />
           </SettingRow>

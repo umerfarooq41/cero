@@ -12,7 +12,7 @@ const APP_SYSTEM_BAR_COLOR = '#0a0a1a';
 const VALID_THEMES = ['system', 'light', 'dark'];
 const VALID_THEME_STYLES = ['cyber', 'aurora', 'sunset', 'emerald', 'obsidian'];
 
-const THEME_STYLE_ALIASES = {
+const LEGACY_THEME_STYLE_MAP = {
   cero: 'aurora',
   ocean: 'aurora',
   forest: 'emerald',
@@ -21,9 +21,8 @@ const THEME_STYLE_ALIASES = {
 
 function normalizeThemeStyle(style) {
   if (VALID_THEME_STYLES.includes(style)) return style;
-  return THEME_STYLE_ALIASES[style] || 'aurora';
+  return LEGACY_THEME_STYLE_MAP[style] || 'aurora';
 }
-
 
 function syncSystemBarColor() {
   if (typeof window === 'undefined') return;
@@ -32,11 +31,6 @@ function syncSystemBarColor() {
     themeColor.setAttribute('content', APP_SYSTEM_BAR_COLOR);
   });
 }
-
-function applyThemeVariables() {
-  syncSystemBarColor();
-}
-
 
 function getStoredTheme() {
   if (typeof window === 'undefined') return 'system';
@@ -48,8 +42,7 @@ function getStoredTheme() {
 function getStoredThemeStyle() {
   if (typeof window === 'undefined') return 'aurora';
 
-  const savedThemeStyle = localStorage.getItem(THEME_STYLE_STORAGE_KEY);
-  return normalizeThemeStyle(savedThemeStyle);
+  return normalizeThemeStyle(localStorage.getItem(THEME_STYLE_STORAGE_KEY));
 }
 
 function getStoredBoolean(key, fallback = false) {
@@ -75,21 +68,14 @@ function applyTheme(mode) {
   const root = document.documentElement;
   const resolvedTheme = mode === 'system' ? getSystemTheme() : mode;
 
-  if (resolvedTheme === 'dark') {
-    root.classList.add('dark');
-  } else {
-    root.classList.remove('dark');
-  }
+  root.classList.toggle('dark', resolvedTheme === 'dark');
 
   const favicon = document.getElementById('favicon');
-
   if (favicon) {
-    favicon.href =
-      resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
+    favicon.href = resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
   }
 
   syncSystemBarColor();
-
   return resolvedTheme;
 }
 
@@ -100,6 +86,10 @@ function applyThemeStyle(style) {
   const safeStyle = normalizeThemeStyle(style);
 
   VALID_THEME_STYLES.forEach((item) => {
+    root.classList.remove(`theme-style-${item}`);
+  });
+
+  Object.keys(LEGACY_THEME_STYLE_MAP).forEach((item) => {
     root.classList.remove(`theme-style-${item}`);
   });
 
@@ -132,15 +122,18 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const resolved = applyTheme(theme);
     setResolvedTheme(resolved);
-    applyThemeVariables(themeStyle, resolved);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme, themeStyle]);
+  }, [theme]);
 
   useEffect(() => {
-    applyThemeStyle(themeStyle);
-    applyThemeVariables(themeStyle, resolvedTheme);
-    localStorage.setItem(THEME_STYLE_STORAGE_KEY, themeStyle);
-  }, [themeStyle, resolvedTheme]);
+    const safeStyle = normalizeThemeStyle(themeStyle);
+    applyThemeStyle(safeStyle);
+    if (safeStyle !== themeStyle) {
+      setThemeStyleState(safeStyle);
+      return;
+    }
+    localStorage.setItem(THEME_STYLE_STORAGE_KEY, safeStyle);
+  }, [themeStyle]);
 
   useEffect(() => {
     applyBooleanClass('compact-mode', compactMode);
@@ -166,8 +159,7 @@ export function ThemeProvider({ children }) {
 
     const handleSystemThemeChange = () => {
       if (theme === 'system') {
-        const resolved = applyTheme('system');
-        setResolvedTheme(resolved);
+        setResolvedTheme(applyTheme('system'));
       }
     };
 
@@ -207,8 +199,8 @@ export function ThemeProvider({ children }) {
   };
 
   const setThemeStyle = (newThemeStyle) => {
-    const safeThemeStyle = normalizeThemeStyle(newThemeStyle);
-    setThemeStyleState(safeThemeStyle);
+    const safeStyle = normalizeThemeStyle(newThemeStyle);
+    setThemeStyleState(safeStyle);
   };
 
   const value = useMemo(
@@ -236,9 +228,7 @@ export function ThemeProvider({ children }) {
     ]
   );
 
-  return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
