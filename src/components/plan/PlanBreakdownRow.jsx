@@ -1,13 +1,7 @@
-import { Badge } from '@/components/ui/badge';
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
+import SourceBadge from '@/components/shared/SourceBadge';
 import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
-
-const SOURCE_BADGE_CLASS = {
-  recurring:
-    'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  goal: 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400',
-};
 
 function getProgressColor(item, rawPercent) {
   if (item.remaining < 0 || rawPercent > 100) return '#DC2626';
@@ -28,6 +22,19 @@ function getTrackedVerb(item) {
   if (type === 'debt') return 'paid';
 
   return 'spent';
+}
+
+function getSourceBadgeTone(item) {
+  if (item.sourceType === 'goal') return 'savings';
+
+  return (
+    item.budgetType ||
+    item.budget_type ||
+    item.type ||
+    item.category?.type ||
+    item.category?.budget_type ||
+    'transfer'
+  );
 }
 
 export default function PlanBreakdownRow({ item, currency }) {
@@ -60,17 +67,10 @@ export default function PlanBreakdownRow({ item, currency }) {
                   {item.name}
                 </p>
 
-                {item.sourceType && (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      'h-5 shrink-0 rounded-full px-2 text-[10px] font-semibold leading-none',
-                      SOURCE_BADGE_CLASS[item.sourceType]
-                    )}
-                  >
-                    {item.sourceType === 'goal' ? 'Goal' : 'Recurring'}
-                  </Badge>
-                )}
+                <SourceBadge
+                  type={item.sourceType}
+                  tone={getSourceBadgeTone(item)}
+                />
               </div>
             </div>
 

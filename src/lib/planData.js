@@ -201,6 +201,7 @@ export function buildPlanViewData({
           tab.color,
         icon: allocation.icon || (sourceType === 'goal' ? 'target' : 'receipt'),
         sourceType,
+        budgetType: activeTab,
       };
     })
     .filter((item) => item.planned > 0 || item.tracked > 0);

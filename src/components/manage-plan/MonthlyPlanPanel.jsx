@@ -5,9 +5,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import CategoryIcon from '@/components/shared/CategoryIcon';
+import SourceBadge from '@/components/shared/SourceBadge';
 import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { budgetPlansApi } from '@/lib/budgetData';
@@ -50,12 +50,6 @@ const sectionConfig = {
     badge:
       'bg-purple-500/10 text-purple-700 ring-purple-500/15 dark:text-purple-400',
   },
-};
-
-const SOURCE_BADGE_CLASS = {
-  recurring:
-    'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  goal: 'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400',
 };
 
 function normalizeType(value) {
@@ -223,17 +217,10 @@ function PlanAmountRow({
             {row.name}
           </span>
 
-          {row.sourceType && (
-            <Badge
-              variant="outline"
-              className={cn(
-                'h-5 rounded-full px-2 text-[10px] font-semibold leading-none',
-                SOURCE_BADGE_CLASS[row.sourceType]
-              )}
-            >
-              {row.sourceType === 'goal' ? 'Goal' : 'Recurring'}
-            </Badge>
-          )}
+          <SourceBadge
+            type={row.sourceType}
+            tone={row.sourceType === 'goal' ? 'savings' : row.type}
+          />
         </div>
 
         {(row.description || lastMonthHint > 0) && (
