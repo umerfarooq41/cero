@@ -62,7 +62,7 @@ export default function BottomNav() {
         className="
           relative mx-auto mb-2 mt-2
           grid h-[4.35rem] max-w-3xl grid-cols-5
-          overflow-hidden rounded-[1.75rem]
+          overflow-hidden
           app-bottom-nav
           px-1.5 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1.5
         "
