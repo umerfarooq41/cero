@@ -25,6 +25,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#EEF4FF',
       surface: 'hsl(221 100% 96%)',
+      background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
       card: '225 100% 99%',
       popover: '225 100% 99%',
       border: '226 62% 86%',
@@ -36,6 +37,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#0B1026',
       surface: 'hsl(230 56% 8%)',
+      background: 'linear-gradient(135deg, #1E40AF 0%, #6D28D9 100%)',
       card: '230 44% 12%',
       popover: '230 44% 12%',
       border: '233 28% 24%',
@@ -49,6 +51,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#E8FBFC',
       surface: 'hsl(186 78% 96%)',
+      background: 'linear-gradient(135deg, #0F766E 0%, #0284C7 100%)',
       card: '186 90% 99%',
       popover: '186 90% 99%',
       border: '185 45% 82%',
@@ -60,6 +63,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#041A1D',
       surface: 'hsl(190 58% 8%)',
+      background: 'linear-gradient(135deg, #115E59 0%, #0369A1 100%)',
       card: '188 46% 11%',
       popover: '188 46% 11%',
       border: '185 26% 23%',
@@ -73,6 +77,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#FFF1F0',
       surface: 'hsl(14 100% 96%)',
+      background: 'linear-gradient(135deg, #E11D48 0%, #EA580C 100%)',
       card: '12 100% 99%',
       popover: '12 100% 99%',
       border: '11 70% 84%',
@@ -84,6 +89,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#1E0B10',
       surface: 'hsl(348 50% 8%)',
+      background: 'linear-gradient(135deg, #9F1239 0%, #9A3412 100%)',
       card: '350 42% 12%',
       popover: '350 42% 12%',
       border: '356 28% 24%',
@@ -97,6 +103,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#ECFDF5',
       surface: 'hsl(152 72% 96%)',
+      background: 'linear-gradient(135deg, #15803D 0%, #0D9488 100%)',
       card: '152 78% 99%',
       popover: '152 78% 99%',
       border: '154 42% 82%',
@@ -108,6 +115,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#061A11',
       surface: 'hsl(154 50% 7%)',
+      background: 'linear-gradient(135deg, #166534 0%, #115E59 100%)',
       card: '154 42% 11%',
       popover: '154 42% 11%',
       border: '154 25% 22%',
@@ -121,6 +129,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '0 0% 100%',
       themeColor: '#F1F5F9',
       surface: 'hsl(210 40% 96%)',
+      background: 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)',
       card: '210 40% 99%',
       popover: '210 40% 99%',
       border: '214 32% 84%',
@@ -132,6 +141,7 @@ const THEME_STYLE_TOKENS = {
       primaryForeground: '222 47% 8%',
       themeColor: '#020617',
       surface: 'hsl(222 47% 5%)',
+      background: 'linear-gradient(135deg, #0F172A 0%, #020617 100%)',
       card: '222 38% 9%',
       popover: '222 38% 9%',
       border: '217 30% 17%',
@@ -162,7 +172,7 @@ function applyThemeVariables(style, resolvedTheme) {
   const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
   const tokens = THEME_STYLE_TOKENS[safeStyle][mode];
 
-  root.style.setProperty('--app-page-gradient', tokens.surface);
+  root.style.setProperty('--app-page-gradient', tokens.background);
   root.style.setProperty('--background', tokens.surface.replace(/^hsl\((.*)\)$/, '$1'));
   root.style.setProperty('--card', tokens.card);
   root.style.setProperty('--popover', tokens.popover);

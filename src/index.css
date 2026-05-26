@@ -1238,12 +1238,12 @@ main,
 }
 
 /* =========================================================
-   STANDALONE SOLID THEMES — NO GRADIENTS
-   Final override for Cyber, Aurora, Sunset, Emerald, Obsidian.
+   STANDALONE DUAL-TONE BACKGROUND THEMES
+   Gradients only on the app background; cards/forms remain solid glass.
    ========================================================= */
 @layer base {
   html {
-    --app-page-gradient: hsl(186 78% 96%);
+    --app-page-gradient: linear-gradient(135deg, #0F766E 0%, #0284C7 100%);
     --app-surface-main-alpha: 0.52;
     --app-surface-strong-alpha: 0.70;
     --app-surface-soft-alpha: 0.34;
@@ -1298,7 +1298,7 @@ main,
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 221 83% 53%;
-    --app-page-gradient: hsl(221 100% 96%);
+    --app-page-gradient: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
   }
 
   html.theme-style-cyber.dark {
@@ -1319,7 +1319,7 @@ main,
     --sidebar-primary: 263 75% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 263 75% 62%;
-    --app-page-gradient: hsl(230 56% 8%);
+    --app-page-gradient: linear-gradient(135deg, #1E40AF 0%, #6D28D9 100%);
   }
 
   html.theme-style-aurora {
@@ -1340,7 +1340,7 @@ main,
     --sidebar-primary: 187 96% 34%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 187 96% 34%;
-    --app-page-gradient: hsl(186 78% 96%);
+    --app-page-gradient: linear-gradient(135deg, #0F766E 0%, #0284C7 100%);
   }
 
   html.theme-style-aurora.dark {
@@ -1361,7 +1361,7 @@ main,
     --sidebar-primary: 184 78% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 184 78% 44%;
-    --app-page-gradient: hsl(190 58% 8%);
+    --app-page-gradient: linear-gradient(135deg, #115E59 0%, #0369A1 100%);
   }
 
   html.theme-style-sunset {
@@ -1382,7 +1382,7 @@ main,
     --sidebar-primary: 347 77% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 347 77% 50%;
-    --app-page-gradient: hsl(14 100% 96%);
+    --app-page-gradient: linear-gradient(135deg, #E11D48 0%, #EA580C 100%);
   }
 
   html.theme-style-sunset.dark {
@@ -1403,7 +1403,7 @@ main,
     --sidebar-primary: 12 74% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 12 74% 53%;
-    --app-page-gradient: hsl(348 50% 8%);
+    --app-page-gradient: linear-gradient(135deg, #9F1239 0%, #9A3412 100%);
   }
 
   html.theme-style-emerald {
@@ -1424,7 +1424,7 @@ main,
     --sidebar-primary: 158 84% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 158 84% 32%;
-    --app-page-gradient: hsl(152 72% 96%);
+    --app-page-gradient: linear-gradient(135deg, #15803D 0%, #0D9488 100%);
   }
 
   html.theme-style-emerald.dark {
@@ -1445,7 +1445,7 @@ main,
     --sidebar-primary: 162 72% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 162 72% 42%;
-    --app-page-gradient: hsl(154 50% 7%);
+    --app-page-gradient: linear-gradient(135deg, #166534 0%, #115E59 100%);
   }
 
   html.theme-style-obsidian {
@@ -1466,7 +1466,7 @@ main,
     --sidebar-primary: 215 20% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 215 20% 44%;
-    --app-page-gradient: hsl(210 40% 96%);
+    --app-page-gradient: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
   }
 
   html.theme-style-obsidian.dark {
@@ -1487,15 +1487,14 @@ main,
     --sidebar-primary: 215 25% 72%;
     --sidebar-primary-foreground: 222 47% 8%;
     --sidebar-ring: 215 25% 72%;
-    --app-page-gradient: hsl(222 47% 5%);
+    --app-page-gradient: linear-gradient(135deg, #0F172A 0%, #020617 100%);
   }
 
   html,
   body,
   #root {
     background: var(--app-page-gradient) !important;
-    background-color: var(--app-page-gradient) !important;
-    background-image: none !important;
+    background-attachment: fixed !important;
   }
 }
 
@@ -1506,8 +1505,6 @@ main,
   .app-main-scroll,
   .app-bottom-nav {
     background: var(--app-page-gradient) !important;
-    background-color: var(--app-page-gradient) !important;
-    background-image: none !important;
     background-attachment: fixed !important;
   }
 
