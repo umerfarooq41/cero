@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 
 import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard.jsx';
+import AppTabs from '@/components/shared/AppTabs.jsx';
 
 const MONTHS = [
   { value: '01', label: 'January', shortLabel: 'Jan' },
@@ -100,31 +101,16 @@ export default function ReflectPeriodSelector({
       }
       contentClassName="space-y-3"
     >
-      <div className="grid grid-cols-2 rounded-2xl app-card-surface p-1 backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={() => changeMode('month')}
-          className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-            periodMode === 'month'
-              ? 'app-card-surface-strong text-foreground shadow-sm'
-              : 'text-muted-foreground'
-          }`}
-        >
-          Month
-        </button>
-
-        <button
-          type="button"
-          onClick={() => changeMode('year')}
-          className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-            periodMode === 'year'
-              ? 'app-card-surface-strong text-foreground shadow-sm'
-              : 'text-muted-foreground'
-          }`}
-        >
-          Year
-        </button>
-      </div>
+      <AppTabs
+        tabs={[
+          { value: 'month', label: 'Month', tone: 'blue' },
+          { value: 'year', label: 'Year', tone: 'blue' },
+        ]}
+        value={periodMode}
+        onChange={changeMode}
+        size="md"
+        layoutId="reflect-period-mode-highlight"
+      />
 
       <div
         className={
