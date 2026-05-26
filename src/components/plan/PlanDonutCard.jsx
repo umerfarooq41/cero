@@ -8,22 +8,10 @@ import {
 import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
 
-function LegendItem({ item }) {
-  return (
-    <div className="flex min-w-0 items-center justify-center gap-1.5 text-[10px] font-semibold leading-4 text-muted-foreground sm:text-[11px]">
-      <span
-        className="h-2 w-2 shrink-0 rounded-full"
-        style={{ backgroundColor: item.color }}
-        aria-hidden="true"
-      />
+function getLegendPercent(item, totalTracked) {
+  if (!totalTracked) return 0;
 
-      <span className="min-w-0 truncate">{item.name}</span>
-
-      <span className="shrink-0 tabular-nums text-foreground/75">
-        {Math.round(item.share || 0)}%
-      </span>
-    </div>
-  );
+  return Math.round((Number(item.tracked || 0) / totalTracked) * 100);
 }
 
 export default function PlanDonutCard({
@@ -36,8 +24,12 @@ export default function PlanDonutCard({
   progress,
   currency,
 }) {
-  const hasTrackedData = chartData.some((item) => Number(item.tracked || 0) > 0);
-  const legendItems = hasTrackedData ? donutChartData : [];
+  const trackedLegendItems = donutChartData.filter(
+    (item) => !item.isRemainder && !item.isEmpty && Number(item.tracked || 0) > 0
+  );
+
+  const hasTrackedData = trackedLegendItems.length > 0;
+  const displayProgress = Math.round(progress);
 
   return (
     <div className="rounded-3xl app-card-surface p-4">
@@ -48,7 +40,9 @@ export default function PlanDonutCard({
           <h2
             className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
             style={{
-              color: tab.color || donutChartData?.[0]?.color || 'hsl(var(--foreground))',
+              color:
+                tab.color || donutChartData?.find((item) => !item.isRemainder)?.color ||
+                'hsl(var(--foreground))',
             }}
           >
             <PlanMoney amount={totalTracked} currency={currency} />
@@ -89,14 +83,14 @@ export default function PlanDonutCard({
               nameKey="name"
               innerRadius={66}
               outerRadius={92}
-              paddingAngle={hasTrackedData && donutChartData.length > 1 ? 3 : 0}
+              paddingAngle={donutChartData.length > 1 ? 3 : 0}
               stroke="none"
               isAnimationActive
             >
               {donutChartData.map((entry, index) => (
                 <Cell
                   key={`${entry.name}-${index}`}
-                  fill={hasTrackedData ? entry.color : '#E5E7EB'}
+                  fill={entry.color}
                   stroke="none"
                   tabIndex={-1}
                   focusable="false"
@@ -113,22 +107,28 @@ export default function PlanDonutCard({
           </p>
 
           <p className="mt-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {Math.round(progress)}%
+            {displayProgress}%
           </p>
         </div>
       </div>
 
-      {legendItems.length > 0 ? (
-        <div
-          className="mt-2 grid w-full items-center gap-2"
-          style={{ gridTemplateColumns: `repeat(${legendItems.length}, minmax(0, 1fr))` }}
-        >
-          {legendItems.map((item) => (
-            <LegendItem key={item.id || item.name} item={item} />
+      {hasTrackedData ? (
+        <div className="mt-2 flex w-full items-center gap-3 overflow-x-auto whitespace-nowrap pb-0.5 text-[11px] font-semibold text-muted-foreground">
+          {trackedLegendItems.map((item) => (
+            <div key={item.id || item.name} className="inline-flex min-w-0 shrink-0 items-center gap-1.5">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="max-w-[5.5rem] truncate">{item.name}</span>
+              <span className="text-foreground/70 tabular-nums">
+                {getLegendPercent(item, totalTracked)}%
+              </span>
+            </div>
           ))}
         </div>
       ) : (
-        <p className="mt-2 text-center text-[11px] font-medium text-muted-foreground">
+        <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
           No tracked {tab.title.toLowerCase()} yet
         </p>
       )}

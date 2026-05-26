@@ -260,9 +260,15 @@ export function buildPlanViewData({
   );
   const totalRemaining = totalPlanned - totalTracked;
   const progress =
-    totalPlanned > 0 ? Math.min((totalTracked / totalPlanned) * 100, 100) : 0;
+    totalPlanned > 0 ? (totalTracked / totalPlanned) * 100 : totalTracked > 0 ? 100 : 0;
 
-  const donutChartData = buildDonutChartData({ activeTab, chartData, tab });
+  const donutChartData = buildDonutChartData({
+    activeTab,
+    chartData,
+    tab,
+    totalTracked,
+    totalPlanned,
+  });
 
   return {
     chartData,
@@ -276,74 +282,106 @@ export function buildPlanViewData({
   };
 }
 
-const DONUT_PALETTES = {
+const DONUT_COLOR_PALETTES = {
   income: ['#047857', '#059669', '#10B981', '#34D399', '#A7F3D0'],
-  expense: ['#C81E1E', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
+  expense: ['#B91C1C', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
   savings: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#BFDBFE'],
   debt: ['#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#DDD6FE'],
 };
 
+const DONUT_REMAINDER_COLOR = 'hsl(var(--muted))';
+
 function getDonutPalette(activeTab, tab) {
-  return DONUT_PALETTES[activeTab] || tab?.shades || ['#2563EB'];
+  return DONUT_COLOR_PALETTES[activeTab] || tab?.shades || [];
 }
 
-function buildNoTrackedDonutSlice() {
-  return [
-    {
-      name: 'No tracked data',
-      value: 1,
-      tracked: 0,
-      planned: 0,
-      remaining: 0,
-      share: 0,
-      color: '#E5E7EB',
-    },
-  ];
+function buildRemainderSlice({ activeTab, totalRemaining, totalPlanned }) {
+  const value = Math.max(Number(totalRemaining || 0), 0);
+
+  if (value <= 0) return null;
+
+  return {
+    id: `${activeTab}-remainder`,
+    name: 'Left',
+    planned: totalPlanned,
+    tracked: 0,
+    remaining: value,
+    value,
+    color: DONUT_REMAINDER_COLOR,
+    isRemainder: true,
+  };
 }
 
-export function buildDonutChartData({ activeTab, chartData = [], tab }) {
-  const trackedRows = chartData
-    .map((item) => ({
-      ...item,
-      tracked: Number(item.tracked || 0),
-      planned: Number(item.planned || 0),
-    }))
-    .filter((item) => item.tracked > 0)
-    .sort((a, b) => b.tracked - a.tracked);
-
-  if (trackedRows.length === 0) {
-    return buildNoTrackedDonutSlice();
-  }
-
+export function buildDonutChartData({
+  activeTab,
+  chartData = [],
+  tab,
+  totalTracked = 0,
+  totalPlanned = 0,
+}) {
+  const planned = Number(totalPlanned || 0);
+  const tracked = Number(totalTracked || 0);
   const palette = getDonutPalette(activeTab, tab);
-  const topFour = trackedRows.slice(0, 4);
-  const others = trackedRows.slice(4);
-  const totalTracked = trackedRows.reduce((sum, item) => sum + item.tracked, 0);
+  const totalRemaining = planned - tracked;
 
-  const visibleRows = topFour.map((item, index) => ({
+  const trackedRows = chartData
+    .filter((item) => Number(item.tracked || 0) > 0)
+    .sort((a, b) => Number(b.tracked || 0) - Number(a.tracked || 0));
+
+  const topFour = trackedRows.slice(0, 4).map((item, index) => ({
     ...item,
-    color: palette[index] || tab?.color || '#2563EB',
-    value: item.tracked,
-    share: totalTracked > 0 ? (item.tracked / totalTracked) * 100 : 0,
+    color: palette[index] || tab?.color || item.color,
+    value: Number(item.tracked || 0),
   }));
 
-  if (others.length === 0) return visibleRows;
+  const remainingTrackedRows = trackedRows.slice(4);
+  const othersTracked = remainingTrackedRows.reduce(
+    (sum, item) => sum + Number(item.tracked || 0),
+    0
+  );
+  const othersPlanned = remainingTrackedRows.reduce(
+    (sum, item) => sum + Number(item.planned || 0),
+    0
+  );
 
-  const othersTracked = others.reduce((sum, item) => sum + item.tracked, 0);
-  const othersPlanned = others.reduce((sum, item) => sum + item.planned, 0);
+  const trackedSlices = [...topFour];
 
-  return [
-    ...visibleRows,
-    {
+  if (othersTracked > 0) {
+    trackedSlices.push({
       id: `${activeTab}-others`,
       name: 'Others',
       planned: othersPlanned,
       tracked: othersTracked,
       remaining: othersPlanned - othersTracked,
-      color: palette[4] || tab?.color || '#94A3B8',
+      color: palette[4] || tab?.color,
       value: othersTracked,
-      share: totalTracked > 0 ? (othersTracked / totalTracked) * 100 : 0,
       isOthers: true,
+    });
+  }
+
+  const remainderSlice = buildRemainderSlice({
+    activeTab,
+    totalRemaining,
+    totalPlanned: planned,
+  });
+
+  if (trackedSlices.length > 0) {
+    return remainderSlice ? [...trackedSlices, remainderSlice] : trackedSlices;
+  }
+
+  if (remainderSlice) return [remainderSlice];
+
+  return [
+    {
+      id: `${activeTab}-empty`,
+      name: 'No tracked data',
+      value: 1,
+      tracked: 0,
+      planned: 0,
+      remaining: 0,
+      color: DONUT_REMAINDER_COLOR,
+      isEmpty: true,
+      isRemainder: true,
     },
   ];
 }
