@@ -846,26 +846,23 @@ main,
   }
 
 }
+
 /* =========================================================
-   EDGE-TO-EDGE PWA SAFE AREA OVERRIDE
-   Keep the browser/system-bar canvas dark, then paint the app
-   surface inside a fixed full-viewport shell.
+   EDGE-TO-EDGE PWA SYSTEM BAR FIX — V3
+   Keep system-bar canvas dark without changing the bottom nav geometry.
+   The app gradient remains on the React shell and navigation surfaces.
    ========================================================= */
 @layer base {
   html {
     --app-system-bar-bg: #0a0a1a;
     --app-safe-area-top: env(safe-area-inset-top, 0px);
     --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --app-bottom-nav-extra: 8px;
-    --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom) + var(--app-bottom-nav-extra));
 
     width: 100%;
     min-height: 100%;
-    overflow: hidden;
     background: var(--app-system-bar-bg) !important;
     background-color: var(--app-system-bar-bg) !important;
     color-scheme: dark light;
-    scroll-behavior: smooth;
   }
 
   body {
@@ -873,70 +870,25 @@ main,
     min-height: 100dvh;
     margin: 0;
     padding: 0;
-    overflow: hidden;
     background: var(--app-system-bar-bg) !important;
     background-color: var(--app-system-bar-bg) !important;
   }
 
   #root {
-    position: relative;
-    isolation: isolate;
     width: 100%;
     min-height: 100dvh;
-    overflow: hidden;
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
-  #root::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 }
 
 @layer utilities {
-  .app-shell {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100dvh;
-    min-height: 100dvh;
-    overflow: hidden;
-    padding: 0;
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
   .app-page-surface,
   .app-gradient-surface,
   .app-fixed-surface,
+  .app-main-scroll,
   .app-bottom-nav {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
-  }
-
-  .app-main-scroll {
-    padding-top: var(--app-safe-area-top) !important;
-    padding-bottom: var(--app-bottom-nav-height) !important;
-    background: transparent !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-  }
-
-  .app-bottom-nav {
-    height: var(--app-bottom-nav-height) !important;
-    padding-bottom: calc(var(--app-safe-area-bottom) + var(--app-bottom-nav-extra)) !important;
-  }
-
-  @media (min-width: 1024px) {
-    .app-main-scroll {
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-    }
   }
 }

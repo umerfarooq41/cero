@@ -5,12 +5,10 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <!-- Paint the browser/PWA system surfaces before React loads. -->
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json?v=20260526-edge-v3" />
   <meta name="theme-color" content="#0a0a1a" />
   <meta name="color-scheme" content="dark light" />
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json?v=20260526" />
 
   <!-- PWA / iOS -->
   <meta name="mobile-web-app-capable" content="yes" />
@@ -22,6 +20,7 @@
   <link id="favicon" rel="icon" type="image/png" href="/icon-dark.png" />
   <link rel="apple-touch-icon" href="/icon-dark.png" />
 
+
   <style>
     html,
     body,
@@ -32,24 +31,11 @@
       background: #0a0a1a;
     }
 
-    body {
+    body,
+    #root {
       min-height: 100dvh;
-      overflow: hidden;
     }
   </style>
-
-  <script>
-    (function lockSystemBars() {
-      var systemBarColor = '#0a0a1a';
-      var themeMetaTags = document.querySelectorAll('meta[name="theme-color"]');
-
-      themeMetaTags.forEach(function (tag) {
-        tag.setAttribute('content', systemBarColor);
-      });
-
-      document.documentElement.style.backgroundColor = systemBarColor;
-    })();
-  </script>
 
   <title>Cero</title>
 </head>

@@ -57,8 +57,7 @@ function BottomNavStyles() {
       {`
         html {
           --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-          --app-bottom-nav-extra: 8px;
-          --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom) + var(--app-bottom-nav-extra));
+          --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
         }
 
         .app-main-scroll {
@@ -73,7 +72,7 @@ function BottomNavStyles() {
 
         .app-bottom-nav {
           height: var(--app-bottom-nav-height);
-          padding-bottom: calc(var(--app-safe-area-bottom) + var(--app-bottom-nav-extra));
+          padding-bottom: var(--app-safe-area-bottom);
           border: 0 !important;
           border-top: 0 !important;
           border-bottom: 0 !important;
@@ -85,7 +84,6 @@ function BottomNavStyles() {
           box-shadow: none !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
-          transform: translateZ(0);
         }
 
         html.dark .app-bottom-nav {
