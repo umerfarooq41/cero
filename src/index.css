@@ -338,22 +338,16 @@ main,
       0 0 0 1px rgba(100, 140, 200, 0.14);
   }
 
-  /* Bottom nav theme colors are handled by the authoritative block below;
-     these older utility stubs are kept as fallback only. */
   .app-bottom-nav {
-    background: hsl(var(--card) / 0.82);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border-top: 1px solid hsl(var(--border) / 0.50);
-    box-shadow: 0 -4px 24px hsl(var(--background) / 0.60);
+    background: hsl(var(--background));
+    border: 0;
+    box-shadow: none;
   }
 
   .dark .app-bottom-nav {
-    background: hsl(var(--card) / 0.82);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border-top: 1px solid hsl(var(--border) / 0.50);
-    box-shadow: 0 -4px 24px hsl(var(--background) / 0.80);
+    background: hsl(var(--background));
+    border: 0;
+    box-shadow: none;
   }
 
   .btn-ripple {
@@ -873,29 +867,17 @@ main,
     height: var(--app-bottom-nav-height);
     padding-bottom: var(--app-safe-area-bottom);
     border: 0 !important;
-    border-top: 1px solid hsl(var(--border) / 0.45) !important;
     outline: 0 !important;
-    /* Solid base layer first so content NEVER bleeds through,
-       then primary-tinted radial glow on top for theme color */
-    background:
-      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.16), transparent 35%),
-      radial-gradient(circle at 88% 0%, hsl(var(--primary) / 0.10), transparent 35%),
-      hsl(var(--card) / 0.88) !important;
-    box-shadow:
-      0 -6px 28px hsl(var(--background) / 0.55) !important;
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    background: hsl(var(--background)) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   html.dark .app-bottom-nav {
-    border-top: 1px solid hsl(var(--border) / 0.55) !important;
-    background:
-      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.20), transparent 35%),
-      radial-gradient(circle at 88% 0%, hsl(var(--primary) / 0.12), transparent 35%),
-      hsl(var(--card) / 0.90) !important;
-    box-shadow:
-      0 -6px 28px hsl(var(--background) / 0.80) !important;
-    backdrop-filter: blur(28px) saturate(160%);
-    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    background: hsl(var(--background)) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
