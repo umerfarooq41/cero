@@ -67,18 +67,38 @@ function getGoalName(transaction, category) {
   );
 }
 
-function SourceBadge({ type, compact = false }) {
+const sourceBadgeToneClasses = {
+  income:
+    'border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+  expense:
+    'border-red-500/15 bg-red-500/10 text-red-700 dark:text-red-400',
+  savings:
+    'border-blue-500/15 bg-blue-500/10 text-blue-700 dark:text-blue-400',
+  debt: 'border-purple-500/15 bg-purple-500/10 text-purple-700 dark:text-purple-400',
+  transfer:
+    'border-sky-500/15 bg-sky-500/10 text-sky-700 dark:text-sky-400',
+};
+
+function normalizeBadgeTone(tone) {
+  if (tone === 'saving') return 'savings';
+  if (tone === 'liability') return 'debt';
+  if (tone === 'asset') return 'savings';
+  return tone || 'transfer';
+}
+
+function SourceBadge({ type, tone = 'transfer', compact = false }) {
   if (!type) return null;
 
   const isGoal = type === 'goal';
+  const normalizedTone = normalizeBadgeTone(tone);
+  const toneClass =
+    sourceBadgeToneClasses[normalizedTone] || sourceBadgeToneClasses.transfer;
 
   return (
     <span
       className={cn(
         'inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[9px] font-bold leading-none',
-        isGoal
-          ? 'border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-          : 'border-primary/15 bg-primary/10 text-primary'
+        toneClass
       )}
     >
       {compact ? (isGoal ? 'G' : 'R') : isGoal ? 'Goal' : 'Recurring'}
@@ -142,6 +162,20 @@ export default function TransactionRow({
     : `${transactionTypeLabel} - ${accountName}`;
 
   const sourceBadgeType = isGoalContribution ? 'goal' : isRecurring ? 'recurring' : null;
+  const sourceBadgeTone = (() => {
+    if (!sourceBadgeType) return null;
+
+    if (isTransfer) {
+      const transferKind = getTransferType(account, toAccount).toLowerCase();
+
+      if (transferKind === 'saving') return 'savings';
+      if (transferKind === 'debt') return 'debt';
+
+      return 'transfer';
+    }
+
+    return category?.budget_type || category?.type || transaction.type;
+  })();
   const amountValue = Math.abs(Number(transaction.amount || 0));
 
   return (
@@ -167,7 +201,11 @@ export default function TransactionRow({
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
           <div className="truncate text-xs font-semibold sm:text-sm sm:font-medium">{title}</div>
-          <SourceBadge type={sourceBadgeType} compact={compactSourceBadges} />
+          <SourceBadge
+            type={sourceBadgeType}
+            tone={sourceBadgeTone}
+            compact={compactSourceBadges}
+          />
         </div>
 
         {primarySubtitle && (
