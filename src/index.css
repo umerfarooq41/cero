@@ -173,8 +173,6 @@
   }
 }
 
-
-
 /* ============================= */
 /* 🖱️ GLOBAL SCROLL POLISH */
 /* ============================= */
@@ -252,8 +250,8 @@ main,
 
   .dark .glass {
     background: rgba(15, 23, 42, 0.62);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -265,11 +263,9 @@ main,
 
   .dark .surface {
     background:
-      linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(8, 13, 28, 0.96));
+      linear-gradient(180deg, rgba(17, 24, 39, 0.72), rgba(8, 13, 28, 0.78));
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
-
-
 
   .surface-card {
     background:
@@ -284,13 +280,10 @@ main,
   }
 
   .dark .surface-card {
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(30, 30, 30, 0.82),
-        rgba(18, 18, 18, 0.92)
-      );
-    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(18, 24, 38, 0.58);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .card-elevated {
@@ -303,10 +296,9 @@ main,
 
   .dark .card-elevated {
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.55),
-      0 12px 30px rgba(0, 0, 0, 0.38),
-      0 24px 60px rgba(0, 0, 0, 0.26);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+      0 8px 22px rgba(0, 0, 0, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .card-soft {
@@ -319,10 +311,12 @@ main,
   }
 
   .dark .card-soft {
-    background: hsl(var(--card) / 0.78);
+    background: hsl(var(--card) / 0.50);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.45),
-      0 10px 26px rgba(0, 0, 0, 0.32);
+      0 8px 20px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .hover-lift {
@@ -342,25 +336,25 @@ main,
 
   .dark .hover-lift:hover {
     box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.4),
-      0 16px 40px rgba(0, 0, 0, 0.45),
-      0 0 0 1px rgba(255, 255, 255, 0.07);
+      0 8px 24px rgba(0, 0, 0, 0.10),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
   }
 
   .app-bottom-nav {
     background: rgba(255, 255, 255, 0.78);
     backdrop-filter: blur(22px) saturate(160%);
     -webkit-backdrop-filter: blur(22px) saturate(160%);
-    border-top: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.06);
+    border: 0;
+    box-shadow: none;
   }
 
   .dark .app-bottom-nav {
-    background: rgba(2, 6, 23, 0.78);
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+    background: rgba(2, 6, 23, 0.56);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    border: 0;
+    box-shadow: none;
   }
-
 
   .btn-ripple {
     position: relative;
@@ -423,7 +417,13 @@ main,
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
   }
+
+  .dark .app-fixed-surface {
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+  }
 }
+
 /* ============================= */
 /* 🎨 CERO THEME STYLES */
 /* ============================= */
@@ -519,7 +519,6 @@ main,
     padding-bottom: 0.7rem;
   }
 }
-
 
 /* ============================= */
 /* 🎨 THEME PRIMARY + FULL SURFACE OVERRIDES */
@@ -696,11 +695,12 @@ main,
     --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
     --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
 
-    --app-card-alpha: 0.58;
-    --app-card-alpha-strong: 0.72;
-    --app-card-alpha-soft: 0.34;
-    --app-card-border-alpha: 0.20;
-    --app-card-shadow-alpha: 0.075;
+    /* Light mode: glassy but not pure white */
+    --app-card-alpha: 0.54;
+    --app-card-alpha-strong: 0.68;
+    --app-card-alpha-soft: 0.30;
+    --app-card-border-alpha: 0.18;
+    --app-card-shadow-alpha: 0.055;
     --app-card-blur: 22px;
     --app-card-saturate: 165%;
     --app-card-shadow-color: 222 47% 9%;
@@ -709,11 +709,12 @@ main,
   }
 
   html.dark {
-    --app-card-alpha: 0.34;
-    --app-card-alpha-strong: 0.48;
-    --app-card-alpha-soft: 0.22;
-    --app-card-border-alpha: 0.11;
-    --app-card-shadow-alpha: 0.16;
+    /* Dark mode: transparent matte cards, not smoky glass */
+    --app-card-alpha: 0.54;
+    --app-card-alpha-strong: 0.62;
+    --app-card-alpha-soft: 0.34;
+    --app-card-border-alpha: 0.13;
+    --app-card-shadow-alpha: 0.08;
     --app-card-shadow-color: 0 0% 0%;
     --app-card-border-color: 0 0% 100%;
     --app-card-highlight-color: 0 0% 100%;
@@ -793,6 +794,35 @@ main,
     -webkit-backdrop-filter: blur(calc(var(--app-card-blur) - 4px)) saturate(var(--app-card-saturate));
   }
 
+  /* Dark mode: transparent cards without frosted/glassy effect */
+  html.dark .app-card-surface {
+    background: hsl(var(--card) / var(--app-card-alpha)) !important;
+    border: 1px solid hsl(var(--app-card-border-color) / var(--app-card-border-alpha)) !important;
+    box-shadow:
+      0 10px 26px hsl(var(--app-card-shadow-color) / var(--app-card-shadow-alpha)),
+      inset 0 1px 0 hsl(0 0% 100% / 0.04) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  html.dark .app-card-surface-strong {
+    background: hsl(var(--card) / var(--app-card-alpha-strong)) !important;
+    border: 1px solid hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) + 0.03)) !important;
+    box-shadow:
+      0 12px 30px hsl(var(--app-card-shadow-color) / calc(var(--app-card-shadow-alpha) + 0.03)),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  html.dark .app-card-surface-soft {
+    background: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
+    border: 1px solid hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) * 0.7)) !important;
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.035) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
   /* Keep older hardcoded card classes on the same glass surface system. */
   [class*='rounded-2xl'][class*='bg-card'],
   [class*='rounded-3xl'][class*='bg-card'],
@@ -806,11 +836,32 @@ main,
     -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
   }
 
+  html.dark [class*='rounded-2xl'][class*='bg-card'],
+  html.dark [class*='rounded-3xl'][class*='bg-card'],
+  html.dark [class*='rounded-xl'][class*='bg-card'] {
+    background-color: hsl(var(--card) / var(--app-card-alpha)) !important;
+    border-color: hsl(var(--app-card-border-color) / var(--app-card-border-alpha)) !important;
+    box-shadow:
+      0 8px 22px hsl(0 0% 0% / 0.08),
+      inset 0 1px 0 hsl(0 0% 100% / 0.04) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
   [class*='rounded-2xl'][class*='bg-background'],
   [class*='rounded-3xl'][class*='bg-background'],
   [class*='rounded-xl'][class*='bg-background'] {
     background-color: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
     border-color: hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) * 0.75)) !important;
+  }
+
+  html.dark [class*='rounded-2xl'][class*='bg-background'],
+  html.dark [class*='rounded-3xl'][class*='bg-background'],
+  html.dark [class*='rounded-xl'][class*='bg-background'] {
+    background-color: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
+    border-color: hsl(var(--app-card-border-color) / calc(var(--app-card-border-alpha) * 0.7)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .app-bottom-nav {
@@ -832,8 +883,10 @@ main,
     background:
       radial-gradient(circle at 9% 0%, hsl(var(--primary) / 0.18), transparent 30%),
       radial-gradient(circle at 92% 0%, hsl(var(--primary) / 0.10), transparent 34%),
-      linear-gradient(to bottom, hsl(var(--card) / 0.34), hsl(var(--card) / 0.54)) !important;
+      linear-gradient(to bottom, hsl(var(--card) / 0.40), hsl(var(--card) / 0.58)) !important;
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.06) !important;
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
   }
 }
