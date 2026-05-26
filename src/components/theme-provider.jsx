@@ -24,6 +24,168 @@ const LEGACY_THEME_STYLE_MAP = {
   obsidian: 'ai-minimal',
 };
 
+const THEME_STYLE_TOKENS = {
+  'warm-aurora': {
+    light: {
+      primary: '35 60% 43%',
+      primaryForeground: '0 0% 100%',
+      ring: '35 60% 43%',
+      chart1: '35 60% 43%',
+      background: '40 30% 98%',
+      foreground: '222 47% 10%',
+      card: '0 0% 100%',
+      popover: '0 0% 100%',
+      sidebarForeground: '222 24% 24%',
+      mutedForeground: '220 10% 40%',
+      gradient: 'radial-gradient(circle at 68% 28%, rgba(212, 163, 89, 0.24) 0%, rgba(212, 163, 89, 0) 54%), radial-gradient(circle at 26% 72%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 50%), linear-gradient(135deg, #fbfaf7 0%, #f4f2ee 100%)',
+      start: '#fbfaf7',
+      end: '#f4f2ee',
+    },
+    dark: {
+      primary: '38 72% 62%',
+      primaryForeground: '222 47% 7%',
+      ring: '38 72% 62%',
+      chart1: '38 72% 62%',
+      background: '225 10% 7%',
+      foreground: '210 40% 98%',
+      card: '225 12% 10%',
+      popover: '225 12% 10%',
+      sidebarForeground: '215 20% 78%',
+      mutedForeground: '215 16% 70%',
+      gradient: 'radial-gradient(circle at 68% 28%, rgba(212, 163, 89, 0.16) 0%, rgba(212, 163, 89, 0) 54%), radial-gradient(circle at 26% 72%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 50%), linear-gradient(135deg, #08090c 0%, #121316 100%)',
+      start: '#08090c',
+      end: '#121316',
+    },
+  },
+  'vibrant-fluid': {
+    light: {
+      primary: '184 73% 38%',
+      primaryForeground: '0 0% 100%',
+      ring: '184 73% 38%',
+      chart1: '184 73% 38%',
+      background: '20 70% 98%',
+      foreground: '222 47% 10%',
+      card: '0 0% 100%',
+      popover: '0 0% 100%',
+      sidebarForeground: '222 24% 24%',
+      mutedForeground: '220 10% 40%',
+      gradient: 'radial-gradient(at 90% 10%, hsla(14, 93%, 69%, 0.30) 0px, transparent 54%), radial-gradient(at 10% 80%, hsla(184, 83%, 63%, 0.30) 0px, transparent 54%), radial-gradient(at 90% 80%, hsla(27, 88%, 65%, 0.20) 0px, transparent 54%), radial-gradient(at 20% 20%, hsla(210, 85%, 70%, 0.22) 0px, transparent 54%), linear-gradient(135deg, #fff5f0 0%, #ecfbff 100%)',
+      start: '#fff5f0',
+      end: '#ecfbff',
+    },
+    dark: {
+      primary: '190 90% 56%',
+      primaryForeground: '222 47% 7%',
+      ring: '190 90% 56%',
+      chart1: '190 90% 56%',
+      background: '260 40% 7%',
+      foreground: '210 40% 98%',
+      card: '260 30% 10%',
+      popover: '260 30% 10%',
+      sidebarForeground: '215 20% 78%',
+      mutedForeground: '215 16% 70%',
+      gradient: 'radial-gradient(at 90% 10%, hsla(260, 85%, 26%, 0.34) 0px, transparent 54%), radial-gradient(at 10% 80%, hsla(320, 75%, 26%, 0.26) 0px, transparent 54%), radial-gradient(at 90% 80%, hsla(190, 90%, 18%, 0.24) 0px, transparent 54%), radial-gradient(at 20% 20%, hsla(280, 80%, 28%, 0.24) 0px, transparent 54%), linear-gradient(135deg, #050411 0%, #1a0f2e 100%)',
+      start: '#050411',
+      end: '#1a0f2e',
+    },
+  },
+  'ai-minimal': {
+    light: {
+      primary: '190 95% 38%',
+      primaryForeground: '0 0% 100%',
+      ring: '190 95% 38%',
+      chart1: '190 95% 38%',
+      background: '210 40% 99%',
+      foreground: '222 47% 10%',
+      card: '0 0% 100%',
+      popover: '0 0% 100%',
+      sidebarForeground: '222 24% 24%',
+      mutedForeground: '220 10% 40%',
+      gradient: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.13) 0%, rgba(0, 180, 216, 0) 58%), radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.08) 0%, rgba(114, 9, 183, 0) 50%), linear-gradient(135deg, #ffffff 0%, #f6fbff 100%)',
+      start: '#ffffff',
+      end: '#f6fbff',
+    },
+    dark: {
+      primary: '190 95% 58%',
+      primaryForeground: '222 47% 7%',
+      ring: '190 95% 58%',
+      chart1: '190 95% 58%',
+      background: '220 42% 5%',
+      foreground: '210 40% 98%',
+      card: '220 34% 8%',
+      popover: '220 34% 8%',
+      sidebarForeground: '215 20% 78%',
+      mutedForeground: '215 16% 70%',
+      gradient: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.22) 0%, rgba(0, 180, 216, 0) 58%), radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.18) 0%, rgba(114, 9, 183, 0) 50%), linear-gradient(135deg, #050812 0%, #090d16 100%)',
+      start: '#050812',
+      end: '#090d16',
+    },
+  },
+  'energy-action': {
+    light: {
+      primary: '14 88% 49%',
+      primaryForeground: '0 0% 100%',
+      ring: '14 88% 49%',
+      chart1: '14 88% 49%',
+      background: '18 55% 99%',
+      foreground: '222 47% 10%',
+      card: '0 0% 100%',
+      popover: '0 0% 100%',
+      sidebarForeground: '222 24% 24%',
+      mutedForeground: '220 10% 40%',
+      gradient: 'linear-gradient(135deg, #fff3ee 0%, #f3f4f6 65%, #ffffff 100%)',
+      start: '#fff3ee',
+      end: '#ffffff',
+    },
+    dark: {
+      primary: '14 82% 58%',
+      primaryForeground: '222 47% 7%',
+      ring: '14 82% 58%',
+      chart1: '14 82% 58%',
+      background: '20 18% 7%',
+      foreground: '210 40% 98%',
+      card: '20 18% 10%',
+      popover: '20 18% 10%',
+      sidebarForeground: '215 20% 78%',
+      mutedForeground: '215 16% 70%',
+      gradient: 'linear-gradient(135deg, #2a0d05 0%, #111113 64%, #09090b 100%)',
+      start: '#2a0d05',
+      end: '#09090b',
+    },
+  },
+};
+
+function setRootVar(root, name, value) {
+  root.style.setProperty(name, value);
+}
+
+function applyThemeStyleTokens(style, resolvedTheme) {
+  if (typeof window === 'undefined') return;
+
+  const root = document.documentElement;
+  const safeStyle = normalizeThemeStyle(style);
+  const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
+  const tokens = THEME_STYLE_TOKENS[safeStyle]?.[mode] || THEME_STYLE_TOKENS['warm-aurora'][mode];
+
+  setRootVar(root, '--primary', tokens.primary);
+  setRootVar(root, '--primary-foreground', tokens.primaryForeground);
+  setRootVar(root, '--ring', tokens.ring);
+  setRootVar(root, '--chart-1', tokens.chart1);
+  setRootVar(root, '--sidebar-primary', tokens.primary);
+  setRootVar(root, '--sidebar-ring', tokens.ring);
+  setRootVar(root, '--sidebar-foreground', tokens.sidebarForeground);
+  setRootVar(root, '--muted-foreground', tokens.mutedForeground);
+  setRootVar(root, '--background', tokens.background);
+  setRootVar(root, '--foreground', tokens.foreground);
+  setRootVar(root, '--card', tokens.card);
+  setRootVar(root, '--card-foreground', tokens.foreground);
+  setRootVar(root, '--popover', tokens.popover);
+  setRootVar(root, '--popover-foreground', tokens.foreground);
+  setRootVar(root, '--app-page-gradient', tokens.gradient);
+  setRootVar(root, '--app-canvas-start', tokens.start);
+  setRootVar(root, '--app-canvas-end', tokens.end);
+}
+
 function syncSystemBarColor() {
   if (typeof window === 'undefined') return;
 
@@ -86,7 +248,7 @@ function applyTheme(mode) {
   return resolvedTheme;
 }
 
-function applyThemeStyle(style) {
+function applyThemeStyle(style, resolvedTheme = getSystemTheme()) {
   if (typeof window === 'undefined') return;
 
   const root = document.documentElement;
@@ -98,6 +260,7 @@ function applyThemeStyle(style) {
 
   root.classList.add(`theme-style-${safeStyle}`);
   root.dataset.themeStyle = safeStyle;
+  applyThemeStyleTokens(safeStyle, resolvedTheme);
 }
 
 function applyBooleanClass(className, enabled) {
@@ -124,18 +287,19 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const resolved = applyTheme(theme);
+    applyThemeStyle(themeStyle, resolved);
     setResolvedTheme(resolved);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
+  }, [theme, themeStyle]);
 
   useEffect(() => {
     const safeStyle = normalizeThemeStyle(themeStyle);
-    applyThemeStyle(safeStyle);
+    applyThemeStyle(safeStyle, resolvedTheme);
     if (safeStyle !== themeStyle) {
       setThemeStyleState(safeStyle);
     }
     localStorage.setItem(THEME_STYLE_STORAGE_KEY, safeStyle);
-  }, [themeStyle]);
+  }, [themeStyle, resolvedTheme]);
 
   useEffect(() => {
     applyBooleanClass('compact-mode', compactMode);
@@ -161,13 +325,15 @@ export function ThemeProvider({ children }) {
 
     const handleSystemThemeChange = () => {
       if (theme === 'system') {
-        setResolvedTheme(applyTheme('system'));
+        const resolved = applyTheme('system');
+        applyThemeStyle(themeStyle, resolved);
+        setResolvedTheme(resolved);
       }
     };
 
     mediaQuery.addEventListener('change', handleSystemThemeChange);
     return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
-  }, [theme]);
+  }, [theme, themeStyle]);
 
   useEffect(() => {
     if (!hapticsEnabled || typeof window === 'undefined') return undefined;

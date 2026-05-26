@@ -467,7 +467,7 @@ export default function Settings() {
       });
 
       setTheme('system');
-      setThemeStyle('aurora');
+      setThemeStyle('warm-aurora');
       setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
