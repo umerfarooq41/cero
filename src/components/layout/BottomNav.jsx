@@ -57,10 +57,12 @@ function BottomNavStyles() {
       {`
         html {
           --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-          --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
+          --app-bottom-nav-extra: 8px;
+          --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom) + var(--app-bottom-nav-extra));
         }
 
         .app-main-scroll {
+          padding-top: 0;
           padding-bottom: var(--app-bottom-nav-height);
         }
 
@@ -72,7 +74,7 @@ function BottomNavStyles() {
 
         .app-bottom-nav {
           height: var(--app-bottom-nav-height);
-          padding-bottom: var(--app-safe-area-bottom);
+          padding-bottom: calc(var(--app-safe-area-bottom) + var(--app-bottom-nav-extra));
           border: 0 !important;
           border-top: 0 !important;
           border-bottom: 0 !important;

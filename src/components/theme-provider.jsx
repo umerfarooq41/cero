@@ -7,6 +7,7 @@ const THEME_STYLE_STORAGE_KEY = 'cero.themeStyle';
 const COMPACT_MODE_STORAGE_KEY = 'cero.compactMode';
 const SHOW_DECIMALS_STORAGE_KEY = 'cero.showDecimals';
 const HAPTICS_STORAGE_KEY = 'cero.hapticsEnabled';
+const APP_SYSTEM_BAR_COLOR = '#0a0a1a';
 
 const VALID_THEMES = ['system', 'light', 'dark'];
 const VALID_THEME_STYLES = ['cero', 'ocean', 'sunset', 'forest', 'minimal'];
@@ -112,7 +113,7 @@ function applyThemeVariables(style, resolvedTheme) {
   root.style.setProperty('--sidebar-ring', tokens.primary);
 
   const themeColor = document.querySelector('meta[name="theme-color"]');
-  if (themeColor) themeColor.setAttribute('content', tokens.themeColor);
+  if (themeColor) themeColor.setAttribute('content', APP_SYSTEM_BAR_COLOR);
 }
 
 function getStoredTheme() {
@@ -168,10 +169,7 @@ function applyTheme(mode) {
   const themeColor = document.querySelector('meta[name="theme-color"]');
 
   if (themeColor) {
-    themeColor.setAttribute(
-      'content',
-      resolvedTheme === 'dark' ? '#020617' : '#f8fafc'
-    );
+    themeColor.setAttribute('content', APP_SYSTEM_BAR_COLOR);
   }
 
   return resolvedTheme;

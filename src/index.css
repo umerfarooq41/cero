@@ -140,14 +140,23 @@
   }
 
   html {
-    min-height: 100%;
-    background: hsl(var(--background));
+    --app-status-bar-bg: #0a0a1a;
+    --app-safe-area-top: env(safe-area-inset-top, 0px);
+    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --app-shell-min-height: calc(100dvh - var(--app-safe-area-top) - var(--app-safe-area-bottom));
+
+    min-height: 100dvh;
+    background: #0a0a1a;
     scroll-behavior: smooth;
   }
 
   body {
     @apply text-foreground font-sans antialiased;
-    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding-top: var(--app-safe-area-top);
+    padding-bottom: var(--app-safe-area-bottom);
+    background-color: #0a0a1a;
 
     background:
       radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
@@ -651,15 +660,22 @@ main,
   }
 
   html,
-  body,
+  body {
+    min-height: 100dvh;
+    background-color: #0a0a1a;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
   #root {
-    min-height: 100%;
+    min-height: var(--app-shell-min-height);
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 
   body {
-    min-height: 100vh;
+    padding-top: var(--app-safe-area-top);
+    padding-bottom: var(--app-safe-area-bottom);
   }
 }
 
@@ -709,15 +725,22 @@ main,
   }
 
   html,
-  body,
+  body {
+    min-height: 100dvh;
+    background-color: #0a0a1a;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
   #root {
-    min-height: 100%;
+    min-height: var(--app-shell-min-height);
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 
   body {
-    min-height: 100dvh;
+    padding-top: var(--app-safe-area-top);
+    padding-bottom: var(--app-safe-area-bottom);
   }
 }
 
@@ -728,6 +751,10 @@ main,
   .app-main-scroll {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
+  }
+
+  .app-main-scroll {
+    padding-top: 0;
   }
 
   .app-fixed-surface,
