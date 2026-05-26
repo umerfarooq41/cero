@@ -25,18 +25,18 @@ export default function LeftToAllocateBanner({
       ? 'text-destructive'
       : 'text-primary';
 
-  const bgColor = isZero
-    ? 'bg-[hsl(var(--success)/0.08)] border-[hsl(var(--success)/0.2)]'
+  const stateBorder = isZero
+    ? 'border-[hsl(var(--success)/0.22)]'
     : isOver
-      ? 'bg-destructive/5 border-destructive/20'
-      : 'bg-primary/5 border-primary/20';
+      ? 'border-destructive/25'
+      : 'border-primary/25';
 
   return (
     <div
       className={cn(
         sticky ? 'sticky top-[72px] z-20' : 'relative z-auto',
         'rounded-3xl border border-border/60 bg-card/75 px-3 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300 sm:px-4',
-        isEditMode ? bgColor : 'border-border'
+        isEditMode ? stateBorder : 'border-border'
       )}
     >
       <div className="relative grid grid-cols-2 items-center">
