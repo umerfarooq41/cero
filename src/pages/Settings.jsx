@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
-  BadgeCheck,
   Brush,
   Calculator,
   Check,
-  ChevronRight,
   CircleDollarSign,
   Download,
   Fingerprint,
-  FolderOpen,
   Globe,
   LayoutGrid,
   LogOut,
@@ -17,7 +14,6 @@ import {
   Moon,
   Palette,
   ShieldCheck,
-  Sparkles,
   Sun,
   Trash2,
   User,
@@ -193,13 +189,6 @@ function SettingsSection({ title, description, children, tone = 'blue' }) {
             </p>
           )}
         </div>
-
-        <span
-          className={cn(
-            'mt-1 h-2 w-2 shrink-0 rounded-full',
-            toneClasses[tone]?.dot || toneClasses.blue.dot
-          )}
-        />
       </div>
 
       <div className="divide-y divide-border/50 px-4">{children}</div>
@@ -274,44 +263,30 @@ function SegmentedOption({ active, onClick, icon: Icon, label }) {
   );
 }
 
-function ThemeStyleCard({ option, active, onSelect }) {
+function ThemeStyleSwatch({ option, active, onSelect }) {
   const selectedClass = toneClasses[option.tone]?.selected || toneClasses.blue.selected;
 
   return (
     <button
       type="button"
       onClick={() => onSelect(option.value)}
+      aria-label={`Apply ${option.label} theme style`}
+      title={option.label}
       className={cn(
-        'group rounded-3xl border bg-background/35 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:bg-background/55 hover:shadow-md',
-        active ? selectedClass : 'border-border/60 text-foreground'
+        'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-gradient-to-br shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        option.preview,
+        active
+          ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
+          : 'border-white/60 ring-1 ring-border/50 dark:border-white/10'
       )}
     >
-      <div
-        className={cn(
-          'mb-3 h-16 rounded-2xl bg-gradient-to-br ring-1 ring-white/45 dark:ring-white/10',
-          option.preview
-        )}
-      />
+      <span className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/10 to-black/5 dark:from-white/10 dark:to-black/20" />
 
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-sm font-bold">{option.label}</div>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {option.description}
-          </p>
-        </div>
-
-        <span
-          className={cn(
-            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border',
-            active
-              ? 'border-current bg-current/10 text-current'
-              : 'border-border text-transparent'
-          )}
-        >
-          <Check className="h-3.5 w-3.5" />
+      {active && (
+        <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">
+          <Check className="h-3 w-3" />
         </span>
-      </div>
+      )}
     </button>
   );
 }
@@ -528,30 +503,6 @@ export default function Settings() {
       />
 
       <main className="mx-auto w-full max-w-4xl px-4 py-3 pb-24 lg:py-8">
-        <section className="animate-child mb-4 overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-xl">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                <Sparkles className="h-6 w-6" />
-              </div>
-
-              <div className="min-w-0">
-                <h2 className="truncate text-lg font-bold tracking-tight">
-                  Cero Control Center
-                </h2>
-                <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                  Appearance, currency, automation, reports, and safety controls.
-                </p>
-              </div>
-            </div>
-
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/45 px-3 py-2 text-xs font-semibold text-muted-foreground">
-              <BadgeCheck className="h-4 w-4 text-[hsl(var(--success))]" />
-              Settings synced
-            </div>
-          </div>
-        </section>
-
         <SettingsSection
           title="Account"
           description="Manage sign-in status and account access."
@@ -622,24 +573,20 @@ export default function Settings() {
             icon={Brush}
             tone="cyan"
             label="Theme Style"
-            description="Each style has a dedicated light and dark background."
+            description="Pick a background color style for both light and dark mode."
             stackOnMobile
           >
-            <span className="rounded-full bg-cyan-500/10 px-2.5 py-1 text-xs font-bold text-cyan-700 ring-1 ring-cyan-500/15 dark:text-cyan-300">
-              {themeStyleOptions.find((item) => item.value === themeStyle)?.label || 'Cero'}
-            </span>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {themeStyleOptions.map((option) => (
+                <ThemeStyleSwatch
+                  key={option.value}
+                  option={option}
+                  active={themeStyle === option.value}
+                  onSelect={handleThemeStyleChange}
+                />
+              ))}
+            </div>
           </SettingRow>
-
-          <div className="grid gap-3 py-3 sm:grid-cols-2 lg:grid-cols-3">
-            {themeStyleOptions.map((option) => (
-              <ThemeStyleCard
-                key={option.value}
-                option={option}
-                active={themeStyle === option.value}
-                onSelect={handleThemeStyleChange}
-              />
-            ))}
-          </div>
 
           <SettingRow
             icon={Globe}
@@ -737,22 +684,6 @@ export default function Settings() {
             description="Adds a light vibration on supported mobile devices when tapping buttons."
           >
             <Switch checked={hapticsEnabled} onCheckedChange={setHapticsEnabled} />
-          </SettingRow>
-        </SettingsSection>
-
-        <SettingsSection
-          title="Manage Plan"
-          description="Open the configuration area without using a separate broken categories route."
-          tone="emerald"
-        >
-          <SettingRow
-            icon={FolderOpen}
-            tone="emerald"
-            label="Categories, Recurring Rules, and Goals"
-            description="Manage setup items in Manage Plan."
-            onClick={() => navigate('/manage-plan?tab=category')}
-          >
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </SettingRow>
         </SettingsSection>
 
