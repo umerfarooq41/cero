@@ -10,187 +10,19 @@ const HAPTICS_STORAGE_KEY = 'cero.hapticsEnabled';
 const APP_SYSTEM_BAR_COLOR = '#0a0a1a';
 
 const VALID_THEMES = ['system', 'light', 'dark'];
-const VALID_THEME_STYLES = ['cyber', 'aurora', 'sunset', 'emerald', 'obsidian'];
+const VALID_THEME_STYLES = ['warm-aurora', 'vibrant-fluid', 'ai-minimal', 'energy-action'];
 
 const LEGACY_THEME_STYLE_MAP = {
-  cero: 'aurora',
-  ocean: 'aurora',
-  forest: 'emerald',
-  minimal: 'obsidian',
+  cero: 'ai-minimal',
+  ocean: 'ai-minimal',
+  cyber: 'ai-minimal',
+  aurora: 'warm-aurora',
+  sunset: 'energy-action',
+  forest: 'warm-aurora',
+  emerald: 'warm-aurora',
+  minimal: 'ai-minimal',
+  obsidian: 'ai-minimal',
 };
-
-
-const THEME_STYLE_TOKENS = {
-  cyber: {
-    light: {
-      primary: '239 84% 56%',
-      primaryForeground: '0 0% 100%',
-      ring: '239 84% 56%',
-      chart1: '239 84% 56%',
-      background: '224 70% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      gradient: 'linear-gradient(135deg, #eef4ff 0%, #f6efff 100%)',
-      start: '#eef4ff',
-      end: '#f6efff',
-    },
-    dark: {
-      primary: '239 84% 70%',
-      primaryForeground: '0 0% 100%',
-      ring: '239 84% 70%',
-      chart1: '239 84% 70%',
-      background: '234 48% 4%',
-      foreground: '210 40% 98%',
-      card: '236 36% 8%',
-      popover: '236 36% 8%',
-      gradient: 'linear-gradient(135deg, #020617 0%, #100b2f 100%)',
-      start: '#020617',
-      end: '#100b2f',
-    },
-  },
-  aurora: {
-    light: {
-      primary: '184 84% 31%',
-      primaryForeground: '0 0% 100%',
-      ring: '184 84% 31%',
-      chart1: '184 84% 31%',
-      background: '186 45% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      gradient: 'linear-gradient(135deg, #e9fbf7 0%, #ebf7ff 100%)',
-      start: '#e9fbf7',
-      end: '#ebf7ff',
-    },
-    dark: {
-      primary: '174 72% 58%',
-      primaryForeground: '222 47% 7%',
-      ring: '174 72% 58%',
-      chart1: '174 72% 58%',
-      background: '192 54% 4%',
-      foreground: '210 40% 98%',
-      card: '190 34% 8%',
-      popover: '190 34% 8%',
-      gradient: 'linear-gradient(135deg, #020617 0%, #042631 100%)',
-      start: '#020617',
-      end: '#042631',
-    },
-  },
-  sunset: {
-    light: {
-      primary: '349 89% 55%',
-      primaryForeground: '0 0% 100%',
-      ring: '349 89% 55%',
-      chart1: '349 89% 55%',
-      background: '18 80% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      gradient: 'linear-gradient(135deg, #fff0f3 0%, #fff3e6 100%)',
-      start: '#fff0f3',
-      end: '#fff3e6',
-    },
-    dark: {
-      primary: '349 89% 70%',
-      primaryForeground: '0 0% 100%',
-      ring: '349 89% 70%',
-      chart1: '349 89% 70%',
-      background: '350 52% 4%',
-      foreground: '210 40% 98%',
-      card: '350 34% 8%',
-      popover: '350 34% 8%',
-      gradient: 'linear-gradient(135deg, #08040a 0%, #2a0609 100%)',
-      start: '#08040a',
-      end: '#2a0609',
-    },
-  },
-  emerald: {
-    light: {
-      primary: '158 64% 34%',
-      primaryForeground: '0 0% 100%',
-      ring: '158 64% 34%',
-      chart1: '158 64% 34%',
-      background: '152 55% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      gradient: 'linear-gradient(135deg, #eafbf1 0%, #e7fff8 100%)',
-      start: '#eafbf1',
-      end: '#e7fff8',
-    },
-    dark: {
-      primary: '160 84% 50%',
-      primaryForeground: '145 45% 8%',
-      ring: '160 84% 50%',
-      chart1: '160 84% 50%',
-      background: '154 48% 4%',
-      foreground: '210 40% 98%',
-      card: '154 34% 8%',
-      popover: '154 34% 8%',
-      gradient: 'linear-gradient(135deg, #020617 0%, #04251a 100%)',
-      start: '#020617',
-      end: '#04251a',
-    },
-  },
-  obsidian: {
-    light: {
-      primary: '215 20% 45%',
-      primaryForeground: '0 0% 100%',
-      ring: '215 20% 45%',
-      chart1: '215 20% 45%',
-      background: '215 30% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      gradient: 'linear-gradient(135deg, #f8fafc 0%, #e7edf5 100%)',
-      start: '#f8fafc',
-      end: '#e7edf5',
-    },
-    dark: {
-      primary: '215 20% 74%',
-      primaryForeground: '222 47% 8%',
-      ring: '215 20% 74%',
-      chart1: '215 20% 74%',
-      background: '222 47% 4%',
-      foreground: '210 40% 98%',
-      card: '222 38% 8%',
-      popover: '222 38% 8%',
-      gradient: 'linear-gradient(135deg, #020617 0%, #080b12 100%)',
-      start: '#020617',
-      end: '#080b12',
-    },
-  },
-};
-
-function setRootVar(root, name, value) {
-  root.style.setProperty(name, value);
-}
-
-function applyThemeStyleTokens(style, resolvedTheme) {
-  if (typeof window === 'undefined') return;
-
-  const root = document.documentElement;
-  const safeStyle = normalizeThemeStyle(style);
-  const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
-  const tokens = THEME_STYLE_TOKENS[safeStyle]?.[mode] || THEME_STYLE_TOKENS.aurora[mode];
-
-  setRootVar(root, '--primary', tokens.primary);
-  setRootVar(root, '--primary-foreground', tokens.primaryForeground);
-  setRootVar(root, '--ring', tokens.ring);
-  setRootVar(root, '--chart-1', tokens.chart1);
-  setRootVar(root, '--sidebar-primary', tokens.primary);
-  setRootVar(root, '--sidebar-ring', tokens.ring);
-  setRootVar(root, '--background', tokens.background);
-  setRootVar(root, '--foreground', tokens.foreground);
-  setRootVar(root, '--card', tokens.card);
-  setRootVar(root, '--card-foreground', tokens.foreground);
-  setRootVar(root, '--popover', tokens.popover);
-  setRootVar(root, '--popover-foreground', tokens.foreground);
-  setRootVar(root, '--app-page-gradient', tokens.gradient);
-  setRootVar(root, '--app-canvas-start', tokens.start);
-  setRootVar(root, '--app-canvas-end', tokens.end);
-}
 
 function syncSystemBarColor() {
   if (typeof window === 'undefined') return;
@@ -209,11 +41,11 @@ function getStoredTheme() {
 
 function normalizeThemeStyle(style) {
   if (VALID_THEME_STYLES.includes(style)) return style;
-  return LEGACY_THEME_STYLE_MAP[style] || 'aurora';
+  return LEGACY_THEME_STYLE_MAP[style] || 'warm-aurora';
 }
 
 function getStoredThemeStyle() {
-  if (typeof window === 'undefined') return 'aurora';
+  if (typeof window === 'undefined') return 'warm-aurora';
 
   return normalizeThemeStyle(localStorage.getItem(THEME_STYLE_STORAGE_KEY));
 }
@@ -254,7 +86,7 @@ function applyTheme(mode) {
   return resolvedTheme;
 }
 
-function applyThemeStyle(style, resolvedTheme = getSystemTheme()) {
+function applyThemeStyle(style) {
   if (typeof window === 'undefined') return;
 
   const root = document.documentElement;
@@ -266,7 +98,6 @@ function applyThemeStyle(style, resolvedTheme = getSystemTheme()) {
 
   root.classList.add(`theme-style-${safeStyle}`);
   root.dataset.themeStyle = safeStyle;
-  applyThemeStyleTokens(safeStyle, resolvedTheme);
 }
 
 function applyBooleanClass(className, enabled) {
@@ -293,19 +124,18 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const resolved = applyTheme(theme);
-    applyThemeStyle(themeStyle, resolved);
     setResolvedTheme(resolved);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme, themeStyle]);
+  }, [theme]);
 
   useEffect(() => {
     const safeStyle = normalizeThemeStyle(themeStyle);
-    applyThemeStyle(safeStyle, resolvedTheme);
+    applyThemeStyle(safeStyle);
     if (safeStyle !== themeStyle) {
       setThemeStyleState(safeStyle);
     }
     localStorage.setItem(THEME_STYLE_STORAGE_KEY, safeStyle);
-  }, [themeStyle, resolvedTheme]);
+  }, [themeStyle]);
 
   useEffect(() => {
     applyBooleanClass('compact-mode', compactMode);
@@ -331,9 +161,7 @@ export function ThemeProvider({ children }) {
 
     const handleSystemThemeChange = () => {
       if (theme === 'system') {
-        const resolved = applyTheme('system');
-        applyThemeStyle(themeStyle, resolved);
-        setResolvedTheme(resolved);
+        setResolvedTheme(applyTheme('system'));
       }
     };
 

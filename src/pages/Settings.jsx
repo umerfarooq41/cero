@@ -97,39 +97,32 @@ const themeOptions = [
 
 const themeStyleOptions = [
   {
-    value: 'cyber',
-    label: 'Cyber Indigo',
-    description: 'Modern SaaS blue and purple theme.',
-    tone: 'blue',
-    swatch: '#4f46e5',
+    value: 'warm-aurora',
+    label: 'Warm Aurora',
+    description: 'Soft gold and steel atmosphere inspired by premium editorial UI.',
+    tone: 'amber',
+    swatch: '#d4a359',
   },
   {
-    value: 'aurora',
-    label: 'Aurora Teal',
-    description: 'Clean fintech teal and sky theme.',
+    value: 'vibrant-fluid',
+    label: 'Vibrant Fluid Hue',
+    description: 'Expressive mesh-style color with coral, cyan, orange, and blue.',
     tone: 'cyan',
-    swatch: '#0ea5a8',
+    swatch: '#22c7d5',
   },
   {
-    value: 'sunset',
-    label: 'Sunset Rose',
-    description: 'Warm rose and orange theme.',
+    value: 'ai-minimal',
+    label: 'Sleek Tech / AI Minimal',
+    description: 'Minimal white or midnight base with subtle cyan and purple glow.',
+    tone: 'blue',
+    swatch: '#00b4d8',
+  },
+  {
+    value: 'energy-action',
+    label: 'High-Energy Action',
+    description: 'Clean diagonal warmth with burnt-orange energy in dark mode.',
     tone: 'rose',
-    swatch: '#e11d48',
-  },
-  {
-    value: 'emerald',
-    label: 'Emerald Forest',
-    description: 'Stable green and teal theme.',
-    tone: 'emerald',
-    swatch: '#059669',
-  },
-  {
-    value: 'obsidian',
-    label: 'Midnight Obsidian',
-    description: 'Minimal slate and graphite theme.',
-    tone: 'slate',
-    swatch: '#64748b',
+    swatch: '#d84315',
   },
 ];
 
@@ -571,7 +564,7 @@ export default function Settings() {
             icon={Brush}
             tone="cyan"
             label="Theme Style"
-            description="Pick a standalone app theme. Backgrounds use dual-tone gradients; components stay solid glass."
+            description="Pick a standalone app theme. Backgrounds carry the mood; components stay solid glass."
             stackOnMobile
           >
             <div className="flex flex-wrap items-center justify-end gap-2">

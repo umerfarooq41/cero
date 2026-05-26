@@ -381,7 +381,20 @@ main,
 
 @layer utilities {
   .app-gradient-surface {
-    background: var(--app-page-gradient);
+    background:
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
+      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.18), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%);
+    background-attachment: fixed;
+  }
+
+  .dark .app-gradient-surface {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%),
+      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%),
+      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%),
+      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%);
     background-attachment: fixed;
   }
 
@@ -438,14 +451,17 @@ main,
 
     --chart-1: var(--primary);
 
-    /* Default = Aurora Teal */
-    --app-page-gradient: linear-gradient(135deg, #effdfa 0%, #eef8ff 100%);
-    --app-canvas-start: #effdfa;
-    --app-canvas-end: #eef8ff;
+    /* Default = Warm Aurora */
+    --app-page-gradient:
+      radial-gradient(circle at 68% 22%, rgba(212, 163, 89, 0.24) 0%, rgba(212, 163, 89, 0) 48%),
+      radial-gradient(circle at 18% 82%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 52%),
+      linear-gradient(135deg, #fbfaf7 0%, #f5f3ee 100%);
+    --app-canvas-start: #fbfaf7;
+    --app-canvas-end: #f5f3ee;
 
-    --app-surface-main-alpha: 0.72;
-    --app-surface-strong-alpha: 0.86;
-    --app-surface-soft-alpha: 0.54;
+    --app-surface-main-alpha: 0.70;
+    --app-surface-strong-alpha: 0.84;
+    --app-surface-soft-alpha: 0.52;
     --app-surface-floating-alpha: 0.97;
     --app-control-alpha: 0.68;
 
@@ -466,8 +482,7 @@ main,
   }
 
   html.dark {
-    color-scheme: dark;
-    --background: 222 47% 4%;
+    --background: 222 47% 5%;
     --foreground: 210 40% 98%;
     --card: 222 38% 9%;
     --card-foreground: 210 40% 98%;
@@ -486,9 +501,12 @@ main,
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 30% 18%;
 
-    --app-page-gradient: linear-gradient(135deg, #020617 0%, #06242f 100%);
-    --app-canvas-start: #020617;
-    --app-canvas-end: #06242f;
+    --app-page-gradient:
+      radial-gradient(circle at 70% 18%, rgba(212, 163, 89, 0.16) 0%, rgba(212, 163, 89, 0) 48%),
+      radial-gradient(circle at 18% 82%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 52%),
+      linear-gradient(135deg, #090a0d 0%, #121316 100%);
+    --app-canvas-start: #090a0d;
+    --app-canvas-end: #121316;
 
     --app-surface-main-alpha: 0.58;
     --app-surface-strong-alpha: 0.72;
@@ -507,129 +525,122 @@ main,
     --app-surface-saturate: 140%;
   }
 
-  /* Theme style variables are class-driven, not system-media-driven.
-     Light mode = html:not(.dark).theme-style-*
-     Dark mode = html.dark.theme-style-*
-     This makes manual Settings toggles work immediately. */
-
-  html:not(.dark).theme-style-cyber {
-    --primary: 239 84% 56%;
+  html:not(.dark).theme-style-warm-aurora {
+    --primary: 35 60% 45%;
     --primary-foreground: 0 0% 100%;
-    --ring: 239 84% 56%;
-    --chart-1: 239 84% 56%;
-    --sidebar-primary: 239 84% 56%;
-    --sidebar-ring: 239 84% 56%;
-    --app-page-gradient: linear-gradient(135deg, #f3f7ff 0%, #fbf5ff 100%);
-    --app-canvas-start: #f3f7ff;
-    --app-canvas-end: #fbf5ff;
+    --ring: 35 60% 45%;
+    --chart-1: 35 60% 45%;
+    --sidebar-primary: 35 60% 45%;
+    --sidebar-ring: 35 60% 45%;
+    --app-page-gradient:
+      radial-gradient(circle at 68% 22%, rgba(212, 163, 89, 0.24) 0%, rgba(212, 163, 89, 0) 48%),
+      radial-gradient(circle at 18% 82%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 52%),
+      linear-gradient(135deg, #fbfaf7 0%, #f5f3ee 100%);
+    --app-canvas-start: #fbfaf7;
+    --app-canvas-end: #f5f3ee;
   }
 
-  html.dark.theme-style-cyber {
-    --primary: 239 84% 68%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 239 84% 68%;
-    --chart-1: 239 84% 68%;
-    --sidebar-primary: 239 84% 68%;
-    --sidebar-ring: 239 84% 68%;
-    --app-page-gradient: linear-gradient(135deg, #020617 0%, #14113a 100%);
-    --app-canvas-start: #020617;
-    --app-canvas-end: #14113a;
-  }
-
-  html:not(.dark).theme-style-aurora {
-    --primary: 180 84% 30%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 180 84% 30%;
-    --chart-1: 180 84% 30%;
-    --sidebar-primary: 180 84% 30%;
-    --sidebar-ring: 180 84% 30%;
-    --app-page-gradient: linear-gradient(135deg, #effdfa 0%, #eef8ff 100%);
-    --app-canvas-start: #effdfa;
-    --app-canvas-end: #eef8ff;
-  }
-
-  html.dark.theme-style-aurora {
-    --primary: 174 72% 56%;
+  html.dark.theme-style-warm-aurora {
+    --primary: 38 72% 62%;
     --primary-foreground: 222 47% 7%;
-    --ring: 174 72% 56%;
-    --chart-1: 174 72% 56%;
-    --sidebar-primary: 174 72% 56%;
-    --sidebar-ring: 174 72% 56%;
-    --app-page-gradient: linear-gradient(135deg, #020617 0%, #06242f 100%);
-    --app-canvas-start: #020617;
-    --app-canvas-end: #06242f;
+    --ring: 38 72% 62%;
+    --chart-1: 38 72% 62%;
+    --sidebar-primary: 38 72% 62%;
+    --sidebar-ring: 38 72% 62%;
+    --app-page-gradient:
+      radial-gradient(circle at 70% 18%, rgba(212, 163, 89, 0.16) 0%, rgba(212, 163, 89, 0) 48%),
+      radial-gradient(circle at 18% 82%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 52%),
+      linear-gradient(135deg, #090a0d 0%, #121316 100%);
+    --app-canvas-start: #090a0d;
+    --app-canvas-end: #121316;
   }
 
-  html:not(.dark).theme-style-sunset {
-    --primary: 349 89% 55%;
+  html:not(.dark).theme-style-vibrant-fluid {
+    --primary: 184 73% 38%;
     --primary-foreground: 0 0% 100%;
-    --ring: 349 89% 55%;
-    --chart-1: 349 89% 55%;
-    --sidebar-primary: 349 89% 55%;
-    --sidebar-ring: 349 89% 55%;
-    --app-page-gradient: linear-gradient(135deg, #fff5f7 0%, #fff8ef 100%);
-    --app-canvas-start: #fff5f7;
-    --app-canvas-end: #fff8ef;
+    --ring: 184 73% 38%;
+    --chart-1: 184 73% 38%;
+    --sidebar-primary: 184 73% 38%;
+    --sidebar-ring: 184 73% 38%;
+    --app-page-gradient:
+      radial-gradient(circle at 92% 10%, hsla(14, 93%, 69%, 0.34) 0%, hsla(14, 93%, 69%, 0) 50%),
+      radial-gradient(circle at 8% 82%, hsla(184, 83%, 63%, 0.34) 0%, hsla(184, 83%, 63%, 0) 52%),
+      radial-gradient(circle at 88% 84%, hsla(27, 88%, 65%, 0.22) 0%, hsla(27, 88%, 65%, 0) 50%),
+      radial-gradient(circle at 20% 18%, hsla(210, 85%, 70%, 0.24) 0%, hsla(210, 85%, 70%, 0) 50%),
+      linear-gradient(135deg, #fff4ef 0%, #edfaff 100%);
+    --app-canvas-start: #fff4ef;
+    --app-canvas-end: #edfaff;
   }
 
-  html.dark.theme-style-sunset {
-    --primary: 349 89% 68%;
+  html.dark.theme-style-vibrant-fluid {
+    --primary: 190 90% 56%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 190 90% 56%;
+    --chart-1: 190 90% 56%;
+    --sidebar-primary: 190 90% 56%;
+    --sidebar-ring: 190 90% 56%;
+    --app-page-gradient:
+      radial-gradient(circle at 90% 10%, hsla(260, 85%, 28%, 0.34) 0%, hsla(260, 85%, 28%, 0) 50%),
+      radial-gradient(circle at 10% 80%, hsla(320, 75%, 28%, 0.24) 0%, hsla(320, 75%, 28%, 0) 52%),
+      radial-gradient(circle at 88% 82%, hsla(190, 90%, 22%, 0.24) 0%, hsla(190, 90%, 22%, 0) 50%),
+      radial-gradient(circle at 18% 20%, hsla(280, 80%, 32%, 0.24) 0%, hsla(280, 80%, 32%, 0) 50%),
+      linear-gradient(135deg, #070512 0%, #120820 100%);
+    --app-canvas-start: #070512;
+    --app-canvas-end: #120820;
+  }
+
+  html:not(.dark).theme-style-ai-minimal {
+    --primary: 190 95% 38%;
     --primary-foreground: 0 0% 100%;
-    --ring: 349 89% 68%;
-    --chart-1: 349 89% 68%;
-    --sidebar-primary: 349 89% 68%;
-    --sidebar-ring: 349 89% 68%;
-    --app-page-gradient: linear-gradient(135deg, #07040a 0%, #2a070c 100%);
-    --app-canvas-start: #07040a;
-    --app-canvas-end: #2a070c;
+    --ring: 190 95% 38%;
+    --chart-1: 190 95% 38%;
+    --sidebar-primary: 190 95% 38%;
+    --sidebar-ring: 190 95% 38%;
+    --app-page-gradient:
+      radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.13) 0%, rgba(0, 180, 216, 0) 58%),
+      radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.08) 0%, rgba(114, 9, 183, 0) 50%),
+      linear-gradient(135deg, #ffffff 0%, #f6fbff 100%);
+    --app-canvas-start: #ffffff;
+    --app-canvas-end: #f6fbff;
   }
 
-  html:not(.dark).theme-style-emerald {
-    --primary: 158 64% 34%;
+  html.dark.theme-style-ai-minimal {
+    --primary: 190 95% 58%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 190 95% 58%;
+    --chart-1: 190 95% 58%;
+    --sidebar-primary: 190 95% 58%;
+    --sidebar-ring: 190 95% 58%;
+    --app-page-gradient:
+      radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.22) 0%, rgba(0, 180, 216, 0) 58%),
+      radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.18) 0%, rgba(114, 9, 183, 0) 50%),
+      linear-gradient(135deg, #050812 0%, #090d16 100%);
+    --app-canvas-start: #050812;
+    --app-canvas-end: #090d16;
+  }
+
+  html:not(.dark).theme-style-energy-action {
+    --primary: 14 88% 49%;
     --primary-foreground: 0 0% 100%;
-    --ring: 158 64% 34%;
-    --chart-1: 158 64% 34%;
-    --sidebar-primary: 158 64% 34%;
-    --sidebar-ring: 158 64% 34%;
-    --app-page-gradient: linear-gradient(135deg, #f0fdf5 0%, #ecfffb 100%);
-    --app-canvas-start: #f0fdf5;
-    --app-canvas-end: #ecfffb;
+    --ring: 14 88% 49%;
+    --chart-1: 14 88% 49%;
+    --sidebar-primary: 14 88% 49%;
+    --sidebar-ring: 14 88% 49%;
+    --app-page-gradient: linear-gradient(135deg, #fff5f1 0%, #f4f4f4 65%, #ffffff 100%);
+    --app-canvas-start: #fff5f1;
+    --app-canvas-end: #ffffff;
   }
 
-  html.dark.theme-style-emerald {
-    --primary: 160 84% 48%;
-    --primary-foreground: 145 45% 8%;
-    --ring: 160 84% 48%;
-    --chart-1: 160 84% 48%;
-    --sidebar-primary: 160 84% 48%;
-    --sidebar-ring: 160 84% 48%;
-    --app-page-gradient: linear-gradient(135deg, #020617 0%, #05251a 100%);
-    --app-canvas-start: #020617;
-    --app-canvas-end: #05251a;
-  }
-
-  html:not(.dark).theme-style-obsidian {
-    --primary: 215 20% 45%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 215 20% 45%;
-    --chart-1: 215 20% 45%;
-    --sidebar-primary: 215 20% 45%;
-    --sidebar-ring: 215 20% 45%;
-    --app-page-gradient: linear-gradient(135deg, #f8fafc 0%, #e9eef5 100%);
-    --app-canvas-start: #f8fafc;
-    --app-canvas-end: #e9eef5;
-  }
-
-  html.dark.theme-style-obsidian {
-    --primary: 215 20% 74%;
-    --primary-foreground: 222 47% 8%;
-    --ring: 215 20% 74%;
-    --chart-1: 215 20% 74%;
-    --sidebar-primary: 215 20% 74%;
-    --sidebar-ring: 215 20% 74%;
-    --app-page-gradient: linear-gradient(135deg, #020617 0%, #080b12 100%);
-    --app-canvas-start: #020617;
-    --app-canvas-end: #080b12;
+  html.dark.theme-style-energy-action {
+    --primary: 14 82% 58%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 14 82% 58%;
+    --chart-1: 14 82% 58%;
+    --sidebar-primary: 14 82% 58%;
+    --sidebar-ring: 14 82% 58%;
+    --app-page-gradient: linear-gradient(135deg, #2a0d05 0%, #111113 64%, #09090b 100%);
+    --app-canvas-start: #2a0d05;
+    --app-canvas-end: #09090b;
   }
 
   html,
@@ -641,7 +652,7 @@ main,
   html {
     background: var(--app-system-bar-bg) !important;
     background-color: var(--app-system-bar-bg) !important;
-    color-scheme: light;
+    color-scheme: light dark;
   }
 
   body {
