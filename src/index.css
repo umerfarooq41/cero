@@ -741,6 +741,8 @@ main,
   /* Existing card utilities: normal card surfaces */
   :where(
     .bg-card,
+    [class~='bg-card/40'],
+    [class~='bg-card/45'],
     [class~='bg-card/50'],
     [class~='bg-card/60'],
     [class~='bg-card/70'],
@@ -775,10 +777,12 @@ main,
     [class~='bg-background/45'],
     [class~='bg-background/50'],
     [class~='bg-background/55'],
+    [class~='bg-background/70'],
     [class~='bg-muted/20'],
     [class~='bg-muted/30'],
     [class~='bg-muted/40'],
-    [class~='bg-muted/50']
+    [class~='bg-muted/50'],
+    [class~='bg-muted/70']
   ) {
     background-color: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
     backdrop-filter: blur(calc(var(--app-card-blur) * 0.75)) saturate(var(--app-card-saturate));

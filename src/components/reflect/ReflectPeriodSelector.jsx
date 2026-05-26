@@ -100,13 +100,13 @@ export default function ReflectPeriodSelector({
       }
       contentClassName="space-y-3"
     >
-      <div className="grid grid-cols-2 rounded-2xl border border-border/60 bg-card/60 p-1 backdrop-blur-xl">
+      <div className="grid grid-cols-2 rounded-2xl border border-border/60 app-card-surface p-1 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => changeMode('month')}
           className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
             periodMode === 'month'
-              ? 'bg-card/90 text-foreground shadow-sm'
+              ? 'app-card-surface-strong text-foreground shadow-sm'
               : 'text-muted-foreground'
           }`}
         >
@@ -118,7 +118,7 @@ export default function ReflectPeriodSelector({
           onClick={() => changeMode('year')}
           className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
             periodMode === 'year'
-              ? 'bg-card/90 text-foreground shadow-sm'
+              ? 'app-card-surface-strong text-foreground shadow-sm'
               : 'text-muted-foreground'
           }`}
         >
@@ -134,7 +134,7 @@ export default function ReflectPeriodSelector({
         }
       >
         <Select value={String(year)} onValueChange={onYearChange}>
-          <SelectTrigger className="h-11 rounded-2xl border-border/60 bg-card/70 backdrop-blur-xl">
+          <SelectTrigger className="h-11 rounded-2xl border-border/60 app-card-surface backdrop-blur-xl">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
 
@@ -152,7 +152,7 @@ export default function ReflectPeriodSelector({
             value={month === 'all' ? selectedMonth.value : month}
             onValueChange={onMonthChange}
           >
-            <SelectTrigger className="h-11 rounded-2xl border-border/60 bg-card/70 backdrop-blur-xl">
+            <SelectTrigger className="h-11 rounded-2xl border-border/60 app-card-surface backdrop-blur-xl">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
 

@@ -297,7 +297,7 @@ function RecurringRuleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl border-border/60 bg-card/95 p-5 backdrop-blur-xl sm:max-w-2xl">
+      <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl border-border/60 app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {editingRule ? 'Edit recurring transaction' : 'Add recurring transaction'}
@@ -474,7 +474,7 @@ function RecurringRuleDialog({
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/35 p-3">
+          <div className="flex items-center justify-between rounded-2xl border border-border/60 app-card-surface-soft p-3">
             <div>
               <p className="text-sm font-semibold text-foreground">Active recurring rule</p>
               <p className="text-xs text-muted-foreground">Turn off to pause without deleting.</p>
@@ -629,7 +629,7 @@ export default function RecurringTransactionsPanel({
   };
 
   return (
-    <section className={cn('rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl md:p-5', className)}>
+    <section className={cn('rounded-3xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl md:p-5', className)}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -654,7 +654,7 @@ export default function RecurringTransactionsPanel({
       </div>
 
       {sortedRules.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-4 py-6 text-center">
+        <div className="rounded-2xl border border-dashed border-border/70 app-card-surface-soft px-4 py-6 text-center">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Clock3 className="h-5 w-5" />
           </div>
@@ -678,7 +678,7 @@ export default function RecurringTransactionsPanel({
             return (
               <div
                 key={rule.id}
-                className="rounded-2xl border border-border/60 bg-background/35 p-3 transition-colors hover:bg-background/55"
+                className="rounded-2xl border border-border/60 app-card-surface-soft p-3 transition-colors hover:bg-card/40"
               >
                 <div className="flex items-start gap-3">
                   <span

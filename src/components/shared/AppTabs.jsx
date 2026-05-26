@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 const toneStyles = {
   neutral: {
     active:
-      'bg-background text-foreground shadow-[0_8px_24px_rgba(15,23,42,0.08)] ring-border/60 dark:bg-white/[0.06] dark:shadow-[0_8px_24px_rgba(0,0,0,0.18)]',
-    inactive: 'text-muted-foreground hover:bg-background/45 hover:text-foreground',
-    indicator: 'bg-background ring-border/60 dark:bg-white/[0.06]',
+      'bg-background text-foreground shadow-[0_8px_24px_rgba(15,23,42,0.08)] ring-border/60  dark:shadow-[0_8px_24px_rgba(0,0,0,0.18)]',
+    inactive: 'text-muted-foreground hover:bg-card/40 hover:text-foreground',
+    indicator: 'bg-background ring-border/60 ',
   },
   blue: {
     active:
@@ -103,7 +103,7 @@ export default function AppTabs({
   return (
     <div
       className={cn(
-        'border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl',
+        'border border-border/60 app-card-surface shadow-sm backdrop-blur-xl',
         sizeClass.shell,
         className
       )}

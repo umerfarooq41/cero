@@ -18,7 +18,7 @@ function getTopGoal(goals = []) {
 
 function SmallMetric({ label, value }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-background/35 p-2.5 sm:p-3">
+    <div className="min-w-0 rounded-2xl app-card-surface-soft p-2.5 sm:p-3">
       <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-[11px]">
         {label}
       </p>
@@ -87,7 +87,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-4 py-6 text-center">
+        <div className="rounded-2xl border border-dashed border-border/70 app-card-surface-soft px-4 py-6 text-center">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Flag className="h-5 w-5" />
           </div>

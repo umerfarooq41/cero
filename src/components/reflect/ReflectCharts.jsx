@@ -93,7 +93,7 @@ function RevealChartCard({ children }) {
 function ChartShell({ className = '' }) {
   return (
     <div
-      className={`${className} flex items-center justify-center rounded-2xl bg-muted/20`}
+      className={`${className} flex items-center justify-center rounded-2xl app-card-surface-soft`}
     >
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
     </div>

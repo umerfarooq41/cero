@@ -122,7 +122,7 @@ export default function UpcomingBillsPreview({
       }
     >
       {previewRules.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-4 py-6 text-center">
+        <div className="rounded-2xl border border-dashed border-border/70 app-card-surface-soft px-4 py-6 text-center">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Clock3 className="h-5 w-5" />
           </div>

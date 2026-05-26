@@ -37,7 +37,7 @@ function DashboardCard(props) {
 
 function EmptyDashboardState({ icon: Icon, title, description, action }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/70 bg-background/35 px-4 py-6 text-center">
+    <div className="rounded-2xl border border-dashed border-border/70 app-card-surface-soft px-4 py-6 text-center">
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
@@ -57,7 +57,7 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
   return (
     <Link
       to={to}
-      className="group rounded-2xl border border-border/60 bg-background/40 p-3 transition-all hover:-translate-y-0.5 hover:bg-background/70 hover:shadow-sm sm:p-4"
+      className="group rounded-2xl border border-border/60 app-card-surface-soft p-3 transition-all hover:-translate-y-0.5 hover:bg-card/40 hover:shadow-sm sm:p-4"
     >
       <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-10 sm:w-10 sm:rounded-2xl">

@@ -13,7 +13,7 @@ export default function DashboardSectionCard({
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
+        'overflow-hidden rounded-3xl border border-border/60 app-card-surface p-3 shadow-sm backdrop-blur-xl sm:p-4 md:p-5',
         className
       )}
     >

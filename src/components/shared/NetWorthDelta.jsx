@@ -30,7 +30,7 @@ export default function NetWorthDelta({
   const liabilityPct = total > 0 ? 100 - assetPct : 50;
 
   return (
-    <section className="rounded-3xl border border-border/60 bg-card/70 p-5 shadow-md backdrop-blur-xl md:p-6">
+    <section className="rounded-3xl border border-border/60 app-card-surface p-5 shadow-md backdrop-blur-xl md:p-6">
       {/* Net Worth */}
       <div className="mb-6 flex flex-col items-center text-center">
         <div className="mb-3 flex items-center gap-2">
@@ -83,7 +83,7 @@ export default function NetWorthDelta({
 
       {/* Two stat cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-card/70 p-4 text-center shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 app-card-surface p-4 text-center shadow-sm backdrop-blur-xl">
           <div className="mb-1.5 flex items-center justify-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
             <ArrowUpRight className="h-3.5 w-3.5" />
             <span>Assets</span>
@@ -98,7 +98,7 @@ export default function NetWorthDelta({
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-card/70 p-4 text-center shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 app-card-surface p-4 text-center shadow-sm backdrop-blur-xl">
           <div className="mb-1.5 flex items-center justify-center gap-1.5 text-xs font-medium text-destructive">
             <ArrowDownRight className="h-3.5 w-3.5" />
             <span>Liabilities</span>

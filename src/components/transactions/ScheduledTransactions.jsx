@@ -281,7 +281,7 @@ function ScheduledSectionCard({ type = 'active', label, count, defaultExpanded =
   const Icon = TYPE_ICONS[type] || Target;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+    <div className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl">
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
@@ -534,7 +534,7 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-3xl border-border/60 bg-card/95 backdrop-blur-xl">
+      <DialogContent className="max-w-lg rounded-3xl border-border/60 app-card-surface-strong backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{remainingAmount > 0 ? `Pay ${rule.name}` : `Add extra to ${rule.name}`}</DialogTitle>
           <DialogDescription>
@@ -543,7 +543,7 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
         </DialogHeader>
 
         <div className="space-y-4 py-1">
-          <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
+          <div className="rounded-2xl border border-border/60 app-card-surface-soft p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Payment path
             </p>
@@ -636,7 +636,7 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-3xl border-border/60 bg-card/95 backdrop-blur-xl">
+      <DialogContent className="max-w-lg rounded-3xl border-border/60 app-card-surface-strong backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>Contribute to {goal.name}</DialogTitle>
           <DialogDescription>
@@ -645,7 +645,7 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
         </DialogHeader>
 
         <div className="space-y-4 py-1">
-          <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
+          <div className="rounded-2xl border border-border/60 app-card-surface-soft p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Transfer path
             </p>
@@ -998,7 +998,7 @@ export default function ScheduledTransactions() {
         </div>
 
         {activeRecurring.length === 0 ? (
-          <div className="rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
+          <div className="rounded-2xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl">
             <EmptyState
               icon={Clock3}
               title="No recurring rules"
@@ -1054,7 +1054,7 @@ export default function ScheduledTransactions() {
         </div>
 
         {activeGoals.length === 0 ? (
-          <div className="rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
+          <div className="rounded-2xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl">
             <EmptyState
               icon={PiggyBank}
               title="No active savings goals"

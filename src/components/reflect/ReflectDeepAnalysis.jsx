@@ -41,7 +41,7 @@ function SectionHeading({ icon: Icon, title, subtitle }) {
 
 function EmptyBlock({ title, text }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-3 py-5 text-center">
+    <div className="rounded-2xl border border-dashed border-border/70 app-card-surface-soft px-3 py-5 text-center">
       <p className="text-sm font-semibold text-foreground">{title}</p>
       <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
         {text}
@@ -125,7 +125,7 @@ function MetricLine({ label, value, subtext, tone = 'default', delay = 0 }) {
 
   return (
     <motion.div
-      className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-border/45 bg-background/25 px-2.5 py-2"
+      className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-border/45 app-card-surface-soft px-2.5 py-2"
       initial={{ y: 6, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 220, damping: 20, delay }}

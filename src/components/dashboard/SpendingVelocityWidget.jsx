@@ -66,7 +66,7 @@ export default function SpendingVelocityWidget({
             Time
           </span>
 
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
+          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] ">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30"
               initial={{ width: 0 }}
@@ -90,7 +90,7 @@ export default function SpendingVelocityWidget({
             Spent
           </span>
 
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
+          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] ">
             <motion.div
               className={cn('absolute inset-y-0 left-0 rounded-full', cfg.barColor)}
               initial={{ width: 0 }}

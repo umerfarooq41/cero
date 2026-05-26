@@ -206,7 +206,7 @@ export default function Onboarding() {
     <div ref={scope} className="min-h-screen bg-transparent px-4 py-8">
       <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center">
         {/* Progress */}
-        <div className="animate-child mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-5 overflow-hidden rounded-2xl border border-border/60 app-card-surface p-3 shadow-sm backdrop-blur-xl">
           <div className="flex gap-1.5">
             {steps.map((_, index) => (
               <div
@@ -228,7 +228,7 @@ export default function Onboarding() {
         </div>
 
         {/* Header */}
-        <div className="animate-child mb-5 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 text-center shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-5 overflow-hidden rounded-2xl border border-border/60 app-card-surface p-6 text-center shadow-sm backdrop-blur-xl">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
             {step === 0 ? (
               <>
@@ -258,7 +258,7 @@ export default function Onboarding() {
         </div>
 
         {/* Main Card */}
-        <div className="animate-child mb-5 min-h-[292px] overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm backdrop-blur-xl">
+        <div className="animate-child mb-5 min-h-[292px] overflow-hidden rounded-2xl border border-border/60 app-card-surface p-6 shadow-sm backdrop-blur-xl">
           {step === 0 && (
             <div className="space-y-4 text-center">
               <p className="text-sm leading-relaxed text-muted-foreground">
@@ -276,7 +276,7 @@ export default function Onboarding() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-background/40 p-4 text-left backdrop-blur-xl">
+              <div className="rounded-2xl border border-border/60 app-card-surface-soft p-4 text-left backdrop-blur-xl">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 
@@ -311,7 +311,7 @@ export default function Onboarding() {
                 </Select>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-background/40 p-4 backdrop-blur-xl">
+              <div className="rounded-2xl border border-border/60 app-card-surface-soft p-4 backdrop-blur-xl">
                 <div className="flex items-start gap-3">
                   <Coins className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -361,7 +361,7 @@ export default function Onboarding() {
                 />
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-background/40 p-4 backdrop-blur-xl">
+              <div className="rounded-2xl border border-border/60 app-card-surface-soft p-4 backdrop-blur-xl">
                 <div className="flex items-start gap-3">
                   <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -376,7 +376,7 @@ export default function Onboarding() {
 
           {step === 3 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background/40 p-4 backdrop-blur-xl">
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 app-card-surface-soft p-4 backdrop-blur-xl">
                 <div className="min-w-0">
                   <div className="text-sm font-medium">
                     Create starter categories
@@ -429,7 +429,7 @@ export default function Onboarding() {
                   </div>
                 </>
               ) : (
-                <div className="rounded-2xl border border-border/60 bg-background/40 p-5 text-center backdrop-blur-xl">
+                <div className="rounded-2xl border border-border/60 app-card-surface-soft p-5 text-center backdrop-blur-xl">
                   <FolderOpen className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
 
                   <p className="text-sm font-medium">
@@ -447,7 +447,7 @@ export default function Onboarding() {
         </div>
 
         {/* Actions */}
-        <div className="animate-child overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl">
+        <div className="animate-child overflow-hidden rounded-2xl border border-border/60 app-card-surface p-3 shadow-sm backdrop-blur-xl">
           <Button
             onClick={goNext}
             disabled={loading}

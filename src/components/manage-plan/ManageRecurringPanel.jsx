@@ -291,7 +291,7 @@ function RecurringRuleModal({
           <DialogTitle>{isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule'}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 rounded-2xl border border-white/40 bg-white/45 p-3 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div className="flex items-center gap-3 rounded-2xl border border-border/50 app-card-surface-soft p-3 backdrop-blur-xl  ">
           <CategoryIcon icon={form.icon} color={form.color} size="lg" />
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">
@@ -481,7 +481,7 @@ function RecurringRuleModal({
             />
           </div>
 
-          <label className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/35 px-4 py-3 text-sm backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <label className="flex items-center justify-between rounded-2xl border border-border/50 app-card-surface-soft px-4 py-3 text-sm backdrop-blur-xl  ">
             <span>
               <span className="font-medium">Active rule</span>
               <span className="block text-xs text-muted-foreground">
@@ -500,7 +500,7 @@ function RecurringRuleModal({
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Color
             </label>
-            <div className="grid grid-cols-10 gap-2 rounded-xl border border-white/40 bg-white/35 p-2 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border/50 app-card-surface-soft p-2 backdrop-blur-xl  ">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -523,7 +523,7 @@ function RecurringRuleModal({
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Icon
             </label>
-            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl border border-white/40 bg-white/35 p-2 backdrop-blur-xl dark:border-white/[0.05] dark:bg-white/[0.03] sm:grid-cols-7 md:grid-cols-8">
+            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl border border-border/50 app-card-surface-soft p-2 backdrop-blur-xl   sm:grid-cols-7 md:grid-cols-8">
               {iconNames.map((item) => (
                 <button
                   key={item}
@@ -689,7 +689,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
   const Icon = TYPE_ICONS[type] || ArrowUpRight;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-xl">
+    <div className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl">
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
@@ -871,7 +871,7 @@ export default function ManageRecurringPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-3xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-base font-semibold">Recurring</h2>
           <p className="mt-1 text-sm text-muted-foreground">

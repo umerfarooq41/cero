@@ -47,7 +47,7 @@ export default function PlanDonutCard({
   currency,
 }) {
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-xl">
+    <div className="rounded-3xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">Tracked</p>
