@@ -25,7 +25,7 @@ function getActionLabel(type) {
   if (type === 'savings') return 'Saved';
   if (type === 'debt') return 'Paid';
 
-  return 'Used';
+  return 'Spent';
 }
 
 function getStatusLabel(type, rawPercent, isOverBudget, tracked) {

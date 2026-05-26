@@ -262,13 +262,7 @@ export function buildPlanViewData({
   const progress =
     totalPlanned > 0 ? (totalTracked / totalPlanned) * 100 : totalTracked > 0 ? 100 : 0;
 
-  const donutChartData = buildDonutChartData({
-    activeTab,
-    chartData,
-    tab,
-    totalTracked,
-    totalPlanned,
-  });
+  const donutChartData = buildDonutChartData({ activeTab, chartData, tab });
 
   return {
     chartData,
@@ -282,44 +276,115 @@ export function buildPlanViewData({
   };
 }
 
-const DONUT_PALETTES = {
-  income: {
-    slices: ['#047857', '#059669', '#10B981', '#34D399', '#6EE7B7'],
-    remainder: '#D1FAE5',
-  },
-  expense: {
-    slices: ['#B91C1C', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
-    remainder: '#FEE2E2',
-  },
-  savings: {
-    slices: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
-    remainder: '#DBEAFE',
-  },
-  debt: {
-    slices: ['#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD'],
-    remainder: '#EDE9FE',
-  },
-};
+function hexToRgba(hex, alpha = 0.28) {
+  if (!hex || typeof hex !== 'string') return `rgba(148, 163, 184, ${alpha})`;
 
-const DEFAULT_DONUT_PALETTE = {
-  slices: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
-  remainder: '#DBEAFE',
-};
+  const normalized = hex.replace('#', '').trim();
 
-function getDonutPalette(activeTab, tab) {
-  const palette = DONUT_PALETTES[activeTab];
-  if (palette) return palette;
+  if (![3, 6].includes(normalized.length)) {
+    return hex;
+  }
 
-  const fallbackSlices = tab?.shades?.length ? tab.shades : DEFAULT_DONUT_PALETTE.slices;
+  const fullHex =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((char) => `${char}${char}`)
+          .join('')
+      : normalized;
 
-  return {
-    slices: fallbackSlices,
-    remainder: fallbackSlices[fallbackSlices.length - 1] || DEFAULT_DONUT_PALETTE.remainder,
-  };
+  const red = parseInt(fullHex.slice(0, 2), 16);
+  const green = parseInt(fullHex.slice(2, 4), 16);
+  const blue = parseInt(fullHex.slice(4, 6), 16);
+
+  if ([red, green, blue].some((value) => Number.isNaN(value))) {
+    return hex;
+  }
+
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
-function buildNoTrackedDonutSlice(activeTab, tab) {
-  const palette = getDonutPalette(activeTab, tab);
+function getMutedRemainderColor(tab) {
+  const shades = Array.isArray(tab?.shades) ? tab.shades : [];
+  const lightestShade = shades[shades.length - 1] || tab?.color || '#94A3B8';
+
+  return hexToRgba(lightestShade, 0.34);
+}
+
+export function buildDonutChartData({ activeTab, chartData = [], tab }) {
+  const totalPlanned = chartData.reduce(
+    (sum, item) => sum + Number(item.planned || 0),
+    0
+  );
+  const totalTracked = chartData.reduce(
+    (sum, item) => sum + Number(item.tracked || 0),
+    0
+  );
+
+  if (totalPlanned <= 0 && totalTracked <= 0) {
+    return [
+      {
+        id: `${activeTab}-empty`,
+        name: 'No data',
+        value: 1,
+        tracked: 0,
+        planned: 0,
+        remaining: 0,
+        color: '#E5E7EB',
+        isEmpty: true,
+      },
+    ];
+  }
+
+  const trackedItems = [...chartData]
+    .filter((item) => Number(item.tracked || 0) > 0)
+    .sort((a, b) => Number(b.tracked || 0) - Number(a.tracked || 0));
+
+  const trackedSlices = trackedItems.slice(0, 4).map((item, index) => ({
+    ...item,
+    color: tab.shades?.[index] || tab.color || item.color,
+    value: Number(item.tracked || 0),
+  }));
+
+  const others = trackedItems.slice(4);
+  const othersTracked = others.reduce(
+    (sum, item) => sum + Number(item.tracked || 0),
+    0
+  );
+  const othersPlanned = others.reduce(
+    (sum, item) => sum + Number(item.planned || 0),
+    0
+  );
+
+  if (othersTracked > 0) {
+    trackedSlices.push({
+      id: `${activeTab}-others`,
+      name: 'Others',
+      planned: othersPlanned,
+      tracked: othersTracked,
+      remaining: othersPlanned - othersTracked,
+      color: tab.shades?.[4] || tab.color,
+      value: othersTracked,
+      isOthers: true,
+    });
+  }
+
+  const untracked = Math.max(totalPlanned - totalTracked, 0);
+
+  if (untracked > 0) {
+    trackedSlices.push({
+      id: `${activeTab}-untracked`,
+      name: 'Untracked',
+      planned: untracked,
+      tracked: 0,
+      remaining: untracked,
+      color: getMutedRemainderColor(tab),
+      value: untracked,
+      isRemainder: true,
+    });
+  }
+
+  if (trackedSlices.length > 0) return trackedSlices;
 
   return [
     {
@@ -327,96 +392,12 @@ function buildNoTrackedDonutSlice(activeTab, tab) {
       name: 'No tracked data',
       value: 1,
       tracked: 0,
-      planned: 0,
-      remaining: 0,
-      share: 0,
-      color: palette.remainder,
-      isEmpty: true,
+      planned: totalPlanned,
+      remaining: totalPlanned,
+      color: getMutedRemainderColor(tab),
       isRemainder: true,
     },
   ];
-}
-
-function buildRemainderSlice({ activeTab, tab, totalRemaining, totalPlanned }) {
-  const value = Math.max(Number(totalRemaining || 0), 0);
-
-  if (value <= 0) return null;
-
-  const palette = getDonutPalette(activeTab, tab);
-
-  return {
-    id: `${activeTab}-untracked`,
-    name: 'Untracked',
-    planned: Number(totalPlanned || 0),
-    tracked: 0,
-    remaining: value,
-    value,
-    share: 0,
-    color: palette.remainder,
-    isRemainder: true,
-  };
-}
-
-export function buildDonutChartData({
-  activeTab,
-  chartData = [],
-  tab,
-  totalTracked = 0,
-  totalPlanned = 0,
-}) {
-  const planned = Number(totalPlanned || 0);
-  const tracked = Number(totalTracked || 0);
-  const totalRemaining = planned - tracked;
-  const palette = getDonutPalette(activeTab, tab);
-
-  const trackedRows = chartData
-    .map((item) => ({
-      ...item,
-      tracked: Number(item.tracked || 0),
-      planned: Number(item.planned || 0),
-    }))
-    .filter((item) => item.tracked > 0)
-    .sort((a, b) => b.tracked - a.tracked);
-
-  const remainderSlice = buildRemainderSlice({
-    activeTab,
-    tab,
-    totalRemaining,
-    totalPlanned: planned,
-  });
-
-  if (trackedRows.length === 0) {
-    return remainderSlice || buildNoTrackedDonutSlice(activeTab, tab);
-  }
-
-  const topFour = trackedRows.slice(0, 4);
-  const others = trackedRows.slice(4);
-
-  const visibleRows = topFour.map((item, index) => ({
-    ...item,
-    color: palette.slices[index] || tab?.color || DEFAULT_DONUT_PALETTE.slices[0],
-    value: item.tracked,
-    share: tracked > 0 ? (item.tracked / tracked) * 100 : 0,
-  }));
-
-  if (others.length > 0) {
-    const othersTracked = others.reduce((sum, item) => sum + item.tracked, 0);
-    const othersPlanned = others.reduce((sum, item) => sum + item.planned, 0);
-
-    visibleRows.push({
-      id: `${activeTab}-others`,
-      name: 'Others',
-      planned: othersPlanned,
-      tracked: othersTracked,
-      remaining: othersPlanned - othersTracked,
-      color: palette.slices[4] || tab?.color || DEFAULT_DONUT_PALETTE.slices[4],
-      value: othersTracked,
-      share: tracked > 0 ? (othersTracked / tracked) * 100 : 0,
-      isOthers: true,
-    });
-  }
-
-  return remainderSlice ? [...visibleRows, remainderSlice] : visibleRows;
 }
 
 export function buildPlanTotals({ allocations = [], categories = [] }) {

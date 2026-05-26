@@ -3,33 +3,84 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
+  Tooltip,
 } from 'recharts';
 
 import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
 
-function LegendItem({ item, compact }) {
+function getTooltipActionLabel(tab, item) {
+  if (item?.isRemainder) return 'Left';
+  if (tab?.key === 'income') return 'Received';
+  if (tab?.key === 'expense') return 'Spent';
+  if (tab?.key === 'savings') return 'Saved';
+  if (tab?.key === 'debt') return 'Paid';
+
+  return tab?.label || 'Tracked';
+}
+
+function DonutTooltip({ active, payload, currency, tab, totalTracked, totalPlanned }) {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0]?.payload;
+  const value = Number(item?.value || 0);
+  const tracked = Number(item?.tracked || 0);
+  const trackedShare = totalTracked > 0 ? Math.round((tracked / totalTracked) * 100) : 0;
+  const plannedShare = totalPlanned > 0 ? Math.round((value / totalPlanned) * 100) : 0;
+  const actionLabel = getTooltipActionLabel(tab, item);
+
+  if (item?.isRemainder) {
+    return (
+      <div className="rounded-xl app-chart-tooltip-surface px-3 py-2 shadow-lg ring-1 ring-border/60">
+        <p className="text-xs font-bold text-popover-foreground tabular-nums">
+          Untracked
+        </p>
+
+        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+          <span>{actionLabel}</span>
+          <PlanMoney
+            amount={value}
+            currency={currency}
+            compact
+            className="font-semibold text-popover-foreground"
+          />
+        </div>
+
+        <p className="mt-1 text-[11px] font-semibold text-muted-foreground tabular-nums">
+          {plannedShare}% of planned
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={cn(
-        'inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border border-border/70 bg-background/85 px-2.5 py-1 text-[10px] font-semibold leading-none text-muted-foreground shadow-sm sm:text-[11px]',
-        compact ? 'flex-1 px-2' : 'shrink-0'
-      )}
-      title={item.name}
-    >
-      <span
-        className="h-2 w-2 shrink-0 rounded-full"
-        style={{ backgroundColor: item.color }}
-        aria-hidden="true"
-      />
-      <span className="min-w-0 truncate">{item.name}</span>
+    <div className="rounded-xl app-chart-tooltip-surface px-3 py-2 shadow-lg ring-1 ring-border/60">
+      <p className="max-w-[160px] truncate text-xs font-bold text-popover-foreground tabular-nums">
+        {item?.name}
+      </p>
+
+      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+        <span>{actionLabel}</span>
+        <PlanMoney
+          amount={tracked}
+          currency={currency}
+          compact
+          className="font-semibold text-popover-foreground"
+        />
+      </div>
+
+      <p
+        className="mt-1 text-[11px] font-semibold tabular-nums"
+        style={{ color: item?.color }}
+      >
+        {trackedShare}% of tracked · {plannedShare}% of planned
+      </p>
     </div>
   );
 }
 
 export default function PlanDonutCard({
   tab,
-  chartData,
   donutChartData,
   totalTracked,
   totalPlanned,
@@ -37,16 +88,9 @@ export default function PlanDonutCard({
   progress,
   currency,
 }) {
-  const trackedLegendItems = donutChartData.filter(
+  const legendItems = donutChartData.filter(
     (item) => !item.isRemainder && !item.isEmpty && Number(item.tracked || 0) > 0
   );
-  const hasTrackedData = trackedLegendItems.length > 0;
-  const displayProgress = Math.round(progress);
-  const compactLegend = trackedLegendItems.length >= 4;
-  const primarySliceColor =
-    donutChartData?.find((item) => !item.isRemainder && !item.isEmpty)?.color ||
-    tab.color ||
-    'hsl(var(--foreground))';
 
   return (
     <div className="rounded-3xl app-card-surface p-4">
@@ -56,7 +100,9 @@ export default function PlanDonutCard({
 
           <h2
             className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
-            style={{ color: primarySliceColor }}
+            style={{
+              color: tab.color || donutChartData?.[0]?.color || 'hsl(var(--foreground))',
+            }}
           >
             <PlanMoney amount={totalTracked} currency={currency} />
           </h2>
@@ -103,7 +149,7 @@ export default function PlanDonutCard({
               {donutChartData.map((entry, index) => (
                 <Cell
                   key={`${entry.name}-${index}`}
-                  fill={entry.color}
+                  fill={entry.color || '#E5E7EB'}
                   stroke="none"
                   tabIndex={-1}
                   focusable="false"
@@ -111,6 +157,25 @@ export default function PlanDonutCard({
                 />
               ))}
             </Pie>
+
+            <Tooltip
+              content={
+                <DonutTooltip
+                  currency={currency}
+                  tab={tab}
+                  totalTracked={totalTracked}
+                  totalPlanned={totalPlanned}
+                />
+              }
+              cursor={false}
+              offset={12}
+              wrapperStyle={{
+                outline: 'none',
+                zIndex: 30,
+                pointerEvents: 'none',
+              }}
+              allowEscapeViewBox={{ x: false, y: false }}
+            />
           </PieChart>
         </ResponsiveContainer>
 
@@ -120,26 +185,37 @@ export default function PlanDonutCard({
           </p>
 
           <p className="mt-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {displayProgress}%
+            {Math.round(progress)}%
           </p>
         </div>
       </div>
 
-      {hasTrackedData ? (
-        <div className="mt-2 flex w-full items-center justify-center gap-1.5 overflow-hidden">
-          {trackedLegendItems.map((item) => (
-            <LegendItem
-              key={item.id || item.name}
-              item={item}
-              compact={compactLegend}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
-          No tracked {tab.title.toLowerCase()} yet
-        </p>
-      )}
+      <div className="mt-3 flex justify-center overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {legendItems.length > 0 ? (
+          <div className="flex min-w-0 flex-nowrap justify-center gap-1.5">
+            {legendItems.map((item) => (
+              <div
+                key={item.id || item.name}
+                className="inline-flex max-w-[68px] shrink items-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-2 py-1 shadow-sm sm:max-w-[92px]"
+                title={item.name}
+              >
+                <span
+                  className="h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+
+                <span className="min-w-0 truncate text-[10px] font-semibold leading-none text-muted-foreground">
+                  {item.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-[11px] font-medium text-muted-foreground">
+            No tracked categories yet
+          </p>
+        )}
+      </div>
     </div>
   );
 }
