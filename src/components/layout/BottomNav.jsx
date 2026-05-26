@@ -8,6 +8,7 @@ import {
   WalletCards,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import './bottomnav.css';
 
 const navItems = [
   {
@@ -55,8 +56,8 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
-      <div className="app-bottom-nav relative mx-auto grid w-full max-w-3xl grid-cols-5">
+    <nav className="app-bottom-nav fixed inset-x-0 bottom-0 z-50 lg:hidden">
+      <div className="mx-auto grid h-full w-full max-w-3xl grid-cols-5">
         {navItems.map((item) => {
           const isActive = isNavItemActive(location.pathname, item);
           const Icon = item.icon;
@@ -73,7 +74,7 @@ export default function BottomNav() {
                 className={cn(
                   `
                   relative z-10 flex min-w-0 flex-col items-center justify-center
-                  gap-1 px-1 py-1.5 text-center
+                  gap-1 px-1 pt-2 text-center
                   transition-colors duration-200
                   `,
                   isActive
@@ -87,12 +88,12 @@ export default function BottomNav() {
                     y: isActive ? -1 : 0,
                   }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  className="relative flex h-10 w-10 items-center justify-center"
+                  className="relative flex h-11 w-11 items-center justify-center"
                 >
                   {isActive && (
                     <motion.div
                       layoutId="nav-icon-highlight"
-                      className="absolute inset-0 rounded-2xl bg-primary/12 shadow-[0_0_26px_hsl(var(--primary)/0.32)] ring-1 ring-primary/25"
+                      className="app-bottom-nav-active-icon absolute inset-0"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -100,7 +101,7 @@ export default function BottomNav() {
                   <Icon
                     className={cn(
                       'relative z-10 h-5 w-5 transition-all duration-200',
-                      isActive && 'drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)] stroke-[2.5]'
+                      isActive && 'app-bottom-nav-active-icon-svg stroke-[2.5]'
                     )}
                   />
                 </motion.div>

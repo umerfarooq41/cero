@@ -1,0 +1,86 @@
+/* =========================================================
+   BOTTOM NAV — layout, safe-area spacing, and visual styles
+   Import this in BottomNav.jsx:
+     import './bottomnav.css';
+   ========================================================= */
+
+/* ── CSS Variables ── */
+@layer base {
+  html {
+    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --app-bottom-nav-height: calc(4.85rem + var(--app-safe-area-bottom));
+  }
+}
+
+/* ── Scroll area padding
+   Keeps content above the fixed nav so it does not scroll/show behind it.
+   Keep this here only if index.css no longer has .app-main-scroll padding. ── */
+@layer utilities {
+  .app-main-scroll {
+    padding-bottom: var(--app-bottom-nav-height);
+  }
+
+  @media (min-width: 1024px) {
+    .app-main-scroll {
+      padding-bottom: 0;
+    }
+  }
+}
+
+/* ── Bottom nav visual styles ── */
+@layer base {
+  .app-bottom-nav {
+    height: var(--app-bottom-nav-height);
+    padding-bottom: var(--app-safe-area-bottom);
+    border: 0 !important;
+    outline: 0 !important;
+
+    /*
+      Mostly opaque card surface so page content does not show through,
+      with subtle primary radial overlays so it still follows the selected theme.
+    */
+    background:
+      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.18), transparent 34%),
+      radial-gradient(circle at 88% 0%, hsl(var(--primary) / 0.10), transparent 38%),
+      linear-gradient(to bottom, hsl(var(--card) / 0.94), hsl(var(--card) / 0.98)) !important;
+
+    box-shadow: none !important;
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+  }
+
+  html.dark .app-bottom-nav {
+    background:
+      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.16), transparent 34%),
+      radial-gradient(circle at 88% 0%, hsl(var(--primary) / 0.08), transparent 38%),
+      linear-gradient(to bottom, hsl(var(--card) / 0.92), hsl(var(--card) / 0.98)) !important;
+
+    box-shadow: none !important;
+    backdrop-filter: blur(12px) saturate(125%);
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+  }
+
+  .app-bottom-nav-active-icon {
+    border-radius: 9999px;
+    background:
+      radial-gradient(circle at 35% 25%, hsl(var(--primary) / 0.36), transparent 44%),
+      hsl(var(--primary) / 0.12);
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.22),
+      0 8px 24px hsl(var(--primary) / 0.20);
+  }
+
+  html.dark .app-bottom-nav-active-icon {
+    background:
+      radial-gradient(circle at 35% 25%, hsl(var(--primary) / 0.34), transparent 44%),
+      hsl(var(--primary) / 0.14);
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.22),
+      0 8px 24px hsl(var(--primary) / 0.18);
+  }
+
+  .app-bottom-nav-active-icon-svg {
+    color: hsl(var(--primary));
+    filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.50));
+  }
+}

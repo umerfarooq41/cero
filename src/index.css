@@ -338,18 +338,6 @@ main,
       0 0 0 1px rgba(100, 140, 200, 0.14);
   }
 
-  .app-bottom-nav {
-    background: hsl(var(--background));
-    border: 0;
-    box-shadow: none;
-  }
-
-  .dark .app-bottom-nav {
-    background: hsl(var(--background));
-    border: 0;
-    box-shadow: none;
-  }
-
   .btn-ripple {
     position: relative;
     overflow: hidden;
@@ -686,9 +674,6 @@ main,
    ========================================================= */
 @layer base {
   html {
-    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
-
     /* Light mode: translucent glass — background gradient shows through */
     --app-card-alpha: 0.46;
     --app-card-alpha-strong: 0.58;
@@ -742,16 +727,6 @@ main,
   .app-gradient-surface {
     border: 0 !important;
     box-shadow: none !important;
-  }
-
-  .app-main-scroll {
-    padding-bottom: var(--app-bottom-nav-height);
-  }
-
-  @media (min-width: 1024px) {
-    .app-main-scroll {
-      padding-bottom: 0;
-    }
   }
 
   .app-card-surface {
@@ -863,21 +838,4 @@ main,
     -webkit-backdrop-filter: blur(14px) saturate(130%);
   }
 
-  .app-bottom-nav {
-    height: var(--app-bottom-nav-height);
-    padding-bottom: var(--app-safe-area-bottom);
-    border: 0 !important;
-    outline: 0 !important;
-    background: hsl(var(--background)) !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  html.dark .app-bottom-nav {
-    background: hsl(var(--background)) !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
 }
