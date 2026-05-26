@@ -97,39 +97,39 @@ const themeOptions = [
 
 const themeStyleOptions = [
   {
-    value: 'cero',
-    label: 'Cero',
-    description: 'Current blue, pink, and teal gradient.',
-    tone: 'blue',
-    preview: 'from-blue-400/60 via-fuchsia-300/45 to-teal-300/50',
+    value: 'cyber',
+    label: 'Cyber Indigo',
+    description: 'Modern blue and purple SaaS tone.',
+    tone: 'purple',
+    swatch: 'bg-indigo-600',
   },
   {
-    value: 'ocean',
-    label: 'Ocean',
-    description: 'Clean blue and aqua finance workspace.',
+    value: 'aurora',
+    label: 'Aurora Teal',
+    description: 'Clean teal and sky fintech workspace.',
     tone: 'cyan',
-    preview: 'from-sky-400/60 via-cyan-300/50 to-teal-300/55',
+    swatch: 'bg-teal-600',
   },
   {
     value: 'sunset',
-    label: 'Sunset',
-    description: 'Warm orange, rose, and gold background.',
-    tone: 'amber',
-    preview: 'from-orange-400/60 via-rose-300/50 to-yellow-300/55',
+    label: 'Sunset Rose',
+    description: 'Warm rose and orange consumer tone.',
+    tone: 'rose',
+    swatch: 'bg-rose-600',
   },
   {
-    value: 'forest',
-    label: 'Forest',
-    description: 'Calm green and mint productivity tone.',
+    value: 'emerald',
+    label: 'Emerald Forest',
+    description: 'Stable green and teal finance tone.',
     tone: 'emerald',
-    preview: 'from-emerald-400/60 via-lime-300/45 to-teal-300/50',
+    swatch: 'bg-emerald-700',
   },
   {
-    value: 'minimal',
-    label: 'Minimal',
-    description: 'Neutral, quieter version of the app.',
+    value: 'obsidian',
+    label: 'Midnight Obsidian',
+    description: 'Quiet slate structure with premium contrast.',
     tone: 'slate',
-    preview: 'from-slate-300/70 via-slate-100/80 to-white/80 dark:from-slate-700/70 dark:via-slate-900/80 dark:to-slate-950/90',
+    swatch: 'bg-slate-700 dark:bg-slate-300',
   },
 ];
 
@@ -273,14 +273,14 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-gradient-to-br shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
-        option.preview,
+        'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        option.swatch,
         active
           ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
           : 'border-white/60 ring-1 ring-border/50 dark:border-white/10'
       )}
     >
-      <span className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/10 to-black/5 dark:from-white/10 dark:to-black/20" />
+      <span className="absolute inset-[3px] rounded-full border border-white/20 bg-white/10 dark:bg-black/15" />
 
       {active && (
         <span className="relative flex h-4 w-4 items-center justify-center rounded-full app-card-surface-strong text-foreground shadow-sm">
@@ -573,7 +573,7 @@ export default function Settings() {
             icon={Brush}
             tone="cyan"
             label="Theme Style"
-            description="Pick a background color style for both light and dark mode."
+            description="Pick a standalone app theme for both light and dark mode."
             stackOnMobile
           >
             <div className="flex flex-wrap items-center justify-end gap-2">

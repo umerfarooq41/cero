@@ -98,7 +98,7 @@ export default function SavingsRateCard({ income = 0, expenses = 0 }) {
           transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 0.2 }}
         />
         <motion.div
-          className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+          className="hidden"
           initial={{ left: '-3rem' }}
           animate={{ left: '110%' }}
           transition={{ duration: 1.1, delay: 0.8, ease: 'easeInOut' }}

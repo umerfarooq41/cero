@@ -53,7 +53,7 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
               }}
             />
             <motion.div
-              className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              className="hidden"
               initial={{ left: '-4rem' }}
               animate={{ left: '110%' }}
               transition={{ duration: 1.2, delay: 0.6, ease: 'easeInOut' }}

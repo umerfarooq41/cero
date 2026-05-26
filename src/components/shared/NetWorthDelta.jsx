@@ -70,7 +70,7 @@ export default function NetWorthDelta({
         />
 
         <motion.div
-          className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+          className="hidden"
           initial={{ left: '-3rem' }}
           animate={{ left: '110%' }}
           transition={{

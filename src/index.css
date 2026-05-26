@@ -1236,3 +1236,353 @@ main,
     color: hsl(var(--muted-foreground) / 0.34) !important;
   }
 }
+
+/* =========================================================
+   STANDALONE SOLID THEMES — NO GRADIENTS
+   Final override for Cyber, Aurora, Sunset, Emerald, Obsidian.
+   ========================================================= */
+@layer base {
+  html {
+    --app-page-gradient: hsl(186 78% 96%);
+    --app-surface-main-alpha: 0.52;
+    --app-surface-strong-alpha: 0.70;
+    --app-surface-soft-alpha: 0.34;
+    --app-surface-floating-alpha: 0.94;
+    --app-control-alpha: 0.46;
+    --app-surface-border-alpha: 0.10;
+    --app-surface-border-strong-alpha: 0.14;
+    --app-surface-border-soft-alpha: 0.08;
+    --app-control-border-alpha: 0.12;
+    --app-surface-shadow-alpha: 0.055;
+    --app-surface-shadow-strong-alpha: 0.085;
+    --app-surface-shadow-color: 222 47% 9%;
+    --app-surface-blur: 24px;
+    --app-surface-saturate: 145%;
+    --app-recharts-tooltip-bg: hsl(var(--popover) / var(--app-surface-floating-alpha));
+    --app-recharts-tooltip-border: hsl(var(--primary) / var(--app-surface-border-strong-alpha));
+    --app-recharts-tooltip-shadow: 0 14px 36px hsl(var(--app-surface-shadow-color) / 0.12);
+  }
+
+  html.dark {
+    --app-surface-main-alpha: 0.38;
+    --app-surface-strong-alpha: 0.56;
+    --app-surface-soft-alpha: 0.26;
+    --app-surface-floating-alpha: 0.96;
+    --app-control-alpha: 0.38;
+    --app-surface-border-alpha: 0.11;
+    --app-surface-border-strong-alpha: 0.15;
+    --app-surface-border-soft-alpha: 0.08;
+    --app-control-border-alpha: 0.13;
+    --app-surface-shadow-alpha: 0.24;
+    --app-surface-shadow-strong-alpha: 0.32;
+    --app-surface-shadow-color: 222 47% 2%;
+    --app-surface-blur: 24px;
+    --app-surface-saturate: 140%;
+  }
+
+  html.theme-style-cyber {
+    --background: 221 100% 96%;
+    --card: 225 100% 99%;
+    --popover: 225 100% 99%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 225 55% 94%;
+    --accent: 226 65% 93%;
+    --border: 226 62% 86%;
+    --input: 226 62% 86%;
+    --ring: 221 83% 53%;
+    --chart-1: 221 83% 53%;
+    --sidebar-background: 225 100% 99%;
+    --sidebar-accent: 226 65% 93%;
+    --sidebar-border: 226 62% 86%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 221 83% 53%;
+    --app-page-gradient: hsl(221 100% 96%);
+  }
+
+  html.theme-style-cyber.dark {
+    --background: 230 56% 8%;
+    --card: 230 44% 12%;
+    --popover: 230 44% 12%;
+    --primary: 263 75% 62%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 231 32% 16%;
+    --accent: 233 34% 18%;
+    --border: 233 28% 24%;
+    --input: 233 28% 24%;
+    --ring: 263 75% 62%;
+    --chart-1: 263 75% 62%;
+    --sidebar-background: 230 44% 12%;
+    --sidebar-accent: 233 34% 18%;
+    --sidebar-border: 233 28% 24%;
+    --sidebar-primary: 263 75% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 263 75% 62%;
+    --app-page-gradient: hsl(230 56% 8%);
+  }
+
+  html.theme-style-aurora {
+    --background: 186 78% 96%;
+    --card: 186 90% 99%;
+    --popover: 186 90% 99%;
+    --primary: 187 96% 34%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 186 50% 93%;
+    --accent: 185 58% 91%;
+    --border: 185 45% 82%;
+    --input: 185 45% 82%;
+    --ring: 187 96% 34%;
+    --chart-1: 187 96% 34%;
+    --sidebar-background: 186 90% 99%;
+    --sidebar-accent: 185 58% 91%;
+    --sidebar-border: 185 45% 82%;
+    --sidebar-primary: 187 96% 34%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 187 96% 34%;
+    --app-page-gradient: hsl(186 78% 96%);
+  }
+
+  html.theme-style-aurora.dark {
+    --background: 190 58% 8%;
+    --card: 188 46% 11%;
+    --popover: 188 46% 11%;
+    --primary: 184 78% 44%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 188 34% 15%;
+    --accent: 187 38% 17%;
+    --border: 185 26% 23%;
+    --input: 185 26% 23%;
+    --ring: 184 78% 44%;
+    --chart-1: 184 78% 44%;
+    --sidebar-background: 188 46% 11%;
+    --sidebar-accent: 187 38% 17%;
+    --sidebar-border: 185 26% 23%;
+    --sidebar-primary: 184 78% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 184 78% 44%;
+    --app-page-gradient: hsl(190 58% 8%);
+  }
+
+  html.theme-style-sunset {
+    --background: 14 100% 96%;
+    --card: 12 100% 99%;
+    --popover: 12 100% 99%;
+    --primary: 347 77% 50%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 12 72% 94%;
+    --accent: 11 82% 92%;
+    --border: 11 70% 84%;
+    --input: 11 70% 84%;
+    --ring: 347 77% 50%;
+    --chart-1: 347 77% 50%;
+    --sidebar-background: 12 100% 99%;
+    --sidebar-accent: 11 82% 92%;
+    --sidebar-border: 11 70% 84%;
+    --sidebar-primary: 347 77% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 347 77% 50%;
+    --app-page-gradient: hsl(14 100% 96%);
+  }
+
+  html.theme-style-sunset.dark {
+    --background: 348 50% 8%;
+    --card: 350 42% 12%;
+    --popover: 350 42% 12%;
+    --primary: 12 74% 53%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 350 34% 16%;
+    --accent: 355 38% 18%;
+    --border: 356 28% 24%;
+    --input: 356 28% 24%;
+    --ring: 12 74% 53%;
+    --chart-1: 12 74% 53%;
+    --sidebar-background: 350 42% 12%;
+    --sidebar-accent: 355 38% 18%;
+    --sidebar-border: 356 28% 24%;
+    --sidebar-primary: 12 74% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 12 74% 53%;
+    --app-page-gradient: hsl(348 50% 8%);
+  }
+
+  html.theme-style-emerald {
+    --background: 152 72% 96%;
+    --card: 152 78% 99%;
+    --popover: 152 78% 99%;
+    --primary: 158 84% 32%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 151 46% 93%;
+    --accent: 153 52% 91%;
+    --border: 154 42% 82%;
+    --input: 154 42% 82%;
+    --ring: 158 84% 32%;
+    --chart-1: 158 84% 32%;
+    --sidebar-background: 152 78% 99%;
+    --sidebar-accent: 153 52% 91%;
+    --sidebar-border: 154 42% 82%;
+    --sidebar-primary: 158 84% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 158 84% 32%;
+    --app-page-gradient: hsl(152 72% 96%);
+  }
+
+  html.theme-style-emerald.dark {
+    --background: 154 50% 7%;
+    --card: 154 42% 11%;
+    --popover: 154 42% 11%;
+    --primary: 162 72% 42%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 154 32% 15%;
+    --accent: 155 36% 17%;
+    --border: 154 25% 22%;
+    --input: 154 25% 22%;
+    --ring: 162 72% 42%;
+    --chart-1: 162 72% 42%;
+    --sidebar-background: 154 42% 11%;
+    --sidebar-accent: 155 36% 17%;
+    --sidebar-border: 154 25% 22%;
+    --sidebar-primary: 162 72% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 162 72% 42%;
+    --app-page-gradient: hsl(154 50% 7%);
+  }
+
+  html.theme-style-obsidian {
+    --background: 210 40% 96%;
+    --card: 210 40% 99%;
+    --popover: 210 40% 99%;
+    --primary: 215 20% 44%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 214 32% 93%;
+    --accent: 214 30% 91%;
+    --border: 214 32% 84%;
+    --input: 214 32% 84%;
+    --ring: 215 20% 44%;
+    --chart-1: 215 20% 44%;
+    --sidebar-background: 210 40% 99%;
+    --sidebar-accent: 214 30% 91%;
+    --sidebar-border: 214 32% 84%;
+    --sidebar-primary: 215 20% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 215 20% 44%;
+    --app-page-gradient: hsl(210 40% 96%);
+  }
+
+  html.theme-style-obsidian.dark {
+    --background: 222 47% 5%;
+    --card: 222 38% 9%;
+    --popover: 222 38% 9%;
+    --primary: 215 25% 72%;
+    --primary-foreground: 222 47% 8%;
+    --muted: 217 33% 13%;
+    --accent: 217 33% 16%;
+    --border: 217 30% 17%;
+    --input: 217 30% 17%;
+    --ring: 215 25% 72%;
+    --chart-1: 215 25% 72%;
+    --sidebar-background: 222 38% 9%;
+    --sidebar-accent: 217 33% 16%;
+    --sidebar-border: 217 30% 17%;
+    --sidebar-primary: 215 25% 72%;
+    --sidebar-primary-foreground: 222 47% 8%;
+    --sidebar-ring: 215 25% 72%;
+    --app-page-gradient: hsl(222 47% 5%);
+  }
+
+  html,
+  body,
+  #root {
+    background: var(--app-page-gradient) !important;
+    background-color: var(--app-page-gradient) !important;
+    background-image: none !important;
+  }
+}
+
+@layer utilities {
+  .app-page-surface,
+  .app-gradient-surface,
+  .app-fixed-surface,
+  .app-main-scroll,
+  .app-bottom-nav {
+    background: var(--app-page-gradient) !important;
+    background-color: var(--app-page-gradient) !important;
+    background-image: none !important;
+    background-attachment: fixed !important;
+  }
+
+  .app-card-surface,
+  .surface,
+  .surface-card,
+  .card-soft,
+  .glass,
+  :where(
+    [class*='rounded-2xl'][class*='bg-card'],
+    [class*='rounded-3xl'][class*='bg-card'],
+    [class*='rounded-xl'][class*='bg-card']
+  ) {
+    background: hsl(var(--card) / var(--app-surface-main-alpha)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--primary) / var(--app-surface-border-alpha)) !important;
+    box-shadow:
+      0 12px 30px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)),
+      inset 0 1px 0 hsl(var(--foreground) / 0.03) !important;
+    backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
+    -webkit-backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
+  }
+
+  .app-card-surface-strong {
+    background: hsl(var(--card) / var(--app-surface-strong-alpha)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+    box-shadow:
+      0 18px 48px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-strong-alpha)),
+      inset 0 1px 0 hsl(var(--foreground) / 0.035) !important;
+    backdrop-filter: blur(calc(var(--app-surface-blur) + 2px)) saturate(var(--app-surface-saturate)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--app-surface-blur) + 2px)) saturate(var(--app-surface-saturate)) !important;
+  }
+
+  .app-card-surface-soft,
+  :where(
+    [class*='rounded-2xl'][class*='bg-background'],
+    [class*='rounded-3xl'][class*='bg-background'],
+    [class*='rounded-xl'][class*='bg-background']
+  ) {
+    background: hsl(var(--card) / var(--app-surface-soft-alpha)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--primary) / var(--app-surface-border-soft-alpha)) !important;
+    box-shadow:
+      0 8px 22px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.52)),
+      inset 0 1px 0 hsl(var(--foreground) / 0.025) !important;
+    backdrop-filter: blur(calc(var(--app-surface-blur) - 4px)) saturate(var(--app-surface-saturate)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--app-surface-blur) - 4px)) saturate(var(--app-surface-saturate)) !important;
+  }
+
+  .app-floating-surface,
+  .app-chart-tooltip-surface,
+  [data-radix-popper-content-wrapper] :where([role='dialog'], [role='menu'], [role='listbox'], [data-radix-select-content]) {
+    background: hsl(var(--popover) / var(--app-surface-floating-alpha)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+    box-shadow: var(--app-recharts-tooltip-shadow) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  :where(
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(.app-amount-input),
+    textarea,
+    [role='combobox']
+  ) {
+    background: hsl(var(--card) / var(--app-control-alpha)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--primary) / var(--app-control-border-alpha)) !important;
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.03) !important;
+    backdrop-filter: blur(12px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(135%) !important;
+  }
+
+  :where(.bg-gradient-to-r, .bg-gradient-to-l, .bg-gradient-to-t, .bg-gradient-to-b, .bg-gradient-to-br, .bg-gradient-to-bl, .bg-gradient-to-tr, .bg-gradient-to-tl) {
+    background-image: none !important;
+  }
+}
