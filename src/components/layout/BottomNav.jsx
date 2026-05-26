@@ -74,15 +74,22 @@ function BottomNavStyles() {
           height: var(--app-bottom-nav-height);
           padding-bottom: var(--app-safe-area-bottom);
           border: 0 !important;
+          border-top: 0 !important;
+          border-bottom: 0 !important;
           outline: 0 !important;
-          background: hsl(var(--background)) !important;
+
+          background: var(--app-page-gradient) !important;
+          background-attachment: fixed !important;
+
           box-shadow: none !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
         }
 
         html.dark .app-bottom-nav {
-          background: hsl(var(--background)) !important;
+          background: var(--app-page-gradient) !important;
+          background-attachment: fixed !important;
+
           box-shadow: none !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
