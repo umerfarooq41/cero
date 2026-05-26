@@ -525,122 +525,100 @@ main,
     --app-surface-saturate: 140%;
   }
 
-  html:not(.dark).theme-style-warm-aurora {
-    --primary: 35 60% 45%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 35 60% 45%;
-    --chart-1: 35 60% 45%;
-    --sidebar-primary: 35 60% 45%;
-    --sidebar-ring: 35 60% 45%;
-    --app-page-gradient:
-      radial-gradient(circle at 68% 22%, rgba(212, 163, 89, 0.24) 0%, rgba(212, 163, 89, 0) 48%),
-      radial-gradient(circle at 18% 82%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 52%),
-      linear-gradient(135deg, #fbfaf7 0%, #f5f3ee 100%);
-    --app-canvas-start: #fbfaf7;
-    --app-canvas-end: #f5f3ee;
+  html:not(.dark).theme-style-cyber {
+    --primary: 243 75% 59%;
+    --ring: 243 75% 59%;
+    --background: 235 100% 98%;
+    --app-page-gradient: linear-gradient(135deg, #f7f8ff 0%, #eeedff 48%, #e6eaff 100%);
   }
 
-  html.dark.theme-style-warm-aurora {
-    --primary: 38 72% 62%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 38 72% 62%;
-    --chart-1: 38 72% 62%;
-    --sidebar-primary: 38 72% 62%;
-    --sidebar-ring: 38 72% 62%;
-    --app-page-gradient:
-      radial-gradient(circle at 70% 18%, rgba(212, 163, 89, 0.16) 0%, rgba(212, 163, 89, 0) 48%),
-      radial-gradient(circle at 18% 82%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 52%),
-      linear-gradient(135deg, #090a0d 0%, #121316 100%);
-    --app-canvas-start: #090a0d;
-    --app-canvas-end: #121316;
+  html.dark.theme-style-cyber {
+    --primary: 245 94% 68%;
+    --ring: 245 94% 68%;
+    --background: 247 54% 5%;
+    --card: 247 36% 9%;
+    --popover: 247 36% 9%;
+    --app-page-gradient: radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.24), rgba(67, 56, 202, 0) 35%), radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.20), rgba(49, 46, 129, 0) 42%), linear-gradient(135deg, #030211 0%, #080721 100%);
   }
 
-  html:not(.dark).theme-style-vibrant-fluid {
-    --primary: 184 73% 38%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 184 73% 38%;
-    --chart-1: 184 73% 38%;
-    --sidebar-primary: 184 73% 38%;
-    --sidebar-ring: 184 73% 38%;
-    --app-page-gradient:
-      radial-gradient(circle at 92% 10%, hsla(14, 93%, 69%, 0.34) 0%, hsla(14, 93%, 69%, 0) 50%),
-      radial-gradient(circle at 8% 82%, hsla(184, 83%, 63%, 0.34) 0%, hsla(184, 83%, 63%, 0) 52%),
-      radial-gradient(circle at 88% 84%, hsla(27, 88%, 65%, 0.22) 0%, hsla(27, 88%, 65%, 0) 50%),
-      radial-gradient(circle at 20% 18%, hsla(210, 85%, 70%, 0.24) 0%, hsla(210, 85%, 70%, 0) 50%),
-      linear-gradient(135deg, #fff4ef 0%, #edfaff 100%);
-    --app-canvas-start: #fff4ef;
-    --app-canvas-end: #edfaff;
+  html:not(.dark).theme-style-aurora {
+    --primary: 184 90% 36%;
+    --ring: 184 90% 36%;
+    --background: 205 60% 98%;
+    --app-page-gradient: radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0) 30%), radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.14), rgba(20, 184, 166, 0) 32%), linear-gradient(135deg, #f8fafc 0%, #eef8ff 45%, #effdfa 100%);
   }
 
-  html.dark.theme-style-vibrant-fluid {
-    --primary: 190 90% 56%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 190 90% 56%;
-    --chart-1: 190 90% 56%;
-    --sidebar-primary: 190 90% 56%;
-    --sidebar-ring: 190 90% 56%;
-    --app-page-gradient:
-      radial-gradient(circle at 90% 10%, hsla(260, 85%, 28%, 0.34) 0%, hsla(260, 85%, 28%, 0) 50%),
-      radial-gradient(circle at 10% 80%, hsla(320, 75%, 28%, 0.24) 0%, hsla(320, 75%, 28%, 0) 52%),
-      radial-gradient(circle at 88% 82%, hsla(190, 90%, 22%, 0.24) 0%, hsla(190, 90%, 22%, 0) 50%),
-      radial-gradient(circle at 18% 20%, hsla(280, 80%, 32%, 0.24) 0%, hsla(280, 80%, 32%, 0) 50%),
-      linear-gradient(135deg, #070512 0%, #120820 100%);
-    --app-canvas-start: #070512;
-    --app-canvas-end: #120820;
+  html.dark.theme-style-aurora {
+    --primary: 184 90% 48%;
+    --ring: 184 90% 48%;
+    --background: 222 47% 5%;
+    --card: 222 36% 9%;
+    --popover: 222 36% 9%;
+    --app-page-gradient: radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0) 35%), radial-gradient(circle at 100% 8%, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0) 35%), linear-gradient(135deg, #020617 0%, #07111d 48%, #031018 100%);
   }
 
-  html:not(.dark).theme-style-ai-minimal {
-    --primary: 190 95% 38%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 190 95% 38%;
-    --chart-1: 190 95% 38%;
-    --sidebar-primary: 190 95% 38%;
-    --sidebar-ring: 190 95% 38%;
-    --app-page-gradient:
-      radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.13) 0%, rgba(0, 180, 216, 0) 58%),
-      radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.08) 0%, rgba(114, 9, 183, 0) 50%),
-      linear-gradient(135deg, #ffffff 0%, #f6fbff 100%);
-    --app-canvas-start: #ffffff;
-    --app-canvas-end: #f6fbff;
+  html:not(.dark).theme-style-sunset {
+    --primary: 343 81% 50%;
+    --ring: 343 81% 50%;
+    --background: 355 100% 98%;
+    --app-page-gradient: linear-gradient(135deg, #fff8f7 0%, #ffecef 50%, #fff0df 100%);
   }
 
-  html.dark.theme-style-ai-minimal {
-    --primary: 190 95% 58%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 190 95% 58%;
-    --chart-1: 190 95% 58%;
-    --sidebar-primary: 190 95% 58%;
-    --sidebar-ring: 190 95% 58%;
-    --app-page-gradient:
-      radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.22) 0%, rgba(0, 180, 216, 0) 58%),
-      radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.18) 0%, rgba(114, 9, 183, 0) 50%),
-      linear-gradient(135deg, #050812 0%, #090d16 100%);
-    --app-canvas-start: #050812;
-    --app-canvas-end: #090d16;
+  html.dark.theme-style-sunset {
+    --primary: 345 88% 64%;
+    --ring: 345 88% 64%;
+    --background: 346 72% 5%;
+    --card: 346 44% 9%;
+    --popover: 346 44% 9%;
+    --app-page-gradient: radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.22), rgba(225, 29, 72, 0) 40%), radial-gradient(circle at 12% 92%, rgba(234, 88, 12, 0.14), rgba(234, 88, 12, 0) 42%), linear-gradient(135deg, #100207 0%, #1b050f 100%);
   }
 
-  html:not(.dark).theme-style-energy-action {
-    --primary: 14 88% 49%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 14 88% 49%;
-    --chart-1: 14 88% 49%;
-    --sidebar-primary: 14 88% 49%;
-    --sidebar-ring: 14 88% 49%;
-    --app-page-gradient: linear-gradient(135deg, #fff5f1 0%, #f4f4f4 65%, #ffffff 100%);
-    --app-canvas-start: #fff5f1;
-    --app-canvas-end: #ffffff;
+  html:not(.dark).theme-style-emerald {
+    --primary: 160 84% 33%;
+    --ring: 160 84% 33%;
+    --background: 150 60% 98%;
+    --app-page-gradient: linear-gradient(135deg, #f4fdf7 0%, #e6fbf1 54%, #d9f8ec 100%);
   }
 
-  html.dark.theme-style-energy-action {
-    --primary: 14 82% 58%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 14 82% 58%;
-    --chart-1: 14 82% 58%;
-    --sidebar-primary: 14 82% 58%;
-    --sidebar-ring: 14 82% 58%;
-    --app-page-gradient: linear-gradient(135deg, #2a0d05 0%, #111113 64%, #09090b 100%);
-    --app-canvas-start: #2a0d05;
-    --app-canvas-end: #09090b;
+  html.dark.theme-style-emerald {
+    --primary: 160 84% 44%;
+    --ring: 160 84% 44%;
+    --background: 154 48% 4%;
+    --card: 154 36% 8%;
+    --popover: 154 36% 8%;
+    --app-page-gradient: radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.18), rgba(4, 120, 87, 0) 45%), linear-gradient(135deg, #020805 0%, #04140e 100%);
+  }
+
+  html:not(.dark).theme-style-quartz {
+    --primary: 25 82% 51%;
+    --ring: 25 82% 51%;
+    --background: 33 70% 98%;
+    --app-page-gradient: linear-gradient(135deg, #fffdf9 0%, #fdf3e8 54%, #fae8d4 100%);
+  }
+
+  html.dark.theme-style-quartz {
+    --primary: 27 88% 64%;
+    --ring: 27 88% 64%;
+    --background: 25 34% 5%;
+    --card: 25 28% 9%;
+    --popover: 25 28% 9%;
+    --app-page-gradient: radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.20), rgba(230, 137, 72, 0) 40%), linear-gradient(135deg, #0e0a07 0%, #21150d 100%);
+  }
+
+  html:not(.dark).theme-style-horizon {
+    --primary: 316 82% 50%;
+    --ring: 187 88% 42%;
+    --background: 292 80% 98%;
+    --app-page-gradient: linear-gradient(135deg, #fffbff 0%, #f5eaff 44%, #e5f7ff 100%);
+  }
+
+  html.dark.theme-style-horizon {
+    --primary: 314 91% 64%;
+    --ring: 186 93% 48%;
+    --background: 275 62% 4%;
+    --card: 275 40% 8%;
+    --popover: 275 40% 8%;
+    --app-page-gradient: radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.24), rgba(217, 70, 239, 0) 45%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.20), rgba(6, 182, 212, 0) 45%), linear-gradient(135deg, #04010a 0%, #0c0217 100%);
   }
 
   html,
@@ -896,5 +874,36 @@ main,
   .app-main-scroll::before,
   .app-main-scroll::after {
     animation: none !important;
+  }
+}
+
+/* ============================= */
+/* Unified canvas header/nav polish */
+/* Header, sidebar, and bottom nav inherit the same page canvas instead of
+   drawing separate glass blocks. */
+/* ============================= */
+@layer utilities {
+  .app-fixed-surface,
+  .app-gradient-surface,
+  .app-bottom-nav,
+  .app-sidebar-dock {
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+    background-size: var(--app-canvas-bg-size, cover) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .app-fixed-surface::before,
+  .app-fixed-surface::after,
+  .app-bottom-nav::before,
+  .app-bottom-nav::after,
+  .app-sidebar-dock::before,
+  .app-sidebar-dock::after {
+    display: none !important;
+    content: none !important;
   }
 }
