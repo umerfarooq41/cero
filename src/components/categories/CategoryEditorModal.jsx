@@ -149,7 +149,7 @@ export default function CategoryEditorModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 p-3 rounded-2xl border border-border/50  app-card-surface-soft  backdrop-blur-xl">
+        <div className="flex items-center gap-3 p-3 rounded-2xl app-card-surface-soft backdrop-blur-xl">
           <CategoryIcon icon={icon} color={color} size="lg" />
 
           <div className="min-w-0">
@@ -237,7 +237,7 @@ export default function CategoryEditorModal({
               Color
             </label>
 
-            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border/50  app-card-surface-soft  p-2 backdrop-blur-xl">
+            <div className="grid grid-cols-10 gap-2 rounded-xl app-card-surface-soft p-2 backdrop-blur-xl">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -260,7 +260,7 @@ export default function CategoryEditorModal({
               Icon
             </label>
 
-            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-border/50  app-card-surface-soft  backdrop-blur-xl">
+            <div className="grid grid-cols-6 sm:grid-cols-7 md:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl app-card-surface-soft backdrop-blur-xl">
               {iconNames.map((item) => (
                 <button
                   key={item}

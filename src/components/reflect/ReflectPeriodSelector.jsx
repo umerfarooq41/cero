@@ -100,7 +100,7 @@ export default function ReflectPeriodSelector({
       }
       contentClassName="space-y-3"
     >
-      <div className="grid grid-cols-2 rounded-2xl border border-border/60 app-card-surface p-1 backdrop-blur-xl">
+      <div className="grid grid-cols-2 rounded-2xl app-card-surface p-1 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => changeMode('month')}
@@ -134,7 +134,7 @@ export default function ReflectPeriodSelector({
         }
       >
         <Select value={String(year)} onValueChange={onYearChange}>
-          <SelectTrigger className="h-11 rounded-2xl border-border/60 app-card-surface backdrop-blur-xl">
+          <SelectTrigger className="h-11 rounded-2xl app-card-surface backdrop-blur-xl">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
 
@@ -152,7 +152,7 @@ export default function ReflectPeriodSelector({
             value={month === 'all' ? selectedMonth.value : month}
             onValueChange={onMonthChange}
           >
-            <SelectTrigger className="h-11 rounded-2xl border-border/60 app-card-surface backdrop-blur-xl">
+            <SelectTrigger className="h-11 rounded-2xl app-card-surface backdrop-blur-xl">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
 

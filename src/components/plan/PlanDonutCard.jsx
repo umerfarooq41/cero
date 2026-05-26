@@ -18,7 +18,7 @@ function DonutTooltip({ active, payload, currency, tab }) {
   const percent = planned > 0 ? Math.round((tracked / planned) * 100) : 0;
 
   return (
-    <div className="rounded-xl border bg-popover px-3 py-2 shadow-lg">
+    <div className="rounded-xl border app-card-surface-strong px-3 py-2 shadow-lg">
       <p className="text-xs font-bold tabular-nums">{item?.name}</p>
 
       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -47,7 +47,7 @@ export default function PlanDonutCard({
   currency,
 }) {
   return (
-    <div className="rounded-3xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl">
+    <div className="rounded-3xl app-card-surface p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">Tracked</p>

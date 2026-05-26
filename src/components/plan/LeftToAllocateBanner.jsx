@@ -35,7 +35,7 @@ export default function LeftToAllocateBanner({
     <div
       className={cn(
         sticky ? 'sticky top-[72px] z-20' : 'relative z-auto',
-        'rounded-3xl border border-border/60 app-card-surface px-3 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300 sm:px-4',
+        'rounded-3xl app-card-surface px-3 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300 sm:px-4',
         isEditMode ? bgColor : 'border-border'
       )}
     >

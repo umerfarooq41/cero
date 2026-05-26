@@ -57,7 +57,7 @@ function QuickAction({ to, icon: Icon, title, subtitle }) {
   return (
     <Link
       to={to}
-      className="group rounded-2xl border border-border/60 app-card-surface-soft p-3 transition-all hover:-translate-y-0.5 hover:bg-card/40 hover:shadow-sm sm:p-4"
+      className="group rounded-2xl app-card-surface-soft p-3 transition-all hover:-translate-y-0.5 hover:brightness-105 hover:shadow-sm sm:p-4"
     >
       <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-10 sm:w-10 sm:rounded-2xl">

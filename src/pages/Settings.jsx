@@ -83,9 +83,9 @@ const toneClasses = {
     dot: 'bg-rose-500',
   },
   slate: {
-    tile: 'bg-slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
-    selected: 'border-slate-500/30 bg-slate-500/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
-    dot: 'bg-slate-500',
+    tile: 'app-card-surface-soft0/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
+    selected: 'border-slate-500/30 app-card-surface-soft0/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
+    dot: 'app-card-surface-soft0',
   },
 };
 
@@ -177,7 +177,7 @@ function IconTile({ icon: Icon, tone = 'blue', className }) {
 
 function SettingsSection({ title, description, children, tone = 'blue' }) {
   return (
-    <section className="settings-section animate-child mb-4 overflow-hidden rounded-3xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl">
+    <section className="settings-section animate-child mb-4 overflow-hidden rounded-3xl app-card-surface">
       <div className="settings-section-header flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4">
         <div className="min-w-0">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -214,7 +214,7 @@ function SettingRow({
       onClick={onClick}
       className={cn(
         'settings-row w-full px-1 py-3 text-left transition-colors',
-        onClick && 'rounded-2xl hover:bg-card/40',
+        onClick && 'rounded-2xl app-surface-hover',
         stackOnMobile
           ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'
           : 'flex items-center gap-4'
@@ -253,8 +253,8 @@ function SegmentedOption({ active, onClick, icon: Icon, label }) {
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2 text-xs font-bold transition-all',
         active
-          ? 'bg-background text-foreground shadow-sm ring-1 ring-border/60'
-          : 'text-muted-foreground hover:bg-card/40 hover:text-foreground'
+          ? 'app-card-surface-strong text-foreground shadow-sm ring-1 ring-border/60'
+          : 'text-muted-foreground app-surface-hover hover:text-foreground'
       )}
     >
       <Icon className="h-4 w-4" />
@@ -283,7 +283,7 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
       <span className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/10 to-black/5 dark:from-white/10 dark:to-black/20" />
 
       {active && (
-        <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">
+        <span className="relative flex h-4 w-4 items-center justify-center rounded-full app-card-surface-strong text-foreground shadow-sm">
           <Check className="h-3 w-3" />
         </span>
       )}
@@ -556,7 +556,7 @@ export default function Settings() {
             description="Choose system, light, or dark mode."
             stackOnMobile
           >
-            <div className="grid grid-cols-3 gap-1 rounded-2xl border border-border/60 app-card-surface-soft p-1">
+            <div className="grid grid-cols-3 gap-1 rounded-2xl app-card-surface-soft p-1">
               {themeOptions.map((option) => (
                 <SegmentedOption
                   key={option.value}
@@ -732,7 +732,7 @@ export default function Settings() {
         </SettingsSection>
 
         <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-          <DialogContent className="overflow-hidden rounded-3xl border border-border/60 app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+          <DialogContent className="overflow-hidden rounded-3xl app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
             <DialogHeader className="border-b border-border/50 px-6 py-5">
               <DialogTitle className="flex items-center gap-3 text-lg font-bold">
                 <IconTile icon={Download} tone="blue" />
@@ -795,7 +795,7 @@ export default function Settings() {
                 <input
                   value={resetConfirmText}
                   onChange={(event) => setResetConfirmText(event.target.value)}
-                  className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm font-semibold outline-none ring-offset-background transition focus:ring-2 focus:ring-destructive/30"
+                  className="h-11 w-full rounded-2xl border border-border app-card-surface-strong px-4 text-sm font-semibold outline-none ring-offset-background transition focus:ring-2 focus:ring-destructive/30"
                   placeholder="RESET"
                 />
               </label>

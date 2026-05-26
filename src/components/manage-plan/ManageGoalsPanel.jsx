@@ -308,12 +308,12 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl border-border/60 app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Goal' : 'New Goal'}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 rounded-2xl border border-border/50 app-card-surface-soft p-3 backdrop-blur-xl  ">
+        <div className="flex items-center gap-3 rounded-2xl app-card-surface-soft p-3">
           <CategoryIcon icon={form.icon_key || 'target'} color={form.color_key || '#276FE4'} size="lg" />
 
           <div className="min-w-0">
@@ -427,7 +427,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
 
-            <div className="grid grid-cols-10 gap-2 rounded-xl border border-border/50 app-card-surface-soft p-2 backdrop-blur-xl  ">
+            <div className="grid grid-cols-10 gap-2 rounded-xl app-card-surface-soft p-2">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -446,7 +446,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
 
-            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl border border-border/50 app-card-surface-soft p-2 backdrop-blur-xl   sm:grid-cols-7 md:grid-cols-8">
+            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl app-card-surface-soft p-2 sm:grid-cols-7 md:grid-cols-8">
               {iconNames.map((item) => (
                 <button
                   key={item}
@@ -552,7 +552,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
         : 'text-muted-foreground';
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl">
+    <div className="overflow-hidden rounded-2xl app-card-surface">
       <div className="flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-accent/30">
         <button
           type="button"
@@ -737,7 +737,7 @@ export default function ManageGoalsPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl app-card-surface p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-sm font-semibold">Savings goals</h2>
           <p className="mt-1 text-xs text-muted-foreground">

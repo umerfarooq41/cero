@@ -685,59 +685,122 @@ main,
   }
 }
 
-/* Mobile viewport + navigation stability */
+/* ============================= */
+/* 🧊 GLOBAL CERO SURFACE SYSTEM */
+/* Tune all cards/boxes/forms from here. */
+/* ============================= */
 @layer base {
   :root {
-    --app-safe-area-top: env(safe-area-inset-top, 0px);
+    --app-card-alpha: 0.66;
+    --app-card-alpha-strong: 0.82;
+    --app-card-alpha-soft: 0.42;
+    --app-card-border-alpha: 0.58;
+    --app-card-shadow-alpha: 0.08;
+    --app-card-blur: 20px;
+    --app-card-saturate: 155%;
+    --app-nav-alpha: 0.54;
     --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --app-bottom-nav-height: calc(4.25rem + var(--app-safe-area-bottom));
+    --app-bottom-nav-height: calc(4rem + var(--app-safe-area-bottom));
+  }
+
+  html.dark {
+    --app-card-alpha: 0.50;
+    --app-card-alpha-strong: 0.68;
+    --app-card-alpha-soft: 0.30;
+    --app-card-border-alpha: 0.34;
+    --app-card-shadow-alpha: 0.28;
+    --app-nav-alpha: 0.48;
   }
 
   html,
   body,
   #root {
-    width: 100%;
     min-height: 100%;
-    min-height: 100dvh;
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
-    overscroll-behavior-y: none;
   }
 
   body {
-    margin: 0;
     min-height: 100dvh;
-    overflow: hidden;
+    min-height: 100svh;
   }
 }
 
 @layer utilities {
-  .app-main-scroll {
-    padding-bottom: calc(var(--app-bottom-nav-height) + 0.75rem);
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
+  .app-page-surface,
+  .app-main-scroll,
+  .app-gradient-surface,
+  .app-fixed-surface {
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
   }
 
-  @media (min-width: 1024px) {
-    .app-main-scroll {
-      padding-bottom: 0;
-    }
+  .app-card-surface {
+    background: hsl(var(--card) / var(--app-card-alpha)) !important;
+    border: 1px solid hsl(var(--border) / var(--app-card-border-alpha)) !important;
+    box-shadow:
+      0 1px 0 hsl(var(--background) / 0.45) inset,
+      0 14px 36px hsl(var(--foreground) / var(--app-card-shadow-alpha)) !important;
+    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate)) !important;
+    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate)) !important;
+  }
+
+  .app-card-surface-strong {
+    background: hsl(var(--card) / var(--app-card-alpha-strong)) !important;
+    border: 1px solid hsl(var(--border) / calc(var(--app-card-border-alpha) + 0.12)) !important;
+    box-shadow:
+      0 1px 0 hsl(var(--background) / 0.5) inset,
+      0 18px 52px hsl(var(--foreground) / calc(var(--app-card-shadow-alpha) + 0.05)) !important;
+    backdrop-filter: blur(calc(var(--app-card-blur) + 4px)) saturate(var(--app-card-saturate)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--app-card-blur) + 4px)) saturate(var(--app-card-saturate)) !important;
+  }
+
+  .app-card-surface-soft {
+    background: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
+    border: 1px solid hsl(var(--border) / calc(var(--app-card-border-alpha) - 0.12)) !important;
+    box-shadow: 0 1px 0 hsl(var(--background) / 0.28) inset !important;
+    backdrop-filter: blur(calc(var(--app-card-blur) - 4px)) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(calc(var(--app-card-blur) - 4px)) saturate(135%) !important;
+  }
+
+  .glass,
+  .surface,
+  .surface-card,
+  .card-soft,
+  .card-elevated {
+    background: hsl(var(--card) / var(--app-card-alpha)) !important;
+    border-color: hsl(var(--border) / var(--app-card-border-alpha)) !important;
+    box-shadow:
+      0 1px 0 hsl(var(--background) / 0.42) inset,
+      0 14px 36px hsl(var(--foreground) / var(--app-card-shadow-alpha)) !important;
+    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate)) !important;
+    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate)) !important;
   }
 
   .app-bottom-nav {
+    background: hsl(var(--card) / var(--app-nav-alpha)) !important;
+    background-image: none !important;
+    border: 0 !important;
     border-top: 0 !important;
     border-bottom: 0 !important;
     box-shadow: none !important;
     outline: 0 !important;
-    background: hsl(var(--card) / 0.56) !important;
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
   }
 
-  .dark .app-bottom-nav {
-    background: hsl(var(--card) / 0.42) !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
+  .app-sidebar-dock {
+    background: hsl(var(--card) / var(--app-nav-alpha)) !important;
+    border: 0 !important;
     box-shadow: none !important;
+    outline: 0 !important;
+    backdrop-filter: blur(22px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+  }
+}
+
+@layer utilities {
+  .app-surface-hover:hover {
+    background: hsl(var(--card) / calc(var(--app-card-alpha-soft) + 0.14)) !important;
   }
 }

@@ -193,7 +193,7 @@ function PlanAmountRow({
       className={cn(
         'flex items-center gap-3 px-4 py-2.5',
         row.isSubcategory && 'pl-14',
-        row.sourceType && 'app-card-surface-soft '
+        row.sourceType && 'app-card-surface-soft'
       )}
     >
       {!row.isSubcategory && (
@@ -602,7 +602,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const count = items.filter((item) => !item.isSectionHeader).length;
 
     return (
-      <section className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl">
+      <section className="overflow-hidden rounded-2xl app-card-surface">
         <button
           type="button"
           onClick={() => toggleSection(type)}
@@ -647,7 +647,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                 return (
                   <div
                     key={row.key}
-                    className="flex items-center gap-3 app-card-surface-soft px-4 py-3 "
+                    className="flex items-center gap-3 app-card-surface-soft px-4 py-3"
                   >
                     <CategoryIcon icon={row.icon} color={row.color} size="sm" />
 

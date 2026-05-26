@@ -413,7 +413,7 @@ export default function AddTransaction() {
           Back
         </Button>
 
-        <div className="animate-child mb-6 rounded-3xl border border-border/60 app-card-surface p-6 shadow-md backdrop-blur-xl md:p-8">
+        <div className="animate-child mb-6 rounded-3xl app-card-surface p-6 shadow-md backdrop-blur-xl md:p-8">
           <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Amount
           </div>
@@ -475,7 +475,7 @@ export default function AddTransaction() {
           className="mb-6 animate-child"
         />
 
-        <div className="animate-child space-y-5 rounded-2xl border border-border/60 app-card-surface p-5 shadow-sm backdrop-blur-xl">
+        <div className="animate-child space-y-5 rounded-2xl app-card-surface p-5">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {type === 'transfer' ? 'From Account' : 'Account'}

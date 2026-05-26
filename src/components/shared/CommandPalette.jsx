@@ -87,7 +87,7 @@ export default function CommandPalette() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="overflow-hidden p-0 shadow-2xl border-border/60 app-card-surface-strong backdrop-blur-2xl max-w-md">
+      <DialogContent className="overflow-hidden p-0 shadow-2xl app-card-surface-strong backdrop-blur-2xl max-w-md">
         <Command className="bg-transparent">
           <CommandInput placeholder="Type a command or search…" className="h-12 text-sm" />
           <CommandList className="max-h-80">

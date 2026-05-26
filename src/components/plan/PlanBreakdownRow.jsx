@@ -42,7 +42,7 @@ export default function PlanBreakdownRow({ item, currency }) {
     <div
       className={cn(
         'px-3 py-3 transition-colors sm:px-4',
-        isSourceRow && 'app-card-surface-soft '
+        isSourceRow && 'app-card-surface-soft'
       )}
     >
       <div className="flex min-w-0 items-center gap-3">

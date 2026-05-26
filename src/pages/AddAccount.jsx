@@ -154,7 +154,7 @@ export default function AddAccount() {
           Back
         </Button>
 
-        <div className="animate-child space-y-5 rounded-2xl border border-border/60 app-card-surface p-5 shadow-sm backdrop-blur-xl">
+        <div className="animate-child space-y-5 rounded-2xl app-card-surface p-5">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Account Name
@@ -223,7 +223,7 @@ export default function AddAccount() {
               Color
             </label>
 
-            <div className="grid grid-cols-8 gap-2 rounded-xl border border-border/60 app-card-surface p-3 backdrop-blur-xl">
+            <div className="grid grid-cols-8 gap-2 rounded-xl border border-border/60 app-card-surface-soft p-3 backdrop-blur-xl">
               {colors.map((item) => (
                 <button
                   key={item}

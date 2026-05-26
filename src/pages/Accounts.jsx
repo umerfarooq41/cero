@@ -82,7 +82,7 @@ export default function Accounts() {
     );
 
     return (
-      <section className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl">
+      <section className="overflow-hidden rounded-2xl app-card-surface">
         <button
           type="button"
           onClick={() => toggleGroup(groupKey)}
@@ -141,7 +141,7 @@ export default function Accounts() {
                 <Link
                   key={account.id}
                   to={`/accounts/${account.id}`}
-                  className="grid min-h-[4.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-card/40 "
+                  className="grid min-h-[4.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:brightness-105"
                 >
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"

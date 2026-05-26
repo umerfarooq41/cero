@@ -25,7 +25,7 @@ export default function StatCard({ label, amount, planned, type = 'neutral', ico
 
   return (
     <div className={cn(
-      "rounded-2xl border border-border/60 app-card-surface backdrop-blur-xl p-4 shadow-sm space-y-3",
+      "rounded-2xl app-card-surface backdrop-blur-xl p-4 shadow-sm space-y-3",
       className
     )}>
       <div className="flex items-center justify-between">

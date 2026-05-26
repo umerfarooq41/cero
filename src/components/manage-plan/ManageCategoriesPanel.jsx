@@ -95,7 +95,7 @@ export default function ManageCategoriesPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 app-card-surface p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl app-card-surface p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-sm font-semibold">Budget structure</h2>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -171,7 +171,7 @@ export default function ManageCategoriesPanel() {
         />
 
         {showArchived && archivedCategories.length > 0 && (
-          <div className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl opacity-75">
+          <div className="overflow-hidden rounded-2xl app-card-surface opacity-75">
             <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
               <Archive className="h-3.5 w-3.5 text-muted-foreground" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

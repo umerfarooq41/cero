@@ -131,7 +131,7 @@ function FilterPill({ active, children, icon: Icon, onClick }) {
         'inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200',
         active
           ? 'border-primary/20 bg-primary/10 text-primary shadow-sm'
-          : 'border-border/60 app-card-surface text-muted-foreground hover:bg-card/40 hover:text-foreground'
+          : 'app-card-surface text-muted-foreground hover:brightness-105 hover:text-foreground'
       )}
     >
       {Icon && <Icon className="h-3.5 w-3.5" />}
@@ -585,9 +585,9 @@ export default function TransactionHistory() {
           {sortedDates.map((date) => (
             <div
               key={date}
-              className="overflow-hidden rounded-2xl border border-border/60 app-card-surface shadow-sm backdrop-blur-xl"
+              className="overflow-hidden rounded-2xl app-card-surface"
             >
-              <div className="border-b border-border/50 app-card-surface px-4 py-2.5 backdrop-blur-xl">
+              <div className="border-b border-border/50 app-card-surface-soft px-4 py-2.5 backdrop-blur-xl">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {date !== 'No Date'
                     ? format(new Date(date), 'EEEE, MMM d')

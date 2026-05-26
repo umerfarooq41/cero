@@ -203,7 +203,7 @@ function AnimatedBar({ value, className, delay = 'delay-150' }) {
   const scaleX = safeValue / 100;
 
   return (
-    <div className="h-1.5 overflow-hidden rounded-full bg-muted/70">
+    <div className="h-1.5 overflow-hidden rounded-full bg-muted/60">
       <div
         className={cn(
           'h-full origin-left rounded-full transition-transform duration-700 ease-out will-change-transform',

@@ -33,7 +33,7 @@ export default function MonthSelector({
         if (info.offset.x > 40) goToPreviousMonth();
       }}
       className={cn(
-        'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1.5 rounded-2xl border border-border/60 app-card-surface p-1.5 shadow-sm backdrop-blur-xl',
+        'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1.5 rounded-2xl app-card-surface p-1.5 shadow-sm backdrop-blur-xl',
         className
       )}
     >
