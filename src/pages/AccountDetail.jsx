@@ -126,14 +126,7 @@ function AccountBalanceHero({ account, startingBalance, balance, isLiability, fo
 
   return (
     <section className="animate-child mb-6 overflow-hidden rounded-3xl app-card-surface shadow-md">
-      <div
-        className={cn(
-          'p-5 sm:p-6',
-          isLiability
-            ? 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent'
-            : 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent'
-        )}
-      >
+      <div className="p-5 sm:p-6">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Current Balance
         </div>

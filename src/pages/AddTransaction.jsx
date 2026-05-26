@@ -436,6 +436,7 @@ export default function AddTransaction() {
                 autoFocus
                 inputMode="decimal"
                 className="
+                  app-amount-input
                   min-w-[4ch]
                   max-w-[8ch]
                   border-none
