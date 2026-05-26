@@ -276,55 +276,73 @@ export function buildPlanViewData({
   };
 }
 
+const DONUT_PALETTES = {
+  income: ['#047857', '#059669', '#10B981', '#34D399', '#A7F3D0'],
+  expense: ['#C81E1E', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
+  savings: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#BFDBFE'],
+  debt: ['#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#DDD6FE'],
+};
+
+function getDonutPalette(activeTab, tab) {
+  return DONUT_PALETTES[activeTab] || tab?.shades || ['#2563EB'];
+}
+
+function buildNoTrackedDonutSlice() {
+  return [
+    {
+      name: 'No tracked data',
+      value: 1,
+      tracked: 0,
+      planned: 0,
+      remaining: 0,
+      share: 0,
+      color: '#E5E7EB',
+    },
+  ];
+}
+
 export function buildDonutChartData({ activeTab, chartData = [], tab }) {
-  if (chartData.length === 0) {
-    return [
-      {
-        name: 'No data',
-        value: 1,
-        tracked: 0,
-        planned: 0,
-        remaining: 0,
-        color: '#E5E7EB',
-      },
-    ];
+  const trackedRows = chartData
+    .map((item) => ({
+      ...item,
+      tracked: Number(item.tracked || 0),
+      planned: Number(item.planned || 0),
+    }))
+    .filter((item) => item.tracked > 0)
+    .sort((a, b) => b.tracked - a.tracked);
+
+  if (trackedRows.length === 0) {
+    return buildNoTrackedDonutSlice();
   }
 
-  const sorted = [...chartData].sort((a, b) => {
-    const aValue = Number(a.tracked || 0) || Number(a.planned || 0);
-    const bValue = Number(b.tracked || 0) || Number(b.planned || 0);
-    return bValue - aValue;
-  });
+  const palette = getDonutPalette(activeTab, tab);
+  const topFour = trackedRows.slice(0, 4);
+  const others = trackedRows.slice(4);
+  const totalTracked = trackedRows.reduce((sum, item) => sum + item.tracked, 0);
 
-  const topFour = sorted.slice(0, 4).map((item, index) => ({
+  const visibleRows = topFour.map((item, index) => ({
     ...item,
-    color: item.color || tab.shades[index],
-    value: Math.max(Number(item.tracked || 0) || Number(item.planned || 0), 0.01),
+    color: palette[index] || tab?.color || '#2563EB',
+    value: item.tracked,
+    share: totalTracked > 0 ? (item.tracked / totalTracked) * 100 : 0,
   }));
 
-  const others = sorted.slice(4);
+  if (others.length === 0) return visibleRows;
 
-  if (others.length === 0) return topFour;
-
-  const othersTracked = others.reduce(
-    (sum, item) => sum + Number(item.tracked || 0),
-    0
-  );
-  const othersPlanned = others.reduce(
-    (sum, item) => sum + Number(item.planned || 0),
-    0
-  );
+  const othersTracked = others.reduce((sum, item) => sum + item.tracked, 0);
+  const othersPlanned = others.reduce((sum, item) => sum + item.planned, 0);
 
   return [
-    ...topFour,
+    ...visibleRows,
     {
       id: `${activeTab}-others`,
       name: 'Others',
       planned: othersPlanned,
       tracked: othersTracked,
       remaining: othersPlanned - othersTracked,
-      color: tab.shades[4] || tab.color,
-      value: Math.max(othersTracked || othersPlanned, 0.01),
+      color: palette[4] || tab?.color || '#94A3B8',
+      value: othersTracked,
+      share: totalTracked > 0 ? (othersTracked / totalTracked) * 100 : 0,
       isOthers: true,
     },
   ];

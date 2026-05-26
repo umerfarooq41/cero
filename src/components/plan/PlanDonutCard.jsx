@@ -3,40 +3,25 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
-  Tooltip,
 } from 'recharts';
 
 import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
 
-function DonutTooltip({ active, payload, currency, tab }) {
-  if (!active || !payload?.length) return null;
-
-  const item = payload[0]?.payload;
-  const tracked = Number(item?.tracked || 0);
-  const planned = Number(item?.planned || 0);
-  const percent = planned > 0 ? Math.round((tracked / planned) * 100) : 0;
-
+function LegendItem({ item }) {
   return (
-    <div className="rounded-xl app-chart-tooltip-surface px-3 py-2 shadow-lg">
-      <p className="text-xs font-bold tabular-nums">{item?.name}</p>
+    <div className="flex min-w-0 items-center justify-center gap-1.5 text-[10px] font-semibold leading-4 text-muted-foreground sm:text-[11px]">
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: item.color }}
+        aria-hidden="true"
+      />
 
-      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-        <span>{tab.label}</span>
-        <PlanMoney
-          amount={tracked}
-          currency={currency}
-          compact
-          className="font-semibold text-popover-foreground"
-        />
-      </div>
+      <span className="min-w-0 truncate">{item.name}</span>
 
-      <p
-        className="mt-1 text-[11px] font-semibold tabular-nums"
-        style={{ color: item?.color }}
-      >
-        {percent}% tracked
-      </p>
+      <span className="shrink-0 tabular-nums text-foreground/75">
+        {Math.round(item.share || 0)}%
+      </span>
     </div>
   );
 }
@@ -51,6 +36,9 @@ export default function PlanDonutCard({
   progress,
   currency,
 }) {
+  const hasTrackedData = chartData.some((item) => Number(item.tracked || 0) > 0);
+  const legendItems = hasTrackedData ? donutChartData : [];
+
   return (
     <div className="rounded-3xl app-card-surface p-4">
       <div className="flex items-start justify-between gap-4">
@@ -58,13 +46,13 @@ export default function PlanDonutCard({
           <p className="text-xs font-medium text-muted-foreground">Tracked</p>
 
           <h2
-  className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
-  style={{
-    color: tab.color || donutChartData?.[0]?.color || 'hsl(var(--foreground))',
-  }}
->
-  <PlanMoney amount={totalTracked} currency={currency} />
-</h2>
+            className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
+            style={{
+              color: tab.color || donutChartData?.[0]?.color || 'hsl(var(--foreground))',
+            }}
+          >
+            <PlanMoney amount={totalTracked} currency={currency} />
+          </h2>
 
           <p className="mt-1 text-xs text-muted-foreground">
             {tab.label} of{' '}
@@ -101,14 +89,14 @@ export default function PlanDonutCard({
               nameKey="name"
               innerRadius={66}
               outerRadius={92}
-              paddingAngle={donutChartData.length > 1 ? 3 : 0}
+              paddingAngle={hasTrackedData && donutChartData.length > 1 ? 3 : 0}
               stroke="none"
               isAnimationActive
             >
               {donutChartData.map((entry, index) => (
                 <Cell
                   key={`${entry.name}-${index}`}
-                  fill={chartData.length > 0 ? entry.color : '#E5E7EB'}
+                  fill={hasTrackedData ? entry.color : '#E5E7EB'}
                   stroke="none"
                   tabIndex={-1}
                   focusable="false"
@@ -116,18 +104,6 @@ export default function PlanDonutCard({
                 />
               ))}
             </Pie>
-
-            <Tooltip
-              content={<DonutTooltip currency={currency} tab={tab} />}
-              cursor={false}
-              offset={12}
-              wrapperStyle={{
-                outline: 'none',
-                zIndex: 30,
-                pointerEvents: 'none',
-              }}
-              allowEscapeViewBox={{ x: false, y: false }}
-            />
           </PieChart>
         </ResponsiveContainer>
 
@@ -141,6 +117,21 @@ export default function PlanDonutCard({
           </p>
         </div>
       </div>
+
+      {legendItems.length > 0 ? (
+        <div
+          className="mt-2 grid w-full items-center gap-2"
+          style={{ gridTemplateColumns: `repeat(${legendItems.length}, minmax(0, 1fr))` }}
+        >
+          {legendItems.map((item) => (
+            <LegendItem key={item.id || item.name} item={item} />
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-center text-[11px] font-medium text-muted-foreground">
+          No tracked {tab.title.toLowerCase()} yet
+        </p>
+      )}
     </div>
   );
 }
