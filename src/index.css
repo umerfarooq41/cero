@@ -175,28 +175,35 @@
 
 /* ============================= */
 /* 🖱️ GLOBAL SCROLL POLISH */
+/* Hide visible scrollbars everywhere while keeping scrolling active */
 /* ============================= */
 
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+html,
+body,
+#root,
+main,
+[data-scroll],
+.app-main-scroll,
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Legacy Edge / IE */
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-  border-radius: 99px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.4);
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+main::-webkit-scrollbar,
+[data-scroll]::-webkit-scrollbar,
+.app-main-scroll::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
 
 main,
-[data-scroll] {
+[data-scroll],
+.app-main-scroll {
   -webkit-overflow-scrolling: touch;
 }
 
