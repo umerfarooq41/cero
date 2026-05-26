@@ -139,7 +139,7 @@ function getToneClasses(tone = 'default') {
       text: 'text-[hsl(var(--success))]',
       bg: 'bg-[hsl(var(--success)/0.1)]',
       ring: 'ring-[hsl(var(--success)/0.15)]',
-      bar: 'bg-[hsl(var(--success))]',
+      bar: 'bg-primary',
     };
   }
 
@@ -148,7 +148,7 @@ function getToneClasses(tone = 'default') {
       text: 'text-destructive',
       bg: 'bg-destructive/10',
       ring: 'ring-destructive/15',
-      bar: 'bg-destructive',
+      bar: 'bg-primary',
     };
   }
 
@@ -157,7 +157,7 @@ function getToneClasses(tone = 'default') {
       text: 'text-amber-500 dark:text-amber-400',
       bg: 'bg-amber-500/10',
       ring: 'ring-amber-500/15',
-      bar: 'bg-amber-400',
+      bar: 'bg-primary',
     };
   }
 
@@ -203,7 +203,7 @@ function AnimatedBar({ value, className, delay = 'delay-150' }) {
   const scaleX = safeValue / 100;
 
   return (
-    <div className="h-1.5 overflow-hidden rounded-full bg-muted/60">
+    <div className="h-2 overflow-hidden rounded-full bg-primary/10">
       <div
         className={cn(
           'h-full origin-left rounded-full transition-transform duration-700 ease-out will-change-transform',
@@ -233,9 +233,42 @@ function PercentBar({ label, value, className, delay }) {
   );
 }
 
+function MetricProgressRow({
+  label,
+  value,
+  valueText,
+  className = 'bg-primary',
+  delay = 'delay-150',
+  valueClassName = 'text-foreground',
+}) {
+  const safeValue = clampPercent(value);
+
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <span className="w-12 shrink-0 text-right text-xs font-medium text-muted-foreground">
+        {label}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <AnimatedBar value={safeValue} className={className} delay={delay} />
+      </div>
+
+      <span
+        className={cn(
+          'w-14 shrink-0 text-right text-xs font-bold tabular-nums',
+          valueClassName
+        )}
+      >
+        {valueText ?? `${Math.round(safeValue)}%`}
+      </span>
+    </div>
+  );
+}
+
 function SummaryCard({
   icon: Icon,
   title,
+  subtitle,
   action,
   value,
   valueTone = 'default',
@@ -248,6 +281,7 @@ function SummaryCard({
     <DashboardSectionCard
       icon={Icon}
       title={title}
+      subtitle={subtitle}
       action={action}
       className={cn('relative self-start !h-auto p-3 sm:p-4', className)}
       contentClassName="space-y-2.5"
@@ -286,6 +320,7 @@ function HeroCashFlowCard({
     <SummaryCard
       icon={BarChart3}
       title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
+      subtitle={isYear ? 'Income minus expenses across the selected year.' : 'Income minus expenses for the selected month.'}
       value={<CurrencyAmount amount={netCashFlow} currency={currency} />}
       valueTone={tone}
       action={<StatusPill tone={tone}>{positive ? 'Positive' : 'Negative'}</StatusPill>}
@@ -306,16 +341,23 @@ function HeroCashFlowCard({
         />
       </div>
 
-      <div className="space-y-1">
-        <AnimatedBar
+      <div className="space-y-2.5 pt-1">
+        <MetricProgressRow
+          label="Saved"
           value={savedProgress}
-          className={positive ? 'bg-[hsl(var(--success))]' : 'bg-destructive'}
+          valueText={`${Math.round(savedProgress)}%`}
+          className="bg-primary"
+          valueClassName="text-primary"
         />
 
-        <div className="flex items-center justify-between text-[11px] leading-4 text-muted-foreground">
-          <span className="tabular-nums">{Math.round(savedProgress)}% saved</span>
-          <span className="tabular-nums">{Math.round(expenseProgress)}% spent</span>
-        </div>
+        <MetricProgressRow
+          label="Spent"
+          value={expenseProgress}
+          valueText={`${Math.round(expenseProgress)}%`}
+          className="bg-primary"
+          delay="delay-300"
+          valueClassName="text-primary"
+        />
       </div>
     </SummaryCard>
   );
@@ -462,6 +504,7 @@ export default function ReflectSummaryCard({
       <SummaryCard
         icon={Wallet}
         title="Net Worth"
+        subtitle="Assets compared with liabilities."
         value={<CurrencyAmount amount={netWorth} currency={currency} />}
         valueTone={netWorthTone}
       >
@@ -481,23 +524,22 @@ export default function ReflectSummaryCard({
           />
         </div>
 
-        <div className="space-y-1">
-          <AnimatedBar
+        <div className="space-y-2.5 pt-1">
+          <MetricProgressRow
+            label="Asset"
             value={computed.netWorthHealth}
-            className="bg-cyan-400"
+            valueText={`${Math.round(computed.netWorthHealth)}%`}
+            className="bg-primary"
             delay="delay-300"
+            valueClassName="text-primary"
           />
-
-          <p className="text-[11px] leading-4 text-muted-foreground">
-            <span className="tabular-nums">{Math.round(computed.netWorthHealth)}%</span>{' '}
-            asset-backed
-          </p>
         </div>
       </SummaryCard>
 
       <SummaryCard
         icon={Activity}
         title={isYear ? 'Yearly Performance' : 'Budget Health'}
+        subtitle={isYear ? 'Tracked outflow against yearly planned pace.' : 'Tracked expenses against your monthly plan.'}
         value={
           isYear ? (
             <CurrencyAmount amount={computed.yearlyTotalYtd} currency={currency} />
@@ -542,7 +584,7 @@ export default function ReflectSummaryCard({
               <PercentBar
                 label="Year Passed"
                 value={computed.yearElapsedPercent}
-                className="bg-cyan-400"
+                className="bg-primary/35"
                 delay="delay-300"
               />
 
@@ -581,22 +623,22 @@ export default function ReflectSummaryCard({
             </div>
 
             {plannedExpenses > 0 ? (
-              <div className="space-y-1">
-                <AnimatedBar
+              <div className="space-y-2.5 pt-1">
+                <MetricProgressRow
+                  label="Used"
                   value={computed.monthlyBudgetUsed}
-                  className={healthToneClasses.bar}
+                  valueText={`${Math.round(computed.monthlyBudgetUsed)}%`}
+                  className="bg-primary"
                   delay="delay-500"
+                  valueClassName="text-primary"
                 />
 
-                <div className="flex items-center justify-between text-[11px] leading-4 text-muted-foreground">
-                  <span className="tabular-nums">{Math.round(computed.monthlyBudgetUsed)}% used</span>
-                  <span>
-                    Daily{' '}
-                    <span className="font-semibold text-foreground">
-                      <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />
-                    </span>
+                <p className="text-right text-[11px] leading-4 text-muted-foreground">
+                  Daily{' '}
+                  <span className="font-semibold text-foreground">
+                    <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />
                   </span>
-                </div>
+                </p>
               </div>
             ) : (
               <p className="text-[11px] leading-4 text-muted-foreground">

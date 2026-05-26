@@ -14,7 +14,7 @@ const STATUS = {
   ahead: {
     label: 'Under budget pace',
     color: 'text-[hsl(var(--success))]',
-    barColor: 'bg-[hsl(var(--success))]',
+    barColor: 'bg-primary',
   },
   'on-track': {
     label: 'On track',
@@ -24,7 +24,7 @@ const STATUS = {
   behind: {
     label: 'Spending too fast',
     color: 'text-destructive',
-    barColor: 'bg-destructive',
+    barColor: 'bg-primary',
   },
 };
 
@@ -66,9 +66,9 @@ export default function SpendingVelocityWidget({
             Time
           </span>
 
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] ">
+          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-primary/10 ">
             <motion.div
-              className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30"
+              className="absolute inset-y-0 left-0 rounded-full bg-primary/30"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{
@@ -90,7 +90,7 @@ export default function SpendingVelocityWidget({
             Spent
           </span>
 
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.06] ">
+          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-primary/10 ">
             <motion.div
               className={cn('absolute inset-y-0 left-0 rounded-full', cfg.barColor)}
               initial={{ width: 0 }}

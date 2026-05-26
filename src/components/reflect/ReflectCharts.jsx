@@ -33,12 +33,17 @@ const formatPercent = (value) => {
   return `${Math.round(value)}%`;
 };
 
-const getCategoryColor = (item) =>
-  item?.color ||
-  item?.categoryColor ||
-  item?.parentColor ||
-  item?.hex_color ||
-  'hsl(var(--muted-foreground))';
+const THEME_CHART_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--primary) / 0.86)',
+  'hsl(var(--primary) / 0.72)',
+  'hsl(var(--primary) / 0.58)',
+  'hsl(var(--primary) / 0.42)',
+  'hsl(var(--primary) / 0.28)',
+];
+
+const getThemeChartColor = (index = 0) =>
+  THEME_CHART_COLORS[index % THEME_CHART_COLORS.length];
 
 const SOLID_RECHARTS_TOOLTIP_STYLE = {
   background: 'hsl(var(--popover))',
@@ -195,17 +200,7 @@ export default function ReflectCharts({
  const roundedBudgetUsage = Math.round(safeEfficiency);
 const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
-  const ringColor = isYear
-    ? yearSpendingRatio <= 65
-      ? 'hsl(var(--success))'
-      : yearSpendingRatio <= 85
-        ? 'hsl(var(--warning))'
-        : 'hsl(var(--destructive))'
-    : safeEfficiency >= 70
-      ? 'hsl(var(--success))'
-      : safeEfficiency >= 40
-        ? 'hsl(var(--warning))'
-        : 'hsl(var(--destructive))';
+  const ringColor = 'hsl(var(--primary))';
 
   const totalCategorySpend = useMemo(
     () =>
@@ -217,21 +212,25 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
   );
 
   const groupedSpendingBreakdown = useMemo(() => {
-    const withPercents = safeSpendingBreakdown.map((item) => ({
+    const sorted = [...safeSpendingBreakdown]
+      .filter((item) => Number(item.value || 0) > 0)
+      .sort((a, b) => Number(b.value || 0) - Number(a.value || 0));
+
+    const withPercents = sorted.map((item, index) => ({
       ...item,
-      color: getCategoryColor(item),
+      color: getThemeChartColor(index),
       percent:
         totalCategorySpend > 0
           ? (Number(item.value || 0) / totalCategorySpend) * 100
           : 0,
     }));
 
-    if (withPercents.length <= 5) {
+    if (withPercents.length <= 4) {
       return withPercents;
     }
 
-    const topItems = withPercents.slice(0, 5);
-    const otherItems = withPercents.slice(5);
+    const topItems = withPercents.slice(0, 4);
+    const otherItems = withPercents.slice(4);
 
     const othersValue = otherItems.reduce(
       (sum, item) => sum + Number(item.value || 0),
@@ -243,7 +242,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
       {
         name: 'Others',
         value: othersValue,
-        color: 'hsl(var(--muted-foreground))',
+        color: getThemeChartColor(4),
         percent:
           totalCategorySpend > 0
             ? (othersValue / totalCategorySpend) * 100
@@ -324,7 +323,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                       <Bar
                         dataKey="income"
-                        fill="hsl(var(--success))"
+                        fill="hsl(var(--primary))"
                         radius={[8, 8, 0, 0]}
                         activeBar={false}
                         style={{
@@ -336,7 +335,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                       <Bar
                         dataKey="expenses"
-                        fill="hsl(var(--destructive))"
+                        fill="hsl(var(--primary) / 0.45)"
                         radius={[8, 8, 0, 0]}
                         activeBar={false}
                         style={{
@@ -375,7 +374,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <path
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
-                      stroke="hsl(var(--secondary))"
+                      stroke="hsl(var(--primary) / 0.12)"
                       strokeWidth="3"
                     />
 
@@ -494,7 +493,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                               {groupedSpendingBreakdown.map((entry) => (
                                 <Cell
                                   key={entry.id || entry.name}
-                                  fill={getCategoryColor(entry)}
+                                  fill={entry.color || getThemeChartColor(0)}
                                   tabIndex={-1}
                                   focusable="false"
                                   style={{ outline: 'none' }}
@@ -538,7 +537,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                   <div className="w-full flex-1 space-y-2">
                     {groupedSpendingBreakdown.map((category) => {
-                      const categoryColor = getCategoryColor(category);
+                      const categoryColor = category.color || getThemeChartColor(0);
 
                       return (
                         <div
