@@ -83,8 +83,8 @@ const toneClasses = {
     dot: 'bg-rose-500',
   },
   slate: {
-    tile: 'slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
-    selected: 'border-slate-500/30 slate-500/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
+    tile: 'bg-slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/15',
+    selected: 'border-slate-500/30 bg-slate-500/10 text-slate-800 shadow-slate-500/10 dark:text-slate-200',
     dot: 'bg-slate-500',
   },
 };
@@ -99,37 +99,37 @@ const themeStyleOptions = [
   {
     value: 'cyber',
     label: 'Cyber Indigo',
-    description: 'Modern blue and indigo workspace.',
+    description: 'Modern SaaS blue and purple theme.',
     tone: 'blue',
-    color: '#4F46E5',
+    swatch: '#4f46e5',
   },
   {
     value: 'aurora',
     label: 'Aurora Teal',
-    description: 'Clean teal and sky finance workspace.',
+    description: 'Clean fintech teal and sky theme.',
     tone: 'cyan',
-    color: '#0891B2',
+    swatch: '#0ea5a8',
   },
   {
     value: 'sunset',
     label: 'Sunset Rose',
-    description: 'Warm rose and orange workspace.',
+    description: 'Warm rose and orange theme.',
     tone: 'rose',
-    color: '#E11D48',
+    swatch: '#e11d48',
   },
   {
     value: 'emerald',
     label: 'Emerald Forest',
-    description: 'Calm green and teal workspace.',
+    description: 'Stable green and teal theme.',
     tone: 'emerald',
-    color: '#059669',
+    swatch: '#059669',
   },
   {
     value: 'obsidian',
     label: 'Midnight Obsidian',
-    description: 'Neutral slate workspace.',
+    description: 'Minimal slate and graphite theme.',
     tone: 'slate',
-    color: '#64748B',
+    swatch: '#64748b',
   },
 ];
 
@@ -272,16 +272,16 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
       onClick={() => onSelect(option.value)}
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
-      style={{ backgroundColor: option.color }}
       className={cn(
         'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
           ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
-          : 'border-white/70 ring-1 ring-border/45 dark:border-white/15'
+          : 'border-border/60 ring-1 ring-border/40'
       )}
+      style={{ backgroundColor: option.swatch }}
     >
       {active && (
-        <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-sm dark:bg-slate-950/90 dark:text-white">
+        <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">
           <Check className="h-3 w-3" />
         </span>
       )}
@@ -474,7 +474,7 @@ export default function Settings() {
       });
 
       setTheme('system');
-      setThemeStyle('cero');
+      setThemeStyle('aurora');
       setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
@@ -670,7 +670,7 @@ export default function Settings() {
             icon={LayoutGrid}
             tone="cyan"
             label="Compact Mode"
-            description="Tightens spacing across the whole app for denser layouts."
+            description="Tightens spacing across the whole app for a denser layout."
           >
             <Switch checked={compactMode} onCheckedChange={setCompactMode} />
           </SettingRow>

@@ -19,11 +19,6 @@ const LEGACY_THEME_STYLE_MAP = {
   minimal: 'obsidian',
 };
 
-function normalizeThemeStyle(style) {
-  if (VALID_THEME_STYLES.includes(style)) return style;
-  return LEGACY_THEME_STYLE_MAP[style] || 'aurora';
-}
-
 function syncSystemBarColor() {
   if (typeof window === 'undefined') return;
 
@@ -37,6 +32,11 @@ function getStoredTheme() {
 
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
   return VALID_THEMES.includes(savedTheme) ? savedTheme : 'system';
+}
+
+function normalizeThemeStyle(style) {
+  if (VALID_THEME_STYLES.includes(style)) return style;
+  return LEGACY_THEME_STYLE_MAP[style] || 'aurora';
 }
 
 function getStoredThemeStyle() {
@@ -69,10 +69,12 @@ function applyTheme(mode) {
   const resolvedTheme = mode === 'system' ? getSystemTheme() : mode;
 
   root.classList.toggle('dark', resolvedTheme === 'dark');
+  root.dataset.appearance = resolvedTheme;
 
   const favicon = document.getElementById('favicon');
   if (favicon) {
-    favicon.href = resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
+    favicon.href =
+      resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
   }
 
   syncSystemBarColor();
@@ -86,10 +88,6 @@ function applyThemeStyle(style) {
   const safeStyle = normalizeThemeStyle(style);
 
   VALID_THEME_STYLES.forEach((item) => {
-    root.classList.remove(`theme-style-${item}`);
-  });
-
-  Object.keys(LEGACY_THEME_STYLE_MAP).forEach((item) => {
     root.classList.remove(`theme-style-${item}`);
   });
 
@@ -130,7 +128,6 @@ export function ThemeProvider({ children }) {
     applyThemeStyle(safeStyle);
     if (safeStyle !== themeStyle) {
       setThemeStyleState(safeStyle);
-      return;
     }
     localStorage.setItem(THEME_STYLE_STORAGE_KEY, safeStyle);
   }, [themeStyle]);
@@ -164,10 +161,7 @@ export function ThemeProvider({ children }) {
     };
 
     mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
   }, [theme]);
 
   useEffect(() => {
@@ -187,10 +181,7 @@ export function ThemeProvider({ children }) {
     };
 
     document.addEventListener('click', handleHapticClick, { passive: true });
-
-    return () => {
-      document.removeEventListener('click', handleHapticClick);
-    };
+    return () => document.removeEventListener('click', handleHapticClick);
   }, [hapticsEnabled]);
 
   const setTheme = (newTheme) => {
@@ -199,8 +190,7 @@ export function ThemeProvider({ children }) {
   };
 
   const setThemeStyle = (newThemeStyle) => {
-    const safeStyle = normalizeThemeStyle(newThemeStyle);
-    setThemeStyleState(safeStyle);
+    setThemeStyleState(normalizeThemeStyle(newThemeStyle));
   };
 
   const value = useMemo(
@@ -218,14 +208,7 @@ export function ThemeProvider({ children }) {
       setHapticsEnabled: setHapticsEnabledState,
       isDark: resolvedTheme === 'dark',
     }),
-    [
-      theme,
-      resolvedTheme,
-      themeStyle,
-      compactMode,
-      showDecimals,
-      hapticsEnabled,
-    ]
+    [theme, resolvedTheme, themeStyle, compactMode, showDecimals, hapticsEnabled]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
