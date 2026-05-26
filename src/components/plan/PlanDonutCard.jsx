@@ -19,62 +19,43 @@ function getTooltipActionLabel(tab, item) {
   return tab?.label || 'Tracked';
 }
 
-function DonutTooltip({ active, payload, currency, tab, totalTracked, totalPlanned }) {
+function getTooltipSurfaceStyle(tab) {
+  const toneColor = tab?.color || 'hsl(var(--primary))';
+
+  return {
+    backgroundColor: `color-mix(in srgb, ${toneColor} 12%, hsl(var(--popover)) 88%)`,
+    borderColor: `color-mix(in srgb, ${toneColor} 24%, hsl(var(--border)) 76%)`,
+  };
+}
+
+function DonutTooltip({ active, payload, currency, tab }) {
   if (!active || !payload?.length) return null;
 
   const item = payload[0]?.payload;
   const value = Number(item?.value || 0);
   const tracked = Number(item?.tracked || 0);
-  const trackedShare = totalTracked > 0 ? Math.round((tracked / totalTracked) * 100) : 0;
-  const plannedShare = totalPlanned > 0 ? Math.round((value / totalPlanned) * 100) : 0;
+  const amount = item?.isRemainder ? value : tracked;
   const actionLabel = getTooltipActionLabel(tab, item);
-
-  if (item?.isRemainder) {
-    return (
-      <div className="rounded-xl app-chart-tooltip-surface px-3 py-2 shadow-lg ring-1 ring-border/60">
-        <p className="text-xs font-bold text-popover-foreground tabular-nums">
-          Untracked
-        </p>
-
-        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{actionLabel}</span>
-          <PlanMoney
-            amount={value}
-            currency={currency}
-            compact
-            className="font-semibold text-popover-foreground"
-          />
-        </div>
-
-        <p className="mt-1 text-[11px] font-semibold text-muted-foreground tabular-nums">
-          {plannedShare}% of planned
-        </p>
-      </div>
-    );
-  }
+  const title = item?.isRemainder ? 'Untracked' : item?.name;
 
   return (
-    <div className="rounded-xl app-chart-tooltip-surface px-3 py-2 shadow-lg ring-1 ring-border/60">
+    <div
+      className="rounded-xl border px-3 py-2 shadow-lg"
+      style={getTooltipSurfaceStyle(tab)}
+    >
       <p className="max-w-[160px] truncate text-xs font-bold text-popover-foreground tabular-nums">
-        {item?.name}
+        {title}
       </p>
 
       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{actionLabel}</span>
         <PlanMoney
-          amount={tracked}
+          amount={amount}
           currency={currency}
           compact
           className="font-semibold text-popover-foreground"
         />
       </div>
-
-      <p
-        className="mt-1 text-[11px] font-semibold tabular-nums"
-        style={{ color: item?.color }}
-      >
-        {trackedShare}% of tracked · {plannedShare}% of planned
-      </p>
     </div>
   );
 }
@@ -163,8 +144,6 @@ export default function PlanDonutCard({
                 <DonutTooltip
                   currency={currency}
                   tab={tab}
-                  totalTracked={totalTracked}
-                  totalPlanned={totalPlanned}
                 />
               }
               cursor={false}
