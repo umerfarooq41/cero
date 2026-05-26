@@ -70,24 +70,13 @@ function SidebarLink({ item, compact = false }) {
     <Link
       to={item.path}
       aria-current={isActive ? 'page' : undefined}
-      className="relative block"
+      className="group relative block"
     >
-      {isActive && !compact && (
-        <motion.div
-          layoutId="sidebar-active"
-          className="absolute inset-0 rounded-xl bg-primary/[0.08]"
-          transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-        />
-      )}
-
       <div
         className={cn(
           `
-          relative z-10
-          flex items-center gap-3
-          rounded-xl px-3
-          text-sm font-medium
-          transition-colors duration-200
+          relative z-10 flex items-center gap-3 rounded-2xl px-3
+          text-sm font-medium transition-colors duration-200
           `,
           compact ? 'h-10' : 'h-11',
           isActive
@@ -95,23 +84,43 @@ function SidebarLink({ item, compact = false }) {
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
-        {isActive && !compact && (
-          <motion.div
-            layoutId="sidebar-line"
-            className="absolute bottom-2 left-0 top-2 w-0.5 rounded-full bg-primary"
-            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-          />
-        )}
-
-        <Icon
+        <motion.div
+          animate={{
+            scale: isActive ? 1.06 : 1,
+            x: isActive ? 1 : 0,
+          }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           className={cn(
-            compact ? 'h-4 w-4' : 'h-5 w-5',
-            'transition-all duration-200',
-            isActive && 'stroke-[2.5]'
+            'relative flex shrink-0 items-center justify-center',
+            compact ? 'h-8 w-8' : 'h-9 w-9'
           )}
-        />
+        >
+          {isActive && (
+            <motion.div
+              layoutId="sidebar-icon-highlight"
+              className="absolute inset-0 rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10"
+              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            />
+          )}
 
-        <span>{item.label}</span>
+          <Icon
+            className={cn(
+              'relative z-10 transition-all duration-200',
+              compact ? 'h-4 w-4' : 'h-5 w-5',
+              isActive && 'stroke-[2.5]'
+            )}
+          />
+        </motion.div>
+
+        <motion.span
+          animate={{ opacity: isActive ? 1 : 0.68 }}
+          className={cn(
+            'min-w-0 truncate transition-all duration-200',
+            isActive ? 'font-semibold' : 'font-medium'
+          )}
+        >
+          {item.label}
+        </motion.span>
       </div>
     </Link>
   );
@@ -123,7 +132,7 @@ export default function Sidebar() {
       className="
         hidden lg:flex lg:static
         h-full w-64 flex-col
-        app-fixed-surface
+        app-sidebar-dock
         border-0 shadow-none ring-0
       "
     >
@@ -143,13 +152,13 @@ export default function Sidebar() {
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-1.5 px-3 py-4">
         {navItems.map((item) => (
           <SidebarLink key={item.path} item={item} />
         ))}
       </nav>
 
-      <div className="space-y-1 px-3 pb-4">
+      <div className="space-y-1.5 px-3 pb-4">
         {bottomItems.map((item) => (
           <SidebarLink key={item.path} item={item} compact />
         ))}

@@ -363,6 +363,20 @@ main,
     box-shadow: none;
   }
 
+  .app-sidebar-dock {
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 0;
+    box-shadow: none;
+  }
+
+  .dark .app-sidebar-dock {
+    background: rgba(2, 6, 23, 0.58);
+    border: 0;
+    box-shadow: none;
+  }
+
 
   .btn-ripple {
     position: relative;
@@ -681,7 +695,8 @@ main,
   .app-page-surface,
   .app-gradient-surface,
   .app-fixed-surface,
-  .app-bottom-nav {
+  .app-bottom-nav,
+  .app-sidebar-dock {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
@@ -689,6 +704,12 @@ main,
   .app-bottom-nav {
     border-top: 0 !important;
     border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .app-sidebar-dock {
+    border-right: 0 !important;
+    border-left: 0 !important;
     box-shadow: none !important;
   }
 }
