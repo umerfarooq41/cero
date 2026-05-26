@@ -102,6 +102,7 @@ const themeStyleOptions = [
     description: 'Soft gold and steel atmosphere inspired by premium editorial UI.',
     tone: 'amber',
     swatch: '#d4a359',
+    canvas: 'radial-gradient(circle at 68% 28%, rgba(212, 163, 89, 0.35), transparent 55%), linear-gradient(135deg, #fbfaf7 0%, #f4f2ee 100%)',
   },
   {
     value: 'vibrant-fluid',
@@ -109,6 +110,7 @@ const themeStyleOptions = [
     description: 'Expressive mesh-style color with coral, cyan, orange, and blue.',
     tone: 'cyan',
     swatch: '#22c7d5',
+    canvas: 'radial-gradient(at 90% 10%, hsla(14, 93%, 69%, 0.65) 0px, transparent 55%), radial-gradient(at 10% 80%, hsla(184, 83%, 63%, 0.65) 0px, transparent 55%), linear-gradient(135deg, #fff5f0 0%, #ecfbff 100%)',
   },
   {
     value: 'ai-minimal',
@@ -116,6 +118,7 @@ const themeStyleOptions = [
     description: 'Minimal white or midnight base with subtle cyan and purple glow.',
     tone: 'blue',
     swatch: '#00b4d8',
+    canvas: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.28), transparent 60%), radial-gradient(circle at 80% 40%, rgba(114, 9, 183, 0.16), transparent 50%), linear-gradient(135deg, #ffffff 0%, #f6fbff 100%)',
   },
   {
     value: 'energy-action',
@@ -123,6 +126,7 @@ const themeStyleOptions = [
     description: 'Clean diagonal warmth with burnt-orange energy in dark mode.',
     tone: 'rose',
     swatch: '#d84315',
+    canvas: 'linear-gradient(135deg, #fff3ee 0%, #f3f4f6 65%, #ffffff 100%)',
   },
 ];
 
@@ -266,12 +270,12 @@ function ThemeStyleSwatch({ option, active, onSelect }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
           ? cn('scale-105 ring-2 ring-offset-2 ring-offset-background', selectedClass)
           : 'border-border/60 ring-1 ring-border/40'
       )}
-      style={{ backgroundColor: option.swatch }}
+      style={{ background: option.canvas || option.swatch }}
     >
       {active && (
         <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">

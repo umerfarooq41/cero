@@ -677,6 +677,40 @@ main,
   .app-bottom-nav {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
+    background-size: var(--app-canvas-bg-size, cover) !important;
+    animation: var(--app-canvas-animation, none);
+  }
+
+  .app-main-scroll {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .app-main-scroll::before,
+  .app-main-scroll::after {
+    content: '';
+    position: fixed;
+    inset: -40%;
+    z-index: 0;
+    pointer-events: none;
+    mix-blend-mode: var(--app-canvas-blend, normal);
+    opacity: 1;
+    transform-origin: center;
+  }
+
+  .app-main-scroll::before {
+    background: var(--app-canvas-before, none);
+    animation: var(--app-canvas-before-animation, none);
+  }
+
+  .app-main-scroll::after {
+    background: var(--app-canvas-after, none);
+    animation: var(--app-canvas-after-animation, none);
+  }
+
+  .app-main-scroll > * {
+    position: relative;
+    z-index: 1;
   }
 
   .app-fixed-surface,
@@ -822,5 +856,45 @@ main,
 
   html.compact-mode :where(section, article, form, [role='dialog']) {
     --compact-padding-shift: 0.88;
+  }
+}
+
+
+/* ============================= */
+/* Animated theme canvas motions  */
+/* ============================= */
+
+@keyframes floatOrbOne {
+  0% { transform: translate(0%, 0%) scale(1); }
+  50% { transform: translate(10%, -8%) scale(1.15); }
+  100% { transform: translate(-5%, 10%) scale(0.95); }
+}
+
+@keyframes floatOrbTwo {
+  0% { transform: translate(5%, 10%) scale(0.9); }
+  50% { transform: translate(-8%, -5%) scale(1.1); }
+  100% { transform: translate(3%, -10%) scale(1); }
+}
+
+@keyframes meshShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes gentlePulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.05); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-page-surface,
+  .app-gradient-surface,
+  .app-fixed-surface,
+  .app-main-scroll,
+  .app-bottom-nav,
+  .app-main-scroll::before,
+  .app-main-scroll::after {
+    animation: none !important;
   }
 }

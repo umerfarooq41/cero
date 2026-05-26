@@ -37,9 +37,16 @@ const THEME_STYLE_TOKENS = {
       popover: '0 0% 100%',
       sidebarForeground: '222 24% 24%',
       mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 68% 28%, rgba(212, 163, 89, 0.24) 0%, rgba(212, 163, 89, 0) 54%), radial-gradient(circle at 26% 72%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 50%), linear-gradient(135deg, #fbfaf7 0%, #f4f2ee 100%)',
+      gradient: 'linear-gradient(135deg, #fbfaf7 0%, #f4f2ee 100%)',
       start: '#fbfaf7',
       end: '#f4f2ee',
+      before: 'radial-gradient(circle at 65% 35%, rgba(212, 163, 89, 0.26) 0%, rgba(212, 163, 89, 0) 55%)',
+      after: 'radial-gradient(circle at 35% 65%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 50%)',
+      blend: 'multiply',
+      animation: 'none',
+      beforeAnimation: 'floatOrbOne 28s infinite alternate ease-in-out',
+      afterAnimation: 'floatOrbTwo 22s infinite alternate ease-in-out',
+      bgSize: 'cover',
     },
     dark: {
       primary: '38 72% 62%',
@@ -52,9 +59,16 @@ const THEME_STYLE_TOKENS = {
       popover: '225 12% 10%',
       sidebarForeground: '215 20% 78%',
       mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 68% 28%, rgba(212, 163, 89, 0.16) 0%, rgba(212, 163, 89, 0) 54%), radial-gradient(circle at 26% 72%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 50%), linear-gradient(135deg, #08090c 0%, #121316 100%)',
+      gradient: 'linear-gradient(135deg, #08090c 0%, #121316 100%)',
       start: '#08090c',
       end: '#121316',
+      before: 'radial-gradient(circle at 65% 35%, rgba(212, 163, 89, 0.18) 0%, rgba(212, 163, 89, 0) 55%)',
+      after: 'radial-gradient(circle at 35% 65%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 50%)',
+      blend: 'screen',
+      animation: 'none',
+      beforeAnimation: 'floatOrbOne 28s infinite alternate ease-in-out',
+      afterAnimation: 'floatOrbTwo 22s infinite alternate ease-in-out',
+      bgSize: 'cover',
     },
   },
   'vibrant-fluid': {
@@ -72,6 +86,13 @@ const THEME_STYLE_TOKENS = {
       gradient: 'radial-gradient(at 90% 10%, hsla(14, 93%, 69%, 0.30) 0px, transparent 54%), radial-gradient(at 10% 80%, hsla(184, 83%, 63%, 0.30) 0px, transparent 54%), radial-gradient(at 90% 80%, hsla(27, 88%, 65%, 0.20) 0px, transparent 54%), radial-gradient(at 20% 20%, hsla(210, 85%, 70%, 0.22) 0px, transparent 54%), linear-gradient(135deg, #fff5f0 0%, #ecfbff 100%)',
       start: '#fff5f0',
       end: '#ecfbff',
+      before: 'none',
+      after: 'none',
+      blend: 'normal',
+      animation: 'meshShift 20s infinite alternate ease-in-out',
+      beforeAnimation: 'none',
+      afterAnimation: 'none',
+      bgSize: '150% 150%',
     },
     dark: {
       primary: '190 90% 56%',
@@ -87,6 +108,13 @@ const THEME_STYLE_TOKENS = {
       gradient: 'radial-gradient(at 90% 10%, hsla(260, 85%, 26%, 0.34) 0px, transparent 54%), radial-gradient(at 10% 80%, hsla(320, 75%, 26%, 0.26) 0px, transparent 54%), radial-gradient(at 90% 80%, hsla(190, 90%, 18%, 0.24) 0px, transparent 54%), radial-gradient(at 20% 20%, hsla(280, 80%, 28%, 0.24) 0px, transparent 54%), linear-gradient(135deg, #050411 0%, #1a0f2e 100%)',
       start: '#050411',
       end: '#1a0f2e',
+      before: 'none',
+      after: 'none',
+      blend: 'normal',
+      animation: 'meshShift 20s infinite alternate ease-in-out',
+      beforeAnimation: 'none',
+      afterAnimation: 'none',
+      bgSize: '150% 150%',
     },
   },
   'ai-minimal': {
@@ -101,9 +129,16 @@ const THEME_STYLE_TOKENS = {
       popover: '0 0% 100%',
       sidebarForeground: '222 24% 24%',
       mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.13) 0%, rgba(0, 180, 216, 0) 58%), radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.08) 0%, rgba(114, 9, 183, 0) 50%), linear-gradient(135deg, #ffffff 0%, #f6fbff 100%)',
+      gradient: 'linear-gradient(135deg, #ffffff 0%, #f6fbff 100%)',
       start: '#ffffff',
       end: '#f6fbff',
+      before: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.13) 0%, rgba(0, 180, 216, 0) 60%), radial-gradient(circle at 80% 40%, rgba(114, 9, 183, 0.08) 0%, rgba(114, 9, 183, 0) 50%)',
+      after: 'none',
+      blend: 'multiply',
+      animation: 'none',
+      beforeAnimation: 'gentlePulse 12s infinite alternate ease-in-out',
+      afterAnimation: 'none',
+      bgSize: 'cover',
     },
     dark: {
       primary: '190 95% 58%',
@@ -116,9 +151,16 @@ const THEME_STYLE_TOKENS = {
       popover: '220 34% 8%',
       sidebarForeground: '215 20% 78%',
       mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.22) 0%, rgba(0, 180, 216, 0) 58%), radial-gradient(circle at 82% 38%, rgba(114, 9, 183, 0.18) 0%, rgba(114, 9, 183, 0) 50%), linear-gradient(135deg, #050812 0%, #090d16 100%)',
+      gradient: 'linear-gradient(135deg, #050812 0%, #090d16 100%)',
       start: '#050812',
       end: '#090d16',
+      before: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.22) 0%, rgba(0, 180, 216, 0) 60%), radial-gradient(circle at 80% 40%, rgba(114, 9, 183, 0.18) 0%, rgba(114, 9, 183, 0) 50%)',
+      after: 'none',
+      blend: 'screen',
+      animation: 'none',
+      beforeAnimation: 'gentlePulse 12s infinite alternate ease-in-out',
+      afterAnimation: 'none',
+      bgSize: 'cover',
     },
   },
   'energy-action': {
@@ -136,6 +178,13 @@ const THEME_STYLE_TOKENS = {
       gradient: 'linear-gradient(135deg, #fff3ee 0%, #f3f4f6 65%, #ffffff 100%)',
       start: '#fff3ee',
       end: '#ffffff',
+      before: 'none',
+      after: 'none',
+      blend: 'normal',
+      animation: 'none',
+      beforeAnimation: 'none',
+      afterAnimation: 'none',
+      bgSize: 'cover',
     },
     dark: {
       primary: '14 82% 58%',
@@ -151,6 +200,13 @@ const THEME_STYLE_TOKENS = {
       gradient: 'linear-gradient(135deg, #2a0d05 0%, #111113 64%, #09090b 100%)',
       start: '#2a0d05',
       end: '#09090b',
+      before: 'none',
+      after: 'none',
+      blend: 'normal',
+      animation: 'none',
+      beforeAnimation: 'none',
+      afterAnimation: 'none',
+      bgSize: 'cover',
     },
   },
 };
@@ -184,6 +240,13 @@ function applyThemeStyleTokens(style, resolvedTheme) {
   setRootVar(root, '--app-page-gradient', tokens.gradient);
   setRootVar(root, '--app-canvas-start', tokens.start);
   setRootVar(root, '--app-canvas-end', tokens.end);
+  setRootVar(root, '--app-canvas-before', tokens.before || 'none');
+  setRootVar(root, '--app-canvas-after', tokens.after || 'none');
+  setRootVar(root, '--app-canvas-blend', tokens.blend || 'normal');
+  setRootVar(root, '--app-canvas-animation', tokens.animation || 'none');
+  setRootVar(root, '--app-canvas-before-animation', tokens.beforeAnimation || 'none');
+  setRootVar(root, '--app-canvas-after-animation', tokens.afterAnimation || 'none');
+  setRootVar(root, '--app-canvas-bg-size', tokens.bgSize || 'cover');
 }
 
 function syncSystemBarColor() {
