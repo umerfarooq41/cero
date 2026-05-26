@@ -3,47 +3,57 @@ import SourceBadge from '@/components/shared/SourceBadge';
 import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
 
-function getProgressColor(item, rawPercent) {
-  if (item.remaining < 0 || rawPercent > 100) return '#DC2626';
-  if (rawPercent >= 100) return '#F59E0B';
-  return item.color || item.categoryColor || 'hsl(var(--primary))';
-}
-
-function getTrackedVerb(item) {
-  const type =
-    item.budgetType ||
-    item.budget_type ||
-    item.type ||
-    item.category?.type ||
-    item.category?.budget_type;
-
-  if (type === 'income') return 'received';
-  if (type === 'savings') return 'saved';
-  if (type === 'debt') return 'paid';
-
-  return 'spent';
-}
-
-function getSourceBadgeTone(item) {
-  if (item.sourceType === 'goal') return 'savings';
-
+function getBudgetType(item) {
   return (
     item.budgetType ||
     item.budget_type ||
     item.type ||
     item.category?.type ||
     item.category?.budget_type ||
-    'transfer'
+    'expense'
   );
+}
+
+function getSourceBadgeTone(item) {
+  if (item.sourceType === 'goal') return 'savings';
+
+  return getBudgetType(item) || 'transfer';
+}
+
+function getActionLabel(type) {
+  if (type === 'income') return 'Received';
+  if (type === 'savings') return 'Saved';
+  if (type === 'debt') return 'Paid';
+
+  return 'Used';
+}
+
+function getStatusLabel(type, rawPercent, isOverBudget, tracked) {
+  if (tracked <= 0) return 'Unused';
+
+  if (type === 'income' && rawPercent >= 100) return 'Received';
+  if (type === 'savings' && rawPercent >= 100) return 'Saved';
+  if (type === 'debt' && rawPercent >= 100) return 'Paid';
+
+  if (type === 'expense') {
+    if (isOverBudget) return 'Over budget';
+    if (rawPercent >= 75) return 'Near limit';
+  }
+
+  return 'On track';
 }
 
 export default function PlanBreakdownRow({ item, currency }) {
   const isSourceRow = Boolean(item.sourceType);
-
-  const rawPercent = item.planned > 0 ? (item.tracked / item.planned) * 100 : 0;
-  const percent = Math.min(rawPercent, 100);
-  const progressColor = getProgressColor(item, rawPercent);
-  const trackedVerb = getTrackedVerb(item);
+  const type = getBudgetType(item);
+  const planned = Number(item.planned || 0);
+  const tracked = Number(item.tracked || 0);
+  const rawPercent = planned > 0 ? (tracked / planned) * 100 : tracked > 0 ? 100 : 0;
+  const isOverBudget = type === 'expense' && tracked > planned;
+  const accentColor = item.categoryColor || item.color || 'hsl(var(--primary))';
+  const amountColor = isOverBudget ? '#dc2626' : accentColor;
+  const actionLabel = getActionLabel(type);
+  const statusLabel = getStatusLabel(type, rawPercent, isOverBudget, tracked);
 
   return (
     <div
@@ -75,42 +85,23 @@ export default function PlanBreakdownRow({ item, currency }) {
             </div>
 
             <p
-              className={cn(
-                'shrink-0 text-sm font-bold tabular-nums',
-                item.remaining < 0 ? 'text-red-600' : 'text-foreground'
-              )}
+              className="shrink-0 text-sm font-bold tabular-nums"
+              style={{ color: amountColor }}
             >
-              <PlanMoney amount={item.planned} currency={currency} compact />
+              <PlanMoney amount={planned} currency={currency} compact />
             </p>
           </div>
 
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${percent}%`,
-                backgroundColor: progressColor,
-              }}
-            />
-          </div>
-
-          <div className="mt-1.5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground tabular-nums">
-            <span className="truncate">
-              <PlanMoney amount={item.tracked} currency={currency} compact />{' '}
-              {trackedVerb}
+          <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] font-medium leading-4 text-muted-foreground tabular-nums">
+            <span>{actionLabel}</span>
+            <span className="font-bold" style={{ color: amountColor }}>
+              <PlanMoney amount={tracked} currency={currency} compact />
             </span>
-
-            <span
-              className={cn(
-                'shrink-0 font-semibold',
-                item.remaining < 0 || rawPercent > 100
-                  ? 'text-red-600'
-                  : rawPercent >= 100
-                    ? 'text-amber-600 dark:text-amber-400'
-                    : 'text-muted-foreground'
-              )}
-            >
-              {Math.round(rawPercent)}%
+            <span className="text-muted-foreground/70">·</span>
+            <span>{Math.round(rawPercent)}%</span>
+            <span className="text-muted-foreground/70">·</span>
+            <span className="font-semibold" style={{ color: amountColor }}>
+              {statusLabel}
             </span>
           </div>
         </div>
