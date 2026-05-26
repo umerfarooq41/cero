@@ -347,14 +347,6 @@ main,
       0 0 0 1px rgba(255, 255, 255, 0.07);
   }
 
-  .app-bottom-nav-backdrop {
-    background:
-      linear-gradient(to top, hsl(var(--background) / 0.42), transparent 92%),
-      var(--app-page-gradient);
-    background-attachment: fixed;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-  }
 
   .app-bottom-nav {
     background:
@@ -703,10 +695,4 @@ main,
     background-attachment: fixed !important;
   }
 
-  .app-bottom-nav-backdrop {
-    background:
-      linear-gradient(to top, hsl(var(--background) / 0.42), transparent 92%),
-      var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
 }
