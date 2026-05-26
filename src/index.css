@@ -685,58 +685,59 @@ main,
   }
 }
 
-/* ============================= */
-/* 📱 EDGE-TO-EDGE MOBILE SURFACES */
-/* ============================= */
+/* Mobile viewport + navigation stability */
+@layer base {
+  :root {
+    --app-safe-area-top: env(safe-area-inset-top, 0px);
+    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --app-bottom-nav-height: calc(4.25rem + var(--app-safe-area-bottom));
+  }
 
-html,
-body,
-#root {
-  min-height: 100%;
-  width: 100%;
-  background: var(--app-page-gradient) !important;
-  background-attachment: fixed !important;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
-
-#root {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.app-page-surface,
-.app-gradient-surface,
-.app-fixed-surface,
-.app-bottom-nav {
-  background: var(--app-page-gradient) !important;
-  background-attachment: fixed !important;
-}
-
-.app-bottom-nav {
-  border: 0 !important;
-  border-top: 0 !important;
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-  outline: 0 !important;
-  padding-bottom: 0 !important;
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-}
-
-.app-fixed-surface {
-  border: 0 !important;
-  box-shadow: none !important;
-  outline: 0 !important;
-}
-
-@supports (height: 100dvh) {
-  .app-page-surface {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
     min-height: 100dvh;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .app-main-scroll {
+    padding-bottom: calc(var(--app-bottom-nav-height) + 0.75rem);
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @media (min-width: 1024px) {
+    .app-main-scroll {
+      padding-bottom: 0;
+    }
+  }
+
+  .app-bottom-nav {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    background: hsl(var(--card) / 0.56) !important;
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+  }
+
+  .dark .app-bottom-nav {
+    background: hsl(var(--card) / 0.42) !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
   }
 }

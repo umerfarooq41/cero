@@ -55,12 +55,13 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 overflow-hidden app-fixed-surface app-bottom-nav lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-[60] h-[var(--app-bottom-nav-height)] translate-y-0 transform-gpu lg:hidden">
+      <div className="absolute inset-0 app-fixed-surface app-bottom-nav" />
+
       <div
         className="
-          mx-auto
-          grid h-[calc(4rem+env(safe-area-inset-bottom))] max-w-3xl grid-cols-5
-          pb-[env(safe-area-inset-bottom)]
+          relative mx-auto grid h-full max-w-3xl grid-cols-5
+          pb-[var(--app-safe-area-bottom)] pt-1
         "
       >
         {navItems.map((item) => {

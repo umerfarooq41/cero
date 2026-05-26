@@ -11,28 +11,49 @@ const HAPTICS_STORAGE_KEY = 'cero.hapticsEnabled';
 const VALID_THEMES = ['system', 'light', 'dark'];
 const VALID_THEME_STYLES = ['cero', 'ocean', 'sunset', 'forest', 'minimal'];
 
-const MOBILE_THEME_COLORS = {
-  cero: { light: '#f1f6ff', dark: '#020617' },
-  ocean: { light: '#dff6ff', dark: '#041221' },
-  sunset: { light: '#fff0df', dark: '#24100b' },
-  forest: { light: '#e9fff4', dark: '#06170f' },
-  minimal: { light: '#f8fafc', dark: '#020617' },
+const THEME_CHROME_COLORS = {
+  cero: {
+    light: '#f8fafc',
+    dark: '#020617',
+  },
+  ocean: {
+    light: '#dff6ff',
+    dark: '#041221',
+  },
+  sunset: {
+    light: '#fff2e2',
+    dark: '#180a09',
+  },
+  forest: {
+    light: '#e5fcec',
+    dark: '#05140d',
+  },
+  minimal: {
+    light: '#f6f8fb',
+    dark: '#020617',
+  },
 };
 
-function updateBrowserThemeColor(resolvedTheme, style) {
+function getChromeColor(style, resolvedTheme) {
+  const safeStyle = VALID_THEME_STYLES.includes(style) ? style : 'cero';
+  const safeTheme = resolvedTheme === 'dark' ? 'dark' : 'light';
+
+  return THEME_CHROME_COLORS[safeStyle]?.[safeTheme] || THEME_CHROME_COLORS.cero[safeTheme];
+}
+
+function syncDocumentChrome(style, resolvedTheme) {
   if (typeof window === 'undefined') return;
 
-  const safeStyle = VALID_THEME_STYLES.includes(style) ? style : 'cero';
-  const safeMode = resolvedTheme === 'dark' ? 'dark' : 'light';
-  const color = MOBILE_THEME_COLORS[safeStyle]?.[safeMode] || MOBILE_THEME_COLORS.cero[safeMode];
-
-  document.documentElement.style.setProperty('--app-mobile-system-color', color);
-
+  const chromeColor = getChromeColor(style, resolvedTheme);
+  const root = document.documentElement;
   const themeColor = document.querySelector('meta[name="theme-color"]');
 
   if (themeColor) {
-    themeColor.setAttribute('content', color);
+    themeColor.setAttribute('content', chromeColor);
   }
+
+  root.style.backgroundColor = chromeColor;
+  document.body.style.backgroundColor = chromeColor;
 }
 
 function getStoredTheme() {
@@ -66,7 +87,7 @@ function getSystemTheme() {
     : 'light';
 }
 
-function applyTheme(mode, style = getStoredThemeStyle()) {
+function applyTheme(mode) {
   if (typeof window === 'undefined') return 'light';
 
   const root = document.documentElement;
@@ -85,7 +106,14 @@ function applyTheme(mode, style = getStoredThemeStyle()) {
       resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
   }
 
-  updateBrowserThemeColor(resolvedTheme, style);
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+
+  if (themeColor) {
+    themeColor.setAttribute(
+      'content',
+      resolvedTheme === 'dark' ? '#020617' : '#f8fafc'
+    );
+  }
 
   return resolvedTheme;
 }
@@ -127,15 +155,18 @@ export function ThemeProvider({ children }) {
   );
 
   useEffect(() => {
-    const resolved = applyTheme(theme, themeStyle);
+    const resolved = applyTheme(theme);
     setResolvedTheme(resolved);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme, themeStyle]);
+  }, [theme]);
 
   useEffect(() => {
     applyThemeStyle(themeStyle);
-    updateBrowserThemeColor(resolvedTheme, themeStyle);
     localStorage.setItem(THEME_STYLE_STORAGE_KEY, themeStyle);
+  }, [themeStyle]);
+
+  useEffect(() => {
+    syncDocumentChrome(themeStyle, resolvedTheme);
   }, [themeStyle, resolvedTheme]);
 
   useEffect(() => {
@@ -162,7 +193,7 @@ export function ThemeProvider({ children }) {
 
     const handleSystemThemeChange = () => {
       if (theme === 'system') {
-        const resolved = applyTheme('system', themeStyle);
+        const resolved = applyTheme('system');
         setResolvedTheme(resolved);
       }
     };
@@ -172,7 +203,7 @@ export function ThemeProvider({ children }) {
     return () => {
       mediaQuery.removeEventListener('change', handleSystemThemeChange);
     };
-  }, [theme, themeStyle]);
+  }, [theme]);
 
   useEffect(() => {
     if (!hapticsEnabled || typeof window === 'undefined') return undefined;

@@ -9,7 +9,7 @@ export default function AppLayout() {
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <main className="app-page-surface flex-1 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
+        <main className="app-page-surface app-main-scroll flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
