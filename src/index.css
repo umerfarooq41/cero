@@ -685,59 +685,64 @@ main,
   }
 }
 
-/* ============================= */
-/* 📱 MOBILE EDGE-TO-EDGE THEME + STABLE NAV OVERRIDES */
-/* Keeps the selected light/dark theme on every surface, removes hard nav/header borders,
-   and prevents content from appearing under the bottom nav. */
-/* ============================= */
-
+/* =========================================================
+   FINAL MOBILE NAV + GLOBAL SURFACE OVERRIDES
+   - One theme canvas across full mobile viewport
+   - Visible but soft card borders/shadows
+   - Bottom navigation glass/mica with theme primary glow
+   ========================================================= */
 @layer base {
   html {
     --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --app-bottom-nav-content-height: 4.85rem;
-    --app-bottom-nav-height: calc(var(--app-bottom-nav-content-height) + var(--app-safe-area-bottom));
+    --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
+
+    --app-card-alpha: 0.66;
+    --app-card-alpha-strong: 0.82;
+    --app-card-alpha-soft: 0.42;
+    --app-card-border-alpha: 0.16;
+    --app-card-shadow-alpha: 0.12;
+    --app-card-blur: 20px;
+    --app-card-saturate: 155%;
+  }
+
+  html.dark {
+    --app-card-alpha: 0.50;
+    --app-card-alpha-strong: 0.66;
+    --app-card-alpha-soft: 0.30;
+    --app-card-border-alpha: 0.13;
+    --app-card-shadow-alpha: 0.32;
+  }
+
+  html,
+  body,
+  #root {
     min-height: 100%;
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 
-  body,
-  #root {
-    min-height: 100dvh;
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
   body {
-    margin: 0;
-    overflow: hidden;
-  }
-
-  #root {
-    overflow: hidden;
+    min-height: 100dvh;
   }
 }
 
 @layer utilities {
   .app-page-surface,
   .app-gradient-surface,
-  .app-fixed-surface {
+  .app-fixed-surface,
+  .app-main-scroll {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 
-  .app-fixed-surface {
+  .app-fixed-surface,
+  .app-gradient-surface {
     border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
     box-shadow: none !important;
-    outline: 0 !important;
   }
 
   .app-main-scroll {
-    min-height: 0;
-    overscroll-behavior-y: contain;
-    padding-bottom: calc(var(--app-bottom-nav-height) + 1rem);
+    padding-bottom: var(--app-bottom-nav-height);
   }
 
   @media (min-width: 1024px) {
@@ -746,36 +751,73 @@ main,
     }
   }
 
-  .app-bottom-nav {
-    background:
-      linear-gradient(
-        180deg,
-        hsl(var(--card) / 0.70),
-        hsl(var(--card) / 0.80)
-      ),
-      var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
+  .app-card-surface {
+    background: hsl(var(--card) / var(--app-card-alpha)) !important;
+    border: 1px solid hsl(var(--foreground) / var(--app-card-border-alpha)) !important;
     box-shadow:
-      0 -18px 38px hsl(var(--foreground) / 0.08),
-      inset 0 1px 0 hsl(var(--background) / 0.18) !important;
+      0 18px 42px hsl(var(--foreground) / var(--app-card-shadow-alpha)),
+      inset 0 1px 0 hsl(var(--background) / 0.38) !important;
+    backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
+    -webkit-backdrop-filter: blur(var(--app-card-blur)) saturate(var(--app-card-saturate));
   }
 
-  .dark .app-bottom-nav {
-    background:
-      linear-gradient(
-        180deg,
-        hsl(var(--card) / 0.62),
-        hsl(var(--card) / 0.78)
-      ),
-      var(--app-page-gradient) !important;
+  .app-card-surface-strong {
+    background: hsl(var(--card) / var(--app-card-alpha-strong)) !important;
+    border: 1px solid hsl(var(--foreground) / calc(var(--app-card-border-alpha) + 0.05)) !important;
     box-shadow:
-      0 -18px 40px hsl(0 0% 0% / 0.28),
+      0 22px 58px hsl(var(--foreground) / calc(var(--app-card-shadow-alpha) + 0.04)),
+      inset 0 1px 0 hsl(var(--background) / 0.42) !important;
+    backdrop-filter: blur(calc(var(--app-card-blur) + 4px)) saturate(var(--app-card-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--app-card-blur) + 4px)) saturate(var(--app-card-saturate));
+  }
+
+  .app-card-surface-soft {
+    background: hsl(var(--card) / var(--app-card-alpha-soft)) !important;
+    border: 1px solid hsl(var(--foreground) / calc(var(--app-card-border-alpha) * 0.72)) !important;
+    box-shadow: inset 0 1px 0 hsl(var(--background) / 0.28) !important;
+    backdrop-filter: blur(calc(var(--app-card-blur) - 4px)) saturate(var(--app-card-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--app-card-blur) - 4px)) saturate(var(--app-card-saturate));
+  }
+
+  /* Make existing hardcoded glass cards show a clear, consistent border. */
+  [class*='rounded-2xl'][class*='bg-card'],
+  [class*='rounded-3xl'][class*='bg-card'],
+  [class*='rounded-xl'][class*='bg-card'] {
+    border-color: hsl(var(--foreground) / var(--app-card-border-alpha)) !important;
+    box-shadow:
+      0 16px 38px hsl(var(--foreground) / calc(var(--app-card-shadow-alpha) * 0.8)),
+      inset 0 1px 0 hsl(var(--background) / 0.32) !important;
+  }
+
+  [class*='rounded-2xl'][class*='bg-background'],
+  [class*='rounded-3xl'][class*='bg-background'],
+  [class*='rounded-xl'][class*='bg-background'] {
+    border-color: hsl(var(--foreground) / calc(var(--app-card-border-alpha) * 0.75)) !important;
+  }
+
+  .app-bottom-nav {
+    height: var(--app-bottom-nav-height);
+    padding-bottom: var(--app-safe-area-bottom);
+    border: 0 !important;
+    outline: 0 !important;
+    background:
+      radial-gradient(circle at 11% 10%, hsl(var(--primary) / 0.20), transparent 30%),
+      radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.12), transparent 34%),
+      linear-gradient(to bottom, hsl(var(--card) / 0.58), hsl(var(--card) / 0.78)) !important;
+    box-shadow:
+      0 -22px 60px hsl(var(--foreground) / 0.08),
+      inset 0 1px 0 hsl(var(--background) / 0.20) !important;
+    backdrop-filter: blur(26px) saturate(175%);
+    -webkit-backdrop-filter: blur(26px) saturate(175%);
+  }
+
+  html.dark .app-bottom-nav {
+    background:
+      radial-gradient(circle at 11% 10%, hsl(var(--primary) / 0.24), transparent 30%),
+      radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.13), transparent 34%),
+      linear-gradient(to bottom, hsl(var(--card) / 0.50), hsl(var(--card) / 0.72)) !important;
+    box-shadow:
+      0 -22px 70px hsl(0 0% 0% / 0.36),
       inset 0 1px 0 hsl(0 0% 100% / 0.06) !important;
   }
 }

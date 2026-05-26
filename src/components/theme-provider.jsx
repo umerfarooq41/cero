@@ -16,111 +16,104 @@ const THEME_STYLE_TOKENS = {
     light: {
       primary: '217 91% 53%',
       primaryForeground: '0 0% 100%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
-        radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.18), transparent 28%),
-        radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.14), transparent 32%),
-        linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%)`,
-      themeColor: '#eef6ff',
+      themeColor: '#eef7ff',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.30), transparent 30%), radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.22), transparent 28%), radial-gradient(circle at 50% 100%, rgba(45, 212, 191, 0.18), transparent 32%), linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 246, 255, 1) 45%, rgba(255, 247, 251, 1) 100%)',
     },
     dark: {
       primary: '217 91% 60%',
       primaryForeground: '0 0% 100%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%),
-        radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%),
-        radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%),
-        linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%)`,
       themeColor: '#020617',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.28), transparent 30%), radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.24), transparent 30%), radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 32%), linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(8, 13, 28, 1) 45%, rgba(3, 7, 18, 1) 100%)',
     },
   },
   ocean: {
     light: {
-      primary: '199 89% 48%',
+      primary: '188 86% 42%',
       primaryForeground: '0 0% 100%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.40), transparent 34%),
-        radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.38), transparent 34%),
-        radial-gradient(circle at 52% 100%, rgba(59, 130, 246, 0.26), transparent 38%),
-        linear-gradient(135deg, rgba(222, 246, 255, 1) 0%, rgba(217, 253, 244, 1) 48%, rgba(228, 240, 255, 1) 100%)`,
-      themeColor: '#dff8ff',
+      themeColor: '#d8fbff',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.42), transparent 34%), radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.40), transparent 34%), radial-gradient(circle at 52% 100%, rgba(59, 130, 246, 0.26), transparent 38%), linear-gradient(135deg, rgba(221, 247, 255, 1) 0%, rgba(213, 253, 243, 1) 48%, rgba(229, 239, 255, 1) 100%)',
     },
     dark: {
       primary: '188 86% 53%',
       primaryForeground: '222 47% 7%',
-      gradient: `
-        radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.30), transparent 32%),
-        radial-gradient(circle at 95% 8%, rgba(20, 184, 166, 0.26), transparent 30%),
-        radial-gradient(circle at 45% 100%, rgba(37, 99, 235, 0.18), transparent 34%),
-        linear-gradient(135deg, rgba(4, 18, 33, 1) 0%, rgba(6, 30, 43, 1) 50%, rgba(3, 7, 18, 1) 100%)`,
       themeColor: '#041221',
+      gradient:
+        'radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.30), transparent 32%), radial-gradient(circle at 95% 8%, rgba(20, 184, 166, 0.26), transparent 30%), radial-gradient(circle at 45% 100%, rgba(37, 99, 235, 0.18), transparent 34%), linear-gradient(135deg, rgba(4, 18, 33, 1) 0%, rgba(6, 30, 43, 1) 50%, rgba(3, 7, 18, 1) 100%)',
     },
   },
   sunset: {
     light: {
       primary: '24 95% 53%',
       primaryForeground: '0 0% 100%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(251, 146, 60, 0.38), transparent 34%),
-        radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.34), transparent 32%),
-        radial-gradient(circle at 48% 100%, rgba(250, 204, 21, 0.24), transparent 38%),
-        linear-gradient(135deg, rgba(255, 241, 224, 1) 0%, rgba(255, 230, 235, 1) 48%, rgba(255, 248, 213, 1) 100%)`,
-      themeColor: '#fff0e6',
+      themeColor: '#fff0dc',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(251, 146, 60, 0.38), transparent 34%), radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.34), transparent 32%), radial-gradient(circle at 48% 100%, rgba(250, 204, 21, 0.24), transparent 38%), linear-gradient(135deg, rgba(255, 242, 226, 1) 0%, rgba(255, 232, 236, 1) 48%, rgba(255, 248, 214, 1) 100%)',
     },
     dark: {
       primary: '33 96% 56%',
       primaryForeground: '24 28% 9%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.28), transparent 32%),
-        radial-gradient(circle at 100% 5%, rgba(236, 72, 153, 0.24), transparent 30%),
-        radial-gradient(circle at 45% 100%, rgba(245, 158, 11, 0.16), transparent 34%),
-        linear-gradient(135deg, rgba(24, 10, 9, 1) 0%, rgba(30, 16, 30, 1) 48%, rgba(3, 7, 18, 1) 100%)`,
       themeColor: '#180a09',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.28), transparent 32%), radial-gradient(circle at 100% 5%, rgba(236, 72, 153, 0.24), transparent 30%), radial-gradient(circle at 45% 100%, rgba(245, 158, 11, 0.16), transparent 34%), linear-gradient(135deg, rgba(24, 10, 9, 1) 0%, rgba(30, 16, 30, 1) 48%, rgba(3, 7, 18, 1) 100%)',
     },
   },
   forest: {
     light: {
       primary: '145 63% 38%',
       primaryForeground: '0 0% 100%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.36), transparent 34%),
-        radial-gradient(circle at 100% 5%, rgba(132, 204, 22, 0.30), transparent 32%),
-        radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.24), transparent 38%),
-        linear-gradient(135deg, rgba(225, 251, 235, 1) 0%, rgba(240, 253, 216, 1) 46%, rgba(219, 250, 237, 1) 100%)`,
       themeColor: '#dcfce7',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.36), transparent 34%), radial-gradient(circle at 100% 5%, rgba(132, 204, 22, 0.32), transparent 32%), radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.24), transparent 38%), linear-gradient(135deg, rgba(229, 252, 236, 1) 0%, rgba(242, 253, 218, 1) 46%, rgba(222, 250, 239, 1) 100%)',
     },
     dark: {
       primary: '142 71% 45%',
       primaryForeground: '145 45% 8%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.25), transparent 32%),
-        radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.18), transparent 30%),
-        radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 34%),
-        linear-gradient(135deg, rgba(5, 20, 13, 1) 0%, rgba(9, 24, 18, 1) 48%, rgba(3, 7, 18, 1) 100%)`,
       themeColor: '#05140d',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.25), transparent 32%), radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.18), transparent 30%), radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 34%), linear-gradient(135deg, rgba(5, 20, 13, 1) 0%, rgba(9, 24, 18, 1) 48%, rgba(3, 7, 18, 1) 100%)',
     },
   },
   minimal: {
     light: {
       primary: '222 47% 32%',
       primaryForeground: '0 0% 100%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.20), transparent 30%),
-        radial-gradient(circle at 100% 0%, rgba(203, 213, 225, 0.22), transparent 28%),
-        linear-gradient(135deg, rgba(246, 248, 251, 1) 0%, rgba(237, 242, 248, 1) 55%, rgba(248, 250, 252, 1) 100%)`,
-      themeColor: '#f6f8fb',
+      themeColor: '#f1f5f9',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.22), transparent 30%), radial-gradient(circle at 100% 0%, rgba(203, 213, 225, 0.24), transparent 28%), linear-gradient(135deg, rgba(246, 248, 251, 1) 0%, rgba(237, 242, 248, 1) 55%, rgba(248, 250, 252, 1) 100%)',
     },
     dark: {
       primary: '210 40% 86%',
       primaryForeground: '222 47% 8%',
-      gradient: `
-        radial-gradient(circle at 0% 0%, rgba(71, 85, 105, 0.20), transparent 30%),
-        radial-gradient(circle at 100% 0%, rgba(100, 116, 139, 0.14), transparent 28%),
-        linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(15, 23, 42, 1) 58%, rgba(3, 7, 18, 1) 100%)`,
       themeColor: '#020617',
+      gradient:
+        'radial-gradient(circle at 0% 0%, rgba(71, 85, 105, 0.18), transparent 30%), radial-gradient(circle at 100% 0%, rgba(100, 116, 139, 0.12), transparent 28%), linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(15, 23, 42, 1) 58%, rgba(3, 7, 18, 1) 100%)',
     },
   },
 };
+
+function applyThemeVariables(style, resolvedTheme) {
+  if (typeof window === 'undefined') return;
+
+  const root = document.documentElement;
+  const safeStyle = VALID_THEME_STYLES.includes(style) ? style : 'cero';
+  const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
+  const tokens = THEME_STYLE_TOKENS[safeStyle][mode];
+
+  root.style.setProperty('--app-page-gradient', tokens.gradient);
+  root.style.setProperty('--primary', tokens.primary);
+  root.style.setProperty('--primary-foreground', tokens.primaryForeground);
+  root.style.setProperty('--ring', tokens.primary);
+  root.style.setProperty('--chart-1', tokens.primary);
+  root.style.setProperty('--sidebar-primary', tokens.primary);
+  root.style.setProperty('--sidebar-primary-foreground', tokens.primaryForeground);
+  root.style.setProperty('--sidebar-ring', tokens.primary);
+
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) themeColor.setAttribute('content', tokens.themeColor);
+}
 
 function getStoredTheme() {
   if (typeof window === 'undefined') return 'system';
@@ -153,41 +146,17 @@ function getSystemTheme() {
     : 'light';
 }
 
-function getThemeStyleTokens(style, resolvedTheme) {
-  const safeStyle = VALID_THEME_STYLES.includes(style) ? style : 'cero';
-  const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
-
-  return THEME_STYLE_TOKENS[safeStyle]?.[mode] ?? THEME_STYLE_TOKENS.cero[mode];
-}
-
-function applyRuntimeThemeTokens(style, resolvedTheme) {
-  if (typeof window === 'undefined') return;
-
-  const root = document.documentElement;
-  const tokens = getThemeStyleTokens(style, resolvedTheme);
-
-  root.style.setProperty('--app-page-gradient', tokens.gradient.replace(/\s+/g, ' ').trim());
-  root.style.setProperty('--primary', tokens.primary);
-  root.style.setProperty('--primary-foreground', tokens.primaryForeground);
-  root.style.setProperty('--ring', tokens.primary);
-  root.style.setProperty('--chart-1', tokens.primary);
-  root.style.setProperty('--sidebar-primary', tokens.primary);
-  root.style.setProperty('--sidebar-primary-foreground', tokens.primaryForeground);
-  root.style.setProperty('--sidebar-ring', tokens.primary);
-  root.style.setProperty('--app-mobile-bar-color', tokens.themeColor);
-
-  const themeColor = document.querySelector('meta[name="theme-color"]');
-  if (themeColor) themeColor.setAttribute('content', tokens.themeColor);
-}
-
 function applyTheme(mode) {
   if (typeof window === 'undefined') return 'light';
 
   const root = document.documentElement;
   const resolvedTheme = mode === 'system' ? getSystemTheme() : mode;
 
-  root.classList.toggle('dark', resolvedTheme === 'dark');
-  root.dataset.resolvedTheme = resolvedTheme;
+  if (resolvedTheme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
 
   const favicon = document.getElementById('favicon');
 
@@ -196,10 +165,19 @@ function applyTheme(mode) {
       resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
   }
 
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+
+  if (themeColor) {
+    themeColor.setAttribute(
+      'content',
+      resolvedTheme === 'dark' ? '#020617' : '#f8fafc'
+    );
+  }
+
   return resolvedTheme;
 }
 
-function applyThemeStyle(style, resolvedTheme = getSystemTheme()) {
+function applyThemeStyle(style) {
   if (typeof window === 'undefined') return;
 
   const root = document.documentElement;
@@ -211,7 +189,6 @@ function applyThemeStyle(style, resolvedTheme = getSystemTheme()) {
 
   root.classList.add(`theme-style-${safeStyle}`);
   root.dataset.themeStyle = safeStyle;
-  applyRuntimeThemeTokens(safeStyle, resolvedTheme);
 }
 
 function applyBooleanClass(className, enabled) {
@@ -238,11 +215,16 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const resolved = applyTheme(theme);
-    applyThemeStyle(themeStyle, resolved);
     setResolvedTheme(resolved);
+    applyThemeVariables(themeStyle, resolved);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-    localStorage.setItem(THEME_STYLE_STORAGE_KEY, themeStyle);
   }, [theme, themeStyle]);
+
+  useEffect(() => {
+    applyThemeStyle(themeStyle);
+    applyThemeVariables(themeStyle, resolvedTheme);
+    localStorage.setItem(THEME_STYLE_STORAGE_KEY, themeStyle);
+  }, [themeStyle, resolvedTheme]);
 
   useEffect(() => {
     applyBooleanClass('compact-mode', compactMode);
@@ -269,7 +251,6 @@ export function ThemeProvider({ children }) {
     const handleSystemThemeChange = () => {
       if (theme === 'system') {
         const resolved = applyTheme('system');
-        applyThemeStyle(themeStyle, resolved);
         setResolvedTheme(resolved);
       }
     };
@@ -279,7 +260,7 @@ export function ThemeProvider({ children }) {
     return () => {
       mediaQuery.removeEventListener('change', handleSystemThemeChange);
     };
-  }, [theme, themeStyle]);
+  }, [theme]);
 
   useEffect(() => {
     if (!hapticsEnabled || typeof window === 'undefined') return undefined;

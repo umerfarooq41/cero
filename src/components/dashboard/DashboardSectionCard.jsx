@@ -13,7 +13,7 @@ export default function DashboardSectionCard({
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-3xl app-card-surface p-3 sm:p-4 md:p-5',
+        'app-card-surface overflow-hidden rounded-3xl p-3 sm:p-4 md:p-5',
         className
       )}
     >

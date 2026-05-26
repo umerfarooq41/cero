@@ -55,11 +55,8 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-50 h-[var(--app-bottom-nav-height)] border-0 app-bottom-nav lg:hidden"
-      aria-label="Primary navigation"
-    >
-      <div className="mx-auto grid h-[var(--app-bottom-nav-content-height)] max-w-3xl grid-cols-5">
+    <nav className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
+      <div className="app-bottom-nav relative mx-auto grid w-full max-w-3xl grid-cols-5">
         {navItems.map((item) => {
           const isActive = isNavItemActive(location.pathname, item);
           const Icon = item.icon;
@@ -76,7 +73,7 @@ export default function BottomNav() {
                 className={cn(
                   `
                   relative z-10 flex min-w-0 flex-col items-center justify-center
-                  gap-1 px-1 py-1 text-center
+                  gap-1 px-1 py-1.5 text-center
                   transition-colors duration-200
                   `,
                   isActive
@@ -86,16 +83,16 @@ export default function BottomNav() {
               >
                 <motion.div
                   animate={{
-                    scale: isActive ? 1.06 : 1,
+                    scale: isActive ? 1.08 : 1,
                     y: isActive ? -1 : 0,
                   }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-                  className="relative flex h-11 w-11 items-center justify-center"
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  className="relative flex h-10 w-10 items-center justify-center"
                 >
                   {isActive && (
                     <motion.div
                       layoutId="nav-icon-highlight"
-                      className="absolute inset-0 rounded-full bg-primary/12 shadow-[0_0_24px_hsl(var(--primary)/0.28)] ring-1 ring-primary/25"
+                      className="absolute inset-0 rounded-2xl bg-primary/12 shadow-[0_0_26px_hsl(var(--primary)/0.32)] ring-1 ring-primary/25"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -103,7 +100,7 @@ export default function BottomNav() {
                   <Icon
                     className={cn(
                       'relative z-10 h-5 w-5 transition-all duration-200',
-                      isActive && 'stroke-[2.6] drop-shadow-[0_0_10px_hsl(var(--primary)/0.45)]'
+                      isActive && 'drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)] stroke-[2.5]'
                     )}
                   />
                 </motion.div>
