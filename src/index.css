@@ -897,122 +897,127 @@ main,
 }
 
 /* =========================================================
-   THEME-TINTED MUTED SURFACES — V4
-   Cards/forms now use the active theme color as a soft tint
-   instead of relying on black/white translucent glass.
+   THEMED COLORED GLASS SURFACES — V5
+   Transparent theme-colored glass for cards/forms in both modes.
+   Floating menus/tooltips remain near-solid for readability.
    ========================================================= */
 @layer base {
   html {
-    /* Main cards: readable, softly tinted */
-    --app-surface-main-alpha: 0.84;
-    --app-surface-main-tint: 0.12;
-    --app-surface-main-tint-soft: 0.055;
+    /* Main cards: more transparent glass with active-theme color in the glass layer */
+    --app-glass-main-alpha: 0.46;
+    --app-glass-main-primary: 0.135;
+    --app-glass-main-primary-soft: 0.045;
 
-    /* Form panels/dialogs/sheets: more solid for readability */
-    --app-surface-strong-alpha: 0.92;
-    --app-surface-strong-tint: 0.08;
-    --app-surface-strong-tint-soft: 0.04;
+    /* Form panels/dialogs/sheets: still glass, but solid enough for fields and labels */
+    --app-glass-strong-alpha: 0.70;
+    --app-glass-strong-primary: 0.105;
+    --app-glass-strong-primary-soft: 0.04;
 
-    /* Small stat/inset cards: lighter and more visibly themed */
-    --app-surface-soft-alpha: 0.76;
-    --app-surface-soft-tint: 0.18;
-    --app-surface-soft-tint-soft: 0.075;
+    /* Small/stat/inset cards: most transparent, visibly airy */
+    --app-glass-soft-alpha: 0.30;
+    --app-glass-soft-primary: 0.16;
+    --app-glass-soft-primary-soft: 0.055;
 
-    /* Floating surfaces stay near-solid so menus/tooltips never look transparent */
-    --app-surface-floating-alpha: 0.98;
-    --app-surface-floating-tint: 0.055;
+    /* Floating surfaces stay near-solid so dropdowns/tooltips do not look see-through */
+    --app-glass-floating-alpha: 0.97;
+    --app-glass-floating-primary: 0.055;
 
-    --app-surface-border-alpha: 0.16;
-    --app-surface-border-strong-alpha: 0.20;
-    --app-surface-border-soft-alpha: 0.12;
-    --app-surface-shadow-alpha: 0.08;
-    --app-surface-shadow-strong-alpha: 0.12;
-    --app-surface-shadow-color: 222 47% 9%;
+    --app-glass-border-alpha: 0.22;
+    --app-glass-border-strong-alpha: 0.26;
+    --app-glass-border-soft-alpha: 0.16;
+    --app-glass-shadow-alpha: 0.07;
+    --app-glass-shadow-strong-alpha: 0.11;
+    --app-glass-shadow-color: 222 47% 9%;
+    --app-glass-blur: 24px;
+    --app-glass-saturate: 175%;
 
     --app-recharts-tooltip-bg:
       linear-gradient(135deg, hsl(var(--primary) / 0.055), transparent 58%),
-      hsl(var(--popover) / 0.98);
-    --app-recharts-tooltip-border: hsl(var(--primary) / 0.16);
-    --app-recharts-tooltip-shadow: 0 16px 42px hsl(var(--app-surface-shadow-color) / 0.16);
+      hsl(var(--popover) / 0.97);
+    --app-recharts-tooltip-border: hsl(var(--primary) / 0.18);
+    --app-recharts-tooltip-shadow: 0 16px 42px hsl(var(--app-glass-shadow-color) / 0.16);
   }
 
   html.dark {
-    --app-surface-main-alpha: 0.78;
-    --app-surface-main-tint: 0.16;
-    --app-surface-main-tint-soft: 0.065;
+    /* Dark mode needs a lower neutral base and stronger theme-colored glass layer */
+    --app-glass-main-alpha: 0.34;
+    --app-glass-main-primary: 0.18;
+    --app-glass-main-primary-soft: 0.07;
 
-    --app-surface-strong-alpha: 0.90;
-    --app-surface-strong-tint: 0.10;
-    --app-surface-strong-tint-soft: 0.045;
+    --app-glass-strong-alpha: 0.58;
+    --app-glass-strong-primary: 0.15;
+    --app-glass-strong-primary-soft: 0.055;
 
-    --app-surface-soft-alpha: 0.70;
-    --app-surface-soft-tint: 0.22;
-    --app-surface-soft-tint-soft: 0.08;
+    --app-glass-soft-alpha: 0.24;
+    --app-glass-soft-primary: 0.22;
+    --app-glass-soft-primary-soft: 0.085;
 
-    --app-surface-floating-alpha: 0.985;
-    --app-surface-floating-tint: 0.06;
+    --app-glass-floating-alpha: 0.975;
+    --app-glass-floating-primary: 0.065;
 
-    --app-surface-border-alpha: 0.18;
-    --app-surface-border-strong-alpha: 0.22;
-    --app-surface-border-soft-alpha: 0.14;
-    --app-surface-shadow-alpha: 0.30;
-    --app-surface-shadow-strong-alpha: 0.40;
-    --app-surface-shadow-color: 222 47% 3%;
+    --app-glass-border-alpha: 0.20;
+    --app-glass-border-strong-alpha: 0.26;
+    --app-glass-border-soft-alpha: 0.16;
+    --app-glass-shadow-alpha: 0.30;
+    --app-glass-shadow-strong-alpha: 0.42;
+    --app-glass-shadow-color: 222 47% 2%;
+    --app-glass-blur: 22px;
+    --app-glass-saturate: 150%;
 
     --app-recharts-tooltip-bg:
-      linear-gradient(135deg, hsl(var(--primary) / 0.075), transparent 58%),
-      hsl(var(--popover) / 0.985);
-    --app-recharts-tooltip-border: hsl(var(--primary) / 0.20);
-    --app-recharts-tooltip-shadow: 0 18px 46px hsl(var(--app-surface-shadow-color) / 0.40);
+      linear-gradient(135deg, hsl(var(--primary) / 0.07), transparent 58%),
+      hsl(var(--popover) / 0.975);
+    --app-recharts-tooltip-border: hsl(var(--primary) / 0.22);
+    --app-recharts-tooltip-shadow: 0 18px 46px hsl(var(--app-glass-shadow-color) / 0.44);
   }
 }
 
 @layer utilities {
   .app-card-surface {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-main-tint)), transparent 56%),
-      linear-gradient(180deg, hsl(var(--primary) / var(--app-surface-main-tint-soft)), transparent 72%),
-      hsl(var(--card) / var(--app-surface-main-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-alpha)) !important;
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / var(--app-glass-main-primary)), transparent 48%),
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-main-primary-soft)), transparent 62%),
+      hsl(var(--card) / var(--app-glass-main-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-glass-border-alpha)) !important;
     box-shadow:
-      0 12px 32px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)),
-      inset 0 1px 0 hsl(var(--primary) / 0.08) !important;
-    backdrop-filter: blur(18px) saturate(145%);
-    -webkit-backdrop-filter: blur(18px) saturate(145%);
+      0 14px 34px hsl(var(--app-glass-shadow-color) / var(--app-glass-shadow-alpha)),
+      inset 0 1px 0 hsl(var(--primary) / 0.12) !important;
+    backdrop-filter: blur(var(--app-glass-blur)) saturate(var(--app-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur)) saturate(var(--app-glass-saturate));
   }
 
   .app-card-surface-strong {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-strong-tint)), transparent 58%),
-      linear-gradient(180deg, hsl(var(--primary) / var(--app-surface-strong-tint-soft)), transparent 74%),
-      hsl(var(--card) / var(--app-surface-strong-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-strong-alpha)) !important;
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / var(--app-glass-strong-primary)), transparent 48%),
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-strong-primary-soft)), transparent 64%),
+      hsl(var(--card) / var(--app-glass-strong-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-glass-border-strong-alpha)) !important;
     box-shadow:
-      0 16px 42px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-strong-alpha)),
-      inset 0 1px 0 hsl(var(--primary) / 0.10) !important;
-    backdrop-filter: blur(16px) saturate(135%);
-    -webkit-backdrop-filter: blur(16px) saturate(135%);
+      0 18px 48px hsl(var(--app-glass-shadow-color) / var(--app-glass-shadow-strong-alpha)),
+      inset 0 1px 0 hsl(var(--primary) / 0.14) !important;
+    backdrop-filter: blur(calc(var(--app-glass-blur) + 2px)) saturate(var(--app-glass-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--app-glass-blur) + 2px)) saturate(var(--app-glass-saturate));
   }
 
   .app-card-surface-soft {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-soft-tint)), transparent 60%),
-      linear-gradient(180deg, hsl(var(--primary) / var(--app-surface-soft-tint-soft)), transparent 76%),
-      hsl(var(--card) / var(--app-surface-soft-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / var(--app-surface-border-soft-alpha)) !important;
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / var(--app-glass-soft-primary)), transparent 52%),
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-soft-primary-soft)), transparent 66%),
+      hsl(var(--card) / var(--app-glass-soft-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / var(--app-glass-border-soft-alpha)) !important;
     box-shadow:
-      0 8px 22px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.62)),
-      inset 0 1px 0 hsl(var(--primary) / 0.07) !important;
-    backdrop-filter: blur(14px) saturate(135%);
-    -webkit-backdrop-filter: blur(14px) saturate(135%);
+      0 8px 22px hsl(var(--app-glass-shadow-color) / calc(var(--app-glass-shadow-alpha) * 0.55)),
+      inset 0 1px 0 hsl(var(--primary) / 0.10) !important;
+    backdrop-filter: blur(calc(var(--app-glass-blur) - 4px)) saturate(var(--app-glass-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--app-glass-blur) - 4px)) saturate(var(--app-glass-saturate));
   }
 
   .app-floating-surface,
   .app-chart-tooltip-surface {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-floating-tint)), transparent 58%),
-      hsl(var(--popover) / var(--app-surface-floating-alpha)) !important;
-    border: 1px solid hsl(var(--primary) / 0.16) !important;
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-floating-primary)), transparent 58%),
+      hsl(var(--popover) / var(--app-glass-floating-alpha)) !important;
+    border: 1px solid hsl(var(--primary) / 0.18) !important;
     box-shadow: var(--app-recharts-tooltip-shadow) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -1023,14 +1028,15 @@ main,
   .card-soft,
   .glass {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-main-tint)), transparent 56%),
-      hsl(var(--card) / var(--app-surface-main-alpha)) !important;
-    border-color: hsl(var(--primary) / var(--app-surface-border-alpha)) !important;
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / var(--app-glass-main-primary)), transparent 48%),
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-main-primary-soft)), transparent 62%),
+      hsl(var(--card) / var(--app-glass-main-alpha)) !important;
+    border-color: hsl(var(--primary) / var(--app-glass-border-alpha)) !important;
     box-shadow:
-      0 12px 30px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)),
-      inset 0 1px 0 hsl(var(--primary) / 0.08) !important;
-    backdrop-filter: blur(18px) saturate(145%);
-    -webkit-backdrop-filter: blur(18px) saturate(145%);
+      0 14px 34px hsl(var(--app-glass-shadow-color) / var(--app-glass-shadow-alpha)),
+      inset 0 1px 0 hsl(var(--primary) / 0.12) !important;
+    backdrop-filter: blur(var(--app-glass-blur)) saturate(var(--app-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur)) saturate(var(--app-glass-saturate));
   }
 
   :where(
@@ -1039,14 +1045,15 @@ main,
     [class*='rounded-xl'][class*='bg-card']
   ) {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-main-tint)), transparent 56%),
-      hsl(var(--card) / var(--app-surface-main-alpha)) !important;
-    border-color: hsl(var(--primary) / var(--app-surface-border-alpha)) !important;
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / var(--app-glass-main-primary)), transparent 48%),
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-main-primary-soft)), transparent 62%),
+      hsl(var(--card) / var(--app-glass-main-alpha)) !important;
+    border-color: hsl(var(--primary) / var(--app-glass-border-alpha)) !important;
     box-shadow:
-      0 10px 26px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.76)),
-      inset 0 1px 0 hsl(var(--primary) / 0.07) !important;
-    backdrop-filter: blur(18px) saturate(145%);
-    -webkit-backdrop-filter: blur(18px) saturate(145%);
+      0 12px 30px hsl(var(--app-glass-shadow-color) / calc(var(--app-glass-shadow-alpha) * 0.82)),
+      inset 0 1px 0 hsl(var(--primary) / 0.10) !important;
+    backdrop-filter: blur(var(--app-glass-blur)) saturate(var(--app-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur)) saturate(var(--app-glass-saturate));
   }
 
   :where(
@@ -1055,9 +1062,10 @@ main,
     [class*='rounded-xl'][class*='bg-background']
   ) {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / var(--app-surface-soft-tint)), transparent 60%),
-      hsl(var(--card) / var(--app-surface-soft-alpha)) !important;
-    border-color: hsl(var(--primary) / var(--app-surface-border-soft-alpha)) !important;
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / var(--app-glass-soft-primary)), transparent 52%),
+      linear-gradient(135deg, hsl(var(--primary) / var(--app-glass-soft-primary-soft)), transparent 66%),
+      hsl(var(--card) / var(--app-glass-soft-alpha)) !important;
+    border-color: hsl(var(--primary) / var(--app-glass-border-soft-alpha)) !important;
   }
 
   :where(
@@ -1066,10 +1074,12 @@ main,
     [role='combobox']
   ) {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / 0.065), transparent 62%),
-      hsl(var(--card) / 0.90) !important;
-    border-color: hsl(var(--primary) / 0.16) !important;
-    box-shadow: inset 0 1px 0 hsl(var(--primary) / 0.055) !important;
+      linear-gradient(135deg, hsl(var(--primary) / 0.085), transparent 62%),
+      hsl(var(--card) / 0.58) !important;
+    border-color: hsl(var(--primary) / 0.20) !important;
+    box-shadow: inset 0 1px 0 hsl(var(--primary) / 0.08) !important;
+    backdrop-filter: blur(12px) saturate(135%);
+    -webkit-backdrop-filter: blur(12px) saturate(135%);
   }
 
   html.dark :where(
@@ -1078,8 +1088,8 @@ main,
     [role='combobox']
   ) {
     background:
-      linear-gradient(135deg, hsl(var(--primary) / 0.08), transparent 62%),
-      hsl(var(--card) / 0.88) !important;
-    border-color: hsl(var(--primary) / 0.18) !important;
+      linear-gradient(135deg, hsl(var(--primary) / 0.11), transparent 62%),
+      hsl(var(--card) / 0.42) !important;
+    border-color: hsl(var(--primary) / 0.22) !important;
   }
 }
