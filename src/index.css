@@ -128,6 +128,90 @@
     --mood-negative: 0 84% 64%;
     --mood-neutral: 215 20% 68%;
   }
+
+
+  /* Theme style accent tokens
+     These override the app primary color, rings, charts, and navigation highlights
+     so theme styles affect tabs, bottom nav, sidebar, FABs, and all primary UI. */
+  html.theme-style-ocean {
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 199 89% 48%;
+    --chart-1: 199 89% 48%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 199 89% 48%;
+  }
+
+  html.theme-style-ocean.dark {
+    --primary: 188 86% 53%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 188 86% 53%;
+    --chart-1: 188 86% 53%;
+    --sidebar-primary: 188 86% 53%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-ring: 188 86% 53%;
+  }
+
+  html.theme-style-sunset {
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 24 95% 53%;
+    --chart-1: 24 95% 53%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 24 95% 53%;
+  }
+
+  html.theme-style-sunset.dark {
+    --primary: 33 96% 56%;
+    --primary-foreground: 24 28% 9%;
+    --ring: 33 96% 56%;
+    --chart-1: 33 96% 56%;
+    --sidebar-primary: 33 96% 56%;
+    --sidebar-primary-foreground: 24 28% 9%;
+    --sidebar-ring: 33 96% 56%;
+  }
+
+  html.theme-style-forest {
+    --primary: 145 63% 38%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 145 63% 38%;
+    --chart-1: 145 63% 38%;
+    --sidebar-primary: 145 63% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 145 63% 38%;
+  }
+
+  html.theme-style-forest.dark {
+    --primary: 142 71% 45%;
+    --primary-foreground: 145 45% 8%;
+    --ring: 142 71% 45%;
+    --chart-1: 142 71% 45%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 145 45% 8%;
+    --sidebar-ring: 142 71% 45%;
+  }
+
+  html.theme-style-minimal {
+    --primary: 222 47% 32%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 222 47% 32%;
+    --chart-1: 222 47% 32%;
+    --sidebar-primary: 222 47% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 222 47% 32%;
+  }
+
+  html.theme-style-minimal.dark {
+    --primary: 210 40% 86%;
+    --primary-foreground: 222 47% 8%;
+    --ring: 210 40% 86%;
+    --chart-1: 210 40% 86%;
+    --sidebar-primary: 210 40% 86%;
+    --sidebar-primary-foreground: 222 47% 8%;
+    --sidebar-ring: 210 40% 86%;
+  }
 }
 
 /* ============================= */

@@ -10,10 +10,10 @@ const toneStyles = {
   },
   blue: {
     active:
-      'bg-blue-500/10 text-blue-700 shadow-[0_8px_24px_rgba(59,130,246,0.16)] ring-blue-500/15 dark:text-blue-400 dark:shadow-[0_8px_24px_rgba(59,130,246,0.10)]',
+      'bg-primary/10 text-primary shadow-[0_8px_24px_hsl(var(--primary)/0.16)] ring-primary/15 dark:shadow-[0_8px_24px_hsl(var(--primary)/0.10)]',
     inactive:
-      'text-muted-foreground hover:bg-blue-500/5 hover:text-blue-700 dark:hover:text-blue-400',
-    indicator: 'bg-blue-500/10 ring-blue-500/15',
+      'text-muted-foreground hover:bg-primary/5 hover:text-primary',
+    indicator: 'bg-primary/10 ring-primary/15',
   },
   emerald: {
     active:
