@@ -57,7 +57,7 @@ function BottomNavStyles() {
       {`
         html {
           --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-          --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom));
+          --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom) + 8px);
         }
 
         .app-main-scroll {
@@ -72,7 +72,8 @@ function BottomNavStyles() {
 
         .app-bottom-nav {
           height: var(--app-bottom-nav-height);
-          padding-bottom: var(--app-safe-area-bottom);
+          /* Extra 8px so nav labels sit above the gesture pill */
+          padding-bottom: calc(var(--app-safe-area-bottom) + 8px);
           border: 0 !important;
           border-top: 0 !important;
           border-bottom: 0 !important;

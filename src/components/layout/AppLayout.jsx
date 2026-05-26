@@ -15,7 +15,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="app-page-surface flex h-[100dvh] min-h-[100dvh] overflow-hidden">
+    <div className="app-page-surface flex min-h-[100dvh] flex-col overflow-hidden lg:flex-row">
       <ScrollManager />
 
       <Sidebar />

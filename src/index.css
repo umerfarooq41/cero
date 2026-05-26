@@ -860,6 +860,8 @@ main,
 
     width: 100%;
     min-height: 100%;
+    /* Extend the #0a0a1a base behind the status bar */
+    padding-top: env(safe-area-inset-top, 0px);
     background: var(--app-system-bar-bg) !important;
     background-color: var(--app-system-bar-bg) !important;
     color-scheme: dark light;
@@ -869,6 +871,7 @@ main,
     width: 100%;
     min-height: 100dvh;
     margin: 0;
+    /* Reset — html already consumed the top inset; bottom is handled by BottomNav */
     padding: 0;
     background: var(--app-system-bar-bg) !important;
     background-color: var(--app-system-bar-bg) !important;
