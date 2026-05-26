@@ -347,30 +347,20 @@ main,
       0 0 0 1px rgba(255, 255, 255, 0.07);
   }
 
-
   .app-bottom-nav {
-    background:
-      linear-gradient(to bottom, hsl(var(--card) / 0.78), hsl(var(--card) / 0.62)),
-      var(--app-page-gradient);
-    background-attachment: fixed;
-    backdrop-filter: blur(24px) saturate(165%);
-    -webkit-backdrop-filter: blur(24px) saturate(165%);
-    border: 1px solid hsl(var(--border) / 0.62);
-    box-shadow:
-      0 -1px 0 hsl(var(--foreground) / 0.04),
-      0 18px 42px rgba(15, 23, 42, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border-top: 0;
+    border-bottom: 0;
+    box-shadow: none;
   }
 
   .dark .app-bottom-nav {
-    background:
-      linear-gradient(to bottom, hsl(var(--card) / 0.72), hsl(var(--card) / 0.54)),
-      var(--app-page-gradient);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow:
-      0 -1px 0 rgba(255, 255, 255, 0.03),
-      0 18px 44px rgba(0, 0, 0, 0.38),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    background: rgba(2, 6, 23, 0.78);
+    border-top: 0;
+    border-bottom: 0;
+    box-shadow: none;
   }
 
 
@@ -690,9 +680,15 @@ main,
 @layer utilities {
   .app-page-surface,
   .app-gradient-surface,
-  .app-fixed-surface {
+  .app-fixed-surface,
+  .app-bottom-nav {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 
+  .app-bottom-nav {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
 }
