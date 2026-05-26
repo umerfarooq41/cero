@@ -70,41 +70,35 @@ export default function PlanBreakdownRow({ item, currency }) {
         />
 
         <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <p className="min-w-0 truncate text-sm font-bold leading-5 text-foreground">
-                  {item.name}
-                </p>
-
-                <SourceBadge
-                  type={item.sourceType}
-                  tone={getSourceBadgeTone(item)}
-                />
-              </div>
-            </div>
-
-            <p
-              className="shrink-0 text-sm font-bold tabular-nums"
-              style={{ color: amountColor }}
-            >
-              <PlanMoney amount={planned} currency={currency} compact />
+          <div className="flex min-w-0 items-center gap-1.5">
+            <p className="min-w-0 truncate text-sm font-bold leading-5 text-foreground">
+              {item.name}
             </p>
+
+            <SourceBadge
+              type={item.sourceType}
+              tone={getSourceBadgeTone(item)}
+            />
           </div>
 
           <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] font-medium leading-4 text-muted-foreground tabular-nums">
             <span>{actionLabel}</span>
-            <span className="font-bold" style={{ color: amountColor }}>
+            <span className="font-semibold text-muted-foreground">
               <PlanMoney amount={tracked} currency={currency} compact />
             </span>
             <span className="text-muted-foreground/70">·</span>
             <span>{Math.round(rawPercent)}%</span>
             <span className="text-muted-foreground/70">·</span>
-            <span className="font-semibold" style={{ color: amountColor }}>
-              {statusLabel}
-            </span>
+            <span>{statusLabel}</span>
           </div>
         </div>
+
+        <p
+          className="shrink-0 self-center text-right text-sm font-bold tabular-nums"
+          style={{ color: amountColor }}
+        >
+          <PlanMoney amount={planned} currency={currency} compact />
+        </p>
       </div>
     </div>
   );
