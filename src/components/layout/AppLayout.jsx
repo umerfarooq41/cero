@@ -6,13 +6,6 @@ import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import ScrollManager from './ScrollManager';
 
-const pageTransition = {
-  type: 'spring',
-  stiffness: 260,
-  damping: 28,
-  mass: 0.55,
-};
-
 export default function AppLayout() {
   const location = useLocation();
 
@@ -26,9 +19,12 @@ export default function AppLayout() {
         <main className="app-page-surface app-main-scroll flex-1 overflow-y-auto lg:pb-0">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 10, scale: 0.995 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={pageTransition}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.18,
+              ease: 'easeOut',
+            }}
             className="min-h-full"
           >
             <Outlet />
