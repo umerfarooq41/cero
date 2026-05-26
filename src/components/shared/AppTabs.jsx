@@ -15,6 +15,13 @@ const toneStyles = {
       'text-muted-foreground hover:bg-primary/5 hover:text-primary',
     indicator: 'bg-primary/10 ring-primary/15',
   },
+  transfer: {
+    active:
+      'bg-sky-500/10 text-sky-700 shadow-[0_8px_24px_rgba(14,165,233,0.16)] ring-sky-500/15 dark:text-sky-400 dark:shadow-[0_8px_24px_rgba(14,165,233,0.10)]',
+    inactive:
+      'text-muted-foreground hover:bg-sky-500/5 hover:text-sky-700 dark:hover:text-sky-400',
+    indicator: 'bg-sky-500/10 ring-sky-500/15',
+  },
   emerald: {
     active:
       'bg-emerald-500/10 text-emerald-700 shadow-[0_8px_24px_rgba(16,185,129,0.16)] ring-emerald-500/15 dark:text-emerald-400 dark:shadow-[0_8px_24px_rgba(16,185,129,0.10)]',

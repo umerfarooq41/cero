@@ -87,7 +87,7 @@ const COLORS = [
 const TYPE_ACCENT = {
   income: 'text-green-700 dark:text-green-400',
   expense: 'text-red-700 dark:text-red-400',
-  transfer: 'text-purple-700 dark:text-purple-400',
+  transfer: 'text-sky-700 dark:text-sky-400',
 };
 
 const TYPE_ICONS = {

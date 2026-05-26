@@ -106,7 +106,7 @@ export default function TransactionRow({
       sign: '-',
     },
     transfer: {
-      color: 'text-primary',
+      color: 'text-sky-600 dark:text-sky-400',
       sign: '',
     },
   };
@@ -153,7 +153,7 @@ export default function TransactionRow({
       )}
     >
       {isTransfer ? (
-        <div className="h-7 w-7 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0 sm:h-8 sm:w-8">
+        <div className="h-7 w-7 rounded-xl flex items-center justify-center bg-sky-500/10 text-sky-600 shrink-0 dark:text-sky-400 sm:h-8 sm:w-8">
           <ArrowLeftRight className="h-3.5 w-3.5 stroke-[2.2] sm:h-4 sm:w-4" />
         </div>
       ) : (

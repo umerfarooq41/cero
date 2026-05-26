@@ -156,7 +156,7 @@ function getStatusClass(status) {
 const TYPE_ACCENT = {
   income: 'text-green-700 dark:text-green-400',
   expense: 'text-red-700 dark:text-red-400',
-  transfer: 'text-purple-700 dark:text-purple-400',
+  transfer: 'text-sky-700 dark:text-sky-400',
   active: 'text-blue-700 dark:text-blue-400',
 };
 
@@ -395,7 +395,7 @@ function ScheduledRecurringRow({
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
       <CategoryIcon
         icon={rule.icon || category?.icon || fallbackIcon}
-        color={rule.color || category?.color || (type === 'income' ? '#22c55e' : type === 'transfer' ? '#8b5cf6' : '#ef4444')}
+        color={rule.color || category?.color || (type === 'income' ? '#22c55e' : type === 'transfer' ? '#0ea5e9' : '#ef4444')}
         size="sm"
       />
 

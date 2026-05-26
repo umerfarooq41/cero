@@ -128,90 +128,6 @@
     --mood-negative: 0 84% 64%;
     --mood-neutral: 215 20% 68%;
   }
-
-
-  /* Theme style accent tokens
-     These override the app primary color, rings, charts, and navigation highlights
-     so theme styles affect tabs, bottom nav, sidebar, FABs, and all primary UI. */
-  html.theme-style-ocean {
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 199 89% 48%;
-    --chart-1: 199 89% 48%;
-    --sidebar-primary: 199 89% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-ring: 199 89% 48%;
-  }
-
-  html.theme-style-ocean.dark {
-    --primary: 188 86% 53%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 188 86% 53%;
-    --chart-1: 188 86% 53%;
-    --sidebar-primary: 188 86% 53%;
-    --sidebar-primary-foreground: 222 47% 7%;
-    --sidebar-ring: 188 86% 53%;
-  }
-
-  html.theme-style-sunset {
-    --primary: 24 95% 53%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 24 95% 53%;
-    --chart-1: 24 95% 53%;
-    --sidebar-primary: 24 95% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-ring: 24 95% 53%;
-  }
-
-  html.theme-style-sunset.dark {
-    --primary: 33 96% 56%;
-    --primary-foreground: 24 28% 9%;
-    --ring: 33 96% 56%;
-    --chart-1: 33 96% 56%;
-    --sidebar-primary: 33 96% 56%;
-    --sidebar-primary-foreground: 24 28% 9%;
-    --sidebar-ring: 33 96% 56%;
-  }
-
-  html.theme-style-forest {
-    --primary: 145 63% 38%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 145 63% 38%;
-    --chart-1: 145 63% 38%;
-    --sidebar-primary: 145 63% 38%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-ring: 145 63% 38%;
-  }
-
-  html.theme-style-forest.dark {
-    --primary: 142 71% 45%;
-    --primary-foreground: 145 45% 8%;
-    --ring: 142 71% 45%;
-    --chart-1: 142 71% 45%;
-    --sidebar-primary: 142 71% 45%;
-    --sidebar-primary-foreground: 145 45% 8%;
-    --sidebar-ring: 142 71% 45%;
-  }
-
-  html.theme-style-minimal {
-    --primary: 222 47% 32%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 222 47% 32%;
-    --chart-1: 222 47% 32%;
-    --sidebar-primary: 222 47% 32%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-ring: 222 47% 32%;
-  }
-
-  html.theme-style-minimal.dark {
-    --primary: 210 40% 86%;
-    --primary-foreground: 222 47% 8%;
-    --ring: 210 40% 86%;
-    --chart-1: 210 40% 86%;
-    --sidebar-primary: 210 40% 86%;
-    --sidebar-primary-foreground: 222 47% 8%;
-    --sidebar-ring: 210 40% 86%;
-  }
 }
 
 /* ============================= */
@@ -604,103 +520,11 @@ main,
   }
 }
 
-/* ============================= */
-/* 🎨 THEME-AWARE FIXED SURFACES */
-/* Applies selected theme backgrounds to sticky header, bottom nav, and desktop sidebar. */
-/* ============================= */
-
-@layer utilities {
-  html.theme-style-ocean .app-gradient-surface,
-  html.theme-style-ocean .app-fixed-surface,
-  html.theme-style-ocean .app-bottom-nav {
-    background:
-      radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.25), transparent 32%),
-      radial-gradient(circle at 95% 8%, rgba(45, 212, 191, 0.22), transparent 30%),
-      radial-gradient(circle at 45% 100%, rgba(59, 130, 246, 0.16), transparent 34%),
-      linear-gradient(135deg, rgba(240, 249, 255, 1) 0%, rgba(236, 253, 245, 1) 48%, rgba(239, 246, 255, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-ocean.dark .app-gradient-surface,
-  html.theme-style-ocean.dark .app-fixed-surface,
-  html.theme-style-ocean.dark .app-bottom-nav {
-    background:
-      radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.27), transparent 32%),
-      radial-gradient(circle at 95% 8%, rgba(20, 184, 166, 0.23), transparent 30%),
-      radial-gradient(circle at 45% 100%, rgba(37, 99, 235, 0.16), transparent 34%),
-      linear-gradient(135deg, rgba(4, 18, 33, 1) 0%, rgba(6, 30, 43, 1) 50%, rgba(3, 7, 18, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-sunset .app-gradient-surface,
-  html.theme-style-sunset .app-fixed-surface,
-  html.theme-style-sunset .app-bottom-nav {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(251, 146, 60, 0.25), transparent 32%),
-      radial-gradient(circle at 100% 5%, rgba(244, 114, 182, 0.22), transparent 30%),
-      radial-gradient(circle at 45% 100%, rgba(250, 204, 21, 0.14), transparent 34%),
-      linear-gradient(135deg, rgba(255, 247, 237, 1) 0%, rgba(255, 241, 242, 1) 48%, rgba(255, 251, 235, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-sunset.dark .app-gradient-surface,
-  html.theme-style-sunset.dark .app-fixed-surface,
-  html.theme-style-sunset.dark .app-bottom-nav {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.25), transparent 32%),
-      radial-gradient(circle at 100% 5%, rgba(236, 72, 153, 0.21), transparent 30%),
-      radial-gradient(circle at 45% 100%, rgba(245, 158, 11, 0.14), transparent 34%),
-      linear-gradient(135deg, rgba(24, 10, 9, 1) 0%, rgba(30, 16, 30, 1) 48%, rgba(3, 7, 18, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-forest .app-gradient-surface,
-  html.theme-style-forest .app-fixed-surface,
-  html.theme-style-forest .app-bottom-nav {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22), transparent 32%),
-      radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.18), transparent 30%),
-      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.14), transparent 34%),
-      linear-gradient(135deg, rgba(240, 253, 244, 1) 0%, rgba(247, 254, 231, 1) 46%, rgba(236, 253, 245, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-forest.dark .app-gradient-surface,
-  html.theme-style-forest.dark .app-fixed-surface,
-  html.theme-style-forest.dark .app-bottom-nav {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22), transparent 32%),
-      radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.16), transparent 30%),
-      radial-gradient(circle at 45% 100%, rgba(20, 184, 166, 0.12), transparent 34%),
-      linear-gradient(135deg, rgba(5, 20, 13, 1) 0%, rgba(9, 24, 18, 1) 48%, rgba(3, 7, 18, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-minimal .app-gradient-surface,
-  html.theme-style-minimal .app-fixed-surface,
-  html.theme-style-minimal .app-bottom-nav {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.13), transparent 30%),
-      radial-gradient(circle at 100% 0%, rgba(203, 213, 225, 0.16), transparent 28%),
-      linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
-    background-attachment: fixed;
-  }
-
-  html.theme-style-minimal.dark .app-gradient-surface,
-  html.theme-style-minimal.dark .app-fixed-surface,
-  html.theme-style-minimal.dark .app-bottom-nav {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(71, 85, 105, 0.18), transparent 30%),
-      radial-gradient(circle at 100% 0%, rgba(100, 116, 139, 0.12), transparent 28%),
-      linear-gradient(135deg, rgba(2, 6, 23, 1) 0%, rgba(15, 23, 42, 1) 58%, rgba(3, 7, 18, 1) 100%);
-    background-attachment: fixed;
-  }
-}
 
 /* ============================= */
-/* 🎨 UNIFIED THEME PAGE SURFACE */
-/* Keeps page, sidebar, sticky header, and bottom nav on the same themed canvas. */
-/* This intentionally sits at the end so it wins over older body/surface gradients. */
+/* 🎨 THEME PRIMARY + FULL SURFACE OVERRIDES */
+/* Theme styles now drive primary UI tokens in both light and dark modes.
+   Transfer UI intentionally stays fixed sky-blue via component classes. */
 /* ============================= */
 
 @layer base {
@@ -721,6 +545,13 @@ main,
   }
 
   html.theme-style-ocean {
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 199 89% 48%;
+    --chart-1: 199 89% 48%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 199 89% 48%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.38), transparent 34%),
       radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.36), transparent 34%),
@@ -729,6 +560,13 @@ main,
   }
 
   html.theme-style-ocean.dark {
+    --primary: 188 86% 53%;
+    --primary-foreground: 222 47% 7%;
+    --ring: 188 86% 53%;
+    --chart-1: 188 86% 53%;
+    --sidebar-primary: 188 86% 53%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-ring: 188 86% 53%;
     --app-page-gradient:
       radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.27), transparent 32%),
       radial-gradient(circle at 95% 8%, rgba(20, 184, 166, 0.23), transparent 30%),
@@ -737,6 +575,13 @@ main,
   }
 
   html.theme-style-sunset {
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 24 95% 53%;
+    --chart-1: 24 95% 53%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 24 95% 53%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(251, 146, 60, 0.35), transparent 34%),
       radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.32), transparent 32%),
@@ -745,6 +590,13 @@ main,
   }
 
   html.theme-style-sunset.dark {
+    --primary: 33 96% 56%;
+    --primary-foreground: 24 28% 9%;
+    --ring: 33 96% 56%;
+    --chart-1: 33 96% 56%;
+    --sidebar-primary: 33 96% 56%;
+    --sidebar-primary-foreground: 24 28% 9%;
+    --sidebar-ring: 33 96% 56%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.25), transparent 32%),
       radial-gradient(circle at 100% 5%, rgba(236, 72, 153, 0.21), transparent 30%),
@@ -753,6 +605,13 @@ main,
   }
 
   html.theme-style-forest {
+    --primary: 145 63% 38%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 145 63% 38%;
+    --chart-1: 145 63% 38%;
+    --sidebar-primary: 145 63% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 145 63% 38%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.32), transparent 34%),
       radial-gradient(circle at 100% 5%, rgba(132, 204, 22, 0.28), transparent 32%),
@@ -761,6 +620,13 @@ main,
   }
 
   html.theme-style-forest.dark {
+    --primary: 142 71% 45%;
+    --primary-foreground: 145 45% 8%;
+    --ring: 142 71% 45%;
+    --chart-1: 142 71% 45%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 145 45% 8%;
+    --sidebar-ring: 142 71% 45%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22), transparent 32%),
       radial-gradient(circle at 100% 8%, rgba(132, 204, 22, 0.16), transparent 30%),
@@ -769,6 +635,13 @@ main,
   }
 
   html.theme-style-minimal {
+    --primary: 222 47% 32%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 222 47% 32%;
+    --chart-1: 222 47% 32%;
+    --sidebar-primary: 222 47% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 222 47% 32%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.18), transparent 30%),
       radial-gradient(circle at 100% 0%, rgba(203, 213, 225, 0.20), transparent 28%),
@@ -776,6 +649,13 @@ main,
   }
 
   html.theme-style-minimal.dark {
+    --primary: 210 40% 86%;
+    --primary-foreground: 222 47% 8%;
+    --ring: 210 40% 86%;
+    --chart-1: 210 40% 86%;
+    --sidebar-primary: 210 40% 86%;
+    --sidebar-primary-foreground: 222 47% 8%;
+    --sidebar-ring: 210 40% 86%;
     --app-page-gradient:
       radial-gradient(circle at 0% 0%, rgba(71, 85, 105, 0.18), transparent 30%),
       radial-gradient(circle at 100% 0%, rgba(100, 116, 139, 0.12), transparent 28%),

@@ -164,7 +164,7 @@ function RuleAmount({ rule, formatCurrency }) {
           ? 'text-[hsl(var(--success))]'
           : rule.type === 'expense'
             ? 'text-destructive'
-            : 'text-primary'
+            : 'text-sky-600 dark:text-sky-400'
       )}
     >
       {rule.type === 'income' ? '+' : rule.type === 'expense' ? '-' : ''}
@@ -688,7 +688,7 @@ export default function RecurringTransactionsPanel({
                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                         : rule.type === 'expense'
                           ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                          : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                          : 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
                     )}
                   >
                     <Icon className="h-4 w-4" />

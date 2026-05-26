@@ -6,14 +6,14 @@ const DEFAULT_OPTIONS = [
   { value: 'all', label: 'All', tone: 'neutral' },
   { value: 'income', label: 'Income', icon: ArrowDownLeft, tone: 'emerald' },
   { value: 'expense', label: 'Expense', icon: ArrowUpRight, tone: 'red' },
-  { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight, tone: 'blue' },
+  { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight, tone: 'transfer' },
 ];
 
 const toneByValue = {
   all: 'neutral',
   income: 'emerald',
   expense: 'red',
-  transfer: 'blue',
+  transfer: 'transfer',
 };
 
 export default function TransactionTypeTabs({
