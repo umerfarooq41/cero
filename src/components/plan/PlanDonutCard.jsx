@@ -8,10 +8,23 @@ import {
 import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
 
-function getLegendPercent(item, totalTracked) {
-  if (!totalTracked) return 0;
-
-  return Math.round((Number(item.tracked || 0) / totalTracked) * 100);
+function LegendItem({ item, compact }) {
+  return (
+    <div
+      className={cn(
+        'inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border border-border/70 bg-background/85 px-2.5 py-1 text-[10px] font-semibold leading-none text-muted-foreground shadow-sm sm:text-[11px]',
+        compact ? 'flex-1 px-2' : 'shrink-0'
+      )}
+      title={item.name}
+    >
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: item.color }}
+        aria-hidden="true"
+      />
+      <span className="min-w-0 truncate">{item.name}</span>
+    </div>
+  );
 }
 
 export default function PlanDonutCard({
@@ -27,9 +40,13 @@ export default function PlanDonutCard({
   const trackedLegendItems = donutChartData.filter(
     (item) => !item.isRemainder && !item.isEmpty && Number(item.tracked || 0) > 0
   );
-
   const hasTrackedData = trackedLegendItems.length > 0;
   const displayProgress = Math.round(progress);
+  const compactLegend = trackedLegendItems.length >= 4;
+  const primarySliceColor =
+    donutChartData?.find((item) => !item.isRemainder && !item.isEmpty)?.color ||
+    tab.color ||
+    'hsl(var(--foreground))';
 
   return (
     <div className="rounded-3xl app-card-surface p-4">
@@ -39,11 +56,7 @@ export default function PlanDonutCard({
 
           <h2
             className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
-            style={{
-              color:
-                tab.color || donutChartData?.find((item) => !item.isRemainder)?.color ||
-                'hsl(var(--foreground))',
-            }}
+            style={{ color: primarySliceColor }}
           >
             <PlanMoney amount={totalTracked} currency={currency} />
           </h2>
@@ -113,18 +126,13 @@ export default function PlanDonutCard({
       </div>
 
       {hasTrackedData ? (
-        <div className="mt-2 flex w-full items-center gap-3 overflow-x-auto whitespace-nowrap pb-0.5 text-[11px] font-semibold text-muted-foreground">
+        <div className="mt-2 flex w-full items-center justify-center gap-1.5 overflow-hidden">
           {trackedLegendItems.map((item) => (
-            <div key={item.id || item.name} className="inline-flex min-w-0 shrink-0 items-center gap-1.5">
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{ backgroundColor: item.color }}
-              />
-              <span className="max-w-[5.5rem] truncate">{item.name}</span>
-              <span className="text-foreground/70 tabular-nums">
-                {getLegendPercent(item, totalTracked)}%
-              </span>
-            </div>
+            <LegendItem
+              key={item.id || item.name}
+              item={item}
+              compact={compactLegend}
+            />
           ))}
         </div>
       ) : (

@@ -282,32 +282,77 @@ export function buildPlanViewData({
   };
 }
 
-const DONUT_COLOR_PALETTES = {
-  income: ['#047857', '#059669', '#10B981', '#34D399', '#A7F3D0'],
-  expense: ['#B91C1C', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
-  savings: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#BFDBFE'],
-  debt: ['#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#DDD6FE'],
+const DONUT_PALETTES = {
+  income: {
+    slices: ['#047857', '#059669', '#10B981', '#34D399', '#6EE7B7'],
+    remainder: '#D1FAE5',
+  },
+  expense: {
+    slices: ['#B91C1C', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
+    remainder: '#FEE2E2',
+  },
+  savings: {
+    slices: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
+    remainder: '#DBEAFE',
+  },
+  debt: {
+    slices: ['#6D28D9', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD'],
+    remainder: '#EDE9FE',
+  },
 };
 
-const DONUT_REMAINDER_COLOR = 'hsl(var(--muted))';
+const DEFAULT_DONUT_PALETTE = {
+  slices: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
+  remainder: '#DBEAFE',
+};
 
 function getDonutPalette(activeTab, tab) {
-  return DONUT_COLOR_PALETTES[activeTab] || tab?.shades || [];
+  const palette = DONUT_PALETTES[activeTab];
+  if (palette) return palette;
+
+  const fallbackSlices = tab?.shades?.length ? tab.shades : DEFAULT_DONUT_PALETTE.slices;
+
+  return {
+    slices: fallbackSlices,
+    remainder: fallbackSlices[fallbackSlices.length - 1] || DEFAULT_DONUT_PALETTE.remainder,
+  };
 }
 
-function buildRemainderSlice({ activeTab, totalRemaining, totalPlanned }) {
+function buildNoTrackedDonutSlice(activeTab, tab) {
+  const palette = getDonutPalette(activeTab, tab);
+
+  return [
+    {
+      id: `${activeTab}-empty`,
+      name: 'No tracked data',
+      value: 1,
+      tracked: 0,
+      planned: 0,
+      remaining: 0,
+      share: 0,
+      color: palette.remainder,
+      isEmpty: true,
+      isRemainder: true,
+    },
+  ];
+}
+
+function buildRemainderSlice({ activeTab, tab, totalRemaining, totalPlanned }) {
   const value = Math.max(Number(totalRemaining || 0), 0);
 
   if (value <= 0) return null;
 
+  const palette = getDonutPalette(activeTab, tab);
+
   return {
-    id: `${activeTab}-remainder`,
-    name: 'Left',
-    planned: totalPlanned,
+    id: `${activeTab}-untracked`,
+    name: 'Untracked',
+    planned: Number(totalPlanned || 0),
     tracked: 0,
     remaining: value,
     value,
-    color: DONUT_REMAINDER_COLOR,
+    share: 0,
+    color: palette.remainder,
     isRemainder: true,
   };
 }
@@ -321,69 +366,57 @@ export function buildDonutChartData({
 }) {
   const planned = Number(totalPlanned || 0);
   const tracked = Number(totalTracked || 0);
-  const palette = getDonutPalette(activeTab, tab);
   const totalRemaining = planned - tracked;
+  const palette = getDonutPalette(activeTab, tab);
 
   const trackedRows = chartData
-    .filter((item) => Number(item.tracked || 0) > 0)
-    .sort((a, b) => Number(b.tracked || 0) - Number(a.tracked || 0));
+    .map((item) => ({
+      ...item,
+      tracked: Number(item.tracked || 0),
+      planned: Number(item.planned || 0),
+    }))
+    .filter((item) => item.tracked > 0)
+    .sort((a, b) => b.tracked - a.tracked);
 
-  const topFour = trackedRows.slice(0, 4).map((item, index) => ({
+  const remainderSlice = buildRemainderSlice({
+    activeTab,
+    tab,
+    totalRemaining,
+    totalPlanned: planned,
+  });
+
+  if (trackedRows.length === 0) {
+    return remainderSlice || buildNoTrackedDonutSlice(activeTab, tab);
+  }
+
+  const topFour = trackedRows.slice(0, 4);
+  const others = trackedRows.slice(4);
+
+  const visibleRows = topFour.map((item, index) => ({
     ...item,
-    color: palette[index] || tab?.color || item.color,
-    value: Number(item.tracked || 0),
+    color: palette.slices[index] || tab?.color || DEFAULT_DONUT_PALETTE.slices[0],
+    value: item.tracked,
+    share: tracked > 0 ? (item.tracked / tracked) * 100 : 0,
   }));
 
-  const remainingTrackedRows = trackedRows.slice(4);
-  const othersTracked = remainingTrackedRows.reduce(
-    (sum, item) => sum + Number(item.tracked || 0),
-    0
-  );
-  const othersPlanned = remainingTrackedRows.reduce(
-    (sum, item) => sum + Number(item.planned || 0),
-    0
-  );
+  if (others.length > 0) {
+    const othersTracked = others.reduce((sum, item) => sum + item.tracked, 0);
+    const othersPlanned = others.reduce((sum, item) => sum + item.planned, 0);
 
-  const trackedSlices = [...topFour];
-
-  if (othersTracked > 0) {
-    trackedSlices.push({
+    visibleRows.push({
       id: `${activeTab}-others`,
       name: 'Others',
       planned: othersPlanned,
       tracked: othersTracked,
       remaining: othersPlanned - othersTracked,
-      color: palette[4] || tab?.color,
+      color: palette.slices[4] || tab?.color || DEFAULT_DONUT_PALETTE.slices[4],
       value: othersTracked,
+      share: tracked > 0 ? (othersTracked / tracked) * 100 : 0,
       isOthers: true,
     });
   }
 
-  const remainderSlice = buildRemainderSlice({
-    activeTab,
-    totalRemaining,
-    totalPlanned: planned,
-  });
-
-  if (trackedSlices.length > 0) {
-    return remainderSlice ? [...trackedSlices, remainderSlice] : trackedSlices;
-  }
-
-  if (remainderSlice) return [remainderSlice];
-
-  return [
-    {
-      id: `${activeTab}-empty`,
-      name: 'No tracked data',
-      value: 1,
-      tracked: 0,
-      planned: 0,
-      remaining: 0,
-      color: DONUT_REMAINDER_COLOR,
-      isEmpty: true,
-      isRemainder: true,
-    },
-  ];
+  return remainderSlice ? [...visibleRows, remainderSlice] : visibleRows;
 }
 
 export function buildPlanTotals({ allocations = [], categories = [] }) {
