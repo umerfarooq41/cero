@@ -74,33 +74,18 @@ function BottomNavStyles() {
           height: var(--app-bottom-nav-height);
           padding-bottom: var(--app-safe-area-bottom);
           border: 0 !important;
-          border-top: 0 !important;
-          border-bottom: 0 !important;
           outline: 0 !important;
-
-          background:
-            radial-gradient(circle at 9% 0%, hsl(var(--primary) / 0.16), transparent 34%),
-            radial-gradient(circle at 92% 0%, hsl(var(--primary) / 0.08), transparent 36%),
-            linear-gradient(to bottom, hsl(var(--card) / 0.94), hsl(var(--card) / 0.98)) !important;
-
-          box-shadow:
-            inset 0 1px 0 hsl(var(--app-card-highlight-color, 0 0% 100%) / 0.08) !important;
-
-          backdrop-filter: blur(18px) saturate(145%);
-          -webkit-backdrop-filter: blur(18px) saturate(145%);
+          background: hsl(var(--background)) !important;
+          box-shadow: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
         html.dark .app-bottom-nav {
-          background:
-            radial-gradient(circle at 9% 0%, hsl(var(--primary) / 0.16), transparent 34%),
-            radial-gradient(circle at 92% 0%, hsl(var(--primary) / 0.08), transparent 36%),
-            linear-gradient(to bottom, hsl(var(--card) / 0.92), hsl(var(--card) / 0.98)) !important;
-
-          box-shadow:
-            inset 0 1px 0 hsl(0 0% 100% / 0.05) !important;
-
-          backdrop-filter: blur(18px) saturate(140%);
-          -webkit-backdrop-filter: blur(18px) saturate(140%);
+          background: hsl(var(--background)) !important;
+          box-shadow: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
         .app-bottom-nav-active-icon {
