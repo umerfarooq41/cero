@@ -33,11 +33,11 @@ import { useCurrency } from '@/hooks/useCurrency';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
 
 const tooltipStyle = {
-  background: 'hsl(var(--popover))',
-  backgroundColor: 'hsl(var(--popover))',
-  border: '1px solid hsl(var(--border))',
+  background: 'var(--app-recharts-tooltip-bg)',
+  backgroundColor: 'hsl(var(--popover) / 0.98)',
+  border: '1px solid var(--app-recharts-tooltip-border)',
   borderRadius: '14px',
-  boxShadow: '0 14px 40px rgb(0 0 0 / 0.18)',
+  boxShadow: 'var(--app-recharts-tooltip-shadow)',
   color: 'hsl(var(--popover-foreground))',
   fontSize: '12px',
   opacity: 1,

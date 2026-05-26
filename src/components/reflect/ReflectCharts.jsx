@@ -46,11 +46,11 @@ const getThemeChartColor = (index = 0) =>
   THEME_CHART_COLORS[index % THEME_CHART_COLORS.length];
 
 const SOLID_RECHARTS_TOOLTIP_STYLE = {
-  background: 'hsl(var(--popover))',
-  backgroundColor: 'hsl(var(--popover))',
-  border: '1px solid hsl(var(--border))',
+  background: 'var(--app-recharts-tooltip-bg)',
+  backgroundColor: 'hsl(var(--popover) / 0.98)',
+  border: '1px solid var(--app-recharts-tooltip-border)',
   borderRadius: '14px',
-  boxShadow: '0 14px 40px rgb(0 0 0 / 0.18)',
+  boxShadow: 'var(--app-recharts-tooltip-shadow)',
   color: 'hsl(var(--popover-foreground))',
   fontSize: '12px',
   opacity: 1,
@@ -267,7 +267,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 }
                 subtitle={
                   isYear
-                    ? 'Income and outflow grouped by quarter'
+                    ? 'Income and expenses grouped by quarter'
                     : 'Selected month with the previous two months'
                 }
               />
@@ -323,7 +323,6 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                       <Bar
                         dataKey="income"
-                        name="Income"
                         fill="hsl(var(--primary))"
                         radius={[8, 8, 0, 0]}
                         activeBar={false}
@@ -336,7 +335,6 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                       <Bar
                         dataKey="expenses"
-                        name="Outflow"
                         fill="hsl(var(--primary) / 0.45)"
                         radius={[8, 8, 0, 0]}
                         activeBar={false}
@@ -365,7 +363,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 title={isYear ? 'Yearly Spending Pace' : 'Budget Usage'}
                 subtitle={
                   isYear
-                    ? 'Tracked outflow compared with tracked income'
+                    ? 'Tracked expenses compared with tracked income'
                     : 'How much of your planned expense budget is already tracked'
                 }
               />
