@@ -140,23 +140,14 @@
   }
 
   html {
-    --app-status-bar-bg: #0a0a1a;
-    --app-safe-area-top: env(safe-area-inset-top, 0px);
-    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --app-shell-min-height: calc(100dvh - var(--app-safe-area-top) - var(--app-safe-area-bottom));
-
-    min-height: 100dvh;
-    background: #0a0a1a;
+    min-height: 100%;
+    background: hsl(var(--background));
     scroll-behavior: smooth;
   }
 
   body {
     @apply text-foreground font-sans antialiased;
-    min-height: 100dvh;
-    margin: 0;
-    padding-top: var(--app-safe-area-top);
-    padding-bottom: var(--app-safe-area-bottom);
-    background-color: #0a0a1a;
+    min-height: 100vh;
 
     background:
       radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.24), transparent 30%),
@@ -660,22 +651,15 @@ main,
   }
 
   html,
-  body {
-    min-height: 100dvh;
-    background-color: #0a0a1a;
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
+  body,
   #root {
-    min-height: var(--app-shell-min-height);
+    min-height: 100%;
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
   }
 
   body {
-    padding-top: var(--app-safe-area-top);
-    padding-bottom: var(--app-safe-area-bottom);
+    min-height: 100vh;
   }
 }
 
@@ -725,22 +709,15 @@ main,
   }
 
   html,
+  body,
+  #root {
+    min-height: 100%;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
   body {
     min-height: 100dvh;
-    background-color: #0a0a1a;
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
-  #root {
-    min-height: var(--app-shell-min-height);
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
-  body {
-    padding-top: var(--app-safe-area-top);
-    padding-bottom: var(--app-safe-area-bottom);
   }
 }
 
@@ -751,10 +728,6 @@ main,
   .app-main-scroll {
     background: var(--app-page-gradient) !important;
     background-attachment: fixed !important;
-  }
-
-  .app-main-scroll {
-    padding-top: 0;
   }
 
   .app-fixed-surface,
@@ -832,45 +805,6 @@ main,
     -webkit-backdrop-filter: blur(14px) saturate(130%);
   }
 
-
-  /* Floating menus and chart tooltips must stay opaque for readability over charts. */
-  .app-floating-surface,
-  .app-chart-tooltip-surface,
-  .recharts-default-tooltip {
-    background: hsl(var(--popover)) !important;
-    background-color: hsl(var(--popover)) !important;
-    border: 1px solid hsl(var(--border)) !important;
-    color: hsl(var(--popover-foreground)) !important;
-    box-shadow:
-      0 18px 48px hsl(var(--app-card-shadow-color) / 0.18),
-      0 0 0 1px hsl(var(--border) / 0.35) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    opacity: 1 !important;
-  }
-
-  html.dark .app-floating-surface,
-  html.dark .app-chart-tooltip-surface,
-  html.dark .recharts-default-tooltip {
-    background: hsl(var(--popover)) !important;
-    background-color: hsl(var(--popover)) !important;
-    border-color: hsl(var(--border)) !important;
-    box-shadow:
-      0 18px 52px hsl(var(--app-card-shadow-color) / 0.52),
-      0 0 0 1px hsl(var(--border) / 0.45) !important;
-  }
-
-  .app-chart-tooltip-surface,
-  .recharts-default-tooltip {
-    border-radius: 14px !important;
-  }
-
-  .recharts-tooltip-wrapper {
-    outline: none !important;
-    z-index: 9999 !important;
-    opacity: 1 !important;
-  }
-
   /* Keep older hardcoded card classes on the same glass surface system. */
   [class*='rounded-2xl'][class*='bg-card'],
   [class*='rounded-3xl'][class*='bg-card'],
@@ -911,4 +845,98 @@ main,
     -webkit-backdrop-filter: blur(14px) saturate(130%);
   }
 
+}
+/* =========================================================
+   EDGE-TO-EDGE PWA SAFE AREA OVERRIDE
+   Keep the browser/system-bar canvas dark, then paint the app
+   surface inside a fixed full-viewport shell.
+   ========================================================= */
+@layer base {
+  html {
+    --app-system-bar-bg: #0a0a1a;
+    --app-safe-area-top: env(safe-area-inset-top, 0px);
+    --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --app-bottom-nav-extra: 8px;
+    --app-bottom-nav-height: calc(4.75rem + var(--app-safe-area-bottom) + var(--app-bottom-nav-extra));
+
+    width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    background: var(--app-system-bar-bg) !important;
+    background-color: var(--app-system-bar-bg) !important;
+    color-scheme: dark light;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--app-system-bar-bg) !important;
+    background-color: var(--app-system-bar-bg) !important;
+  }
+
+  #root {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    min-height: 100dvh;
+    overflow: hidden;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
+  #root::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+}
+
+@layer utilities {
+  .app-shell {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+    padding: 0;
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
+  .app-page-surface,
+  .app-gradient-surface,
+  .app-fixed-surface,
+  .app-bottom-nav {
+    background: var(--app-page-gradient) !important;
+    background-attachment: fixed !important;
+  }
+
+  .app-main-scroll {
+    padding-top: var(--app-safe-area-top) !important;
+    padding-bottom: var(--app-bottom-nav-height) !important;
+    background: transparent !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .app-bottom-nav {
+    height: var(--app-bottom-nav-height) !important;
+    padding-bottom: calc(var(--app-safe-area-bottom) + var(--app-bottom-nav-extra)) !important;
+  }
+
+  @media (min-width: 1024px) {
+    .app-main-scroll {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+  }
 }

@@ -62,7 +62,6 @@ function BottomNavStyles() {
         }
 
         .app-main-scroll {
-          padding-top: 0;
           padding-bottom: var(--app-bottom-nav-height);
         }
 
@@ -86,6 +85,7 @@ function BottomNavStyles() {
           box-shadow: none !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
+          transform: translateZ(0);
         }
 
         html.dark .app-bottom-nav {

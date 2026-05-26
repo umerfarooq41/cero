@@ -12,7 +12,7 @@ export default function PageHeader({
       data-no-page-entrance
       className={cn(
         `
-        sticky top-0 z-40
+        sticky top-[var(--app-safe-area-top)] z-40
         app-fixed-surface
         border-0
         shadow-none

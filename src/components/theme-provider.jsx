@@ -95,6 +95,32 @@ const THEME_STYLE_TOKENS = {
   },
 };
 
+function applySystemBarColor() {
+  if (typeof window === 'undefined') return;
+
+  document.documentElement.style.setProperty(
+    '--app-system-bar-bg',
+    APP_SYSTEM_BAR_COLOR
+  );
+  document.documentElement.style.setProperty(
+    'background-color',
+    APP_SYSTEM_BAR_COLOR,
+    'important'
+  );
+
+  if (document.body) {
+    document.body.style.setProperty(
+      'background-color',
+      APP_SYSTEM_BAR_COLOR,
+      'important'
+    );
+  }
+
+  document.querySelectorAll('meta[name="theme-color"]').forEach((themeColor) => {
+    themeColor.setAttribute('content', APP_SYSTEM_BAR_COLOR);
+  });
+}
+
 function applyThemeVariables(style, resolvedTheme) {
   if (typeof window === 'undefined') return;
 
@@ -112,8 +138,7 @@ function applyThemeVariables(style, resolvedTheme) {
   root.style.setProperty('--sidebar-primary-foreground', tokens.primaryForeground);
   root.style.setProperty('--sidebar-ring', tokens.primary);
 
-  const themeColor = document.querySelector('meta[name="theme-color"]');
-  if (themeColor) themeColor.setAttribute('content', APP_SYSTEM_BAR_COLOR);
+  applySystemBarColor();
 }
 
 function getStoredTheme() {
@@ -166,11 +191,7 @@ function applyTheme(mode) {
       resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
   }
 
-  const themeColor = document.querySelector('meta[name="theme-color"]');
-
-  if (themeColor) {
-    themeColor.setAttribute('content', APP_SYSTEM_BAR_COLOR);
-  }
+  applySystemBarColor();
 
   return resolvedTheme;
 }

@@ -5,19 +5,51 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
+  <!-- Paint the browser/PWA system surfaces before React loads. -->
   <meta name="theme-color" content="#0a0a1a" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json?v=20260526" />
 
   <!-- PWA / iOS -->
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="true" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Cero" />
 
   <!-- Icons -->
   <link id="favicon" rel="icon" type="image/png" href="/icon-dark.png" />
   <link rel="apple-touch-icon" href="/icon-dark.png" />
+
+  <style>
+    html,
+    body,
+    #root {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: #0a0a1a;
+    }
+
+    body {
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+  </style>
+
+  <script>
+    (function lockSystemBars() {
+      var systemBarColor = '#0a0a1a';
+      var themeMetaTags = document.querySelectorAll('meta[name="theme-color"]');
+
+      themeMetaTags.forEach(function (tag) {
+        tag.setAttribute('content', systemBarColor);
+      });
+
+      document.documentElement.style.backgroundColor = systemBarColor;
+    })();
+  </script>
 
   <title>Cero</title>
 </head>
