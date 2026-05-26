@@ -94,40 +94,6 @@ function BottomNavStyles() {
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
         }
-
-        .app-bottom-nav-active-icon {
-          background:
-            radial-gradient(circle at 35% 25%, hsl(var(--primary) / 0.30), transparent 42%),
-            hsl(var(--primary) / 0.10);
-
-          color: hsl(var(--primary));
-
-          box-shadow:
-            0 0 0 1px hsl(var(--primary) / 0.20),
-            0 10px 28px hsl(var(--primary) / 0.20);
-        }
-
-        html.dark .app-bottom-nav-active-icon {
-          background:
-            radial-gradient(circle at 35% 25%, hsl(var(--primary) / 0.28), transparent 42%),
-            hsl(var(--primary) / 0.12);
-
-          box-shadow:
-            0 0 0 1px hsl(var(--primary) / 0.18),
-            0 10px 28px hsl(var(--primary) / 0.18);
-        }
-
-        .app-bottom-nav-active-label {
-          color: hsl(var(--primary));
-        }
-
-        .app-bottom-nav-inactive-label {
-          color: hsl(var(--muted-foreground));
-        }
-
-        .app-bottom-nav-inactive-icon {
-          color: hsl(var(--muted-foreground));
-        }
       `}
     </style>
   );
@@ -158,7 +124,7 @@ export default function BottomNav() {
                   className={cn(
                     `
                     relative z-10 flex min-w-0 flex-col items-center justify-center
-                    gap-1 px-1 py-1.5 text-center
+                    gap-1.5 px-1 py-1.5 text-center
                     transition-colors duration-200
                     `,
                     isActive
@@ -168,16 +134,25 @@ export default function BottomNav() {
                 >
                   <motion.div
                     animate={{
-                      scale: isActive ? 1.08 : 1,
+                      scale: isActive ? 1.06 : 1,
                       y: isActive ? -1 : 0,
                     }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className="relative flex h-10 w-10 items-center justify-center"
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 25,
+                    }}
+                    className="relative flex h-11 w-11 items-center justify-center"
                   >
                     {isActive && (
                       <motion.div
                         layoutId="nav-icon-highlight"
-                        className="app-bottom-nav-active-icon absolute inset-0 rounded-2xl"
+                        className="
+                          absolute inset-0 rounded-full
+                          bg-primary/10
+                          ring-1 ring-primary/25
+                          shadow-[0_0_26px_hsl(var(--primary)/0.22)]
+                        "
                         transition={{
                           type: 'spring',
                           stiffness: 380,
@@ -188,10 +163,10 @@ export default function BottomNav() {
 
                     <Icon
                       className={cn(
-                        'relative z-10 h-5 w-5 transition-all duration-200',
+                        'relative z-10 h-6 w-6 transition-all duration-200',
                         isActive
-                          ? 'drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)] stroke-[2.5]'
-                          : 'app-bottom-nav-inactive-icon'
+                          ? 'text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.65)] stroke-[2.6]'
+                          : 'text-muted-foreground/80 stroke-[2.4]'
                       )}
                     />
                   </motion.div>
@@ -199,10 +174,10 @@ export default function BottomNav() {
                   <motion.span
                     animate={{ opacity: isActive ? 1 : 0.62 }}
                     className={cn(
-                      'block max-w-full truncate text-[10px] leading-none transition-all duration-200 sm:text-[11px]',
+                      'block max-w-full truncate text-[12px] leading-none transition-all duration-200',
                       isActive
-                        ? 'app-bottom-nav-active-label font-semibold'
-                        : 'app-bottom-nav-inactive-label font-medium'
+                        ? 'font-bold text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.35)]'
+                        : 'font-medium text-muted-foreground'
                     )}
                   >
                     {item.label}
