@@ -17,10 +17,7 @@ import {
 } from 'recharts';
 
 import ReflectCard from './ReflectCard.jsx';
-import {
-  CurrencyAmount,
-  formatCurrencyText,
-} from './ReflectSummaryCard.jsx';
+import { CurrencyAmount } from './ReflectSummaryCard.jsx';
 
 const CHART_WRAP_CLASS =
   'w-full min-w-0 select-none [-webkit-tap-highlight-color:transparent] [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper]:select-none [&_.recharts-surface]:outline-none [&_.recharts-surface]:select-none [&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-bar-rectangle]:outline-none [&_.recharts-rectangle]:outline-none [&_.recharts-active-bar]:outline-none [&_.recharts-tooltip-cursor]:hidden [&_.recharts-dot]:outline-none [&_.recharts-active-dot]:hidden [&_svg]:outline-none [&_svg_*]:outline-none [&_*]:focus:outline-none [&_*]:focus-visible:outline-none';
@@ -72,6 +69,17 @@ const donutTooltipProps = {
     pointerEvents: 'none',
   },
 };
+
+function TooltipCurrencyValue({ value, currency }) {
+  return (
+    <CurrencyAmount
+      amount={Number(value || 0)}
+      currency={currency}
+      compact
+      className="font-semibold text-popover-foreground"
+    />
+  );
+}
 
 function RevealChartCard({ children }) {
   const ref = useRef(null);
@@ -309,9 +317,9 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           maxWidth: 150,
                           whiteSpace: 'normal',
                         }}
-                        formatter={(value) =>
-                          formatCurrencyText(value, currency)
-                        }
+                        formatter={(value) => (
+                          <TooltipCurrencyValue value={value} currency={currency} />
+                        )}
                       />
 
                       <Bar
@@ -503,9 +511,9 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                                 maxWidth: 140,
                                 whiteSpace: 'normal',
                               }}
-                              formatter={(value) =>
-                                formatCurrencyText(value, currency)
-                              }
+                              formatter={(value) => (
+                                <TooltipCurrencyValue value={value} currency={currency} />
+                              )}
                             />
                           </PieChart>
                         </ResponsiveContainer>
@@ -635,9 +643,9 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                             maxWidth: 150,
                             whiteSpace: 'normal',
                           }}
-                          formatter={(value) =>
-                            formatCurrencyText(value, currency)
-                          }
+                          formatter={(value) => (
+                            <TooltipCurrencyValue value={value} currency={currency} />
+                          )}
                           labelFormatter={(label) =>
                             isYear ? label : `Day ${label}`
                           }

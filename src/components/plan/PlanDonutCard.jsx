@@ -23,7 +23,12 @@ function DonutTooltip({ active, payload, currency, tab }) {
 
       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{tab.label}</span>
-        <PlanMoney amount={tracked} currency={currency} compact />
+        <PlanMoney
+          amount={tracked}
+          currency={currency}
+          compact
+          className="font-semibold text-popover-foreground"
+        />
       </div>
 
       <p
