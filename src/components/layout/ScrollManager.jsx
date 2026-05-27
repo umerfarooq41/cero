@@ -1,76 +1,78 @@
-import { useLayoutEffect, useRef } from 'react';
-import { useLocation, useNavigationType } from 'react-router-dom';
+import { useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
-const MAIN_NAV_ROUTES = ['/', '/plan', '/transactions', '/accounts', '/manage-plan'];
+function getScrollTargets() {
+  const targets = [document.querySelector('.app-main-scroll')].filter(Boolean);
 
-function isMainRoute(pathname) {
-  return MAIN_NAV_ROUTES.includes(pathname);
+  return [
+    ...targets,
+    window,
+    document.documentElement,
+    document.body,
+  ];
 }
 
-function getScrollElement() {
-  return document.querySelector('.app-main-scroll') || window;
-}
+function setTargetTop(target) {
+  if (!target) return;
 
-function setScrollTop(scrollElement) {
-  if (scrollElement === window) {
+  if (target === window) {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
     return;
   }
 
-  scrollElement.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  scrollElement.scrollTop = 0;
-  scrollElement.scrollLeft = 0;
+  if (typeof target.scrollTo === 'function') {
+    target.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }
+
+  target.scrollTop = 0;
+  target.scrollLeft = 0;
 }
 
 function scrollToTop() {
-  const scrollElement = getScrollElement();
-  const previousScrollBehavior = scrollElement === window ? null : scrollElement.style.scrollBehavior;
+  const targets = getScrollTargets();
+  const previousScrollBehaviors = targets.map((target) => {
+    if (target === window || !target?.style) return null;
 
-  if (scrollElement !== window) {
-    scrollElement.style.scrollBehavior = 'auto';
-  }
+    const previous = target.style.scrollBehavior;
+    target.style.scrollBehavior = 'auto';
+    return previous;
+  });
 
-  setScrollTop(scrollElement);
+  const run = () => {
+    targets.forEach(setTargetTop);
+  };
 
+  run();
+  requestAnimationFrame(run);
   requestAnimationFrame(() => {
-    setScrollTop(scrollElement);
+    run();
 
-    requestAnimationFrame(() => {
-      setScrollTop(scrollElement);
+    window.setTimeout(run, 0);
+    window.setTimeout(() => {
+      run();
 
-      if (scrollElement !== window) {
-        scrollElement.style.scrollBehavior = previousScrollBehavior || '';
-      }
-    });
+      targets.forEach((target, index) => {
+        if (target === window || !target?.style) return;
+        target.style.scrollBehavior = previousScrollBehaviors[index] || '';
+      });
+    }, 80);
   });
 }
 
 export default function ScrollManager() {
   const location = useLocation();
-  const navigationType = useNavigationType();
-  const previousPathRef = useRef(location.pathname);
 
   useLayoutEffect(() => {
-    const previousPath = previousPathRef.current;
-    const currentPath = location.pathname;
-
-    previousPathRef.current = currentPath;
-
-    const isSamePage = previousPath === currentPath;
-    const isBackOrForward = navigationType === 'POP';
-
-    if (isSamePage) return;
-
-    // Preserve natural browser back/forward position.
-    if (isBackOrForward) return;
-
-    // Bottom-nav/main pages should always begin at the top of the app scroll area.
-    if (isMainRoute(currentPath)) {
-      scrollToTop();
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
     }
-  }, [location.pathname, navigationType]);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (location.hash) return;
+
+    scrollToTop();
+  }, [location.pathname, location.search, location.hash]);
 
   return null;
 }
