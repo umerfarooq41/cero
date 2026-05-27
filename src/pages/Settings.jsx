@@ -101,56 +101,64 @@ const themeStyleOptions = [
     label: 'Ember Noir',
     description: 'Warm amber glow with a deep noir dark mode.',
     tone: 'amber',
-    lightCanvas: "#fff7ed url('/backgrounds/ember-noir-light.svg') center / cover no-repeat",
-    darkCanvas: "#030303 url('/backgrounds/ember-noir-dark.svg') center / cover no-repeat",
+    lightAccent: '28 92% 46%',
+    darkAccent: '32 94% 58%',
+  },
+  {
+    value: 'copper-smoke',
+    label: 'Copper Smoke',
+    description: 'Smoky warm copper canvas with neutral premium surfaces.',
+    tone: 'amber',
+    lightAccent: '24 72% 42%',
+    darkAccent: '28 82% 62%',
   },
   {
     value: 'rose-quartz',
     label: 'Rose Quartz',
     description: 'Soft rose and blush background with a jewel-like dark mode.',
     tone: 'rose',
-    lightCanvas: "#fff7fb url('/backgrounds/rose-quartz-light.svg') center / cover no-repeat",
-    darkCanvas: "#15040d url('/backgrounds/rose-quartz-dark.svg') center / cover no-repeat",
+    lightAccent: '340 82% 48%',
+    darkAccent: '340 86% 62%',
   },
   {
     value: 'forest-neon',
     label: 'Forest Neon',
     description: 'Fresh green canvas with a focused neon forest dark mode.',
     tone: 'emerald',
-    lightCanvas: "#f3ffe8 url('/backgrounds/forest-neon-light.svg') center / cover no-repeat",
-    darkCanvas: "#030d05 url('/backgrounds/forest-neon-dark.svg') center / cover no-repeat",
+    lightAccent: '142 76% 38%',
+    darkAccent: '142 72% 52%',
   },
   {
     value: 'orchid-fire',
     label: 'Orchid Fire',
     description: 'Purple orchid energy with a dramatic dark background.',
     tone: 'purple',
-    lightCanvas: "#fff0fb url('/backgrounds/orchid-fire-light.svg') center / cover no-repeat",
-    darkCanvas: "#0a0310 url('/backgrounds/orchid-fire-dark.svg') center / cover no-repeat",
+    lightAccent: '292 84% 42%',
+    darkAccent: '292 84% 62%',
   },
   {
     value: 'mango-lagoon',
     label: 'Mango Lagoon',
     description: 'Golden mango warmth balanced with smooth lagoon depth.',
     tone: 'amber',
-    lightCanvas: "#fff4dc url('/backgrounds/mango-lagoon-light.svg') center / cover no-repeat",
-    darkCanvas: "#070a08 url('/backgrounds/mango-lagoon-dark.svg') center / cover no-repeat",
+    lightAccent: '38 92% 44%',
+    darkAccent: '38 92% 58%',
   },
   {
     value: 'sunset-aqua',
     label: 'Sunset Aqua',
     description: 'Coral sunset warmth with soft aqua atmosphere.',
     tone: 'cyan',
-    lightCanvas: "#fff1e9 url('/backgrounds/sunset-aqua-light.svg') center / cover no-repeat",
-    darkCanvas: "#0b0503 url('/backgrounds/sunset-aqua-dark.svg') center / cover no-repeat",
+    lightAccent: '16 88% 48%',
+    darkAccent: '18 92% 58%',
   },
   {
     value: 'graphite-glow',
     label: 'Graphite Glow',
     description: 'Neutral graphite style for a quieter premium look.',
     tone: 'slate',
-    lightCanvas: "#fafafa url('/backgrounds/graphite-glow-light.svg') center / cover no-repeat",
-    darkCanvas: "#020202 url('/backgrounds/graphite-glow-dark.svg') center / cover no-repeat",
+    lightAccent: '215 16% 42%',
+    darkAccent: '215 18% 72%',
   },
 ];
 
@@ -261,7 +269,7 @@ function SettingRow({
         </div>
       </div>
 
-      <div className="shrink-0 self-start sm:self-center">{children}</div>
+      <div className={cn('shrink-0 self-start sm:self-center', stackOnMobile && 'w-full sm:w-auto')}>{children}</div>
     </Wrapper>
   );
 }
@@ -285,7 +293,7 @@ function SegmentedOption({ active, onClick, icon: Icon, label }) {
 }
 
 function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
-  const canvas = resolvedTheme === 'dark' ? option.darkCanvas : option.lightCanvas;
+  const accent = resolvedTheme === 'dark' ? option.darkAccent : option.lightAccent;
 
   return (
     <button
@@ -294,16 +302,20 @@ function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border shadow-sm transition-all hover:-translate-y-0.5 hover:scale-105 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
-          ? 'scale-105 border-border/80 bg-card/25 ring-2 ring-border/80 ring-offset-2 ring-offset-background'
-          : 'border-border/60 ring-1 ring-border/40'
+          ? 'border-primary/45 ring-2 ring-primary/30 ring-offset-2 ring-offset-background'
+          : 'border-border/60 hover:border-border/80'
       )}
-      style={{ background: canvas || option.swatch }}
     >
+      <span
+        className="h-5 w-5 rounded-full shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+        style={{ backgroundColor: `hsl(${accent})` }}
+      />
+
       {active && (
-        <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">
-          <Check className="h-3 w-3" />
+        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-background text-foreground shadow-sm ring-1 ring-border/70">
+          <Check className="h-2.5 w-2.5" />
         </span>
       )}
     </button>
@@ -596,7 +608,7 @@ export default function Settings() {
             description="Pick a standalone app theme. Backgrounds carry the mood; cards and borders stay neutral."
             stackOnMobile
           >
-            <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 sm:justify-end">
+            <div className="grid w-full grid-cols-4 justify-items-center gap-2 sm:w-[216px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}

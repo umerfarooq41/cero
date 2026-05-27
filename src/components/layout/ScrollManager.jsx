@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 const MAIN_NAV_ROUTES = ['/', '/plan', '/transactions', '/accounts', '/manage-plan'];
@@ -11,15 +11,40 @@ function getScrollElement() {
   return document.querySelector('.app-main-scroll') || window;
 }
 
-function scrollToTop() {
-  const scrollElement = getScrollElement();
-
+function setScrollTop(scrollElement) {
   if (scrollElement === window) {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     return;
   }
 
-  scrollElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  scrollElement.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  scrollElement.scrollTop = 0;
+  scrollElement.scrollLeft = 0;
+}
+
+function scrollToTop() {
+  const scrollElement = getScrollElement();
+  const previousScrollBehavior = scrollElement === window ? null : scrollElement.style.scrollBehavior;
+
+  if (scrollElement !== window) {
+    scrollElement.style.scrollBehavior = 'auto';
+  }
+
+  setScrollTop(scrollElement);
+
+  requestAnimationFrame(() => {
+    setScrollTop(scrollElement);
+
+    requestAnimationFrame(() => {
+      setScrollTop(scrollElement);
+
+      if (scrollElement !== window) {
+        scrollElement.style.scrollBehavior = previousScrollBehavior || '';
+      }
+    });
+  });
 }
 
 export default function ScrollManager() {
@@ -27,7 +52,7 @@ export default function ScrollManager() {
   const navigationType = useNavigationType();
   const previousPathRef = useRef(location.pathname);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previousPath = previousPathRef.current;
     const currentPath = location.pathname;
 
@@ -41,11 +66,9 @@ export default function ScrollManager() {
     // Preserve natural browser back/forward position.
     if (isBackOrForward) return;
 
-    // Main bottom-nav pages open from the top.
+    // Bottom-nav/main pages should always begin at the top of the app scroll area.
     if (isMainRoute(currentPath)) {
-      requestAnimationFrame(() => {
-        scrollToTop();
-      });
+      scrollToTop();
     }
   }, [location.pathname, navigationType]);
 

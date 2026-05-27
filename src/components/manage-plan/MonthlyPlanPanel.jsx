@@ -185,9 +185,8 @@ function PlanAmountRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 px-4 py-2.5',
-        row.isSubcategory && 'pl-14',
-        row.sourceType && 'app-card-surface-soft'
+        'flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/30',
+        row.isSubcategory && 'pl-14'
       )}
     >
       {!row.isSubcategory && (

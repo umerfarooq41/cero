@@ -44,7 +44,6 @@ function getStatusLabel(type, rawPercent, isOverBudget, tracked) {
 }
 
 export default function PlanBreakdownRow({ item, currency }) {
-  const isSourceRow = Boolean(item.sourceType);
   const type = getBudgetType(item);
   const planned = Number(item.planned || 0);
   const tracked = Number(item.tracked || 0);
@@ -57,10 +56,7 @@ export default function PlanBreakdownRow({ item, currency }) {
 
   return (
     <div
-      className={cn(
-        'px-3 py-3 transition-colors sm:px-4',
-        isSourceRow && 'app-card-surface-soft'
-      )}
+      className="px-3 py-3 transition-colors hover:bg-accent/30 sm:px-4"
     >
       <div className="flex min-w-0 items-center gap-3">
         <CategoryIconBadge
