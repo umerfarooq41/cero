@@ -129,12 +129,12 @@ const themeStyleOptions = [
     darkAccent: '142 72% 52%',
   },
   {
-    value: 'orchid-fire',
-    label: 'Orchid Fire',
-    description: 'Purple orchid energy with a dramatic dark background.',
-    tone: 'purple',
-    lightAccent: '292 84% 42%',
-    darkAccent: '292 84% 62%',
+    value: 'blue-ruby',
+    label: 'Blue Ruby',
+    description: 'Modern blue gradients with subtle ruby energy.',
+    tone: 'blue',
+    lightAccent: '221 83% 53%',
+    darkAccent: '221 83% 64%',
   },
   {
     value: 'mango-lagoon',
@@ -302,7 +302,7 @@ function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
           ? 'border-primary/45 ring-2 ring-primary/30 ring-offset-2 ring-offset-background'
           : 'border-border/60 hover:border-border/80'
@@ -314,7 +314,7 @@ function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
       />
 
       {active && (
-        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-background text-foreground shadow-sm ring-1 ring-border/70">
+        <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm ring-1 ring-background/80">
           <Check className="h-2.5 w-2.5" />
         </span>
       )}

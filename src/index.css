@@ -627,29 +627,29 @@ main,
     --app-bg-image: url('/backgrounds/forest-neon-dark.svg');
   }
 
-  /* Orchid Fire */
-  html.theme-style-orchid-fire:not(.dark) {
-    --primary: 292 84% 42%;
-    --ring: 292 84% 42%;
-    --accent: 292 88% 94%;
-    --accent-foreground: 292 84% 18%;
-    --chart-1: 292 84% 42%;
-    --sidebar-primary: 292 84% 42%;
-    --sidebar-ring: 292 84% 42%;
-    --app-bg-color: #fff0fb;
-    --app-bg-image: url('/backgrounds/orchid-fire-light.svg');
+  /* Blue Ruby */
+  html.theme-style-blue-ruby:not(.dark) {
+    --primary: 221 83% 53%;
+    --ring: 221 83% 53%;
+    --accent: 221 92% 94%;
+    --accent-foreground: 221 82% 18%;
+    --chart-1: 221 83% 53%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-ring: 221 83% 53%;
+    --app-bg-color: #eef6ff;
+    --app-bg-image: url('/backgrounds/blue-ruby-light.svg');
   }
 
-  html.theme-style-orchid-fire.dark {
-    --primary: 292 84% 62%;
-    --ring: 292 84% 62%;
-    --accent: 292 70% 16%;
-    --accent-foreground: 292 96% 90%;
-    --chart-1: 292 84% 62%;
-    --sidebar-primary: 292 84% 62%;
-    --sidebar-ring: 292 84% 62%;
-    --app-bg-color: #0a0310;
-    --app-bg-image: url('/backgrounds/orchid-fire-dark.svg');
+  html.theme-style-blue-ruby.dark {
+    --primary: 221 83% 64%;
+    --ring: 221 83% 64%;
+    --accent: 221 56% 16%;
+    --accent-foreground: 221 92% 90%;
+    --chart-1: 221 83% 64%;
+    --sidebar-primary: 221 83% 64%;
+    --sidebar-ring: 221 83% 64%;
+    --app-bg-color: #060813;
+    --app-bg-image: url('/backgrounds/blue-ruby-dark.svg');
   }
 
   /* Mango Lagoon */
