@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <!-- PWA -->
-  <link rel="manifest" href="/manifest.json?v=20260527-icons-v1" />
+  <link rel="manifest" href="/manifest.json?v=20260527-icons-v2" />
   <meta name="theme-color" content="#0a0a1a" />
   <meta name="color-scheme" content="dark light" />
 
@@ -17,10 +17,10 @@
   <meta name="apple-mobile-web-app-title" content="Cero" />
 
   <!-- Icons -->
-  <link id="favicon" rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-dark.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-dark.png" media="(prefers-color-scheme: dark)" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-light.png" media="(prefers-color-scheme: light)" />
-  <link id="apple-touch-icon" rel="apple-touch-icon" href="/apple-touch-icon-dark.png" />
+  <link id="favicon" rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-dark.png?v=20260527-logo-v2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-dark.png?v=20260527-logo-v2" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-light.png?v=20260527-logo-v2" media="(prefers-color-scheme: light)" />
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="/apple-touch-icon-dark.png?v=20260527-icons-v2" />
 
 
   <style>
@@ -57,14 +57,14 @@
       if (!favicon) return;
 
       favicon.href = isDark
-        ? '/favicon-32x32-dark.png'
-        : '/favicon-32x32-light.png';
+        ? '/favicon-32x32-dark.png?v=20260527-logo-v2'
+        : '/favicon-32x32-light.png?v=20260527-logo-v2';
 
       const appleTouchIcon = document.getElementById('apple-touch-icon');
       if (appleTouchIcon) {
         appleTouchIcon.href = isDark
-          ? '/apple-touch-icon-dark.png'
-          : '/apple-touch-icon-light.png';
+          ? '/apple-touch-icon-dark.png?v=20260527-icons-v2'
+          : '/apple-touch-icon-light.png?v=20260527-icons-v2';
       }
     }
 

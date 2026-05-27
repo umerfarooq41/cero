@@ -43,33 +43,37 @@ export default function PageHeader({
           md:pb-5
         "
       >
-        <div className="flex min-w-0 items-start gap-3">
-          <Logo size={32} className="mt-0.5" priority />
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Logo size={28} priority />
 
-          <div className="min-w-0">
             <h1
               className="
+                min-w-0
+                truncate
                 text-2xl
                 font-bold
+                leading-none
                 tracking-tight
                 text-foreground
               "
             >
               {title}
             </h1>
-
-            {subtitle && (
-              <p
-                className="
-                  mt-1
-                  text-sm
-                  text-muted-foreground
-                "
-              >
-                {subtitle}
-              </p>
-            )}
           </div>
+
+          {subtitle && (
+            <p
+              className="
+                mt-1.5
+                text-sm
+                leading-snug
+                text-muted-foreground
+              "
+            >
+              {subtitle}
+            </p>
+          )}
         </div>
 
         <Link
