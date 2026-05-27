@@ -110,9 +110,12 @@ export default function BottomNav() {
                 to={item.path}
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}
-                className="relative flex min-w-0 items-center justify-center"
+                data-haptic="true"
+                className="group relative flex min-w-0 touch-manipulation items-center justify-center"
               >
-                <div
+                <motion.div
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ type: 'spring', stiffness: 520, damping: 30 }}
                   className={cn(
                     'relative flex min-w-0 flex-col items-center justify-center gap-1 text-center transition-colors duration-200',
                     isActive
@@ -120,30 +123,48 @@ export default function BottomNav() {
                       : 'text-muted-foreground/75 hover:text-foreground'
                   )}
                 >
-                  <motion.span
-                    layout
-                    animate={{ opacity: isActive ? 1 : 0, scaleX: isActive ? 1 : 0.55 }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                    className="absolute -top-1 h-0.5 w-6 rounded-full bg-primary"
-                  />
-
                   <motion.div
-                    animate={{ scale: isActive ? 1.05 : 1, y: isActive ? -1 : 0 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 26 }}
-                    className="flex h-7 w-7 items-center justify-center"
+                    animate={{ scale: isActive ? 1.04 : 1, y: isActive ? -1 : 0 }}
+                    transition={{ type: 'spring', stiffness: 430, damping: 28 }}
+                    className="relative flex h-10 w-10 items-center justify-center rounded-full"
                   >
+                    {isActive && (
+                      <motion.span
+                        layoutId="bottom-nav-active-orb"
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
+                        style={{
+                          boxShadow:
+                            '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
+                        }}
+                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                      />
+                    )}
+
+                    {isActive && (
+                      <motion.span
+                        aria-hidden="true"
+                        className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
+                        initial={{ opacity: 0, scale: 0.75 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.75 }}
+                        transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                      />
+                    )}
+
                     <Icon
                       className={cn(
-                        'h-5 w-5 transition-all duration-200',
+                        'relative z-10 h-5 w-5 transition-all duration-200',
                         isActive
-                          ? 'text-primary stroke-[2.55]'
-                          : 'text-muted-foreground/80 stroke-[2.25]'
+                          ? 'text-primary stroke-[2.65]'
+                          : 'text-muted-foreground/80 stroke-[2.25] group-hover:text-foreground'
                       )}
                     />
                   </motion.div>
 
                   <motion.span
-                    animate={{ opacity: isActive ? 1 : 0.7 }}
+                    animate={{ opacity: isActive ? 1 : 0.68, y: isActive ? -1 : 0 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                     className={cn(
                       'block max-w-full whitespace-nowrap text-[10px] leading-none transition-all duration-200',
                       isActive
@@ -153,7 +174,7 @@ export default function BottomNav() {
                   >
                     {item.label}
                   </motion.span>
-                </div>
+                </motion.div>
               </Link>
             );
           })}
