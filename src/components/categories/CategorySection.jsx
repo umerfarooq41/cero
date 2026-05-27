@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, MoreHorizontal, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import CategoryIcon from '@/components/shared/CategoryIcon';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import CategoryIcon from '@/components/shared/CategoryIcon';
+import { cn } from '@/lib/utils';
+
 const TYPE_ACCENT = {
-  income: 'text-green-700',
-  expense: 'text-red-700',
-  savings: 'text-blue-700',
-  debt: 'text-purple-700',
+  income: 'text-green-700 dark:text-green-400',
+  expense: 'text-red-700 dark:text-red-400',
+  savings: 'text-blue-700 dark:text-blue-400',
+  debt: 'text-purple-700 dark:text-purple-400',
 };
+
+const rowClass =
+  'group flex items-center gap-3 px-4 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20';
 
 function CategoryRow({ cat, subs, onAction, onAddSub }) {
   const [subOpen, setSubOpen] = useState(false);
@@ -17,29 +21,36 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
 
   return (
     <div>
-      <div
-        className="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition-colors group"
-      >
+      <div className={cn(rowClass, 'py-3')}>
         <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium leading-tight">{cat.name}</div>
+
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium leading-tight text-foreground">
+            {cat.name}
+          </div>
+
           {hasSubs && (
-            <div className="text-xs text-muted-foreground">{subs.length} subcategor{subs.length > 1 ? 'ies' : 'y'}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">
+              {subs.length} subcategor{subs.length > 1 ? 'ies' : 'y'}
+            </div>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <button
+            type="button"
             onClick={() => onAddSub(cat)}
-            className="p-1.5 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             title="Add subcategory"
           >
             <Plus className="h-4 w-4" />
           </button>
+
           <button
+            type="button"
             onClick={() => onAction(cat)}
-            className="p-1.5 rounded-md hover:bg-accent text-muted-foreground transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            title="Category actions"
           >
             <MoreHorizontal className="h-4 w-4" />
           </button>
@@ -47,15 +58,21 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
 
         {hasSubs && (
           <button
-            onClick={() => setSubOpen(p => !p)}
-            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            type="button"
+            onClick={() => setSubOpen((value) => !value)}
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            aria-label={subOpen ? 'Hide subcategories' : 'Show subcategories'}
           >
-            <ChevronRight className={cn("w-4 h-4 transition-transform duration-200", subOpen && "rotate-90")} />
+            <ChevronRight
+              className={cn(
+                'h-4 w-4 transition-transform duration-200',
+                subOpen && 'rotate-90'
+              )}
+            />
           </button>
         )}
       </div>
 
-      {/* Subcategories */}
       <AnimatePresence initial={false}>
         {hasSubs && subOpen && (
           <motion.div
@@ -65,7 +82,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
             transition={{ duration: 0.18, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            {subs.map(sub => (
+            {subs.map((sub) => (
               <SubRow key={sub.id} sub={sub} onAction={onAction} />
             ))}
           </motion.div>
@@ -77,12 +94,21 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
 
 function SubRow({ sub, onAction }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-2.5 pl-[3.5rem] hover:bg-accent/30 transition-colors group border-t border-border/30">
-      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sub.color || '#888' }} />
-      <span className="text-sm text-muted-foreground flex-1 truncate">{sub.name}</span>
+    <div className={cn(rowClass, 'border-t border-border/40 py-2.5 pl-[3.5rem]')}>
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: sub.color || '#888' }}
+      />
+
+      <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+        {sub.name}
+      </span>
+
       <button
+        type="button"
         onClick={() => onAction(sub)}
-        className="p-1.5 rounded-md hover:bg-accent opacity-0 group-hover:opacity-100 text-muted-foreground transition-all"
+        className="rounded-lg p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-muted/50 hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        title="Subcategory actions"
       >
         <MoreHorizontal className="h-4 w-4" />
       </button>
@@ -90,44 +116,59 @@ function SubRow({ sub, onAction }) {
   );
 }
 
-export default function CategorySection({ type, label, categories, defaultExpanded = false, onAction, onAddSub, onAddNew }) {
+export default function CategorySection({
+  type,
+  label,
+  categories,
+  defaultExpanded = false,
+  onAction,
+  onAddSub,
+  onAddNew,
+}) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
 
-  const parents = categories.filter(c => c.type === type && !c.parent_id);
-  const allSubs = categories.filter(c => c.parent_id);
-  const totalCount = parents.length + parents.reduce((sum, p) => {
-    return sum + allSubs.filter(s => s.parent_id === p.id).length;
+  const parents = categories.filter((category) => category.type === type && !category.parent_id);
+  const allSubs = categories.filter((category) => category.parent_id);
+  const totalCount = parents.length + parents.reduce((sum, parent) => {
+    return sum + allSubs.filter((sub) => sub.parent_id === parent.id).length;
   }, 0);
 
   return (
-    <div className="rounded-2xl app-card-surface backdrop-blur-xl shadow-sm overflow-hidden">
-      {/* Section header */}
-      <button
-        onClick={() => setIsOpen(p => !p)}
-        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-accent/30 transition-colors"
-      >
-        <div className="flex items-center gap-2.5">
-          <ChevronDown className={cn(
-            "w-4 h-4 text-muted-foreground transition-transform duration-200",
-            !isOpen && "-rotate-90"
-          )} />
-          <h3 className={cn("text-sm font-semibold", TYPE_ACCENT[type])}>{label}</h3>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-medium bg-secondary px-2 py-0.5 rounded-full text-muted-foreground tabular-nums">
+    <div className="overflow-hidden rounded-2xl app-card-surface shadow-sm">
+      <div className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20">
+        <button
+          type="button"
+          onClick={() => setIsOpen((value) => !value)}
+          className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+        >
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+              !isOpen && '-rotate-90'
+            )}
+          />
+
+          <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>
+            {label}
+          </h3>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-border/50 bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
             {totalCount}
           </span>
+
           <button
-            onClick={(e) => { e.stopPropagation(); onAddNew(type); }}
-            className="p-1 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            type="button"
+            onClick={() => onAddNew(type)}
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             title="Add category"
           >
             <Plus className="h-4 w-4" />
           </button>
         </div>
-      </button>
+      </div>
 
-      {/* Category rows */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -138,23 +179,28 @@ export default function CategorySection({ type, label, categories, defaultExpand
             className="overflow-hidden"
           >
             {parents.length === 0 ? (
-              <div className="px-5 py-6 text-center border-t border-border/50">
-                <p className="text-xs text-muted-foreground">No {label.toLowerCase()} categories yet.</p>
+              <div className="border-t border-border/50 px-5 py-6 text-center">
+                <p className="text-xs text-muted-foreground">
+                  No {label.toLowerCase()} categories yet.
+                </p>
+
                 <button
+                  type="button"
                   onClick={() => onAddNew(type)}
-                  className="text-xs text-primary font-medium mt-1 hover:underline"
+                  className="mt-1 text-xs font-medium text-primary hover:underline"
                 >
                   Add one
                 </button>
               </div>
             ) : (
               <div className="divide-y divide-border/50 border-t border-border/50">
-                {parents.map(cat => {
-                  const subs = allSubs.filter(s => s.parent_id === cat.id);
+                {parents.map((category) => {
+                  const subs = allSubs.filter((sub) => sub.parent_id === category.id);
+
                   return (
                     <CategoryRow
-                      key={cat.id}
-                      cat={cat}
+                      key={category.id}
+                      cat={category}
                       subs={subs}
                       onAction={onAction}
                       onAddSub={onAddSub}

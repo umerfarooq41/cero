@@ -41,6 +41,8 @@ export default function ManagePlanTabs({ activeTab, onChange, className = '' }) 
       size="sm"
       layoutId="manage-plan-tab-highlight"
       className={className}
+      gridClassName="gap-0.5 sm:gap-1"
+      buttonClassName="gap-1 px-1 py-2 text-[10px] sm:gap-1 sm:px-2 sm:text-xs md:gap-1.5 md:px-2.5 md:text-sm"
     />
   );
 }

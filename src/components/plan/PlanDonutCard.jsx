@@ -169,13 +169,13 @@ export default function PlanDonutCard({
         </div>
       </div>
 
-      <div className="mt-3 flex justify-center overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="mt-3 flex justify-center pb-0.5">
         {legendItems.length > 0 ? (
-          <div className="flex min-w-0 flex-nowrap justify-center gap-1.5">
+          <div className="flex w-full flex-wrap items-center justify-center gap-1.5 text-center">
             {legendItems.map((item) => (
               <div
                 key={item.id || item.name}
-                className="inline-flex max-w-[68px] shrink items-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-2 py-1 shadow-sm sm:max-w-[92px]"
+                className="inline-flex min-h-7 max-w-[9.5rem] items-center justify-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-2.5 py-1 text-center shadow-sm"
                 title={item.name}
               >
                 <span
@@ -183,7 +183,7 @@ export default function PlanDonutCard({
                   style={{ backgroundColor: item.color }}
                 />
 
-                <span className="min-w-0 truncate text-[10px] font-semibold leading-none text-muted-foreground">
+                <span className="min-w-0 whitespace-normal break-words text-[10px] font-semibold leading-tight text-muted-foreground">
                   {item.name}
                 </span>
               </div>
