@@ -27,6 +27,7 @@ import { currencies, getCurrencyByCode } from '@/lib/currencies';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { usePageEntrance } from '@/hooks/usePageTransition';
+import Logo from '@/components/Logo';
 
 const steps = [
   {
@@ -231,18 +232,7 @@ export default function Onboarding() {
         <div className="animate-child mb-5 overflow-hidden rounded-2xl app-card-surface p-6 text-center shadow-sm backdrop-blur-xl">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
             {step === 0 ? (
-              <>
-                <img
-                  src="/icon-light.png"
-                  alt="Cero"
-                  className="block h-12 w-12 object-contain dark:hidden"
-                />
-                <img
-                  src="/icon-dark.png"
-                  alt="Cero"
-                  className="hidden h-12 w-12 object-contain dark:block"
-                />
-              </>
+              <Logo size={52} priority />
             ) : (
               <StepIcon className="h-7 w-7 text-primary" />
             )}

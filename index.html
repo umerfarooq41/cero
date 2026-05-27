@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <!-- PWA -->
-  <link rel="manifest" href="/manifest.json?v=20260526-edge-v3" />
+  <link rel="manifest" href="/manifest.json?v=20260527-icons-v1" />
   <meta name="theme-color" content="#0a0a1a" />
   <meta name="color-scheme" content="dark light" />
 
@@ -17,8 +17,10 @@
   <meta name="apple-mobile-web-app-title" content="Cero" />
 
   <!-- Icons -->
-  <link id="favicon" rel="icon" type="image/png" href="/icon-dark.png" />
-  <link rel="apple-touch-icon" href="/icon-dark.png" />
+  <link id="favicon" rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-dark.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-dark.png" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-light.png" media="(prefers-color-scheme: light)" />
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="/apple-touch-icon-dark.png" />
 
 
   <style>
@@ -55,8 +57,15 @@
       if (!favicon) return;
 
       favicon.href = isDark
-        ? '/icon-dark.png'
-        : '/icon-light.png';
+        ? '/favicon-32x32-dark.png'
+        : '/favicon-32x32-light.png';
+
+      const appleTouchIcon = document.getElementById('apple-touch-icon');
+      if (appleTouchIcon) {
+        appleTouchIcon.href = isDark
+          ? '/apple-touch-icon-dark.png'
+          : '/apple-touch-icon-light.png';
+      }
     }
 
     setFavicon();

@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { cn } from '@/lib/utils';
 
 export default function PageHeader({
@@ -42,29 +43,33 @@ export default function PageHeader({
           md:pb-5
         "
       >
-        <div className="min-w-0">
-          <h1
-            className="
-              text-2xl
-              font-bold
-              tracking-tight
-              text-foreground
-            "
-          >
-            {title}
-          </h1>
+        <div className="flex min-w-0 items-start gap-3">
+          <Logo size={32} className="mt-0.5" priority />
 
-          {subtitle && (
-            <p
+          <div className="min-w-0">
+            <h1
               className="
-                mt-1
-                text-sm
-                text-muted-foreground
+                text-2xl
+                font-bold
+                tracking-tight
+                text-foreground
               "
             >
-              {subtitle}
-            </p>
-          )}
+              {title}
+            </h1>
+
+            {subtitle && (
+              <p
+                className="
+                  mt-1
+                  text-sm
+                  text-muted-foreground
+                "
+              >
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
 
         <Link

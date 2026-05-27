@@ -12,6 +12,7 @@ import {
 import PageNotFound from './lib/PageNotFound';
 import { useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
+import Logo from '@/components/Logo';
 
 import Dashboard from '@/pages/Dashboard';
 import Plan from '@/pages/Plan';
@@ -28,8 +29,13 @@ import Auth from '@/pages/Auth';
 import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
 
 const LoadingScreen = () => (
-  <div className="fixed inset-0 flex items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" />
+  <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
+    <div className="flex flex-col items-center text-center">
+      <Logo size={64} priority />
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">Cero</h1>
+      <p className="mt-1 text-sm font-medium text-muted-foreground">Zero-Based Budgeting</p>
+      <div className="mt-6 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
+    </div>
   </div>
 );
 

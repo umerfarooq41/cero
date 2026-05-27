@@ -8,6 +8,7 @@ import {
   SlidersHorizontal,
   WalletCards,
 } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -149,13 +150,7 @@ export default function Sidebar() {
     >
       <div className="px-6 pb-6 pt-5">
         <Link to="/" className="flex items-center gap-3" data-haptic="true">
-          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl surface-card card-elevated ring-1 ring-white/40 dark:ring-white/[0.05]">
-            <img
-              src="/icon-192.png"
-              alt="Cero"
-              className="h-full w-full object-contain p-1"
-            />
-          </div>
+          <Logo size={36} priority />
 
           <div className="min-w-0">
             <span className="block text-lg font-bold leading-none tracking-tight text-foreground">

@@ -407,7 +407,17 @@ function applyTheme(mode) {
   const favicon = document.getElementById('favicon');
   if (favicon) {
     favicon.href =
-      resolvedTheme === 'dark' ? '/icon-dark.png' : '/icon-light.png';
+      resolvedTheme === 'dark'
+        ? '/favicon-32x32-dark.png'
+        : '/favicon-32x32-light.png';
+  }
+
+  const appleTouchIcon = document.getElementById('apple-touch-icon');
+  if (appleTouchIcon) {
+    appleTouchIcon.href =
+      resolvedTheme === 'dark'
+        ? '/apple-touch-icon-dark.png'
+        : '/apple-touch-icon-light.png';
   }
 
   syncSystemBarColor();
