@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-label="Ember Noir - Dark" preserveAspectRatio="xMidYMid slice">
+  <title>Ember Noir - Dark</title>
+  <rect width="1600" height="1000" fill="#030303"/>
+  <defs>
+
+    <filter id="blur80" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="80"/></filter>
+    <filter id="blur110" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="110"/></filter>
+    <filter id="blur140" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="140"/></filter>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.13"/></feComponentTransfer>
+    </filter>
+    <radialGradient id="softVignette" cx="50%" cy="42%" r="78%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="62%" stop-color="#000000" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.38"/>
+    </radialGradient>
+    <radialGradient id="darkVignette" cx="50%" cy="42%" r="82%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="55%" stop-color="#000000" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.82"/>
+    </radialGradient>
+
+  </defs>
+
+  <g filter="url(#blur110)" opacity="1">
+    <ellipse cx="420" cy="420" rx="470" ry="300" fill="#f59e0b" opacity="0.7"/>
+    <ellipse cx="1080" cy="180" rx="560" ry="360" fill="#dc2626" opacity="0.58"/>
+    <ellipse cx="850" cy="860" rx="880" ry="270" fill="#000000" opacity="0.9"/>
+    <path d="M-140,680 C180,320 440,220 770,380 C1030,506 1160,180 1740,40 L1740,1120 L-140,1120 Z" fill="#dc2626" opacity="0.14"/>
+  </g>
+  <rect width="1600" height="1000" fill="rgba(0,0,0,0.38)"/>
+  <rect width="1600" height="1000" fill="url(#darkVignette)"/>
+  <rect width="1600" height="1000" filter="url(#noise)" opacity="0.18"/>
+
+</svg>

@@ -8,314 +8,249 @@ const COMPACT_MODE_STORAGE_KEY = 'cero.compactMode';
 const SHOW_DECIMALS_STORAGE_KEY = 'cero.showDecimals';
 const HAPTICS_STORAGE_KEY = 'cero.hapticsEnabled';
 const APP_SYSTEM_BAR_COLOR = '#0a0a1a';
+const DEFAULT_THEME_STYLE = 'ember-noir';
 
 const VALID_THEMES = ['system', 'light', 'dark'];
 const VALID_THEME_STYLES = [
-  'cyber-indigo',
-  'aurora-bloom',
-  'sunset-rose',
-  'emerald-forest',
-  'desert-quartz',
-  'cyberpunk-horizon',
+  'ember-noir',
+  'rose-quartz',
+  'forest-neon',
+  'orchid-fire',
+  'mango-lagoon',
+  'sunset-aqua',
+  'graphite-glow',
 ];
 
 const LEGACY_THEME_STYLE_MAP = {
-  cero: 'aurora-bloom',
-  ocean: 'aurora-bloom',
-  cyber: 'cyber-indigo',
-  indigo: 'cyber-indigo',
-  aurora: 'aurora-bloom',
-  sunset: 'sunset-rose',
-  rose: 'sunset-rose',
-  forest: 'emerald-forest',
-  emerald: 'emerald-forest',
-  sage: 'emerald-forest',
-  quartz: 'desert-quartz',
-  desert: 'desert-quartz',
-  horizon: 'cyberpunk-horizon',
-  minimal: 'desert-quartz',
-  obsidian: 'desert-quartz',
-  'warm-aurora': 'desert-quartz',
-  'vibrant-fluid': 'cyberpunk-horizon',
-  'ai-minimal': 'aurora-bloom',
-  'energy-action': 'sunset-rose',
+  cero: DEFAULT_THEME_STYLE,
+  ocean: 'sunset-aqua',
+  cyber: 'graphite-glow',
+  indigo: 'graphite-glow',
+  aurora: 'sunset-aqua',
+  sunset: 'sunset-aqua',
+  rose: 'rose-quartz',
+  forest: 'forest-neon',
+  emerald: 'forest-neon',
+  sage: 'forest-neon',
+  quartz: 'mango-lagoon',
+  desert: 'mango-lagoon',
+  horizon: 'orchid-fire',
+  minimal: 'graphite-glow',
+  obsidian: 'graphite-glow',
+  'warm-aurora': 'mango-lagoon',
+  'vibrant-fluid': 'orchid-fire',
+  'ai-minimal': 'graphite-glow',
+  'energy-action': 'sunset-aqua',
+  'cyber-indigo': 'graphite-glow',
+  'aurora-bloom': 'sunset-aqua',
+  'sunset-rose': 'rose-quartz',
+  'emerald-forest': 'forest-neon',
+  'desert-quartz': 'mango-lagoon',
+  'cyberpunk-horizon': 'orchid-fire',
+};
+
+const NEUTRAL_MODE_TOKENS = {
+  light: {
+    background: '218 42% 97%',
+    foreground: '222 47% 10%',
+    card: '0 0% 100%',
+    cardForeground: '222 47% 10%',
+    popover: '0 0% 100%',
+    popoverForeground: '222 47% 10%',
+    border: '220 20% 88%',
+    input: '220 20% 88%',
+    muted: '220 20% 94%',
+    mutedForeground: '220 9% 43%',
+    secondary: '220 25% 95%',
+    secondaryForeground: '222 47% 12%',
+    destructive: '0 78% 56%',
+    success: '145 63% 38%',
+    warning: '38 92% 50%',
+    sidebarBackground: '0 0% 100%',
+    sidebarForeground: '220 9% 35%',
+    sidebarAccent: '220 25% 95%',
+    sidebarAccentForeground: '222 47% 11%',
+    sidebarBorder: '220 20% 90%',
+    primaryForeground: '0 0% 100%',
+    surfaceMainAlpha: '0.74',
+    surfaceStrongAlpha: '0.90',
+    surfaceSoftAlpha: '0.58',
+    surfaceFloatingAlpha: '0.98',
+    controlAlpha: '0.78',
+    surfaceBorderAlpha: '0.18',
+    surfaceBorderStrongAlpha: '0.24',
+    surfaceBorderSoftAlpha: '0.14',
+    controlBorderAlpha: '0.20',
+    surfaceShadowColor: '222 47% 9%',
+    surfaceShadowAlpha: '0.075',
+    surfaceShadowStrongAlpha: '0.12',
+    surfaceBlur: '22px',
+    surfaceSaturate: '145%',
+  },
+  dark: {
+    background: '222 47% 5%',
+    foreground: '210 40% 98%',
+    card: '222 38% 9%',
+    cardForeground: '210 40% 98%',
+    popover: '222 38% 9%',
+    popoverForeground: '210 40% 98%',
+    border: '217 30% 20%',
+    input: '217 30% 20%',
+    muted: '217 33% 13%',
+    mutedForeground: '215 20% 72%',
+    secondary: '217 33% 13%',
+    secondaryForeground: '210 40% 98%',
+    destructive: '0 84% 63%',
+    success: '145 70% 48%',
+    warning: '43 96% 56%',
+    sidebarBackground: '222 47% 7%',
+    sidebarForeground: '215 20% 78%',
+    sidebarAccent: '217 33% 14%',
+    sidebarAccentForeground: '210 40% 98%',
+    sidebarBorder: '217 30% 18%',
+    primaryForeground: '222 47% 7%',
+    surfaceMainAlpha: '0.64',
+    surfaceStrongAlpha: '0.78',
+    surfaceSoftAlpha: '0.46',
+    surfaceFloatingAlpha: '0.98',
+    controlAlpha: '0.62',
+    surfaceBorderAlpha: '0.16',
+    surfaceBorderStrongAlpha: '0.22',
+    surfaceBorderSoftAlpha: '0.13',
+    controlBorderAlpha: '0.18',
+    surfaceShadowColor: '222 47% 2%',
+    surfaceShadowAlpha: '0.28',
+    surfaceShadowStrongAlpha: '0.38',
+    surfaceBlur: '22px',
+    surfaceSaturate: '140%',
+  },
 };
 
 const THEME_STYLE_TOKENS = {
-  'cyber-indigo': {
+  'ember-noir': {
     light: {
-      primary: '243 75% 55%',
-      primaryForeground: '0 0% 100%',
-      ring: '243 75% 55%',
-      chart1: '243 75% 55%',
-      background: '232 64% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      sidebarForeground: '226 28% 24%',
-      mutedForeground: '224 12% 42%',
-      gradient: 'radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.36) 0%, rgba(37, 99, 235, 0) 46%), radial-gradient(circle at 88% 14%, rgba(124, 58, 237, 0.32) 0%, rgba(124, 58, 237, 0) 48%), radial-gradient(circle at 56% 100%, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0) 48%), linear-gradient(135deg, #eef2ff 0%, #e0e7ff 46%, #ddd6fe 100%)',
-      start: '#eef2ff',
-      end: '#ddd6fe',
-      before: 'none',
-      after: 'none',
-      blend: 'multiply',
-      animation: 'none',
-      beforeAnimation: 'floatOrbOne 34s infinite alternate ease-in-out',
-      afterAnimation: 'floatOrbTwo 30s infinite alternate ease-in-out',
-      bgSize: 'cover',
+      primary: '28 92% 46%',
+      ring: '28 92% 46%',
+      accent: '28 92% 92%',
+      accentForeground: '24 92% 18%',
+      appBgColor: '#fff7ed',
+      appBgImage: "url('/backgrounds/ember-noir-light.svg')",
     },
     dark: {
-      primary: '245 94% 68%',
-      primaryForeground: '222 47% 7%',
-      ring: '245 94% 68%',
-      chart1: '245 94% 68%',
-      background: '245 64% 4%',
-      foreground: '210 40% 98%',
-      card: '245 42% 8%',
-      popover: '245 42% 8%',
-      sidebarForeground: '232 24% 82%',
-      mutedForeground: '232 18% 70%',
-      gradient: 'radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.25) 0%, rgba(67, 56, 202, 0) 38%), radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.22) 0%, rgba(49, 46, 129, 0) 42%), linear-gradient(135deg, #030211 0%, #080721 100%)',
-      start: '#030211',
-      end: '#080721',
-      before: 'none',
-      after: 'none',
-      blend: 'screen',
-      animation: 'none',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '32 94% 58%',
+      ring: '32 94% 58%',
+      accent: '28 72% 16%',
+      accentForeground: '34 96% 88%',
+      appBgColor: '#030303',
+      appBgImage: "url('/backgrounds/ember-noir-dark.svg')",
     },
   },
-  'aurora-bloom': {
+  'rose-quartz': {
     light: {
-      primary: '199 88% 42%',
-      primaryForeground: '0 0% 100%',
-      ring: '199 88% 42%',
-      chart1: '199 88% 42%',
-      background: '210 60% 99%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      sidebarForeground: '222 24% 24%',
-      mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 2% 12%, rgba(14, 165, 233, 0.36) 0%, rgba(14, 165, 233, 0) 42%), radial-gradient(circle at 92% 4%, rgba(20, 184, 166, 0.34) 0%, rgba(20, 184, 166, 0) 44%), radial-gradient(circle at 54% 100%, rgba(244, 114, 182, 0.16) 0%, rgba(244, 114, 182, 0) 42%), linear-gradient(135deg, #ecfeff 0%, #dbeafe 46%, #ccfbf1 100%)',
-      start: '#ecfeff',
-      end: '#ccfbf1',
-      before: 'none',
-      after: 'none',
-      blend: 'normal',
-      animation: 'meshShift 42s infinite alternate ease-in-out',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: '135% 135%',
+      primary: '340 82% 48%',
+      ring: '340 82% 48%',
+      accent: '340 88% 94%',
+      accentForeground: '340 82% 20%',
+      appBgColor: '#fff7fb',
+      appBgImage: "url('/backgrounds/rose-quartz-light.svg')",
     },
     dark: {
-      primary: '184 90% 56%',
-      primaryForeground: '222 47% 7%',
-      ring: '184 90% 56%',
-      chart1: '184 90% 56%',
-      background: '222 47% 4%',
-      foreground: '210 40% 98%',
-      card: '222 38% 8%',
-      popover: '222 38% 8%',
-      sidebarForeground: '215 20% 78%',
-      mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.24) 0%, rgba(37, 99, 235, 0) 38%), radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.20) 0%, rgba(147, 51, 234, 0) 34%), linear-gradient(135deg, #020617 0%, #080d1c 48%, #030712 100%)',
-      start: '#020617',
-      end: '#030712',
-      before: 'none',
-      after: 'none',
-      blend: 'screen',
-      animation: 'none',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '340 86% 62%',
+      ring: '340 86% 62%',
+      accent: '340 72% 16%',
+      accentForeground: '340 96% 90%',
+      appBgColor: '#15040d',
+      appBgImage: "url('/backgrounds/rose-quartz-dark.svg')",
     },
   },
-  'sunset-rose': {
+  'forest-neon': {
     light: {
-      primary: '343 81% 50%',
-      primaryForeground: '0 0% 100%',
-      ring: '343 81% 50%',
-      chart1: '343 81% 50%',
-      background: '350 100% 99%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      sidebarForeground: '222 24% 24%',
-      mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.34) 0%, rgba(225, 29, 72, 0) 46%), radial-gradient(circle at 14% 88%, rgba(234, 88, 12, 0.34) 0%, rgba(234, 88, 12, 0) 48%), radial-gradient(circle at 48% 22%, rgba(251, 191, 36, 0.16) 0%, rgba(251, 191, 36, 0) 42%), linear-gradient(135deg, #fff1f2 0%, #ffedd5 50%, #fee2e2 100%)',
-      start: '#fff1f2',
-      end: '#fee2e2',
-      before: 'none',
-      after: 'none',
-      blend: 'multiply',
-      animation: 'none',
-      beforeAnimation: 'floatOrbOne 36s infinite alternate ease-in-out',
-      afterAnimation: 'floatOrbTwo 32s infinite alternate ease-in-out',
-      bgSize: 'cover',
+      primary: '142 76% 38%',
+      ring: '142 76% 38%',
+      accent: '142 72% 92%',
+      accentForeground: '142 78% 16%',
+      appBgColor: '#f3ffe8',
+      appBgImage: "url('/backgrounds/forest-neon-light.svg')",
     },
     dark: {
-      primary: '345 88% 64%',
-      primaryForeground: '222 47% 7%',
-      ring: '345 88% 64%',
-      chart1: '345 88% 64%',
-      background: '345 60% 5%',
-      foreground: '210 40% 98%',
-      card: '345 42% 8%',
-      popover: '345 42% 8%',
-      sidebarForeground: '215 20% 78%',
-      mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.22) 0%, rgba(225, 29, 72, 0) 42%), linear-gradient(135deg, #120309 0%, #1c0510 100%)',
-      start: '#120309',
-      end: '#1c0510',
-      before: 'none',
-      after: 'none',
-      blend: 'screen',
-      animation: 'none',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '142 72% 52%',
+      ring: '142 72% 52%',
+      accent: '142 64% 14%',
+      accentForeground: '142 92% 88%',
+      appBgColor: '#030d05',
+      appBgImage: "url('/backgrounds/forest-neon-dark.svg')",
     },
   },
-  'emerald-forest': {
+  'orchid-fire': {
     light: {
-      primary: '160 84% 33%',
-      primaryForeground: '0 0% 100%',
-      ring: '160 84% 33%',
-      chart1: '160 84% 33%',
-      background: '145 76% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      sidebarForeground: '222 24% 24%',
-      mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.36) 0%, rgba(13, 148, 136, 0) 46%), radial-gradient(circle at 8% 86%, rgba(22, 163, 74, 0.30) 0%, rgba(22, 163, 74, 0) 48%), radial-gradient(circle at 92% 78%, rgba(132, 204, 22, 0.14) 0%, rgba(132, 204, 22, 0) 44%), linear-gradient(135deg, #ecfdf5 0%, #d1fae5 52%, #ccfbf1 100%)',
-      start: '#ecfdf5',
-      end: '#ccfbf1',
-      before: 'none',
-      after: 'none',
-      blend: 'multiply',
-      animation: 'none',
-      beforeAnimation: 'gentlePulse 18s infinite alternate ease-in-out',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '292 84% 42%',
+      ring: '292 84% 42%',
+      accent: '292 88% 94%',
+      accentForeground: '292 84% 18%',
+      appBgColor: '#fff0fb',
+      appBgImage: "url('/backgrounds/orchid-fire-light.svg')",
     },
     dark: {
-      primary: '160 84% 48%',
-      primaryForeground: '222 47% 7%',
-      ring: '160 84% 48%',
-      chart1: '160 84% 48%',
-      background: '150 70% 3%',
-      foreground: '210 40% 98%',
-      card: '150 42% 7%',
-      popover: '150 42% 7%',
-      sidebarForeground: '215 20% 78%',
-      mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.20) 0%, rgba(4, 120, 87, 0) 48%), linear-gradient(135deg, #020805 0%, #04140e 100%)',
-      start: '#020805',
-      end: '#04140e',
-      before: 'none',
-      after: 'none',
-      blend: 'screen',
-      animation: 'none',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '292 84% 62%',
+      ring: '292 84% 62%',
+      accent: '292 70% 16%',
+      accentForeground: '292 96% 90%',
+      appBgColor: '#0a0310',
+      appBgImage: "url('/backgrounds/orchid-fire-dark.svg')",
     },
   },
-  'desert-quartz': {
+  'mango-lagoon': {
     light: {
-      primary: '25 82% 51%',
-      primaryForeground: '0 0% 100%',
-      ring: '25 82% 51%',
-      chart1: '25 82% 51%',
-      background: '34 100% 98%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      sidebarForeground: '222 24% 24%',
-      mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 22% 14%, rgba(234, 88, 12, 0.34) 0%, rgba(234, 88, 12, 0) 46%), radial-gradient(circle at 84% 82%, rgba(217, 119, 6, 0.30) 0%, rgba(217, 119, 6, 0) 48%), radial-gradient(circle at 52% 54%, rgba(251, 191, 36, 0.18) 0%, rgba(251, 191, 36, 0) 44%), linear-gradient(135deg, #fff7ed 0%, #fed7aa 54%, #fde68a 100%)',
-      start: '#fff7ed',
-      end: '#fde68a',
-      before: 'none',
-      after: 'none',
-      blend: 'multiply',
-      animation: 'none',
-      beforeAnimation: 'floatOrbOne 40s infinite alternate ease-in-out',
-      afterAnimation: 'floatOrbTwo 34s infinite alternate ease-in-out',
-      bgSize: 'cover',
+      primary: '38 92% 44%',
+      ring: '38 92% 44%',
+      accent: '38 92% 92%',
+      accentForeground: '30 92% 18%',
+      appBgColor: '#fff4dc',
+      appBgImage: "url('/backgrounds/mango-lagoon-light.svg')",
     },
     dark: {
-      primary: '27 88% 64%',
-      primaryForeground: '222 47% 7%',
-      ring: '27 88% 64%',
-      chart1: '27 88% 64%',
-      background: '25 38% 5%',
-      foreground: '210 40% 98%',
-      card: '25 32% 8%',
-      popover: '25 32% 8%',
-      sidebarForeground: '215 20% 78%',
-      mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.22) 0%, rgba(230, 137, 72, 0) 42%), linear-gradient(135deg, #0e0a07 0%, #22150d 100%)',
-      start: '#0e0a07',
-      end: '#22150d',
-      before: 'none',
-      after: 'none',
-      blend: 'screen',
-      animation: 'none',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '38 92% 58%',
+      ring: '38 92% 58%',
+      accent: '38 72% 16%',
+      accentForeground: '38 96% 88%',
+      appBgColor: '#070a08',
+      appBgImage: "url('/backgrounds/mango-lagoon-dark.svg')",
     },
   },
-  'cyberpunk-horizon': {
+  'sunset-aqua': {
     light: {
-      primary: '316 82% 50%',
-      primaryForeground: '0 0% 100%',
-      ring: '187 88% 42%',
-      chart1: '316 82% 50%',
-      background: '290 80% 99%',
-      foreground: '222 47% 10%',
-      card: '0 0% 100%',
-      popover: '0 0% 100%',
-      sidebarForeground: '222 24% 24%',
-      mutedForeground: '220 10% 40%',
-      gradient: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.40) 0%, rgba(217, 70, 239, 0) 46%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.38) 0%, rgba(6, 182, 212, 0) 48%), radial-gradient(circle at 42% 10%, rgba(99, 102, 241, 0.20) 0%, rgba(99, 102, 241, 0) 42%), linear-gradient(135deg, #fae8ff 0%, #cffafe 48%, #e0e7ff 100%)',
-      start: '#fae8ff',
-      end: '#e0e7ff',
-      before: 'none',
-      after: 'none',
-      blend: 'multiply',
-      animation: 'none',
-      beforeAnimation: 'floatOrbOne 30s infinite alternate ease-in-out',
-      afterAnimation: 'floatOrbTwo 26s infinite alternate ease-in-out',
-      bgSize: 'cover',
+      primary: '16 88% 48%',
+      ring: '16 88% 48%',
+      accent: '16 92% 92%',
+      accentForeground: '18 92% 18%',
+      appBgColor: '#fff1e9',
+      appBgImage: "url('/backgrounds/sunset-aqua-light.svg')",
     },
     dark: {
-      primary: '314 91% 66%',
-      primaryForeground: '222 47% 7%',
-      ring: '186 93% 48%',
-      chart1: '314 91% 66%',
-      background: '280 70% 4%',
-      foreground: '210 40% 98%',
-      card: '280 42% 7%',
-      popover: '280 42% 7%',
-      sidebarForeground: '215 20% 78%',
-      mutedForeground: '215 16% 70%',
-      gradient: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.28) 0%, rgba(217, 70, 239, 0) 46%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.22) 0%, rgba(6, 182, 212, 0) 46%), linear-gradient(135deg, #04010a 0%, #0c0217 100%)',
-      start: '#04010a',
-      end: '#0c0217',
-      before: 'none',
-      after: 'none',
-      blend: 'screen',
-      animation: 'none',
-      beforeAnimation: 'none',
-      afterAnimation: 'none',
-      bgSize: 'cover',
+      primary: '18 92% 58%',
+      ring: '18 92% 58%',
+      accent: '18 72% 16%',
+      accentForeground: '18 96% 88%',
+      appBgColor: '#0b0503',
+      appBgImage: "url('/backgrounds/sunset-aqua-dark.svg')",
+    },
+  },
+  'graphite-glow': {
+    light: {
+      primary: '215 16% 42%',
+      ring: '215 16% 42%',
+      accent: '215 20% 92%',
+      accentForeground: '215 24% 18%',
+      appBgColor: '#fafafa',
+      appBgImage: "url('/backgrounds/graphite-glow-light.svg')",
+    },
+    dark: {
+      primary: '215 18% 72%',
+      ring: '215 18% 72%',
+      accent: '215 18% 16%',
+      accentForeground: '215 24% 90%',
+      appBgColor: '#020202',
+      appBgImage: "url('/backgrounds/graphite-glow-dark.svg')",
     },
   },
 };
@@ -330,32 +265,71 @@ function applyThemeStyleTokens(style, resolvedTheme) {
   const root = document.documentElement;
   const safeStyle = normalizeThemeStyle(style);
   const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
-  const tokens = THEME_STYLE_TOKENS[safeStyle]?.[mode] || THEME_STYLE_TOKENS['aurora-bloom'][mode];
+  const neutral = NEUTRAL_MODE_TOKENS[mode];
+  const tokens = THEME_STYLE_TOKENS[safeStyle]?.[mode] || THEME_STYLE_TOKENS[DEFAULT_THEME_STYLE][mode];
+
+  setRootVar(root, '--background', neutral.background);
+  setRootVar(root, '--foreground', neutral.foreground);
+  setRootVar(root, '--card', neutral.card);
+  setRootVar(root, '--card-foreground', neutral.cardForeground);
+  setRootVar(root, '--popover', neutral.popover);
+  setRootVar(root, '--popover-foreground', neutral.popoverForeground);
+  setRootVar(root, '--border', neutral.border);
+  setRootVar(root, '--input', neutral.input);
+  setRootVar(root, '--muted', neutral.muted);
+  setRootVar(root, '--muted-foreground', neutral.mutedForeground);
+  setRootVar(root, '--secondary', neutral.secondary);
+  setRootVar(root, '--secondary-foreground', neutral.secondaryForeground);
+  setRootVar(root, '--destructive', neutral.destructive);
+  setRootVar(root, '--success', neutral.success);
+  setRootVar(root, '--warning', neutral.warning);
 
   setRootVar(root, '--primary', tokens.primary);
-  setRootVar(root, '--primary-foreground', tokens.primaryForeground);
+  setRootVar(root, '--primary-foreground', neutral.primaryForeground);
   setRootVar(root, '--ring', tokens.ring);
-  setRootVar(root, '--chart-1', tokens.chart1);
+  setRootVar(root, '--accent', tokens.accent);
+  setRootVar(root, '--accent-foreground', tokens.accentForeground);
+  setRootVar(root, '--chart-1', tokens.primary);
+
+  setRootVar(root, '--sidebar-background', neutral.sidebarBackground);
+  setRootVar(root, '--sidebar-foreground', neutral.sidebarForeground);
   setRootVar(root, '--sidebar-primary', tokens.primary);
+  setRootVar(root, '--sidebar-primary-foreground', neutral.primaryForeground);
+  setRootVar(root, '--sidebar-accent', neutral.sidebarAccent);
+  setRootVar(root, '--sidebar-accent-foreground', neutral.sidebarAccentForeground);
+  setRootVar(root, '--sidebar-border', neutral.sidebarBorder);
   setRootVar(root, '--sidebar-ring', tokens.ring);
-  setRootVar(root, '--sidebar-foreground', tokens.sidebarForeground);
-  setRootVar(root, '--muted-foreground', tokens.mutedForeground);
-  setRootVar(root, '--background', tokens.background);
-  setRootVar(root, '--foreground', tokens.foreground);
-  setRootVar(root, '--card', tokens.card);
-  setRootVar(root, '--card-foreground', tokens.foreground);
-  setRootVar(root, '--popover', tokens.popover);
-  setRootVar(root, '--popover-foreground', tokens.foreground);
-  setRootVar(root, '--app-page-gradient', tokens.gradient);
-  setRootVar(root, '--app-canvas-start', tokens.start);
-  setRootVar(root, '--app-canvas-end', tokens.end);
-  setRootVar(root, '--app-canvas-before', tokens.before || 'none');
-  setRootVar(root, '--app-canvas-after', tokens.after || 'none');
-  setRootVar(root, '--app-canvas-blend', tokens.blend || 'normal');
-  setRootVar(root, '--app-canvas-animation', tokens.animation || 'none');
-  setRootVar(root, '--app-canvas-before-animation', tokens.beforeAnimation || 'none');
-  setRootVar(root, '--app-canvas-after-animation', tokens.afterAnimation || 'none');
-  setRootVar(root, '--app-canvas-bg-size', tokens.bgSize || 'cover');
+
+  setRootVar(root, '--app-bg-color', tokens.appBgColor);
+  setRootVar(root, '--app-bg-image', tokens.appBgImage);
+  setRootVar(root, '--app-page-gradient', tokens.appBgImage);
+  setRootVar(root, '--app-canvas-start', tokens.appBgColor);
+  setRootVar(root, '--app-canvas-end', tokens.appBgColor);
+  setRootVar(root, '--app-canvas-before', 'none');
+  setRootVar(root, '--app-canvas-after', 'none');
+  setRootVar(root, '--app-canvas-blend', 'normal');
+  setRootVar(root, '--app-canvas-animation', 'none');
+  setRootVar(root, '--app-canvas-before-animation', 'none');
+  setRootVar(root, '--app-canvas-after-animation', 'none');
+  setRootVar(root, '--app-canvas-bg-size', 'cover');
+
+  setRootVar(root, '--app-surface-main-alpha', neutral.surfaceMainAlpha);
+  setRootVar(root, '--app-surface-strong-alpha', neutral.surfaceStrongAlpha);
+  setRootVar(root, '--app-surface-soft-alpha', neutral.surfaceSoftAlpha);
+  setRootVar(root, '--app-surface-floating-alpha', neutral.surfaceFloatingAlpha);
+  setRootVar(root, '--app-control-alpha', neutral.controlAlpha);
+  setRootVar(root, '--app-surface-border-alpha', neutral.surfaceBorderAlpha);
+  setRootVar(root, '--app-surface-border-strong-alpha', neutral.surfaceBorderStrongAlpha);
+  setRootVar(root, '--app-surface-border-soft-alpha', neutral.surfaceBorderSoftAlpha);
+  setRootVar(root, '--app-control-border-alpha', neutral.controlBorderAlpha);
+  setRootVar(root, '--app-surface-shadow-color', neutral.surfaceShadowColor);
+  setRootVar(root, '--app-surface-shadow-alpha', neutral.surfaceShadowAlpha);
+  setRootVar(root, '--app-surface-shadow-strong-alpha', neutral.surfaceShadowStrongAlpha);
+  setRootVar(root, '--app-surface-blur', neutral.surfaceBlur);
+  setRootVar(root, '--app-surface-saturate', neutral.surfaceSaturate);
+  setRootVar(root, '--app-recharts-tooltip-bg', `hsl(${neutral.popover} / ${neutral.surfaceFloatingAlpha})`);
+  setRootVar(root, '--app-recharts-tooltip-border', `hsl(${neutral.border} / 0.72)`);
+  setRootVar(root, '--app-recharts-tooltip-shadow', `0 16px 40px hsl(${neutral.surfaceShadowColor} / ${mode === 'dark' ? '0.42' : '0.14'})`);
 }
 
 function syncSystemBarColor() {
@@ -375,11 +349,11 @@ function getStoredTheme() {
 
 function normalizeThemeStyle(style) {
   if (VALID_THEME_STYLES.includes(style)) return style;
-  return LEGACY_THEME_STYLE_MAP[style] || 'aurora-bloom';
+  return LEGACY_THEME_STYLE_MAP[style] || DEFAULT_THEME_STYLE;
 }
 
 function getStoredThemeStyle() {
-  if (typeof window === 'undefined') return 'aurora-bloom';
+  if (typeof window === 'undefined') return DEFAULT_THEME_STYLE;
 
   return normalizeThemeStyle(localStorage.getItem(THEME_STYLE_STORAGE_KEY));
 }

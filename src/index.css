@@ -415,7 +415,8 @@ main,
 
 /* ============================= */
 /* 🎨 CERO THEMES + GLOBAL SURFACES */
-/* Centralized theme system. Only the app/page canvas uses gradients. */
+/* Theme styles only control accent colors and the page canvas. */
+/* Cards, forms, popovers, and borders stay neutral in light/dark mode. */
 /* ============================= */
 
 @layer base {
@@ -430,45 +431,50 @@ main,
     --card-foreground: 222 47% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 10%;
-    --primary: 180 84% 32%;
+    --primary: 28 92% 46%;
     --primary-foreground: 0 0% 100%;
-    --ring: 180 84% 32%;
-    --border: 222 28% 78%;
-    --input: 222 28% 78%;
-    --muted: 220 20% 93%;
-    --muted-foreground: 222 16% 40%;
-    --accent: 220 24% 92%;
-    --accent-foreground: 222 47% 12%;
+    --ring: 28 92% 46%;
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 9% 43%;
+    --accent: 28 92% 92%;
+    --accent-foreground: 24 92% 18%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 16% 34%;
+    --sidebar-foreground: 220 9% 35%;
     --sidebar-primary: var(--primary);
     --sidebar-primary-foreground: var(--primary-foreground);
     --sidebar-accent: 220 25% 95%;
     --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 20% 86%;
+    --sidebar-border: 220 20% 90%;
     --sidebar-ring: var(--primary);
 
     --chart-1: var(--primary);
 
-    /* Default = Warm Aurora */
-    --app-page-gradient:
-      radial-gradient(circle at 68% 22%, rgba(212, 163, 89, 0.24) 0%, rgba(212, 163, 89, 0) 48%),
-      radial-gradient(circle at 18% 82%, rgba(40, 45, 55, 0.08) 0%, rgba(40, 45, 55, 0) 52%),
-      linear-gradient(135deg, #fbfaf7 0%, #f5f3ee 100%);
-    --app-canvas-start: #fbfaf7;
-    --app-canvas-end: #f5f3ee;
+    --app-bg-color: #fff7ed;
+    --app-bg-image: url('/backgrounds/ember-noir-light.svg');
+    --app-page-gradient: var(--app-bg-image);
+    --app-canvas-start: var(--app-bg-color);
+    --app-canvas-end: var(--app-bg-color);
+    --app-canvas-before: none;
+    --app-canvas-after: none;
+    --app-canvas-blend: normal;
+    --app-canvas-animation: none;
+    --app-canvas-before-animation: none;
+    --app-canvas-after-animation: none;
+    --app-canvas-bg-size: cover;
 
-    --app-surface-main-alpha: 0.70;
-    --app-surface-strong-alpha: 0.84;
-    --app-surface-soft-alpha: 0.52;
-    --app-surface-floating-alpha: 0.97;
-    --app-control-alpha: 0.68;
+    --app-surface-main-alpha: 0.74;
+    --app-surface-strong-alpha: 0.90;
+    --app-surface-soft-alpha: 0.58;
+    --app-surface-floating-alpha: 0.98;
+    --app-control-alpha: 0.78;
 
-    --app-surface-border-alpha: 0.14;
-    --app-surface-border-strong-alpha: 0.18;
-    --app-surface-border-soft-alpha: 0.11;
-    --app-control-border-alpha: 0.18;
+    --app-surface-border-alpha: 0.18;
+    --app-surface-border-strong-alpha: 0.24;
+    --app-surface-border-soft-alpha: 0.14;
+    --app-control-border-alpha: 0.20;
 
     --app-surface-shadow-color: 222 47% 9%;
     --app-surface-shadow-alpha: 0.075;
@@ -488,36 +494,32 @@ main,
     --card-foreground: 210 40% 98%;
     --popover: 222 38% 9%;
     --popover-foreground: 210 40% 98%;
+    --primary-foreground: 222 47% 7%;
     --border: 217 30% 20%;
     --input: 217 30% 20%;
     --muted: 217 33% 13%;
     --muted-foreground: 215 20% 72%;
-    --accent: 217 33% 16%;
-    --accent-foreground: 210 40% 98%;
 
     --sidebar-background: 222 47% 7%;
     --sidebar-foreground: 215 20% 78%;
+    --sidebar-primary-foreground: var(--primary-foreground);
     --sidebar-accent: 217 33% 14%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 30% 18%;
 
-    --app-page-gradient:
-      radial-gradient(circle at 70% 18%, rgba(212, 163, 89, 0.16) 0%, rgba(212, 163, 89, 0) 48%),
-      radial-gradient(circle at 18% 82%, rgba(140, 155, 175, 0.08) 0%, rgba(140, 155, 175, 0) 52%),
-      linear-gradient(135deg, #090a0d 0%, #121316 100%);
-    --app-canvas-start: #090a0d;
-    --app-canvas-end: #121316;
+    --app-bg-color: #030303;
+    --app-bg-image: url('/backgrounds/ember-noir-dark.svg');
 
-    --app-surface-main-alpha: 0.58;
-    --app-surface-strong-alpha: 0.72;
-    --app-surface-soft-alpha: 0.40;
+    --app-surface-main-alpha: 0.64;
+    --app-surface-strong-alpha: 0.78;
+    --app-surface-soft-alpha: 0.46;
     --app-surface-floating-alpha: 0.98;
-    --app-control-alpha: 0.56;
+    --app-control-alpha: 0.62;
 
-    --app-surface-border-alpha: 0.14;
-    --app-surface-border-strong-alpha: 0.18;
-    --app-surface-border-soft-alpha: 0.11;
-    --app-control-border-alpha: 0.17;
+    --app-surface-border-alpha: 0.16;
+    --app-surface-border-strong-alpha: 0.22;
+    --app-surface-border-soft-alpha: 0.13;
+    --app-control-border-alpha: 0.18;
 
     --app-surface-shadow-color: 222 47% 2%;
     --app-surface-shadow-alpha: 0.28;
@@ -525,181 +527,179 @@ main,
     --app-surface-saturate: 140%;
   }
 
-  html:not(.dark).theme-style-cyber-indigo {
-    --primary: 243 75% 55%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 243 75% 55%;
-    --chart-1: 243 75% 55%;
-    --sidebar-primary: 243 75% 55%;
-    --sidebar-ring: 243 75% 55%;
-    --app-page-gradient:
-      radial-gradient(circle at 16% 10%, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0) 48%),
-      radial-gradient(circle at 90% 86%, rgba(124, 58, 237, 0.16) 0%, rgba(124, 58, 237, 0) 52%),
-      linear-gradient(135deg, #f4f5ff 0%, #eae8ff 48%, #e0e4ff 100%);
-    --app-canvas-start: #f4f5ff;
-    --app-canvas-end: #e0e4ff;
+  /* Ember Noir */
+  html.theme-style-ember-noir:not(.dark) {
+    --primary: 28 92% 46%;
+    --ring: 28 92% 46%;
+    --accent: 28 92% 92%;
+    --accent-foreground: 24 92% 18%;
+    --chart-1: 28 92% 46%;
+    --sidebar-primary: 28 92% 46%;
+    --sidebar-ring: 28 92% 46%;
+    --app-bg-color: #fff7ed;
+    --app-bg-image: url('/backgrounds/ember-noir-light.svg');
   }
 
-  html.dark.theme-style-cyber-indigo {
-    --primary: 245 94% 68%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 245 94% 68%;
-    --chart-1: 245 94% 68%;
-    --sidebar-primary: 245 94% 68%;
-    --sidebar-ring: 245 94% 68%;
-    --app-page-gradient:
-      radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.25) 0%, rgba(67, 56, 202, 0) 38%),
-      radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.22) 0%, rgba(49, 46, 129, 0) 42%),
-      linear-gradient(135deg, #030211 0%, #080721 100%);
-    --app-canvas-start: #030211;
-    --app-canvas-end: #080721;
+  html.theme-style-ember-noir.dark {
+    --primary: 32 94% 58%;
+    --ring: 32 94% 58%;
+    --accent: 28 72% 16%;
+    --accent-foreground: 34 96% 88%;
+    --chart-1: 32 94% 58%;
+    --sidebar-primary: 32 94% 58%;
+    --sidebar-ring: 32 94% 58%;
+    --app-bg-color: #030303;
+    --app-bg-image: url('/backgrounds/ember-noir-dark.svg');
   }
 
-  html:not(.dark).theme-style-aurora-bloom {
-    --primary: 199 88% 42%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 199 88% 42%;
-    --chart-1: 199 88% 42%;
-    --sidebar-primary: 199 88% 42%;
-    --sidebar-ring: 199 88% 42%;
-    --app-page-gradient:
-      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.20) 0%, rgba(96, 165, 250, 0) 34%),
-      radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.14) 0%, rgba(244, 114, 182, 0) 32%),
-      linear-gradient(135deg, #f8fafc 0%, #f1f6ff 48%, #fff7fb 100%);
-    --app-canvas-start: #f8fafc;
-    --app-canvas-end: #fff7fb;
+  /* Rose Quartz */
+  html.theme-style-rose-quartz:not(.dark) {
+    --primary: 340 82% 48%;
+    --ring: 340 82% 48%;
+    --accent: 340 88% 94%;
+    --accent-foreground: 340 82% 20%;
+    --chart-1: 340 82% 48%;
+    --sidebar-primary: 340 82% 48%;
+    --sidebar-ring: 340 82% 48%;
+    --app-bg-color: #fff7fb;
+    --app-bg-image: url('/backgrounds/rose-quartz-light.svg');
   }
 
-  html.dark.theme-style-aurora-bloom {
-    --primary: 184 90% 56%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 184 90% 56%;
-    --chart-1: 184 90% 56%;
-    --sidebar-primary: 184 90% 56%;
-    --sidebar-ring: 184 90% 56%;
-    --app-page-gradient:
-      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.24) 0%, rgba(37, 99, 235, 0) 38%),
-      radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.20) 0%, rgba(147, 51, 234, 0) 34%),
-      linear-gradient(135deg, #020617 0%, #080d1c 48%, #030712 100%);
-    --app-canvas-start: #020617;
-    --app-canvas-end: #030712;
+  html.theme-style-rose-quartz.dark {
+    --primary: 340 86% 62%;
+    --ring: 340 86% 62%;
+    --accent: 340 72% 16%;
+    --accent-foreground: 340 96% 90%;
+    --chart-1: 340 86% 62%;
+    --sidebar-primary: 340 86% 62%;
+    --sidebar-ring: 340 86% 62%;
+    --app-bg-color: #15040d;
+    --app-bg-image: url('/backgrounds/rose-quartz-dark.svg');
   }
 
-  html:not(.dark).theme-style-sunset-rose {
-    --primary: 343 81% 50%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 343 81% 50%;
-    --chart-1: 343 81% 50%;
-    --sidebar-primary: 343 81% 50%;
-    --sidebar-ring: 343 81% 50%;
-    --app-page-gradient:
-      radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.16) 0%, rgba(225, 29, 72, 0) 48%),
-      radial-gradient(circle at 12% 90%, rgba(234, 88, 12, 0.12) 0%, rgba(234, 88, 12, 0) 52%),
-      linear-gradient(135deg, #fff5f5 0%, #ffe8ed 50%, #ffdbe3 100%);
-    --app-canvas-start: #fff5f5;
-    --app-canvas-end: #ffdbe3;
+  /* Forest Neon */
+  html.theme-style-forest-neon:not(.dark) {
+    --primary: 142 76% 38%;
+    --ring: 142 76% 38%;
+    --accent: 142 72% 92%;
+    --accent-foreground: 142 78% 16%;
+    --chart-1: 142 76% 38%;
+    --sidebar-primary: 142 76% 38%;
+    --sidebar-ring: 142 76% 38%;
+    --app-bg-color: #f3ffe8;
+    --app-bg-image: url('/backgrounds/forest-neon-light.svg');
   }
 
-  html.dark.theme-style-sunset-rose {
-    --primary: 345 88% 64%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 345 88% 64%;
-    --chart-1: 345 88% 64%;
-    --sidebar-primary: 345 88% 64%;
-    --sidebar-ring: 345 88% 64%;
-    --app-page-gradient:
-      radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.22) 0%, rgba(225, 29, 72, 0) 42%),
-      linear-gradient(135deg, #120309 0%, #1c0510 100%);
-    --app-canvas-start: #120309;
-    --app-canvas-end: #1c0510;
+  html.theme-style-forest-neon.dark {
+    --primary: 142 72% 52%;
+    --ring: 142 72% 52%;
+    --accent: 142 64% 14%;
+    --accent-foreground: 142 92% 88%;
+    --chart-1: 142 72% 52%;
+    --sidebar-primary: 142 72% 52%;
+    --sidebar-ring: 142 72% 52%;
+    --app-bg-color: #030d05;
+    --app-bg-image: url('/backgrounds/forest-neon-dark.svg');
   }
 
-  html:not(.dark).theme-style-emerald-forest {
-    --primary: 160 84% 33%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 160 84% 33%;
-    --chart-1: 160 84% 33%;
-    --sidebar-primary: 160 84% 33%;
-    --sidebar-ring: 160 84% 33%;
-    --app-page-gradient:
-      radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.16) 0%, rgba(13, 148, 136, 0) 48%),
-      radial-gradient(circle at 12% 88%, rgba(21, 128, 61, 0.12) 0%, rgba(21, 128, 61, 0) 52%),
-      linear-gradient(135deg, #f0fdf4 0%, #e1fbf0 55%, #d1fae5 100%);
-    --app-canvas-start: #f0fdf4;
-    --app-canvas-end: #d1fae5;
+  /* Orchid Fire */
+  html.theme-style-orchid-fire:not(.dark) {
+    --primary: 292 84% 42%;
+    --ring: 292 84% 42%;
+    --accent: 292 88% 94%;
+    --accent-foreground: 292 84% 18%;
+    --chart-1: 292 84% 42%;
+    --sidebar-primary: 292 84% 42%;
+    --sidebar-ring: 292 84% 42%;
+    --app-bg-color: #fff0fb;
+    --app-bg-image: url('/backgrounds/orchid-fire-light.svg');
   }
 
-  html.dark.theme-style-emerald-forest {
-    --primary: 160 84% 48%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 160 84% 48%;
-    --chart-1: 160 84% 48%;
-    --sidebar-primary: 160 84% 48%;
-    --sidebar-ring: 160 84% 48%;
-    --app-page-gradient:
-      radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.20) 0%, rgba(4, 120, 87, 0) 48%),
-      linear-gradient(135deg, #020805 0%, #04140e 100%);
-    --app-canvas-start: #020805;
-    --app-canvas-end: #04140e;
+  html.theme-style-orchid-fire.dark {
+    --primary: 292 84% 62%;
+    --ring: 292 84% 62%;
+    --accent: 292 70% 16%;
+    --accent-foreground: 292 96% 90%;
+    --chart-1: 292 84% 62%;
+    --sidebar-primary: 292 84% 62%;
+    --sidebar-ring: 292 84% 62%;
+    --app-bg-color: #0a0310;
+    --app-bg-image: url('/backgrounds/orchid-fire-dark.svg');
   }
 
-  html:not(.dark).theme-style-desert-quartz {
-    --primary: 25 82% 51%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 25 82% 51%;
-    --chart-1: 25 82% 51%;
-    --sidebar-primary: 25 82% 51%;
-    --sidebar-ring: 25 82% 51%;
-    --app-page-gradient:
-      radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.18) 0%, rgba(230, 137, 72, 0) 46%),
-      radial-gradient(circle at 85% 85%, rgba(120, 53, 15, 0.08) 0%, rgba(120, 53, 15, 0) 52%),
-      linear-gradient(135deg, #fffbf7 0%, #fdf2e4 55%, #f9e6cf 100%);
-    --app-canvas-start: #fffbf7;
-    --app-canvas-end: #f9e6cf;
+  /* Mango Lagoon */
+  html.theme-style-mango-lagoon:not(.dark) {
+    --primary: 38 92% 44%;
+    --ring: 38 92% 44%;
+    --accent: 38 92% 92%;
+    --accent-foreground: 30 92% 18%;
+    --chart-1: 38 92% 44%;
+    --sidebar-primary: 38 92% 44%;
+    --sidebar-ring: 38 92% 44%;
+    --app-bg-color: #fff4dc;
+    --app-bg-image: url('/backgrounds/mango-lagoon-light.svg');
   }
 
-  html.dark.theme-style-desert-quartz {
-    --primary: 27 88% 64%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 27 88% 64%;
-    --chart-1: 27 88% 64%;
-    --sidebar-primary: 27 88% 64%;
-    --sidebar-ring: 27 88% 64%;
-    --app-page-gradient:
-      radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.22) 0%, rgba(230, 137, 72, 0) 42%),
-      linear-gradient(135deg, #0e0a07 0%, #22150d 100%);
-    --app-canvas-start: #0e0a07;
-    --app-canvas-end: #22150d;
+  html.theme-style-mango-lagoon.dark {
+    --primary: 38 92% 58%;
+    --ring: 38 92% 58%;
+    --accent: 38 72% 16%;
+    --accent-foreground: 38 96% 88%;
+    --chart-1: 38 92% 58%;
+    --sidebar-primary: 38 92% 58%;
+    --sidebar-ring: 38 92% 58%;
+    --app-bg-color: #070a08;
+    --app-bg-image: url('/backgrounds/mango-lagoon-dark.svg');
   }
 
-  html:not(.dark).theme-style-cyberpunk-horizon {
-    --primary: 316 82% 50%;
-    --primary-foreground: 0 0% 100%;
-    --ring: 187 88% 42%;
-    --chart-1: 316 82% 50%;
-    --sidebar-primary: 316 82% 50%;
-    --sidebar-ring: 187 88% 42%;
-    --app-page-gradient:
-      radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.18) 0%, rgba(217, 70, 239, 0) 48%),
-      radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0) 50%),
-      linear-gradient(135deg, #fdf8ff 0%, #f3e8ff 45%, #e0f2fe 100%);
-    --app-canvas-start: #fdf8ff;
-    --app-canvas-end: #e0f2fe;
+  /* Sunset Aqua */
+  html.theme-style-sunset-aqua:not(.dark) {
+    --primary: 16 88% 48%;
+    --ring: 16 88% 48%;
+    --accent: 16 92% 92%;
+    --accent-foreground: 18 92% 18%;
+    --chart-1: 16 88% 48%;
+    --sidebar-primary: 16 88% 48%;
+    --sidebar-ring: 16 88% 48%;
+    --app-bg-color: #fff1e9;
+    --app-bg-image: url('/backgrounds/sunset-aqua-light.svg');
   }
 
-  html.dark.theme-style-cyberpunk-horizon {
-    --primary: 314 91% 66%;
-    --primary-foreground: 222 47% 7%;
-    --ring: 186 93% 48%;
-    --chart-1: 314 91% 66%;
-    --sidebar-primary: 314 91% 66%;
-    --sidebar-ring: 186 93% 48%;
-    --app-page-gradient:
-      radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.28) 0%, rgba(217, 70, 239, 0) 46%),
-      radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.22) 0%, rgba(6, 182, 212, 0) 46%),
-      linear-gradient(135deg, #04010a 0%, #0c0217 100%);
-    --app-canvas-start: #04010a;
-    --app-canvas-end: #0c0217;
+  html.theme-style-sunset-aqua.dark {
+    --primary: 18 92% 58%;
+    --ring: 18 92% 58%;
+    --accent: 18 72% 16%;
+    --accent-foreground: 18 96% 88%;
+    --chart-1: 18 92% 58%;
+    --sidebar-primary: 18 92% 58%;
+    --sidebar-ring: 18 92% 58%;
+    --app-bg-color: #0b0503;
+    --app-bg-image: url('/backgrounds/sunset-aqua-dark.svg');
+  }
+
+  /* Graphite Glow */
+  html.theme-style-graphite-glow:not(.dark) {
+    --primary: 215 16% 42%;
+    --ring: 215 16% 42%;
+    --accent: 215 20% 92%;
+    --accent-foreground: 215 24% 18%;
+    --chart-1: 215 16% 42%;
+    --sidebar-primary: 215 16% 42%;
+    --sidebar-ring: 215 16% 42%;
+    --app-bg-color: #fafafa;
+    --app-bg-image: url('/backgrounds/graphite-glow-light.svg');
+  }
+
+  html.theme-style-graphite-glow.dark {
+    --primary: 215 18% 72%;
+    --ring: 215 18% 72%;
+    --accent: 215 18% 16%;
+    --accent-foreground: 215 24% 90%;
+    --chart-1: 215 18% 72%;
+    --sidebar-primary: 215 18% 72%;
+    --sidebar-ring: 215 18% 72%;
+    --app-bg-color: #020202;
+    --app-bg-image: url('/backgrounds/graphite-glow-dark.svg');
   }
 
   html,
@@ -714,16 +714,14 @@ main,
     color-scheme: light dark;
   }
 
-  body {
-    min-height: 100dvh;
-    margin: 0;
-    background: var(--app-page-gradient) !important;
-    background-attachment: fixed !important;
-  }
-
+  body,
   #root {
     min-height: 100dvh;
-    background: var(--app-page-gradient) !important;
+    margin: 0;
+    background-color: var(--app-bg-color, hsl(var(--background))) !important;
+    background-image: var(--app-bg-image) !important;
+    background-size: cover !important;
+    background-position: center !important;
     background-attachment: fixed !important;
   }
 }
@@ -734,9 +732,11 @@ main,
   .app-fixed-surface,
   .app-main-scroll,
   .app-bottom-nav {
-    background: var(--app-page-gradient) !important;
+    background-color: var(--app-bg-color, hsl(var(--background))) !important;
+    background-image: var(--app-bg-image) !important;
+    background-size: cover !important;
+    background-position: center !important;
     background-attachment: fixed !important;
-    background-size: var(--app-canvas-bg-size, cover) !important;
     animation: var(--app-canvas-animation, none);
   }
 
@@ -881,7 +881,7 @@ main,
      inside components are flattened into solid theme color. */
   [class*='bg-gradient-to-']:not(.app-page-surface):not(.app-gradient-surface):not(.app-fixed-surface):not(.app-main-scroll):not(.app-bottom-nav) {
     background-image: none !important;
-    background-color: hsl(var(--primary)) !important;
+    background-color: hsl(var(--card) / var(--app-surface-main-alpha)) !important;
   }
 
   /* Global compact mode */

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-label="Orchid Fire - Dark" preserveAspectRatio="xMidYMid slice">
+  <title>Orchid Fire - Dark</title>
+  <rect width="1600" height="1000" fill="#0a0310"/>
+  <defs>
+    <filter id="blur95" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="95"/>
+    </filter>
+    <filter id="blur120" x="-42%" y="-42%" width="184%" height="184%">
+      <feGaussianBlur stdDeviation="120"/>
+    </filter>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.74" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.14"/>
+      </feComponentTransfer>
+    </filter>
+    <radialGradient id="softVignette" cx="50%" cy="42%" r="82%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="64%" stop-color="#000000" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.24"/>
+    </radialGradient>
+    <radialGradient id="darkVignette" cx="50%" cy="42%" r="84%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="55%" stop-color="#000000" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.86"/>
+    </radialGradient>
+  </defs>
+  <g filter="url(#blur120)" opacity="1" >
+    <ellipse cx="260" cy="230" rx="600" ry="390" fill="#a21caf" opacity="0.5"/>
+    <ellipse cx="1160" cy="260" rx="650" ry="410" fill="#c2410c" opacity="0.38"/>
+    <ellipse cx="820" cy="850" rx="780" ry="310" fill="#2563eb" opacity="0.22"/>
+    <path d="M-180,720 C120,330 390,190 725,365 C1010,515 1195,170 1780,20 L1780,1110 L-180,1110 Z" fill="#c2410c" opacity="0.12"/>
+  </g>
+  <rect width="1600" height="1000" fill="rgba(0,0,0,0.38)"/>
+  <rect width="1600" height="1000" fill="url(#darkVignette)"/>
+  <rect width="1600" height="1000" filter="url(#noise)" opacity="0.18"/>
+</svg>

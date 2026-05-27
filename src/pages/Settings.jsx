@@ -97,58 +97,60 @@ const themeOptions = [
 
 const themeStyleOptions = [
   {
-    value: 'cyber-indigo',
-    label: 'Cyber Indigo',
-    description: 'Modern SaaS blue and violet canvas with a crisp technical feel.',
-    tone: 'blue',
-    swatch: '#6366f1',
-    lightCanvas: 'radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.36), transparent 46%), radial-gradient(circle at 88% 14%, rgba(124, 58, 237, 0.32), transparent 48%), radial-gradient(circle at 56% 100%, rgba(14, 165, 233, 0.18), transparent 48%), linear-gradient(135deg, #eef2ff 0%, #e0e7ff 46%, #ddd6fe 100%)',
-    darkCanvas: 'radial-gradient(circle at 0% 0%, rgba(67, 56, 202, 0.58), transparent 38%), radial-gradient(circle at 100% 100%, rgba(49, 46, 129, 0.52), transparent 42%), linear-gradient(135deg, #030211 0%, #080721 100%)',
-  },
-  {
-    value: 'aurora-bloom',
-    label: 'Aurora Bloom',
-    description: 'Airy blue, lavender, and rose mist for a clean premium dashboard.',
-    tone: 'cyan',
-    swatch: '#38bdf8',
-    lightCanvas: 'radial-gradient(circle at 2% 12%, rgba(14, 165, 233, 0.36), transparent 42%), radial-gradient(circle at 92% 4%, rgba(20, 184, 166, 0.34), transparent 44%), radial-gradient(circle at 54% 100%, rgba(244, 114, 182, 0.16), transparent 42%), linear-gradient(135deg, #ecfeff 0%, #dbeafe 46%, #ccfbf1 100%)',
-    darkCanvas: 'radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.56), transparent 38%), radial-gradient(circle at 100% 8%, rgba(147, 51, 234, 0.46), transparent 34%), linear-gradient(135deg, #020617 0%, #080d1c 48%, #030712 100%)',
-  },
-  {
-    value: 'sunset-rose',
-    label: 'Sunset Rose',
-    description: 'Warm rose and orange glow for a softer expressive theme.',
-    tone: 'rose',
-    swatch: '#e11d48',
-    lightCanvas: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.34), transparent 46%), radial-gradient(circle at 14% 88%, rgba(234, 88, 12, 0.34), transparent 48%), radial-gradient(circle at 48% 22%, rgba(251, 191, 36, 0.16), transparent 42%), linear-gradient(135deg, #fff1f2 0%, #ffedd5 50%, #fee2e2 100%)',
-    darkCanvas: 'radial-gradient(circle at 90% 10%, rgba(225, 29, 72, 0.52), transparent 42%), linear-gradient(135deg, #120309 0%, #1c0510 100%)',
-  },
-  {
-    value: 'emerald-forest',
-    label: 'Emerald Forest',
-    description: 'Stable green and teal canvas for savings, safety, and calm focus.',
-    tone: 'emerald',
-    swatch: '#10b981',
-    lightCanvas: 'radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.36), transparent 46%), radial-gradient(circle at 8% 86%, rgba(22, 163, 74, 0.30), transparent 48%), radial-gradient(circle at 92% 78%, rgba(132, 204, 22, 0.14), transparent 44%), linear-gradient(135deg, #ecfdf5 0%, #d1fae5 52%, #ccfbf1 100%)',
-    darkCanvas: 'radial-gradient(circle at 50% 0%, rgba(4, 120, 87, 0.48), transparent 48%), linear-gradient(135deg, #020805 0%, #04140e 100%)',
-  },
-  {
-    value: 'desert-quartz',
-    label: 'Desert Quartz',
-    description: 'Warm sand and copper tones with a polished Saudi-inspired warmth.',
+    value: 'ember-noir',
+    label: 'Ember Noir',
+    description: 'Warm amber glow with a deep noir dark mode.',
     tone: 'amber',
-    swatch: '#ea580c',
-    lightCanvas: 'radial-gradient(circle at 22% 14%, rgba(234, 88, 12, 0.34), transparent 46%), radial-gradient(circle at 84% 82%, rgba(217, 119, 6, 0.30), transparent 48%), radial-gradient(circle at 52% 54%, rgba(251, 191, 36, 0.18), transparent 44%), linear-gradient(135deg, #fff7ed 0%, #fed7aa 54%, #fde68a 100%)',
-    darkCanvas: 'radial-gradient(circle at 25% 15%, rgba(230, 137, 72, 0.48), transparent 42%), linear-gradient(135deg, #0e0a07 0%, #22150d 100%)',
+    lightCanvas: "#fff7ed url('/backgrounds/ember-noir-light.svg') center / cover no-repeat",
+    darkCanvas: "#030303 url('/backgrounds/ember-noir-dark.svg') center / cover no-repeat",
   },
   {
-    value: 'cyberpunk-horizon',
-    label: 'Cyberpunk Horizon',
-    description: 'Distinct magenta and cyan energy without matching the calmer themes.',
+    value: 'rose-quartz',
+    label: 'Rose Quartz',
+    description: 'Soft rose and blush background with a jewel-like dark mode.',
+    tone: 'rose',
+    lightCanvas: "#fff7fb url('/backgrounds/rose-quartz-light.svg') center / cover no-repeat",
+    darkCanvas: "#15040d url('/backgrounds/rose-quartz-dark.svg') center / cover no-repeat",
+  },
+  {
+    value: 'forest-neon',
+    label: 'Forest Neon',
+    description: 'Fresh green canvas with a focused neon forest dark mode.',
+    tone: 'emerald',
+    lightCanvas: "#f3ffe8 url('/backgrounds/forest-neon-light.svg') center / cover no-repeat",
+    darkCanvas: "#030d05 url('/backgrounds/forest-neon-dark.svg') center / cover no-repeat",
+  },
+  {
+    value: 'orchid-fire',
+    label: 'Orchid Fire',
+    description: 'Purple orchid energy with a dramatic dark background.',
     tone: 'purple',
-    swatch: '#d946ef',
-    lightCanvas: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.40), transparent 46%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.38), transparent 48%), radial-gradient(circle at 42% 10%, rgba(99, 102, 241, 0.20), transparent 42%), linear-gradient(135deg, #fae8ff 0%, #cffafe 48%, #e0e7ff 100%)',
-    darkCanvas: 'radial-gradient(circle at 80% 10%, rgba(217, 70, 239, 0.58), transparent 46%), radial-gradient(circle at 10% 80%, rgba(6, 182, 212, 0.48), transparent 46%), linear-gradient(135deg, #04010a 0%, #0c0217 100%)',
+    lightCanvas: "#fff0fb url('/backgrounds/orchid-fire-light.svg') center / cover no-repeat",
+    darkCanvas: "#0a0310 url('/backgrounds/orchid-fire-dark.svg') center / cover no-repeat",
+  },
+  {
+    value: 'mango-lagoon',
+    label: 'Mango Lagoon',
+    description: 'Golden mango warmth balanced with smooth lagoon depth.',
+    tone: 'amber',
+    lightCanvas: "#fff4dc url('/backgrounds/mango-lagoon-light.svg') center / cover no-repeat",
+    darkCanvas: "#070a08 url('/backgrounds/mango-lagoon-dark.svg') center / cover no-repeat",
+  },
+  {
+    value: 'sunset-aqua',
+    label: 'Sunset Aqua',
+    description: 'Coral sunset warmth with soft aqua atmosphere.',
+    tone: 'cyan',
+    lightCanvas: "#fff1e9 url('/backgrounds/sunset-aqua-light.svg') center / cover no-repeat",
+    darkCanvas: "#0b0503 url('/backgrounds/sunset-aqua-dark.svg') center / cover no-repeat",
+  },
+  {
+    value: 'graphite-glow',
+    label: 'Graphite Glow',
+    description: 'Neutral graphite style for a quieter premium look.',
+    tone: 'slate',
+    lightCanvas: "#fafafa url('/backgrounds/graphite-glow-light.svg') center / cover no-repeat",
+    darkCanvas: "#020202 url('/backgrounds/graphite-glow-dark.svg') center / cover no-repeat",
   },
 ];
 
@@ -494,7 +496,7 @@ export default function Settings() {
       });
 
       setTheme('system');
-      setThemeStyle('aurora-bloom');
+      setThemeStyle('ember-noir');
       setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
@@ -591,10 +593,10 @@ export default function Settings() {
             icon={Brush}
             tone="cyan"
             label="Theme Style"
-            description="Pick a standalone app theme. Backgrounds carry the mood; components stay solid glass."
+            description="Pick a standalone app theme. Backgrounds carry the mood; cards and borders stay neutral."
             stackOnMobile
           >
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 sm:justify-end">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
