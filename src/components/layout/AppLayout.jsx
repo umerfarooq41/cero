@@ -15,12 +15,12 @@ export default function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="app-page-surface flex min-h-[100dvh] flex-col overflow-hidden lg:flex-row">
+    <div className="app-page-surface flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden lg:flex-row">
       <ScrollManager />
 
       <Sidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:pl-64">
         <main className="app-page-surface app-main-scroll flex-1 overflow-y-auto lg:pb-0">
           <motion.div
             key={location.pathname}

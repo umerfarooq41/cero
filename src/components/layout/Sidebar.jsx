@@ -140,15 +140,16 @@ export default function Sidebar() {
   return (
     <aside
       className="
-        hidden lg:flex lg:static
-        h-full w-64 flex-col
-        app-sidebar-dock
+        app-page-surface
+        fixed inset-y-0 left-0 z-50
+        hidden h-[100dvh] w-64 flex-col overflow-hidden
         border-0 shadow-none ring-0
+        lg:flex
       "
     >
-      <div className="flex h-16 items-center justify-between px-6">
+      <div className="px-6 pb-6 pt-5">
         <Link to="/" className="flex items-center gap-3" data-haptic="true">
-          <div className="h-9 w-9 overflow-hidden rounded-xl surface-card card-elevated ring-1 ring-white/40 dark:ring-white/[0.05]">
+          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl surface-card card-elevated ring-1 ring-white/40 dark:ring-white/[0.05]">
             <img
               src="/icon-192.png"
               alt="Cero"
@@ -156,25 +157,24 @@ export default function Sidebar() {
             />
           </div>
 
-          <span className="text-lg font-bold leading-none tracking-tight">
-            Cero
-          </span>
+          <div className="min-w-0">
+            <span className="block text-lg font-bold leading-none tracking-tight text-foreground">
+              Cero
+            </span>
+            <span className="mt-1.5 block truncate text-xs font-medium leading-none text-muted-foreground/70">
+              Zero-Based Budgeting
+            </span>
+          </div>
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="space-y-1 px-3">
         {navItems.map((item) => (
           <SidebarLink key={item.path} item={item} pathname={location.pathname} />
         ))}
       </nav>
 
-      <div className="px-4 pb-3">
-        <div className="text-center text-xs text-muted-foreground/70">
-          Zero-Based Budgeting
-        </div>
-      </div>
-
-      <nav className="px-3 pb-4">
+      <nav className="mt-auto px-3 pb-6 pt-5">
         <SidebarLink item={settingsItem} pathname={location.pathname} />
       </nav>
     </aside>

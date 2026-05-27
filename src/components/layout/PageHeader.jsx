@@ -73,7 +73,7 @@ export default function PageHeader({
           aria-current={settingsActive ? 'page' : undefined}
           data-haptic="true"
           className={cn(
-            'group relative mt-0.5 flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors duration-200',
+            'group relative mt-0.5 flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors duration-200 lg:hidden',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             settingsActive
               ? 'text-primary'

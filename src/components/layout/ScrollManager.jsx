@@ -2,14 +2,12 @@ import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 function getScrollTargets() {
-  const targets = [document.querySelector('.app-main-scroll')].filter(Boolean);
-
   return [
-    ...targets,
+    document.querySelector('.app-main-scroll'),
     window,
     document.documentElement,
     document.body,
-  ];
+  ].filter(Boolean);
 }
 
 function setTargetTop(target) {
@@ -18,6 +16,10 @@ function setTargetTop(target) {
   if (target === window) {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     return;
+  }
+
+  if (target.style) {
+    target.style.scrollBehavior = 'auto';
   }
 
   if (typeof target.scrollTo === 'function') {
@@ -29,33 +31,17 @@ function setTargetTop(target) {
 }
 
 function scrollToTop() {
-  const targets = getScrollTargets();
-  const previousScrollBehaviors = targets.map((target) => {
-    if (target === window || !target?.style) return null;
-
-    const previous = target.style.scrollBehavior;
-    target.style.scrollBehavior = 'auto';
-    return previous;
-  });
-
   const run = () => {
-    targets.forEach(setTargetTop);
+    getScrollTargets().forEach(setTargetTop);
   };
 
   run();
   requestAnimationFrame(run);
   requestAnimationFrame(() => {
     run();
-
     window.setTimeout(run, 0);
-    window.setTimeout(() => {
-      run();
-
-      targets.forEach((target, index) => {
-        if (target === window || !target?.style) return;
-        target.style.scrollBehavior = previousScrollBehaviors[index] || '';
-      });
-    }, 80);
+    window.setTimeout(run, 80);
+    window.setTimeout(run, 180);
   });
 }
 
@@ -72,7 +58,7 @@ export default function ScrollManager() {
     if (location.hash) return;
 
     scrollToTop();
-  }, [location.pathname, location.search, location.hash]);
+  }, [location.key, location.pathname, location.search, location.hash]);
 
   return null;
 }
