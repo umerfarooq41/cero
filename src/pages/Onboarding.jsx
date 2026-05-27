@@ -32,7 +32,8 @@ import Logo from '@/components/Logo';
 const steps = [
   {
     title: 'Welcome to Cero',
-    subtitle: 'Plan-first, zero-based budgeting',
+    subtitle: 'Build a monthly plan where every penny you earn has a purpose.',
+    helper: 'Set up your first budget in a few simple steps.',
     icon: Sparkles,
   },
   {
@@ -242,9 +243,17 @@ export default function Onboarding() {
             {steps[step].title}
           </h1>
 
-          <p className="text-sm text-muted-foreground">
-            {steps[step].subtitle}
-          </p>
+          <div className="space-y-1">
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {steps[step].subtitle}
+            </p>
+
+            {steps[step].helper && (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {steps[step].helper}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Main Card */}
@@ -252,17 +261,17 @@ export default function Onboarding() {
           {step === 0 && (
             <div className="space-y-4 text-center">
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Start with a clear monthly plan. Add your income, assign it to
-                what matters, and track every transaction as the month unfolds.
+                Cero helps you plan your month before spending starts, then keeps
+                your accounts, transactions, and budget progress connected.
               </p>
 
               <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Planning goal
+                  Onboarding goal
                 </div>
 
                 <p className="mt-1 text-sm font-semibold text-primary">
-                  Plan first. Spend second.
+                  Start clean. Adjust anytime.
                 </p>
               </div>
 
@@ -272,7 +281,7 @@ export default function Onboarding() {
 
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     You can change your currency, accounts, and categories
-                    anytime.
+                    later from Settings and Manage Plan.
                   </p>
                 </div>
               </div>
@@ -427,8 +436,7 @@ export default function Onboarding() {
                   </p>
 
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    You can create your own categories later from the Categories
-                    page.
+                    You can create your own categories later from Manage Plan.
                   </p>
                 </div>
               )}
