@@ -14,7 +14,7 @@ export default function ReflectCard({ children, className }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className={cn(
-        'overflow-hidden rounded-3xl app-card-surface backdrop-blur-xl shadow-sm',
+        'overflow-hidden rounded-3xl app-card-surface backdrop-blur-xl shadow-sm lg:h-full',
         'focus:outline-none focus-visible:outline-none',
         className
       )}

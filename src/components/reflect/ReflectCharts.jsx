@@ -108,7 +108,7 @@ function RevealChartCard({ children }) {
         duration: 0.5,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="min-w-0"
+      className="min-w-0 lg:h-full"
     >
       {children(isInView)}
     </motion.div>
@@ -253,7 +253,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
   return (
     <>
-      <div className="mb-4 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mb-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-3 sm:p-4">
@@ -451,7 +451,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
         </RevealChartCard>
       </div>
 
-      <div className="mb-4 grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mb-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-3 sm:p-4">

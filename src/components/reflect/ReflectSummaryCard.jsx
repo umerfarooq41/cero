@@ -283,7 +283,7 @@ function SummaryCard({
       title={title}
       subtitle={subtitle}
       action={action}
-      className={cn('relative self-start !h-auto p-3 sm:p-4', className)}
+      className={cn('relative self-start p-3 sm:p-4 lg:h-full lg:self-stretch', className)}
       contentClassName="space-y-2.5"
     >
       <div
@@ -487,7 +487,7 @@ export default function ReflectSummaryCard({
   const monthlyBudgetIsPositive = computed.monthlyBudgetDifference >= 0;
 
   return (
-    <div className="mb-4 grid grid-cols-1 items-start gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="mb-4 grid grid-cols-1 items-start gap-2.5 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-4">
       <HeroCashFlowCard
         isYear={isYear}
         income={income}

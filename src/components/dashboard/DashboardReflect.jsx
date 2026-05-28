@@ -461,7 +461,7 @@ export default function DashboardReflect() {
       </div>
 
       <div className="animate-child">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 lg:gap-4">
           {insights.map((insight, index) => (
             <ReflectInsightCard
               key={`${isYear ? 'year' : 'month'}-${insight.title}`}
