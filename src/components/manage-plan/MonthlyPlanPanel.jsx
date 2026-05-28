@@ -633,7 +633,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                 return (
                   <div
                     key={row.key}
-                    className="flex items-center gap-3 app-card-surface-soft px-4 py-3"
+                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20"
                   >
                     <CategoryIcon icon={row.icon} color={row.color} size="sm" />
 
@@ -643,7 +643,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                       </div>
                     </div>
 
-                    <div className="shrink-0 text-right text-sm font-bold tabular-nums">
+                    <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
                       {formatCurrency(sectionTotal || 0)}
                     </div>
                   </div>
