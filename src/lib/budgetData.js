@@ -800,9 +800,15 @@ export async function exportFinancialReport() {
 export async function resetUserData() {
   const userId = await currentUserId();
 
+  // Delete child/source rows first so foreign-key references do not block a full reset.
+  // This keeps the authenticated user account, but clears every Cero data table
+  // used by the app before Settings recreates a fresh onboarding settings row.
   const tablesInDeleteOrder = [
+    "goal_contributions",
     "budget_plans",
     "transactions",
+    "recurring_transactions",
+    "savings_goals",
     "accounts",
     "categories",
     "user_settings",

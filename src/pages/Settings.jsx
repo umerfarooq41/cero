@@ -498,14 +498,27 @@ export default function Settings() {
     try {
       await resetUserData();
 
-      await saveUserSettings({
+      const resetSettings = {
         onboarding_complete: false,
         currency: 'SAR',
         currency_placement: 'before',
         theme: 'system',
         shift25th: false,
         auto_sweep: false,
-      });
+      };
+
+      await saveUserSettings(resetSettings);
+
+      setSettings((prev) => ({
+        ...prev,
+        theme: resetSettings.theme,
+        currency: resetSettings.currency,
+        onboarding_complete: resetSettings.onboarding_complete,
+        budgetLogic: {
+          twentyFifthRule: resetSettings.shift25th,
+          autoSweepSurplus: resetSettings.auto_sweep,
+        },
+      }));
 
       setTheme('system');
       setThemeStyle('ember-noir');
@@ -513,9 +526,28 @@ export default function Settings() {
       setShowDecimals(true);
       setHapticsEnabled(false);
 
-      queryClient.clear();
+      await queryClient.cancelQueries();
 
-      toast.success('All Cero data has been deleted');
+      const userScopedKeys = [
+        ['accounts', user?.id],
+        ['categories', user?.id],
+        ['transactions', user?.id],
+        ['all-transactions', user?.id],
+        ['recurring-transactions', user?.id],
+        ['savings-goals', user?.id],
+        ['goal-contributions', user?.id],
+        ['allocations', user?.id],
+        ['all-allocations', user?.id],
+      ];
+
+      userScopedKeys.forEach((queryKey) => {
+        queryClient.setQueryData(queryKey, []);
+      });
+
+      queryClient.setQueryData(['user-settings', user?.id], resetSettings);
+      queryClient.invalidateQueries();
+
+      toast.success('All Cero data has been deleted. Start setup again.');
       setShowResetDialog(false);
       setResetConfirmText('');
       navigate('/onboarding', { replace: true });
