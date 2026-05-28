@@ -149,7 +149,7 @@ export default function DashboardHero({
           </h1>
 
           <p className="mt-5 max-w-xl text-base font-medium leading-7 text-muted-foreground sm:text-lg">
-            Build a monthly plan where every penny you earn has a purpose. Track your budget, scheduled bills, accounts, and goals from one clean website-style command center.
+            Build a monthly plan where every penny you earn has a purpose. Track your budget, scheduled bills, accounts, and goals from one clean command center.
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -187,7 +187,7 @@ export default function DashboardHero({
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground/75">
-                  Website preview
+                  Dashboard preview
                 </p>
                 <h2 className="mt-1 text-lg font-black tracking-tight text-foreground">
                   Money command center

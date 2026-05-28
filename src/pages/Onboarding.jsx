@@ -29,11 +29,14 @@ import { cn } from '@/lib/utils';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import Logo from '@/components/Logo';
 
+const zeroBasedExplanation =
+  'Zero-based budgeting means every unit of income is assigned to spending, saving, debt, or future plans before the month begins.';
+
 const steps = [
   {
     title: 'Welcome to Cero',
     subtitle: 'Build a monthly plan where every penny you earn has a purpose.',
-    helper: 'Set up your first budget in a few simple steps.',
+    helper: zeroBasedExplanation,
     icon: Sparkles,
   },
   {
@@ -103,7 +106,7 @@ function DesktopStepItem({ item, index, active, complete }) {
   return (
     <div
       className={cn(
-        'flex items-start gap-3 rounded-2xl border p-3 transition-all duration-300',
+        'flex items-start gap-2.5 rounded-2xl border p-2.5 transition-all duration-300',
         active
           ? 'border-primary/20 bg-primary/10 text-foreground shadow-sm'
           : complete
@@ -113,7 +116,7 @@ function DesktopStepItem({ item, index, active, complete }) {
     >
       <span
         className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black tabular-nums',
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-black tabular-nums',
           active
             ? 'bg-primary text-primary-foreground'
             : complete
@@ -127,9 +130,9 @@ function DesktopStepItem({ item, index, active, complete }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Icon className={cn('h-4 w-4', active || complete ? 'text-primary' : 'text-muted-foreground')} />
-          <p className="truncate text-sm font-black">{item.title}</p>
+          <p className="truncate text-xs font-black xl:text-sm">{item.title}</p>
         </div>
-        <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-muted-foreground">
+        <p className="mt-0.5 line-clamp-1 text-[11px] font-medium leading-4 text-muted-foreground xl:line-clamp-2 xl:text-xs xl:leading-5">
           {item.subtitle}
         </p>
       </div>
@@ -152,7 +155,7 @@ function ProgressBar({ step }) {
         ))}
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+      <div className="mt-2 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
         <span>
           Step {step + 1} of {steps.length}
         </span>
@@ -272,23 +275,27 @@ export default function Onboarding() {
   const renderStepContent = ({ desktop = false } = {}) => (
     <>
       {step === 0 && (
-        <div className={cn('space-y-4 text-center', desktop && 'text-left')}>
+        <div className={cn('space-y-4 text-center', desktop && 'space-y-3 text-left')}>
           <p className="text-sm leading-relaxed text-muted-foreground">
             Cero helps you plan your month before spending starts, then keeps
             your accounts, transactions, and budget progress connected.
           </p>
 
-          <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+          <div className={cn('rounded-2xl border border-primary/10 bg-primary/5 p-4', desktop && 'p-3')}>
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Onboarding goal
+              Zero-based budgeting
             </div>
 
             <p className="mt-1 text-sm font-semibold text-primary">
-              Start clean. Adjust anytime.
+              Every penny gets a job.
+            </p>
+
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              {zeroBasedExplanation}
             </p>
           </div>
 
-          <div className="rounded-2xl app-card-surface-soft p-4 text-left backdrop-blur-xl">
+          <div className={cn('rounded-2xl app-card-surface-soft p-4 text-left backdrop-blur-xl', desktop && 'p-3')}>
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 
@@ -302,14 +309,14 @@ export default function Onboarding() {
       )}
 
       {step === 1 && (
-        <div className="space-y-4">
+        <div className={cn('space-y-4', desktop && 'space-y-3')}>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               Currency
             </label>
 
             <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger className="h-11 rounded-xl">
+              <SelectTrigger className={cn('h-11 rounded-xl', desktop && 'h-10')}>
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
 
@@ -323,7 +330,7 @@ export default function Onboarding() {
             </Select>
           </div>
 
-          <div className="rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl">
+          <div className={cn('rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl', desktop && 'p-3')}>
             <div className="flex items-start gap-3">
               <Coins className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -334,7 +341,7 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+          <div className={cn('rounded-2xl border border-primary/10 bg-primary/5 p-4', desktop && 'p-3')}>
             <p className="text-xs font-medium text-primary">
               Selected: <CurrencyLabel option={selectedCurrency} />
             </p>
@@ -343,7 +350,7 @@ export default function Onboarding() {
       )}
 
       {step === 2 && (
-        <div className="space-y-4">
+        <div className={cn('space-y-4', desktop && 'space-y-3')}>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               Account Name
@@ -353,7 +360,7 @@ export default function Onboarding() {
               value={accountName}
               onChange={(event) => setAccountName(event.target.value)}
               placeholder="Main Account"
-              className="h-11 rounded-xl"
+              className={cn('h-11 rounded-xl', desktop && 'h-10')}
             />
           </div>
 
@@ -369,11 +376,11 @@ export default function Onboarding() {
               placeholder="0.00"
               step="0.01"
               inputMode="decimal"
-              className="h-11 rounded-xl"
+              className={cn('h-11 rounded-xl', desktop && 'h-10')}
             />
           </div>
 
-          <div className="rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl">
+          <div className={cn('rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl', desktop && 'p-3')}>
             <div className="flex items-start gap-3">
               <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -387,8 +394,8 @@ export default function Onboarding() {
       )}
 
       {step === 3 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl">
+        <div className={cn('space-y-4', desktop && 'space-y-3')}>
+          <div className={cn('flex items-center justify-between gap-4 rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl', desktop && 'p-3')}>
             <div className="min-w-0">
               <div className="text-sm font-medium">
                 Create starter categories
@@ -407,7 +414,7 @@ export default function Onboarding() {
 
           {createStarterCategories ? (
             <>
-              <div className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4">
+              <div className={cn('flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4', desktop && 'p-3')}>
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 
                 <p className="text-xs leading-relaxed text-muted-foreground">
@@ -419,7 +426,7 @@ export default function Onboarding() {
               <div
                 className={cn(
                   'grid max-h-44 grid-cols-2 gap-1.5 overflow-y-auto pr-1',
-                  desktop && 'lg:max-h-56'
+                  desktop && 'lg:max-h-32 xl:max-h-40'
                 )}
               >
                 {defaultCategories.map((category) => (
@@ -446,7 +453,7 @@ export default function Onboarding() {
               </div>
             </>
           ) : (
-            <div className="rounded-2xl app-card-surface-soft p-5 text-center backdrop-blur-xl">
+            <div className={cn('rounded-2xl app-card-surface-soft p-5 text-center backdrop-blur-xl', desktop && 'p-4')}>
               <FolderOpen className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
 
               <p className="text-sm font-medium">
@@ -468,7 +475,7 @@ export default function Onboarding() {
       <Button
         onClick={goNext}
         disabled={loading}
-        className="h-12 w-full gap-2 rounded-xl text-sm font-semibold"
+        className="h-11 w-full gap-2 rounded-xl text-sm font-semibold lg:h-10 xl:h-11"
       >
         {loading
           ? 'Setting up...'
@@ -484,7 +491,7 @@ export default function Onboarding() {
           type="button"
           variant="ghost"
           onClick={goBack}
-          className="mt-2 h-10 w-full rounded-xl text-xs text-muted-foreground"
+          className="mt-1.5 h-9 w-full rounded-xl text-xs text-muted-foreground"
         >
           Back
         </Button>
@@ -493,8 +500,8 @@ export default function Onboarding() {
   );
 
   return (
-    <div ref={scope} className="app-page-surface min-h-screen bg-transparent px-4 py-6 sm:py-8 lg:px-8">
-      <main className="mx-auto min-h-[calc(100vh-3rem)] w-full max-w-md lg:flex lg:max-w-6xl lg:items-center">
+    <div ref={scope} className="app-page-surface min-h-screen bg-transparent px-4 py-6 sm:py-8 lg:flex lg:h-[100dvh] lg:min-h-0 lg:items-center lg:justify-center lg:overflow-hidden lg:px-6 lg:py-4">
+      <main className="mx-auto min-h-[calc(100vh-3rem)] w-full max-w-md lg:flex lg:h-full lg:min-h-0 lg:max-h-[calc(100dvh-2rem)] lg:max-w-6xl lg:items-center">
         <section className="w-full lg:hidden">
           <div className="animate-child mb-5">
             <ProgressBar step={step} />
@@ -535,8 +542,8 @@ export default function Onboarding() {
           </div>
         </section>
 
-        <section className="animate-child hidden w-full overflow-hidden rounded-[2rem] app-card-surface-strong shadow-sm backdrop-blur-xl lg:grid lg:min-h-[680px] lg:grid-cols-[minmax(0,1.05fr)_minmax(430px,0.95fr)]">
-          <div className="flex flex-col justify-between p-8 xl:p-10">
+        <section className="animate-child hidden h-full min-h-0 w-full overflow-hidden rounded-[2rem] app-card-surface-strong shadow-sm backdrop-blur-xl lg:grid lg:grid-cols-[minmax(0,0.92fr)_minmax(390px,1.08fr)]">
+          <div className="flex min-h-0 flex-col justify-between p-5 xl:p-7">
             <div>
               <div className="flex items-center gap-3">
                 <Logo size={46} priority />
@@ -548,20 +555,20 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-border/45 bg-background/30 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground shadow-sm">
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-border/45 bg-background/30 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground shadow-sm xl:mt-7">
                 <Sparkles className="h-3.5 w-3.5" />
                 First setup
               </div>
 
-              <h1 className="mt-5 max-w-xl text-5xl font-black leading-[0.95] tracking-[-0.055em] text-foreground xl:text-6xl">
+              <h1 className="mt-4 max-w-xl text-4xl font-black leading-[0.96] tracking-[-0.055em] text-foreground xl:text-5xl">
                 Set up your budget foundation.
               </h1>
 
-              <p className="mt-5 max-w-xl text-base font-medium leading-7 text-muted-foreground xl:text-lg xl:leading-8">
-                Choose your currency, add your main account, and start with clean categories so your first monthly plan feels ready from day one.
+              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-muted-foreground xl:mt-4 xl:text-base xl:leading-7">
+                Zero-based budgeting gives every penny a purpose before the month begins. Choose your currency, add your main account, and start with clean categories.
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2 xl:mt-5">
                 {['Currency', 'Account', 'Categories'].map((label) => (
                   <span
                     key={label}
@@ -574,7 +581,7 @@ export default function Onboarding() {
               </div>
             </div>
 
-            <div className="mt-8 space-y-3">
+            <div className="mt-5 space-y-2.5 xl:mt-6 xl:space-y-3">
               {steps.map((item, index) => (
                 <DesktopStepItem
                   key={item.title}
@@ -587,12 +594,12 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <div className="border-l border-border/35 bg-background/15 p-6 xl:p-8">
+          <div className="min-h-0 border-l border-border/35 bg-background/15 p-4 xl:p-5">
             <div className="flex h-full min-h-0 flex-col">
               <ProgressBar step={step} />
 
-              <div className="mt-6 flex items-start gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
+              <div className="mt-3 flex items-start gap-3 xl:mt-4 xl:gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10 xl:h-16 xl:w-16">
                   {step === 0 ? (
                     <Logo size={52} priority />
                   ) : (
@@ -601,27 +608,27 @@ export default function Onboarding() {
                 </div>
 
                 <div className="min-w-0 flex-1 pt-1">
-                  <h2 className="text-2xl font-black tracking-tight text-foreground">
+                  <h2 className="text-xl font-black tracking-tight text-foreground xl:text-2xl">
                     {steps[step].title}
                   </h2>
 
-                  <p className="mt-1 text-sm font-medium leading-6 text-muted-foreground">
+                  <p className="mt-0.5 text-xs font-medium leading-5 text-muted-foreground xl:text-sm xl:leading-6">
                     {steps[step].subtitle}
                   </p>
 
                   {steps[step].helper && (
-                    <p className="mt-1 text-sm font-medium leading-6 text-muted-foreground">
+                    <p className="mt-0.5 line-clamp-2 text-xs font-medium leading-5 text-muted-foreground xl:text-sm xl:leading-6">
                       {steps[step].helper}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="mt-6 min-h-0 flex-1 overflow-hidden rounded-[1.75rem] border border-border/35 bg-background/20 p-6 shadow-sm">
+              <div className="mt-3 min-h-0 flex-1 overflow-hidden rounded-[1.75rem] border border-border/35 bg-background/20 p-4 shadow-sm xl:mt-4 xl:p-5">
                 {renderStepContent({ desktop: true })}
               </div>
 
-              <div className="mt-5">
+              <div className="mt-3 xl:mt-4">
                 {actions({ wrapped: false })}
               </div>
             </div>

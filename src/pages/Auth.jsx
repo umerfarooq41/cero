@@ -198,7 +198,11 @@ export default function Auth() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-base font-medium leading-7 text-muted-foreground sm:text-lg lg:text-xl lg:leading-8">
-            Cero brings your plan, transactions, accounts, recurring bills, and savings goals into one clean website-style command center.
+            Cero brings your plan, transactions, accounts, recurring bills, and savings goals into one clean command center for your money.
+          </p>
+
+          <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-muted-foreground sm:text-base">
+            Zero-based budgeting means every penny you earn is assigned to spending, saving, debt, or future plans before the month begins.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
