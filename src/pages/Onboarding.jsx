@@ -275,13 +275,13 @@ export default function Onboarding() {
   const renderStepContent = ({ desktop = false } = {}) => (
     <>
       {step === 0 && (
-        <div className={cn('space-y-4 text-center', desktop && 'space-y-3 text-left')}>
+        <div className={cn('space-y-3 text-center sm:space-y-4', desktop && 'space-y-3 text-left')}>
           <p className="text-sm leading-relaxed text-muted-foreground">
             Cero helps you plan your month before spending starts, then keeps
             your accounts, transactions, and budget progress connected.
           </p>
 
-          <div className={cn('rounded-2xl border border-primary/10 bg-primary/5 p-4', desktop && 'p-3')}>
+          <div className={cn('rounded-2xl border border-primary/10 bg-primary/5 p-3.5 sm:p-4', desktop && 'p-3')}>
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Zero-based budgeting
             </div>
@@ -295,7 +295,7 @@ export default function Onboarding() {
             </p>
           </div>
 
-          <div className={cn('rounded-2xl app-card-surface-soft p-4 text-left backdrop-blur-xl', desktop && 'p-3')}>
+          <div className={cn('rounded-2xl app-card-surface-soft p-3.5 text-left backdrop-blur-xl sm:p-4', desktop && 'p-3')}>
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 
@@ -309,7 +309,7 @@ export default function Onboarding() {
       )}
 
       {step === 1 && (
-        <div className={cn('space-y-4', desktop && 'space-y-3')}>
+        <div className={cn('space-y-3.5 sm:space-y-4', desktop && 'space-y-3')}>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               Currency
@@ -330,7 +330,7 @@ export default function Onboarding() {
             </Select>
           </div>
 
-          <div className={cn('rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl', desktop && 'p-3')}>
+          <div className={cn('rounded-2xl app-card-surface-soft p-3.5 backdrop-blur-xl sm:p-4', desktop && 'p-3')}>
             <div className="flex items-start gap-3">
               <Coins className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -341,7 +341,7 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <div className={cn('rounded-2xl border border-primary/10 bg-primary/5 p-4', desktop && 'p-3')}>
+          <div className={cn('rounded-2xl border border-primary/10 bg-primary/5 p-3.5 sm:p-4', desktop && 'p-3')}>
             <p className="text-xs font-medium text-primary">
               Selected: <CurrencyLabel option={selectedCurrency} />
             </p>
@@ -350,7 +350,7 @@ export default function Onboarding() {
       )}
 
       {step === 2 && (
-        <div className={cn('space-y-4', desktop && 'space-y-3')}>
+        <div className={cn('space-y-3.5 sm:space-y-4', desktop && 'space-y-3')}>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               Account Name
@@ -380,7 +380,7 @@ export default function Onboarding() {
             />
           </div>
 
-          <div className={cn('rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl', desktop && 'p-3')}>
+          <div className={cn('rounded-2xl app-card-surface-soft p-3.5 backdrop-blur-xl sm:p-4', desktop && 'p-3')}>
             <div className="flex items-start gap-3">
               <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -394,8 +394,8 @@ export default function Onboarding() {
       )}
 
       {step === 3 && (
-        <div className={cn('space-y-4', desktop && 'space-y-3')}>
-          <div className={cn('flex items-center justify-between gap-4 rounded-2xl app-card-surface-soft p-4 backdrop-blur-xl', desktop && 'p-3')}>
+        <div className={cn('space-y-3.5 sm:space-y-4', desktop && 'space-y-3')}>
+          <div className={cn('flex items-center justify-between gap-3 rounded-2xl app-card-surface-soft p-3.5 backdrop-blur-xl sm:gap-4 sm:p-4', desktop && 'p-3')}>
             <div className="min-w-0">
               <div className="text-sm font-medium">
                 Create starter categories
@@ -414,7 +414,7 @@ export default function Onboarding() {
 
           {createStarterCategories ? (
             <>
-              <div className={cn('flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4', desktop && 'p-3')}>
+              <div className={cn('flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-3.5 sm:p-4', desktop && 'p-3')}>
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 
                 <p className="text-xs leading-relaxed text-muted-foreground">
@@ -453,7 +453,7 @@ export default function Onboarding() {
               </div>
             </>
           ) : (
-            <div className={cn('rounded-2xl app-card-surface-soft p-5 text-center backdrop-blur-xl', desktop && 'p-4')}>
+            <div className={cn('rounded-2xl app-card-surface-soft p-4 text-center backdrop-blur-xl sm:p-5', desktop && 'p-4')}>
               <FolderOpen className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
 
               <p className="text-sm font-medium">
@@ -471,7 +471,7 @@ export default function Onboarding() {
   );
 
   const actions = ({ wrapped = true } = {}) => (
-    <div className={cn(wrapped && 'overflow-hidden rounded-2xl app-card-surface p-3')}>
+    <div className={cn(wrapped && 'overflow-hidden rounded-2xl app-card-surface p-3 sm:p-3.5')}>
       <Button
         onClick={goNext}
         disabled={loading}
@@ -500,23 +500,23 @@ export default function Onboarding() {
   );
 
   return (
-    <div ref={scope} className="app-page-surface min-h-screen bg-transparent px-4 py-6 sm:py-8 lg:flex lg:h-[100dvh] lg:min-h-0 lg:items-center lg:justify-center lg:overflow-hidden lg:px-6 lg:py-4">
-      <main className="mx-auto min-h-[calc(100vh-3rem)] w-full max-w-md lg:flex lg:h-full lg:min-h-0 lg:max-h-[calc(100dvh-2rem)] lg:max-w-6xl lg:items-center">
-        <section className="w-full lg:hidden">
-          <div className="animate-child mb-5">
+    <div ref={scope} className="app-page-surface min-h-screen bg-transparent px-4 py-4 sm:py-6 lg:flex lg:h-[100dvh] lg:min-h-0 lg:items-center lg:justify-center lg:overflow-hidden lg:px-6 lg:py-4">
+      <main className="mx-auto w-full max-w-md lg:flex lg:h-full lg:min-h-0 lg:max-h-[calc(100dvh-2rem)] lg:max-w-6xl lg:items-center">
+        <section className="w-full space-y-4 lg:hidden">
+          <div className="animate-child">
             <ProgressBar step={step} />
           </div>
 
-          <div className="animate-child mb-5 overflow-hidden rounded-2xl app-card-surface p-6 text-center shadow-sm backdrop-blur-xl">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10">
+          <div className="animate-child overflow-hidden rounded-2xl app-card-surface p-4 text-center shadow-sm backdrop-blur-xl sm:p-5">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-sm ring-1 ring-primary/10 sm:h-16 sm:w-16">
               {step === 0 ? (
-                <Logo size={52} priority />
+                <Logo size={48} priority />
               ) : (
                 <StepIcon className="h-7 w-7 text-primary" />
               )}
             </div>
 
-            <h1 className="mb-2 text-2xl font-bold tracking-tight">
+            <h1 className="mb-2 text-xl font-bold tracking-tight sm:text-2xl">
               {steps[step].title}
             </h1>
 
@@ -533,7 +533,7 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <div className="animate-child mb-5 min-h-[292px] overflow-hidden rounded-2xl app-card-surface p-6 shadow-sm backdrop-blur-xl">
+          <div className="animate-child min-h-[260px] overflow-hidden rounded-2xl app-card-surface p-4 shadow-sm backdrop-blur-xl sm:min-h-[280px] sm:p-5">
             {renderStepContent()}
           </div>
 
