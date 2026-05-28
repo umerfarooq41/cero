@@ -88,6 +88,22 @@ function getGoalTarget(goal) {
   return Number(goal?.target_amount ?? goal?.amount ?? 0);
 }
 
+function isActiveRecurringRule(rule) {
+  return rule?.is_active !== false && !rule?.is_archived;
+}
+
+function isIncomeRecurringRule(rule) {
+  return String(rule?.type || '').toLowerCase() === 'income';
+}
+
+function getRecurringRulesTotal(rules = []) {
+  return rules.reduce((total, rule) => total + Number(rule?.amount || 0), 0);
+}
+
+function formatRuleCount(count, singularLabel, pluralLabel = `${singularLabel}s`) {
+  return `${count} ${count === 1 ? singularLabel : pluralLabel}`;
+}
+
 export default function DashboardHero({
   budget,
   transactions = [],
@@ -108,7 +124,11 @@ export default function DashboardHero({
   const goalProgress = topGoal
     ? Math.min((getGoalAmount(topGoal) / getGoalTarget(topGoal)) * 100, 100)
     : 0;
-  const upcomingCount = recurringTransactions.filter((item) => !item.is_archived).length;
+  const activeRecurringRules = recurringTransactions.filter(isActiveRecurringRule);
+  const scheduledBillRules = activeRecurringRules.filter(
+    (rule) => !isIncomeRecurringRule(rule)
+  );
+  const scheduledBillAmount = getRecurringRulesTotal(scheduledBillRules);
   const leftValue = Number(budget.leftToAllocate || 0);
   const leftTone = leftValue === 0 ? 'good' : leftValue > 0 ? 'warning' : 'danger';
 
@@ -188,9 +208,12 @@ export default function DashboardHero({
             <PreviewRow
               icon={Receipt}
               title="Scheduled bills"
-              subtitle={`${upcomingCount} active recurring rules`}
-              amount={formatCurrency(Number(budget.totalPlannedExpenses || 0))}
-              badge="Due"
+              subtitle={formatRuleCount(
+                scheduledBillRules.length,
+                'active bill rule'
+              )}
+              amount={formatCurrency(scheduledBillAmount)}
+              badge="Bills"
             />
             <PreviewRow
               icon={Target}
