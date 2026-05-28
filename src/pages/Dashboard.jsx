@@ -5,6 +5,7 @@ import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import DashboardReflect from '@/components/dashboard/DashboardReflect';
 import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import DashboardHero from '@/components/dashboard/DashboardHero';
+import PageHeader from '@/components/layout/PageHeader';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import { format } from 'date-fns';
@@ -39,8 +40,15 @@ export default function Dashboard() {
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <main className="mx-auto w-full max-w-7xl px-4 py-5 pb-28 md:px-6 lg:px-8 lg:py-8">
-        <div className="animate-child">
+      <div className="lg:hidden">
+        <PageHeader
+          title="Dashboard"
+          subtitle="Your financial command center"
+        />
+      </div>
+
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:px-8 lg:py-8">
+        <div className="hidden animate-child lg:block">
           <DashboardHero
             budget={budget}
             transactions={transactions}
@@ -50,7 +58,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="mt-6 animate-child">
+        <div className="animate-child lg:mt-6">
           <DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} />
         </div>
 
