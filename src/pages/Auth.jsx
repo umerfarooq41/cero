@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -49,9 +49,9 @@ function HeaderLink({ children }) {
 
 function ProductPreviewCard({ icon: Icon, title, subtitle, amount, progress, className }) {
   return (
-    <div className={cn('app-card-surface-soft rounded-3xl p-3.5 shadow-sm sm:p-4', className)}>
+    <div className={cn('app-card-surface-soft rounded-3xl p-4 shadow-sm', className)}>
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary/75 text-muted-foreground sm:h-11 sm:w-11">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary/75 text-muted-foreground">
           <Icon className="h-5 w-5" />
         </span>
 
@@ -66,7 +66,7 @@ function ProductPreviewCard({ icon: Icon, title, subtitle, amount, progress, cla
       </div>
 
       {typeof progress === 'number' ? (
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary/80 sm:mt-4">
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-secondary/80">
           <div
             className="h-full rounded-full bg-primary/75"
             style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
@@ -80,11 +80,11 @@ function ProductPreviewCard({ icon: Icon, title, subtitle, amount, progress, cla
 function FeatureCard({ icon: Icon, title, description }) {
   return (
     <article className="app-card-surface-soft rounded-3xl p-4 sm:p-5">
-      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-11 sm:w-11">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" />
       </span>
-      <h3 className="mt-3 text-base font-black tracking-tight text-foreground sm:mt-4">{title}</h3>
-      <p className="mt-1.5 text-sm font-medium leading-6 text-muted-foreground sm:mt-2">{description}</p>
+      <h3 className="mt-4 text-base font-black tracking-tight text-foreground">{title}</h3>
+      <p className="mt-2 text-sm font-medium leading-6 text-muted-foreground">{description}</p>
     </article>
   );
 }
@@ -92,7 +92,6 @@ function FeatureCard({ icon: Icon, title, description }) {
 export default function Auth() {
   const { isAuthenticated, signIn, signUp, signInWithGoogle } = useAuth();
   const scope = usePageEntrance();
-  const authCardRef = useRef(null);
   const [mode, setMode] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -104,18 +103,6 @@ export default function Auth() {
   }
 
   const isSignup = mode === 'signup';
-
-  const focusAuthCard = (nextMode) => {
-    setSignupNotice('');
-    setMode(nextMode);
-
-    window.requestAnimationFrame(() => {
-      authCardRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    });
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -167,8 +154,8 @@ export default function Auth() {
   };
 
   return (
-    <div ref={scope} className="app-page-surface min-h-screen overflow-x-hidden bg-transparent">
-      <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8 lg:py-7">
+    <div ref={scope} className="app-page-surface min-h-screen overflow-hidden bg-transparent">
+      <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-5 md:px-6 lg:px-8 lg:py-7">
         <div className="flex items-center gap-3">
           <Logo size={42} priority />
           <div>
@@ -190,37 +177,43 @@ export default function Auth() {
           type="button"
           variant="outline"
           className="hidden rounded-full px-5 font-bold sm:inline-flex"
-          onClick={() => focusAuthCard(isSignup ? 'signin' : 'signup')}
+          onClick={() => {
+            setSignupNotice('');
+            setMode(isSignup ? 'signin' : 'signup');
+          }}
         >
           {isSignup ? 'Sign in' : 'Sign up'}
         </Button>
       </header>
 
-      <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 pb-8 pt-1 md:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-8 lg:px-8 lg:pb-16 lg:pt-8">
+      <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-8 px-4 pb-10 pt-2 md:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-8 lg:pb-16 lg:pt-8">
         <section className="animate-child max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/45 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground shadow-sm">
             <LayoutDashboard className="h-3.5 w-3.5" />
             The modern way to manage your money
           </div>
 
-          <h1 className="mt-4 text-4xl font-black leading-[0.95] tracking-[-0.055em] text-foreground sm:mt-5 sm:text-5xl lg:text-7xl">
+          <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-[-0.055em] text-foreground sm:text-5xl lg:text-7xl">
             Build a monthly plan where every penny you earn has a purpose.
           </h1>
 
-          <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-muted-foreground sm:mt-6 sm:text-lg lg:text-xl lg:leading-8">
+          <p className="mt-6 max-w-2xl text-base font-medium leading-7 text-muted-foreground sm:text-lg lg:text-xl lg:leading-8">
             Cero brings your plan, transactions, accounts, recurring bills, and savings goals into one clean command center for your money.
           </p>
 
-          <p className="mt-2.5 max-w-2xl text-sm font-semibold leading-6 text-muted-foreground sm:mt-3 sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-muted-foreground sm:text-base">
             Zero-based budgeting means every penny you earn is assigned to spending, saving, debt, or future plans before the month begins.
           </p>
 
-          <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button
               type="button"
               size="lg"
               className="h-12 rounded-full px-6 text-sm font-bold shadow-sm"
-              onClick={() => focusAuthCard('signup')}
+              onClick={() => {
+                setSignupNotice('');
+                setMode('signup');
+              }}
             >
               Set up your first budget
               <ArrowRight className="h-4 w-4" />
@@ -231,13 +224,16 @@ export default function Auth() {
               variant="outline"
               size="lg"
               className="h-12 rounded-full px-6 text-sm font-bold"
-              onClick={() => focusAuthCard('signin')}
+              onClick={() => {
+                setSignupNotice('');
+                setMode('signin');
+              }}
             >
               I already have an account
             </Button>
           </div>
 
-          <div className="mt-6 grid gap-2.5 text-sm font-semibold text-muted-foreground sm:mt-7 sm:grid-cols-3 sm:gap-3">
+          <div className="mt-7 grid gap-3 text-sm font-semibold text-muted-foreground sm:grid-cols-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[hsl(var(--success))]" />
               Monthly budget clarity
@@ -253,8 +249,8 @@ export default function Auth() {
           </div>
         </section>
 
-        <aside ref={authCardRef} id="auth-card" className="animate-child scroll-mt-4 grid gap-3 sm:gap-4 lg:gap-5">
-          <form onSubmit={handleSubmit} className="app-card-surface-strong rounded-[1.75rem] p-4 sm:rounded-[2rem] sm:p-6">
+        <aside className="animate-child grid gap-4 lg:gap-5">
+          <form onSubmit={handleSubmit} className="app-card-surface-strong rounded-[2rem] p-5 sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.16em] text-muted-foreground/75">
@@ -270,7 +266,7 @@ export default function Auth() {
             </div>
 
             {signupNotice ? (
-              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/8 p-3.5 text-left sm:mt-5">
+              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/8 p-3.5 text-left">
                 <MailCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p className="text-xs font-semibold leading-5 text-muted-foreground">
                   {signupNotice}
@@ -278,7 +274,7 @@ export default function Auth() {
               </div>
             ) : null}
 
-            <div className="mt-4 space-y-3 sm:mt-5">
+            <div className="mt-5 space-y-3">
               <Input
                 type="email"
                 value={email}
@@ -298,7 +294,7 @@ export default function Auth() {
               />
             </div>
 
-            <Button type="submit" disabled={loading} className="mt-4 h-12 w-full rounded-2xl font-bold sm:mt-5">
+            <Button type="submit" disabled={loading} className="mt-5 h-12 w-full rounded-2xl font-bold">
               {loading ? 'Please wait...' : isSignup ? 'Create account' : 'Sign in'}
             </Button>
 
@@ -309,7 +305,7 @@ export default function Auth() {
               </p>
             ) : null}
 
-            <div className="relative my-4 sm:my-5">
+            <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border/55" />
               </div>
@@ -331,8 +327,11 @@ export default function Auth() {
 
             <button
               type="button"
-              onClick={() => focusAuthCard(isSignup ? 'signin' : 'signup')}
-              className="mt-4 w-full text-sm font-bold text-muted-foreground transition-colors hover:text-foreground sm:mt-5"
+              onClick={() => {
+                setSignupNotice('');
+                setMode(isSignup ? 'signin' : 'signup');
+              }}
+              className="mt-5 w-full text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
             >
               {isSignup ? 'Already have an account? Sign in' : 'Need an account? Create one'}
             </button>
@@ -357,7 +356,7 @@ export default function Auth() {
         </aside>
       </main>
 
-      <section className="relative z-10 mx-auto grid w-full max-w-7xl gap-3 px-4 pb-10 md:px-6 lg:grid-cols-3 lg:gap-4 lg:px-8 lg:pb-12">
+      <section className="relative z-10 mx-auto grid w-full max-w-7xl gap-4 px-4 pb-12 md:px-6 lg:grid-cols-3 lg:px-8">
         {featureItems.map((item) => (
           <FeatureCard key={item.title} {...item} />
         ))}
