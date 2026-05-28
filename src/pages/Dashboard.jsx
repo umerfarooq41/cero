@@ -29,7 +29,7 @@ export default function Dashboard() {
         subtitle="Your financial command center"
       />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 lg:py-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:py-8">
         <DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
         <div className="mt-4">

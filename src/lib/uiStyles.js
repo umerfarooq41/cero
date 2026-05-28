@@ -12,7 +12,7 @@ export const typography = {
 };
 
 export const surfaces = {
-  page: 'mx-auto w-full max-w-6xl px-4 py-4 md:px-6 md:py-6',
+  page: 'mx-auto w-full max-w-7xl px-4 py-4 md:px-6 md:py-6',
   card:
   'rounded-2xl app-card-surface backdrop-blur-xl p-4 shadow-sm',
   heroCard: 'rounded-3xl app-card-surface backdrop-blur-xl p-5 shadow-md md:p-6',

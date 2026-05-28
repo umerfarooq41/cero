@@ -303,7 +303,7 @@ export default function AccountDetail() {
         subtitle={`${account.type?.replace('_', ' ') || 'Account'} details and activity`}
       />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-24 lg:py-8">
         <div className="mb-4 flex items-center justify-between gap-3 animate-child">
           <Button
             variant="ghost"

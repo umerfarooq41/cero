@@ -17,11 +17,13 @@ export default function PageHeader({
       data-no-page-entrance
       className={cn(
         `
+        app-page-header
         sticky top-0 z-40
-        app-fixed-surface
         border-0
         shadow-none
         ring-0
+        lg:static
+        lg:z-10
         `,
         className
       )}
@@ -31,7 +33,7 @@ export default function PageHeader({
           mx-auto
           flex
           w-full
-          max-w-6xl
+          max-w-7xl
           items-start
           justify-between
           gap-4
@@ -41,11 +43,14 @@ export default function PageHeader({
           md:px-6
           md:pt-6
           md:pb-5
+          lg:px-8
+          lg:pt-10
+          lg:pb-4
         "
       >
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2.5">
-            <Logo size={28} priority />
+            <Logo size={28} priority className="lg:hidden" />
 
             <h1
               className="
@@ -56,6 +61,8 @@ export default function PageHeader({
                 leading-none
                 tracking-tight
                 text-foreground
+                lg:text-4xl
+                lg:leading-[0.95]
               "
             >
               {title}
@@ -66,9 +73,12 @@ export default function PageHeader({
             <p
               className="
                 mt-1.5
+                max-w-2xl
                 text-sm
                 leading-snug
                 text-muted-foreground
+                lg:mt-3
+                lg:text-base
               "
             >
               {subtitle}

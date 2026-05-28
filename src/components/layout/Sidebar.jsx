@@ -40,7 +40,7 @@ const navItems = [
   {
     path: '/manage-plan',
     icon: SlidersHorizontal,
-    label: 'Manage',
+    label: 'Manage Plan',
     matches: ['/manage-plan', '/categories'],
   },
 ];
@@ -60,7 +60,7 @@ function isNavItemActive(pathname, item) {
   });
 }
 
-function SidebarLink({ item, pathname }) {
+function WebsiteNavLink({ item, pathname }) {
   const isActive = isNavItemActive(pathname, item);
   const Icon = item.icon;
 
@@ -71,107 +71,85 @@ function SidebarLink({ item, pathname }) {
       aria-current={isActive ? 'page' : undefined}
       data-haptic="true"
       className={cn(
-        'group relative flex touch-manipulation items-center rounded-2xl px-3 py-2 transition-colors duration-200',
+        'group relative inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        isActive ? 'text-primary' : 'text-muted-foreground/80 hover:text-foreground'
+        isActive
+          ? 'text-primary'
+          : 'text-muted-foreground/82 hover:text-foreground'
       )}
     >
-      <motion.div
-        whileTap={{ scale: 0.96 }}
-        transition={{ type: 'spring', stiffness: 520, damping: 30 }}
-        className="relative flex min-w-0 items-center gap-3"
-      >
+      {isActive ? (
         <motion.span
-          animate={{ scale: isActive ? 1.04 : 1, x: isActive ? 1 : 0 }}
-          transition={{ type: 'spring', stiffness: 430, damping: 28 }}
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-        >
-          {isActive && (
-            <motion.span
-              layoutId="sidebar-nav-active-orb"
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
-              style={{
-                boxShadow:
-                  '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
-              }}
-              transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-            />
-          )}
+          layoutId="website-nav-active-pill"
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/18"
+          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        />
+      ) : null}
 
-          {isActive && (
-            <motion.span
-              aria-hidden="true"
-              className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
-              initial={{ opacity: 0, scale: 0.75 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.75 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-            />
-          )}
+      <Icon
+        className={cn(
+          'relative z-10 h-4 w-4 transition-all duration-200',
+          isActive
+            ? 'text-primary stroke-[2.6]'
+            : 'text-muted-foreground/78 stroke-[2.25] group-hover:text-foreground'
+        )}
+      />
 
-          <Icon
-            className={cn(
-              'relative z-10 h-5 w-5 transition-all duration-200',
-              isActive
-                ? 'text-primary stroke-[2.65]'
-                : 'text-muted-foreground/80 stroke-[2.25] group-hover:text-foreground'
-            )}
-          />
-        </motion.span>
-
-        <motion.span
-          animate={{ opacity: isActive ? 1 : 0.72, x: isActive ? 1 : 0 }}
-          transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-          className={cn(
-            'truncate text-sm leading-none transition-all duration-200',
-            isActive ? 'font-bold text-primary' : 'font-medium text-muted-foreground'
-          )}
-        >
-          {item.label}
-        </motion.span>
-      </motion.div>
+      <span className="relative z-10 whitespace-nowrap">{item.label}</span>
     </Link>
   );
 }
 
 export default function Sidebar() {
   const location = useLocation();
+  const settingsActive = isNavItemActive(location.pathname, settingsItem);
 
   return (
-    <aside
+    <header
       className="
-        app-page-surface
-        fixed inset-y-0 left-0 z-50
-        hidden h-[100dvh] w-64 flex-col overflow-hidden
-        border-0 shadow-none ring-0
-        lg:flex
+        app-website-header
+        hidden h-20 shrink-0 border-0 shadow-none ring-0
+        lg:block
       "
     >
-      <div className="px-6 pb-6 pt-5">
-        <Link to="/" className="flex items-center gap-3" data-haptic="true">
-          <Logo size={36} priority />
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-6 px-8">
+        <Link to="/" className="flex min-w-0 items-center gap-3" data-haptic="true">
+          <Logo size={38} priority />
 
           <div className="min-w-0">
-            <span className="block text-lg font-bold leading-none tracking-tight text-foreground">
+            <span className="block text-xl font-bold leading-none tracking-tight text-foreground">
               Cero
             </span>
-            <span className="mt-1.5 block truncate text-xs font-medium leading-none text-muted-foreground/70">
-              Zero-Based Budgeting
+            <span className="mt-1.5 block truncate text-xs font-semibold leading-none text-muted-foreground/72">
+              Zero-based budgeting
             </span>
           </div>
         </Link>
+
+        <nav className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
+          {navItems.map((item) => (
+            <WebsiteNavLink key={item.path} item={item} pathname={location.pathname} />
+          ))}
+        </nav>
+
+        <Link
+          to="/settings"
+          aria-label="Open settings"
+          aria-current={settingsActive ? 'page' : undefined}
+          data-haptic="true"
+          className={cn(
+            'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-200',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            settingsActive
+              ? 'bg-primary/10 text-primary ring-1 ring-primary/18'
+              : 'text-muted-foreground/82 hover:bg-foreground/[0.04] hover:text-foreground'
+          )}
+        >
+          <Settings className="h-4 w-4" />
+          Settings
+        </Link>
       </div>
-
-      <nav className="space-y-1 px-3">
-        {navItems.map((item) => (
-          <SidebarLink key={item.path} item={item} pathname={location.pathname} />
-        ))}
-      </nav>
-
-      <nav className="mt-auto px-3 pb-6 pt-5">
-        <SidebarLink item={settingsItem} pathname={location.pathname} />
-      </nav>
-    </aside>
+    </header>
   );
 }

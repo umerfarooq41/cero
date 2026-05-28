@@ -52,7 +52,7 @@ export default function Transactions() {
         }
       />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-24 lg:py-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-24 lg:py-8">
         <TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} />
 
         <AnimatePresence mode="wait" initial={false}>

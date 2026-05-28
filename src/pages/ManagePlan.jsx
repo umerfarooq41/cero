@@ -88,7 +88,7 @@ export default function ManagePlan() {
         icon={Settings2}
       />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 lg:py-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 lg:py-8">
         <div className="animate-child mb-4">
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>

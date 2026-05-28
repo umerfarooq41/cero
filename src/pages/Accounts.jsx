@@ -265,7 +265,7 @@ export default function Accounts() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader title="Accounts" subtitle="Your financial overview" />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 md:py-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 md:py-6">
         <div className="animate-child mb-4">
           <NetWorthDelta
             netWorth={netWorth}

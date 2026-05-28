@@ -72,7 +72,7 @@ export default function Plan() {
         subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
       />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 md:px-6 lg:py-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:py-8">
         <div className="mb-4 animate-child">
           <div className="flex items-center justify-center">
             <MonthSelector
