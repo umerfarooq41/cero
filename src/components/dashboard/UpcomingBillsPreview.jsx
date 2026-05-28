@@ -108,14 +108,14 @@ export default function UpcomingBillsPreview({
 
   return (
     <DashboardSectionCard
-      title="Upcoming bills"
-      subtitle="Compact preview of important recurring items."
+      title="Upcoming Bills & Income"
+      subtitle="Compact preview of important recurring bills and income."
       icon={CalendarClock}
       className={className}
       action={
         <DashboardGhostAction>
           <Link to="/transactions?tab=scheduled">
-            <span className="hidden sm:inline">View </span>Scheduled
+            View all
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </DashboardGhostAction>

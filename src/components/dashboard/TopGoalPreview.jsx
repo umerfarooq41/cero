@@ -41,7 +41,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
       action={
         <DashboardGhostAction>
           <Link to="/transactions?tab=scheduled">
-            <span className="hidden sm:inline">View </span>Scheduled
+            View all
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </DashboardGhostAction>
