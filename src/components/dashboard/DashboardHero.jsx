@@ -133,7 +133,7 @@ export default function DashboardHero({
   const leftTone = leftValue === 0 ? 'good' : leftValue > 0 ? 'warning' : 'danger';
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] app-card-surface-strong p-5 sm:p-6 lg:p-8">
+    <section className="relative hidden overflow-hidden rounded-[2rem] app-card-surface-strong p-5 lg:block lg:p-8">
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-[hsl(var(--success)/0.11)] blur-3xl" />
 
