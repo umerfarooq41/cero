@@ -770,6 +770,36 @@ main,
     isolation: isolate;
   }
 
+
+  .auth-theme-canvas {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .auth-theme-canvas::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 18% 18%, hsl(var(--primary) / 0.18), transparent 32%),
+      radial-gradient(circle at 82% 78%, hsl(var(--accent) / 0.42), transparent 34%),
+      linear-gradient(135deg, hsl(var(--primary) / 0.055), transparent 42%, hsl(var(--primary) / 0.06));
+  }
+
+  .dark .auth-theme-canvas::before {
+    background:
+      radial-gradient(circle at 18% 18%, hsl(var(--primary) / 0.20), transparent 34%),
+      radial-gradient(circle at 82% 78%, hsl(var(--accent) / 0.28), transparent 36%),
+      linear-gradient(135deg, hsl(var(--primary) / 0.08), transparent 44%, hsl(var(--primary) / 0.08));
+  }
+
+  .auth-theme-canvas > * {
+    position: relative;
+    z-index: 1;
+  }
+
   .app-main-scroll::before,
   .app-main-scroll::after {
     content: '';
@@ -944,6 +974,19 @@ main,
 }
 
 
+@media (max-width: 1023px) {
+  body,
+  #root,
+  .app-page-surface,
+  .app-gradient-surface,
+  .app-fixed-surface,
+  .app-main-scroll,
+  .app-bottom-nav {
+    background-attachment: scroll !important;
+  }
+}
+
+
 /* ============================= */
 /* Animated theme canvas motions  */
 /* ============================= */
@@ -980,54 +1023,5 @@ main,
   .app-main-scroll::before,
   .app-main-scroll::after {
     animation: none !important;
-  }
-}
-
-/* ============================= */
-/* 🖥️ WEBSITE-STYLE DESKTOP SHELL */
-/* Desktop uses a public-website style top navigation instead of an app sidebar. */
-/* ============================= */
-
-@layer utilities {
-  .app-website-header {
-    position: relative;
-    z-index: 50;
-    background-color: hsl(var(--card) / 0.58) !important;
-    border-bottom: 1px solid hsl(var(--border) / 0.18) !important;
-    box-shadow:
-      0 10px 30px hsl(var(--app-surface-shadow-color) / 0.055),
-      inset 0 -1px 0 hsl(var(--foreground) / 0.025) !important;
-    backdrop-filter: blur(24px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-  }
-
-  .dark .app-website-header {
-    background-color: hsl(var(--card) / 0.46) !important;
-    border-bottom-color: hsl(var(--border) / 0.14) !important;
-    box-shadow:
-      0 14px 34px hsl(var(--app-surface-shadow-color) / 0.28),
-      inset 0 -1px 0 hsl(var(--foreground) / 0.025) !important;
-  }
-
-  .app-page-header {
-    background-color: var(--app-bg-color, hsl(var(--background))) !important;
-    background-image: var(--app-bg-image) !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-attachment: fixed !important;
-    backdrop-filter: blur(18px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
-  }
-
-  @media (min-width: 1024px) {
-    .app-page-header {
-      background: transparent !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-
-    .app-main-scroll {
-      scroll-padding-top: 1.5rem;
-    }
   }
 }

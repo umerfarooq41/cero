@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 
 function HeaderLink({ children }) {
   return (
-    <span className="text-sm font-bold text-muted-foreground/82 transition-colors hover:text-foreground">
+    <span className="text-sm font-bold text-muted-foreground/82 transition-colors hover:text-primary">
       {children}
     </span>
   );
@@ -106,7 +106,7 @@ export default function Auth() {
   };
 
   return (
-    <div ref={scope} className="app-page-surface min-h-screen overflow-x-hidden bg-transparent">
+    <div ref={scope} className="auth-theme-canvas app-page-surface min-h-screen overflow-x-hidden bg-transparent">
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8 lg:py-7">
         <div className="flex items-center gap-3">
           <Logo size={42} priority />
@@ -128,7 +128,7 @@ export default function Auth() {
         <Button
           type="button"
           variant="outline"
-          className="hidden rounded-full px-5 font-bold sm:inline-flex"
+          className="hidden rounded-full border-primary/20 bg-primary/10 px-5 font-bold text-primary hover:bg-primary/20 sm:inline-flex"
           onClick={() => focusAuthCard(isSignup ? 'signin' : 'signup')}
         >
           {isSignup ? 'Sign in' : 'Sign up'}
@@ -137,7 +137,7 @@ export default function Auth() {
 
       <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 pb-8 pt-1 md:px-6 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-10 lg:px-8 lg:pb-16 lg:pt-8">
         <section className="animate-child max-w-3xl">
-          <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-border/50 bg-background/45 px-3 py-1.5 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-muted-foreground shadow-sm sm:text-xs sm:tracking-[0.16em]">
+          <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[0.625rem] font-black uppercase tracking-[0.08em] text-primary shadow-sm shadow-primary/10 sm:text-xs sm:tracking-[0.16em]">
             <LayoutDashboard className="h-3.5 w-3.5 shrink-0" />
             <span className="whitespace-nowrap">The modern way to manage your money</span>
           </div>
@@ -152,23 +152,23 @@ export default function Auth() {
 
           <div className="mt-5 grid max-w-2xl gap-2.5 text-sm font-semibold text-muted-foreground sm:mt-6 sm:text-[0.95rem]">
             <div className="inline-flex items-start gap-2.5">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--success))]" />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>Plan every month with total clarity</span>
             </div>
             <div className="inline-flex items-start gap-2.5">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--success))]" />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>Purposefully allocate your income</span>
             </div>
             <div className="inline-flex items-start gap-2.5">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--success))]" />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>Track transactions and balances seamlessly</span>
             </div>
             <div className="inline-flex items-start gap-2.5">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--success))]" />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>Manage recurring bills manually</span>
             </div>
             <div className="inline-flex items-start gap-2.5">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--success))]" />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>Build goals and track progress</span>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function Auth() {
               type="button"
               variant="outline"
               size="lg"
-              className="h-12 rounded-full px-6 text-sm font-bold"
+              className="h-12 rounded-full border-primary/20 bg-primary/5 px-6 text-sm font-bold text-foreground hover:bg-primary/10"
               onClick={() => focusAuthCard('signin')}
             >
               I already have an account
@@ -217,7 +217,7 @@ export default function Auth() {
             </div>
 
             {signupNotice ? (
-              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/8 p-3.5 text-left sm:mt-5">
+              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/10 p-3.5 text-left sm:mt-5">
                 <MailCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p className="text-xs font-semibold leading-5 text-muted-foreground">
                   {signupNotice}
@@ -270,7 +270,7 @@ export default function Auth() {
               variant="outline"
               disabled={loading}
               onClick={handleGoogleSignIn}
-              className="h-12 w-full rounded-2xl font-bold"
+              className="h-12 w-full rounded-2xl border-primary/20 bg-primary/5 font-bold hover:bg-primary/10"
             >
               <KeyRound className="h-4 w-4" />
               Continue with Google
@@ -279,7 +279,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => focusAuthCard(isSignup ? 'signin' : 'signup')}
-              className="mt-4 w-full text-sm font-bold text-muted-foreground transition-colors hover:text-foreground sm:mt-5"
+              className="mt-4 w-full text-sm font-bold text-muted-foreground transition-colors hover:text-primary sm:mt-5"
             >
               {isSignup ? 'Already have an account? Sign in' : 'Need an account? Create one'}
             </button>
