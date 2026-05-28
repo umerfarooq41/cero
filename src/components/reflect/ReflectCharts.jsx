@@ -86,6 +86,49 @@ function TooltipCurrencyValue({ value, currency }) {
   );
 }
 
+
+function getDonutTooltipSurfaceStyle(item) {
+  const toneColor = item?.color || 'hsl(var(--primary))';
+
+  return {
+    backgroundColor: `color-mix(in srgb, ${toneColor} 12%, hsl(var(--popover)) 88%)`,
+    borderColor: `color-mix(in srgb, ${toneColor} 24%, hsl(var(--border)) 76%)`,
+  };
+}
+
+function DonutTooltip({ active, payload, currency }) {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0]?.payload;
+  if (!item) return null;
+
+  const value = Number(item.value || 0);
+  const percent = Number(item.percent || 0);
+
+  return (
+    <div
+      className="rounded-xl border px-3 py-2 shadow-lg"
+      style={getDonutTooltipSurfaceStyle(item)}
+    >
+      <p className="max-w-[170px] truncate text-xs font-bold text-popover-foreground">
+        {item.name}
+      </p>
+
+      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+        <CurrencyAmount
+          amount={value}
+          currency={currency}
+          compact
+          className="font-semibold text-popover-foreground"
+        />
+        <span className="font-medium tabular-nums">
+          {formatPercent(percent)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function RevealChartCard({ children }) {
   const ref = useRef(null);
 
@@ -463,112 +506,88 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="grid gap-4 sm:gap-5 lg:min-h-[208px] lg:grid-cols-[minmax(132px,160px)_minmax(0,1fr)] lg:items-center xl:grid-cols-[minmax(150px,176px)_minmax(0,1fr)]">
-                  <div className="flex justify-center lg:justify-start">
-                    <div className="relative h-32 w-32 shrink-0 sm:h-36 sm:w-36 lg:h-40 lg:w-40">
-                      <div className={`${CHART_WRAP_CLASS} h-32 w-32 sm:h-36 sm:w-36 lg:h-40 lg:w-40`}>
-                        {isVisible ? (
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart
-                              margin={{
-                                top: 0,
-                                right: 0,
-                                bottom: 0,
-                                left: 0,
-                              }}
+                <div className="flex flex-col items-center gap-4 sm:gap-5 lg:min-h-[208px] lg:justify-center">
+                  <div className="relative h-40 w-40 shrink-0 sm:h-44 sm:w-44 lg:h-48 lg:w-48 xl:h-52 xl:w-52">
+                    <div className={`${CHART_WRAP_CLASS} h-40 w-40 sm:h-44 sm:w-44 lg:h-48 lg:w-48 xl:h-52 xl:w-52`}>
+                      {isVisible ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart
+                            margin={{
+                              top: 0,
+                              right: 0,
+                              bottom: 0,
+                              left: 0,
+                            }}
+                          >
+                            <Pie
+                              data={groupedSpendingBreakdown}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius="56%"
+                              outerRadius="82%"
+                              paddingAngle={3}
+                              dataKey="value"
+                              stroke="hsl(var(--card))"
+                              strokeWidth={2}
+                              activeShape={false}
+                              activeIndex={-1}
+                              {...getChartAnimation(isVisible)}
                             >
-                              <Pie
-                                data={groupedSpendingBreakdown}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius="54%"
-                                outerRadius="78%"
-                                paddingAngle={3}
-                                dataKey="value"
-                                stroke="hsl(var(--card))"
-                                strokeWidth={2}
-                                activeShape={false}
-                                activeIndex={-1}
-                                {...getChartAnimation(isVisible)}
-                              >
-                                {groupedSpendingBreakdown.map((entry) => (
-                                  <Cell
-                                    key={entry.id || entry.name}
-                                    fill={entry.color || getThemeChartColor(0)}
-                                    tabIndex={-1}
-                                    focusable="false"
-                                    style={{ outline: 'none' }}
-                                  />
-                                ))}
-                              </Pie>
+                              {groupedSpendingBreakdown.map((entry) => (
+                                <Cell
+                                  key={entry.id || entry.name}
+                                  fill={entry.color || getThemeChartColor(0)}
+                                  tabIndex={-1}
+                                  focusable="false"
+                                  style={{ outline: 'none' }}
+                                />
+                              ))}
+                            </Pie>
 
-                              <Tooltip
-                                {...donutTooltipProps}
-                                cursor={false}
-                                contentStyle={{
-                                  ...tooltipStyle,
-                                  zIndex: 9999,
-                                  maxWidth: 140,
-                                  whiteSpace: 'normal',
-                                }}
-                                formatter={(value) => (
-                                  <TooltipCurrencyValue value={value} currency={currency} />
-                                )}
-                              />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        ) : (
-                          <ChartShell className="h-full" />
-                        )}
-                      </div>
+                            <Tooltip
+                              {...donutTooltipProps}
+                              content={<DonutTooltip currency={currency} />}
+                              cursor={false}
+                              offset={12}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <ChartShell className="h-full" />
+                      )}
+                    </div>
 
-                      <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center text-center">
-                        <span className="text-sm font-bold leading-none tracking-tight tabular-nums sm:text-base">
-                          <CurrencyAmount
-                            amount={totalCategorySpend}
-                            currency={currency}
-                            compact
-                          />
-                        </span>
-                        <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                          tracked
-                        </span>
-                      </div>
+                    <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center text-center">
+                      <span className="max-w-[86px] text-sm font-bold leading-none tracking-tight tabular-nums sm:max-w-[96px] sm:text-base lg:max-w-[104px] lg:text-lg">
+                        <CurrencyAmount
+                          amount={totalCategorySpend}
+                          currency={currency}
+                          compact
+                        />
+                      </span>
+                      <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        tracked
+                      </span>
                     </div>
                   </div>
 
-                  <div className="w-full min-w-0 space-y-2.5">
-                    {groupedSpendingBreakdown.map((category, index) => {
+                  <div className="flex w-full flex-wrap items-center justify-center gap-1.5 text-center sm:gap-2">
+                    {groupedSpendingBreakdown.map((category) => {
                       const categoryColor = category.color || getThemeChartColor(0);
 
                       return (
                         <div
                           key={category.id || category.name}
-                          className="grid min-w-0 grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-2xl px-2 py-1.5 transition-colors hover:bg-muted/30 sm:px-2.5"
+                          className="inline-flex min-h-7 max-w-[9.5rem] items-center justify-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-2.5 py-1 text-center shadow-sm transition-colors hover:bg-background/90"
+                          title={category.name}
                         >
-                          <span className="text-right text-[11px] font-semibold tabular-nums text-muted-foreground">
-                            {index + 1}
-                          </span>
-
-                          <div
-                            className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-background/70"
+                          <span
+                            className="h-1.5 w-1.5 shrink-0 rounded-full"
                             style={{ backgroundColor: categoryColor }}
                           />
 
-                          <span className="min-w-0 truncate text-xs font-medium text-foreground sm:text-sm">
+                          <span className="min-w-0 whitespace-normal break-words text-[10px] font-semibold leading-tight text-muted-foreground">
                             {category.name}
-                          </span>
-
-                          <span className="text-xs font-semibold text-muted-foreground tabular-nums">
-                            {formatPercent(category.percent)}
-                          </span>
-
-                          <span className="text-right text-xs font-semibold tabular-nums text-foreground sm:text-sm">
-                            <CurrencyAmount
-                              amount={category.value}
-                              currency={currency}
-                              compact
-                            />
                           </span>
                         </div>
                       );
