@@ -43,7 +43,7 @@ function normalizeType(type = '') {
 function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurrency }) {
   const items = [
     {
-      label: 'Cash Available',
+      label: 'Available',
       value: cashAvailable,
       Icon: Banknote,
       tone: 'text-emerald-600 dark:text-emerald-400',
