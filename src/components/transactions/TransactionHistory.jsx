@@ -619,12 +619,11 @@ export default function TransactionHistory() {
         </div>
       )}
 
-      {hasTransactions && (
-        <FloatingActionButton
-          to={ADD_TRANSACTION_ROUTE}
-          ariaLabel="Add transaction"
-        />
-      )}
+      <FloatingActionButton
+        to={ADD_TRANSACTION_ROUTE}
+        ariaLabel="Add transaction"
+        label="Add transaction"
+      />
     </div>
   );
 }
