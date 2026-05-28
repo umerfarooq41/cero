@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   KeyRound,
   LayoutDashboard,
+  MailCheck,
   Receipt,
   ShieldCheck,
   Target,
@@ -94,6 +95,7 @@ export default function Auth() {
   const [mode, setMode] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [signupNotice, setSignupNotice] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (isAuthenticated) {
@@ -107,11 +109,28 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      const cleanEmail = email.trim();
+
       if (isSignup) {
-        await signUp(email, password);
-        toast.success('Account created');
+        const result = await signUp(cleanEmail, password);
+        const confirmationRequired = !result?.session;
+
+        if (confirmationRequired) {
+          const message = `We sent a confirmation link to ${cleanEmail}. Confirm your email, then sign in to Cero.`;
+          setSignupNotice(message);
+          setMode('signin');
+          setPassword('');
+          toast.success('Check your email to confirm your account', {
+            description: `Open the confirmation link sent to ${cleanEmail}, then sign in.`,
+            duration: 7000,
+          });
+        } else {
+          setSignupNotice('');
+          toast.success('Account created and signed in');
+        }
       } else {
-        await signIn(email, password);
+        await signIn(cleanEmail, password);
+        setSignupNotice('');
         toast.success('Signed in');
       }
     } catch (error) {
@@ -158,7 +177,10 @@ export default function Auth() {
           type="button"
           variant="outline"
           className="hidden rounded-full px-5 font-bold sm:inline-flex"
-          onClick={() => setMode(isSignup ? 'signin' : 'signup')}
+          onClick={() => {
+            setSignupNotice('');
+            setMode(isSignup ? 'signin' : 'signup');
+          }}
         >
           {isSignup ? 'Sign in' : 'Sign up'}
         </Button>
@@ -184,7 +206,10 @@ export default function Auth() {
               type="button"
               size="lg"
               className="h-12 rounded-full px-6 text-sm font-bold shadow-sm"
-              onClick={() => setMode('signup')}
+              onClick={() => {
+                setSignupNotice('');
+                setMode('signup');
+              }}
             >
               Set up your first budget
               <ArrowRight className="h-4 w-4" />
@@ -195,7 +220,10 @@ export default function Auth() {
               variant="outline"
               size="lg"
               className="h-12 rounded-full px-6 text-sm font-bold"
-              onClick={() => setMode('signin')}
+              onClick={() => {
+                setSignupNotice('');
+                setMode('signin');
+              }}
             >
               I already have an account
             </Button>
@@ -233,6 +261,15 @@ export default function Auth() {
               </span>
             </div>
 
+            {signupNotice ? (
+              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/8 p-3.5 text-left">
+                <MailCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <p className="text-xs font-semibold leading-5 text-muted-foreground">
+                  {signupNotice}
+                </p>
+              </div>
+            ) : null}
+
             <div className="mt-5 space-y-3">
               <Input
                 type="email"
@@ -257,6 +294,13 @@ export default function Auth() {
               {loading ? 'Please wait...' : isSignup ? 'Create account' : 'Sign in'}
             </Button>
 
+            {isSignup ? (
+              <p className="mt-3 flex items-start gap-2 rounded-2xl bg-secondary/45 px-3 py-2.5 text-xs font-medium leading-5 text-muted-foreground">
+                <MailCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                After creating your account, confirm your email from the link we send before signing in.
+              </p>
+            ) : null}
+
             <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border/55" />
@@ -279,7 +323,10 @@ export default function Auth() {
 
             <button
               type="button"
-              onClick={() => setMode(isSignup ? 'signin' : 'signup')}
+              onClick={() => {
+                setSignupNotice('');
+                setMode(isSignup ? 'signin' : 'signup');
+              }}
               className="mt-5 w-full text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
             >
               {isSignup ? 'Already have an account? Sign in' : 'Need an account? Create one'}
