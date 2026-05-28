@@ -685,8 +685,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         formatCurrency={formatCurrency}
       />
 
-      <div className="space-y-3">
-        <div>
+      <div className="space-y-3 lg:flex lg:items-end lg:justify-between lg:gap-6 lg:space-y-0">
+        <div className="min-w-0">
           <h2 className="text-sm font-semibold">Planned amounts</h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Recurring and Goal badges show source amounts. Editing any row only
@@ -694,7 +694,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end lg:shrink-0">
           <Button
             type="button"
             variant="outline"

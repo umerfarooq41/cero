@@ -166,7 +166,7 @@ export default function DashboardOverview() {
 
   return (
     <>
-      <div className="animate-child">
+      <div className="animate-child lg:hidden">
           <LeftToAllocateBanner
             leftToAllocate={budget.leftToAllocate}
             totalIncome={budget.totalPlannedIncome || budget.totalIncome}
@@ -174,7 +174,7 @@ export default function DashboardOverview() {
           />
         </div>
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
           <DashboardCard
             title="Spending velocity"
             subtitle="Compare time passed with actual expense pace."
@@ -245,7 +245,7 @@ export default function DashboardOverview() {
           />
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <DashboardCard
             title="Recent transactions"
             subtitle="Latest activity from the current budget month."
