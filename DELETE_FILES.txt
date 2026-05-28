@@ -1,0 +1,7 @@
+Delete this old file after copying the updated files:
+
+src/components/layout/Sidebar.jsx
+
+It has been replaced by:
+
+src/components/layout/DesktopTopNav.jsx

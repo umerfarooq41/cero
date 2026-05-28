@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-import Sidebar from './Sidebar';
+import DesktopTopNav from './DesktopTopNav';
 import BottomNav from './BottomNav';
 import ScrollManager from './ScrollManager';
 
@@ -18,7 +18,7 @@ export default function AppLayout() {
     <div className="app-page-surface flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
       <ScrollManager />
 
-      <Sidebar />
+      <DesktopTopNav />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <main className="app-page-surface app-main-scroll flex-1 overflow-y-auto lg:pb-0">

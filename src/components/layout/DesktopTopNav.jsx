@@ -60,7 +60,7 @@ function isNavItemActive(pathname, item) {
   });
 }
 
-function WebsiteNavLink({ item, pathname }) {
+function DesktopTopNavLink({ item, pathname }) {
   const isActive = isNavItemActive(pathname, item);
   const Icon = item.icon;
 
@@ -71,39 +71,66 @@ function WebsiteNavLink({ item, pathname }) {
       aria-current={isActive ? 'page' : undefined}
       data-haptic="true"
       className={cn(
-        'group relative inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-200',
+        'group relative inline-flex h-12 touch-manipulation items-center gap-2.5 rounded-2xl px-3 text-sm font-semibold transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        isActive
-          ? 'text-foreground'
-          : 'text-muted-foreground/82 hover:text-foreground'
+        isActive ? 'text-primary' : 'text-muted-foreground/82 hover:text-foreground'
       )}
     >
-      {isActive ? (
-        <motion.span
-          layoutId="website-nav-active-pill"
-          aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-background/55 ring-1 ring-border/50 shadow-sm dark:bg-white/[0.06] dark:ring-white/10"
-          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-        />
-      ) : null}
-
-      <Icon
-        className={cn(
-          'relative z-10 h-4 w-4 transition-all duration-200',
-          isActive
-            ? 'text-foreground stroke-[2.6]'
-            : 'text-muted-foreground/78 stroke-[2.25] group-hover:text-foreground'
+      <motion.span
+        animate={{ scale: isActive ? 1.04 : 1, y: isActive ? -1 : 0 }}
+        transition={{ type: 'spring', stiffness: 430, damping: 28 }}
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+      >
+        {isActive && (
+          <motion.span
+            layoutId="desktop-top-nav-active-orb"
+            aria-hidden="true"
+            className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
+            style={{
+              boxShadow:
+                '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
+            }}
+            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+          />
         )}
-      />
 
-      <span className="relative z-10 whitespace-nowrap">{item.label}</span>
+        {isActive && (
+          <motion.span
+            aria-hidden="true"
+            className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
+            initial={{ opacity: 0, scale: 0.75 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.75 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+          />
+        )}
+
+        <Icon
+          className={cn(
+            'relative z-10 h-5 w-5 transition-all duration-200',
+            isActive
+              ? 'text-primary stroke-[2.65]'
+              : 'text-muted-foreground/80 stroke-[2.25] group-hover:text-foreground'
+          )}
+        />
+      </motion.span>
+
+      <motion.span
+        animate={{ opacity: isActive ? 1 : 0.68, y: isActive ? -1 : 0 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+        className={cn(
+          'relative z-10 whitespace-nowrap leading-none transition-all duration-200',
+          isActive ? 'font-bold text-primary' : 'font-medium text-muted-foreground'
+        )}
+      >
+        {item.label}
+      </motion.span>
     </Link>
   );
 }
 
-export default function Sidebar() {
+export default function DesktopTopNav() {
   const location = useLocation();
-  const settingsActive = isNavItemActive(location.pathname, settingsItem);
 
   return (
     <header
@@ -129,26 +156,13 @@ export default function Sidebar() {
 
         <nav className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
           {navItems.map((item) => (
-            <WebsiteNavLink key={item.path} item={item} pathname={location.pathname} />
+            <DesktopTopNavLink key={item.path} item={item} pathname={location.pathname} />
           ))}
         </nav>
 
-        <Link
-          to="/settings"
-          aria-label="Open settings"
-          aria-current={settingsActive ? 'page' : undefined}
-          data-haptic="true"
-          className={cn(
-            'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-200',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            settingsActive
-              ? 'bg-background/55 text-foreground ring-1 ring-border/50 shadow-sm dark:bg-white/[0.06] dark:ring-white/10'
-              : 'text-muted-foreground/82 hover:bg-foreground/[0.04] hover:text-foreground'
-          )}
-        >
-          <Settings className="h-4 w-4" />
-          Settings
-        </Link>
+        <nav className="flex shrink-0 items-center">
+          <DesktopTopNavLink item={settingsItem} pathname={location.pathname} />
+        </nav>
       </div>
     </header>
   );
