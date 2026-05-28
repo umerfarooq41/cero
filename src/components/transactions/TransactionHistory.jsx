@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 import EmptyState from '@/components/shared/EmptyState';
-import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
 import TransactionRow from '@/components/transactions/TransactionRow';
@@ -618,8 +617,6 @@ export default function TransactionHistory() {
           ))}
         </div>
       )}
-
-      <FloatingActionButton to={ADD_TRANSACTION_ROUTE} ariaLabel="Add transaction" />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { CalendarClock, Clock3 } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import ScheduledTransactions from '@/components/transactions/ScheduledTransactions';
 import AppTabs, { AppTabPanel } from '@/components/shared/AppTabs.jsx';
+import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import TransactionHistory from '@/components/transactions/TransactionHistory';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 
@@ -64,6 +65,10 @@ export default function Transactions() {
             )}
           </AppTabPanel>
         </AnimatePresence>
+
+        {activeTab === 'history' && (
+          <FloatingActionButton to="/add-transaction" ariaLabel="Add transaction" />
+        )}
       </main>
     </div>
   );
