@@ -2,15 +2,11 @@ import { useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
   ArrowRight,
-  CalendarCheck,
   CheckCircle2,
   KeyRound,
   LayoutDashboard,
   MailCheck,
-  Receipt,
   ShieldCheck,
-  Target,
-  WalletCards,
 } from 'lucide-react';
 
 import Logo from '@/components/Logo';
@@ -18,74 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import { useAuth } from '@/lib/AuthContext';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const featureItems = [
-  {
-    icon: CalendarCheck,
-    title: 'Monthly plan',
-    description: 'Assign income across expenses, savings, and debt before the month starts.',
-  },
-  {
-    icon: Receipt,
-    title: 'Transactions',
-    description: 'Track history, scheduled bills, recurring rules, and goal transfers clearly.',
-  },
-  {
-    icon: Target,
-    title: 'Savings goals',
-    description: 'Turn every contribution into visible progress without mixing it with spending.',
-  },
-];
 
 function HeaderLink({ children }) {
   return (
     <span className="text-sm font-bold text-muted-foreground/82 transition-colors hover:text-foreground">
       {children}
     </span>
-  );
-}
-
-function ProductPreviewCard({ icon: Icon, title, subtitle, amount, progress, className }) {
-  return (
-    <div className={cn('app-card-surface-soft rounded-3xl p-3.5 shadow-sm sm:p-4', className)}>
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary/75 text-muted-foreground sm:h-11 sm:w-11">
-          <Icon className="h-5 w-5" />
-        </span>
-
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black text-foreground">{title}</p>
-          <p className="mt-0.5 truncate text-xs font-medium text-muted-foreground">{subtitle}</p>
-        </div>
-
-        {amount ? (
-          <p className="shrink-0 text-sm font-black tabular-nums text-foreground">{amount}</p>
-        ) : null}
-      </div>
-
-      {typeof progress === 'number' ? (
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary/80 sm:mt-4">
-          <div
-            className="h-full rounded-full bg-primary/75"
-            style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function FeatureCard({ icon: Icon, title, description }) {
-  return (
-    <article className="app-card-surface-soft rounded-3xl p-4 sm:p-5">
-      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-11 sm:w-11">
-        <Icon className="h-5 w-5" />
-      </span>
-      <h3 className="mt-3 text-base font-black tracking-tight text-foreground sm:mt-4">{title}</h3>
-      <p className="mt-1.5 text-sm font-medium leading-6 text-muted-foreground sm:mt-2">{description}</p>
-    </article>
   );
 }
 
@@ -196,7 +131,7 @@ export default function Auth() {
         </Button>
       </header>
 
-      <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 pb-8 pt-1 md:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-8 lg:px-8 lg:pb-16 lg:pt-8">
+      <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 pb-8 pt-1 md:px-6 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-10 lg:px-8 lg:pb-16 lg:pt-8">
         <section className="animate-child max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/45 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground shadow-sm">
             <LayoutDashboard className="h-3.5 w-3.5" />
@@ -237,23 +172,23 @@ export default function Auth() {
             </Button>
           </div>
 
-          <div className="mt-6 grid gap-2.5 text-sm font-semibold text-muted-foreground sm:mt-7 sm:grid-cols-3 sm:gap-3">
-            <div className="flex items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground sm:mt-6">
+            <div className="inline-flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[hsl(var(--success))]" />
               Monthly budget clarity
             </div>
-            <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[hsl(var(--success))]" />
               Manual recurring control
             </div>
-            <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[hsl(var(--success))]" />
               Goal-based saving
             </div>
           </div>
         </section>
 
-        <aside ref={authCardRef} id="auth-card" className="animate-child scroll-mt-4 grid gap-3 sm:gap-4 lg:gap-5">
+        <aside ref={authCardRef} id="auth-card" className="animate-child scroll-mt-4">
           <form onSubmit={handleSubmit} className="app-card-surface-strong rounded-[1.75rem] p-4 sm:rounded-[2rem] sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -337,31 +272,8 @@ export default function Auth() {
               {isSignup ? 'Already have an account? Sign in' : 'Need an account? Create one'}
             </button>
           </form>
-
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            <ProductPreviewCard
-              icon={WalletCards}
-              title="Left to allocate"
-              subtitle="May monthly balance"
-              amount="250"
-              progress={72}
-            />
-            <ProductPreviewCard
-              icon={Receipt}
-              title="Upcoming bills"
-              subtitle="3 scheduled this week"
-              amount="1,850"
-              progress={58}
-            />
-          </div>
         </aside>
       </main>
-
-      <section className="relative z-10 mx-auto grid w-full max-w-7xl gap-3 px-4 pb-10 md:px-6 lg:grid-cols-3 lg:gap-4 lg:px-8 lg:pb-12">
-        {featureItems.map((item) => (
-          <FeatureCard key={item.title} {...item} />
-        ))}
-      </section>
     </div>
   );
 }
