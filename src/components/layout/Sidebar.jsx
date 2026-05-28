@@ -74,7 +74,7 @@ function WebsiteNavLink({ item, pathname }) {
         'group relative inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         isActive
-          ? 'text-primary'
+          ? 'text-foreground'
           : 'text-muted-foreground/82 hover:text-foreground'
       )}
     >
@@ -82,7 +82,7 @@ function WebsiteNavLink({ item, pathname }) {
         <motion.span
           layoutId="website-nav-active-pill"
           aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/18"
+          className="absolute inset-0 rounded-full bg-background/55 ring-1 ring-border/50 shadow-sm dark:bg-white/[0.06] dark:ring-white/10"
           transition={{ type: 'spring', stiffness: 420, damping: 34 }}
         />
       ) : null}
@@ -91,7 +91,7 @@ function WebsiteNavLink({ item, pathname }) {
         className={cn(
           'relative z-10 h-4 w-4 transition-all duration-200',
           isActive
-            ? 'text-primary stroke-[2.6]'
+            ? 'text-foreground stroke-[2.6]'
             : 'text-muted-foreground/78 stroke-[2.25] group-hover:text-foreground'
         )}
       />
@@ -142,7 +142,7 @@ export default function Sidebar() {
             'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-200',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             settingsActive
-              ? 'bg-primary/10 text-primary ring-1 ring-primary/18'
+              ? 'bg-background/55 text-foreground ring-1 ring-border/50 shadow-sm dark:bg-white/[0.06] dark:ring-white/10'
               : 'text-muted-foreground/82 hover:bg-foreground/[0.04] hover:text-foreground'
           )}
         >
