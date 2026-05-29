@@ -49,7 +49,9 @@ function getTransferType(account, toAccount) {
   return formatTransactionType(category);
 }
 
-function cleanGeneratedNote(note = '') {
+function cleanGeneratedNote(note) {
+  if (note == null) return '';
+
   return String(note)
     .replace(/\s*·\s*Recurring\s*$/i, '')
     .replace(/^Contribution to\s+/i, '')
@@ -95,11 +97,13 @@ export default function TransactionRow({
 
   const config = typeConfig[transaction.type] || typeConfig.expense;
   const isTransfer = transaction.type === 'transfer';
+
   const isRecurring = Boolean(
     transaction.source_type === 'recurring' ||
       transaction.recurring_transaction_id ||
       transaction.recurring_posted_for_date
   );
+
   const isGoalContribution = Boolean(
     transaction.source_type === 'goal' ||
       transaction.source_type === 'savings_goal' ||
@@ -109,21 +113,26 @@ export default function TransactionRow({
 
   const accountName = account?.name || 'Account';
   const transactionTypeLabel = formatTransactionType(transaction.type);
-  const transferTypeLabel = getTransferType(account, toAccount);
   const transferTitle = [accountName, toAccount?.name].filter(Boolean).join(' → ');
-  const transferCategoryName = isGoalContribution
+
+  const noteLabel = cleanGeneratedNote(transaction.note);
+
+  const transferDetailLabel = isGoalContribution
     ? getGoalName(transaction, category)
-    : category?.name || cleanGeneratedNote(transaction.note) || transferTypeLabel || 'Transfer';
+    : category?.name || noteLabel;
 
   const title = isTransfer
     ? transferTitle || 'Transfer'
-    : category?.name || cleanGeneratedNote(transaction.note) || 'Uncategorized';
+    : category?.name || noteLabel || 'Uncategorized';
 
   const primarySubtitle = isTransfer
-    ? `Transfer - ${transferCategoryName}`
+    ? transferDetailLabel
+      ? `Transfer - ${transferDetailLabel}`
+      : 'Transfer'
     : `${transactionTypeLabel} - ${accountName}`;
 
   const sourceBadgeType = isGoalContribution ? 'goal' : isRecurring ? 'recurring' : null;
+
   const sourceBadgeTone = (() => {
     if (!sourceBadgeType) return null;
 
@@ -138,6 +147,7 @@ export default function TransactionRow({
 
     return category?.budget_type || category?.type || transaction.type;
   })();
+
   const amountValue = Math.abs(Number(transaction.amount || 0));
 
   return (
@@ -162,7 +172,10 @@ export default function TransactionRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
-          <div className="truncate text-xs font-semibold sm:text-sm sm:font-medium">{title}</div>
+          <div className="truncate text-xs font-semibold sm:text-sm sm:font-medium">
+            {title}
+          </div>
+
           <SourceBadge
             type={sourceBadgeType}
             tone={sourceBadgeTone}
