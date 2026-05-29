@@ -13,47 +13,48 @@ export default function PageHeader({
   const settingsActive = location.pathname === '/settings';
 
   return (
-    <>
-      <header
-        data-no-page-entrance
-        className={cn(
-          `
-          app-page-header
-          fixed inset-x-0 top-0 z-50
-          h-[var(--app-mobile-page-header-height)]
-          overflow-visible
-          border-0
-          shadow-none
-          ring-0
-          lg:static
-          lg:z-10
+    <header
+      data-no-page-entrance
+      className={cn(
+        `
+        app-page-header
+        pointer-events-none
+        fixed inset-x-0 top-0 z-50
+        h-[var(--app-mobile-page-header-height)]
+        border-0
+        shadow-none
+        ring-0
+        lg:pointer-events-auto
+        lg:static
+        lg:z-10
+        lg:h-auto
+        `,
+        className
+      )}
+    >
+      <div
+        className="
+          pointer-events-auto
+          mx-auto
+          flex
+          h-full
+          w-full
+          max-w-7xl
+          items-start
+          justify-between
+          gap-4
+          px-4
+          pt-[calc(1.15rem+var(--app-safe-area-top))]
+          pb-3
+          md:px-6
+          md:pt-[calc(1.35rem+var(--app-safe-area-top))]
+          md:pb-4
           lg:h-auto
-          `,
-          className
-        )}
+          lg:px-8
+          lg:pt-10
+          lg:pb-4
+        "
       >
-        <div
-          className="
-            mx-auto
-            flex
-            h-full
-            w-full
-            max-w-7xl
-            items-start
-            justify-between
-            gap-4
-            px-4
-            pt-[calc(1.25rem+var(--app-safe-area-top))]
-            pb-4
-            md:px-6
-            md:pt-[calc(1.5rem+var(--app-safe-area-top))]
-            md:pb-5
-            lg:h-auto
-            lg:px-8
-            lg:pt-10
-            lg:pb-4
-          "
-        >
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2.5">
             <Logo size={28} priority className="lg:hidden" />
@@ -146,13 +147,6 @@ export default function PageHeader({
           </motion.span>
         </Link>
       </div>
-      </header>
-
-      <div
-        aria-hidden="true"
-        data-no-page-entrance
-        className="h-[var(--app-mobile-page-header-height)] shrink-0 lg:hidden"
-      />
-    </>
+    </header>
   );
 }
