@@ -780,8 +780,9 @@ main,
 
   @media (max-width: 1023px) {
     .app-main-scroll {
-      padding-top: var(--app-mobile-page-header-height);
-      scroll-padding-top: var(--app-mobile-page-header-height);
+      margin-top: var(--app-mobile-page-header-height);
+      padding-top: 0 !important;
+      scroll-padding-top: 0;
     }
 
     .app-page-header {
