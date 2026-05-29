@@ -1,20 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
-  ArrowLeft,
   ArrowDownLeft,
-  ArrowUpRight,
+  ArrowLeft,
   ArrowLeftRight,
-  Trash2,
+  ArrowUpRight,
 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
-import PageHeader from '@/components/layout/PageHeader';
-import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-
 import {
   Select,
   SelectContent,
@@ -22,73 +19,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-
-import { useQueryClient } from '@tanstack/react-query';
-import { accountsApi, transactionsApi } from '@/lib/budgetData';
-import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
-import { toast } from 'sonner';
-
-import {
-  useCategories,
-  useAccounts,
-  useAllTransactions,
-  useSavingsGoals,
-} from '@/hooks/useBudgetData';
-
+import { Textarea } from '@/components/ui/textarea';
+import { useAccounts, useAllTransactions, useCategories } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
-import { usePageEntrance } from '@/hooks/usePageTransition';
-import {
-  getCurrencyCode as getSharedCurrencyCode,
-  getCurrencySymbol as getSharedCurrencySymbol,
-} from '@/lib/currencies';
+import { accountsApi, transactionsApi } from '@/lib/budgetData';
+import { cn } from '@/lib/utils';
 
 const typeOptions = [
-  { value: 'income', label: 'Income', icon: ArrowDownLeft },
-  { value: 'expense', label: 'Expense', icon: ArrowUpRight },
-  { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight },
+  {
+    value: 'expense',
+    label: 'Expense',
+    icon: ArrowUpRight,
+    color: 'border-destructive bg-destructive/10 text-destructive',
+  },
+  {
+    value: 'income',
+    label: 'Income',
+    icon: ArrowDownLeft,
+    color:
+      'border-[hsl(var(--success))] bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]',
+  },
+  {
+    value: 'transfer',
+    label: 'Transfer',
+    icon: ArrowLeftRight,
+    color: 'border-primary bg-primary/10 text-primary',
+  },
 ];
 
-const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
-
-const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
+const TRANSFER_PURPOSES = {
+  normal: 'normal',
+  savingsAllocation: 'savings_allocation',
+  debtPayment: 'debt_payment',
+};
 
 function CurrencyPrefix({ currency }) {
-  const currencyCode = getCurrencyCode(currency);
+  const currencyCode =
+    typeof currency === 'string'
+      ? currency
+      : currency?.code || currency?.currency || 'SAR';
 
   if (currencyCode === 'SAR') {
-    return (
-      <span
-        className="inline-block h-[0.72em] w-[0.72em] shrink-0 bg-current opacity-80"
-        style={{
-          WebkitMask: 'url(/sar.svg) center / contain no-repeat',
-          mask: 'url(/sar.svg) center / contain no-repeat',
-        }}
-      />
-    );
+    return <img src="/sar.svg" alt="SAR" className="h-8 w-8 opacity-70" />;
   }
 
-  return <span className="text-[0.75em] leading-none">{getCurrencySymbol(currency)}</span>;
-}
-
-function normalizeCategoryType(value) {
-  const normalized = String(value || '').toLowerCase().trim();
-
-  if (normalized === 'saving') return 'savings';
-  if (normalized === 'liability') return 'debt';
-
-  return normalized;
+  return <span>{currencyCode}</span>;
 }
 
 function addDelta(deltas, accountId, amount) {
@@ -100,8 +75,8 @@ function getTransactionDeltas(transaction, accounts) {
   const deltas = {};
   const amount = Number(transaction.amount) || 0;
 
-  const source = accounts.find((a) => a.id === transaction.account_id);
-  const destination = accounts.find((a) => a.id === transaction.to_account_id);
+  const source = accounts.find((account) => account.id === transaction.account_id);
+  const destination = accounts.find((account) => account.id === transaction.to_account_id);
 
   if (source) {
     const sourceDelta =
@@ -117,50 +92,56 @@ function getTransactionDeltas(transaction, accounts) {
   }
 
   if (transaction.type === 'transfer' && destination) {
-    const destinationDelta =
-      destination.category === 'liability' ? -amount : amount;
-
+    const destinationDelta = destination.category === 'liability' ? -amount : amount;
     addDelta(deltas, destination.id, destinationDelta);
   }
 
   return deltas;
 }
 
-function getAccountType(account) {
-  return account?.type || account?.account_type || '';
-}
-
-function isDebtAccount(account) {
-  const accountType = getAccountType(account);
-
-  return (
-    account?.category === 'liability' ||
-    accountType === 'credit_card' ||
-    accountType === 'loan' ||
-    accountType === 'debt'
-  );
+function normalizeCategoryType(type) {
+  if (type === 'saving') return 'savings';
+  if (type === 'liability') return 'debt';
+  return String(type || '').toLowerCase();
 }
 
 function isSavingsAccount(account) {
-  const accountType = getAccountType(account);
+  return normalizeCategoryType(account?.type) === 'savings';
+}
 
-  return accountType === 'savings' || accountType === 'investment';
+function isDebtAccount(account) {
+  const accountType = normalizeCategoryType(account?.type);
+  const accountCategory = normalizeCategoryType(account?.category);
+
+  return (
+    accountCategory === 'debt' ||
+    accountCategory === 'liability' ||
+    accountType === 'debt' ||
+    accountType === 'loan' ||
+    accountType === 'credit_card'
+  );
+}
+
+function getTransferPurposeFromCategory(category) {
+  const categoryType = normalizeCategoryType(category?.type);
+
+  if (categoryType === 'savings') return TRANSFER_PURPOSES.savingsAllocation;
+  if (categoryType === 'debt') return TRANSFER_PURPOSES.debtPayment;
+
+  return TRANSFER_PURPOSES.normal;
 }
 
 export default function AddTransaction() {
-  const scope = usePageEntrance();
   const navigate = useNavigate();
   const { id } = useParams();
-
   const isEditing = Boolean(id);
   const queryClient = useQueryClient();
 
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: allTransactions = [] } = useAllTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
 
-  const existingTransaction = allTransactions.find((t) => t.id === id);
+  const existingTransaction = allTransactions.find((transaction) => transaction.id === id);
   const currency = useCurrency();
 
   const [amount, setAmount] = useState('');
@@ -168,109 +149,122 @@ export default function AddTransaction() {
   const [categoryId, setCategoryId] = useState('');
   const [accountId, setAccountId] = useState('');
   const [toAccountId, setToAccountId] = useState('');
+  const [transferPurpose, setTransferPurpose] = useState(TRANSFER_PURPOSES.normal);
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const destinationAccount = useMemo(
+    () => accounts.find((account) => account.id === toAccountId),
+    [accounts, toAccountId]
+  );
+
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === categoryId),
+    [categories, categoryId]
+  );
+
+  const transferPurposeOptions = useMemo(() => {
+    const options = [
+      {
+        value: TRANSFER_PURPOSES.normal,
+        label: 'Normal transfer',
+        description: 'Move money only. Does not affect the monthly plan.',
+      },
+    ];
+
+    if (isSavingsAccount(destinationAccount)) {
+      options.push({
+        value: TRANSFER_PURPOSES.savingsAllocation,
+        label: 'Savings allocation',
+        description: 'Track this transfer against a savings category.',
+      });
+    }
+
+    if (isDebtAccount(destinationAccount)) {
+      options.push({
+        value: TRANSFER_PURPOSES.debtPayment,
+        label: 'Debt payment',
+        description: 'Track this transfer against a debt category.',
+      });
+    }
+
+    return options;
+  }, [destinationAccount]);
+
+  const requiresCategory =
+    type !== 'transfer' ||
+    transferPurpose === TRANSFER_PURPOSES.savingsAllocation ||
+    transferPurpose === TRANSFER_PURPOSES.debtPayment;
+
   useEffect(() => {
     if (!existingTransaction) return;
+
+    const existingCategory = categories.find(
+      (category) => category.id === existingTransaction.category_id
+    );
 
     setAmount(String(existingTransaction.amount ?? ''));
     setType(existingTransaction.type || 'expense');
     setCategoryId(existingTransaction.category_id || '');
     setAccountId(existingTransaction.account_id || '');
     setToAccountId(existingTransaction.to_account_id || '');
+    setTransferPurpose(
+      existingTransaction.type === 'transfer'
+        ? getTransferPurposeFromCategory(existingCategory)
+        : TRANSFER_PURPOSES.normal
+    );
     setDate(existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setNote(existingTransaction.note || '');
-  }, [existingTransaction]);
+  }, [categories, existingTransaction]);
 
-  const selectedFromAccount = accounts.find((a) => a.id === accountId);
-  const selectedToAccount = accounts.find((a) => a.id === toAccountId);
+  useEffect(() => {
+    if (type !== 'transfer') return;
 
-  const getTransferCategoryType = () => {
-    if (type !== 'transfer') return null;
+    const currentPurposeAllowed = transferPurposeOptions.some(
+      (option) => option.value === transferPurpose
+    );
 
-    const involvesDebt =
-      isDebtAccount(selectedFromAccount) || isDebtAccount(selectedToAccount);
-
-    if (involvesDebt) return 'debt';
-
-    const involvesSavings =
-      isSavingsAccount(selectedFromAccount) ||
-      isSavingsAccount(selectedToAccount);
-
-    if (involvesSavings) return 'savings';
-
-    return null;
-  };
-
-  const transferCategoryType = getTransferCategoryType();
+    if (!currentPurposeAllowed) {
+      setTransferPurpose(TRANSFER_PURPOSES.normal);
+      setCategoryId('');
+    }
+  }, [transferPurpose, transferPurposeOptions, type]);
 
   const filteredCategories = categories.filter((category) => {
     const categoryType = normalizeCategoryType(category.type);
 
-    if (type === 'expense') return categoryType === 'expense';
-    if (type === 'income') return categoryType === 'income';
+    if (type === 'expense') {
+      return categoryType === 'expense';
+    }
+
+    if (type === 'income') {
+      return categoryType === 'income';
+    }
 
     if (type === 'transfer') {
-      if (!transferCategoryType) return false;
-      return categoryType === transferCategoryType;
+      if (transferPurpose === TRANSFER_PURPOSES.savingsAllocation) {
+        return categoryType === 'savings';
+      }
+
+      if (transferPurpose === TRANSFER_PURPOSES.debtPayment) {
+        return categoryType === 'debt';
+      }
     }
 
     return false;
   });
 
-  useEffect(() => {
-    if (!categoryId) return;
-
-    const selectedCategory = categories.find((c) => c.id === categoryId);
-    const selectedCategoryType = normalizeCategoryType(selectedCategory?.type);
-
-    if (type === 'expense' && selectedCategoryType !== 'expense') {
-      setCategoryId('');
-    }
-
-    if (type === 'income' && selectedCategoryType !== 'income') {
-      setCategoryId('');
-    }
-
-    if (
-      type === 'transfer' &&
-      transferCategoryType &&
-      selectedCategoryType !== transferCategoryType
-    ) {
-      setCategoryId('');
-    }
-
-    if (type === 'transfer' && !transferCategoryType) {
-      setCategoryId('');
-    }
-  }, [type, transferCategoryType, categoryId, categories]);
-
-  const shouldShowCategory =
-    type !== 'transfer' || Boolean(transferCategoryType);
-
-  const categoryPlaceholder =
-    type === 'transfer' && !transferCategoryType
-      ? 'No category needed'
-      : 'Select category';
-
-  const refreshData = () => {
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['accounts'] });
-  };
-
   const handleSubmit = async () => {
-    if (!amount || parseFloat(amount) <= 0) {
+    const parsedAmount = Number(amount || 0);
+
+    if (!parsedAmount || parsedAmount <= 0) {
       toast.error('Enter a valid amount');
       return;
     }
 
     if (!accountId) {
-      toast.error(
-        type === 'transfer' ? 'Select a source account' : 'Select an account'
-      );
+      toast.error(type === 'transfer' ? 'Select a source account' : 'Select an account');
       return;
     }
 
@@ -284,12 +278,17 @@ export default function AddTransaction() {
       return;
     }
 
-    if (type !== 'transfer' && !categoryId) {
-      toast.error('Select a category');
-      return;
-    }
+    if (requiresCategory && !categoryId) {
+      if (type === 'transfer' && transferPurpose === TRANSFER_PURPOSES.savingsAllocation) {
+        toast.error('Select a savings category');
+        return;
+      }
 
-    if (type === 'transfer' && transferCategoryType && !categoryId) {
+      if (type === 'transfer' && transferPurpose === TRANSFER_PURPOSES.debtPayment) {
+        toast.error('Select a debt category');
+        return;
+      }
+
       toast.error('Select a category');
       return;
     }
@@ -297,8 +296,6 @@ export default function AddTransaction() {
     setSaving(true);
 
     try {
-      const parsedAmount = parseFloat(amount);
-
       if (isEditing && !existingTransaction) {
         toast.error('Transaction not found');
         return;
@@ -309,7 +306,7 @@ export default function AddTransaction() {
         type,
         date,
         note: note || null,
-        category_id: categoryId || null,
+        category_id: requiresCategory ? categoryId || null : null,
         account_id: accountId || null,
         to_account_id: type === 'transfer' ? toAccountId || null : null,
       };
@@ -321,7 +318,6 @@ export default function AddTransaction() {
       }
 
       const newDeltas = getTransactionDeltas(data, accounts);
-
       const oldDeltas =
         isEditing && existingTransaction
           ? getTransactionDeltas(existingTransaction, accounts)
@@ -333,8 +329,7 @@ export default function AddTransaction() {
       ]);
 
       const balanceUpdates = [...allAccountIds].map((changedAccountId) => {
-        const account = accounts.find((a) => a.id === changedAccountId);
-
+        const account = accounts.find((item) => item.id === changedAccountId);
         if (!account) return Promise.resolve();
 
         const delta =
@@ -348,7 +343,11 @@ export default function AddTransaction() {
 
       await Promise.all(balanceUpdates);
 
-      refreshData();
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
 
       toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
       navigate('/transactions');
@@ -360,159 +359,128 @@ export default function AddTransaction() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!isEditing || !id) return;
-
-    if (!existingTransaction) {
-      toast.error('Transaction not found');
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await deleteTransactionWithEffects({
-        transaction: existingTransaction,
-        accounts,
-        savingsGoals,
-      });
-
-      refreshData();
-      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
-
-      toast.success('Transaction deleted');
-      navigate('/transactions');
-    } catch (error) {
-      console.error('Transaction delete failed:', error);
-      toast.error(error.message || 'Could not delete transaction');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
-    <div ref={scope} className="min-h-screen bg-transparent">
-      <PageHeader
-        title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
-        subtitle={
-          isEditing
-            ? 'Update transaction details'
-            : 'Record income, spending, transfers, or debt activity'
-        }
-      />
-
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
+    <div className="mx-auto max-w-lg px-4 py-6 lg:py-10">
+      <div className="mb-8 flex items-center gap-3">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={() => navigate(-1)}
-          className="animate-child mb-4 gap-2"
+          className="shrink-0"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+          <ArrowLeft className="h-5 w-5" />
         </Button>
 
-        <div className="animate-child mb-6 rounded-3xl app-card-surface p-6 shadow-md backdrop-blur-xl md:p-8">
-          <div className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Amount
-          </div>
+        <h1 className="text-xl font-bold tracking-tight">
+          {isEditing ? 'Edit Transaction' : 'Add Transaction'}
+        </h1>
+      </div>
 
-          <div className="flex justify-center overflow-hidden">
-            <div className="inline-flex max-w-full items-center gap-3 text-5xl font-bold leading-none text-foreground tabular-nums">
-              <CurrencyPrefix currency={currency} />
-
-              <input
-                type="text"
-                value={amount}
-                onChange={(e) => {
-                  const nextValue = e.target.value
-                    .replace(/[^0-9.]/g, '')
-                    .replace(/(\..*)\./g, '$1');
-
-                  setAmount(nextValue);
-                }}
-                placeholder="0.00"
-                autoFocus
-                inputMode="decimal"
-                className="
-                  app-amount-input
-                  min-w-[4ch]
-                  max-w-[8ch]
-                  border-none
-                  bg-transparent
-                  p-0
-                  text-left
-                  text-5xl
-                  font-bold
-                  leading-none
-                  tabular-nums
-                  text-foreground
-                  outline-none
-                  placeholder:text-muted-foreground/30
-                  [appearance:textfield]
-                  [&::-webkit-inner-spin-button]:appearance-none
-                  [&::-webkit-outer-spin-button]:appearance-none
-                "
-                style={{
-                  width: `${Math.min(
-                    8,
-                    Math.max(4, String(amount || '0.00').length)
-                  )}ch`,
-                }}
-              />
-            </div>
-          </div>
+      <div className="mb-6 rounded-2xl border border-border bg-card p-8 text-center">
+        <div className="mb-3 text-xs uppercase tracking-wider text-muted-foreground">
+          Amount
         </div>
 
-        <TransactionTypeTabs
-          value={type}
-          options={typeOptions}
-          onChange={(nextType) => {
-            setType(nextType);
-            setCategoryId('');
-            setToAccountId('');
-          }}
-          className="mb-6 animate-child"
-        />
+        <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center text-3xl font-light text-muted-foreground">
+            <CurrencyPrefix currency={currency} />
+          </div>
 
-        <div className="animate-child space-y-5 rounded-2xl app-card-surface p-5">
+          <input
+            type="number"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            placeholder="0.00"
+            className="w-48 border-none bg-transparent text-center text-5xl font-bold tabular-nums outline-none"
+            step="0.01"
+            min="0"
+            autoFocus
+          />
+        </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-3 gap-2">
+        {typeOptions.map((option) => {
+          const isActive = type === option.value;
+          const Icon = option.icon;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                setType(option.value);
+                setCategoryId('');
+                setToAccountId('');
+                setTransferPurpose(TRANSFER_PURPOSES.normal);
+              }}
+              className={cn(
+                'flex flex-col items-center gap-1.5 rounded-xl border-2 py-3 text-sm font-medium transition-all',
+                isActive
+                  ? option.color
+                  : 'border-border text-muted-foreground hover:border-muted-foreground/30'
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border bg-card p-5">
+        {type !== 'transfer' && (
           <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {type === 'transfer' ? 'From Account' : 'Account'}
+            <label className="text-xs font-medium text-muted-foreground">
+              Category
             </label>
 
-            <Select
-              value={accountId}
-              onValueChange={(value) => {
-                setAccountId(value);
-
-                if (type === 'transfer') {
-                  setCategoryId('');
-
-                  if (value === toAccountId) {
-                    setToAccountId('');
-                  }
-                }
-              }}
-            >
+            <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select account" />
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
 
               <SelectContent>
-                {accounts.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    {a.name}
+                {filteredCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: category.color || '#0078D4' }}
+                      />
+                      {category.name}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+        )}
 
-          {type === 'transfer' && (
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">
+            {type === 'transfer' ? 'From Account' : 'Account'}
+          </label>
+
+          <Select value={accountId} onValueChange={setAccountId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select account" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {accounts.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {type === 'transfer' && (
+          <>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <label className="text-xs font-medium text-muted-foreground">
                 To Account
               </label>
 
@@ -520,6 +488,7 @@ export default function AddTransaction() {
                 value={toAccountId}
                 onValueChange={(value) => {
                   setToAccountId(value);
+                  setTransferPurpose(TRANSFER_PURPOSES.normal);
                   setCategoryId('');
                 }}
               >
@@ -529,132 +498,115 @@ export default function AddTransaction() {
 
                 <SelectContent>
                   {accounts
-                    .filter((a) => a.id !== accountId)
-                    .map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.name}
+                    .filter((account) => account.id !== accountId)
+                    .map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
                       </SelectItem>
                     ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
 
-          {shouldShowCategory && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Category
+              <label className="text-xs font-medium text-muted-foreground">
+                Transfer Purpose
               </label>
 
               <Select
-                value={categoryId}
-                onValueChange={setCategoryId}
-                disabled={type === 'transfer' && !transferCategoryType}
+                value={transferPurpose}
+                onValueChange={(value) => {
+                  setTransferPurpose(value);
+                  setCategoryId('');
+                }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={categoryPlaceholder} />
+                  <SelectValue placeholder="Select purpose" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  {filteredCategories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: c.color || '#0078D4' }}
-                        />
-                        {c.name}
-                      </div>
+                  {transferPurposeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              {type === 'transfer' &&
-                transferCategoryType &&
-                filteredCategories.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    No matching {transferCategoryType} categories found.
-                  </p>
-                )}
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {
+                  transferPurposeOptions.find(
+                    (option) => option.value === transferPurpose
+                  )?.description
+                }
+              </p>
             </div>
-          )}
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Date
-            </label>
+            {requiresCategory && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {transferPurpose === TRANSFER_PURPOSES.savingsAllocation
+                    ? 'Savings Category'
+                    : 'Debt Category'}
+                </label>
 
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        transferPurpose === TRANSFER_PURPOSES.savingsAllocation
+                          ? 'Select savings category'
+                          : 'Select debt category'
+                      }
+                    />
+                  </SelectTrigger>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Note
-            </label>
+                  <SelectContent>
+                    {filteredCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: category.color || '#0078D4' }}
+                          />
+                          {category.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </>
+        )}
 
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Add a note..."
-              className="h-20 resize-none"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">
+            Date
+          </label>
+          <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
         </div>
 
-        <Button
-          onClick={handleSubmit}
-          disabled={saving || !amount}
-          className="animate-child mt-6 h-12 w-full rounded-xl text-sm font-semibold"
-        >
-          {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
-        </Button>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">
+            Note
+          </label>
+          <Textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Add a note."
+            className="h-20 resize-none"
+          />
+        </div>
+      </div>
 
-        {isEditing && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={saving}
-                className="animate-child mt-3 h-12 w-full rounded-xl border-destructive/30 text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Transaction
-              </Button>
-            </AlertDialogTrigger>
-
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
-
-                <AlertDialogDescription>
-                  This action cannot be undone. The transaction will be
-                  permanently deleted and the account balance will be adjusted.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={saving}>
-                  Cancel
-                </AlertDialogCancel>
-
-                <AlertDialogAction
-                  disabled={saving}
-                  onClick={handleDelete}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </main>
+      <Button
+        onClick={handleSubmit}
+        disabled={saving || !amount}
+        className="mt-6 h-12 w-full text-sm font-semibold"
+      >
+        {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
+      </Button>
     </div>
   );
 }
