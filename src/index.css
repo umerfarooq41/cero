@@ -424,7 +424,7 @@ main,
     --app-system-bar-bg: #0a0a1a;
     --app-safe-area-top: env(safe-area-inset-top, 0px);
     --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --app-mobile-page-header-height: calc(6.75rem + var(--app-safe-area-top));
+    --app-mobile-page-header-height: calc(4.85rem + var(--app-safe-area-top));
 
     --background: 218 42% 97%;
     --foreground: 222 47% 10%;
@@ -754,7 +754,6 @@ main,
 
 @layer utilities {
   .app-page-surface,
-  .app-page-header,
   .app-gradient-surface,
   .app-fixed-surface,
   .app-main-scroll,
@@ -790,12 +789,12 @@ main,
       inset-inline: 0 !important;
       top: 0 !important;
       z-index: 50 !important;
-      overflow: hidden;
-      background-color: var(--app-bg-color, hsl(var(--background))) !important;
-      background-image: var(--app-bg-image) !important;
-      background-size: cover !important;
-      background-position: center top !important;
-      background-attachment: scroll !important;
+      overflow: visible;
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
   }
 
@@ -1056,7 +1055,6 @@ main,
 
 @media (prefers-reduced-motion: reduce) {
   .app-page-surface,
-  .app-page-header,
   .app-gradient-surface,
   .app-fixed-surface,
   .app-main-scroll,
