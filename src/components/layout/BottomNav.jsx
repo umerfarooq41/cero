@@ -60,16 +60,6 @@ function BottomNavStyles() {
           --app-bottom-nav-height: calc(4.25rem + var(--app-safe-area-bottom));
         }
 
-        .app-main-scroll {
-          padding-bottom: var(--app-bottom-nav-height);
-        }
-
-        @media (min-width: 1024px) {
-          .app-main-scroll {
-            padding-bottom: 0;
-          }
-        }
-
         .app-bottom-nav {
           height: var(--app-bottom-nav-height);
           padding-bottom: var(--app-safe-area-bottom);
@@ -77,11 +67,9 @@ function BottomNavStyles() {
           border-top: 0 !important;
           border-bottom: 0 !important;
           outline: 0 !important;
-          background-color: var(--app-bg-color, hsl(var(--background))) !important;
-          background-image: var(--app-bg-image) !important;
-          background-size: cover !important;
-          background-position: center !important;
-          background-attachment: fixed !important;
+          background: transparent !important;
+          background-color: transparent !important;
+          background-image: none !important;
           box-shadow: none !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
