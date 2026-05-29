@@ -778,7 +778,8 @@ main,
   }
 
   @media (max-width: 1023px) {
-    .app-main-scroll {
+    .app-main-scroll,
+    .app-main-scroll.app-page-surface {
       flex: 0 0 auto;
       height: calc(100dvh - var(--app-mobile-page-header-height) - var(--app-bottom-nav-height, 4.25rem));
       margin-top: var(--app-mobile-page-header-height);
@@ -788,6 +789,20 @@ main,
       scroll-padding-bottom: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .app-main-scroll::before,
+    .app-main-scroll::after {
+      display: none !important;
+      content: none !important;
+      background: none !important;
+      animation: none !important;
     }
 
     .app-page-header {
@@ -799,6 +814,16 @@ main,
       background: transparent !important;
       background-color: transparent !important;
       background-image: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+
+    .app-bottom-nav {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
     }
