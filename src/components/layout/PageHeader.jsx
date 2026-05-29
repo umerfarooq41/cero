@@ -21,7 +21,7 @@ export default function PageHeader({
           app-page-header
           fixed inset-x-0 top-0 z-50
           h-[var(--app-mobile-page-header-height)]
-          overflow-hidden
+          overflow-visible
           border-0
           shadow-none
           ring-0
