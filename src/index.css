@@ -773,13 +773,41 @@ main,
   }
 
   .app-page-header {
+    position: relative;
+    isolation: isolate;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  .app-page-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-color: var(--app-bg-color, hsl(var(--background))) !important;
     background-image: var(--app-bg-image) !important;
     background-size: cover !important;
     background-position: center top !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    outline: 0 !important;
+    background-attachment: fixed !important;
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 76%,
+      rgba(0, 0, 0, 0.82) 88%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 76%,
+      rgba(0, 0, 0, 0.82) 88%,
+      transparent 100%
+    );
   }
 
 
@@ -990,11 +1018,14 @@ main,
   body,
   #root,
   .app-page-surface,
-  .app-page-header,
   .app-gradient-surface,
   .app-fixed-surface,
   .app-main-scroll,
   .app-bottom-nav {
+    background-attachment: scroll !important;
+  }
+
+  .app-page-header::before {
     background-attachment: scroll !important;
   }
 }
