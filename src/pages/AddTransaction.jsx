@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowLeftRight,
   ArrowUpRight,
+  Trash2,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -20,9 +21,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAccounts, useAllTransactions, useCategories } from '@/hooks/useBudgetData';
+import {
+  useAccounts,
+  useAllTransactions,
+  useCategories,
+  useSavingsGoals,
+} from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
+import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
 import { cn } from '@/lib/utils';
 
 const typeOptions = [
@@ -153,6 +160,7 @@ export default function AddTransaction() {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const destinationAccount = useMemo(
     () => accounts.find((account) => account.id === toAccountId),
@@ -356,6 +364,45 @@ export default function AddTransaction() {
       toast.error(error.message || 'Could not save transaction');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isEditing || !existingTransaction) {
+      toast.error('Transaction not found');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Delete this transaction? This will also reverse its account balance effects.'
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+
+    try {
+      await deleteTransactionWithEffects({
+        transaction: existingTransaction,
+        accounts,
+        savingsGoals,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
+
+      toast.success('Transaction deleted');
+      navigate('/transactions');
+    } catch (error) {
+      console.error('Transaction delete failed:', error);
+      toast.error(error.message || 'Could not delete transaction');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -602,11 +649,24 @@ export default function AddTransaction() {
 
       <Button
         onClick={handleSubmit}
-        disabled={saving || !amount}
+        disabled={saving || deleting || !amount}
         className="mt-6 h-12 w-full text-sm font-semibold"
       >
         {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
       </Button>
+
+      {isEditing && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleDelete}
+          disabled={saving || deleting}
+          className="mt-3 h-12 w-full text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {deleting ? 'Deleting...' : 'Delete Transaction'}
+        </Button>
+      )}
     </div>
   );
 }
