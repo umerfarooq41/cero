@@ -81,10 +81,13 @@ export default function PageHeader({
               className="
                 mt-1.5
                 max-w-2xl
+                truncate
                 text-sm
                 leading-snug
                 text-muted-foreground
                 lg:mt-3
+                lg:overflow-visible
+                lg:whitespace-normal
                 lg:text-base
               "
             >
