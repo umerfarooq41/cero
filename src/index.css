@@ -756,8 +756,7 @@ main,
   .app-page-surface,
   .app-gradient-surface,
   .app-fixed-surface,
-  .app-main-scroll,
-  .app-bottom-nav {
+  .app-main-scroll {
     background-color: var(--app-bg-color, hsl(var(--background))) !important;
     background-image: var(--app-bg-image) !important;
     background-size: cover !important;
@@ -780,9 +779,15 @@ main,
 
   @media (max-width: 1023px) {
     .app-main-scroll {
+      flex: 0 0 auto;
+      height: calc(100dvh - var(--app-mobile-page-header-height) - var(--app-bottom-nav-height, 4.25rem));
       margin-top: var(--app-mobile-page-header-height);
       padding-top: 0 !important;
+      padding-bottom: 0 !important;
       scroll-padding-top: 0;
+      scroll-padding-bottom: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .app-page-header {
@@ -1016,8 +1021,7 @@ main,
   .app-page-surface,
   .app-gradient-surface,
   .app-fixed-surface,
-  .app-main-scroll,
-  .app-bottom-nav {
+  .app-main-scroll {
     background-attachment: scroll !important;
   }
 
