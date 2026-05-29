@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowLeftRight,
   ArrowUpRight,
+  AlertTriangle,
   Trash2,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,6 +22,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   useAccounts,
   useAllTransactions,
@@ -147,6 +156,7 @@ export default function AddTransaction() {
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: allTransactions = [] } = useAllTransactions();
+  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const existingTransaction = allTransactions.find((transaction) => transaction.id === id);
   const currency = useCurrency();
@@ -161,6 +171,7 @@ export default function AddTransaction() {
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const destinationAccount = useMemo(
     () => accounts.find((account) => account.id === toAccountId),
@@ -367,17 +378,14 @@ export default function AddTransaction() {
     }
   };
 
+
+
   const handleDelete = async () => {
     if (!isEditing || !existingTransaction) {
       toast.error('Transaction not found');
+      setDeleteOpen(false);
       return;
     }
-
-    const confirmed = window.confirm(
-      'Delete this transaction? This will also reverse its account balance effects.'
-    );
-
-    if (!confirmed) return;
 
     setDeleting(true);
 
@@ -388,15 +396,18 @@ export default function AddTransaction() {
         savingsGoals,
       });
 
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
-      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['all-transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['accounts'] }),
+        queryClient.invalidateQueries({ queryKey: ['savings-goals'] }),
+        queryClient.invalidateQueries({ queryKey: ['goal-contributions'] }),
+        queryClient.invalidateQueries({ queryKey: ['budget-summary'] }),
+        queryClient.invalidateQueries({ queryKey: ['plan-data'] }),
+      ]);
 
       toast.success('Transaction deleted');
+      setDeleteOpen(false);
       navigate('/transactions');
     } catch (error) {
       console.error('Transaction delete failed:', error);
@@ -405,6 +416,7 @@ export default function AddTransaction() {
       setDeleting(false);
     }
   };
+
 
   return (
     <div className="mx-auto max-w-lg px-4 py-6 lg:py-10">
@@ -659,14 +671,62 @@ export default function AddTransaction() {
         <Button
           type="button"
           variant="ghost"
-          onClick={handleDelete}
-          disabled={saving || deleting}
+          onClick={() => setDeleteOpen(true)}
+          disabled={saving || deleting || !existingTransaction}
           className="mt-3 h-12 w-full text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          {deleting ? 'Deleting...' : 'Delete Transaction'}
+          Delete Transaction
         </Button>
       )}
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="overflow-hidden rounded-3xl border border-destructive/25 app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(127,29,29,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+          <DialogHeader className="border-b border-destructive/20 px-6 py-5">
+            <DialogTitle className="flex items-center gap-3 text-lg font-bold text-destructive">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+              </span>
+              Delete Transaction
+            </DialogTitle>
+
+            <DialogDescription className="pt-2 text-sm leading-6">
+              This will permanently delete the transaction and reverse its account balance effects.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 px-6 py-5">
+            <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm leading-6 text-muted-foreground">
+              Linked goal contribution effects will also be reversed when this transaction
+              belongs to a savings goal.
+            </div>
+          </div>
+
+          <DialogFooter className="border-t border-border/50 px-6 py-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-2xl"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="button"
+              variant="destructive"
+              className="rounded-2xl"
+              onClick={handleDelete}
+              disabled={deleting || !existingTransaction}
+            >
+              {deleting ? 'Deleting...' : 'Delete Transaction'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
