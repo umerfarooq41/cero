@@ -20,14 +20,26 @@ const clampPercent = (value) =>
 
 const safeNumber = (value) => Number(value || 0);
 
-function isActiveGoal(goal) {
+function isGoalComplete(goal) {
   const target = safeNumber(goal?.target_amount);
   const current = safeNumber(goal?.current_amount);
 
+  return target > 0 && current >= target;
+}
+
+function isActiveGoal(goal) {
   if (goal?.is_archived) return false;
-  if (target > 0 && current >= target) return false;
+  if (isGoalComplete(goal)) return false;
 
   return true;
+}
+
+function shouldShowGoalInReflect(goal, isYear) {
+  if (isYear) {
+    return isActiveGoal(goal) || isGoalComplete(goal);
+  }
+
+  return isActiveGoal(goal);
 }
 
 function getTransactionGoalId(transaction) {
@@ -216,45 +228,48 @@ function getGoalTrackState(goal) {
 }
 
 function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = false }) {
-  const activeGoals = useMemo(
-    () => (Array.isArray(goals) ? goals.filter(isActiveGoal) : []),
-    [goals]
+  const reflectGoals = useMemo(
+    () =>
+      Array.isArray(goals)
+        ? goals.filter((goal) => shouldShowGoalInReflect(goal, isYear))
+        : [],
+    [goals, isYear]
   );
 
-  const activeGoalIds = useMemo(
-    () => new Set(activeGoals.map((goal) => goal.id).filter(Boolean)),
-    [activeGoals]
+  const reflectGoalIds = useMemo(
+    () => new Set(reflectGoals.map((goal) => goal.id).filter(Boolean)),
+    [reflectGoals]
   );
 
   const safeGoalTransactions = useMemo(() => {
     if (!Array.isArray(goalTransactions)) return [];
-    if (activeGoalIds.size === 0) return [];
+    if (reflectGoalIds.size === 0) return [];
 
     return goalTransactions.filter((transaction) => {
       if (!isGoalTransferTransaction(transaction)) return false;
 
       const goalId = getTransactionGoalId(transaction);
-      return goalId ? activeGoalIds.has(goalId) : false;
+      return goalId ? reflectGoalIds.has(goalId) : false;
     });
-  }, [goalTransactions, activeGoalIds]);
+  }, [goalTransactions, reflectGoalIds]);
 
   const stats = useMemo(() => {
-    const totalSaved = activeGoals.reduce(
+    const totalSaved = reflectGoals.reduce(
       (sum, goal) => sum + safeNumber(goal.current_amount),
       0
     );
-    const totalTarget = activeGoals.reduce(
+    const totalTarget = reflectGoals.reduce(
       (sum, goal) => sum + safeNumber(goal.target_amount),
       0
     );
     const periodContribution = safeGoalTransactions
       .filter(isGoalTransferTransaction)
       .reduce((sum, transaction) => sum + Math.max(0, safeNumber(transaction.amount)), 0);
-    const monthlyRequired = activeGoals.reduce((sum, goal) => {
+    const monthlyRequired = reflectGoals.reduce((sum, goal) => {
       const required = getMonthlyRequiredSaving(goal);
       return sum + (required === null ? 0 : safeNumber(required));
     }, 0);
-    const completed = activeGoals.filter((goal) => getGoalRemaining(goal) <= 0).length;
+    const completed = reflectGoals.filter(isGoalComplete).length;
 
     return {
       totalSaved,
@@ -264,11 +279,11 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
       completed,
       overallProgress: totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0,
     };
-  }, [activeGoals, safeGoalTransactions]);
+  }, [reflectGoals, safeGoalTransactions]);
 
   const priorityGoals = useMemo(
-    () => sortGoalsByPriority(activeGoals).slice(0, 3),
-    [activeGoals]
+    () => sortGoalsByPriority(reflectGoals).slice(0, 3),
+    [reflectGoals]
   );
 
   return (
@@ -279,10 +294,14 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
         subtitle="Goals, contributions, and required monthly pace."
       />
 
-      {activeGoals.length === 0 ? (
+      {reflectGoals.length === 0 ? (
         <EmptyBlock
-          title="No active savings goals"
-          text="Create a new goal in Manage Plan, then Reflect will show progress and pace analysis here. Completed and archived goals stay out of the current goal analysis."
+          title={isYear ? 'No goals to summarize' : 'No active savings goals'}
+          text={
+            isYear
+              ? 'Goals completed or active during the year will appear here.'
+              : 'Create a new goal in Manage Plan, then Reflect will show progress and pace analysis here. Completed goals stay out of monthly active goal analysis.'
+          }
         />
       ) : (
         <motion.div
@@ -335,7 +354,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
               <MetricLine
                 label="Required/mo"
                 value={<Money value={stats.monthlyRequired} currency={currency} />}
-                subtext={`${stats.completed}/${activeGoals.length} funded`}
+                subtext={`${stats.completed}/${reflectGoals.length} funded`}
                 delay={0.12}
               />
             </div>
