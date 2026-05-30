@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
@@ -27,8 +28,10 @@ import {
   useTransactions,
   useRecurringTransactions,
   useSavingsGoals,
+  useAllTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
+import { attachGoalFundingProgress } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 
 function DashboardCard(props) {
@@ -148,7 +151,12 @@ export default function DashboardOverview() {
   const { data: accounts = [] } = useAccounts();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: allTransactions = [] } = useAllTransactions();
 
+  const goalsWithFunding = useMemo(
+    () => attachGoalFundingProgress(savingsGoals, allTransactions),
+    [allTransactions, savingsGoals]
+  );
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -239,7 +247,7 @@ export default function DashboardOverview() {
           />
 
           <TopGoalPreview
-            goals={savingsGoals}
+            goals={goalsWithFunding}
             formatCurrency={formatCurrency}
             className="animate-child"
           />

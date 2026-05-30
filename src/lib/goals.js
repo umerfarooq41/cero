@@ -107,20 +107,91 @@ export function formatGoalDate(value) {
   }).format(date);
 }
 
+export function getGoalFundedAmount(goal) {
+  const fallbackCurrent = Math.max(0, Number(goal?.current_amount || 0));
+  const fundedAmount =
+    goal?.funded_amount ??
+    goal?.total_contributed_amount ??
+    goal?.progress_amount ??
+    fallbackCurrent;
+
+  return Math.max(0, Number(fundedAmount || 0));
+}
+
+export function getGoalAvailableAmount(goal) {
+  return Math.max(0, Number(goal?.current_amount || 0));
+}
+
+export function getGoalTransactionGoalId(transaction) {
+  return transaction?.savings_goal_id || transaction?.goal_id || null;
+}
+
+export function isGoalFundUseTransaction(transaction) {
+  const note = String(transaction?.note || '').trim().toLowerCase();
+
+  return (
+    transaction?.source_type === 'goal_withdrawal' ||
+    (note.startsWith('use ') && note.endsWith(' funds'))
+  );
+}
+
+export function getGoalFundingTotals(transactions = []) {
+  return transactions.reduce(
+    (totals, transaction) => {
+      const goalId = getGoalTransactionGoalId(transaction);
+
+      if (!goalId || transaction?.type !== 'transfer') return totals;
+
+      const amount = Math.max(0, Number(transaction?.amount || 0));
+      const isFundUse = isGoalFundUseTransaction(transaction);
+
+      if (!isFundUse) {
+        totals.fundedByGoal[goalId] = (totals.fundedByGoal[goalId] || 0) + amount;
+      }
+
+      totals.netByGoal[goalId] =
+        (totals.netByGoal[goalId] || 0) + (isFundUse ? -amount : amount);
+
+      return totals;
+    },
+    { fundedByGoal: {}, netByGoal: {} }
+  );
+}
+
+export function attachGoalFundingProgress(goals = [], transactions = []) {
+  const { fundedByGoal, netByGoal } = getGoalFundingTotals(transactions);
+
+  return goals.map((goal) => {
+    const netPostedTotal = Number(netByGoal[goal.id] || 0);
+    const fundedPostedTotal = Number(fundedByGoal[goal.id] || 0);
+    const startingAmount = Math.max(
+      0,
+      Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - netPostedTotal))
+    );
+
+    return {
+      ...goal,
+      starting_amount: startingAmount,
+      current_amount: Math.max(0, startingAmount + netPostedTotal),
+      funded_amount: Math.max(0, startingAmount + fundedPostedTotal),
+    };
+  });
+}
+
 export function getGoalProgress(goal) {
-  const current = Math.max(0, Number(goal?.current_amount || 0));
+  const funded = getGoalFundedAmount(goal);
   const target = Math.max(0, Number(goal?.target_amount || 0));
 
   if (!target) return 0;
 
-  return Math.min(100, Math.round((current / target) * 100));
+  return Math.min(100, Math.round((funded / target) * 100));
 }
 
 export function getGoalRemaining(goal) {
-  const current = Math.max(0, Number(goal?.current_amount || 0));
+  const funded = getGoalFundedAmount(goal);
   const target = Math.max(0, Number(goal?.target_amount || 0));
 
-  return Math.max(0, target - current);
+  return Math.max(0, target - funded);
 }
 
 export function getMonthsUntilTarget(targetDate) {

@@ -40,6 +40,7 @@ import {
   useRecurringTransactions,
   useSavingsGoals,
   useTransactions,
+  useAllTransactions,
 } from "@/hooks/useBudgetData";
 import { useCurrency } from "@/hooks/useCurrency";
 import {
@@ -59,7 +60,7 @@ import {
   getGoalProgress,
   getGoalRemaining,
   getGoalStatus,
-  getMonthlyRequiredSaving,
+  getGoalPlannedAmountForMonth,
   sortGoalsByPriority,
   todayIsoDate as goalTodayIsoDate,
 } from "@/lib/goals";
@@ -199,7 +200,12 @@ function getGoalSourceId(row) {
 }
 
 function isGoalFundUseTransaction(row) {
-  return row?.source_type === "goal_withdrawal";
+  const note = String(row?.note || "").trim().toLowerCase();
+
+  return (
+    row?.source_type === "goal_withdrawal" ||
+    (note.startsWith("use ") && note.endsWith(" funds"))
+  );
 }
 
 function sumGoalContributionsByGoal(rows = []) {
@@ -213,6 +219,18 @@ function sumGoalContributionsByGoal(rows = []) {
 }
 
 function sumGoalTransactionsByGoal(rows = []) {
+  return rows.reduce((totals, row) => {
+    const goalId = row?.savings_goal_id || row?.goal_id || null;
+    if (!goalId || row?.type !== "transfer" || isGoalFundUseTransaction(row))
+      return totals;
+
+    totals[goalId] =
+      (totals[goalId] || 0) + Math.max(0, Number(row?.amount || 0));
+    return totals;
+  }, {});
+}
+
+function sumGoalFundedTotalsByGoal(rows = []) {
   return rows.reduce((totals, row) => {
     const goalId = row?.savings_goal_id || row?.goal_id || null;
     if (!goalId || row?.type !== "transfer" || isGoalFundUseTransaction(row))
@@ -245,14 +263,14 @@ function getGoalPlanRow(goal, allocations = []) {
   });
 }
 
-function getGoalMonthlyPlanAmount(goal, allocations = []) {
+function getGoalMonthlyPlanAmount(goal, allocations = [], currentMonth) {
   const planRow = getGoalPlanRow(goal, allocations);
 
   if (planRow) {
     return Math.max(0, Number(planRow.planned_amount || 0));
   }
 
-  const fallback = getMonthlyRequiredSaving(goal);
+  const fallback = getGoalPlannedAmountForMonth(goal, currentMonth);
   return fallback === null ? null : Math.max(0, Number(fallback || 0));
 }
 
@@ -1025,6 +1043,7 @@ export default function ScheduledTransactions() {
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: monthTransactions = [] } = useTransactions(currentMonth);
+  const { data: allTransactions = [] } = useAllTransactions();
   const { data: allocations = [] } = useAllocations(currentMonth);
 
   const [postingId, setPostingId] = useState(null);
@@ -1077,19 +1096,28 @@ export default function ScheduledTransactions() {
     [monthTransactions],
   );
 
+  const fundedTotalsByGoal = useMemo(
+    () => sumGoalFundedTotalsByGoal(allTransactions),
+    [allTransactions],
+  );
+
   const activeGoals = useMemo(
     () =>
       sortGoalsByPriority(
         savingsGoals
           .filter((goal) => !goal.is_archived)
           .map((goal) => {
+            const startingAmount = Math.max(0, Number(goal.starting_amount || 0));
+            const fundedAmount = startingAmount + Number(fundedTotalsByGoal[goal.id] || 0);
             const goalWithProgress = {
               ...goal,
               current_amount: Math.max(0, Number(goal.current_amount || 0)),
+              funded_amount: Math.max(0, fundedAmount),
             };
             const plannedThisMonth = getGoalMonthlyPlanAmount(
               goalWithProgress,
               allocations,
+              currentMonth,
             );
             const contributedThisMonth = monthContributionsByGoal[goal.id] || 0;
             const hasMonthlyPlan =
@@ -1109,7 +1137,7 @@ export default function ScheduledTransactions() {
             };
           }),
       ),
-    [allocations, monthContributionsByGoal, savingsGoals],
+    [allocations, currentMonth, fundedTotalsByGoal, monthContributionsByGoal, savingsGoals],
   );
 
   const invalidateData = () => {

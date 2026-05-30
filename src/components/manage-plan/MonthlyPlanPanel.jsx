@@ -16,9 +16,11 @@ import {
   useCategories,
   useRecurringTransactions,
   useSavingsGoals,
+  useAllTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import {
+  attachGoalFundingProgress,
   formatGoalDate,
   getGoalProgress,
   getGoalStartDate,
@@ -263,6 +265,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   const { data: allocations = [] } = useAllocations(currentMonth);
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: allTransactions = [] } = useAllTransactions();
 
   const prevMonth = format(
     subMonths(new Date(`${currentMonth}-01T00:00:00`), 1),
@@ -281,6 +284,11 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         .map((category) => category.id)
     );
   }, [categories]);
+
+  const goalsWithFunding = useMemo(
+    () => attachGoalFundingProgress(savingsGoals, allTransactions),
+    [allTransactions, savingsGoals]
+  );
 
   const allocationByRowKey = useMemo(() => {
     const result = {};
@@ -442,7 +450,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       result[row.type]?.push(row);
     });
 
-    savingsGoals
+    goalsWithFunding
       .filter((goal) => !goal.is_archived && isGoalPlannedForMonth(goal, currentMonth))
       .forEach((goal) => {
         const monthlyRequired = getGoalPlannedAmountForMonth(goal, currentMonth);
@@ -467,7 +475,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       });
 
     return result;
-  }, [categories, currentMonth, leafCategoryIds, recurringTransactions, savingsGoals]);
+  }, [categories, currentMonth, goalsWithFunding, leafCategoryIds, recurringTransactions]);
 
   const allRows = useMemo(() => {
     return Object.values(rowsByType)

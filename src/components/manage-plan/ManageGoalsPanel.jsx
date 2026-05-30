@@ -137,13 +137,40 @@ function getGoalTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
-function sumPostedGoalTransactionsByGoal(transactions = []) {
+function isGoalFundUseTransaction(transaction) {
+  const note = String(transaction?.note || '').trim().toLowerCase();
+
+  return (
+    transaction?.source_type === 'goal_withdrawal' ||
+    (note.startsWith('use ') && note.endsWith(' funds'))
+  );
+}
+
+function sumFundedGoalTransactionsByGoal(transactions = []) {
+  return transactions.reduce((totals, transaction) => {
+    const goalId = getGoalTransactionGoalId(transaction);
+
+    if (
+      !goalId ||
+      transaction?.type !== 'transfer' ||
+      isGoalFundUseTransaction(transaction)
+    ) {
+      return totals;
+    }
+
+    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(transaction?.amount || 0));
+    return totals;
+  }, {});
+}
+
+function sumNetGoalTransactionsByGoal(transactions = []) {
   return transactions.reduce((totals, transaction) => {
     const goalId = getGoalTransactionGoalId(transaction);
 
     if (!goalId || transaction?.type !== 'transfer') return totals;
 
-    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(transaction?.amount || 0));
+    const amount = Math.max(0, Number(transaction?.amount || 0));
+    totals[goalId] = (totals[goalId] || 0) + (isGoalFundUseTransaction(transaction) ? -amount : amount);
     return totals;
   }, {});
 }
@@ -644,25 +671,33 @@ export default function ManageGoalsPanel() {
     initialData: [],
   });
 
-  const postedGoalTotals = useMemo(
-    () => sumPostedGoalTransactionsByGoal(allTransactions),
+  const fundedGoalTotals = useMemo(
+    () => sumFundedGoalTransactionsByGoal(allTransactions),
+    [allTransactions]
+  );
+
+  const netGoalTotals = useMemo(
+    () => sumNetGoalTransactionsByGoal(allTransactions),
     [allTransactions]
   );
 
   const normalizedGoals = useMemo(
     () => savingsGoals.map((goal) => {
-      const postedTotal = Number(postedGoalTotals[goal.id] || 0);
+      const netPostedTotal = Number(netGoalTotals[goal.id] || 0);
+      const fundedPostedTotal = Number(fundedGoalTotals[goal.id] || 0);
       const startingAmount = Math.max(
         0,
-        Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - postedTotal))
+        Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - netPostedTotal))
       );
 
       return {
         ...goal,
         starting_amount: startingAmount,
+        current_amount: Math.max(0, startingAmount + netPostedTotal),
+        funded_amount: Math.max(0, startingAmount + fundedPostedTotal),
       };
     }),
-    [postedGoalTotals, savingsGoals]
+    [fundedGoalTotals, netGoalTotals, savingsGoals]
   );
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -696,11 +731,11 @@ export default function ManageGoalsPanel() {
 
     try {
       if (editingGoal?.id) {
-        const postedTotal = Number(postedGoalTotals[editingGoal.id] || 0);
+        const netPostedTotal = Number(netGoalTotals[editingGoal.id] || 0);
 
         await savingsGoalsApi.update(editingGoal.id, {
           ...payload,
-          current_amount: Number(payload.starting_amount || 0) + postedTotal,
+          current_amount: Number(payload.starting_amount || 0) + netPostedTotal,
         });
         toast.success('Savings goal updated');
       } else {

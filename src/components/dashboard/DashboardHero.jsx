@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { getGoalFundedAmount } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 
 function MetricCard({ label, value, detail, icon: Icon, tone = 'default' }) {
@@ -81,7 +82,7 @@ function PreviewRow({ icon: Icon, title, subtitle, amount, badge }) {
 }
 
 function getGoalAmount(goal) {
-  return Number(goal?.current_amount ?? goal?.saved_amount ?? goal?.starting_amount ?? 0);
+  return getGoalFundedAmount(goal);
 }
 
 function getGoalTarget(goal) {

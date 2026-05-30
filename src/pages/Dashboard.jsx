@@ -9,13 +9,16 @@ import PageHeader from '@/components/layout/PageHeader';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import { format } from 'date-fns';
+import { useMemo } from 'react';
 import {
   useBudgetSummary,
+  useAllTransactions,
   useRecurringTransactions,
   useSavingsGoals,
   useTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
+import { attachGoalFundingProgress } from '@/lib/goals';
 
 const validTabs = new Set(['overview', 'reflect']);
 
@@ -36,6 +39,11 @@ export default function Dashboard() {
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: allTransactions = [] } = useAllTransactions();
+  const goalsWithFunding = useMemo(
+    () => attachGoalFundingProgress(savingsGoals, allTransactions),
+    [allTransactions, savingsGoals]
+  );
   const formatCurrency = useCurrencyFormatter();
 
   return (
@@ -53,7 +61,7 @@ export default function Dashboard() {
             budget={budget}
             transactions={transactions}
             recurringTransactions={recurringTransactions}
-            goals={savingsGoals}
+            goals={goalsWithFunding}
             formatCurrency={formatCurrency}
           />
         </div>

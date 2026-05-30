@@ -1,6 +1,5 @@
 import {
   accountsApi,
-  budgetPlansApi,
   goalContributionsApi,
   transactionsApi,
 } from '@/lib/budgetData';
@@ -12,10 +11,6 @@ import {
 
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
-}
-
-function monthKeyFromDate(dateValue) {
-  return String(dateValue || todayIsoDate()).slice(0, 7);
 }
 
 function safeAmount(value) {
@@ -31,17 +26,6 @@ function isDebtAccount(account) {
     category === 'debt' ||
     ['loan', 'credit_card', 'credit-card', 'creditcard', 'debt'].includes(type)
   );
-}
-
-function findGoalPlanRow(goal, allocations = []) {
-  return allocations.find((allocation) => {
-    const sourceType = String(allocation?.source_type || '').toLowerCase();
-
-    return (
-      (sourceType === 'goal' || sourceType === 'savings_goal') &&
-      allocation?.source_id === goal?.id
-    );
-  });
 }
 
 async function applyAccountBalanceDeltas(transactionPayload, accounts = []) {
@@ -113,25 +97,8 @@ export async function postGoalContribution({
   }
 
   const contributionDate = date || todayIsoDate();
-  const contributionMonth = monthKeyFromDate(contributionDate || month);
   const contributionNote = note || `Contribution to ${goal.name}`;
   const savingsCategory = getDefaultSavingsCategory(categories);
-  const existingGoalPlan = findGoalPlanRow(goal, allocations);
-  const plannedAmountSnapshot = safeAmount(goal.month_planned_amount);
-
-  if (!existingGoalPlan && plannedAmountSnapshot > 0) {
-    await budgetPlansApi.upsert({
-      category_id: null,
-      month: contributionMonth,
-      planned_amount: plannedAmountSnapshot,
-      source_type: 'goal',
-      source_id: goal.id,
-      budget_type: 'savings',
-      label: goal.name,
-      icon: goal.icon_key || 'target',
-      color: goal.color_key || '#276FE4',
-    });
-  }
 
   const contribution = await goalContributionsApi.create({
     goal_id: goal.id,
