@@ -31,18 +31,22 @@ function getActionLabel(type) {
 function getStatusLabel(type, rawPercent, isOverBudget, tracked) {
   if (tracked <= 0) return 'Unused';
 
+  const isFullyTracked = Math.abs(rawPercent - 100) < 0.01;
+
   if (type === 'income' && rawPercent >= 100) return 'Received';
+
   if (type === 'savings' && rawPercent >= 100) return 'Saved';
+
   if (type === 'debt' && rawPercent >= 100) return 'Paid';
 
   if (type === 'expense') {
     if (isOverBudget) return 'Over budget';
+    if (isFullyTracked) return 'Spent';
     if (rawPercent >= 75) return 'Near limit';
   }
 
   return 'On track';
 }
-
 export default function PlanBreakdownRow({ item, currency }) {
   const type = getBudgetType(item);
   const planned = Number(item.planned || 0);
