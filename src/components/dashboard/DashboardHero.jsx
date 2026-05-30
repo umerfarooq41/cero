@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { getGoalFundedAmount } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 
 function MetricCard({ label, value, detail, icon: Icon, tone = 'default' }) {
@@ -82,11 +81,24 @@ function PreviewRow({ icon: Icon, title, subtitle, amount, badge }) {
 }
 
 function getGoalAmount(goal) {
-  return getGoalFundedAmount(goal);
+  return Math.max(0, Number(goal?.current_amount ?? goal?.saved_amount ?? 0));
 }
 
 function getGoalTarget(goal) {
-  return Number(goal?.target_amount ?? goal?.amount ?? 0);
+  return Math.max(0, Number(goal?.target_amount ?? goal?.amount ?? 0));
+}
+
+function isGoalComplete(goal) {
+  const target = getGoalTarget(goal);
+  const saved = getGoalAmount(goal);
+
+  if (target <= 0) return false;
+
+  return saved >= target;
+}
+
+function isDashboardGoalCandidate(goal) {
+  return Boolean(goal && !goal.is_archived && getGoalTarget(goal) > 0 && !isGoalComplete(goal));
 }
 
 function isActiveRecurringRule(rule) {
@@ -116,12 +128,12 @@ export default function DashboardHero({
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
     Number(budget.totalPlannedSavings || 0) +
-    Number(budget.assignablePlannedDebt ?? budget.totalPlannedDebt ?? 0);
+    Number(budget.totalPlannedDebt || 0);
   const trackedOutflow =
     Number(budget.totalExpenses || 0) +
     Number(budget.totalTrackedSavings || 0) +
     Number(budget.totalTrackedDebt || 0);
-  const topGoal = goals.find((goal) => getGoalTarget(goal) > 0);
+  const topGoal = goals.find(isDashboardGoalCandidate);
   const goalProgress = topGoal
     ? Math.min((getGoalAmount(topGoal) / getGoalTarget(topGoal)) * 100, 100)
     : 0;
