@@ -47,8 +47,57 @@ export function getTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
+export function getContributionGoalId(contribution) {
+  return contribution?.goal_id || contribution?.savings_goal_id || null;
+}
+
+function getMonthKey(dateValue) {
+  return String(dateValue || '').slice(0, 7);
+}
+
+function isLikelyGoalFundUseContribution(contribution) {
+  const note = String(contribution?.note || '').trim().toLowerCase();
+
+  return note.startsWith('use ') && note.endsWith(' funds');
+}
+
+function hasMatchingGoalTransaction(contribution, transactions = []) {
+  return transactions.some((transaction) => {
+    if (contribution?.transaction_id && transaction?.id === contribution.transaction_id) {
+      return true;
+    }
+
+    return Boolean(
+      contribution?.id && transaction?.goal_contribution_id === contribution.id
+    );
+  });
+}
+
+function getTrackedForGoalContributions({
+  goalContributions = [],
+  transactions = [],
+  sourceId,
+  currentMonth,
+}) {
+  if (!sourceId || !currentMonth) return 0;
+
+  return goalContributions.reduce((sum, contribution) => {
+    if (getContributionGoalId(contribution) !== sourceId) return sum;
+    if (getMonthKey(contribution.contribution_date) !== currentMonth) return sum;
+    if (isLikelyGoalFundUseContribution(contribution)) return sum;
+    if (hasMatchingGoalTransaction(contribution, transactions)) return sum;
+
+    return sum + getTransactionAmount(contribution);
+  }, 0);
+}
+
 export function isGoalFundUseTransaction(transaction) {
-  return transaction?.source_type === 'goal_withdrawal';
+  const note = String(transaction?.note || '').trim().toLowerCase();
+
+  return (
+    transaction?.source_type === 'goal_withdrawal' ||
+    (note.startsWith('use ') && note.endsWith(' funds'))
+  );
 }
 
 export function isSourceLinkedTransaction(transaction) {
@@ -176,10 +225,17 @@ export function buildSuggestedGoalAllocations({
     .filter(Boolean);
 }
 
-export function getTrackedForSource({ transactions = [], sourceType, sourceId, categoryId }) {
+export function getTrackedForSource({
+  transactions = [],
+  goalContributions = [],
+  sourceType,
+  sourceId,
+  categoryId,
+  currentMonth,
+}) {
   const normalizedSourceType = normalizeSourceType(sourceType);
 
-  return transactions.reduce((sum, transaction) => {
+  const transactionTracked = transactions.reduce((sum, transaction) => {
     if (normalizedSourceType === 'goal') {
       return getTransactionGoalId(transaction) === sourceId && !isGoalFundUseTransaction(transaction)
         ? sum + getTransactionAmount(transaction)
@@ -204,7 +260,22 @@ export function getTrackedForSource({ transactions = [], sourceType, sourceId, c
 
     return sum;
   }, 0);
+
+  if (normalizedSourceType !== 'goal') {
+    return transactionTracked;
+  }
+
+  return (
+    transactionTracked +
+    getTrackedForGoalContributions({
+      goalContributions,
+      transactions,
+      sourceId,
+      currentMonth,
+    })
+  );
 }
+
 
 export function getTrackedForCategory({ transactions = [], categoryId }) {
   return transactions
@@ -221,6 +292,7 @@ export function buildPlanViewData({
   subcategories = [],
   allocations = [],
   transactions = [],
+  goalContributions = [],
   savingsGoals = [],
   currentMonth,
   tab,
@@ -240,9 +312,11 @@ export function buildPlanViewData({
       const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
       const tracked = getTrackedForSource({
         transactions,
+        goalContributions,
         sourceType,
         sourceId: allocation.source_id,
         categoryId: allocation.category_id,
+        currentMonth,
       });
 
       return {

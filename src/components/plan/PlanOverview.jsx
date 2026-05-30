@@ -16,6 +16,7 @@ export default function PlanOverview({
   currency,
   allocations,
   transactions,
+  goalContributions,
   savingsGoals,
   currentMonth,
 }) {
@@ -29,6 +30,7 @@ export default function PlanOverview({
         subcategories,
         allocations,
         transactions,
+        goalContributions,
         savingsGoals,
         currentMonth,
         tab,
@@ -39,6 +41,7 @@ export default function PlanOverview({
       subcategories,
       allocations,
       transactions,
+      goalContributions,
       savingsGoals,
       currentMonth,
       tab,

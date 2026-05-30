@@ -39,7 +39,12 @@ export function getTransactionDeltas(transaction, accounts = []) {
 }
 
 export function isGoalFundUseTransaction(transaction) {
-  return transaction?.source_type === 'goal_withdrawal';
+  const note = String(transaction?.note || '').trim().toLowerCase();
+
+  return (
+    transaction?.source_type === 'goal_withdrawal' ||
+    (note.startsWith('use ') && note.endsWith(' funds'))
+  );
 }
 
 export function isGoalContributionTransaction(transaction) {

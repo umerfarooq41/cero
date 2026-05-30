@@ -60,6 +60,27 @@ async function applyAccountBalanceDeltas(transactionPayload, accounts = []) {
   );
 }
 
+async function createTransactionWithOptionalSourceType(payload) {
+  try {
+    return await transactionsApi.create(payload);
+  } catch (error) {
+    const message = String(error?.message || '').toLowerCase();
+    const shouldRetryWithoutSourceType =
+      Object.prototype.hasOwnProperty.call(payload, 'source_type') &&
+      (message.includes('source_type') ||
+        message.includes('schema cache') ||
+        message.includes('column') ||
+        message.includes('could not find'));
+
+    if (!shouldRetryWithoutSourceType) {
+      throw error;
+    }
+
+    const { source_type: _sourceType, ...fallbackPayload } = payload;
+    return transactionsApi.create(fallbackPayload);
+  }
+}
+
 export async function postGoalContribution({
   goal,
   amount,
@@ -92,7 +113,7 @@ export async function postGoalContribution({
   }
 
   const contributionDate = date || todayIsoDate();
-  const contributionMonth = month || monthKeyFromDate(contributionDate);
+  const contributionMonth = monthKeyFromDate(contributionDate || month);
   const contributionNote = note || `Contribution to ${goal.name}`;
   const savingsCategory = getDefaultSavingsCategory(categories);
   const existingGoalPlan = findGoalPlanRow(goal, allocations);
@@ -133,7 +154,7 @@ export async function postGoalContribution({
     source_type: 'goal',
   };
 
-  const transaction = await transactionsApi.create(transactionPayload);
+  const transaction = await createTransactionWithOptionalSourceType(transactionPayload);
 
   await applyAccountBalanceDeltas(transactionPayload, accounts);
 
@@ -219,7 +240,7 @@ export async function postGoalFundUse({
     source_type: 'goal_withdrawal',
   };
 
-  const transaction = await transactionsApi.create(transactionPayload);
+  const transaction = await createTransactionWithOptionalSourceType(transactionPayload);
 
   await applyAccountBalanceDeltas(transactionPayload, accounts);
 
