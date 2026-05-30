@@ -12,8 +12,34 @@ import {
   sortGoalsByPriority,
 } from '@/lib/goals';
 
+function getGoalSavedAmount(goal) {
+  return Math.max(0, Number(goal?.current_amount ?? goal?.saved_amount ?? 0));
+}
+
+function getGoalTargetAmount(goal) {
+  return Math.max(0, Number(goal?.target_amount ?? 0));
+}
+
+function isGoalComplete(goal) {
+  const target = getGoalTargetAmount(goal);
+  const saved = getGoalSavedAmount(goal);
+
+  if (target <= 0) return false;
+
+  return saved >= target || getGoalProgress(goal) >= 100;
+}
+
+function isDashboardGoalCandidate(goal) {
+  return Boolean(
+    goal &&
+      !goal.is_archived &&
+      getGoalTargetAmount(goal) > 0 &&
+      !isGoalComplete(goal)
+  );
+}
+
 function getTopGoal(goals = []) {
-  return sortGoalsByPriority(goals.filter((goal) => !goal.is_archived))[0] || null;
+  return sortGoalsByPriority(goals.filter(isDashboardGoalCandidate))[0] || null;
 }
 
 function SmallMetric({ label, value }) {
@@ -31,16 +57,20 @@ function SmallMetric({ label, value }) {
 
 export default function TopGoalPreview({ goals = [], formatCurrency, className }) {
   const topGoal = getTopGoal(goals);
+  const savedAmount = topGoal ? getGoalSavedAmount(topGoal) : 0;
+  const targetAmount = topGoal ? getGoalTargetAmount(topGoal) : 0;
+  const progress = topGoal ? getGoalProgress(topGoal) : 0;
+  const monthlyRequired = topGoal ? getMonthlyRequiredSaving(topGoal) : null;
 
   return (
     <DashboardSectionCard
       title="Top goal progress"
-      subtitle="Your highest-priority savings goal."
+      subtitle="Your highest-priority active savings goal."
       icon={Target}
       className={className}
       action={
         <DashboardGhostAction>
-          <Link to="/transactions?tab=scheduled">
+          <Link to="/manage-plan?tab=goals">
             View all
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
@@ -55,13 +85,12 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
                 {topGoal.name}
               </p>
               <p className="mt-1 truncate text-[11px] font-semibold text-muted-foreground tabular-nums sm:text-sm">
-                {formatCurrency(Number(topGoal.current_amount || 0))} /{' '}
-                {formatCurrency(Number(topGoal.target_amount || 0))}
+                {formatCurrency(savedAmount)} / {formatCurrency(targetAmount)}
               </p>
             </div>
 
             <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary sm:px-2.5 sm:py-1 sm:text-[11px]">
-              {getGoalProgress(topGoal)}%
+              {progress}%
               <span className="hidden sm:inline"> complete</span>
             </span>
           </div>
@@ -69,7 +98,7 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary sm:mt-4">
             <div
               className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${getGoalProgress(topGoal)}%` }}
+              style={{ width: `${progress}%` }}
             />
           </div>
 
@@ -77,9 +106,9 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
             <SmallMetric
               label="Required monthly"
               value={
-                getMonthlyRequiredSaving(topGoal) === null
+                monthlyRequired === null
                   ? 'No target'
-                  : formatCurrency(getMonthlyRequiredSaving(topGoal))
+                  : formatCurrency(monthlyRequired)
               }
             />
 
@@ -91,9 +120,9 @@ export default function TopGoalPreview({ goals = [], formatCurrency, className }
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Flag className="h-5 w-5" />
           </div>
-          <p className="mt-3 text-sm font-semibold text-foreground">No savings goal yet</p>
+          <p className="mt-3 text-sm font-semibold text-foreground">No active savings goals</p>
           <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
-            Create a savings goal in Manage Plan. Contributions happen from Transactions → Scheduled.
+            Completed goals stay in Manage Plan. Create a new goal to show progress here.
           </p>
           <Button asChild size="sm" className="mt-4 rounded-xl">
             <Link to="/manage-plan?tab=goals">Manage Goals</Link>
