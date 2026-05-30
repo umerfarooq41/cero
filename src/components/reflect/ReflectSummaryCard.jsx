@@ -304,16 +304,14 @@ function HeroCashFlowCard({
   isYear,
   income,
   expenses,
-  trackedSavings = 0,
-  trackedDebt = 0,
   netCashFlow,
   currency,
 }) {
-  const totalOutflow = Number(expenses || 0) + Number(trackedSavings || 0) + Number(trackedDebt || 0);
+  const actualExpenses = Number(expenses || 0);
   const positive = netCashFlow >= 0;
   const tone = positive ? 'good' : 'bad';
-  const outflowProgress =
-    income > 0 ? Math.min((Math.max(totalOutflow, 0) / income) * 100, 100) : 0;
+  const expenseProgress =
+    income > 0 ? Math.min((Math.max(actualExpenses, 0) / income) * 100, 100) : 0;
 
   return (
     <SummaryCard
@@ -321,8 +319,8 @@ function HeroCashFlowCard({
       title={isYear ? 'Yearly Cash Flow' : 'Monthly Cash Flow'}
       subtitle={
         isYear
-          ? 'Actual income minus expenses, savings, and debt.'
-          : 'Actual income minus expenses, savings, and debt.'
+          ? 'Actual income minus actual expenses.'
+          : 'Actual income minus actual expenses.'
       }
       value={<CurrencyAmount amount={netCashFlow} currency={currency} />}
       valueTone={tone}
@@ -337,8 +335,8 @@ function HeroCashFlowCard({
         />
 
         <MoneyRow
-          label="Expenses + Savings + Debt"
-          amount={totalOutflow}
+          label="Actual Expenses"
+          amount={actualExpenses}
           currency={currency}
           tone={positive ? 'text-muted-foreground' : 'text-destructive'}
         />
@@ -346,9 +344,9 @@ function HeroCashFlowCard({
 
       <div className="space-y-2.5 pt-1">
         <MetricProgressRow
-          label="Outflow"
-          value={outflowProgress}
-          valueText={`${Math.round(outflowProgress)}%`}
+          label="Expenses"
+          value={expenseProgress}
+          valueText={`${Math.round(expenseProgress)}%`}
           className="bg-primary"
           delay="delay-300"
           valueClassName={positive ? 'text-primary' : 'text-destructive'}
