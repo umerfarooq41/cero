@@ -171,6 +171,7 @@ export const budgetPlansApi = {
 
     return createRow("budget_plans", payload);
   },
+  delete: (id) => deleteRow("budget_plans", id),
 };
 
 export async function getUserSettings() {
@@ -821,4 +822,3 @@ export async function resetUserData() {
 
   return true;
 }
-
