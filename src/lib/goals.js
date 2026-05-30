@@ -2,6 +2,50 @@ export function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+export function getGoalStartDate(goal) {
+  return goal?.start_date || goal?.created_at?.slice?.(0, 10) || todayIsoDate();
+}
+
+export function isGoalActiveForMonth(goal, month) {
+  if (!month) return true;
+
+  const startMonth = String(getGoalStartDate(goal)).slice(0, 7);
+
+  return !startMonth || startMonth <= month;
+}
+
+export function getMonthsBetweenGoalDates(startDate, targetDate) {
+  if (!startDate || !targetDate) return null;
+
+  const start = new Date(`${String(startDate).slice(0, 10)}T00:00:00`);
+  const target = new Date(`${String(targetDate).slice(0, 10)}T00:00:00`);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(target.getTime())) return null;
+
+  const yearDiff = target.getFullYear() - start.getFullYear();
+  const monthDiff = target.getMonth() - start.getMonth();
+  const totalMonths = yearDiff * 12 + monthDiff + 1;
+
+  return Math.max(1, totalMonths);
+}
+
+export function getMonthlyRequiredSavingForMonth(goal, month) {
+  if (!isGoalActiveForMonth(goal, month)) return null;
+
+  const remaining = getGoalRemaining(goal);
+
+  if (remaining <= 0) return 0;
+
+  if (!month) return getMonthlyRequiredSaving(goal);
+
+  const monthStart = `${month}-01`;
+  const months = getMonthsBetweenGoalDates(monthStart, goal?.target_date);
+
+  if (months === null) return null;
+
+  return Math.ceil(remaining / months);
+}
+
 export function formatGoalDate(value) {
   if (!value) return 'No deadline';
 
@@ -125,18 +169,6 @@ export function getDefaultSavingsCategory(categories = []) {
         normalize(category.type) === 'savings' && !category.parent_id
     ) ||
     categories.find((category) => normalize(category.type) === 'savings') ||
-    null
-  );
-}
-
-export function getDefaultDebtCategory(categories = []) {
-  const normalize = (value) => String(value || '').toLowerCase().trim();
-
-  return (
-    categories.find(
-      (category) => normalize(category.type) === 'debt' && !category.parent_id
-    ) ||
-    categories.find((category) => normalize(category.type) === 'debt') ||
     null
   );
 }

@@ -46,9 +46,11 @@ import {
   formatGoalDate,
   getGoalProgress,
   getGoalRemaining,
+  getGoalStartDate,
   getGoalStatus,
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
+  todayIsoDate,
 } from '@/lib/goals';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { useAccounts, useAllTransactions } from '@/hooks/useBudgetData';
@@ -95,6 +97,7 @@ const emptyGoalForm = () => ({
   name: '',
   target_amount: '',
   current_amount: '',
+  start_date: todayIsoDate(),
   target_date: '',
   from_account_id: 'none',
   to_account_id: 'none',
@@ -134,18 +137,13 @@ function getGoalTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
-function isGoalFundUseTransaction(transaction) {
-  return transaction?.source_type === 'goal_withdrawal';
-}
-
 function sumPostedGoalTransactionsByGoal(transactions = []) {
   return transactions.reduce((totals, transaction) => {
     const goalId = getGoalTransactionGoalId(transaction);
 
     if (!goalId || transaction?.type !== 'transfer') return totals;
 
-    const amount = Math.max(0, Number(transaction?.amount || 0));
-    totals[goalId] = (totals[goalId] || 0) + (isGoalFundUseTransaction(transaction) ? -amount : amount);
+    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(transaction?.amount || 0));
     return totals;
   }, {});
 }
@@ -228,6 +226,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
         name: editingGoal.name || '',
         target_amount: String(editingGoal.target_amount ?? ''),
         current_amount: String(editingGoal.starting_amount ?? editingGoal.current_amount ?? ''),
+        start_date: getGoalStartDate(editingGoal),
         target_date: editingGoal.target_date || '',
         from_account_id: editingGoal.from_account_id || 'none',
         to_account_id: editingGoal.to_account_id || 'none',
@@ -300,6 +299,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       target_amount: targetAmount,
       starting_amount: currentAmount,
       current_amount: currentAmount,
+      start_date: form.start_date || todayIsoDate(),
       target_date: form.target_date || null,
       from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
       to_account_id: form.to_account_id === 'none' ? null : form.to_account_id,
@@ -324,7 +324,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{form.name.trim() || 'Goal Name'}</div>
             <div className="text-xs text-muted-foreground">
-              Target {form.target_amount ? Number(form.target_amount).toLocaleString() : '0'}
+              Starts {formatGoalDate(form.start_date)} · Target {form.target_amount ? Number(form.target_amount).toLocaleString() : '0'}
               {form.target_date ? ` · ${formatGoalDate(form.target_date)}` : ''}
             </div>
           </div>
@@ -344,7 +344,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Target amount</label>
               <Input
@@ -368,6 +368,15 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
                 step="0.01"
                 inputMode="decimal"
                 placeholder="0"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Start date</label>
+              <Input
+                value={form.start_date}
+                onChange={(event) => updateForm('start_date', event.target.value)}
+                type="date"
               />
             </div>
 
@@ -530,7 +539,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
         </p>
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
-          Target {formatCurrency(target)}
+          Starts {formatGoalDate(getGoalStartDate(goal))} · Target {formatCurrency(target)}
         </p>
       </div>
 

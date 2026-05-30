@@ -21,8 +21,10 @@ import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import {
   formatGoalDate,
   getGoalProgress,
+  getGoalStartDate,
   getGoalStatus,
-  getMonthlyRequiredSaving,
+  getMonthlyRequiredSavingForMonth,
+  isGoalActiveForMonth,
 } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 import { formatCurrencyNumberText } from '@/lib/currencies';
@@ -140,6 +142,7 @@ function getGoalPlanDescription(goal) {
   const progress = getGoalProgress(goal);
   const status = getGoalStatus(goal);
   const target = formatMoneyText(goal?.target_amount);
+  const startDate = formatGoalDate(getGoalStartDate(goal));
   const targetDate = goal?.target_date ? formatGoalDate(goal.target_date) : null;
 
   const statusText =
@@ -148,7 +151,7 @@ function getGoalPlanDescription(goal) {
     ? `Target ${target} · ${targetDate}`
     : `Target ${target}`;
 
-  return `${statusText} · ${progress}% complete · ${targetText}`;
+  return `Starts ${startDate} · ${statusText} · ${progress}% complete · ${targetText}`;
 }
 
 function getAllocationSourceType(allocation) {
@@ -440,9 +443,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     });
 
     savingsGoals
-      .filter((goal) => !goal.is_archived)
+      .filter((goal) => !goal.is_archived && isGoalActiveForMonth(goal, currentMonth))
       .forEach((goal) => {
-        const monthlyRequired = getMonthlyRequiredSaving(goal);
+        const monthlyRequired = getMonthlyRequiredSavingForMonth(goal, currentMonth);
 
         if (monthlyRequired === null || Number(monthlyRequired || 0) <= 0) {
           return;
@@ -464,7 +467,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       });
 
     return result;
-  }, [categories, leafCategoryIds, recurringTransactions, savingsGoals]);
+  }, [categories, currentMonth, leafCategoryIds, recurringTransactions, savingsGoals]);
 
   const allRows = useMemo(() => {
     return Object.values(rowsByType)
@@ -689,8 +692,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         <div className="min-w-0">
           <h2 className="text-sm font-semibold">Planned amounts</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Recurring and Goal badges show source amounts. Editing any row only
-            changes this month’s plan.
+            Recurring and Goal badges show source amounts. Goals appear from their
+            start month onward. Editing any row only changes this month’s plan.
           </p>
         </div>
 
