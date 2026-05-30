@@ -28,6 +28,11 @@ import {
   getGoalPlannedAmountForMonth,
   isGoalPlannedForMonth,
 } from '@/lib/goals';
+import {
+  calculateLeftToAllocateFromTotals,
+  getAssignablePlannedDebt,
+  getFundedDebtPaymentTotal,
+} from '@/lib/planData';
 import { cn } from '@/lib/utils';
 import { formatCurrencyNumberText } from '@/lib/currencies';
 
@@ -273,6 +278,12 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   );
   const { data: prevAllocations = [] } = useAllocations(prevMonth);
 
+  const currentMonthTransactions = useMemo(() => {
+    return allTransactions.filter((transaction) =>
+      String(transaction?.date || '').startsWith(currentMonth)
+    );
+  }, [allTransactions, currentMonth]);
+
   const [values, setValues] = useState({});
   const [saving, setSaving] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -508,15 +519,25 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const totalExpenses = sumType('expense');
     const totalSavings = sumType('savings');
     const totalDebt = sumType('debt');
+    const fundedDebtPayments = getFundedDebtPaymentTotal(currentMonthTransactions);
+    const assignableDebt = getAssignablePlannedDebt(totalDebt, fundedDebtPayments);
 
     return {
       totalIncome,
       totalExpenses,
       totalSavings,
       totalDebt,
-      leftToAllocate: totalIncome - totalExpenses - totalSavings - totalDebt,
+      fundedDebtPayments,
+      assignableDebt,
+      leftToAllocate: calculateLeftToAllocateFromTotals({
+        totalIncome,
+        totalExpenses,
+        totalSavings,
+        totalDebt,
+        fundedDebtPayments,
+      }),
     };
-  }, [rowsByType, values]);
+  }, [currentMonthTransactions, rowsByType, values]);
 
   const getHint = (rowKey) => {
     return Number(prevAllocationByRowKey[rowKey]?.planned_amount || 0);

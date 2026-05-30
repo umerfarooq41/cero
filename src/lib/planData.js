@@ -100,6 +100,29 @@ export function isGoalFundUseTransaction(transaction) {
   );
 }
 
+export function getFundedDebtPaymentTotal(transactions = []) {
+  return transactions.reduce((sum, transaction) => {
+    if (!isGoalFundUseTransaction(transaction)) return sum;
+
+    return sum + getTransactionAmount(transaction);
+  }, 0);
+}
+
+export function getAssignablePlannedDebt(plannedDebt = 0, fundedDebtPayments = 0) {
+  return Math.max(0, Number(plannedDebt || 0) - Number(fundedDebtPayments || 0));
+}
+
+export function calculateLeftToAllocateFromTotals(totals = {}) {
+  const income = Number(totals.income || totals.totalIncome || 0);
+  const expense = Number(totals.expense || totals.totalExpenses || 0);
+  const savings = Number(totals.savings || totals.totalSavings || 0);
+  const debt = Number(totals.debt || totals.totalDebt || 0);
+  const fundedDebtPayments = Number(totals.fundedDebtPayments || 0);
+  const assignableDebt = getAssignablePlannedDebt(debt, fundedDebtPayments);
+
+  return income - expense - savings - assignableDebt;
+}
+
 export function isSourceLinkedTransaction(transaction) {
   return Boolean(
     transaction?.recurring_transaction_id ||
@@ -279,10 +302,16 @@ export function getTrackedForSource({
 
 export function getTrackedForCategory({ transactions = [], categoryId }) {
   return transactions
-    .filter(
-      (transaction) =>
-        transaction.category_id === categoryId && !isSourceLinkedTransaction(transaction)
-    )
+    .filter((transaction) => {
+      if (transaction.category_id !== categoryId) return false;
+
+      // Goal-fund use is funded by money saved earlier. It should show as
+      // tracked debt activity, but it should not become a new current-month
+      // assignment in Left to Allocate.
+      if (isGoalFundUseTransaction(transaction)) return true;
+
+      return !isSourceLinkedTransaction(transaction);
+    })
     .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 }
 
@@ -536,6 +565,7 @@ export function buildPlanTotals({
   allocations = [],
   categories = [],
   savingsGoals = [],
+  transactions = [],
   currentMonth,
 } = {}) {
   const totals = {
@@ -575,5 +605,16 @@ export function buildPlanTotals({
     totals[type] += Number(allocation.planned_amount || 0);
   });
 
-  return totals;
+  const fundedDebtPayments = getFundedDebtPaymentTotal(transactions);
+  const assignableDebt = getAssignablePlannedDebt(totals.debt, fundedDebtPayments);
+
+  return {
+    ...totals,
+    fundedDebtPayments,
+    assignableDebt,
+    leftToAllocate: calculateLeftToAllocateFromTotals({
+      ...totals,
+      fundedDebtPayments,
+    }),
+  };
 }

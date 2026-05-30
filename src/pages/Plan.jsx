@@ -50,15 +50,18 @@ export default function Plan() {
   );
 
   const plannedTotals = useMemo(
-    () => buildPlanTotals({ allocations, categories, savingsGoals, currentMonth }),
-    [allocations, categories, currentMonth, savingsGoals]
+    () =>
+      buildPlanTotals({
+        allocations,
+        categories,
+        savingsGoals,
+        transactions,
+        currentMonth,
+      }),
+    [allocations, categories, currentMonth, savingsGoals, transactions]
   );
 
-  const leftToAllocate =
-    plannedTotals.income -
-    plannedTotals.expense -
-    plannedTotals.savings -
-    plannedTotals.debt;
+  const leftToAllocate = plannedTotals.leftToAllocate;
 
   const handleMonthChange = (month) => {
     setCurrentMonth(month);

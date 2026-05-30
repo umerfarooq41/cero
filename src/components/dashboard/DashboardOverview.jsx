@@ -161,7 +161,7 @@ export default function DashboardOverview() {
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
     Number(budget.totalPlannedSavings || 0) +
-    Number(budget.totalPlannedDebt || 0);
+    Number(budget.assignablePlannedDebt ?? budget.totalPlannedDebt ?? 0);
 
   const trackedOutflow =
     Number(budget.totalExpenses || 0) +

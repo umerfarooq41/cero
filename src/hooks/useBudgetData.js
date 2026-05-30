@@ -10,7 +10,11 @@ import {
   transactionsApi,
   getUserSettings,
 } from '@/lib/budgetData';
-import { buildPlanTotals } from '@/lib/planData';
+import {
+  buildPlanTotals,
+  calculateLeftToAllocateFromTotals,
+  isGoalFundUseTransaction,
+} from '@/lib/planData';
 import {
   calculateAutoSweepSurplus,
   filterTransactionsByBudgetMonth,
@@ -189,7 +193,7 @@ function getGoalTransactionId(transaction) {
 }
 
 function isGoalFundUse(transaction) {
-  return transaction?.source_type === 'goal_withdrawal';
+  return isGoalFundUseTransaction(transaction);
 }
 
 function isGoalTransfer(transaction) {
@@ -239,7 +243,10 @@ function buildBudgetSummary({
   const sumTrackedByType = (type) => {
     return transactions
       .filter((transaction) => {
-        if (isGoalFundUse(transaction)) return false;
+        if (isGoalFundUse(transaction)) {
+          return type === 'debt';
+        }
+
         if (type === 'savings' && isGoalTransfer(transaction)) return true;
         if (type === 'debt' && isDebtTransfer(transaction, accountsById)) return true;
         return getCategoryType(categories, transaction.category_id) === type;
@@ -258,17 +265,18 @@ function buildBudgetSummary({
   const totalTrackedSavings = sumTrackedByType('savings');
   const totalTrackedDebt = sumTrackedByType('debt');
 
-  const planTotals = plannedTotals || buildPlanTotals({ allocations, categories });
+  const planTotals = plannedTotals || buildPlanTotals({ allocations, categories, transactions });
   const totalPlannedIncome = planTotals.income;
   const totalPlannedExpenses = planTotals.expense;
   const totalPlannedSavings = planTotals.savings;
   const totalPlannedDebt = planTotals.debt;
 
   const leftToAllocate =
-    totalPlannedIncome -
-    totalPlannedExpenses -
-    totalPlannedSavings -
-    totalPlannedDebt;
+    planTotals.leftToAllocate ??
+    calculateLeftToAllocateFromTotals({
+      ...planTotals,
+      fundedDebtPayments: planTotals.fundedDebtPayments || 0,
+    });
 
   return {
     categories,
@@ -285,6 +293,8 @@ function buildBudgetSummary({
     totalPlannedExpenses,
     totalPlannedSavings,
     totalPlannedDebt,
+    fundedDebtPayments: planTotals.fundedDebtPayments || 0,
+    assignablePlannedDebt: planTotals.assignableDebt ?? totalPlannedDebt,
     leftToAllocate,
   };
 }
@@ -322,9 +332,16 @@ export function useYearBudgetSummary(year) {
 
   const plannedTotals = Object.values(allocationsByMonth).reduce(
     (sum, monthAllocations) => {
+      const month = monthAllocations[0]?.month;
+      const monthTransactions = month
+        ? yearTransactions.filter((transaction) =>
+            String(transaction?.date || '').startsWith(month)
+          )
+        : [];
       const monthTotals = buildPlanTotals({
         allocations: monthAllocations,
         categories,
+        transactions: monthTransactions,
       });
 
       return {
@@ -332,9 +349,23 @@ export function useYearBudgetSummary(year) {
         expense: sum.expense + monthTotals.expense,
         savings: sum.savings + monthTotals.savings,
         debt: sum.debt + monthTotals.debt,
+        fundedDebtPayments:
+          (sum.fundedDebtPayments || 0) + Number(monthTotals.fundedDebtPayments || 0),
+        assignableDebt:
+          (sum.assignableDebt || 0) + Number(monthTotals.assignableDebt || 0),
+        leftToAllocate:
+          (sum.leftToAllocate || 0) + Number(monthTotals.leftToAllocate || 0),
       };
     },
-    { income: 0, expense: 0, savings: 0, debt: 0 }
+    {
+      income: 0,
+      expense: 0,
+      savings: 0,
+      debt: 0,
+      fundedDebtPayments: 0,
+      assignableDebt: 0,
+      leftToAllocate: 0,
+    }
   );
 
   return buildBudgetSummary({
