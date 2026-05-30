@@ -60,14 +60,9 @@ function getGoalTransactionId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
-function isGoalFundUse(transaction) {
-  return transaction?.source_type === 'goal_withdrawal';
-}
-
 function isGoalTransfer(transaction) {
   return Boolean(
     transaction?.type === 'transfer' &&
-      !isGoalFundUse(transaction) &&
       (getGoalTransactionId(transaction) || transaction?.goal_contribution_id)
   );
 }
@@ -78,7 +73,7 @@ function getAccountsById(accounts = []) {
 
 function isDebtTransfer(transaction, accountsById) {
   if (transaction?.type !== 'transfer') return false;
-  if (isGoalFundUse(transaction) || isGoalTransfer(transaction)) return false;
+  if (isGoalTransfer(transaction)) return false;
 
   const destinationAccount = accountsById.get(transaction?.to_account_id);
   const destinationCategory = String(destinationAccount?.category || '').toLowerCase();
@@ -140,7 +135,6 @@ function getMonthTotals(
 
   const savings = txns
     .filter((transaction) => {
-      if (isGoalFundUse(transaction)) return false;
       if (isGoalTransfer(transaction)) return true;
       return getCategoryType(categories, transaction.category_id) === 'savings';
     })
@@ -148,7 +142,6 @@ function getMonthTotals(
 
   const debt = txns
     .filter((transaction) => {
-      if (isGoalFundUse(transaction)) return false;
       if (isDebtTransfer(transaction, accountsById)) return true;
       return getCategoryType(categories, transaction.category_id) === 'debt';
     })
@@ -162,7 +155,7 @@ function getMonthTotals(
     savings,
     debt,
     totalOutflow,
-    net: income - totalOutflow,
+    net: income - expenses,
   };
 }
 
@@ -258,7 +251,6 @@ export default function useReflectAnalysis({
   const trackedSavings = useMemo(() => {
     return periodTransactions
       .filter((transaction) => {
-        if (isGoalFundUse(transaction)) return false;
         if (isGoalTransfer(transaction)) return true;
         return getCategoryType(categories, transaction.category_id) === 'savings';
       })
@@ -268,7 +260,6 @@ export default function useReflectAnalysis({
   const trackedDebt = useMemo(() => {
     return periodTransactions
       .filter((transaction) => {
-        if (isGoalFundUse(transaction)) return false;
         if (isDebtTransfer(transaction, accountsById)) return true;
         return getCategoryType(categories, transaction.category_id) === 'debt';
       })
@@ -284,7 +275,10 @@ export default function useReflectAnalysis({
   const totalPlannedOutflow = plannedExpenses + plannedSavings + plannedDebt;
   const totalTrackedOutflow = expenses + trackedSavings + trackedDebt;
 
-  const netCashFlow = income - totalTrackedOutflow;
+  // Cash flow is operating cash flow only: income minus actual expenses.
+  // Savings transfers, debt payments, and normal transfers are allocations/movement,
+  // so they stay out of cash-flow math and remain tracked separately.
+  const netCashFlow = income - expenses;
 
   const netWorth = useMemo(() => {
     return accounts.reduce((sum, account) => {
@@ -365,7 +359,7 @@ export default function useReflectAnalysis({
         return {
           month: quarter.label,
           income: totals.income,
-          expenses: totals.totalOutflow,
+          expenses: totals.expenses,
           net: totals.net,
         };
       });
@@ -383,7 +377,7 @@ export default function useReflectAnalysis({
       return {
         month: label,
         income: totals.income,
-        expenses: totals.totalOutflow,
+        expenses: totals.expenses,
         net: totals.net,
       };
     });
