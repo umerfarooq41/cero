@@ -41,16 +41,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { savingsGoalsApi } from '@/lib/budgetData';
+import { budgetPlansApi, savingsGoalsApi } from '@/lib/budgetData';
 import {
   formatGoalDate,
   getGoalProgress,
   getGoalRemaining,
-  getGoalStartDate,
   getGoalStatus,
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
-  todayIsoDate,
 } from '@/lib/goals';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { useAccounts, useAllTransactions } from '@/hooks/useBudgetData';
@@ -97,7 +95,6 @@ const emptyGoalForm = () => ({
   name: '',
   target_amount: '',
   current_amount: '',
-  start_date: todayIsoDate(),
   target_date: '',
   from_account_id: 'none',
   to_account_id: 'none',
@@ -137,42 +134,124 @@ function getGoalTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
-function isGoalFundUseTransaction(transaction) {
-  const note = String(transaction?.note || '').trim().toLowerCase();
-
-  return (
-    transaction?.source_type === 'goal_withdrawal' ||
-    (note.startsWith('use ') && note.endsWith(' funds'))
-  );
-}
-
-function sumFundedGoalTransactionsByGoal(transactions = []) {
+function sumPostedGoalTransactionsByGoal(transactions = []) {
   return transactions.reduce((totals, transaction) => {
     const goalId = getGoalTransactionGoalId(transaction);
 
-    if (
-      !goalId ||
-      transaction?.type !== 'transfer' ||
-      isGoalFundUseTransaction(transaction)
-    ) {
-      return totals;
-    }
+    if (!goalId || transaction?.type !== 'transfer') return totals;
 
     totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(transaction?.amount || 0));
     return totals;
   }, {});
 }
 
-function sumNetGoalTransactionsByGoal(transactions = []) {
-  return transactions.reduce((totals, transaction) => {
-    const goalId = getGoalTransactionGoalId(transaction);
 
-    if (!goalId || transaction?.type !== 'transfer') return totals;
+function getMonthKey(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(`${String(value).slice(0, 10)}T00:00:00`);
 
-    const amount = Math.max(0, Number(transaction?.amount || 0));
-    totals[goalId] = (totals[goalId] || 0) + (isGoalFundUseTransaction(transaction) ? -amount : amount);
-    return totals;
-  }, {});
+  if (Number.isNaN(date.getTime())) return null;
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function compareMonthKeys(a, b) {
+  return String(a || '').localeCompare(String(b || ''));
+}
+
+function addMonthsToKey(monthKey, amount) {
+  const [year, month] = String(monthKey || '').split('-').map(Number);
+
+  if (!year || !month) return null;
+
+  const date = new Date(year, month - 1 + amount, 1);
+  return getMonthKey(date);
+}
+
+function getGoalPlanMonths(goal, startMonth = getMonthKey()) {
+  if (!startMonth) return [];
+
+  const targetMonth = getMonthKey(goal?.target_date);
+
+  if (!targetMonth || compareMonthKeys(targetMonth, startMonth) < 0) {
+    return [startMonth];
+  }
+
+  const months = [];
+  let cursor = startMonth;
+  let guard = 0;
+
+  while (cursor && compareMonthKeys(cursor, targetMonth) <= 0 && guard < 120) {
+    months.push(cursor);
+    cursor = addMonthsToKey(cursor, 1);
+    guard += 1;
+  }
+
+  return months;
+}
+
+function isGoalCompleted(goal) {
+  const target = Number(goal?.target_amount || 0);
+  const current = Number(goal?.current_amount || 0);
+
+  return target > 0 && current >= target;
+}
+
+async function syncGoalMonthlyPlanRows(goal) {
+  if (!goal?.id) return;
+
+  const startMonth = getMonthKey();
+  const monthlyRequired = getMonthlyRequiredSaving(goal);
+  const amount = Number(monthlyRequired || 0);
+  const shouldHavePlanRows = !goal.is_archived && !isGoalCompleted(goal) && amount > 0;
+  const targetMonths = shouldHavePlanRows ? getGoalPlanMonths(goal, startMonth) : [];
+  const targetMonthSet = new Set(targetMonths);
+  const existingRows = await budgetPlansApi.list();
+  const existingGoalRows = existingRows.filter(
+    (row) => row.source_type === 'goal' && row.source_id === goal.id
+  );
+
+  const duplicates = [];
+  const existingByMonth = new Map();
+
+  existingGoalRows.forEach((row) => {
+    if (!row.month) return;
+
+    if (existingByMonth.has(row.month)) {
+      duplicates.push(row);
+    } else {
+      existingByMonth.set(row.month, row);
+    }
+  });
+
+  const staleRows = existingGoalRows.filter((row) => {
+    if (!row.month || compareMonthKeys(row.month, startMonth) < 0) return false;
+    return !targetMonthSet.has(row.month);
+  });
+
+  await Promise.all(
+    [...duplicates, ...staleRows].map((row) => budgetPlansApi.delete(row.id))
+  );
+
+  if (!shouldHavePlanRows) return;
+
+  await Promise.all(
+    targetMonths.map((month) => {
+      const existing = existingByMonth.get(month);
+
+      return budgetPlansApi.upsert({
+        id: existing?.id,
+        category_id: null,
+        month,
+        planned_amount: amount,
+        source_type: 'goal',
+        source_id: goal.id,
+        budget_type: 'savings',
+        label: goal.name,
+        icon: goal.icon_key || 'target',
+        color: goal.color_key || '#276FE4',
+      });
+    })
+  );
 }
 
 function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
@@ -253,7 +332,6 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
         name: editingGoal.name || '',
         target_amount: String(editingGoal.target_amount ?? ''),
         current_amount: String(editingGoal.starting_amount ?? editingGoal.current_amount ?? ''),
-        start_date: getGoalStartDate(editingGoal),
         target_date: editingGoal.target_date || '',
         from_account_id: editingGoal.from_account_id || 'none',
         to_account_id: editingGoal.to_account_id || 'none',
@@ -326,7 +404,6 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       target_amount: targetAmount,
       starting_amount: currentAmount,
       current_amount: currentAmount,
-      start_date: form.start_date || todayIsoDate(),
       target_date: form.target_date || null,
       from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
       to_account_id: form.to_account_id === 'none' ? null : form.to_account_id,
@@ -351,7 +428,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{form.name.trim() || 'Goal Name'}</div>
             <div className="text-xs text-muted-foreground">
-              Starts {formatGoalDate(form.start_date)} · Target {form.target_amount ? Number(form.target_amount).toLocaleString() : '0'}
+              Target {form.target_amount ? Number(form.target_amount).toLocaleString() : '0'}
               {form.target_date ? ` · ${formatGoalDate(form.target_date)}` : ''}
             </div>
           </div>
@@ -371,7 +448,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Target amount</label>
               <Input
@@ -395,15 +472,6 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
                 step="0.01"
                 inputMode="decimal"
                 placeholder="0"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Start date</label>
-              <Input
-                value={form.start_date}
-                onChange={(event) => updateForm('start_date', event.target.value)}
-                type="date"
               />
             </div>
 
@@ -566,7 +634,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
         </p>
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
-          Starts {formatGoalDate(getGoalStartDate(goal))} · Target {formatCurrency(target)}
+          Target {formatCurrency(target)}
         </p>
       </div>
 
@@ -671,33 +739,25 @@ export default function ManageGoalsPanel() {
     initialData: [],
   });
 
-  const fundedGoalTotals = useMemo(
-    () => sumFundedGoalTransactionsByGoal(allTransactions),
-    [allTransactions]
-  );
-
-  const netGoalTotals = useMemo(
-    () => sumNetGoalTransactionsByGoal(allTransactions),
+  const postedGoalTotals = useMemo(
+    () => sumPostedGoalTransactionsByGoal(allTransactions),
     [allTransactions]
   );
 
   const normalizedGoals = useMemo(
     () => savingsGoals.map((goal) => {
-      const netPostedTotal = Number(netGoalTotals[goal.id] || 0);
-      const fundedPostedTotal = Number(fundedGoalTotals[goal.id] || 0);
+      const postedTotal = Number(postedGoalTotals[goal.id] || 0);
       const startingAmount = Math.max(
         0,
-        Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - netPostedTotal))
+        Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - postedTotal))
       );
 
       return {
         ...goal,
         starting_amount: startingAmount,
-        current_amount: Math.max(0, startingAmount + netPostedTotal),
-        funded_amount: Math.max(0, startingAmount + fundedPostedTotal),
       };
     }),
-    [fundedGoalTotals, netGoalTotals, savingsGoals]
+    [postedGoalTotals, savingsGoals]
   );
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -719,6 +779,10 @@ export default function ManageGoalsPanel() {
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['manage-savings-goals'] });
     queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+    queryClient.invalidateQueries({ queryKey: ['allocations'] });
+    queryClient.invalidateQueries({ queryKey: ['all-allocations'] });
+    queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
+    queryClient.invalidateQueries({ queryKey: ['plan-data'] });
   };
 
   const openNew = () => {
@@ -730,20 +794,27 @@ export default function ManageGoalsPanel() {
     setSaving(true);
 
     try {
-      if (editingGoal?.id) {
-        const netPostedTotal = Number(netGoalTotals[editingGoal.id] || 0);
+      let savedGoal;
 
-        await savingsGoalsApi.update(editingGoal.id, {
+      if (editingGoal?.id) {
+        const postedTotal = Number(postedGoalTotals[editingGoal.id] || 0);
+        const goalPayload = {
           ...payload,
-          current_amount: Number(payload.starting_amount || 0) + netPostedTotal,
-        });
-        toast.success('Savings goal updated');
+          current_amount: Number(payload.starting_amount || 0) + postedTotal,
+        };
+
+        savedGoal = await savingsGoalsApi.update(editingGoal.id, goalPayload);
+        await syncGoalMonthlyPlanRows(savedGoal);
+        toast.success('Savings goal updated and monthly plan synced');
       } else {
-        await savingsGoalsApi.create({
+        const goalPayload = {
           ...payload,
           current_amount: Number(payload.starting_amount || 0),
-        });
-        toast.success('Savings goal created');
+        };
+
+        savedGoal = await savingsGoalsApi.create(goalPayload);
+        await syncGoalMonthlyPlanRows(savedGoal);
+        toast.success('Savings goal created and monthly plan updated');
       }
 
       refresh();
@@ -759,11 +830,12 @@ export default function ManageGoalsPanel() {
 
   const handleArchive = async (goal) => {
     try {
-      await savingsGoalsApi.update(goal.id, {
+      const updatedGoal = await savingsGoalsApi.update(goal.id, {
         is_archived: !goal.is_archived,
         archived_at: goal.is_archived ? null : new Date().toISOString(),
       });
 
+      await syncGoalMonthlyPlanRows(updatedGoal);
       refresh();
       toast.success(goal.is_archived ? 'Savings goal restored' : 'Savings goal archived');
     } catch (error) {
