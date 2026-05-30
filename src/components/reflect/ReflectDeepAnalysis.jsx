@@ -20,6 +20,25 @@ const clampPercent = (value) =>
 
 const safeNumber = (value) => Number(value || 0);
 
+function isActiveGoal(goal) {
+  const target = safeNumber(goal?.target_amount);
+  const current = safeNumber(goal?.current_amount);
+
+  if (goal?.is_archived) return false;
+  if (target > 0 && current >= target) return false;
+
+  return true;
+}
+
+function getTransactionGoalId(transaction) {
+  return (
+    transaction?.savings_goal_id ||
+    transaction?.goal_id ||
+    transaction?.source_id ||
+    null
+  );
+}
+
 function SectionHeading({ icon: Icon, title, subtitle }) {
   return (
     <div className="mb-4 min-w-0">
@@ -151,11 +170,12 @@ function MetricLine({ label, value, subtext, tone = 'default', delay = 0 }) {
 function isGoalTransferTransaction(transaction) {
   return (
     transaction?.type === 'transfer' &&
-    transaction?.source_type !== 'goal_withdrawal' &&
     Boolean(
       transaction.savings_goal_id ||
         transaction.goal_id ||
-        transaction.goal_contribution_id
+        transaction.goal_contribution_id ||
+        transaction.source_type === 'goal' ||
+        transaction.source_type === 'savings_goal'
     )
   );
 }
@@ -196,8 +216,27 @@ function getGoalTrackState(goal) {
 }
 
 function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = false }) {
-  const activeGoals = Array.isArray(goals) ? goals : [];
-  const safeGoalTransactions = Array.isArray(goalTransactions) ? goalTransactions : [];
+  const activeGoals = useMemo(
+    () => (Array.isArray(goals) ? goals.filter(isActiveGoal) : []),
+    [goals]
+  );
+
+  const activeGoalIds = useMemo(
+    () => new Set(activeGoals.map((goal) => goal.id).filter(Boolean)),
+    [activeGoals]
+  );
+
+  const safeGoalTransactions = useMemo(() => {
+    if (!Array.isArray(goalTransactions)) return [];
+    if (activeGoalIds.size === 0) return [];
+
+    return goalTransactions.filter((transaction) => {
+      if (!isGoalTransferTransaction(transaction)) return false;
+
+      const goalId = getTransactionGoalId(transaction);
+      return goalId ? activeGoalIds.has(goalId) : false;
+    });
+  }, [goalTransactions, activeGoalIds]);
 
   const stats = useMemo(() => {
     const totalSaved = activeGoals.reduce(
@@ -242,8 +281,8 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
 
       {activeGoals.length === 0 ? (
         <EmptyBlock
-          title="No savings goals yet"
-          text="Create savings goals from Manage Plan, then Reflect will show progress and pace analysis here."
+          title="No active savings goals"
+          text="Create a new goal in Manage Plan, then Reflect will show progress and pace analysis here. Completed and archived goals stay out of the current goal analysis."
         />
       ) : (
         <motion.div
