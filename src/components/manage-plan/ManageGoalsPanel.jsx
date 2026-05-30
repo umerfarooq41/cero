@@ -134,13 +134,18 @@ function getGoalTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
+function isGoalFundUseTransaction(transaction) {
+  return transaction?.source_type === 'goal_withdrawal';
+}
+
 function sumPostedGoalTransactionsByGoal(transactions = []) {
   return transactions.reduce((totals, transaction) => {
     const goalId = getGoalTransactionGoalId(transaction);
 
     if (!goalId || transaction?.type !== 'transfer') return totals;
 
-    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(transaction?.amount || 0));
+    const amount = Math.max(0, Number(transaction?.amount || 0));
+    totals[goalId] = (totals[goalId] || 0) + (isGoalFundUseTransaction(transaction) ? -amount : amount);
     return totals;
   }, {});
 }

@@ -45,6 +45,10 @@ export function getTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
+export function isGoalFundUseTransaction(transaction) {
+  return transaction?.source_type === 'goal_withdrawal';
+}
+
 export function isSourceLinkedTransaction(transaction) {
   return Boolean(
     transaction?.recurring_transaction_id ||
@@ -131,7 +135,7 @@ export function getTrackedForSource({ transactions = [], sourceType, sourceId, c
 
   return transactions.reduce((sum, transaction) => {
     if (normalizedSourceType === 'goal') {
-      return getTransactionGoalId(transaction) === sourceId
+      return getTransactionGoalId(transaction) === sourceId && !isGoalFundUseTransaction(transaction)
         ? sum + getTransactionAmount(transaction)
         : sum;
     }

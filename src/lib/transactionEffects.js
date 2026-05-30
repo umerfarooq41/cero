@@ -38,13 +38,18 @@ export function getTransactionDeltas(transaction, accounts = []) {
   return deltas;
 }
 
+export function isGoalFundUseTransaction(transaction) {
+  return transaction?.source_type === 'goal_withdrawal';
+}
+
 export function isGoalContributionTransaction(transaction) {
   return Boolean(
     transaction?.savings_goal_id ||
       transaction?.goal_id ||
       transaction?.goal_contribution_id ||
       transaction?.source_type === 'goal' ||
-      transaction?.source_type === 'savings_goal'
+      transaction?.source_type === 'savings_goal' ||
+      transaction?.source_type === 'goal_withdrawal'
   );
 }
 
@@ -114,12 +119,15 @@ export async function recalculateGoalCurrentAmount(goalId, savingsGoals = []) {
       const transactionGoalId = getTransactionGoalId(transaction);
       return transactionGoalId === goalId && transaction.type === 'transfer';
     })
-    .reduce((sum, transaction) => sum + Math.max(0, Number(transaction.amount || 0)), 0);
+    .reduce((sum, transaction) => {
+      const amount = Math.max(0, Number(transaction.amount || 0));
+      return sum + (isGoalFundUseTransaction(transaction) ? -amount : amount);
+    }, 0);
 
   const startingAmount = Math.max(0, Number(goal.starting_amount ?? 0));
 
   await savingsGoalsApi.update(goalId, {
-    current_amount: startingAmount + postedTotal,
+    current_amount: Math.max(0, startingAmount + postedTotal),
   });
 }
 

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDownLeft,
   ArrowLeftRight,
@@ -8,14 +8,14 @@ import {
   Clock3,
   PiggyBank,
   Target,
-} from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import EmptyState from '@/components/shared/EmptyState';
-import CategoryIcon from '@/components/shared/CategoryIcon';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import EmptyState from "@/components/shared/EmptyState";
+import CategoryIcon from "@/components/shared/CategoryIcon";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -23,9 +23,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   useAccounts,
   useCategories,
@@ -33,13 +40,13 @@ import {
   useRecurringTransactions,
   useSavingsGoals,
   useTransactions,
-} from '@/hooks/useBudgetData';
-import { useCurrency } from '@/hooks/useCurrency';
+} from "@/hooks/useBudgetData";
+import { useCurrency } from "@/hooks/useCurrency";
 import {
   accountsApi,
   recurringTransactionsApi,
   transactionsApi,
-} from '@/lib/budgetData';
+} from "@/lib/budgetData";
 import {
   calculateNextDueDate,
   formatRecurringDate,
@@ -47,7 +54,7 @@ import {
   getRecurringStatus,
   sortRecurringByDueDate,
   todayIsoDate as recurringTodayIsoDate,
-} from '@/lib/recurringTransactions';
+} from "@/lib/recurringTransactions";
 import {
   getGoalProgress,
   getGoalRemaining,
@@ -55,17 +62,18 @@ import {
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
   todayIsoDate as goalTodayIsoDate,
-} from '@/lib/goals';
+} from "@/lib/goals";
 import {
   invalidateGoalContributionQueries,
   postGoalContribution,
-} from '@/lib/goalContributionEffects';
+  postGoalFundUse,
+} from "@/lib/goalContributionEffects";
 import {
   getCurrencyCode as getSharedCurrencyCode,
   getCurrencySymbol as getSharedCurrencySymbol,
   formatCurrencyNumberText,
-} from '@/lib/currencies';
-import { cn } from '@/lib/utils';
+} from "@/lib/currencies";
+import { cn } from "@/lib/utils";
 
 const getCurrencyCode = (currency) => getSharedCurrencyCode(currency);
 const getCurrencySymbol = (currency) => getSharedCurrencySymbol(currency);
@@ -76,23 +84,23 @@ function formatNumber(value = 0) {
   return formatCurrencyNumberText(number);
 }
 
-function CurrencyAmount({ amount, currency, className = '' }) {
+function CurrencyAmount({ amount, currency, className = "" }) {
   const code = getCurrencyCode(currency);
   const symbol = getCurrencySymbol(currency);
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
-        className
+        "inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums",
+        className,
       )}
     >
-      {code === 'SAR' ? (
+      {code === "SAR" ? (
         <span
           className="inline-block h-[0.8em] w-[0.8em] shrink-0 bg-current align-middle"
           style={{
-            WebkitMask: 'url(/sar.svg) center / contain no-repeat',
-            mask: 'url(/sar.svg) center / contain no-repeat',
+            WebkitMask: "url(/sar.svg) center / contain no-repeat",
+            mask: "url(/sar.svg) center / contain no-repeat",
           }}
         />
       ) : (
@@ -113,24 +121,29 @@ function getTransactionDeltas(transaction, accounts) {
   const deltas = {};
   const amount = Number(transaction.amount) || 0;
 
-  const source = accounts.find((account) => account.id === transaction.account_id);
-  const destination = accounts.find((account) => account.id === transaction.to_account_id);
+  const source = accounts.find(
+    (account) => account.id === transaction.account_id,
+  );
+  const destination = accounts.find(
+    (account) => account.id === transaction.to_account_id,
+  );
 
   if (source) {
     const sourceDelta =
-      transaction.type === 'income'
-        ? source.category === 'liability'
+      transaction.type === "income"
+        ? source.category === "liability"
           ? -amount
           : amount
-        : source.category === 'liability'
+        : source.category === "liability"
           ? amount
           : -amount;
 
     addDelta(deltas, source.id, sourceDelta);
   }
 
-  if (transaction.type === 'transfer' && destination) {
-    const destinationDelta = destination.category === 'liability' ? -amount : amount;
+  if (transaction.type === "transfer" && destination) {
+    const destinationDelta =
+      destination.category === "liability" ? -amount : amount;
     addDelta(deltas, destination.id, destinationDelta);
   }
 
@@ -138,26 +151,26 @@ function getTransactionDeltas(transaction, accounts) {
 }
 
 function getStatusClass(status) {
-  if (status.key === 'overdue') {
-    return 'border-destructive/20 bg-destructive/10 text-destructive';
+  if (status.key === "overdue") {
+    return "border-destructive/20 bg-destructive/10 text-destructive";
   }
 
-  if (status.key === 'due_today') {
-    return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400';
+  if (status.key === "due_today") {
+    return "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400";
   }
 
-  if (status.key === 'paused') {
-    return 'border-border bg-secondary text-muted-foreground';
+  if (status.key === "paused") {
+    return "border-border bg-secondary text-muted-foreground";
   }
 
-  return 'border-primary/20 bg-primary/10 text-primary';
+  return "border-primary/20 bg-primary/10 text-primary";
 }
 
 const TYPE_ACCENT = {
-  income: 'text-green-700 dark:text-green-400',
-  expense: 'text-red-700 dark:text-red-400',
-  transfer: 'text-sky-700 dark:text-sky-400',
-  active: 'text-blue-700 dark:text-blue-400',
+  income: "text-green-700 dark:text-green-400",
+  expense: "text-red-700 dark:text-red-400",
+  transfer: "text-sky-700 dark:text-sky-400",
+  active: "text-blue-700 dark:text-blue-400",
 };
 
 const TYPE_ICONS = {
@@ -168,9 +181,9 @@ const TYPE_ICONS = {
 };
 
 const RECURRING_SECTIONS = [
-  { type: 'income', label: 'Income' },
-  { type: 'expense', label: 'Expenses' },
-  { type: 'transfer', label: 'Debt Payments' },
+  { type: "income", label: "Income" },
+  { type: "expense", label: "Expenses" },
+  { type: "transfer", label: "Debt Payments" },
 ];
 
 function getCurrentMonthKey() {
@@ -183,6 +196,10 @@ function getGoalContributionAmount(row) {
 
 function getGoalSourceId(row) {
   return row?.goal_id || row?.savings_goal_id || null;
+}
+
+function isGoalFundUseTransaction(row) {
+  return row?.source_type === "goal_withdrawal";
 }
 
 function sumGoalContributionsByGoal(rows = []) {
@@ -198,9 +215,11 @@ function sumGoalContributionsByGoal(rows = []) {
 function sumGoalTransactionsByGoal(rows = []) {
   return rows.reduce((totals, row) => {
     const goalId = row?.savings_goal_id || row?.goal_id || null;
-    if (!goalId || row?.type !== 'transfer') return totals;
+    if (!goalId || row?.type !== "transfer" || isGoalFundUseTransaction(row))
+      return totals;
 
-    totals[goalId] = (totals[goalId] || 0) + Math.max(0, Number(row?.amount || 0));
+    totals[goalId] =
+      (totals[goalId] || 0) + Math.max(0, Number(row?.amount || 0));
     return totals;
   }, {});
 }
@@ -210,15 +229,19 @@ function sumRecurringPostedByRule(rows = []) {
     const ruleId = row?.recurring_transaction_id || null;
     if (!ruleId) return totals;
 
-    totals[ruleId] = (totals[ruleId] || 0) + Math.max(0, Number(row?.amount || 0));
+    totals[ruleId] =
+      (totals[ruleId] || 0) + Math.max(0, Number(row?.amount || 0));
     return totals;
   }, {});
 }
 
 function getGoalPlanRow(goal, allocations = []) {
   return allocations.find((allocation) => {
-    const sourceType = String(allocation?.source_type || '').toLowerCase();
-    return (sourceType === 'goal' || sourceType === 'savings_goal') && allocation?.source_id === goal?.id;
+    const sourceType = String(allocation?.source_type || "").toLowerCase();
+    return (
+      (sourceType === "goal" || sourceType === "savings_goal") &&
+      allocation?.source_id === goal?.id
+    );
   });
 }
 
@@ -233,12 +256,11 @@ function getGoalMonthlyPlanAmount(goal, allocations = []) {
   return fallback === null ? null : Math.max(0, Number(fallback || 0));
 }
 
-
 function getRecurringPlanRow(rule, allocations = []) {
   return allocations.find((allocation) => {
-    const sourceType = String(allocation?.source_type || '').toLowerCase();
+    const sourceType = String(allocation?.source_type || "").toLowerCase();
     return (
-      (sourceType === 'recurring' || sourceType === 'recurring_transaction') &&
+      (sourceType === "recurring" || sourceType === "recurring_transaction") &&
       allocation?.source_id === rule?.id
     );
   });
@@ -255,28 +277,53 @@ function getRecurringMonthlyPlanAmount(rule, allocations = []) {
 }
 
 function isCreditCardAccount(account) {
-  const type = String(account?.type || '').toLowerCase();
-  return type === 'credit_card' || type === 'credit-card' || type === 'creditcard';
+  const type = String(account?.type || "").toLowerCase();
+  return (
+    type === "credit_card" || type === "credit-card" || type === "creditcard"
+  );
+}
+
+function isDebtAccount(account) {
+  const category = String(account?.category || "").toLowerCase();
+  const type = String(account?.type || "").toLowerCase();
+
+  return (
+    category === "liability" ||
+    category === "debt" ||
+    ["loan", "credit_card", "credit-card", "creditcard", "debt"].includes(type)
+  );
 }
 
 function isFlexibleCreditCardDebt(rule, toAccount) {
-  return normalizeRuleType(rule?.type) === 'transfer' && isCreditCardAccount(toAccount);
+  return (
+    normalizeRuleType(rule?.type) === "transfer" &&
+    isCreditCardAccount(toAccount)
+  );
 }
 
 function normalizeRuleType(type) {
-  if (type === 'debt') return 'transfer';
-  return ['income', 'expense', 'transfer'].includes(type) ? type : 'expense';
+  if (type === "debt") return "transfer";
+  return ["income", "expense", "transfer"].includes(type) ? type : "expense";
 }
 
-function formatCurrencyElement(amount, currency, className = '') {
-  return <CurrencyAmount amount={amount} currency={currency} className={className} />;
+function formatCurrencyElement(amount, currency, className = "") {
+  return (
+    <CurrencyAmount amount={amount} currency={currency} className={className} />
+  );
 }
 
 function isDueNow(status) {
-  return status.key === 'overdue' || status.key === 'due_today';
+  return status.key === "overdue" || status.key === "due_today";
 }
 
-function ScheduledSectionCard({ type = 'active', label, count, defaultExpanded = false, emptyText, children }) {
+function ScheduledSectionCard({
+  type = "active",
+  label,
+  count,
+  defaultExpanded = false,
+  emptyText,
+  children,
+}) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
   const Icon = TYPE_ICONS[type] || Target;
 
@@ -290,12 +337,16 @@ function ScheduledSectionCard({ type = 'active', label, count, defaultExpanded =
         <div className="flex min-w-0 items-center gap-2.5">
           <ChevronDown
             className={cn(
-              'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
-              !isOpen && '-rotate-90'
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+              !isOpen && "-rotate-90",
             )}
           />
-          <Icon className={cn('h-4 w-4 shrink-0', TYPE_ACCENT[type])} />
-          <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
+          <Icon className={cn("h-4 w-4 shrink-0", TYPE_ACCENT[type])} />
+          <h3
+            className={cn("truncate text-sm font-semibold", TYPE_ACCENT[type])}
+          >
+            {label}
+          </h3>
         </div>
 
         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
@@ -307,9 +358,9 @@ function ScheduledSectionCard({ type = 'active', label, count, defaultExpanded =
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 1 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden"
           >
             {count === 0 ? (
@@ -333,8 +384,8 @@ function ScheduledStatusBadge({ children, className }) {
     <Badge
       variant="outline"
       className={cn(
-        'h-5 rounded-full px-2 py-0 text-[10px] font-semibold leading-none',
-        className
+        "h-5 rounded-full px-2 py-0 text-[10px] font-semibold leading-none",
+        className,
       )}
     >
       {children}
@@ -360,26 +411,30 @@ function ScheduledRecurringRow({
   const plannedThisMonth = Number(rule.month_planned_amount ?? baseAmount);
   const paidThisMonth = Number(rule.month_paid_amount || 0);
   const monthRemaining = Math.max(0, plannedThisMonth - paidThisMonth);
-  const isMonthCovered = flexibleCreditCard && plannedThisMonth > 0 && monthRemaining <= 0;
+  const isMonthCovered =
+    flexibleCreditCard && plannedThisMonth > 0 && monthRemaining <= 0;
   const displayAmount = flexibleCreditCard
     ? isMonthCovered
       ? plannedThisMonth
       : monthRemaining
     : baseAmount;
-  const fallbackIcon = type === 'income' ? 'income' : type === 'transfer' ? 'loan' : 'receipt';
+  const fallbackIcon =
+    type === "income" ? "income" : type === "transfer" ? "loan" : "receipt";
   const buttonLabel = flexibleCreditCard
     ? posting
-      ? 'Saving…'
+      ? "Saving…"
       : isMonthCovered
-        ? 'Add extra'
-        : 'Pay'
+        ? "Add extra"
+        : "Pay"
     : posting
-      ? 'Posting…'
+      ? "Posting…"
       : dueNow
-        ? 'Post'
-        : 'Future';
+        ? "Post"
+        : "Future";
   const canUseAction = flexibleCreditCard
-    ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
+    ? rule.is_active &&
+      !posting &&
+      Boolean(rule.account_id && rule.to_account_id)
     : dueNow && !posting && rule.is_active;
 
   const handleAction = () => {
@@ -395,7 +450,15 @@ function ScheduledRecurringRow({
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
       <CategoryIcon
         icon={rule.icon || category?.icon || fallbackIcon}
-        color={rule.color || category?.color || (type === 'income' ? '#22c55e' : type === 'transfer' ? '#0ea5e9' : '#ef4444')}
+        color={
+          rule.color ||
+          category?.color ||
+          (type === "income"
+            ? "#22c55e"
+            : type === "transfer"
+              ? "#0ea5e9"
+              : "#ef4444")
+        }
         size="sm"
       />
 
@@ -405,7 +468,9 @@ function ScheduledRecurringRow({
         </h3>
 
         <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-xs font-medium text-muted-foreground">
-          <span className="truncate">{getRecurringFrequencyLabel(rule.frequency)} · {status.label}</span>
+          <span className="truncate">
+            {getRecurringFrequencyLabel(rule.frequency)} · {status.label}
+          </span>
           {!rule.is_active && (
             <ScheduledStatusBadge className="border-border bg-secondary text-muted-foreground">
               Paused
@@ -415,11 +480,11 @@ function ScheduledRecurringRow({
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
           Next {formatRecurringDate(rule.next_due_date)}
-          {type === 'transfer'
-            ? ` · ${toAccount?.name || 'Debt account'}`
+          {type === "transfer"
+            ? ` · ${toAccount?.name || "Debt account"}`
             : account
               ? ` · ${account.name}`
-              : ''}
+              : ""}
         </p>
       </div>
 
@@ -430,7 +495,7 @@ function ScheduledRecurringRow({
 
         <Button
           size="sm"
-          variant={dueNow || flexibleCreditCard ? 'default' : 'secondary'}
+          variant={dueNow || flexibleCreditCard ? "default" : "secondary"}
           onClick={handleAction}
           disabled={!canUseAction}
           className="h-7 rounded-xl px-3 text-xs"
@@ -442,15 +507,26 @@ function ScheduledRecurringRow({
   );
 }
 
-function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onContribute }) {
+function ScheduledGoalRow({
+  goal,
+  fromAccount,
+  toAccount,
+  currency,
+  saving,
+  usingFunds,
+  onContribute,
+  onUseFunds,
+}) {
   const progress = getGoalProgress(goal);
   const target = Number(goal.target_amount || 0);
   const remaining = getGoalRemaining(goal);
   const status = getGoalStatus(goal);
-  const color = goal.color_key || '#276FE4';
+  const color = goal.color_key || "#276FE4";
   const isCompleted = remaining <= 0 || progress >= 100;
-  const statusLabel = status.key === 'due' ? 'Target passed' : status.label;
+  const statusLabel = status.key === "due" ? "Target passed" : status.label;
   const missingAccounts = !fromAccount || !toAccount;
+  const savedAmount = Math.max(0, Number(goal.current_amount || 0));
+  const canUseFunds = savedAmount > 0 && Boolean(toAccount);
   const plannedAmountRaw = goal.month_planned_amount;
   const plannedThisMonth = Number(plannedAmountRaw || 0);
   const hasMonthlyPlan = plannedAmountRaw !== null && plannedThisMonth > 0;
@@ -464,7 +540,7 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
 
   return (
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
-      <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
+      <CategoryIcon icon={goal.icon_key || "target"} color={color} size="sm" />
 
       <div className="min-w-0 flex-1 pt-0.5">
         <h3 className="min-w-0 truncate text-sm font-semibold leading-tight">
@@ -472,7 +548,9 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
         </h3>
 
         <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
-          {isCompleted ? '100% complete' : `${statusLabel} · ${progress}% complete`}
+          {isCompleted
+            ? "100% complete"
+            : `${statusLabel} · ${progress}% complete`}
         </p>
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
@@ -483,51 +561,79 @@ function ScheduledGoalRow({ goal, fromAccount, toAccount, currency, saving, onCo
       <div className="ml-2 flex shrink-0 flex-col items-end gap-2 text-right">
         <div className="text-sm font-semibold tabular-nums text-foreground">
           {isCompleted
-            ? 'Completed'
+            ? "Completed"
             : !hasMonthlyPlan
-              ? 'Set target'
+              ? "Set target"
               : formatCurrencyElement(displayAmount, currency)}
         </div>
 
-        <Button
-          size="sm"
-          onClick={() => onContribute(goal)}
-          disabled={isCompleted || missingAccounts || !hasMonthlyPlan || saving}
-          className="h-7 rounded-xl px-3 text-xs"
-        >
-          {saving
-            ? 'Saving…'
-            : isCompleted
-              ? 'Done'
-              : !hasMonthlyPlan
-                ? 'Set target'
-                : isMonthDone
-                  ? 'Add extra'
-                  : 'Contribute'}
-        </Button>
+        <div className="flex flex-col items-end gap-1.5">
+          <Button
+            size="sm"
+            onClick={() => onContribute(goal)}
+            disabled={
+              isCompleted || missingAccounts || !hasMonthlyPlan || saving
+            }
+            className="h-7 rounded-xl px-3 text-xs"
+          >
+            {saving
+              ? "Saving…"
+              : isCompleted
+                ? "Done"
+                : !hasMonthlyPlan
+                  ? "Set target"
+                  : isMonthDone
+                    ? "Add extra"
+                    : "Contribute"}
+          </Button>
+
+          {canUseFunds && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onUseFunds(goal)}
+              disabled={usingFunds}
+              className="h-7 rounded-xl px-3 text-xs"
+            >
+              {usingFunds ? "Using…" : "Use funds"}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, onSubmit, saving }) {
+function RecurringPaymentDialog({
+  rule,
+  accounts,
+  currency,
+  open,
+  onOpenChange,
+  onSubmit,
+  saving,
+}) {
   const plannedAmount = Number(rule?.month_planned_amount || rule?.amount || 0);
   const paidThisMonth = Number(rule?.month_paid_amount || 0);
   const remainingAmount = Math.max(0, plannedAmount - paidThisMonth);
-  const suggestedAmount = remainingAmount > 0 ? remainingAmount : '';
+  const suggestedAmount = remainingAmount > 0 ? remainingAmount : "";
 
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState("");
   const [date, setDate] = useState(recurringTodayIsoDate());
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState("");
 
-  const fromAccount = accounts.find((account) => account.id === rule?.account_id);
-  const toAccount = accounts.find((account) => account.id === rule?.to_account_id);
+  const fromAccount = accounts.find(
+    (account) => account.id === rule?.account_id,
+  );
+  const toAccount = accounts.find(
+    (account) => account.id === rule?.to_account_id,
+  );
 
   useEffect(() => {
     if (!open) return;
-    setAmount(suggestedAmount ? String(suggestedAmount) : '');
+    setAmount(suggestedAmount ? String(suggestedAmount) : "");
     setDate(recurringTodayIsoDate());
-    setNote(rule ? `${rule.name} · Recurring` : '');
+    setNote(rule ? `${rule.name} · Recurring` : "");
   }, [open, rule, suggestedAmount]);
 
   if (!rule) return null;
@@ -536,9 +642,14 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg rounded-3xl app-card-surface-strong backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle>{remainingAmount > 0 ? `Pay ${rule.name}` : `Add extra to ${rule.name}`}</DialogTitle>
+          <DialogTitle>
+            {remainingAmount > 0
+              ? `Pay ${rule.name}`
+              : `Add extra to ${rule.name}`}
+          </DialogTitle>
           <DialogDescription>
-            This posts a credit card payment transfer using the saved recurring accounts.
+            This posts a credit card payment transfer using the saved recurring
+            accounts.
           </DialogDescription>
         </DialogHeader>
 
@@ -548,7 +659,8 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
               Payment path
             </p>
             <p className="mt-1 text-sm font-bold text-foreground">
-              {fromAccount?.name || 'Missing from account'} → {toAccount?.name || 'Missing credit card'}
+              {fromAccount?.name || "Missing from account"} →{" "}
+              {toAccount?.name || "Missing credit card"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Checking decreases and the credit card liability decreases.
@@ -556,7 +668,9 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Amount</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Amount
+            </label>
             <Input
               type="number"
               min="0"
@@ -569,7 +683,9 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Date</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Date
+            </label>
             <Input
               type="date"
               value={date}
@@ -578,7 +694,9 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Note</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Note
+            </label>
             <Textarea
               value={note}
               onChange={(event) => setNote(event.target.value)}
@@ -589,14 +707,20 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             Cancel
           </Button>
           <Button
-            onClick={() => onSubmit({ amount: Number(amount || 0), date, note })}
+            onClick={() =>
+              onSubmit({ amount: Number(amount || 0), date, note })
+            }
             disabled={saving || !fromAccount || !toAccount}
           >
-            {saving ? 'Saving...' : remainingAmount > 0 ? 'Pay' : 'Add extra'}
+            {saving ? "Saving..." : remainingAmount > 0 ? "Pay" : "Add extra"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -604,32 +728,45 @@ function RecurringPaymentDialog({ rule, accounts, currency, open, onOpenChange, 
   );
 }
 
-function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, onSubmit, saving }) {
+function GoalContributionDialog({
+  goal,
+  accounts,
+  currency,
+  open,
+  onOpenChange,
+  onSubmit,
+  saving,
+}) {
   const suggestedAmount = useMemo(() => {
-    if (!goal) return '';
+    if (!goal) return "";
 
     const remainingThisMonth = Number(goal.month_remaining_amount || 0);
     if (remainingThisMonth > 0) return String(remainingThisMonth);
 
     const plannedThisMonth = Number(goal.month_planned_amount || 0);
     const contributedThisMonth = Number(goal.month_contributed_amount || 0);
-    if (plannedThisMonth > 0 && contributedThisMonth <= 0) return String(plannedThisMonth);
+    if (plannedThisMonth > 0 && contributedThisMonth <= 0)
+      return String(plannedThisMonth);
 
-    return '';
+    return "";
   }, [goal]);
 
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState("");
   const [date, setDate] = useState(goalTodayIsoDate());
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState("");
 
-  const fromAccount = accounts.find((account) => account.id === goal?.from_account_id);
-  const toAccount = accounts.find((account) => account.id === goal?.to_account_id);
+  const fromAccount = accounts.find(
+    (account) => account.id === goal?.from_account_id,
+  );
+  const toAccount = accounts.find(
+    (account) => account.id === goal?.to_account_id,
+  );
 
   useEffect(() => {
     if (!open) return;
     setAmount(suggestedAmount);
     setDate(goalTodayIsoDate());
-    setNote(goal ? `Contribution to ${goal.name}` : '');
+    setNote(goal ? `Contribution to ${goal.name}` : "");
   }, [goal, open, suggestedAmount]);
 
   if (!goal) return null;
@@ -640,7 +777,8 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
         <DialogHeader>
           <DialogTitle>Contribute to {goal.name}</DialogTitle>
           <DialogDescription>
-            This creates a transfer from the saved checking account to the saved savings account.
+            This creates a transfer from the saved checking account to the saved
+            savings account.
           </DialogDescription>
         </DialogHeader>
 
@@ -650,7 +788,8 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
               Transfer path
             </p>
             <p className="mt-1 text-sm font-bold text-foreground">
-              {fromAccount?.name || 'Missing from account'} → {toAccount?.name || 'Missing savings account'}
+              {fromAccount?.name || "Missing from account"} →{" "}
+              {toAccount?.name || "Missing savings account"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Goal progress is updated, but net worth stays neutral.
@@ -658,7 +797,9 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Amount</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Amount
+            </label>
             <Input
               type="number"
               min="0"
@@ -670,13 +811,19 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
             />
             {suggestedAmount && (
               <p className="text-xs text-muted-foreground">
-                Suggested monthly amount: <CurrencyAmount amount={Number(suggestedAmount)} currency={currency} />
+                Suggested monthly amount:{" "}
+                <CurrencyAmount
+                  amount={Number(suggestedAmount)}
+                  currency={currency}
+                />
               </p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Date</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Date
+            </label>
             <Input
               type="date"
               value={date}
@@ -685,7 +832,9 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Note</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Note
+            </label>
             <Textarea
               value={note}
               onChange={(event) => setNote(event.target.value)}
@@ -696,14 +845,170 @@ function GoalContributionDialog({ goal, accounts, currency, open, onOpenChange, 
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             Cancel
           </Button>
           <Button
-            onClick={() => onSubmit({ amount: Number(amount || 0), date, note })}
+            onClick={() =>
+              onSubmit({ amount: Number(amount || 0), date, note })
+            }
             disabled={saving || !fromAccount || !toAccount}
           >
-            {saving ? 'Contributing...' : 'Contribute'}
+            {saving ? "Contributing..." : "Contribute"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function GoalFundUseDialog({
+  goal,
+  accounts,
+  currency,
+  open,
+  onOpenChange,
+  onSubmit,
+  saving,
+}) {
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(goalTodayIsoDate());
+  const [note, setNote] = useState("");
+  const [toAccountId, setToAccountId] = useState("");
+
+  const fromAccount = accounts.find(
+    (account) => account.id === goal?.to_account_id,
+  );
+  const debtAccounts = useMemo(
+    () => accounts.filter((account) => isDebtAccount(account)),
+    [accounts],
+  );
+  const availableAmount = Math.max(0, Number(goal?.current_amount || 0));
+
+  useEffect(() => {
+    if (!open) return;
+
+    setAmount(availableAmount ? String(availableAmount) : "");
+    setDate(goalTodayIsoDate());
+    setNote(goal ? `Use ${goal.name} funds` : "");
+    setToAccountId(debtAccounts[0]?.id || "");
+  }, [availableAmount, debtAccounts, goal, open]);
+
+  if (!goal) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg rounded-3xl app-card-surface-strong backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle>Use funds from {goal.name}</DialogTitle>
+          <DialogDescription>
+            Move saved goal money to a debt account. This lowers the saved goal
+            balance and reduces the liability without counting as a new monthly
+            allocation.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-1">
+          <div className="rounded-2xl app-card-surface-soft p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Saved funds account
+            </p>
+            <p className="mt-1 text-sm font-bold text-foreground">
+              {fromAccount?.name || "Missing savings account"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Available:{" "}
+              <CurrencyAmount amount={availableAmount} currency={currency} />
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Pay to debt account
+            </label>
+            <Select value={toAccountId} onValueChange={setToAccountId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select debt account" />
+              </SelectTrigger>
+              <SelectContent>
+                {debtAccounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+                {debtAccounts.length === 0 && (
+                  <SelectItem value="no-debt-accounts" disabled>
+                    No debt accounts
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Amount
+            </label>
+            <Input
+              type="number"
+              min="0"
+              max={availableAmount || undefined}
+              step="0.01"
+              inputMode="decimal"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder="0.00"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Date
+            </label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Note
+            </label>
+            <Textarea
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              className="h-20 resize-none"
+              placeholder="Optional note"
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() =>
+              onSubmit({ amount: Number(amount || 0), date, note, toAccountId })
+            }
+            disabled={
+              saving ||
+              !fromAccount ||
+              !toAccountId ||
+              toAccountId === "no-debt-accounts"
+            }
+          >
+            {saving ? "Using funds..." : "Use funds"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -724,12 +1029,15 @@ export default function ScheduledTransactions() {
 
   const [postingId, setPostingId] = useState(null);
   const [savingGoalId, setSavingGoalId] = useState(null);
+  const [usingGoalFundsId, setUsingGoalFundsId] = useState(null);
   const [selectedGoal, setSelectedGoal] = useState(null);
-  const [selectedRecurringPayment, setSelectedRecurringPayment] = useState(null);
+  const [selectedGoalFundUse, setSelectedGoalFundUse] = useState(null);
+  const [selectedRecurringPayment, setSelectedRecurringPayment] =
+    useState(null);
 
   const recurringPaymentsByRule = useMemo(
     () => sumRecurringPostedByRule(monthTransactions),
-    [monthTransactions]
+    [monthTransactions],
   );
 
   const activeRecurring = useMemo(
@@ -738,8 +1046,13 @@ export default function ScheduledTransactions() {
         recurringTransactions
           .filter((rule) => !rule.is_archived)
           .map((rule) => {
-            const toAccount = accounts.find((account) => account.id === rule.to_account_id);
-            const plannedThisMonth = getRecurringMonthlyPlanAmount(rule, allocations);
+            const toAccount = accounts.find(
+              (account) => account.id === rule.to_account_id,
+            );
+            const plannedThisMonth = getRecurringMonthlyPlanAmount(
+              rule,
+              allocations,
+            );
             const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
 
             const isFlexiblePayment = isFlexibleCreditCardDebt(rule, toAccount);
@@ -754,14 +1067,14 @@ export default function ScheduledTransactions() {
               is_flexible_payment: isFlexiblePayment,
               is_month_done: paidThisMonth > 0,
             };
-          })
+          }),
       ),
-    [accounts, allocations, recurringPaymentsByRule, recurringTransactions]
+    [accounts, allocations, recurringPaymentsByRule, recurringTransactions],
   );
 
   const monthContributionsByGoal = useMemo(
     () => sumGoalTransactionsByGoal(monthTransactions),
-    [monthTransactions]
+    [monthTransactions],
   );
 
   const activeGoals = useMemo(
@@ -774,11 +1087,18 @@ export default function ScheduledTransactions() {
               ...goal,
               current_amount: Math.max(0, Number(goal.current_amount || 0)),
             };
-            const plannedThisMonth = getGoalMonthlyPlanAmount(goalWithProgress, allocations);
+            const plannedThisMonth = getGoalMonthlyPlanAmount(
+              goalWithProgress,
+              allocations,
+            );
             const contributedThisMonth = monthContributionsByGoal[goal.id] || 0;
-            const hasMonthlyPlan = plannedThisMonth !== null && Number(plannedThisMonth || 0) > 0;
+            const hasMonthlyPlan =
+              plannedThisMonth !== null && Number(plannedThisMonth || 0) > 0;
             const monthRemainingAmount = hasMonthlyPlan
-              ? Math.max(0, Number(plannedThisMonth || 0) - contributedThisMonth)
+              ? Math.max(
+                  0,
+                  Number(plannedThisMonth || 0) - contributedThisMonth,
+                )
               : null;
 
             return {
@@ -787,21 +1107,21 @@ export default function ScheduledTransactions() {
               month_contributed_amount: contributedThisMonth,
               month_remaining_amount: monthRemainingAmount,
             };
-          })
+          }),
       ),
-    [allocations, monthContributionsByGoal, savingsGoals]
+    [allocations, monthContributionsByGoal, savingsGoals],
   );
 
   const invalidateData = () => {
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['accounts'] });
-    queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-    queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
-    queryClient.invalidateQueries({ queryKey: ['allocations'] });
-    queryClient.invalidateQueries({ queryKey: ['all-allocations'] });
-    queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
+    queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["all-transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    queryClient.invalidateQueries({ queryKey: ["recurring-transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+    queryClient.invalidateQueries({ queryKey: ["goal-contributions"] });
+    queryClient.invalidateQueries({ queryKey: ["allocations"] });
+    queryClient.invalidateQueries({ queryKey: ["all-allocations"] });
+    queryClient.invalidateQueries({ queryKey: ["budget-summary"] });
   };
 
   const updateAccountBalances = async (transactionPayload) => {
@@ -816,7 +1136,7 @@ export default function ScheduledTransactions() {
         return accountsApi.update(accountId, {
           balance: (Number(account.balance) || 0) + delta,
         });
-      })
+      }),
     );
   };
 
@@ -824,24 +1144,24 @@ export default function ScheduledTransactions() {
     const status = getRecurringStatus(rule);
 
     if (!rule.is_active) {
-      toast.error('This recurring rule is paused');
+      toast.error("This recurring rule is paused");
       return;
     }
 
     if (!isDueNow(status)) {
-      toast.error('This recurring item is not due yet');
+      toast.error("This recurring item is not due yet");
       return;
     }
 
     if (!rule.account_id) {
-      toast.error('This recurring rule is missing an account');
+      toast.error("This recurring rule is missing an account");
       return;
     }
 
     const transactionType = normalizeRuleType(rule.type);
 
-    if (transactionType === 'transfer' && !rule.to_account_id) {
-      toast.error('This recurring transfer is missing a destination account');
+    if (transactionType === "transfer" && !rule.to_account_id) {
+      toast.error("This recurring transfer is missing a destination account");
       return;
     }
 
@@ -856,7 +1176,8 @@ export default function ScheduledTransactions() {
         note: rule.note || `${rule.name} · Recurring`,
         category_id: rule.category_id || null,
         account_id: rule.account_id || null,
-        to_account_id: transactionType === 'transfer' ? rule.to_account_id || null : null,
+        to_account_id:
+          transactionType === "transfer" ? rule.to_account_id || null : null,
         recurring_transaction_id: rule.id,
         recurring_posted_for_date: postedForDate,
       };
@@ -871,10 +1192,10 @@ export default function ScheduledTransactions() {
       });
 
       invalidateData();
-      toast.success('Recurring transaction posted');
+      toast.success("Recurring transaction posted");
     } catch (error) {
-      console.error('Recurring post failed:', error);
-      toast.error(error.message || 'Could not post recurring transaction');
+      console.error("Recurring post failed:", error);
+      toast.error(error.message || "Could not post recurring transaction");
     } finally {
       setPostingId(null);
     }
@@ -884,25 +1205,34 @@ export default function ScheduledTransactions() {
     if (!selectedRecurringPayment) return;
 
     const rule = selectedRecurringPayment;
-    const fromAccount = accounts.find((account) => account.id === rule.account_id);
-    const toAccount = accounts.find((account) => account.id === rule.to_account_id);
+    const fromAccount = accounts.find(
+      (account) => account.id === rule.account_id,
+    );
+    const toAccount = accounts.find(
+      (account) => account.id === rule.to_account_id,
+    );
     const alreadyPaidThisMonth = Number(rule.month_paid_amount || 0);
-    const plannedThisMonth = Number(rule.month_planned_amount || rule.amount || 0);
-    const wasMonthCovered = plannedThisMonth > 0 && alreadyPaidThisMonth >= plannedThisMonth;
-    const willMonthBeCovered = plannedThisMonth > 0 && alreadyPaidThisMonth + Number(amount || 0) >= plannedThisMonth;
+    const plannedThisMonth = Number(
+      rule.month_planned_amount || rule.amount || 0,
+    );
+    const wasMonthCovered =
+      plannedThisMonth > 0 && alreadyPaidThisMonth >= plannedThisMonth;
+    const willMonthBeCovered =
+      plannedThisMonth > 0 &&
+      alreadyPaidThisMonth + Number(amount || 0) >= plannedThisMonth;
 
     if (!amount || amount <= 0) {
-      toast.error('Enter a valid payment amount');
+      toast.error("Enter a valid payment amount");
       return;
     }
 
     if (!fromAccount || !toAccount) {
-      toast.error('This credit card payment is missing its from/to accounts');
+      toast.error("This credit card payment is missing its from/to accounts");
       return;
     }
 
     if (fromAccount.id === toAccount.id) {
-      toast.error('Payment from/to accounts must be different');
+      toast.error("Payment from/to accounts must be different");
       return;
     }
 
@@ -915,7 +1245,7 @@ export default function ScheduledTransactions() {
 
       const transactionPayload = {
         amount,
-        type: 'transfer',
+        type: "transfer",
         date: paymentDate,
         note: paymentNote,
         category_id: rule.category_id || null,
@@ -943,10 +1273,14 @@ export default function ScheduledTransactions() {
 
       invalidateData();
       setSelectedRecurringPayment(null);
-      toast.success(willMonthBeCovered ? 'Credit card payment posted' : 'Partial credit card payment posted');
+      toast.success(
+        willMonthBeCovered
+          ? "Credit card payment posted"
+          : "Partial credit card payment posted",
+      );
     } catch (error) {
-      console.error('Credit card payment failed:', error);
-      toast.error(error.message || 'Could not post credit card payment');
+      console.error("Credit card payment failed:", error);
+      toast.error(error.message || "Could not post credit card payment");
     } finally {
       setPostingId(null);
     }
@@ -971,18 +1305,47 @@ export default function ScheduledTransactions() {
 
       invalidateGoalContributionQueries(queryClient);
       setSelectedGoal(null);
-      toast.success('Goal contribution posted');
+      toast.success("Goal contribution posted");
     } catch (error) {
-      console.error('Goal contribution failed:', error);
-      toast.error(error.message || 'Could not post goal contribution');
+      console.error("Goal contribution failed:", error);
+      toast.error(error.message || "Could not post goal contribution");
     } finally {
       setSavingGoalId(null);
     }
   };
 
+  const handleGoalFundUse = async ({ amount, date, note, toAccountId }) => {
+    if (!selectedGoalFundUse) return;
+
+    setUsingGoalFundsId(selectedGoalFundUse.id);
+
+    try {
+      await postGoalFundUse({
+        goal: selectedGoalFundUse,
+        amount,
+        date,
+        note,
+        toAccountId,
+        accounts,
+        categories,
+      });
+
+      invalidateGoalContributionQueries(queryClient);
+      setSelectedGoalFundUse(null);
+      toast.success("Saved funds used");
+    } catch (error) {
+      console.error("Goal fund use failed:", error);
+      toast.error(error.message || "Could not use saved funds");
+    } finally {
+      setUsingGoalFundsId(null);
+    }
+  };
+
   const recurringByType = useMemo(() => {
     return RECURRING_SECTIONS.reduce((groups, section) => {
-      groups[section.type] = activeRecurring.filter((rule) => normalizeRuleType(rule.type) === section.type);
+      groups[section.type] = activeRecurring.filter(
+        (rule) => normalizeRuleType(rule.type) === section.type,
+      );
       return groups;
     }, {});
   }, [activeRecurring]);
@@ -1016,13 +1379,21 @@ export default function ScheduledTransactions() {
                   type={section.type}
                   label={section.label}
                   count={rules.length}
-                  defaultExpanded={section.type === 'expense' || rules.length > 0}
+                  defaultExpanded={
+                    section.type === "expense" || rules.length > 0
+                  }
                   emptyText={`No scheduled ${section.label.toLowerCase()} right now.`}
                 >
                   {rules.map((rule) => {
-                    const category = categories.find((item) => item.id === rule.category_id);
-                    const account = accounts.find((item) => item.id === rule.account_id);
-                    const toAccount = accounts.find((item) => item.id === rule.to_account_id);
+                    const category = categories.find(
+                      (item) => item.id === rule.category_id,
+                    );
+                    const account = accounts.find(
+                      (item) => item.id === rule.account_id,
+                    );
+                    const toAccount = accounts.find(
+                      (item) => item.id === rule.to_account_id,
+                    );
 
                     return (
                       <ScheduledRecurringRow
@@ -1049,7 +1420,8 @@ export default function ScheduledTransactions() {
         <div className="px-1">
           <h2 className="text-base font-semibold">Savings Goals</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Same goal rows as Manage Plan, with contribution actions for execution.
+            Same goal rows as Manage Plan, with contribution actions for
+            execution.
           </p>
         </div>
 
@@ -1070,8 +1442,12 @@ export default function ScheduledTransactions() {
             emptyText="No active savings goals right now."
           >
             {activeGoals.map((goal) => {
-              const fromAccount = accounts.find((account) => account.id === goal.from_account_id);
-              const toAccount = accounts.find((account) => account.id === goal.to_account_id);
+              const fromAccount = accounts.find(
+                (account) => account.id === goal.from_account_id,
+              );
+              const toAccount = accounts.find(
+                (account) => account.id === goal.to_account_id,
+              );
 
               return (
                 <ScheduledGoalRow
@@ -1081,7 +1457,9 @@ export default function ScheduledTransactions() {
                   toAccount={toAccount}
                   currency={currency}
                   saving={savingGoalId === goal.id}
+                  usingFunds={usingGoalFundsId === goal.id}
                   onContribute={setSelectedGoal}
+                  onUseFunds={setSelectedGoalFundUse}
                 />
               );
             })}
@@ -1107,6 +1485,16 @@ export default function ScheduledTransactions() {
         onOpenChange={(open) => !open && setSelectedGoal(null)}
         onSubmit={handleGoalContribution}
         saving={Boolean(savingGoalId)}
+      />
+
+      <GoalFundUseDialog
+        goal={selectedGoalFundUse}
+        accounts={accounts}
+        currency={currency}
+        open={Boolean(selectedGoalFundUse)}
+        onOpenChange={(open) => !open && setSelectedGoalFundUse(null)}
+        onSubmit={handleGoalFundUse}
+        saving={Boolean(usingGoalFundsId)}
       />
     </div>
   );

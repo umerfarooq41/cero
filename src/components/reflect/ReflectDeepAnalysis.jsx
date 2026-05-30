@@ -151,6 +151,7 @@ function MetricLine({ label, value, subtext, tone = 'default', delay = 0 }) {
 function isGoalTransferTransaction(transaction) {
   return (
     transaction?.type === 'transfer' &&
+    transaction?.source_type !== 'goal_withdrawal' &&
     Boolean(
       transaction.savings_goal_id ||
         transaction.goal_id ||

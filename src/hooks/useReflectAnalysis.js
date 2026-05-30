@@ -60,9 +60,14 @@ function getGoalTransactionId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
+function isGoalFundUse(transaction) {
+  return transaction?.source_type === 'goal_withdrawal';
+}
+
 function isGoalTransfer(transaction) {
   return Boolean(
     transaction?.type === 'transfer' &&
+      !isGoalFundUse(transaction) &&
       (getGoalTransactionId(transaction) || transaction?.goal_contribution_id)
   );
 }
@@ -73,7 +78,7 @@ function getAccountsById(accounts = []) {
 
 function isDebtTransfer(transaction, accountsById) {
   if (transaction?.type !== 'transfer') return false;
-  if (isGoalTransfer(transaction)) return false;
+  if (isGoalFundUse(transaction) || isGoalTransfer(transaction)) return false;
 
   const destinationAccount = accountsById.get(transaction?.to_account_id);
   const destinationCategory = String(destinationAccount?.category || '').toLowerCase();
@@ -135,6 +140,7 @@ function getMonthTotals(
 
   const savings = txns
     .filter((transaction) => {
+      if (isGoalFundUse(transaction)) return false;
       if (isGoalTransfer(transaction)) return true;
       return getCategoryType(categories, transaction.category_id) === 'savings';
     })
@@ -142,6 +148,7 @@ function getMonthTotals(
 
   const debt = txns
     .filter((transaction) => {
+      if (isGoalFundUse(transaction)) return false;
       if (isDebtTransfer(transaction, accountsById)) return true;
       return getCategoryType(categories, transaction.category_id) === 'debt';
     })
@@ -251,6 +258,7 @@ export default function useReflectAnalysis({
   const trackedSavings = useMemo(() => {
     return periodTransactions
       .filter((transaction) => {
+        if (isGoalFundUse(transaction)) return false;
         if (isGoalTransfer(transaction)) return true;
         return getCategoryType(categories, transaction.category_id) === 'savings';
       })
@@ -260,6 +268,7 @@ export default function useReflectAnalysis({
   const trackedDebt = useMemo(() => {
     return periodTransactions
       .filter((transaction) => {
+        if (isGoalFundUse(transaction)) return false;
         if (isDebtTransfer(transaction, accountsById)) return true;
         return getCategoryType(categories, transaction.category_id) === 'debt';
       })

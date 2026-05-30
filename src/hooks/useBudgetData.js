@@ -188,9 +188,14 @@ function getGoalTransactionId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
 
+function isGoalFundUse(transaction) {
+  return transaction?.source_type === 'goal_withdrawal';
+}
+
 function isGoalTransfer(transaction) {
   return Boolean(
     transaction?.type === 'transfer' &&
+      !isGoalFundUse(transaction) &&
       (getGoalTransactionId(transaction) || transaction?.goal_contribution_id)
   );
 }
@@ -201,7 +206,7 @@ function getAccountById(accounts = []) {
 
 function isDebtTransfer(transaction, accountsById) {
   if (transaction?.type !== 'transfer') return false;
-  if (isGoalTransfer(transaction)) return false;
+  if (isGoalFundUse(transaction) || isGoalTransfer(transaction)) return false;
 
   const destinationAccount = accountsById.get(transaction?.to_account_id);
   const category = String(destinationAccount?.category || '').toLowerCase();
@@ -234,6 +239,7 @@ function buildBudgetSummary({
   const sumTrackedByType = (type) => {
     return transactions
       .filter((transaction) => {
+        if (isGoalFundUse(transaction)) return false;
         if (type === 'savings' && isGoalTransfer(transaction)) return true;
         if (type === 'debt' && isDebtTransfer(transaction, accountsById)) return true;
         return getCategoryType(categories, transaction.category_id) === type;

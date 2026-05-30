@@ -55,6 +55,8 @@ function cleanGeneratedNote(note) {
   return String(note)
     .replace(/\s*·\s*Recurring\s*$/i, '')
     .replace(/^Contribution to\s+/i, '')
+    .replace(/^Use\s+/i, '')
+    .replace(/\s+funds$/i, '')
     .trim();
 }
 
