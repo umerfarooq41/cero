@@ -172,3 +172,14 @@ export function getDefaultSavingsCategory(categories = []) {
     null
   );
 }
+export function getDefaultDebtCategory(categories = []) {
+  const normalize = (value) => String(value || '').toLowerCase().trim();
+
+  return (
+    categories.find(
+      (category) => normalize(category.type) === 'debt' && !category.parent_id
+    ) ||
+    categories.find((category) => normalize(category.type) === 'debt') ||
+    null
+  );
+}
