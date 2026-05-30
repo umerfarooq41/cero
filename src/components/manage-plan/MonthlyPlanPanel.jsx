@@ -23,8 +23,8 @@ import {
   getGoalProgress,
   getGoalStartDate,
   getGoalStatus,
-  getMonthlyRequiredSavingForMonth,
-  isGoalActiveForMonth,
+  getGoalPlannedAmountForMonth,
+  isGoalPlannedForMonth,
 } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 import { formatCurrencyNumberText } from '@/lib/currencies';
@@ -443,9 +443,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     });
 
     savingsGoals
-      .filter((goal) => !goal.is_archived && isGoalActiveForMonth(goal, currentMonth))
+      .filter((goal) => !goal.is_archived && isGoalPlannedForMonth(goal, currentMonth))
       .forEach((goal) => {
-        const monthlyRequired = getMonthlyRequiredSavingForMonth(goal, currentMonth);
+        const monthlyRequired = getGoalPlannedAmountForMonth(goal, currentMonth);
 
         if (monthlyRequired === null || Number(monthlyRequired || 0) <= 0) {
           return;

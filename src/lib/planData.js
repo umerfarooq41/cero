@@ -1,3 +1,5 @@
+import { getGoalPlannedAmountForMonth, isGoalPlannedForMonth } from '@/lib/goals';
+
 export function normalizePlanType(value) {
   const type = String(value || '').toLowerCase();
 
@@ -130,6 +132,50 @@ export function dedupeSourceAllocations(allocations = []) {
   return Array.from(byNaturalKey.values());
 }
 
+function hasGoalSourceAllocation(sourceAllocations = [], goalId) {
+  return sourceAllocations.some(
+    (allocation) =>
+      normalizeSourceType(getAllocationSourceType(allocation)) === 'goal' &&
+      allocation.source_id === goalId
+  );
+}
+
+export function buildSuggestedGoalAllocations({
+  savingsGoals = [],
+  sourceAllocations = [],
+  currentMonth,
+} = {}) {
+  if (!currentMonth) return [];
+
+  return savingsGoals
+    .filter(
+      (goal) =>
+        goal &&
+        !goal.is_archived &&
+        !hasGoalSourceAllocation(sourceAllocations, goal.id) &&
+        isGoalPlannedForMonth(goal, currentMonth)
+    )
+    .map((goal) => {
+      const plannedAmount = getGoalPlannedAmountForMonth(goal, currentMonth);
+
+      if (plannedAmount === null || Number(plannedAmount || 0) <= 0) {
+        return null;
+      }
+
+      return {
+        source_type: 'goal',
+        source_id: goal.id,
+        category_id: null,
+        budget_type: 'savings',
+        planned_amount: Number(plannedAmount || 0),
+        label: goal.name,
+        icon: goal.icon_key || 'target',
+        color: goal.color_key || '#276FE4',
+      };
+    })
+    .filter(Boolean);
+}
+
 export function getTrackedForSource({ transactions = [], sourceType, sourceId, categoryId }) {
   const normalizedSourceType = normalizeSourceType(sourceType);
 
@@ -175,9 +221,17 @@ export function buildPlanViewData({
   subcategories = [],
   allocations = [],
   transactions = [],
+  savingsGoals = [],
+  currentMonth,
   tab,
 }) {
-  const sourceAllocations = dedupeSourceAllocations(allocations);
+  const savedSourceAllocations = dedupeSourceAllocations(allocations);
+  const suggestedGoalAllocations = buildSuggestedGoalAllocations({
+    savingsGoals,
+    sourceAllocations: savedSourceAllocations,
+    currentMonth,
+  });
+  const sourceAllocations = [...savedSourceAllocations, ...suggestedGoalAllocations];
 
   const extraPlanRows = sourceAllocations
     .filter((allocation) => normalizePlanType(allocation.budget_type) === activeTab)
@@ -404,7 +458,12 @@ export function buildDonutChartData({ activeTab, chartData = [], tab }) {
   ];
 }
 
-export function buildPlanTotals({ allocations = [], categories = [] }) {
+export function buildPlanTotals({
+  allocations = [],
+  categories = [],
+  savingsGoals = [],
+  currentMonth,
+} = {}) {
   const totals = {
     income: 0,
     expense: 0,
@@ -428,7 +487,14 @@ export function buildPlanTotals({ allocations = [], categories = [] }) {
     totals[type] += Number(allocation.planned_amount || 0);
   });
 
-  dedupeSourceAllocations(allocations).forEach((allocation) => {
+  const savedSourceAllocations = dedupeSourceAllocations(allocations);
+  const suggestedGoalAllocations = buildSuggestedGoalAllocations({
+    savingsGoals,
+    sourceAllocations: savedSourceAllocations,
+    currentMonth,
+  });
+
+  [...savedSourceAllocations, ...suggestedGoalAllocations].forEach((allocation) => {
     const type = normalizePlanType(allocation.budget_type);
     if (!Object.prototype.hasOwnProperty.call(totals, type)) return;
 

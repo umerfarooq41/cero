@@ -12,6 +12,7 @@ import {
   useAllocations,
   useBudgetSummary,
   useCategories,
+  useSavingsGoals,
   useTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
@@ -39,6 +40,7 @@ export default function Plan() {
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
   const { data: transactions = [] } = useTransactions(currentMonth);
+  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const subcategories = useMemo(
     () => categories.filter((category) => category.parent_id),
@@ -46,8 +48,8 @@ export default function Plan() {
   );
 
   const plannedTotals = useMemo(
-    () => buildPlanTotals({ allocations, categories }),
-    [allocations, categories]
+    () => buildPlanTotals({ allocations, categories, savingsGoals, currentMonth }),
+    [allocations, categories, currentMonth, savingsGoals]
   );
 
   const leftToAllocate =
@@ -114,6 +116,8 @@ export default function Plan() {
             currency={currency}
             allocations={allocations}
             transactions={transactions}
+            savingsGoals={savingsGoals}
+            currentMonth={currentMonth}
           />
         </div>
       </main>

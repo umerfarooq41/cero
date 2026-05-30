@@ -16,6 +16,8 @@ export default function PlanOverview({
   currency,
   allocations,
   transactions,
+  savingsGoals,
+  currentMonth,
 }) {
   const tab = PLAN_TABS.find((item) => item.key === activeTab) || PLAN_TABS[0];
 
@@ -27,9 +29,20 @@ export default function PlanOverview({
         subcategories,
         allocations,
         transactions,
+        savingsGoals,
+        currentMonth,
         tab,
       }),
-    [activeTab, categories, subcategories, allocations, transactions, tab]
+    [
+      activeTab,
+      categories,
+      subcategories,
+      allocations,
+      transactions,
+      savingsGoals,
+      currentMonth,
+      tab,
+    ]
   );
 
   return (

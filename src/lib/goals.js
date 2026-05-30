@@ -6,12 +6,28 @@ export function getGoalStartDate(goal) {
   return goal?.start_date || goal?.created_at?.slice?.(0, 10) || todayIsoDate();
 }
 
+export function getMonthKey(value) {
+  return value ? String(value).slice(0, 7) : '';
+}
+
+export function getCurrentMonthKey() {
+  return todayIsoDate().slice(0, 7);
+}
+
 export function isGoalActiveForMonth(goal, month) {
   if (!month) return true;
 
-  const startMonth = String(getGoalStartDate(goal)).slice(0, 7);
+  const startMonth = getMonthKey(getGoalStartDate(goal));
 
   return !startMonth || startMonth <= month;
+}
+
+export function isGoalPlannedForMonth(goal, month) {
+  if (!isGoalActiveForMonth(goal, month)) return false;
+
+  const targetMonth = getMonthKey(goal?.target_date);
+
+  return !targetMonth || month <= targetMonth;
 }
 
 export function getMonthsBetweenGoalDates(startDate, targetDate) {
@@ -29,6 +45,25 @@ export function getMonthsBetweenGoalDates(startDate, targetDate) {
   return Math.max(1, totalMonths);
 }
 
+export function getGoalOriginalFundingAmount(goal) {
+  const target = Math.max(0, Number(goal?.target_amount || 0));
+  const starting = Math.max(0, Number(goal?.starting_amount || 0));
+
+  return Math.max(0, target - starting);
+}
+
+export function getGoalScheduledMonthlySaving(goal) {
+  const amountToFund = getGoalOriginalFundingAmount(goal);
+
+  if (amountToFund <= 0) return 0;
+
+  const months = getMonthsBetweenGoalDates(getGoalStartDate(goal), goal?.target_date);
+
+  if (months === null) return null;
+
+  return Math.ceil(amountToFund / months);
+}
+
 export function getMonthlyRequiredSavingForMonth(goal, month) {
   if (!isGoalActiveForMonth(goal, month)) return null;
 
@@ -44,6 +79,18 @@ export function getMonthlyRequiredSavingForMonth(goal, month) {
   if (months === null) return null;
 
   return Math.ceil(remaining / months);
+}
+
+export function getGoalPlannedAmountForMonth(goal, month) {
+  if (!month || !isGoalPlannedForMonth(goal, month)) return null;
+
+  const targetMonth = getMonthKey(goal?.target_date);
+
+  if (targetMonth && month <= targetMonth) {
+    return getGoalScheduledMonthlySaving(goal);
+  }
+
+  return getMonthlyRequiredSavingForMonth(goal, month);
 }
 
 export function formatGoalDate(value) {
