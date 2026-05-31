@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -13,20 +14,20 @@ import PageNotFound from './lib/PageNotFound';
 import { useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 import Logo from '@/components/Logo';
-
-import Dashboard from '@/pages/Dashboard';
-import Plan from '@/pages/Plan';
-import Transactions from '@/pages/Transactions';
-import ManagePlan from '@/pages/ManagePlan';
-import AddTransaction from '@/pages/AddTransaction';
-import Accounts from '@/pages/Accounts';
-import AccountDetail from '@/pages/AccountDetail';
-import AddAccount from '@/pages/AddAccount';
-import Settings from '@/pages/Settings';
 import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
 
 import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
+
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Plan = lazy(() => import('@/pages/Plan'));
+const Transactions = lazy(() => import('@/pages/Transactions'));
+const ManagePlan = lazy(() => import('@/pages/ManagePlan'));
+const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
+const Accounts = lazy(() => import('@/pages/Accounts'));
+const AccountDetail = lazy(() => import('@/pages/AccountDetail'));
+const AddAccount = lazy(() => import('@/pages/AddAccount'));
+const Settings = lazy(() => import('@/pages/Settings'));
 
 const LoadingScreen = () => (
   <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
@@ -37,6 +38,18 @@ const LoadingScreen = () => (
       <div className="mt-6 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
     </div>
   </div>
+);
+
+const RouteLoadingState = () => (
+  <div className="flex min-h-[50vh] items-center justify-center p-6">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
+  </div>
+);
+
+const LazyPage = ({ children }) => (
+  <Suspense fallback={<RouteLoadingState />}>
+    {children}
+  </Suspense>
 );
 
 const AuthenticatedApp = () => {
@@ -86,25 +99,25 @@ const AuthenticatedApp = () => {
       <Route path="/onboarding" element={<Onboarding />} />
 
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/plan" element={<Plan />} />
+        <Route path="/" element={<LazyPage><Dashboard /></LazyPage>} />
+        <Route path="/plan" element={<LazyPage><Plan /></LazyPage>} />
         <Route
           path="/edit-plan"
           element={<Navigate to="/manage-plan?tab=monthly-plan" replace />}
         />
-        <Route path="/transactions" element={<Transactions />} />
-        <Route path="/add-transaction" element={<AddTransaction />} />
-        <Route path="/transactions/:id/edit" element={<AddTransaction />} />
-        <Route path="/accounts" element={<Accounts />} />
-        <Route path="/accounts/:id" element={<AccountDetail />} />
-        <Route path="/add-account" element={<AddAccount />} />
-        <Route path="/accounts/:id/edit" element={<AddAccount />} />
-        <Route path="/manage-plan" element={<ManagePlan />} />
+        <Route path="/transactions" element={<LazyPage><Transactions /></LazyPage>} />
+        <Route path="/add-transaction" element={<LazyPage><AddTransaction /></LazyPage>} />
+        <Route path="/transactions/:id/edit" element={<LazyPage><AddTransaction /></LazyPage>} />
+        <Route path="/accounts" element={<LazyPage><Accounts /></LazyPage>} />
+        <Route path="/accounts/:id" element={<LazyPage><AccountDetail /></LazyPage>} />
+        <Route path="/add-account" element={<LazyPage><AddAccount /></LazyPage>} />
+        <Route path="/accounts/:id/edit" element={<LazyPage><AddAccount /></LazyPage>} />
+        <Route path="/manage-plan" element={<LazyPage><ManagePlan /></LazyPage>} />
         <Route
           path="/categories"
           element={<Navigate to="/manage-plan?tab=categories" replace />}
         />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings" element={<LazyPage><Settings /></LazyPage>} />
         <Route
           path="/reflect"
           element={<Navigate to="/?tab=reflect" replace />}
