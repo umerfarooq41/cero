@@ -17,7 +17,7 @@ export function useCurrency() {
       return settings?.currency || 'SAR';
     },
     enabled: Boolean(session?.user?.id),
-    staleTime: 0,
+    staleTime: 5 * 60_000,
   });
 
   return currencyCode;
