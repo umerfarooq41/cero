@@ -9,8 +9,8 @@ export function usePageEntrance(
   useEffect(() => {
     animate(
       selector,
-      { opacity: [0, 1], y: [16, 0], filter: ['blur(4px)', 'blur(0px)'] },
-      { duration: 0.4, delay: stagger(0.06), ease: [0.25, 0.46, 0.45, 0.94] }
+      { opacity: [0, 1], y: [10, 0] },
+      { duration: 0.22, delay: stagger(0.035), ease: [0.22, 1, 0.36, 1] }
     );
   }, [animate, selector]);
 
