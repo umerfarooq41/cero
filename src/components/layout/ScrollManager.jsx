@@ -31,17 +31,12 @@ function setTargetTop(target) {
 }
 
 function scrollToTop() {
-  const run = () => {
-    getScrollTargets().forEach(setTargetTop);
-  };
-
-  run();
-  requestAnimationFrame(run);
   requestAnimationFrame(() => {
-    run();
-    window.setTimeout(run, 0);
-    window.setTimeout(run, 80);
-    window.setTimeout(run, 180);
+    getScrollTargets().forEach(setTargetTop);
+
+    requestAnimationFrame(() => {
+      getScrollTargets().forEach(setTargetTop);
+    });
   });
 }
 
