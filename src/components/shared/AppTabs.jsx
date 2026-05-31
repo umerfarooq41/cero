@@ -136,7 +136,7 @@ export default function AppTabs({
                     'absolute inset-0 rounded-[inherit] shadow-sm ring-1',
                     toneStyle.indicator
                   )}
-                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
                 />
               )}
 
@@ -165,10 +165,10 @@ export default function AppTabs({
 }
 
 export const tabPanelMotion = {
-  initial: { opacity: 0, y: 8, filter: 'blur(3px)' },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-  exit: { opacity: 0, y: -6, filter: 'blur(3px)' },
-  transition: { duration: 0.18, ease: 'easeOut' },
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -4 },
+  transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] },
 };
 
 export function AppTabPanel({ children, className }) {
