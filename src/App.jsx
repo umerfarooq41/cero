@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -9,24 +10,23 @@ import {
   useLocation,
 } from 'react-router-dom';
 
-import PageNotFound from './lib/PageNotFound';
 import { useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 import Logo from '@/components/Logo';
-
-import Dashboard from '@/pages/Dashboard';
-import Plan from '@/pages/Plan';
-import Transactions from '@/pages/Transactions';
-import ManagePlan from '@/pages/ManagePlan';
-import AddTransaction from '@/pages/AddTransaction';
-import Accounts from '@/pages/Accounts';
-import AccountDetail from '@/pages/AccountDetail';
-import AddAccount from '@/pages/AddAccount';
-import Settings from '@/pages/Settings';
-import Onboarding from '@/pages/Onboarding';
-import Auth from '@/pages/Auth';
-
 import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
+
+const PageNotFound = lazy(() => import('./lib/PageNotFound'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Plan = lazy(() => import('@/pages/Plan'));
+const Transactions = lazy(() => import('@/pages/Transactions'));
+const ManagePlan = lazy(() => import('@/pages/ManagePlan'));
+const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
+const Accounts = lazy(() => import('@/pages/Accounts'));
+const AccountDetail = lazy(() => import('@/pages/AccountDetail'));
+const AddAccount = lazy(() => import('@/pages/AddAccount'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Onboarding = lazy(() => import('@/pages/Onboarding'));
+const Auth = lazy(() => import('@/pages/Auth'));
 
 const LoadingScreen = () => (
   <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
@@ -56,11 +56,13 @@ const AuthenticatedApp = () => {
 
   if (!isAuthenticated) {
     return (
-      <Routes>
-        <Route path="/login" element={<Auth />} />
-        <Route path="/signup" element={<Auth />} />
-        <Route path="*" element={<Auth />} />
-      </Routes>
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/login" element={<Auth />} />
+          <Route path="/signup" element={<Auth />} />
+          <Route path="*" element={<Auth />} />
+        </Routes>
+      </Suspense>
     );
   }
 
@@ -80,7 +82,8 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Routes>
+    <Suspense fallback={<LoadingScreen />}>
+      <Routes>
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/signup" element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Onboarding />} />
@@ -111,8 +114,9 @@ const AuthenticatedApp = () => {
         />
       </Route>
 
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </Suspense>
   );
 };
 
