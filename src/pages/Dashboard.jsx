@@ -9,13 +9,12 @@ import PageHeader from '@/components/layout/PageHeader';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import { format } from 'date-fns';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   useBudgetSummary,
   useAllTransactions,
   useRecurringTransactions,
   useSavingsGoals,
-  useTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { attachGoalFundingProgress } from '@/lib/goals';
@@ -28,15 +27,20 @@ export default function Dashboard() {
   const requestedTab = searchParams.get('tab');
   const activeTab = validTabs.has(requestedTab) ? requestedTab : 'overview';
 
-  const handleTabChange = (nextTab) => {
-    setSearchParams(nextTab === 'reflect' ? { tab: 'reflect' } : {}, {
-      replace: true,
-    });
-  };
+  const handleTabChange = useCallback(
+    (nextTab) => {
+      setSearchParams(nextTab === 'reflect' ? { tab: 'reflect' } : {}, {
+        replace: true,
+      });
+    },
+    [setSearchParams]
+  );
 
   const currentMonth = format(new Date(), 'yyyy-MM');
   const budget = useBudgetSummary(currentMonth);
-  const { data: transactions = [] } = useTransactions(currentMonth);
+  const transactions = budget.transactions || [];
+  const categories = budget.categories || [];
+  const accounts = budget.accounts || [];
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { data: allTransactions = [] } = useAllTransactions();
@@ -73,7 +77,20 @@ export default function Dashboard() {
         <div className="mt-4">
           <AnimatePresence mode="wait" initial={false}>
             <AppTabPanel key={activeTab}>
-              {activeTab === 'reflect' ? <DashboardReflect /> : <DashboardOverview />}
+              {activeTab === 'reflect' ? (
+                <DashboardReflect />
+              ) : (
+                <DashboardOverview
+                  currentMonth={currentMonth}
+                  budget={budget}
+                  transactions={transactions}
+                  categories={categories}
+                  accounts={accounts}
+                  recurringTransactions={recurringTransactions}
+                  goals={goalsWithFunding}
+                  formatCurrency={formatCurrency}
+                />
+              )}
             </AppTabPanel>
           </AnimatePresence>
         </div>
