@@ -250,15 +250,15 @@ main,
 @layer utilities {
   .glass {
     background: rgba(255, 255, 255, 0.52);
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(10px) saturate(135%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
     border: 1px solid rgba(200, 215, 240, 0.38);
   }
 
   .dark .glass {
     background: rgba(15, 23, 42, 0.52);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(9px) saturate(130%);
+    -webkit-backdrop-filter: blur(9px) saturate(130%);
     border: 1px solid rgba(120, 160, 220, 0.12);
   }
 
@@ -281,15 +281,15 @@ main,
         rgba(255, 255, 255, 0.60),
         rgba(255, 255, 255, 0.76)
       );
-    backdrop-filter: blur(20px) saturate(155%);
-    -webkit-backdrop-filter: blur(20px) saturate(155%);
+    backdrop-filter: blur(10px) saturate(135%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
     border-color: rgba(180, 200, 230, 0.28);
   }
 
   .dark .surface-card {
     background: rgba(18, 24, 38, 0.48);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(9px) saturate(130%);
+    -webkit-backdrop-filter: blur(9px) saturate(130%);
     border-color: rgba(100, 140, 200, 0.10);
   }
 
@@ -309,8 +309,8 @@ main,
 
   .card-soft {
     background: hsl(var(--card) / 0.86);
-    backdrop-filter: blur(14px) saturate(135%);
-    -webkit-backdrop-filter: blur(14px) saturate(135%);
+    backdrop-filter: blur(8px) saturate(125%);
+    -webkit-backdrop-filter: blur(8px) saturate(125%);
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.03),
       0 6px 18px rgba(15, 23, 42, 0.05);
@@ -318,8 +318,8 @@ main,
 
   .dark .card-soft {
     background: hsl(var(--card) / 0.44);
-    backdrop-filter: blur(16px) saturate(130%);
-    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    backdrop-filter: blur(8px) saturate(125%);
+    -webkit-backdrop-filter: blur(8px) saturate(125%);
     box-shadow:
       0 8px 20px rgba(0, 0, 0, 0.20);
   }
@@ -403,13 +403,13 @@ main,
     border: 0;
     box-shadow: none;
     outline: 0;
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(9px) saturate(130%);
+    -webkit-backdrop-filter: blur(9px) saturate(130%);
   }
 
   .dark .app-fixed-surface {
-    backdrop-filter: blur(18px) saturate(130%);
-    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    backdrop-filter: blur(9px) saturate(125%);
+    -webkit-backdrop-filter: blur(9px) saturate(125%);
   }
 }
 
@@ -480,8 +480,8 @@ main,
     --app-surface-shadow-color: 222 47% 9%;
     --app-surface-shadow-alpha: 0.075;
     --app-surface-shadow-strong-alpha: 0.12;
-    --app-surface-blur: 22px;
-    --app-surface-saturate: 145%;
+    --app-surface-blur: 10px;
+    --app-surface-saturate: 135%;
 
     --app-recharts-tooltip-bg: hsl(var(--popover) / var(--app-surface-floating-alpha));
     --app-recharts-tooltip-border: hsl(var(--border) / 0.72);
@@ -525,7 +525,7 @@ main,
     --app-surface-shadow-color: 222 47% 2%;
     --app-surface-shadow-alpha: 0.28;
     --app-surface-shadow-strong-alpha: 0.38;
-    --app-surface-saturate: 140%;
+    --app-surface-saturate: 132%;
   }
 
   /* Ember Noir */
@@ -728,6 +728,22 @@ main,
     --app-bg-image: url('/backgrounds/graphite-glow-dark.svg');
   }
 
+
+
+  @media (max-width: 768px) {
+    :root {
+      --app-surface-blur: 6px;
+      --app-surface-saturate: 122%;
+      --app-surface-shadow-alpha: 0.055;
+      --app-surface-shadow-strong-alpha: 0.10;
+    }
+
+    html.dark {
+      --app-surface-shadow-alpha: 0.22;
+      --app-surface-shadow-strong-alpha: 0.30;
+    }
+  }
+
   html,
   body,
   #root {
@@ -898,8 +914,8 @@ main,
     border: 0 !important;
     box-shadow: none !important;
     outline: 0 !important;
-    backdrop-filter: blur(18px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+    backdrop-filter: blur(10px) saturate(125%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(125%) !important;
   }
 
   .app-card-surface,
@@ -969,8 +985,8 @@ main,
     border-color: hsl(var(--border) / 0.62) !important;
     color: hsl(var(--foreground)) !important;
     box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.035) !important;
-    backdrop-filter: blur(12px) saturate(135%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(135%) !important;
+    backdrop-filter: blur(8px) saturate(125%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(125%) !important;
   }
 
   :where(
