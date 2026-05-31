@@ -17,14 +17,17 @@ import Logo from '@/components/Logo';
 import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
 
+// Keep primary navigation pages eager so the bottom/side nav feels instant.
+import Dashboard from '@/pages/Dashboard';
+import Plan from '@/pages/Plan';
+import Transactions from '@/pages/Transactions';
+import Accounts from '@/pages/Accounts';
+import ManagePlan from '@/pages/ManagePlan';
+
 import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
 
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const Plan = lazy(() => import('@/pages/Plan'));
-const Transactions = lazy(() => import('@/pages/Transactions'));
-const ManagePlan = lazy(() => import('@/pages/ManagePlan'));
+// Lazy-load secondary pages that are opened less often.
 const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
-const Accounts = lazy(() => import('@/pages/Accounts'));
 const AccountDetail = lazy(() => import('@/pages/AccountDetail'));
 const AddAccount = lazy(() => import('@/pages/AddAccount'));
 const Settings = lazy(() => import('@/pages/Settings'));
@@ -99,20 +102,21 @@ const AuthenticatedApp = () => {
       <Route path="/onboarding" element={<Onboarding />} />
 
       <Route element={<AppLayout />}>
-        <Route path="/" element={<LazyPage><Dashboard /></LazyPage>} />
-        <Route path="/plan" element={<LazyPage><Plan /></LazyPage>} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/plan" element={<Plan />} />
         <Route
           path="/edit-plan"
           element={<Navigate to="/manage-plan?tab=monthly-plan" replace />}
         />
-        <Route path="/transactions" element={<LazyPage><Transactions /></LazyPage>} />
+        <Route path="/transactions" element={<Transactions />} />
+        <Route path="/accounts" element={<Accounts />} />
+        <Route path="/manage-plan" element={<ManagePlan />} />
+
         <Route path="/add-transaction" element={<LazyPage><AddTransaction /></LazyPage>} />
         <Route path="/transactions/:id/edit" element={<LazyPage><AddTransaction /></LazyPage>} />
-        <Route path="/accounts" element={<LazyPage><Accounts /></LazyPage>} />
         <Route path="/accounts/:id" element={<LazyPage><AccountDetail /></LazyPage>} />
         <Route path="/add-account" element={<LazyPage><AddAccount /></LazyPage>} />
         <Route path="/accounts/:id/edit" element={<LazyPage><AddAccount /></LazyPage>} />
-        <Route path="/manage-plan" element={<LazyPage><ManagePlan /></LazyPage>} />
         <Route
           path="/categories"
           element={<Navigate to="/manage-plan?tab=categories" replace />}
