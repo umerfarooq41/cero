@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
 import {
   ArrowRight,
   Landmark,
@@ -21,17 +20,6 @@ import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TopGoalPreview from '@/components/dashboard/TopGoalPreview';
 import { Button } from '@/components/ui/button';
 import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard';
-import {
-  useAccounts,
-  useBudgetSummary,
-  useCategories,
-  useTransactions,
-  useRecurringTransactions,
-  useSavingsGoals,
-  useAllTransactions,
-} from '@/hooks/useBudgetData';
-import { useCurrencyFormatter } from '@/hooks/useCurrency';
-import { attachGoalFundingProgress } from '@/lib/goals';
 import { cn } from '@/lib/utils';
 
 function DashboardCard(props) {
@@ -140,23 +128,19 @@ function getTransactionToAccount(transaction, accounts) {
   return accounts.find((account) => account.id === transaction.to_account_id);
 }
 
-export default function DashboardOverview() {
+export default function DashboardOverview({
+  currentMonth,
+  budget = {},
+  transactions = [],
+  categories = [],
+  accounts = [],
+  recurringTransactions = [],
+  goals = [],
+  formatCurrency,
+}) {
   const navigate = useNavigate();
-  const currentMonth = format(new Date(), 'yyyy-MM');
-  const formatCurrency = useCurrencyFormatter();
 
-  const budget = useBudgetSummary(currentMonth);
-  const { data: transactions = [] } = useTransactions(currentMonth);
-  const { data: categories = [] } = useCategories();
-  const { data: accounts = [] } = useAccounts();
-  const { data: recurringTransactions = [] } = useRecurringTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: allTransactions = [] } = useAllTransactions();
-
-  const goalsWithFunding = useMemo(
-    () => attachGoalFundingProgress(savingsGoals, allTransactions),
-    [allTransactions, savingsGoals]
-  );
+  const goalsWithFunding = goals;
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -168,9 +152,20 @@ export default function DashboardOverview() {
     Number(budget.totalTrackedSavings || 0) +
     Number(budget.totalTrackedDebt || 0);
 
-  const recentTransactions = [...transactions]
-    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
-    .slice(0, 5);
+  const recentTransactions = useMemo(
+    () =>
+      [...transactions]
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+        .slice(0, 5),
+    [transactions]
+  );
+
+  const handleTransactionClick = useCallback(
+    (transactionId) => {
+      navigate(`/transactions/${transactionId}/edit`);
+    },
+    [navigate]
+  );
 
   return (
     <>
@@ -296,9 +291,7 @@ export default function DashboardOverview() {
                       formatCurrency={formatCurrency}
                       compactSourceBadges
                       flush
-                      onClick={() =>
-                        navigate(`/transactions/${transaction.id}/edit`)
-                      }
+                      onClick={() => handleTransactionClick(transaction.id)}
                     />
                   ))}
               </div>
