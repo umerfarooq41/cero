@@ -2,15 +2,18 @@ import { useCallback, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { sortGoalsByPriority, todayIsoDate } from "@/lib/goals";
+import {
+  getGoalProgress,
+  getGoalRemaining,
+  sortGoalsByPriority,
+  todayIsoDate,
+} from "@/lib/goals";
 import {
   invalidateGoalContributionQueries,
   postGoalContribution,
-  postGoalFundUse,
 } from "@/lib/goalContributionEffects";
 import {
   getGoalMonthlyPlanAmount,
-  isDebtAccount,
   sumGoalFundedTotalsByGoal,
   sumGoalTransactionsByGoal,
 } from "./scheduledUtils";
@@ -41,23 +44,11 @@ export default function useGoalItems({
 }) {
   const queryClient = useQueryClient();
   const [savingGoalId, setSavingGoalId] = useState(null);
-  const [usingGoalFundsId, setUsingGoalFundsId] = useState(null);
 
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [contributionAmount, setContributionAmount] = useState("");
   const [contributionDate, setContributionDate] = useState(todayIsoDate());
   const [contributionNote, setContributionNote] = useState("");
-
-  const [selectedGoalFundUse, setSelectedGoalFundUse] = useState(null);
-  const [fundUseAmount, setFundUseAmount] = useState("");
-  const [fundUseDate, setFundUseDate] = useState(todayIsoDate());
-  const [fundUseNote, setFundUseNote] = useState("");
-  const [fundUseToAccountId, setFundUseToAccountId] = useState("");
-
-  const debtAccounts = useMemo(
-    () => accounts.filter((account) => isDebtAccount(account)),
-    [accounts],
-  );
 
   const monthContributionsByGoal = useMemo(
     () => sumGoalTransactionsByGoal(monthTransactions),
@@ -81,9 +72,10 @@ export default function useGoalItems({
             );
             const fundedAmount =
               startingAmount + Number(fundedTotalsByGoal[goal.id] || 0);
+            const currentAmount = Math.max(0, Number(goal.current_amount || 0));
             const goalWithProgress = {
               ...goal,
-              current_amount: Math.max(0, Number(goal.current_amount || 0)),
+              current_amount: currentAmount,
               funded_amount: Math.max(0, fundedAmount),
             };
             const plannedThisMonth = getGoalMonthlyPlanAmount(
@@ -100,12 +92,15 @@ export default function useGoalItems({
                   Number(plannedThisMonth || 0) - contributedThisMonth,
                 )
               : null;
+            const progress = getGoalProgress(goalWithProgress);
+            const remaining = getGoalRemaining(goalWithProgress);
 
             return {
               ...goalWithProgress,
               month_planned_amount: plannedThisMonth,
               month_contributed_amount: contributedThisMonth,
               month_remaining_amount: monthRemainingAmount,
+              is_completed: remaining <= 0 || progress >= 100,
             };
           }),
       ),
@@ -130,27 +125,6 @@ export default function useGoalItems({
     setContributionAmount("");
     setContributionDate(todayIsoDate());
     setContributionNote("");
-  }, []);
-
-  const openFundUseDialog = useCallback(
-    (goal) => {
-      const availableAmount = Math.max(0, Number(goal?.current_amount || 0));
-
-      setSelectedGoalFundUse(goal);
-      setFundUseAmount(availableAmount ? String(availableAmount) : "");
-      setFundUseDate(todayIsoDate());
-      setFundUseNote(goal ? `Use ${goal.name} funds` : "");
-      setFundUseToAccountId(debtAccounts[0]?.id || "");
-    },
-    [debtAccounts],
-  );
-
-  const closeFundUseDialog = useCallback(() => {
-    setSelectedGoalFundUse(null);
-    setFundUseAmount("");
-    setFundUseDate(todayIsoDate());
-    setFundUseNote("");
-    setFundUseToAccountId("");
   }, []);
 
   const submitContribution = useCallback(async () => {
@@ -192,49 +166,11 @@ export default function useGoalItems({
     selectedGoal,
   ]);
 
-  const submitFundUse = useCallback(async () => {
-    if (!selectedGoalFundUse) return;
-
-    setUsingGoalFundsId(selectedGoalFundUse.id);
-
-    try {
-      await postGoalFundUse({
-        goal: selectedGoalFundUse,
-        amount: Number(fundUseAmount || 0),
-        date: fundUseDate,
-        note: fundUseNote,
-        toAccountId: fundUseToAccountId,
-        accounts,
-        categories,
-      });
-
-      invalidateGoalContributionQueries(queryClient);
-      closeFundUseDialog();
-      toast.success("Saved funds used");
-    } catch (error) {
-      console.error("Goal fund use failed:", error);
-      toast.error(error.message || "Could not use saved funds");
-    } finally {
-      setUsingGoalFundsId(null);
-    }
-  }, [
-    accounts,
-    categories,
-    closeFundUseDialog,
-    fundUseAmount,
-    fundUseDate,
-    fundUseNote,
-    fundUseToAccountId,
-    queryClient,
-    selectedGoalFundUse,
-  ]);
-
   return {
     activeGoals,
     monthContributionsByGoal,
     fundedTotalsByGoal,
     savingGoalId,
-    usingGoalFundsId,
     contributionDialog: {
       goal: selectedGoal,
       open: Boolean(selectedGoal),
@@ -248,22 +184,6 @@ export default function useGoalItems({
       closeDialog: closeContributionDialog,
       submit: submitContribution,
       suggestedAmount: getSuggestedContributionAmount(selectedGoal),
-    },
-    fundUseDialog: {
-      goal: selectedGoalFundUse,
-      open: Boolean(selectedGoalFundUse),
-      amount: fundUseAmount,
-      date: fundUseDate,
-      note: fundUseNote,
-      toAccountId: fundUseToAccountId,
-      setAmount: setFundUseAmount,
-      setDate: setFundUseDate,
-      setNote: setFundUseNote,
-      setToAccountId: setFundUseToAccountId,
-      openDialog: openFundUseDialog,
-      closeDialog: closeFundUseDialog,
-      submit: submitFundUse,
-      debtAccounts,
     },
   };
 }

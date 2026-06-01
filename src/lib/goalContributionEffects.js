@@ -3,7 +3,7 @@ import {
   goalContributionsApi,
   transactionsApi,
 } from '@/lib/budgetData';
-import { getDefaultDebtCategory, getDefaultSavingsCategory } from '@/lib/goals';
+import { getDefaultSavingsCategory } from '@/lib/goals';
 import {
   getTransactionDeltas,
   recalculateGoalCurrentAmount,
@@ -15,17 +15,6 @@ function todayIsoDate() {
 
 function safeAmount(value) {
   return Math.max(0, Number(value || 0));
-}
-
-function isDebtAccount(account) {
-  const category = String(account?.category || '').toLowerCase();
-  const type = String(account?.type || '').toLowerCase();
-
-  return (
-    category === 'liability' ||
-    category === 'debt' ||
-    ['loan', 'credit_card', 'credit-card', 'creditcard', 'debt'].includes(type)
-  );
 }
 
 async function applyAccountBalanceDeltas(transactionPayload, accounts = []) {
@@ -72,8 +61,6 @@ export async function postGoalContribution({
   note,
   accounts = [],
   categories = [],
-  allocations = [],
-  month,
 }) {
   if (!goal?.id) {
     throw new Error('Goal not found');
@@ -119,92 +106,6 @@ export async function postGoalContribution({
     savings_goal_id: goal.id,
     goal_contribution_id: contribution.id,
     source_type: 'goal',
-  };
-
-  const transaction = await createTransactionWithOptionalSourceType(transactionPayload);
-
-  await applyAccountBalanceDeltas(transactionPayload, accounts);
-
-  await goalContributionsApi.update(contribution.id, {
-    transaction_id: transaction.id,
-  });
-
-  const updatedGoal = await recalculateGoalCurrentAmount(goal.id);
-
-  return {
-    contribution,
-    transaction,
-    updatedGoal,
-  };
-}
-
-export async function postGoalFundUse({
-  goal,
-  amount,
-  date,
-  note,
-  toAccountId,
-  accounts = [],
-  categories = [],
-}) {
-  if (!goal?.id) {
-    throw new Error('Goal not found');
-  }
-
-  const useAmount = safeAmount(amount);
-
-  if (!useAmount) {
-    throw new Error('Enter a valid amount to use');
-  }
-
-  const availableAmount = safeAmount(goal.current_amount);
-
-  if (useAmount > availableAmount) {
-    throw new Error('Amount is higher than the saved goal balance');
-  }
-
-  const fromAccount = accounts.find((account) => account.id === goal.to_account_id);
-  const toAccount = accounts.find((account) => account.id === toAccountId);
-
-  if (!fromAccount) {
-    throw new Error('This goal is missing its saved funds account');
-  }
-
-  if (!toAccount) {
-    throw new Error('Select the debt account to pay');
-  }
-
-  if (!isDebtAccount(toAccount)) {
-    throw new Error('Select a loan, credit card, or debt account');
-  }
-
-  if (fromAccount.id === toAccount.id) {
-    throw new Error('From and to accounts must be different');
-  }
-
-  const useDate = date || todayIsoDate();
-  const useNote = note || `Use ${goal.name} funds`;
-  const debtCategory = getDefaultDebtCategory(categories);
-
-  const contribution = await goalContributionsApi.create({
-    goal_id: goal.id,
-    account_id: fromAccount.id,
-    amount: useAmount,
-    contribution_date: useDate,
-    note: useNote,
-  });
-
-  const transactionPayload = {
-    amount: useAmount,
-    type: 'transfer',
-    date: useDate,
-    note: useNote,
-    category_id: debtCategory?.id || null,
-    account_id: fromAccount.id,
-    to_account_id: toAccount.id,
-    savings_goal_id: goal.id,
-    goal_contribution_id: contribution.id,
-    source_type: 'goal_withdrawal',
   };
 
   const transaction = await createTransactionWithOptionalSourceType(transactionPayload);

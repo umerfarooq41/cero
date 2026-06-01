@@ -110,9 +110,7 @@ export default function ScheduledTransactions() {
         accounts={accounts}
         currency={currency}
         savingGoalId={goals.savingGoalId}
-        usingGoalFundsId={goals.usingGoalFundsId}
         contributionDialog={goals.contributionDialog}
-        fundUseDialog={goals.fundUseDialog}
         formatCurrencyElement={formatCurrencyElement}
       />
     </div>
