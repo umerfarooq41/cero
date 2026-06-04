@@ -12,8 +12,9 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/layout/PageHeader';
+import AppTabs from '@/components/shared/AppTabs.jsx';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -40,27 +41,25 @@ import {
 import { useCurrency } from '@/hooks/useCurrency';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
-import { cn } from '@/lib/utils';
 
 const typeOptions = [
   {
     value: 'expense',
     label: 'Expense',
     icon: ArrowUpRight,
-    color: 'border-destructive bg-destructive/10 text-destructive',
+    tone: 'red',
   },
   {
     value: 'income',
     label: 'Income',
     icon: ArrowDownLeft,
-    color:
-      'border-[hsl(var(--success))] bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]',
+    tone: 'emerald',
   },
   {
     value: 'transfer',
     label: 'Transfer',
     icon: ArrowLeftRight,
-    color: 'border-primary bg-primary/10 text-primary',
+    tone: 'transfer',
   },
 ];
 
@@ -77,10 +76,24 @@ function CurrencyPrefix({ currency }) {
       : currency?.code || currency?.currency || 'SAR';
 
   if (currencyCode === 'SAR') {
-    return <img src="/sar.svg" alt="SAR" className="h-6 w-6 opacity-70" />;
+    return <img src="/sar.svg" alt="SAR" className="h-5 w-5 opacity-70" />;
   }
 
-  return <span className="text-base font-semibold">{currencyCode}</span>;
+  return <span className="text-sm font-semibold">{currencyCode}</span>;
+}
+
+function TransactionTypeSelector({ value, onChange }) {
+  return (
+    <AppTabs
+      tabs={typeOptions}
+      value={value}
+      onChange={onChange}
+      size="sm"
+      layoutId="add-transaction-type-tab-highlight"
+      gridClassName="gap-0.5 sm:gap-1"
+      buttonClassName="gap-1.5 px-2 py-2.5 text-xs sm:text-sm"
+    />
+  );
 }
 
 function addDelta(deltas, accountId, amount) {
@@ -177,11 +190,6 @@ export default function AddTransaction() {
   const destinationAccount = useMemo(
     () => accounts.find((account) => account.id === toAccountId),
     [accounts, toAccountId]
-  );
-
-  const selectedCategory = useMemo(
-    () => categories.find((category) => category.id === categoryId),
-    [categories, categoryId]
   );
 
   const transferPurposeOptions = useMemo(() => {
@@ -425,55 +433,36 @@ export default function AddTransaction() {
             ? 'Update transaction details'
             : 'Record income, expenses, or transfers'
         }
+        action={
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            className="group relative flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-full text-muted-foreground/80 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <ArrowLeft className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
+          </button>
+        }
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="mb-4 gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-
-        <div className="space-y-5 rounded-2xl app-card-surface p-5">
-          <div className="grid grid-cols-3 gap-2">
-            {typeOptions.map((option) => {
-              const isActive = type === option.value;
-              const Icon = option.icon;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    setType(option.value);
-                    setCategoryId('');
-                    setToAccountId('');
-                    setTransferPurpose(TRANSFER_PURPOSES.normal);
-                  }}
-                  className={cn(
-                    'flex min-h-[4.75rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-sm font-semibold transition-all',
-                    isActive
-                      ? option.color
-                      : 'border-border/60 bg-background/55 text-muted-foreground hover:border-muted-foreground/30 hover:bg-background/75'
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
+      <main className="mx-auto w-full max-w-3xl px-4 py-3 pb-24 lg:py-8">
+        <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
+          <TransactionTypeSelector
+            value={type}
+            onChange={(nextType) => {
+              setType(nextType);
+              setCategoryId('');
+              setToAccountId('');
+              setTransferPurpose(TRANSFER_PURPOSES.normal);
+            }}
+          />
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Amount
             </label>
 
-            <div className="flex h-16 items-center rounded-2xl border border-border/60 bg-background/80 px-4 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+            <div className="flex h-14 items-center rounded-2xl border border-border/60 bg-background/80 px-4 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
               <span className="mr-3 flex shrink-0 items-center text-muted-foreground">
                 <CurrencyPrefix currency={currency} />
               </span>
@@ -483,7 +472,7 @@ export default function AddTransaction() {
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 placeholder="0.00"
-                className="h-full min-w-0 flex-1 border-0 bg-transparent px-0 text-left text-3xl font-bold tabular-nums tracking-tight text-foreground outline-none placeholder:text-muted-foreground/45"
+                className="h-full min-w-0 flex-1 border-0 bg-transparent px-0 text-left text-2xl font-bold tabular-nums tracking-tight text-foreground outline-none placeholder:text-muted-foreground/45 sm:text-3xl"
                 step="0.01"
                 min="0"
                 inputMode="decimal"
@@ -647,13 +636,19 @@ export default function AddTransaction() {
             <label className="text-xs font-medium text-muted-foreground">
               Date
             </label>
-            <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+
+            <Input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               Note
             </label>
+
             <Textarea
               value={note}
               onChange={(event) => setNote(event.target.value)}
@@ -666,7 +661,7 @@ export default function AddTransaction() {
         <Button
           onClick={handleSubmit}
           disabled={saving || deleting || !amount}
-          className="mt-6 h-12 w-full text-sm font-semibold"
+          className="mt-5 h-12 w-full text-sm font-semibold"
         >
           {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
         </Button>
