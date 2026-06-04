@@ -8,6 +8,7 @@ export default function PageHeader({
   title,
   subtitle,
   className,
+  action,
 }) {
   const location = useLocation();
   const settingsActive = location.pathname === '/settings';
@@ -97,59 +98,63 @@ export default function PageHeader({
           )}
         </div>
 
-        <Link
-          to="/settings"
-          aria-label="Open settings"
-          aria-current={settingsActive ? 'page' : undefined}
-          data-haptic="true"
-          className={cn(
-            'group relative flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors duration-200 lg:hidden',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            settingsActive
-              ? 'text-primary'
-              : 'text-muted-foreground/80 hover:text-foreground'
-          )}
-        >
-          <motion.span
-            whileTap={{ scale: 0.92 }}
-            animate={{ scale: settingsActive ? 1.04 : 1, y: settingsActive ? -1 : 0 }}
-            transition={{ type: 'spring', stiffness: 430, damping: 28 }}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full"
+        {action ? (
+          <div className="shrink-0">{action}</div>
+        ) : (
+          <Link
+            to="/settings"
+            aria-label="Open settings"
+            aria-current={settingsActive ? 'page' : undefined}
+            data-haptic="true"
+            className={cn(
+              'group relative flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors duration-200 lg:hidden',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              settingsActive
+                ? 'text-primary'
+                : 'text-muted-foreground/80 hover:text-foreground'
+            )}
           >
-            {settingsActive && (
-              <motion.span
-                layoutId="header-settings-active-orb"
-                aria-hidden="true"
-                className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
-                style={{
-                  boxShadow:
-                    '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
-                }}
-                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              />
-            )}
-
-            {settingsActive && (
-              <motion.span
-                aria-hidden="true"
-                className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
-                initial={{ opacity: 0, scale: 0.75 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.75 }}
-                transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-              />
-            )}
-
-            <Settings
-              className={cn(
-                'relative z-10 h-[1.15rem] w-[1.15rem] transition-all duration-200',
-                settingsActive
-                  ? 'text-primary stroke-[2.65]'
-                  : 'text-muted-foreground/80 stroke-[2.25] group-hover:text-foreground'
+            <motion.span
+              whileTap={{ scale: 0.92 }}
+              animate={{ scale: settingsActive ? 1.04 : 1, y: settingsActive ? -1 : 0 }}
+              transition={{ type: 'spring', stiffness: 430, damping: 28 }}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full"
+            >
+              {settingsActive && (
+                <motion.span
+                  layoutId="header-settings-active-orb"
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
+                  style={{
+                    boxShadow:
+                      '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
               )}
-            />
-          </motion.span>
-        </Link>
+
+              {settingsActive && (
+                <motion.span
+                  aria-hidden="true"
+                  className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
+                  initial={{ opacity: 0, scale: 0.75 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.75 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                />
+              )}
+
+              <Settings
+                className={cn(
+                  'relative z-10 h-[1.15rem] w-[1.15rem] transition-all duration-200',
+                  settingsActive
+                    ? 'text-primary stroke-[2.65]'
+                    : 'text-muted-foreground/80 stroke-[2.25] group-hover:text-foreground'
+                )}
+              />
+            </motion.span>
+          </Link>
+        )}
       </div>
     </header>
   );
