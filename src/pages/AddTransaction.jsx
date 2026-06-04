@@ -446,7 +446,7 @@ export default function AddTransaction() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-3 pb-24 lg:py-8">
-        <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
+        <div className="mb-3">
           <TransactionTypeSelector
             value={type}
             onChange={(nextType) => {
@@ -456,7 +456,9 @@ export default function AddTransaction() {
               setTransferPurpose(TRANSFER_PURPOSES.normal);
             }}
           />
+        </div>
 
+        <div className="space-y-3.5 rounded-2xl app-card-surface p-4 sm:p-5">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Amount
