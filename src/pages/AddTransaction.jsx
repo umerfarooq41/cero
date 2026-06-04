@@ -13,6 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import PageHeader from '@/components/layout/PageHeader';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -76,10 +77,10 @@ function CurrencyPrefix({ currency }) {
       : currency?.code || currency?.currency || 'SAR';
 
   if (currencyCode === 'SAR') {
-    return <img src="/sar.svg" alt="SAR" className="h-8 w-8 opacity-70" />;
+    return <img src="/sar.svg" alt="SAR" className="h-6 w-6 opacity-70" />;
   }
 
-  return <span>{currencyCode}</span>;
+  return <span className="text-base font-semibold">{currencyCode}</span>;
 }
 
 function addDelta(deltas, accountId, amount) {
@@ -378,8 +379,6 @@ export default function AddTransaction() {
     }
   };
 
-
-
   const handleDelete = async () => {
     if (!isEditing || !existingTransaction) {
       toast.error('Transaction not found');
@@ -417,268 +416,274 @@ export default function AddTransaction() {
     }
   };
 
-
   return (
-    <div className="mx-auto max-w-lg px-4 py-6 lg:py-10">
-      <div className="mb-8 flex items-center gap-3">
+    <div className="min-h-screen bg-transparent">
+      <PageHeader
+        title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
+        subtitle={
+          isEditing
+            ? 'Update transaction details'
+            : 'Record income, expenses, or transfers'
+        }
+      />
+
+      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={() => navigate(-1)}
-          className="shrink-0"
+          className="mb-4 gap-2"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4" />
+          Back
         </Button>
 
-        <h1 className="text-xl font-bold tracking-tight">
-          {isEditing ? 'Edit Transaction' : 'Add Transaction'}
-        </h1>
-      </div>
+        <div className="space-y-5 rounded-2xl app-card-surface p-5">
+          <div className="grid grid-cols-3 gap-2">
+            {typeOptions.map((option) => {
+              const isActive = type === option.value;
+              const Icon = option.icon;
 
-      <div className="mb-6 rounded-2xl border border-border bg-card p-8 text-center">
-        <div className="mb-3 text-xs uppercase tracking-wider text-muted-foreground">
-          Amount
-        </div>
-
-        <div className="flex items-center justify-center gap-2">
-          <div className="flex items-center text-3xl font-light text-muted-foreground">
-            <CurrencyPrefix currency={currency} />
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setType(option.value);
+                    setCategoryId('');
+                    setToAccountId('');
+                    setTransferPurpose(TRANSFER_PURPOSES.normal);
+                  }}
+                  className={cn(
+                    'flex min-h-[4.75rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-sm font-semibold transition-all',
+                    isActive
+                      ? option.color
+                      : 'border-border/60 bg-background/55 text-muted-foreground hover:border-muted-foreground/30 hover:bg-background/75'
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
 
-          <input
-            type="number"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            placeholder="0.00"
-            className="w-48 border-none bg-transparent text-center text-5xl font-bold tabular-nums outline-none"
-            step="0.01"
-            min="0"
-            autoFocus
-          />
-        </div>
-      </div>
-
-      <div className="mb-6 grid grid-cols-3 gap-2">
-        {typeOptions.map((option) => {
-          const isActive = type === option.value;
-          const Icon = option.icon;
-
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                setType(option.value);
-                setCategoryId('');
-                setToAccountId('');
-                setTransferPurpose(TRANSFER_PURPOSES.normal);
-              }}
-              className={cn(
-                'flex flex-col items-center gap-1.5 rounded-xl border-2 py-3 text-sm font-medium transition-all',
-                isActive
-                  ? option.color
-                  : 'border-border text-muted-foreground hover:border-muted-foreground/30'
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="space-y-4 rounded-xl border border-border bg-card p-5">
-        {type !== 'transfer' && (
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Category
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Amount
             </label>
 
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <div className="flex h-16 items-center rounded-2xl border border-border/60 bg-background/80 px-4 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+              <span className="mr-3 flex shrink-0 items-center text-muted-foreground">
+                <CurrencyPrefix currency={currency} />
+              </span>
+
+              <input
+                type="number"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder="0.00"
+                className="h-full min-w-0 flex-1 border-0 bg-transparent px-0 text-left text-3xl font-bold tabular-nums tracking-tight text-foreground outline-none placeholder:text-muted-foreground/45"
+                step="0.01"
+                min="0"
+                inputMode="decimal"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {type !== 'transfer' && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                Category
+              </label>
+
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {filteredCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: category.color || '#0078D4' }}
+                        />
+                        {category.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              {type === 'transfer' ? 'From Account' : 'Account'}
+            </label>
+
+            <Select value={accountId} onValueChange={setAccountId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Select account" />
               </SelectTrigger>
 
               <SelectContent>
-                {filteredCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: category.color || '#0078D4' }}
-                      />
-                      {category.name}
-                    </div>
+                {accounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-        )}
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">
-            {type === 'transfer' ? 'From Account' : 'Account'}
-          </label>
-
-          <Select value={accountId} onValueChange={setAccountId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select account" />
-            </SelectTrigger>
-
-            <SelectContent>
-              {accounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {type === 'transfer' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                To Account
-              </label>
-
-              <Select
-                value={toAccountId}
-                onValueChange={(value) => {
-                  setToAccountId(value);
-                  setTransferPurpose(TRANSFER_PURPOSES.normal);
-                  setCategoryId('');
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select destination" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {accounts
-                    .filter((account) => account.id !== accountId)
-                    .map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Transfer Purpose
-              </label>
-
-              <Select
-                value={transferPurpose}
-                onValueChange={(value) => {
-                  setTransferPurpose(value);
-                  setCategoryId('');
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select purpose" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {transferPurposeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {
-                  transferPurposeOptions.find(
-                    (option) => option.value === transferPurpose
-                  )?.description
-                }
-              </p>
-            </div>
-
-            {requiresCategory && (
+          {type === 'transfer' && (
+            <>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">
-                  {transferPurpose === TRANSFER_PURPOSES.savingsAllocation
-                    ? 'Savings Category'
-                    : 'Debt Category'}
+                  To Account
                 </label>
 
-                <Select value={categoryId} onValueChange={setCategoryId}>
+                <Select
+                  value={toAccountId}
+                  onValueChange={(value) => {
+                    setToAccountId(value);
+                    setTransferPurpose(TRANSFER_PURPOSES.normal);
+                    setCategoryId('');
+                  }}
+                >
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        transferPurpose === TRANSFER_PURPOSES.savingsAllocation
-                          ? 'Select savings category'
-                          : 'Select debt category'
-                      }
-                    />
+                    <SelectValue placeholder="Select destination" />
                   </SelectTrigger>
 
                   <SelectContent>
-                    {filteredCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: category.color || '#0078D4' }}
-                          />
-                          {category.name}
-                        </div>
+                    {accounts
+                      .filter((account) => account.id !== accountId)
+                      .map((account) => (
+                        <SelectItem key={account.id} value={account.id}>
+                          {account.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Transfer Purpose
+                </label>
+
+                <Select
+                  value={transferPurpose}
+                  onValueChange={(value) => {
+                    setTransferPurpose(value);
+                    setCategoryId('');
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select purpose" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {transferPurposeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {
+                    transferPurposeOptions.find(
+                      (option) => option.value === transferPurpose
+                    )?.description
+                  }
+                </p>
               </div>
-            )}
-          </>
-        )}
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">
-            Date
-          </label>
-          <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+              {requiresCategory && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {transferPurpose === TRANSFER_PURPOSES.savingsAllocation
+                      ? 'Savings Category'
+                      : 'Debt Category'}
+                  </label>
+
+                  <Select value={categoryId} onValueChange={setCategoryId}>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          transferPurpose === TRANSFER_PURPOSES.savingsAllocation
+                            ? 'Select savings category'
+                            : 'Select debt category'
+                        }
+                      />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {filteredCategories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: category.color || '#0078D4' }}
+                            />
+                            {category.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Date
+            </label>
+            <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Note
+            </label>
+            <Textarea
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Add a note."
+              className="h-20 resize-none"
+            />
+          </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">
-            Note
-          </label>
-          <Textarea
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="Add a note."
-            className="h-20 resize-none"
-          />
-        </div>
-      </div>
-
-      <Button
-        onClick={handleSubmit}
-        disabled={saving || deleting || !amount}
-        className="mt-6 h-12 w-full text-sm font-semibold"
-      >
-        {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
-      </Button>
-
-      {isEditing && (
         <Button
-          type="button"
-          variant="ghost"
-          onClick={() => setDeleteOpen(true)}
-          disabled={saving || deleting || !existingTransaction}
-          className="mt-3 h-12 w-full text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={handleSubmit}
+          disabled={saving || deleting || !amount}
+          className="mt-6 h-12 w-full text-sm font-semibold"
         >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete Transaction
+          {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
         </Button>
-      )}
+
+        {isEditing && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setDeleteOpen(true)}
+            disabled={saving || deleting || !existingTransaction}
+            className="mt-3 h-12 w-full text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Transaction
+          </Button>
+        )}
+      </main>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="overflow-hidden rounded-3xl border border-destructive/25 app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(127,29,29,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
@@ -729,4 +734,3 @@ export default function AddTransaction() {
     </div>
   );
 }
-
