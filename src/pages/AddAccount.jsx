@@ -141,20 +141,39 @@ export default function AddAccount() {
             ? 'Update account details and balance'
             : 'Create a wallet, bank, savings, debt, or investment account'
         }
+        action={
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            className="
+              group
+              relative
+              flex
+              h-9
+              w-9
+              shrink-0
+              touch-manipulation
+              items-center
+              justify-center
+              rounded-full
+              text-muted-foreground/80
+              transition-colors
+              duration-200
+              hover:text-foreground
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-ring
+              focus-visible:ring-offset-2
+            "
+          >
+            <ArrowLeft className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
+          </button>
+        }
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24 lg:py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="animate-child mb-4 gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-
-        <div className="animate-child space-y-5 rounded-2xl app-card-surface p-5">
+      <main className="mx-auto w-full max-w-3xl px-4 py-3 pb-24 lg:py-8">
+        <div className="animate-child space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Account Name
@@ -247,7 +266,7 @@ export default function AddAccount() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="animate-child mt-6 h-12 w-full rounded-xl text-sm font-semibold"
+          className="animate-child mt-5 h-12 w-full rounded-xl text-sm font-semibold"
         >
           {saving
             ? 'Saving...'
