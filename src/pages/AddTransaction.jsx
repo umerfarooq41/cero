@@ -41,6 +41,7 @@ import {
 import { useCurrency } from '@/hooks/useCurrency';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
 import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
+import { getCurrencyCode, getCurrencySymbol } from '@/lib/currencies';
 
 const typeOptions = [
   {
@@ -70,16 +71,27 @@ const TRANSFER_PURPOSES = {
 };
 
 function CurrencyPrefix({ currency }) {
-  const currencyCode =
-    typeof currency === 'string'
-      ? currency
-      : currency?.code || currency?.currency || 'SAR';
+  const currencyCode = getCurrencyCode(currency);
+  const symbol = getCurrencySymbol(currencyCode);
 
   if (currencyCode === 'SAR') {
-    return <img src="/sar.svg" alt="SAR" className="h-5 w-5 opacity-70" />;
+    return (
+      <span
+        aria-label="SAR"
+        className="inline-block h-5 w-5 shrink-0 bg-current opacity-80"
+        style={{
+          WebkitMask: 'url(/sar.svg) center / contain no-repeat',
+          mask: 'url(/sar.svg) center / contain no-repeat',
+        }}
+      />
+    );
   }
 
-  return <span className="text-sm font-semibold">{currencyCode}</span>;
+  return (
+    <span className="text-sm font-semibold leading-none text-current sm:text-base">
+      {symbol}
+    </span>
+  );
 }
 
 function TransactionTypeSelector({ value, onChange }) {
