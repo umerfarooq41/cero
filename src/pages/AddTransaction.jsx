@@ -78,7 +78,7 @@ function CurrencyPrefix({ currency }) {
     return (
       <span
         aria-label="SAR"
-        className="inline-block h-5 w-5 shrink-0 bg-current opacity-80"
+        className="inline-block h-[1em] w-[1em] shrink-0 bg-current opacity-90 align-[-0.08em]"
         style={{
           WebkitMask: 'url(/sar.svg) center / contain no-repeat',
           mask: 'url(/sar.svg) center / contain no-repeat',
@@ -88,7 +88,7 @@ function CurrencyPrefix({ currency }) {
   }
 
   return (
-    <span className="text-sm font-semibold leading-none text-current sm:text-base">
+    <span className="text-[1em] font-bold leading-none text-current">
       {symbol}
     </span>
   );
@@ -477,7 +477,7 @@ export default function AddTransaction() {
             </label>
 
             <div className="flex h-14 items-center rounded-2xl border border-border/60 bg-background/80 px-4 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
-              <span className="mr-3 flex shrink-0 items-center text-muted-foreground">
+              <span className="mr-3 flex shrink-0 items-center text-2xl font-bold leading-none text-foreground sm:text-3xl">
                 <CurrencyPrefix currency={currency} />
               </span>
 
@@ -486,7 +486,7 @@ export default function AddTransaction() {
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 placeholder="0.00"
-                className="h-full min-w-0 flex-1 border-0 bg-transparent px-0 text-left text-2xl font-bold tabular-nums tracking-tight text-foreground outline-none placeholder:text-muted-foreground/45 sm:text-3xl"
+                className="app-amount-input h-full min-w-0 flex-1 appearance-none border-0 bg-transparent px-0 text-left text-2xl font-bold tabular-nums tracking-tight text-foreground outline-none ring-0 placeholder:text-muted-foreground/45 focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 sm:text-3xl [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 step="0.01"
                 min="0"
                 inputMode="decimal"
