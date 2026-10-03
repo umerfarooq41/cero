@@ -18,6 +18,7 @@ export default function PlanOverview({
   transactions,
   goalContributions,
   savingsGoals,
+  recurringTransactions,
   currentMonth,
 }) {
   const tab = PLAN_TABS.find((item) => item.key === activeTab) || PLAN_TABS[0];
@@ -32,6 +33,7 @@ export default function PlanOverview({
         transactions,
         goalContributions,
         savingsGoals,
+        recurringTransactions,
         currentMonth,
         tab,
       }),
@@ -43,6 +45,7 @@ export default function PlanOverview({
       transactions,
       goalContributions,
       savingsGoals,
+      recurringTransactions,
       currentMonth,
       tab,
     ]
