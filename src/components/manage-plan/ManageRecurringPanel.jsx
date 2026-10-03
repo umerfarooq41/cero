@@ -546,7 +546,7 @@ function RecurringRuleModal({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {form.type === 'transfer' ? 'First installment due date' : 'Next Due Date'}
+              {form.type === 'transfer' ? 'First installment payment date' : 'Next Due Date'}
             </label>
             <Input
               value={form.next_due_date}
