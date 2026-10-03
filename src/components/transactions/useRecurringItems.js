@@ -150,6 +150,21 @@ export default function useRecurringItems({
       }
 
       const transactionType = normalizeRuleType(rule.type);
+      const destinationAccount = accounts.find((account) => account.id === rule.to_account_id);
+      const isFiniteDebt =
+        transactionType === "transfer" &&
+        destinationAccount &&
+        !isFlexibleCreditCardDebt(rule, destinationAccount);
+      const outstandingDebt = isFiniteDebt
+        ? Math.max(0, Number(destinationAccount.balance || 0))
+        : null;
+
+      if (isFiniteDebt && outstandingDebt <= 0) {
+        await recurringTransactionsApi.update(rule.id, { is_active: false });
+        invalidateScheduledQueries(queryClient);
+        toast.success("Debt is paid off. Recurring rule completed.");
+        return;
+      }
 
       if (transactionType === "transfer" && !rule.to_account_id) {
         toast.error("This recurring transfer is missing a destination account");
@@ -160,8 +175,14 @@ export default function useRecurringItems({
 
       try {
         const postedForDate = rule.next_due_date || todayIsoDate();
+        const scheduledAmount = Math.max(0, Number(rule.amount || 0));
+        const postingAmount = isFiniteDebt
+          ? Math.min(scheduledAmount, outstandingDebt)
+          : scheduledAmount;
+        const completesDebt = isFiniteDebt && postingAmount >= outstandingDebt;
+
         const transactionPayload = {
-          amount: Number(rule.amount || 0),
+          amount: postingAmount,
           type: transactionType,
           date: postedForDate,
           note: rule.note || `${rule.name} · Recurring`,
@@ -180,10 +201,11 @@ export default function useRecurringItems({
           last_posted_date: todayIsoDate(),
           last_posted_transaction_id: transaction.id,
           next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
+          ...(completesDebt ? { is_active: false } : {}),
         });
 
         invalidateScheduledQueries(queryClient);
-        toast.success("Recurring transaction posted");
+        toast.success(completesDebt ? "Final debt payment posted. Plan completed." : "Recurring transaction posted");
       } catch (error) {
         console.error("Recurring post failed:", error);
         toast.error(error.message || "Could not post recurring transaction");
