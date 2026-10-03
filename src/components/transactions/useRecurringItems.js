@@ -13,7 +13,6 @@ import {
   getRecurringMonthlyPlanAmount,
   getTransactionDeltas,
   isDueNow,
-  isFlexibleCreditCardDebt,
   normalizeRuleType,
   RECURRING_SECTIONS,
   sumRecurringPostedByRule,
@@ -85,9 +84,7 @@ export default function useRecurringItems({
             const toAccount = accounts.find(
               (account) => account.id === rule.to_account_id,
             );
-            const finiteDebt =
-              normalizeRuleType(rule.type) === "transfer" &&
-              !isFlexibleCreditCardDebt(rule, toAccount);
+            const finiteDebt = normalizeRuleType(rule.type) === "transfer";
             const debtPaidOff =
               finiteDebt &&
               Math.max(0, Number(toAccount?.balance || 0)) <= 0;
@@ -105,7 +102,7 @@ export default function useRecurringItems({
               allocations,
             );
             const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
-            const isFlexiblePayment = isFlexibleCreditCardDebt(rule, toAccount);
+            const isFlexiblePayment = normalizeRuleType(rule.type) === "transfer" && (rule.payment_mode || "fixed") === "flexible";
 
             return {
               ...rule,
@@ -154,7 +151,9 @@ export default function useRecurringItems({
         return;
       }
 
-      if (!isDueNow(status)) {
+      const isDebt = normalizeRuleType(rule.type) === "transfer";
+      const isFixedDebt = isDebt && (rule.payment_mode || "fixed") === "fixed";
+      if (!isDueNow(status) && !isFixedDebt) {
         toast.error("This recurring item is not due yet");
         return;
       }
@@ -166,10 +165,7 @@ export default function useRecurringItems({
 
       const transactionType = normalizeRuleType(rule.type);
       const destinationAccount = accounts.find((account) => account.id === rule.to_account_id);
-      const isFiniteDebt =
-        transactionType === "transfer" &&
-        destinationAccount &&
-        !isFlexibleCreditCardDebt(rule, destinationAccount);
+      const isFiniteDebt = transactionType === "transfer" && destinationAccount;
       const outstandingDebt = isFiniteDebt
         ? Math.max(0, Number(destinationAccount.balance || 0))
         : null;
