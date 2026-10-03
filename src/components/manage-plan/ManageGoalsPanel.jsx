@@ -98,6 +98,7 @@ const emptyGoalForm = () => ({
   target_date: '',
   duration_count: '',
   duration_unit: 'months',
+  contribution_mode: 'flexible',
   from_account_id: 'none',
   to_account_id: 'none',
   icon_key: 'target',
@@ -346,6 +347,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
         target_date: editingGoal.target_date || '',
         duration_count: String(editingGoal.duration_count ?? ''),
         duration_unit: editingGoal.duration_unit || 'months',
+        contribution_mode: editingGoal.contribution_mode || 'flexible',
         from_account_id: editingGoal.from_account_id || 'none',
         to_account_id: editingGoal.to_account_id || 'none',
         icon_key: editingGoal.icon_key || 'target',
@@ -421,6 +423,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       duration_count: Number(form.duration_count) > 0 ? Math.floor(Number(form.duration_count)) : null,
       duration_unit: Number(form.duration_count) > 0 ? form.duration_unit : null,
       completed_at: null,
+      contribution_mode: form.contribution_mode,
       from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
       to_account_id: form.to_account_id === 'none' ? null : form.to_account_id,
       icon_key: form.icon_key || 'target',
@@ -499,6 +502,18 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
                 type="date"
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Contribution mode</label>
+            <Select value={form.contribution_mode} onValueChange={(value) => updateForm('contribution_mode', value)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fixed">Fixed contributions</SelectItem>
+                <SelectItem value="flexible">Flexible contributions</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">{form.contribution_mode === 'fixed' ? 'Each planned contribution completes one scheduled occurrence.' : 'Contribute any amount, multiple times whenever you want.'}</p>
           </div>
 
           <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
