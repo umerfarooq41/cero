@@ -870,7 +870,7 @@ export default function ManageRecurringPanel() {
       .filter((rule) => {
         const total = Math.max(0, Number(rule.total_amount || 0));
         const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
-        return !!rule.completed_at || (total > 0 && paid >= total);
+        return !!rule.completed_at || (total > 0 && paid >= total - 0.005);
       })
       .sort((a, b) =>
         String(b.completed_at || b.next_due_date || '').localeCompare(
@@ -886,7 +886,7 @@ export default function ManageRecurringPanel() {
         if (normalizeRuleType(rule.type) !== 'transfer') return true;
         const total = Math.max(0, Number(rule.total_amount || 0));
         const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
-        return !rule.completed_at && (total <= 0 || paid < total);
+        return !rule.completed_at && (total <= 0 || paid < total - 0.005);
       })
       .map((rule) => {
         if (
