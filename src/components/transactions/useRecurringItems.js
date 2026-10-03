@@ -48,6 +48,17 @@ export async function updateAccountBalances(transactionPayload, accounts = []) {
   );
 }
 
+function shouldAdvanceLastPostedPointer(rule, postedForDate, allTransactions = []) {
+  const currentLatestOccurrence = allTransactions
+    .filter((transaction) => transaction.recurring_transaction_id === rule?.id)
+    .map((transaction) => String(transaction.recurring_posted_for_date || '').slice(0, 10))
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+
+  return !currentLatestOccurrence || String(postedForDate || '') >= currentLatestOccurrence;
+}
+
 function getSuggestedPaymentAmount(rule) {
   if (!rule) return "";
 
@@ -225,7 +236,7 @@ export default function useRecurringItems({
         const transactionPayload = {
           amount: postingAmount,
           type: transactionType,
-          date: postedForDate,
+          date: todayIsoDate(),
           note: rule.note || `${rule.name} · Recurring`,
           category_id: rule.category_id || null,
           account_id: rule.account_id || null,
@@ -238,13 +249,24 @@ export default function useRecurringItems({
         const transaction = await transactionsApi.create(transactionPayload);
         await updateAccountBalances(transactionPayload, accounts);
 
+        const advancePointer = shouldAdvanceLastPostedPointer(
+          rule,
+          postedForDate,
+          allTransactions
+        );
         await recurringTransactionsApi.update(rule.id, {
-          last_posted_date: todayIsoDate(),
-          last_posted_transaction_id: transaction.id,
+          ...(advancePointer
+            ? {
+                last_posted_date: todayIsoDate(),
+                last_posted_transaction_id: transaction.id,
+              }
+            : {}),
           next_due_date: completesDebt
             ? null
             : calculateNextDueDate(postedForDate, rule.frequency),
-          ...(completesDebt ? { is_active: false, completed_at: todayIsoDate() } : {}),
+          ...(completesDebt
+            ? { is_active: false, completed_at: transactionPayload.date }
+            : {}),
         });
 
         invalidateScheduledQueries(queryClient);
@@ -256,7 +278,7 @@ export default function useRecurringItems({
         setPostingId(null);
       }
     },
-    [accounts, allRecurringPaymentsByRule, queryClient, verifiedOccurrencesByRule],
+    [accounts, allRecurringPaymentsByRule, allTransactions, queryClient, verifiedOccurrencesByRule],
   );
 
   const submitPaymentDialog = useCallback(async () => {
@@ -327,25 +349,32 @@ export default function useRecurringItems({
       const transaction = await transactionsApi.create(transactionPayload);
       await updateAccountBalances(transactionPayload, accounts);
 
+      const advancePointer = shouldAdvanceLastPostedPointer(
+        rule,
+        postedForDate,
+        allTransactions
+      );
+      const pointerUpdate = advancePointer
+        ? {
+            last_posted_date: todayIsoDate(),
+            last_posted_transaction_id: transaction.id,
+          }
+        : {};
+
       if (completesDebt) {
         await recurringTransactionsApi.update(rule.id, {
-          last_posted_date: todayIsoDate(),
-          last_posted_transaction_id: transaction.id,
+          ...pointerUpdate,
           is_active: false,
-          completed_at: todayIsoDate(),
+          completed_at: date,
           next_due_date: null,
         });
       } else if (!wasMonthCovered && willMonthBeCovered) {
         await recurringTransactionsApi.update(rule.id, {
-          last_posted_date: todayIsoDate(),
-          last_posted_transaction_id: transaction.id,
+          ...pointerUpdate,
           next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
         });
-      } else {
-        await recurringTransactionsApi.update(rule.id, {
-          last_posted_date: todayIsoDate(),
-          last_posted_transaction_id: transaction.id,
-        });
+      } else if (advancePointer) {
+        await recurringTransactionsApi.update(rule.id, pointerUpdate);
       }
 
       invalidateScheduledQueries(queryClient);
@@ -366,6 +395,7 @@ export default function useRecurringItems({
   }, [
     accounts,
     allRecurringPaymentsByRule,
+    allTransactions,
     closePaymentDialog,
     paymentAmount,
     paymentDate,
