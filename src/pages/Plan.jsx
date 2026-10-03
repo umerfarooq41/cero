@@ -13,6 +13,7 @@ import {
   useBudgetSummary,
   useCategories,
   useGoalContributions,
+  useRecurringTransactions,
   useSavingsGoals,
   useTransactions,
 } from '@/hooks/useBudgetData';
@@ -43,6 +44,7 @@ export default function Plan() {
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: goalContributions = [] } = useGoalContributions();
   const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
 
   const subcategories = useMemo(
     () => categories.filter((category) => category.parent_id),
@@ -55,10 +57,11 @@ export default function Plan() {
         allocations,
         categories,
         savingsGoals,
+        recurringTransactions,
         transactions,
         currentMonth,
       }),
-    [allocations, categories, currentMonth, savingsGoals, transactions]
+    [allocations, categories, currentMonth, recurringTransactions, savingsGoals, transactions]
   );
 
   const leftToAllocate = plannedTotals.leftToAllocate;
@@ -123,6 +126,7 @@ export default function Plan() {
             transactions={transactions}
             goalContributions={goalContributions}
             savingsGoals={savingsGoals}
+            recurringTransactions={recurringTransactions}
             currentMonth={currentMonth}
           />
         </div>
