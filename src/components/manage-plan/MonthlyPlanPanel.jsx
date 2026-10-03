@@ -687,7 +687,11 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
     try {
       await Promise.all(
-        allRows.map((row) => {
+        allRows
+          // Scheduled recurring items and fixed goals are derived from their
+          // authoritative rules/ledger. Persist only editable plan rows.
+          .filter((row) => !row.isGenerated)
+          .map((row) => {
           const existingAllocation = allocationByRowKey[row.key];
           const sourceType = row.sourceType || 'category';
           const sourceId = row.sourceId || row.categoryId || row.id;
