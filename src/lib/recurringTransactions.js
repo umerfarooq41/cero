@@ -107,7 +107,12 @@ export function calculateDueDateAfterOccurrences(startDate, frequency = 'monthly
 export function getFixedDebtNextDueDate(rule, postedOccurrenceCount = 0) {
   if (!rule || rule.payment_mode === 'flexible') return rule?.next_due_date || null;
 
-  const firstDueDate = rule.start_date || rule.next_due_date;
+  // next_due_date is the authoritative anchor for the remaining schedule.
+  // This lets a user revise future installments after payments have started
+  // without recalculating or rewriting historical occurrence dates.
+  if (rule.next_due_date) return rule.next_due_date;
+
+  const firstDueDate = rule.start_date;
   if (!firstDueDate) return null;
 
   return calculateDueDateAfterOccurrences(
