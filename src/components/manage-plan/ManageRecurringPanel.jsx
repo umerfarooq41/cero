@@ -16,6 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import CategoryIcon, { iconNames } from '@/components/shared/CategoryIcon';
+import AppTabs from '@/components/shared/AppTabs';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -108,6 +109,12 @@ const TYPE_LABELS = {
   expense: 'Expenses',
   transfer: 'Debt Payments',
 };
+
+const TYPE_TABS = [
+  { value: 'income', label: 'Income', icon: ArrowDownLeft, tone: 'emerald' },
+  { value: 'expense', label: 'Expenses', icon: ArrowUpRight, tone: 'red' },
+  { value: 'transfer', label: 'Debt', icon: ArrowLeftRight, tone: 'purple' },
+];
 
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
@@ -381,7 +388,7 @@ function RecurringRuleModal({
           </div>
         </div>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-3 py-1">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Name
@@ -401,34 +408,20 @@ function RecurringRuleModal({
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Type
             </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {Object.entries(TYPE_LABELS).map(([value, label]) => {
-                const Icon = TYPE_ICONS[value];
-
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    disabled={hasPostedDebtHistory}
-                    onClick={() => {
-                      updateForm('type', value);
-                      updateForm('category_id', 'none');
-                      updateForm('account_id', 'none');
-                      updateForm('to_account_id', 'none');
-                    }}
-                    className={cn(
-                      'flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-medium transition-all',
-                      form.type === value
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'bg-secondary text-muted-foreground hover:bg-accent'
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{label.replace(' Payments', '')}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <AppTabs
+              tabs={TYPE_TABS}
+              value={form.type}
+              onChange={(value) => {
+                if (hasPostedDebtHistory) return;
+                updateForm('type', value);
+                updateForm('category_id', 'none');
+                updateForm('account_id', 'none');
+                updateForm('to_account_id', 'none');
+              }}
+              size="sm"
+              layoutId="recurring-type-highlight"
+              className={cn(hasPostedDebtHistory && 'pointer-events-none opacity-70')}
+            />
           </div>
 
           {form.type === 'transfer' && (
@@ -467,7 +460,7 @@ function RecurringRuleModal({
                   </div>
                 </div>
               )}
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total debt</label>
                   <Input value={form.total_amount} onChange={(event) => {
@@ -500,7 +493,7 @@ function RecurringRuleModal({
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {form.type === 'transfer' ? 'Installment amount' : 'Amount'}
@@ -536,7 +529,7 @@ function RecurringRuleModal({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Category
@@ -591,43 +584,46 @@ function RecurringRuleModal({
             </div>
           </div>
 
-          {form.type === 'transfer' && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Debt account
-              </label>
-              <Select value={form.to_account_id} onValueChange={(value) => updateForm('to_account_id', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select liability account" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Select liability account</SelectItem>
-                  {liabilityAccounts
-                    .filter((account) => account.id !== form.account_id)
-                    .map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {getAccountLabel(account)}
+          <div className={cn('grid gap-3', form.type === 'transfer' && 'grid-cols-2')}>
+            {form.type === 'transfer' && (
+              <div className="min-w-0 space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Debt account
+                </label>
+                <Select value={form.to_account_id} onValueChange={(value) => updateForm('to_account_id', value)}>
+                  <SelectTrigger className="min-w-0">
+                    <SelectValue placeholder="Select liability account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Select liability account</SelectItem>
+                    {liabilityAccounts
+                      .filter((account) => account.id !== form.account_id)
+                      .map((account) => (
+                        <SelectItem key={account.id} value={account.id}>
+                          {getAccountLabel(account)}
+                        </SelectItem>
+                      ))}
+                    {liabilityAccounts.length === 0 && (
+                      <SelectItem value="no-liability-accounts" disabled>
+                        No liability accounts
                       </SelectItem>
-                    ))}
-                  {liabilityAccounts.length === 0 && (
-                    <SelectItem value="no-liability-accounts" disabled>
-                      No liability accounts
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {form.type === 'transfer' ? (hasPostedDebtHistory ? 'Next installment date' : 'First installment date') : 'Next Due Date'}
-            </label>
-            <Input
-              value={form.next_due_date}
-              onChange={(event) => updateForm('next_due_date', event.target.value)}
-              type="date"
-            />
+            <div className="min-w-0 space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {form.type === 'transfer' ? (hasPostedDebtHistory ? 'Next installment' : 'First installment') : 'Next due date'}
+              </label>
+              <Input
+                value={form.next_due_date}
+                onChange={(event) => updateForm('next_due_date', event.target.value)}
+                type="date"
+                className="min-w-0"
+              />
+            </div>
           </div>
 
           {isDebt && form.payment_mode === 'fixed' && debtInstallments > 0 && Number(form.amount || 0) > 0 && (
@@ -660,56 +656,63 @@ function RecurringRuleModal({
             />
           </label>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Color
-            </label>
-            <div className="grid grid-cols-10 gap-2 rounded-xl app-card-surface-soft p-2">
-              {COLORS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => updateForm('color', item)}
-                  className={cn(
-                    'h-8 w-8 rounded-xl border border-border transition-all',
-                    form.color === item
-                      ? 'scale-110 ring-2 ring-primary ring-offset-2'
-                      : 'hover:scale-105'
-                  )}
-                  style={{ backgroundColor: item }}
-                  aria-label={`Use color ${item}`}
-                />
-              ))}
-            </div>
-          </div>
+          <details className="group rounded-2xl app-card-surface-soft">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-3">
+                <CategoryIcon icon={form.icon} color={form.color} size="sm" />
+                <div>
+                  <p className="text-sm font-medium">Appearance</p>
+                  <p className="text-xs text-muted-foreground">Color and icon</p>
+                </div>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+            </summary>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Icon
-            </label>
-            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl app-card-surface-soft p-2 sm:grid-cols-7 md:grid-cols-8">
-              {iconNames.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => updateForm('icon', item)}
-                  className={cn(
-                    'flex h-10 items-center justify-center rounded-xl border transition-all',
-                    form.icon === item
-                      ? 'scale-105 border-primary bg-primary/10 ring-1 ring-primary'
-                      : 'border-transparent hover:border-border hover:bg-accent'
-                  )}
-                  title={item}
-                >
-                  <CategoryIcon
-                    icon={item}
-                    color={form.icon === item ? form.color : '#888'}
-                    size="sm"
-                  />
-                </button>
-              ))}
+            <div className="space-y-4 border-t border-border/50 px-3 pb-3 pt-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
+                <div className="grid grid-cols-8 gap-2 rounded-xl bg-background/35 p-2 sm:grid-cols-10">
+                  {COLORS.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => updateForm('color', item)}
+                      className={cn(
+                        'aspect-square w-full min-w-0 rounded-lg border border-border transition-all',
+                        form.color === item
+                          ? 'ring-2 ring-primary ring-offset-2'
+                          : 'hover:scale-105'
+                      )}
+                      style={{ backgroundColor: item }}
+                      aria-label={`Use color ${item}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
+                <div className="grid max-h-44 grid-cols-7 gap-1.5 overflow-y-auto rounded-xl bg-background/35 p-2">
+                  {iconNames.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => updateForm('icon', item)}
+                      className={cn(
+                        'flex aspect-square min-w-0 items-center justify-center rounded-lg border transition-all',
+                        form.icon === item
+                          ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                          : 'border-transparent hover:border-border hover:bg-accent'
+                      )}
+                      title={item}
+                    >
+                      <CategoryIcon icon={item} color={form.icon === item ? form.color : '#888'} size="sm" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          </details>
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
