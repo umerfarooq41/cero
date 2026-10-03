@@ -201,7 +201,7 @@ export default function useRecurringItems({
           last_posted_date: todayIsoDate(),
           last_posted_transaction_id: transaction.id,
           next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
-          ...(completesDebt ? { is_active: false } : {}),
+          ...(completesDebt ? { is_active: false, completed_at: todayIsoDate() } : {}),
         });
 
         invalidateScheduledQueries(queryClient);
