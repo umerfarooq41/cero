@@ -119,21 +119,52 @@ export async function recalculateGoalCurrentAmount(goalId, savingsGoals = []) {
   if (!goal) return;
 
   const transactions = await transactionsApi.list();
-  const postedTotal = transactions
+  const goalTransactions = transactions
     .filter((transaction) => {
       const transactionGoalId = getTransactionGoalId(transaction);
       return transactionGoalId === goalId && transaction.type === 'transfer';
     })
-    .reduce((sum, transaction) => {
-      const amount = Math.max(0, Number(transaction.amount || 0));
-      return sum + (isGoalFundUseTransaction(transaction) ? -amount : amount);
-    }, 0);
+    .sort((a, b) => {
+      const dateCompare = String(a.date || '').localeCompare(String(b.date || ''));
+      if (dateCompare !== 0) return dateCompare;
+      return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+    });
+
+  const postedTotal = goalTransactions.reduce((sum, transaction) => {
+    const amount = Math.max(0, Number(transaction.amount || 0));
+    return sum + (isGoalFundUseTransaction(transaction) ? -amount : amount);
+  }, 0);
 
   const startingAmount = Math.max(0, Number(goal.starting_amount ?? 0));
+  const currentAmount = Math.max(0, startingAmount + postedTotal);
+  const targetAmount = Math.max(0, Number(goal.target_amount || 0));
 
-  await savingsGoalsApi.update(goalId, {
-    current_amount: Math.max(0, startingAmount + postedTotal),
-  });
+  // Completion is historical: once the goal first reaches its target, later
+  // use/withdrawal of those funds must not erase the completion date.
+  let completedAt = goal.completed_at || null;
+  if (!completedAt && targetAmount > 0) {
+    let funded = startingAmount;
+    for (const transaction of goalTransactions) {
+      const amount = Math.max(0, Number(transaction.amount || 0));
+      funded += isGoalFundUseTransaction(transaction) ? -amount : amount;
+      funded = Math.max(0, funded);
+      if (funded >= targetAmount - 0.005) {
+        completedAt = String(transaction.date || '').slice(0, 10) || null;
+        break;
+      }
+    }
+  }
+
+  const update = {
+    current_amount: currentAmount,
+  };
+
+  if (completedAt) {
+    update.completed_at = completedAt;
+    update.next_due_date = null;
+  }
+
+  return savingsGoalsApi.update(goalId, update);
 }
 
 export async function deleteTransactionWithEffects({
