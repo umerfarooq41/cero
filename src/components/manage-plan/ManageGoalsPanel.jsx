@@ -96,6 +96,8 @@ const emptyGoalForm = () => ({
   target_amount: '',
   current_amount: '',
   target_date: '',
+  duration_count: '',
+  duration_unit: 'months',
   from_account_id: 'none',
   to_account_id: 'none',
   icon_key: 'target',
@@ -128,6 +130,15 @@ function isSavingsAccount(account) {
 function getAccountLabel(account) {
   const type = String(account?.type || 'account').replace(/_/g, ' ');
   return `${account?.name || 'Account'} · ${type}`;
+}
+
+function addGoalDuration(count, unit) {
+  const amount = Math.max(1, Math.floor(Number(count || 0)));
+  const date = new Date();
+  if (unit === 'weeks') date.setDate(date.getDate() + amount * 7);
+  else if (unit === 'years') date.setFullYear(date.getFullYear() + amount);
+  else date.setMonth(date.getMonth() + amount);
+  return date.toISOString().slice(0, 10);
 }
 
 function getGoalTransactionGoalId(transaction) {
@@ -333,6 +344,8 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
         target_amount: String(editingGoal.target_amount ?? ''),
         current_amount: String(editingGoal.starting_amount ?? editingGoal.current_amount ?? ''),
         target_date: editingGoal.target_date || '',
+        duration_count: '',
+        duration_unit: 'months',
         from_account_id: editingGoal.from_account_id || 'none',
         to_account_id: editingGoal.to_account_id || 'none',
         icon_key: editingGoal.icon_key || 'target',
@@ -482,6 +495,35 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
                 onChange={(event) => updateForm('target_date', event.target.value)}
                 type="date"
               />
+            </div>
+          </div>
+
+          <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
+            <div>
+              <p className="text-sm font-semibold">Savings plan length</p>
+              <p className="text-xs text-muted-foreground">Instead of choosing a date manually, set how long you want to save. Cero calculates the target date and required contribution.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">For</label>
+                <Input value={form.duration_count} onChange={(event) => {
+                  const value = event.target.value;
+                  setForm((current) => ({ ...current, duration_count: value, target_date: Number(value) > 0 ? addGoalDuration(value, current.duration_unit) : current.target_date }));
+                }} type="number" min="1" step="1" inputMode="numeric" placeholder="12" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Period</label>
+                <Select value={form.duration_unit} onValueChange={(value) => {
+                  setForm((current) => ({ ...current, duration_unit: value, target_date: Number(current.duration_count) > 0 ? addGoalDuration(current.duration_count, value) : current.target_date }));
+                }}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weeks">Weeks</SelectItem>
+                    <SelectItem value="months">Months</SelectItem>
+                    <SelectItem value="years">Years</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
