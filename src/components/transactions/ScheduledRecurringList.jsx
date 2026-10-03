@@ -19,7 +19,6 @@ import {
 } from "@/lib/recurringTransactions";
 import {
   isDueNow,
-  isFlexibleCreditCardDebt,
   normalizeRuleType,
   RECURRING_SECTIONS,
 } from "./scheduledUtils";
@@ -150,7 +149,9 @@ function ScheduledRecurringRow({
   const dueNow = isDueNow(status);
   const baseAmount = Math.abs(Number(rule.amount || 0));
   const type = normalizeRuleType(rule.type);
-  const flexibleCreditCard = isFlexibleCreditCardDebt(rule, toAccount);
+  const isDebt = type === "transfer";
+  const flexibleCreditCard = isDebt && (rule.payment_mode || "fixed") === "flexible";
+  const fixedDebt = isDebt && !flexibleCreditCard;
   const plannedThisMonth = Number(rule.month_planned_amount ?? baseAmount);
   const paidThisMonth = Number(rule.month_paid_amount || 0);
   const monthRemaining = Math.max(0, plannedThisMonth - paidThisMonth);
@@ -164,21 +165,15 @@ function ScheduledRecurringRow({
   const fallbackIcon =
     type === "income" ? "income" : type === "transfer" ? "loan" : "receipt";
   const buttonLabel = flexibleCreditCard
-    ? posting
-      ? "Saving…"
-      : isMonthCovered
-        ? "Add extra"
-        : "Pay"
-    : posting
-      ? "Posting…"
-      : dueNow
-        ? "Post"
-        : "Future";
+    ? posting ? "Saving…" : isMonthCovered ? "Add extra" : "Pay"
+    : fixedDebt
+      ? posting ? "Posting…" : dueNow ? "Pay installment" : "Pay next early"
+      : posting ? "Posting…" : dueNow ? "Post" : "Future";
   const canUseAction = flexibleCreditCard
-    ? rule.is_active &&
-      !posting &&
-      Boolean(rule.account_id && rule.to_account_id)
-    : dueNow && !posting && rule.is_active;
+    ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
+    : fixedDebt
+      ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
+      : dueNow && !posting && rule.is_active;
 
   const handleAction = () => {
     if (flexibleCreditCard) {
@@ -216,7 +211,7 @@ function ScheduledRecurringRow({
       }
       meta={
         <>
-          Next {formatRecurringDate(rule.next_due_date)}
+          {fixedDebt && rule.duration_count ? `Payment ${Math.min(Number(rule.duration_count), Math.floor(Number(rule.total_amount || 0) > 0 ? (Number(rule.total_amount || 0) - Math.max(0, Number(toAccount?.balance || 0))) / Math.max(0.01, Number(rule.amount || 0)) + 1 : 1))} of ${rule.duration_count} · ` : ""}Next {formatRecurringDate(rule.next_due_date)}
           {type === "transfer"
             ? ` · ${toAccount?.name || "Debt account"}`
             : account
