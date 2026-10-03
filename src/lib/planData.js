@@ -1,4 +1,5 @@
-import { getGoalPlannedAmountForMonth, isGoalPlannedForMonth } from '@/lib/goals';
+import { addGoalOccurrence, getFixedGoalContributionAmount, getGoalPlannedAmountForMonth, isGoalPlannedForMonth } from '@/lib/goals';
+import { calculateDueDateAfterOccurrences } from '@/lib/recurringTransactions';
 
 export function normalizePlanType(value) {
   const type = String(value || '').toLowerCase();
@@ -315,6 +316,85 @@ export function getTrackedForCategory({ transactions = [], categoryId }) {
     .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 }
 
+
+function getScheduledRecurringAmount(rule, currentMonth) {
+  if (!rule || !currentMonth || rule.is_archived || rule.is_active === false) return 0;
+  const type = normalizePlanType(rule.type);
+  if (type === 'debt' && (rule.payment_mode || 'fixed') === 'flexible') return null;
+  const start = rule.start_date || rule.next_due_date;
+  const amount = Math.max(0, Number(rule.amount || 0));
+  if (!start || !amount) return 0;
+  const limit = type === 'debt' && Number(rule.duration_count || 0) > 0
+    ? Number(rule.duration_count)
+    : 240;
+  let total = 0;
+  for (let index = 0; index < limit; index += 1) {
+    const due = calculateDueDateAfterOccurrences(start, rule.frequency || 'monthly', index);
+    const month = String(due || '').slice(0, 7);
+    if (month === currentMonth) total += amount;
+    if (month > currentMonth) break;
+  }
+  return total;
+}
+
+function getScheduledGoalAmount(goal, currentMonth) {
+  if (!goal || !currentMonth || goal.is_archived) return null;
+  if ((goal.contribution_mode || 'flexible') !== 'fixed') return null;
+  const amount = getFixedGoalContributionAmount(goal);
+  const count = Math.max(0, Number(goal.duration_count || 0));
+  if (!amount || !count) return 0;
+  let total = 0;
+  for (let index = 0; index < count; index += 1) {
+    const due = addGoalOccurrence(goal.start_date || goal.next_due_date, goal.frequency || 'monthly', index);
+    if (String(due || '').slice(0, 7) === currentMonth) total += amount;
+  }
+  return total;
+}
+
+function buildAuthoritativeScheduledAllocations({
+  recurringTransactions = [],
+  savingsGoals = [],
+  allocations = [],
+  currentMonth,
+} = {}) {
+  const generated = [];
+  recurringTransactions.forEach((rule) => {
+    const amount = getScheduledRecurringAmount(rule, currentMonth);
+    if (amount === null) return;
+    generated.push({
+      source_type: 'recurring',
+      source_id: rule.id,
+      category_id: rule.category_id || null,
+      budget_type: normalizePlanType(rule.type),
+      planned_amount: amount,
+      label: rule.name,
+      icon: rule.icon || 'receipt',
+      color: rule.color,
+    });
+  });
+  savingsGoals.forEach((goal) => {
+    const amount = getScheduledGoalAmount(goal, currentMonth);
+    if (amount === null) return;
+    generated.push({
+      source_type: 'goal',
+      source_id: goal.id,
+      category_id: null,
+      budget_type: 'savings',
+      planned_amount: amount,
+      label: goal.name,
+      icon: goal.icon_key || 'target',
+      color: goal.color_key,
+    });
+  });
+  const generatedKeys = new Set(generated.map((row) => `${row.source_type}:${row.source_id}`));
+  const manualOrFlexible = allocations.filter((allocation) => {
+    const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
+    if (sourceType === 'category') return true;
+    return !generatedKeys.has(`${sourceType}:${allocation.source_id}`);
+  });
+  return [...manualOrFlexible, ...generated];
+}
+
 export function buildPlanViewData({
   activeTab,
   categories = [],
@@ -323,10 +403,17 @@ export function buildPlanViewData({
   transactions = [],
   goalContributions = [],
   savingsGoals = [],
+  recurringTransactions = [],
   currentMonth,
   tab,
 }) {
-  const savedSourceAllocations = dedupeSourceAllocations(allocations);
+  const authoritativeAllocations = buildAuthoritativeScheduledAllocations({
+    recurringTransactions,
+    savingsGoals,
+    allocations,
+    currentMonth,
+  });
+  const savedSourceAllocations = dedupeSourceAllocations(authoritativeAllocations);
   const suggestedGoalAllocations = buildSuggestedGoalAllocations({
     savingsGoals,
     sourceAllocations: savedSourceAllocations,
@@ -565,6 +652,7 @@ export function buildPlanTotals({
   allocations = [],
   categories = [],
   savingsGoals = [],
+  recurringTransactions = [],
   transactions = [],
   currentMonth,
 } = {}) {
@@ -575,7 +663,14 @@ export function buildPlanTotals({
     debt: 0,
   };
 
-  allocations.forEach((allocation) => {
+  const authoritativeAllocations = buildAuthoritativeScheduledAllocations({
+    recurringTransactions,
+    savingsGoals,
+    allocations,
+    currentMonth,
+  });
+
+  authoritativeAllocations.forEach((allocation) => {
     const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
     if (sourceType !== 'category') return;
 
@@ -591,7 +686,7 @@ export function buildPlanTotals({
     totals[type] += Number(allocation.planned_amount || 0);
   });
 
-  const savedSourceAllocations = dedupeSourceAllocations(allocations);
+  const savedSourceAllocations = dedupeSourceAllocations(authoritativeAllocations);
   const suggestedGoalAllocations = buildSuggestedGoalAllocations({
     savingsGoals,
     sourceAllocations: savedSourceAllocations,
