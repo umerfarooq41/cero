@@ -836,6 +836,21 @@ export default function ManageRecurringPanel() {
   const [initialType, setInitialType] = useState('expense');
   const [saving, setSaving] = useState(false);
 
+  const completedDebtRules = useMemo(() => {
+    return recurringRules
+      .filter((rule) => !rule.is_archived && normalizeRuleType(rule.type) === 'transfer')
+      .filter((rule) => {
+        const liability = accounts.find((account) => account.id === rule.to_account_id);
+        if (normalizeAccountType(liability?.type) === 'credit_card') return false;
+        return !!rule.completed_at || Math.max(0, Number(liability?.balance || 0)) <= 0;
+      })
+      .sort((a, b) =>
+        String(b.completed_at || b.next_due_date || '').localeCompare(
+          String(a.completed_at || a.next_due_date || '')
+        )
+      );
+  }, [accounts, recurringRules]);
+
   const visibleRules = useMemo(() => {
     return recurringRules
       .filter((rule) => !rule.is_archived)
@@ -996,6 +1011,44 @@ export default function ManageRecurringPanel() {
           onAction={handleAction}
           formatCurrency={formatCurrency}
         />
+
+        {completedDebtRules.length > 0 && (
+          <div className="overflow-hidden rounded-2xl app-card-surface">
+            <div className="flex items-center justify-between px-5 py-3.5">
+              <div>
+                <h3 className="text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">Paid-off debt history</p>
+              </div>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+                {completedDebtRules.length}
+              </span>
+            </div>
+            <div className="divide-y divide-border/50 border-t border-border/50">
+              {completedDebtRules.map((rule) => {
+                const liability = accounts.find((account) => account.id === rule.to_account_id);
+                const category = categories.find((item) => item.id === rule.category_id);
+                return (
+                  <div key={rule.id} className="flex items-start gap-3 px-4 py-3.5">
+                    <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="truncate text-sm font-semibold">{rule.name}</div>
+                        <div className="shrink-0 text-sm font-semibold text-green-700 dark:text-green-400">Completed</div>
+                      </div>
+                      <p className="mt-1 text-xs font-medium text-muted-foreground">
+                        Paid off{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        Original debt {formatCurrency(Math.abs(Number(rule.total_amount || 0)))}
+                        {liability ? ` · ${liability.name}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <RecurringRuleModal
