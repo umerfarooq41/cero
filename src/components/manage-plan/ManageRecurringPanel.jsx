@@ -473,7 +473,12 @@ function RecurringRuleModal({
                   <Input
                     value={hasPostedDebtHistory ? Math.max(0, debtInstallments - postedInstallments) : form.duration_count}
                     onChange={(event) => {
-                      const count = Math.max(1, Math.floor(Number(event.target.value || 1)));
+                      const raw = event.target.value;
+                      if (raw === '') {
+                        setForm((current) => ({ ...current, duration_count: '' }));
+                        return;
+                      }
+                      const count = Math.max(1, Math.floor(Number(raw)));
                       setForm((current) => ({
                         ...current,
                         duration_count: String(hasPostedDebtHistory ? postedInstallments + count : count),
@@ -486,7 +491,7 @@ function RecurringRuleModal({
                     min="1"
                     step="1"
                     inputMode="numeric"
-                    placeholder="4"
+                    placeholder="Enter number"
                   />
                 </div>
               </div>
@@ -494,25 +499,37 @@ function RecurringRuleModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {form.type === 'transfer' ? 'Installment amount' : 'Amount'}
-              </label>
-              <Input
-                value={form.amount}
-                onChange={(event) => updateForm('amount', event.target.value)}
-                readOnly={form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory}
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                placeholder="0.00"
-              />
-            </div>
+            {!(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) ? (
+              <div className="space-y-1.5">
+                <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {form.type === 'transfer' ? 'Payment amount' : 'Amount'}
+                </label>
+                <Input
+                  value={form.amount}
+                  onChange={(event) => updateForm('amount', event.target.value)}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                />
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Payment amount
+                </label>
+                <div className="flex h-10 items-center px-1 text-sm font-medium">
+                  {Number(form.amount || 0) > 0
+                    ? (formatCurrency ? formatCurrency(Number(form.amount)) : form.amount)
+                    : 'Calculated automatically'}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {form.type === 'transfer' ? 'Installment frequency' : 'Frequency'}
+              <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Frequency
               </label>
               <Select value={form.frequency} onValueChange={(value) => updateForm('frequency', value)}>
                 <SelectTrigger>
