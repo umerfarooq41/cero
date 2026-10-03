@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { recurringTransactionsApi } from '@/lib/budgetData';
+import { accountsApi, recurringTransactionsApi } from '@/lib/budgetData';
 import {
   formatRecurringDate,
   FREQUENCY_OPTIONS,
@@ -107,6 +107,9 @@ const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 const emptyForm = (type = 'expense') => ({
   name: '',
   amount: '',
+  total_amount: '',
+  duration_count: '',
+  duration_unit: 'months',
   type,
   category_id: 'none',
   account_id: 'none',
@@ -191,6 +194,9 @@ function RecurringRuleModal({
       setForm({
         name: editingRule.name || '',
         amount: String(editingRule.amount ?? ''),
+        total_amount: '',
+        duration_count: '',
+        duration_unit: editingRule.frequency === 'weekly' ? 'weeks' : editingRule.frequency === 'yearly' ? 'years' : 'months',
         type: normalizeRuleType(editingRule.type),
         category_id: editingRule.category_id || 'none',
         account_id: editingRule.account_id || 'none',
@@ -235,6 +241,8 @@ function RecurringRuleModal({
   };
 
   const handleSave = async () => {
+    const totalAmount = Number(form.total_amount || 0);
+    const durationCount = Math.max(0, Math.floor(Number(form.duration_count || 0)));
     const amount = Number(form.amount || 0);
 
     if (!form.name.trim()) {
@@ -266,7 +274,13 @@ function RecurringRuleModal({
       return;
     }
 
+    if (form.type === 'transfer' && (!totalAmount || totalAmount <= 0)) {
+      toast.error('Enter the total debt');
+      return;
+    }
+
     await onSave({
+      __debt_total: form.type === 'transfer' ? totalAmount : null,
       name: form.name.trim(),
       amount,
       type: form.type,
@@ -352,10 +366,45 @@ function RecurringRuleModal({
             </div>
           </div>
 
+          {form.type === 'transfer' && (
+            <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
+              <div>
+                <p className="text-sm font-semibold">Debt payoff plan</p>
+                <p className="text-xs text-muted-foreground">Set the full debt and how long you want the plan to run. Cero will stop the rule when the liability reaches zero.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total debt</label>
+                  <Input value={form.total_amount} onChange={(event) => updateForm('total_amount', event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">For</label>
+                  <Input value={form.duration_count} onChange={(event) => {
+                    const count = Math.max(0, Math.floor(Number(event.target.value || 0)));
+                    setForm((current) => ({ ...current, duration_count: event.target.value, amount: count > 0 && Number(current.total_amount) > 0 ? (Number(current.total_amount) / count).toFixed(2) : current.amount }));
+                  }} type="number" min="1" step="1" inputMode="numeric" placeholder="4" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Period</label>
+                  <Select value={form.duration_unit} onValueChange={(value) => {
+                    setForm((current) => ({ ...current, duration_unit: value, frequency: value === 'weeks' ? 'weekly' : value === 'years' ? 'yearly' : 'monthly' }));
+                  }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weeks">Weeks</SelectItem>
+                      <SelectItem value="months">Months</SelectItem>
+                      <SelectItem value="years">Years</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Amount
+                {form.type === 'transfer' ? 'Payment amount' : 'Amount'}
               </label>
               <Input
                 value={form.amount}
@@ -819,13 +868,23 @@ export default function ManageRecurringPanel() {
   const handleSave = async (payload) => {
     setSaving(true);
 
+    const { __debt_total: debtTotal, ...rulePayload } = payload;
+
     try {
       if (editingRule?.id) {
-        await recurringTransactionsApi.update(editingRule.id, payload);
+        await recurringTransactionsApi.update(editingRule.id, rulePayload);
         toast.success('Recurring rule updated');
       } else {
-        await recurringTransactionsApi.create(payload);
+        await recurringTransactionsApi.create(rulePayload);
         toast.success('Recurring rule created');
+      }
+
+      if (rulePayload.type === 'transfer' && rulePayload.to_account_id && Number(debtTotal) > 0) {
+        const liability = accounts.find((account) => account.id === rulePayload.to_account_id);
+        if (liability) {
+          await accountsApi.update(liability.id, { balance: Number(debtTotal) });
+          await queryClient.invalidateQueries({ queryKey: ['accounts'] });
+        }
       }
 
       await refresh();
