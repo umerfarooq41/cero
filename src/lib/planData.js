@@ -323,6 +323,48 @@ export function getTrackedForCategory({ transactions = [], categoryId }) {
 }
 
 
+export function getVerifiedRecurringTransactionsForRule(rule, allTransactions = []) {
+  if (!rule?.id) return [];
+
+  const amount = Math.max(0, Number(rule.amount || 0));
+  const startDate = rule.start_date || rule.next_due_date;
+  const count = Math.max(0, Number(rule.duration_count || 0));
+  const scheduledDates = new Set();
+
+  if (startDate && count > 0) {
+    for (let index = 0; index < count; index += 1) {
+      scheduledDates.add(
+        calculateDueDateAfterOccurrences(
+          startDate,
+          rule.frequency || 'monthly',
+          index
+        )
+      );
+    }
+  }
+
+  return allTransactions.filter((transaction) => {
+    if (transaction.recurring_transaction_id === rule.id) return true;
+
+    // Legacy/recreated-rule fallback: a recurring debt transaction may have
+    // the old rule id. Verify it only when the immutable occurrence date,
+    // amount, category and both accounts agree with this rule. This prevents
+    // amount/name guessing while allowing historical Plan months to reconcile
+    // against the posted transaction ledger.
+    if (normalizePlanType(rule.type) !== 'debt') return false;
+    if (!(transaction.recurring_transaction_id || transaction.recurring_posted_for_date || transaction.source_type === 'recurring')) return false;
+
+    const postedFor = String(transaction.recurring_posted_for_date || transaction.date || '').slice(0, 10);
+    if (!postedFor || !scheduledDates.has(postedFor)) return false;
+    if (Math.abs(getTransactionAmount(transaction) - amount) > 0.005) return false;
+    if ((transaction.account_id || null) !== (rule.account_id || null)) return false;
+    if ((transaction.to_account_id || null) !== (rule.to_account_id || null)) return false;
+    if ((transaction.category_id || null) !== (rule.category_id || null)) return false;
+
+    return true;
+  });
+}
+
 function getScheduledRecurringAmount(rule, currentMonth, allTransactions = []) {
   if (!rule || !currentMonth || rule.is_archived) return 0;
   const type = normalizePlanType(rule.type);
@@ -330,8 +372,9 @@ function getScheduledRecurringAmount(rule, currentMonth, allTransactions = []) {
   const amount = Math.max(0, Number(rule.amount || 0));
 
   if (type === 'debt' && (rule.payment_mode || 'fixed') === 'fixed') {
-    const linkedTransactions = allTransactions.filter(
-      (transaction) => transaction.recurring_transaction_id === rule.id
+    const linkedTransactions = getVerifiedRecurringTransactionsForRule(
+      rule,
+      allTransactions
     );
     const postedDates = [...new Set(
       linkedTransactions
