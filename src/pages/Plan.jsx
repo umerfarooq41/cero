@@ -53,6 +53,51 @@ export default function Plan() {
     [categories]
   );
 
+  // Plan accounting follows the scheduled occurrence month for recurring
+  // postings. Transaction History still follows the actual posting date.
+  // This lets a late/early payment verify the month it was actually due for.
+  const planTransactions = useMemo(() => {
+    const byId = new Map();
+
+    allTransactions.forEach((transaction) => {
+      const occurrenceMonth = transaction?.recurring_posted_for_date
+        ? String(transaction.recurring_posted_for_date).slice(0, 7)
+        : null;
+      const transactionMonth = String(
+        transaction?.date ||
+          transaction?.transaction_date ||
+          transaction?.created_at ||
+          ''
+      ).slice(0, 7);
+      const effectiveMonth = occurrenceMonth || transactionMonth;
+
+      if (effectiveMonth === currentMonth) {
+        byId.set(
+          transaction.id ||
+            `${effectiveMonth}:${transaction.type}:${transaction.amount}:${transaction.account_id || ''}`,
+          transaction
+        );
+      }
+    });
+
+    // Keep the month-scoped query as a fallback while avoiding recurring rows
+    // whose immutable occurrence belongs to a different Plan month.
+    transactions.forEach((transaction) => {
+      const occurrenceMonth = transaction?.recurring_posted_for_date
+        ? String(transaction.recurring_posted_for_date).slice(0, 7)
+        : null;
+      if (occurrenceMonth && occurrenceMonth !== currentMonth) return;
+
+      byId.set(
+        transaction.id ||
+          `${currentMonth}:${transaction.type}:${transaction.amount}:${transaction.account_id || ''}`,
+        transaction
+      );
+    });
+
+    return [...byId.values()];
+  }, [allTransactions, currentMonth, transactions]);
+
   const plannedTotals = useMemo(
     () =>
       buildPlanTotals({
@@ -61,10 +106,10 @@ export default function Plan() {
         savingsGoals,
         recurringTransactions,
         allTransactions,
-        transactions,
+        transactions: planTransactions,
         currentMonth,
       }),
-    [allocations, allTransactions, categories, currentMonth, recurringTransactions, savingsGoals, transactions]
+    [allocations, allTransactions, categories, currentMonth, planTransactions, recurringTransactions, savingsGoals]
   );
 
   const leftToAllocate = plannedTotals.leftToAllocate;
@@ -126,7 +171,7 @@ export default function Plan() {
             subcategories={subcategories}
             currency={currency}
             allocations={allocations}
-            transactions={transactions}
+            transactions={planTransactions}
             goalContributions={goalContributions}
             savingsGoals={savingsGoals}
             recurringTransactions={recurringTransactions}
