@@ -152,11 +152,16 @@ function ScheduledGoalRow({
     : null;
   const isMonthDone = !isCompleted && hasMonthlyPlan && monthRemaining <= 0;
   const isFixed = (goal.contribution_mode || "flexible") === "fixed";
-  const displayAmount = isFixed ? (isMonthDone ? plannedThisMonth : monthRemaining) : remaining;
+  const displayAmount = isFixed
+    ? Math.min(Number(goal.fixed_contribution_amount || 0), remaining)
+    : remaining;
   const totalContributions = Math.max(1, Number(goal.duration_count || 0));
-  const completedContributions = hasMonthlyPlan && plannedThisMonth > 0
-    ? Math.min(totalContributions, Math.floor(Math.max(0, Number(goal.funded_amount || 0) - Number(goal.starting_amount || 0)) / plannedThisMonth))
-    : 0;
+  const completedContributions = Math.min(
+    totalContributions,
+    Math.max(0, Number(goal.posted_occurrence_count || 0)),
+  );
+  const occurrenceStatus = goal.occurrence_status;
+  const fixedScheduleDone = isFixed && completedContributions >= totalContributions;
 
   return (
     <ScheduledItemCard
@@ -164,32 +169,32 @@ function ScheduledGoalRow({
       color={color}
       title={goal.name}
       subtitle={
-        isCompleted ? "100% complete" : `${statusLabel} · ${progress}% complete`
+        isCompleted
+          ? "100% complete"
+          : isFixed && occurrenceStatus
+            ? `${occurrenceStatus.label} · ${progress}% complete`
+            : `${statusLabel} · ${progress}% complete`
       }
-      meta={<>{isFixed && goal.duration_count ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · ` : ""}Target {formatCurrencyElement(target, currency)}</>}
+      meta={<>{isFixed && goal.duration_count ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · Next ${goal.next_due_date || "No date"} · ` : ""}Target {formatCurrencyElement(target, currency)}</>}
       amount={
         isCompleted
           ? "Completed"
-          : isFixed && !hasMonthlyPlan
-            ? "Set target"
-            : formatCurrencyElement(displayAmount, currency)
+          : formatCurrencyElement(displayAmount, currency)
       }
       actions={
         <Button
           size="sm"
           onClick={() => onContribute(goal)}
-          disabled={isCompleted || missingAccounts || (isFixed && (!hasMonthlyPlan || isMonthDone)) || saving}
+          disabled={isCompleted || missingAccounts || fixedScheduleDone || saving}
           className="h-7 rounded-xl px-3 text-xs"
         >
           {saving
             ? "Saving…"
             : isCompleted
               ? "Done"
-              : isFixed && !hasMonthlyPlan
-                ? "Set target"
-                : isFixed && isMonthDone
-                  ? "Contribution done"
-                  : "Contribute"}
+              : fixedScheduleDone
+                ? "Done"
+                : "Contribute"}
         </Button>
       }
     />
