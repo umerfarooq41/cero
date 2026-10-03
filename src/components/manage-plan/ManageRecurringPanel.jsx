@@ -205,7 +205,10 @@ function RecurringRuleModal({
         account_id: editingRule.account_id || 'none',
         to_account_id: editingRule.to_account_id || 'none',
         frequency: editingRule.frequency || 'monthly',
-        next_due_date: editingRule.next_due_date || todayIsoDate(),
+        next_due_date:
+          normalizeRuleType(editingRule.type) === 'transfer'
+            ? (editingRule.start_date || editingRule.next_due_date || todayIsoDate())
+            : (editingRule.next_due_date || todayIsoDate()),
         is_active: editingRule.is_active !== false,
         icon: editingRule.icon || 'receipt',
         color: editingRule.color || COLORS[0],
@@ -296,8 +299,14 @@ function RecurringRuleModal({
       to_account_id:
         form.type === 'transfer' ? form.to_account_id : null,
       frequency: form.frequency,
-      start_date: editingRule?.start_date || form.next_due_date,
-      next_due_date: form.next_due_date,
+      start_date:
+        form.type === 'transfer'
+          ? (editingRule?.start_date || form.next_due_date)
+          : (editingRule?.start_date || form.next_due_date),
+      next_due_date:
+        form.type === 'transfer' && editingRule
+          ? (editingRule.next_due_date || form.next_due_date)
+          : form.next_due_date,
       is_active: form.is_active,
       icon: form.icon,
       color: form.color,
