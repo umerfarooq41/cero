@@ -41,7 +41,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { budgetPlansApi, savingsGoalsApi } from '@/lib/budgetData';
+import { savingsGoalsApi } from '@/lib/budgetData';
 import {
   formatGoalDate,
   getGoalProgress,
@@ -173,113 +173,6 @@ function sumPostedGoalTransactionsByGoal(transactions = []) {
 }
 
 
-function getMonthKey(value = new Date()) {
-  const date = value instanceof Date ? value : new Date(`${String(value).slice(0, 10)}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) return null;
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function compareMonthKeys(a, b) {
-  return String(a || '').localeCompare(String(b || ''));
-}
-
-function addMonthsToKey(monthKey, amount) {
-  const [year, month] = String(monthKey || '').split('-').map(Number);
-
-  if (!year || !month) return null;
-
-  const date = new Date(year, month - 1 + amount, 1);
-  return getMonthKey(date);
-}
-
-function getGoalPlanMonths(goal, startMonth = getMonthKey()) {
-  if (!startMonth) return [];
-
-  const targetMonth = getMonthKey(goal?.target_date);
-
-  if (!targetMonth || compareMonthKeys(targetMonth, startMonth) < 0) {
-    return [startMonth];
-  }
-
-  const months = [];
-  let cursor = startMonth;
-  let guard = 0;
-
-  while (cursor && compareMonthKeys(cursor, targetMonth) <= 0 && guard < 120) {
-    months.push(cursor);
-    cursor = addMonthsToKey(cursor, 1);
-    guard += 1;
-  }
-
-  return months;
-}
-
-function isGoalCompleted(goal) {
-  const target = Number(goal?.target_amount || 0);
-  const current = Number(goal?.current_amount || 0);
-
-  return target > 0 && current >= target;
-}
-
-async function syncGoalMonthlyPlanRows(goal) {
-  if (!goal?.id) return;
-
-  const startMonth = getMonthKey();
-  const monthlyRequired = getMonthlyRequiredSaving(goal);
-  const amount = Number(monthlyRequired || 0);
-  const shouldHavePlanRows = !goal.is_archived && !isGoalCompleted(goal) && amount > 0;
-  const targetMonths = shouldHavePlanRows ? getGoalPlanMonths(goal, startMonth) : [];
-  const targetMonthSet = new Set(targetMonths);
-  const existingRows = await budgetPlansApi.list();
-  const existingGoalRows = existingRows.filter(
-    (row) => row.source_type === 'goal' && row.source_id === goal.id
-  );
-
-  const duplicates = [];
-  const existingByMonth = new Map();
-
-  existingGoalRows.forEach((row) => {
-    if (!row.month) return;
-
-    if (existingByMonth.has(row.month)) {
-      duplicates.push(row);
-    } else {
-      existingByMonth.set(row.month, row);
-    }
-  });
-
-  const staleRows = existingGoalRows.filter((row) => {
-    if (!row.month || compareMonthKeys(row.month, startMonth) < 0) return false;
-    return !targetMonthSet.has(row.month);
-  });
-
-  await Promise.all(
-    [...duplicates, ...staleRows].map((row) => budgetPlansApi.delete(row.id))
-  );
-
-  if (!shouldHavePlanRows) return;
-
-  await Promise.all(
-    targetMonths.map((month) => {
-      const existing = existingByMonth.get(month);
-
-      return budgetPlansApi.upsert({
-        id: existing?.id,
-        category_id: null,
-        month,
-        planned_amount: amount,
-        source_type: 'goal',
-        source_id: goal.id,
-        budget_type: 'savings',
-        label: goal.name,
-        icon: goal.icon_key || 'target',
-        color: goal.color_key || '#276FE4',
-      });
-    })
-  );
-}
 
 function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
   if (!goal) return null;
@@ -443,7 +336,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       frequency: form.contribution_mode === 'fixed' ? form.frequency : null,
       start_date: form.contribution_mode === 'fixed' ? form.start_date : null,
       next_due_date: form.contribution_mode === 'fixed' ? form.start_date : null,
-      completed_at: null,
+      completed_at: editingGoal?.completed_at || null,
       contribution_mode: form.contribution_mode,
       from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
       to_account_id: form.to_account_id === 'none' ? null : form.to_account_id,
@@ -890,8 +783,7 @@ export default function ManageGoalsPanel() {
         };
 
         savedGoal = await savingsGoalsApi.update(editingGoal.id, goalPayload);
-        await syncGoalMonthlyPlanRows(savedGoal);
-        toast.success('Savings goal updated and monthly plan synced');
+        toast.success('Savings goal updated');
       } else {
         const goalPayload = {
           ...payload,
@@ -899,8 +791,7 @@ export default function ManageGoalsPanel() {
         };
 
         savedGoal = await savingsGoalsApi.create(goalPayload);
-        await syncGoalMonthlyPlanRows(savedGoal);
-        toast.success('Savings goal created and monthly plan updated');
+        toast.success('Savings goal created');
       }
 
       refresh();
@@ -916,12 +807,10 @@ export default function ManageGoalsPanel() {
 
   const handleArchive = async (goal) => {
     try {
-      const updatedGoal = await savingsGoalsApi.update(goal.id, {
+      await savingsGoalsApi.update(goal.id, {
         is_archived: !goal.is_archived,
         archived_at: goal.is_archived ? null : new Date().toISOString(),
       });
-
-      await syncGoalMonthlyPlanRows(updatedGoal);
       refresh();
       toast.success(goal.is_archived ? 'Savings goal restored' : 'Savings goal archived');
     } catch (error) {
