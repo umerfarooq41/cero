@@ -81,6 +81,21 @@ export default function useRecurringItems({
       sortRecurringByDueDate(
         recurringTransactions
           .filter((rule) => !rule.is_archived)
+          .filter((rule) => {
+            const toAccount = accounts.find(
+              (account) => account.id === rule.to_account_id,
+            );
+            const finiteDebt =
+              normalizeRuleType(rule.type) === "transfer" &&
+              !isFlexibleCreditCardDebt(rule, toAccount);
+            const debtPaidOff =
+              finiteDebt &&
+              Math.max(0, Number(toAccount?.balance || 0)) <= 0;
+
+            // A completed finite debt is history, not a future scheduled item.
+            // Keep manually paused ongoing rules visible, but remove paid-off debts.
+            return !debtPaidOff && !rule.completed_at;
+          })
           .map((rule) => {
             const toAccount = accounts.find(
               (account) => account.id === rule.to_account_id,
