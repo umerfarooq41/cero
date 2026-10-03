@@ -194,7 +194,7 @@ function RecurringRuleModal({
       setForm({
         name: editingRule.name || '',
         amount: String(editingRule.amount ?? ''),
-        total_amount: '',
+        total_amount: String(Math.max(0, Number(accounts.find((account) => account.id === editingRule.to_account_id)?.balance || 0))),
         duration_count: '',
         duration_unit: editingRule.frequency === 'weekly' ? 'weeks' : editingRule.frequency === 'yearly' ? 'years' : 'months',
         type: normalizeRuleType(editingRule.type),
@@ -375,7 +375,10 @@ function RecurringRuleModal({
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total debt</label>
-                  <Input value={form.total_amount} onChange={(event) => updateForm('total_amount', event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
+                  <Input value={form.total_amount} onChange={(event) => {
+                    const total = Number(event.target.value || 0);
+                    setForm((current) => ({ ...current, total_amount: event.target.value, amount: Number(current.duration_count) > 0 && total > 0 ? (total / Number(current.duration_count)).toFixed(2) : current.amount }));
+                  }} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">For</label>
