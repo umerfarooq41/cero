@@ -323,13 +323,51 @@ export function getTrackedForCategory({ transactions = [], categoryId }) {
 }
 
 
-function getScheduledRecurringAmount(rule, currentMonth) {
+function getScheduledRecurringAmount(rule, currentMonth, allTransactions = []) {
   if (!rule || !currentMonth || rule.is_archived || rule.is_active === false) return 0;
   const type = normalizePlanType(rule.type);
   if (type === 'debt' && (rule.payment_mode || 'fixed') === 'flexible') return null;
-  const start = rule.start_date || rule.next_due_date;
   const amount = Math.max(0, Number(rule.amount || 0));
-  if (!start || !amount) return 0;
+  if (!amount) return 0;
+
+  if (type === 'debt' && (rule.payment_mode || 'fixed') === 'fixed') {
+    const totalOccurrences = Math.max(0, Number(rule.duration_count || 0));
+    const postedDates = [...new Set(
+      allTransactions
+        .filter((transaction) => transaction.recurring_transaction_id === rule.id)
+        .map((transaction) => transaction.recurring_posted_for_date)
+        .filter(Boolean)
+        .map((date) => String(date).slice(0, 10))
+    )].sort();
+
+    // Posted occurrence dates are immutable history. Never regenerate those
+    // months from a later-edited/migrated rule start date.
+    const postedInMonth = postedDates.filter((date) => date.slice(0, 7) === currentMonth).length;
+    const remainingOccurrences = totalOccurrences > 0
+      ? Math.max(0, totalOccurrences - postedDates.length)
+      : 0;
+
+    let futureInMonth = 0;
+    if (remainingOccurrences > 0 && rule.next_due_date) {
+      for (let index = 0; index < remainingOccurrences; index += 1) {
+        const due = calculateDueDateAfterOccurrences(
+          rule.next_due_date,
+          rule.frequency || 'monthly',
+          index
+        );
+        const month = String(due || '').slice(0, 7);
+        if (month === currentMonth) futureInMonth += 1;
+        if (month > currentMonth) break;
+      }
+    }
+
+    if (postedDates.length > 0 || rule.next_due_date) {
+      return (postedInMonth + futureInMonth) * amount;
+    }
+  }
+
+  const start = rule.start_date || rule.next_due_date;
+  if (!start) return 0;
   const limit = type === 'debt' && Number(rule.duration_count || 0) > 0
     ? Number(rule.duration_count)
     : 240;
@@ -362,10 +400,11 @@ function buildAuthoritativeScheduledAllocations({
   savingsGoals = [],
   allocations = [],
   currentMonth,
+  allTransactions = [],
 } = {}) {
   const generated = [];
   recurringTransactions.forEach((rule) => {
-    const amount = getScheduledRecurringAmount(rule, currentMonth);
+    const amount = getScheduledRecurringAmount(rule, currentMonth, allTransactions);
     if (amount === null) return;
     generated.push({
       source_type: 'recurring',
@@ -410,6 +449,7 @@ export function buildPlanViewData({
   goalContributions = [],
   savingsGoals = [],
   recurringTransactions = [],
+  allTransactions = [],
   currentMonth,
   tab,
 }) {
@@ -418,6 +458,7 @@ export function buildPlanViewData({
     savingsGoals,
     allocations,
     currentMonth,
+    allTransactions,
   });
   const savedSourceAllocations = dedupeSourceAllocations(authoritativeAllocations);
   const suggestedGoalAllocations = buildSuggestedGoalAllocations({
@@ -659,6 +700,7 @@ export function buildPlanTotals({
   categories = [],
   savingsGoals = [],
   recurringTransactions = [],
+  allTransactions = [],
   transactions = [],
   currentMonth,
 } = {}) {
@@ -674,6 +716,7 @@ export function buildPlanTotals({
     savingsGoals,
     allocations,
     currentMonth,
+    allTransactions,
   });
 
   authoritativeAllocations.forEach((allocation) => {
