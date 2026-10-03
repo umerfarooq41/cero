@@ -106,7 +106,7 @@ function GoalContributionDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-4 border-t border-border/50 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <Button
             variant="outline"
             onClick={dialog.closeDialog}
