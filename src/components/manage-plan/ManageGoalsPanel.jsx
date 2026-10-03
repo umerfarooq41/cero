@@ -143,6 +143,20 @@ function addGoalDuration(count, unit) {
   return date.toISOString().slice(0, 10);
 }
 
+function getFixedGoalTargetDate(startDate, count, frequency) {
+  if (!startDate || Number(count) <= 0) return '';
+  const date = new Date(`${startDate}T00:00:00`);
+  const steps = Math.max(0, Math.floor(Number(count)) - 1);
+  for (let index = 0; index < steps; index += 1) {
+    if (frequency === 'weekly') date.setDate(date.getDate() + 7);
+    else if (frequency === 'biweekly') date.setDate(date.getDate() + 14);
+    else if (frequency === 'quarterly') date.setMonth(date.getMonth() + 3);
+    else if (frequency === 'yearly') date.setFullYear(date.getFullYear() + 1);
+    else date.setMonth(date.getMonth() + 1);
+  }
+  return date.toISOString().slice(0, 10);
+}
+
 function getGoalTransactionGoalId(transaction) {
   return transaction?.savings_goal_id || transaction?.goal_id || null;
 }
@@ -421,7 +435,9 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       target_amount: targetAmount,
       starting_amount: currentAmount,
       current_amount: currentAmount,
-      target_date: form.target_date || null,
+      target_date: form.contribution_mode === 'fixed'
+        ? getFixedGoalTargetDate(form.start_date, form.duration_count, form.frequency)
+        : (form.target_date || null),
       duration_count: Number(form.duration_count) > 0 ? Math.floor(Number(form.duration_count)) : null,
       duration_unit: Number(form.duration_count) > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null,
       frequency: form.contribution_mode === 'fixed' ? form.frequency : null,
@@ -499,14 +515,16 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Target date</label>
-              <Input
-                value={form.target_date}
-                onChange={(event) => updateForm('target_date', event.target.value)}
-                type="date"
-              />
-            </div>
+            {form.contribution_mode !== 'fixed' && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Target date</label>
+                <Input
+                  value={form.target_date}
+                  onChange={(event) => updateForm('target_date', event.target.value)}
+                  type="date"
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
