@@ -37,6 +37,7 @@ import { accountsApi, recurringTransactionsApi } from '@/lib/budgetData';
 import {
   formatRecurringDate,
   FREQUENCY_OPTIONS,
+  getFixedDebtNextDueDate,
   getRecurringFrequencyLabel,
   getRecurringStatus,
   todayIsoDate,
@@ -50,7 +51,6 @@ import {
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 import { sumRecurringPostedByRule } from '@/components/transactions/scheduledUtils';
-import { getFixedDebtNextDueDate } from '@/lib/recurringTransactions';
 
 const COLORS = [
   '#276FE4',
@@ -870,6 +870,21 @@ export default function ManageRecurringPanel() {
         const total = Math.max(0, Number(rule.total_amount || 0));
         const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
         return !rule.completed_at && (total <= 0 || paid < total);
+      })
+      .map((rule) => {
+        if (
+          normalizeRuleType(rule.type) !== 'transfer' ||
+          (rule.payment_mode || 'fixed') !== 'fixed'
+        ) return rule;
+
+        const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
+        const installmentAmount = Math.max(0.01, Number(rule.amount || 0));
+        const postedOccurrences = Math.floor((paid + 0.000001) / installmentAmount);
+
+        return {
+          ...rule,
+          next_due_date: getFixedDebtNextDueDate(rule, postedOccurrences),
+        };
       })
       .sort((a, b) => {
         if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
