@@ -839,11 +839,21 @@ export default function ManageRecurringPanel() {
   const visibleRules = useMemo(() => {
     return recurringRules
       .filter((rule) => !rule.is_archived)
+      .filter((rule) => {
+        if (normalizeRuleType(rule.type) !== 'transfer') return true;
+        const liability = accounts.find((account) => account.id === rule.to_account_id);
+        const isFlexibleCreditCard =
+          normalizeAccountType(liability?.type) === 'credit_card';
+        if (isFlexibleCreditCard) return true;
+
+        const remainingDebt = Math.max(0, Number(liability?.balance || 0));
+        return remainingDebt > 0 && !rule.completed_at;
+      })
       .sort((a, b) => {
         if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
         return String(a.next_due_date || '').localeCompare(String(b.next_due_date || ''));
       });
-  }, [recurringRules]);
+  }, [accounts, recurringRules]);
 
   const groupedRules = useMemo(() => {
     return {
