@@ -35,6 +35,8 @@ import {
 } from '@/lib/planData';
 import { cn } from '@/lib/utils';
 import { formatCurrencyNumberText } from '@/lib/currencies';
+import { calculateDueDateAfterOccurrences } from '@/lib/recurringTransactions';
+import { getFixedGoalContributionAmount, addGoalOccurrence } from '@/lib/goals';
 
 const sectionConfig = {
   income: {
@@ -185,6 +187,46 @@ function getAllocationRowKey(allocation) {
   return allocation?.category_id ? `category:${allocation.category_id}` : null;
 }
 
+
+function getMonthOccurrenceAmount({ startDate, frequency, amount, countLimit, month }) {
+  if (!startDate || !month || Number(amount || 0) <= 0) return 0;
+  const limit = countLimit ? Math.max(0, Number(countLimit)) : 240;
+  let total = 0;
+  for (let index = 0; index < limit; index += 1) {
+    const dueDate = calculateDueDateAfterOccurrences(startDate, frequency || 'monthly', index);
+    const dueMonth = String(dueDate || '').slice(0, 7);
+    if (dueMonth === month) total += Number(amount || 0);
+    if (dueMonth > month) break;
+  }
+  return total;
+}
+
+function getRecurringAmountForMonth(rule, month) {
+  const type = normalizeType(rule?.type);
+  const isFlexibleDebt = type === 'debt' && (rule?.payment_mode || 'fixed') === 'flexible';
+  if (isFlexibleDebt) return null;
+  return getMonthOccurrenceAmount({
+    startDate: rule?.start_date || rule?.next_due_date,
+    frequency: rule?.frequency || 'monthly',
+    amount: Number(rule?.amount || 0),
+    countLimit: type === 'debt' ? rule?.duration_count : null,
+    month,
+  });
+}
+
+function getGoalAmountForMonth(goal, month) {
+  if ((goal?.contribution_mode || 'flexible') !== 'fixed') return null;
+  const amount = getFixedGoalContributionAmount(goal);
+  const count = Math.max(0, Number(goal?.duration_count || 0));
+  if (!amount || !count) return 0;
+  let total = 0;
+  for (let index = 0; index < count; index += 1) {
+    const dueDate = addGoalOccurrence(goal.start_date || goal.next_due_date, goal.frequency || 'monthly', index);
+    if (String(dueDate || '').slice(0, 7) === month) total += amount;
+  }
+  return total;
+}
+
 function PlanAmountRow({
   row,
   value,
@@ -248,15 +290,21 @@ function PlanAmountRow({
       </div>
 
       <div className="w-28 shrink-0">
-        <Input
-          type="number"
-          min="0"
-          step="0.01"
-          value={value || ''}
-          onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
-          placeholder="0.00"
-          className="h-8 text-right text-sm tabular-nums"
-        />
+        {row.isGenerated ? (
+          <div className="h-8 rounded-md border border-border/50 bg-muted/35 px-3 text-right text-sm font-medium leading-8 tabular-nums text-muted-foreground">
+            {formatMoneyText(value || 0)}
+          </div>
+        ) : (
+          <Input
+            type="number"
+            min="0"
+            step="0.01"
+            value={value || ''}
+            onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
+            placeholder="0.00"
+            className="h-8 text-right text-sm tabular-nums"
+          />
+        )}
       </div>
     </div>
   );
@@ -341,16 +389,20 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         const category = categories.find((item) => item.id === ruleCategoryId);
         const ruleType =
           getCategoryType(category, categories) || normalizeType(rule.type);
-        const amount = Number(rule.amount || 0);
+        const scheduledAmount = getRecurringAmountForMonth(rule, currentMonth);
+        const isGenerated = scheduledAmount !== null;
+        const amount = isGenerated ? Number(scheduledAmount || 0) : Number(rule.amount || 0);
 
         if (ruleCategoryId && leafCategoryIds.has(ruleCategoryId)) {
           const current = recurringByCategory.get(ruleCategoryId) || {
             amount: 0,
             names: [],
             descriptions: [],
+            isGenerated: true,
           };
 
           current.amount += amount;
+          current.isGenerated = current.isGenerated && isGenerated;
           current.names.push(rule.name);
           current.descriptions.push(getRecurringPlanDescription(rule));
           recurringByCategory.set(ruleCategoryId, current);
@@ -368,6 +420,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           sourceId: rule.id,
           categoryId: ruleCategoryId || null,
           suggestedAmount: amount,
+          isGenerated,
           description: getRecurringPlanDescription(rule),
         });
       });
@@ -416,6 +469,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
               isSubcategory: true,
               parentColor: parent.color,
               sourceType: recurring ? 'recurring' : null,
+              isGenerated: Boolean(recurring?.isGenerated),
               suggestedAmount: recurring?.amount || 0,
               description: recurring
                 ? [...new Set(recurring.descriptions)].join(' · ')
@@ -449,6 +503,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           icon: parent.icon,
           color: parent.color,
           sourceType: recurring ? 'recurring' : null,
+          isGenerated: Boolean(recurring?.isGenerated),
           suggestedAmount: recurring?.amount || 0,
           description: recurring
             ? [...new Set(recurring.descriptions)].join(' · ')
@@ -464,7 +519,11 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     goalsWithFunding
       .filter((goal) => !goal.is_archived && isGoalPlannedForMonth(goal, currentMonth))
       .forEach((goal) => {
-        const monthlyRequired = getGoalPlannedAmountForMonth(goal, currentMonth);
+        const fixedScheduled = getGoalAmountForMonth(goal, currentMonth);
+        const isGenerated = fixedScheduled !== null;
+        const monthlyRequired = isGenerated
+          ? fixedScheduled
+          : getGoalPlannedAmountForMonth(goal, currentMonth);
 
         if (monthlyRequired === null || Number(monthlyRequired || 0) <= 0) {
           return;
@@ -481,6 +540,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           sourceId: goal.id,
           categoryId: null,
           suggestedAmount: Number(monthlyRequired || 0),
+          isGenerated,
           description: getGoalPlanDescription(goal),
         });
       });
@@ -500,9 +560,11 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     allRows.forEach((row) => {
       const allocation = allocationByRowKey[row.key];
 
-      initial[row.key] = allocation
-        ? Number(allocation.planned_amount || 0)
-        : Number(row.suggestedAmount || 0);
+      initial[row.key] = row.isGenerated
+        ? Number(row.suggestedAmount || 0)
+        : allocation
+          ? Number(allocation.planned_amount || 0)
+          : Number(row.suggestedAmount || 0);
     });
 
     setValues(initial);
@@ -539,8 +601,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     };
   }, [currentMonthTransactions, rowsByType, values]);
 
-  const getHint = (rowKey) => {
-    return Number(prevAllocationByRowKey[rowKey]?.planned_amount || 0);
+  const getHint = (row) => {
+    if (row.isGenerated) return 0;
+    return Number(prevAllocationByRowKey[row.key]?.planned_amount || 0);
   };
 
   const setValue = (rowKey, amount) => {
@@ -554,6 +617,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const nextValues = { ...values };
 
     allRows.forEach((row) => {
+      if (row.isGenerated) return;
       const previousValue = prevAllocationByRowKey[row.key]?.planned_amount;
 
       if (previousValue !== undefined && previousValue !== null) {
@@ -687,7 +751,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                   key={row.key}
                   row={row}
                   value={values[row.key]}
-                  lastMonthHint={getHint(row.key)}
+                  lastMonthHint={getHint(row)}
                   onChange={(value) => setValue(row.key, value)}
                   formatCurrency={formatCurrency}
                 />
