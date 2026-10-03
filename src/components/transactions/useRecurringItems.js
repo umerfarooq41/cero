@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { accountsApi, recurringTransactionsApi, transactionsApi } from "@/lib/budgetData";
 import {
   calculateNextDueDate,
+  getFixedDebtNextDueDate,
   getRecurringStatus,
   sortRecurringByDueDate,
   todayIsoDate,
@@ -106,10 +107,18 @@ export default function useRecurringItems({
             const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
             const paidTotal = allRecurringPaymentsByRule[rule.id] || 0;
             const totalDebt = Math.max(0, Number(rule.total_amount || 0));
+            const installmentAmount = Math.max(0.01, Number(rule.amount || 0));
+            const postedOccurrences = Math.floor((paidTotal + 0.000001) / installmentAmount);
             const isFlexiblePayment = normalizeRuleType(rule.type) === "transfer" && (rule.payment_mode || "fixed") === "flexible";
 
             return {
               ...rule,
+              next_due_date:
+                normalizeRuleType(rule.type) === "transfer" &&
+                (rule.payment_mode || "fixed") === "fixed"
+                  ? getFixedDebtNextDueDate(rule, postedOccurrences)
+                  : rule.next_due_date,
+              posted_occurrence_count: postedOccurrences,
               month_planned_amount: plannedThisMonth,
               month_paid_amount: paidThisMonth,
               total_paid_amount: paidTotal,
@@ -195,7 +204,12 @@ export default function useRecurringItems({
       setPostingId(rule.id);
 
       try {
-        const postedForDate = rule.next_due_date || todayIsoDate();
+        const installmentAmount = Math.max(0.01, Number(rule.amount || 0));
+        const paidTotalBeforePost = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
+        const postedOccurrences = Math.floor((paidTotalBeforePost + 0.000001) / installmentAmount);
+        const postedForDate = isFixedDebt
+          ? getFixedDebtNextDueDate(rule, postedOccurrences)
+          : rule.next_due_date || todayIsoDate();
         const scheduledAmount = Math.max(0, Number(rule.amount || 0));
         const postingAmount = isFiniteDebt
           ? Math.min(scheduledAmount, outstandingDebt)
