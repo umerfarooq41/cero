@@ -43,11 +43,14 @@ import {
 } from '@/lib/recurringTransactions';
 import {
   useAccounts,
+  useAllTransactions,
   useCategories,
   useRecurringTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
+import { sumRecurringPostedByRule } from '@/components/transactions/scheduledUtils';
+import { getFixedDebtNextDueDate } from '@/lib/recurringTransactions';
 
 const COLORS = [
   '#276FE4',
@@ -829,6 +832,7 @@ export default function ManageRecurringPanel() {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
   const { data: recurringRules = [] } = useRecurringTransactions();
+  const { data: allTransactions = [] } = useAllTransactions();
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
 
@@ -838,40 +842,40 @@ export default function ManageRecurringPanel() {
   const [editingRule, setEditingRule] = useState(null);
   const [initialType, setInitialType] = useState('expense');
   const [saving, setSaving] = useState(false);
+  const recurringPaidByRule = useMemo(
+    () => sumRecurringPostedByRule(allTransactions),
+    [allTransactions]
+  );
 
   const completedDebtRules = useMemo(() => {
     return recurringRules
       .filter((rule) => !rule.is_archived && normalizeRuleType(rule.type) === 'transfer')
       .filter((rule) => {
-        const liability = accounts.find((account) => account.id === rule.to_account_id);
-        if (normalizeAccountType(liability?.type) === 'credit_card') return false;
-        return !!rule.completed_at || Math.max(0, Number(liability?.balance || 0)) <= 0;
+        const total = Math.max(0, Number(rule.total_amount || 0));
+        const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
+        return !!rule.completed_at || (total > 0 && paid >= total);
       })
       .sort((a, b) =>
         String(b.completed_at || b.next_due_date || '').localeCompare(
           String(a.completed_at || a.next_due_date || '')
         )
       );
-  }, [accounts, recurringRules]);
+  }, [recurringPaidByRule, recurringRules]);
 
   const visibleRules = useMemo(() => {
     return recurringRules
       .filter((rule) => !rule.is_archived)
       .filter((rule) => {
         if (normalizeRuleType(rule.type) !== 'transfer') return true;
-        const liability = accounts.find((account) => account.id === rule.to_account_id);
-        const isFlexibleCreditCard =
-          normalizeAccountType(liability?.type) === 'credit_card';
-        if (isFlexibleCreditCard) return true;
-
-        const remainingDebt = Math.max(0, Number(liability?.balance || 0));
-        return remainingDebt > 0 && !rule.completed_at;
+        const total = Math.max(0, Number(rule.total_amount || 0));
+        const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
+        return !rule.completed_at && (total <= 0 || paid < total);
       })
       .sort((a, b) => {
         if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
         return String(a.next_due_date || '').localeCompare(String(b.next_due_date || ''));
       });
-  }, [accounts, recurringRules]);
+  }, [recurringPaidByRule, recurringRules]);
 
   const groupedRules = useMemo(() => {
     return {
