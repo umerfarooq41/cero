@@ -432,9 +432,26 @@ function buildAuthoritativeScheduledAllocations({
     });
   });
   const generatedKeys = new Set(generated.map((row) => `${row.source_type}:${row.source_id}`));
+  const recurringById = new Map(
+    recurringTransactions.filter(Boolean).map((rule) => [rule.id, rule])
+  );
   const manualOrFlexible = allocations.filter((allocation) => {
     const sourceType = normalizeSourceType(getAllocationSourceType(allocation));
     if (sourceType === 'category') return true;
+
+    if (sourceType === 'recurring') {
+      const rule = recurringById.get(allocation.source_id);
+
+      // Recurring rows are schedule-owned. A copied/manual snapshot must never
+      // survive beside the authoritative occurrence row. Only explicitly
+      // flexible debt rules may keep a saved allocation as their plan amount.
+      if (!rule) return false;
+      const type = normalizePlanType(rule.type);
+      const isFlexibleDebt =
+        type === 'debt' && (rule.payment_mode || 'fixed') === 'flexible';
+      if (!isFlexibleDebt) return false;
+    }
+
     return !generatedKeys.has(`${sourceType}:${allocation.source_id}`);
   });
   return [...manualOrFlexible, ...generated];
