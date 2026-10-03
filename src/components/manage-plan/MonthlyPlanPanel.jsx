@@ -140,8 +140,7 @@ function formatDateText(value) {
 
 function getRecurringPlanDescription(rule) {
   const isCompletedDebt =
-    normalizeType(rule?.type) === 'debt' &&
-    (Boolean(rule?.completed_at) || rule?.is_active === false);
+    normalizeType(rule?.type) === 'debt' && Boolean(rule?.completed_at);
 
   if (isCompletedDebt) {
     return `${formatFrequency(rule?.frequency)} · Completed`;
@@ -600,7 +599,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       });
 
     return result;
-  }, [categories, currentMonth, goalsWithFunding, leafCategoryIds, recurringTransactions]);
+  }, [allTransactions, categories, currentMonth, goalsWithFunding, leafCategoryIds, recurringTransactions]);
 
   const allRows = useMemo(() => {
     return Object.values(rowsByType)
