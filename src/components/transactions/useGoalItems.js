@@ -16,6 +16,7 @@ import {
   postGoalContribution,
 } from "@/lib/goalContributionEffects";
 import {
+  countVerifiedGoalContributionsByGoal,
   getGoalMonthlyPlanAmount,
   sumGoalFundedTotalsByGoal,
   sumGoalTransactionsByGoal,
@@ -63,6 +64,11 @@ export default function useGoalItems({
     [allTransactions],
   );
 
+  const verifiedContributionsByGoal = useMemo(
+    () => countVerifiedGoalContributionsByGoal(allTransactions),
+    [allTransactions],
+  );
+
   const activeGoals = useMemo(
     () =>
       sortGoalsByPriority(
@@ -100,10 +106,10 @@ export default function useGoalItems({
 
             const contributionMode = goal.contribution_mode || "flexible";
             const fixedAmount = contributionMode === "fixed" ? getFixedGoalContributionAmount(goalWithProgress) : 0;
-            const postedAmount = Math.max(0, Number(fundedTotalsByGoal[goal.id] || 0));
-            const postedOccurrences = fixedAmount > 0
-              ? Math.floor((postedAmount + 0.000001) / fixedAmount)
-              : 0;
+            const postedOccurrences = Math.max(
+              0,
+              Number(verifiedContributionsByGoal[goal.id] || 0),
+            );
             const nextDueDate = contributionMode === "fixed"
               ? getFixedGoalNextDueDate(goalWithProgress, postedOccurrences)
               : null;
@@ -130,6 +136,7 @@ export default function useGoalItems({
       fundedTotalsByGoal,
       monthContributionsByGoal,
       savingsGoals,
+      verifiedContributionsByGoal,
     ],
   );
 
