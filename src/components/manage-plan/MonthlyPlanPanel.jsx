@@ -32,6 +32,7 @@ import {
   calculateLeftToAllocateFromTotals,
   getAssignablePlannedDebt,
   getFundedDebtPaymentTotal,
+  getVerifiedRecurringTransactionsForRule,
 } from '@/lib/planData';
 import { cn } from '@/lib/utils';
 import { formatCurrencyNumberText } from '@/lib/currencies';
@@ -138,6 +139,14 @@ function formatDateText(value) {
 }
 
 function getRecurringPlanDescription(rule) {
+  const isCompletedDebt =
+    normalizeType(rule?.type) === 'debt' &&
+    (Boolean(rule?.completed_at) || rule?.is_active === false);
+
+  if (isCompletedDebt) {
+    return `${formatFrequency(rule?.frequency)} · Completed`;
+  }
+
   return `${formatFrequency(rule?.frequency)} · Next ${formatDateText(
     rule?.next_due_date
   )}`;
@@ -208,8 +217,9 @@ function getRecurringAmountForMonth(rule, month, allTransactions = []) {
   const amount = Number(rule?.amount || 0);
 
   if (type === 'debt' && (rule?.payment_mode || 'fixed') === 'fixed') {
-    const linkedTransactions = allTransactions.filter(
-      (transaction) => transaction.recurring_transaction_id === rule.id
+    const linkedTransactions = getVerifiedRecurringTransactionsForRule(
+      rule,
+      allTransactions
     );
     const postedDates = [...new Set(
       linkedTransactions
