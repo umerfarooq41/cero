@@ -295,7 +295,7 @@ function RecurringRuleModal({
       total_amount: form.type === 'transfer' ? totalAmount : null,
       duration_count: form.type === 'transfer' && durationCount > 0 ? durationCount : null,
       duration_unit: form.type === 'transfer' && durationCount > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null,
-      completed_at: null,
+      completed_at: editingRule?.completed_at || null,
       payment_mode: form.type === 'transfer' ? form.payment_mode : null,
       type: form.type,
       category_id: form.category_id === 'none' ? null : form.category_id,
