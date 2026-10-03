@@ -267,17 +267,23 @@ export function getTrackedForSource({
     }
 
     if (normalizedSourceType === 'recurring') {
-      const matchesRule = sourceId && transaction.recurring_transaction_id === sourceId;
-      const hasRecurringMarker = Boolean(
-        transaction.recurring_transaction_id ||
-          transaction.recurring_posted_for_date ||
-          transaction.source_type === 'recurring'
+      // A recurring transaction must belong to exactly one source row.
+      // Prefer the persisted recurring rule id. Category fallback is only for
+      // legacy recurring transactions that do not have a rule id at all.
+      const matchesRule =
+        Boolean(sourceId) && transaction.recurring_transaction_id === sourceId;
+      const hasRuleId = Boolean(transaction.recurring_transaction_id);
+      const isLegacyRecurring = Boolean(
+        !hasRuleId &&
+          (transaction.recurring_posted_for_date ||
+            transaction.source_type === 'recurring')
       );
+      const matchesLegacyCategory =
+        Boolean(categoryId) &&
+        transaction.category_id === categoryId &&
+        isLegacyRecurring;
 
-      const matchesCategoryGroup =
-        categoryId && transaction.category_id === categoryId && hasRecurringMarker;
-
-      return matchesRule || matchesCategoryGroup
+      return matchesRule || matchesLegacyCategory
         ? sum + getTransactionAmount(transaction)
         : sum;
     }
