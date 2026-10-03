@@ -151,7 +151,12 @@ function ScheduledGoalRow({
     ? Math.max(0, plannedThisMonth - contributedThisMonth)
     : null;
   const isMonthDone = !isCompleted && hasMonthlyPlan && monthRemaining <= 0;
-  const displayAmount = isMonthDone ? plannedThisMonth : monthRemaining;
+  const isFixed = (goal.contribution_mode || "flexible") === "fixed";
+  const displayAmount = isFixed ? (isMonthDone ? plannedThisMonth : monthRemaining) : remaining;
+  const totalContributions = Math.max(1, Number(goal.duration_count || 0));
+  const completedContributions = hasMonthlyPlan && plannedThisMonth > 0
+    ? Math.min(totalContributions, Math.floor(Math.max(0, Number(goal.funded_amount || 0) - Number(goal.starting_amount || 0)) / plannedThisMonth))
+    : 0;
 
   return (
     <ScheduledItemCard
@@ -161,11 +166,11 @@ function ScheduledGoalRow({
       subtitle={
         isCompleted ? "100% complete" : `${statusLabel} · ${progress}% complete`
       }
-      meta={<>Target {formatCurrencyElement(target, currency)}</>}
+      meta={<>{isFixed && goal.duration_count ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · ` : ""}Target {formatCurrencyElement(target, currency)}</>}
       amount={
         isCompleted
           ? "Completed"
-          : !hasMonthlyPlan
+          : isFixed && !hasMonthlyPlan
             ? "Set target"
             : formatCurrencyElement(displayAmount, currency)
       }
@@ -173,17 +178,17 @@ function ScheduledGoalRow({
         <Button
           size="sm"
           onClick={() => onContribute(goal)}
-          disabled={isCompleted || missingAccounts || !hasMonthlyPlan || saving}
+          disabled={isCompleted || missingAccounts || (isFixed && (!hasMonthlyPlan || isMonthDone)) || saving}
           className="h-7 rounded-xl px-3 text-xs"
         >
           {saving
             ? "Saving…"
             : isCompleted
               ? "Done"
-              : !hasMonthlyPlan
+              : isFixed && !hasMonthlyPlan
                 ? "Set target"
-                : isMonthDone
-                  ? "Add extra"
+                : isFixed && isMonthDone
+                  ? "Contribution done"
                   : "Contribute"}
         </Button>
       }
