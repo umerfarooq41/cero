@@ -11,6 +11,7 @@ import {
   todayIsoDate,
 } from "@/lib/recurringTransactions";
 import {
+  countVerifiedRecurringOccurrencesByRule,
   getRecurringMonthlyPlanAmount,
   getTransactionDeltas,
   isDueNow,
@@ -80,6 +81,10 @@ export default function useRecurringItems({
     () => sumRecurringPostedByRule(allTransactions),
     [allTransactions],
   );
+  const verifiedOccurrencesByRule = useMemo(
+    () => countVerifiedRecurringOccurrencesByRule(allTransactions),
+    [allTransactions],
+  );
 
   const activeRecurring = useMemo(
     () =>
@@ -107,8 +112,7 @@ export default function useRecurringItems({
             const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
             const paidTotal = allRecurringPaymentsByRule[rule.id] || 0;
             const totalDebt = Math.max(0, Number(rule.total_amount || 0));
-            const installmentAmount = Math.max(0.01, Number(rule.amount || 0));
-            const postedOccurrences = Math.floor((paidTotal + 0.000001) / installmentAmount);
+            const postedOccurrences = Math.max(0, Number(verifiedOccurrencesByRule[rule.id] || 0));
             const isFlexiblePayment = normalizeRuleType(rule.type) === "transfer" && (rule.payment_mode || "fixed") === "flexible";
 
             return {
@@ -131,7 +135,7 @@ export default function useRecurringItems({
             };
           }),
       ),
-    [accounts, allocations, allRecurringPaymentsByRule, recurringPaymentsByRule, recurringTransactions],
+    [accounts, allocations, allRecurringPaymentsByRule, recurringPaymentsByRule, recurringTransactions, verifiedOccurrencesByRule],
   );
 
   const recurringByType = useMemo(() => {
@@ -204,9 +208,7 @@ export default function useRecurringItems({
       setPostingId(rule.id);
 
       try {
-        const installmentAmount = Math.max(0.01, Number(rule.amount || 0));
-        const paidTotalBeforePost = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
-        const postedOccurrences = Math.floor((paidTotalBeforePost + 0.000001) / installmentAmount);
+        const postedOccurrences = Math.max(0, Number(verifiedOccurrencesByRule[rule.id] || 0));
         const postedForDate = isFixedDebt
           ? getFixedDebtNextDueDate(rule, postedOccurrences)
           : rule.next_due_date || todayIsoDate();
@@ -248,7 +250,7 @@ export default function useRecurringItems({
         setPostingId(null);
       }
     },
-    [accounts, allRecurringPaymentsByRule, queryClient],
+    [accounts, allRecurringPaymentsByRule, queryClient, verifiedOccurrencesByRule],
   );
 
   const submitPaymentDialog = useCallback(async () => {
