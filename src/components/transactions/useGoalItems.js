@@ -3,6 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import {
+  getFixedGoalContributionAmount,
+  getFixedGoalNextDueDate,
+  getGoalOccurrenceStatus,
   getGoalProgress,
   getGoalRemaining,
   sortGoalsByPriority,
@@ -96,9 +99,23 @@ export default function useGoalItems({
             const remaining = getGoalRemaining(goalWithProgress);
 
             const contributionMode = goal.contribution_mode || "flexible";
+            const fixedAmount = contributionMode === "fixed" ? getFixedGoalContributionAmount(goalWithProgress) : 0;
+            const postedAmount = Math.max(0, Number(fundedTotalsByGoal[goal.id] || 0));
+            const postedOccurrences = fixedAmount > 0
+              ? Math.floor((postedAmount + 0.000001) / fixedAmount)
+              : 0;
+            const nextDueDate = contributionMode === "fixed"
+              ? getFixedGoalNextDueDate(goalWithProgress, postedOccurrences)
+              : null;
             return {
               ...goalWithProgress,
               contribution_mode: contributionMode,
+              fixed_contribution_amount: fixedAmount,
+              posted_occurrence_count: postedOccurrences,
+              next_due_date: nextDueDate,
+              occurrence_status: contributionMode === "fixed"
+                ? getGoalOccurrenceStatus({ ...goalWithProgress, next_due_date: nextDueDate })
+                : null,
               month_planned_amount: plannedThisMonth,
               month_contributed_amount: contributedThisMonth,
               month_remaining_amount: monthRemainingAmount,
@@ -117,13 +134,15 @@ export default function useGoalItems({
 
   const openContributionDialog = useCallback((goal) => {
     const isFixed = (goal?.contribution_mode || "flexible") === "fixed";
-    if (isFixed && Number(goal?.month_remaining_amount || 0) <= 0) {
-      toast.error("This scheduled contribution is already complete");
+    const totalOccurrences = Math.max(0, Number(goal?.duration_count || 0));
+    const postedOccurrences = Math.max(0, Number(goal?.posted_occurrence_count || 0));
+    if (isFixed && totalOccurrences > 0 && postedOccurrences >= totalOccurrences) {
+      toast.error("All scheduled contributions are complete");
       return;
     }
     setSelectedGoal(goal);
-    setContributionAmount(isFixed ? String(goal?.month_remaining_amount || goal?.month_planned_amount || "") : getSuggestedContributionAmount(goal));
-    setContributionDate(todayIsoDate());
+    setContributionAmount(isFixed ? String(goal?.fixed_contribution_amount || "") : getSuggestedContributionAmount(goal));
+    setContributionDate(isFixed ? (goal?.next_due_date || todayIsoDate()) : todayIsoDate());
     setContributionNote(goal ? `Contribution to ${goal.name}` : "");
   }, []);
 
@@ -138,7 +157,10 @@ export default function useGoalItems({
     if (!selectedGoal) return;
 
     const isFixed = (selectedGoal.contribution_mode || "flexible") === "fixed";
-    const fixedAmount = Number(selectedGoal.month_remaining_amount || selectedGoal.month_planned_amount || 0);
+    const fixedAmount = Math.min(
+      Number(selectedGoal.fixed_contribution_amount || 0),
+      getGoalRemaining(selectedGoal),
+    );
     const requestedAmount = Number(contributionAmount || 0);
     if (isFixed && fixedAmount <= 0) {
       toast.error("This scheduled contribution is already complete");
