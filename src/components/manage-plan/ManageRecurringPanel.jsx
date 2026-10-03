@@ -50,7 +50,10 @@ import {
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
-import { sumRecurringPostedByRule } from '@/components/transactions/scheduledUtils';
+import {
+  countVerifiedRecurringOccurrencesByRule,
+  sumRecurringPostedByRule,
+} from '@/components/transactions/scheduledUtils';
 
 const COLORS = [
   '#276FE4',
@@ -855,6 +858,10 @@ export default function ManageRecurringPanel() {
     () => sumRecurringPostedByRule(allTransactions),
     [allTransactions]
   );
+  const verifiedOccurrencesByRule = useMemo(
+    () => countVerifiedRecurringOccurrencesByRule(allTransactions),
+    [allTransactions]
+  );
 
   const completedDebtRules = useMemo(() => {
     return recurringRules
@@ -869,7 +876,7 @@ export default function ManageRecurringPanel() {
           String(a.completed_at || a.next_due_date || '')
         )
       );
-  }, [recurringPaidByRule, recurringRules]);
+  }, [recurringPaidByRule, recurringRules, verifiedOccurrencesByRule]);
 
   const visibleRules = useMemo(() => {
     return recurringRules
@@ -886,9 +893,10 @@ export default function ManageRecurringPanel() {
           (rule.payment_mode || 'fixed') !== 'fixed'
         ) return rule;
 
-        const paid = Math.max(0, Number(recurringPaidByRule[rule.id] || 0));
-        const installmentAmount = Math.max(0.01, Number(rule.amount || 0));
-        const postedOccurrences = Math.floor((paid + 0.000001) / installmentAmount);
+        const postedOccurrences = Math.max(
+          0,
+          Number(verifiedOccurrencesByRule[rule.id] || 0)
+        );
 
         return {
           ...rule,
