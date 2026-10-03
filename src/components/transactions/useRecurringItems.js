@@ -194,7 +194,11 @@ export default function useRecurringItems({
         : null;
 
       if (isFiniteDebt && outstandingDebt <= 0) {
-        await recurringTransactionsApi.update(rule.id, { is_active: false });
+        await recurringTransactionsApi.update(rule.id, {
+          is_active: false,
+          completed_at: rule.completed_at || todayIsoDate(),
+          next_due_date: null,
+        });
         invalidateScheduledQueries(queryClient);
         toast.success("Debt is paid off. Recurring rule completed.");
         return;
@@ -237,7 +241,9 @@ export default function useRecurringItems({
         await recurringTransactionsApi.update(rule.id, {
           last_posted_date: todayIsoDate(),
           last_posted_transaction_id: transaction.id,
-          next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
+          next_due_date: completesDebt
+            ? null
+            : calculateNextDueDate(postedForDate, rule.frequency),
           ...(completesDebt ? { is_active: false, completed_at: todayIsoDate() } : {}),
         });
 
@@ -327,6 +333,7 @@ export default function useRecurringItems({
           last_posted_transaction_id: transaction.id,
           is_active: false,
           completed_at: todayIsoDate(),
+          next_due_date: null,
         });
       } else if (!wasMonthCovered && willMonthBeCovered) {
         await recurringTransactionsApi.update(rule.id, {
