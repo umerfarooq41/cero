@@ -201,14 +201,41 @@ function getMonthOccurrenceAmount({ startDate, frequency, amount, countLimit, mo
   return total;
 }
 
-function getRecurringAmountForMonth(rule, month) {
+function getRecurringAmountForMonth(rule, month, allTransactions = []) {
   const type = normalizeType(rule?.type);
   const isFlexibleDebt = type === 'debt' && (rule?.payment_mode || 'fixed') === 'flexible';
   if (isFlexibleDebt) return null;
+  const amount = Number(rule?.amount || 0);
+
+  if (type === 'debt' && (rule?.payment_mode || 'fixed') === 'fixed') {
+    const postedDates = [...new Set(
+      allTransactions
+        .filter((transaction) => transaction.recurring_transaction_id === rule.id)
+        .map((transaction) => transaction.recurring_posted_for_date)
+        .filter(Boolean)
+        .map((date) => String(date).slice(0, 10))
+    )].sort();
+    const postedInMonth = postedDates.filter((date) => date.slice(0, 7) === month).length;
+    const totalOccurrences = Math.max(0, Number(rule?.duration_count || 0));
+    const remaining = Math.max(0, totalOccurrences - postedDates.length);
+    let futureInMonth = 0;
+    if (remaining > 0 && rule?.next_due_date) {
+      for (let index = 0; index < remaining; index += 1) {
+        const due = calculateDueDateAfterOccurrences(rule.next_due_date, rule.frequency || 'monthly', index);
+        const dueMonth = String(due || '').slice(0, 7);
+        if (dueMonth === month) futureInMonth += 1;
+        if (dueMonth > month) break;
+      }
+    }
+    if (postedDates.length > 0 || rule?.next_due_date) {
+      return (postedInMonth + futureInMonth) * amount;
+    }
+  }
+
   return getMonthOccurrenceAmount({
     startDate: rule?.start_date || rule?.next_due_date,
     frequency: rule?.frequency || 'monthly',
-    amount: Number(rule?.amount || 0),
+    amount,
     countLimit: type === 'debt' ? rule?.duration_count : null,
     month,
   });
@@ -389,7 +416,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         const category = categories.find((item) => item.id === ruleCategoryId);
         const ruleType =
           getCategoryType(category, categories) || normalizeType(rule.type);
-        const scheduledAmount = getRecurringAmountForMonth(rule, currentMonth);
+        const scheduledAmount = getRecurringAmountForMonth(rule, currentMonth, allTransactions);
         const isGenerated = scheduledAmount !== null;
         const amount = isGenerated ? Number(scheduledAmount || 0) : Number(rule.amount || 0);
 
