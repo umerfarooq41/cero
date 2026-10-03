@@ -439,7 +439,7 @@ function RecurringRuleModal({
           )}
 
           {form.type === 'transfer' && (
-            <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
+            <div className="space-y-3">
               <div>
                 <p className="text-sm font-semibold">Payment plan</p>
                 <p className="text-xs text-muted-foreground">
@@ -639,7 +639,7 @@ function RecurringRuleModal({
             </div>
           )}
 
-          <label className="flex items-center justify-between rounded-2xl app-card-surface-soft px-4 py-3 text-sm">
+          <label className="flex items-center justify-between border-t border-border/50 px-1 py-3 text-sm">
             <span>
               <span className="font-medium">{isDebt ? 'Payment schedule active' : 'Active rule'}</span>
               <span className="block text-xs text-muted-foreground">
@@ -656,8 +656,8 @@ function RecurringRuleModal({
             />
           </label>
 
-          <details className="group rounded-2xl app-card-surface-soft">
-            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3">
+          <details className="group border-t border-border/50">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-1 py-3">
               <div className="flex items-center gap-3">
                 <CategoryIcon icon={form.icon} color={form.color} size="sm" />
                 <div>
@@ -668,10 +668,10 @@ function RecurringRuleModal({
               <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
             </summary>
 
-            <div className="space-y-4 border-t border-border/50 px-3 pb-3 pt-3">
+            <div className="space-y-4 pb-3 pt-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
-                <div className="grid grid-cols-8 gap-2 rounded-xl bg-background/35 p-2 sm:grid-cols-10">
+                <div className="grid grid-cols-8 gap-2 py-1 sm:grid-cols-10">
                   {COLORS.map((item) => (
                     <button
                       key={item}
@@ -692,7 +692,7 @@ function RecurringRuleModal({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
-                <div className="grid max-h-44 grid-cols-7 gap-1.5 overflow-y-auto rounded-xl bg-background/35 p-2">
+                <div className="grid max-h-44 grid-cols-7 gap-1.5 overflow-y-auto py-1">
                   {iconNames.map((item) => (
                     <button
                       key={item}
