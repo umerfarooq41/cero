@@ -256,6 +256,7 @@ export function getTrackedForSource({
   sourceId,
   categoryId,
   currentMonth,
+  recurringRule = null,
 }) {
   const normalizedSourceType = normalizeSourceType(sourceType);
 
@@ -267,6 +268,16 @@ export function getTrackedForSource({
     }
 
     if (normalizedSourceType === 'recurring') {
+      if (recurringRule) {
+        const verified = getVerifiedRecurringTransactionsForRule(
+          recurringRule,
+          transactions
+        );
+        return verified.includes(transaction)
+          ? sum + getTransactionAmount(transaction)
+          : sum;
+      }
+
       // A recurring transaction must belong to exactly one source row.
       // Prefer the persisted recurring rule id. Category fallback is only for
       // legacy recurring transactions that do not have a rule id at all.
@@ -557,6 +568,10 @@ export function buildPlanViewData({
         sourceId: allocation.source_id,
         categoryId: allocation.category_id,
         currentMonth,
+        recurringRule:
+          sourceType === 'recurring'
+            ? recurringTransactions.find((rule) => rule.id === allocation.source_id) || null
+            : null,
       });
 
       return {
