@@ -95,8 +95,10 @@ export default function useGoalItems({
             const progress = getGoalProgress(goalWithProgress);
             const remaining = getGoalRemaining(goalWithProgress);
 
+            const contributionMode = goal.contribution_mode || "flexible";
             return {
               ...goalWithProgress,
+              contribution_mode: contributionMode,
               month_planned_amount: plannedThisMonth,
               month_contributed_amount: contributedThisMonth,
               month_remaining_amount: monthRemainingAmount,
@@ -114,8 +116,13 @@ export default function useGoalItems({
   );
 
   const openContributionDialog = useCallback((goal) => {
+    const isFixed = (goal?.contribution_mode || "flexible") === "fixed";
+    if (isFixed && Number(goal?.month_remaining_amount || 0) <= 0) {
+      toast.error("This scheduled contribution is already complete");
+      return;
+    }
     setSelectedGoal(goal);
-    setContributionAmount(getSuggestedContributionAmount(goal));
+    setContributionAmount(isFixed ? String(goal?.month_remaining_amount || goal?.month_planned_amount || "") : getSuggestedContributionAmount(goal));
     setContributionDate(todayIsoDate());
     setContributionNote(goal ? `Contribution to ${goal.name}` : "");
   }, []);
@@ -130,12 +137,19 @@ export default function useGoalItems({
   const submitContribution = useCallback(async () => {
     if (!selectedGoal) return;
 
+    const isFixed = (selectedGoal.contribution_mode || "flexible") === "fixed";
+    const fixedAmount = Number(selectedGoal.month_remaining_amount || selectedGoal.month_planned_amount || 0);
+    const requestedAmount = Number(contributionAmount || 0);
+    if (isFixed && fixedAmount <= 0) {
+      toast.error("This scheduled contribution is already complete");
+      return;
+    }
     setSavingGoalId(selectedGoal.id);
 
     try {
       await postGoalContribution({
         goal: selectedGoal,
-        amount: Number(contributionAmount || 0),
+        amount: isFixed ? fixedAmount : requestedAmount,
         date: contributionDate,
         note: contributionNote,
         accounts,
