@@ -532,8 +532,23 @@ function RecurringRuleModal({
                 </SelectContent>
               </Select>
             </div>
+            {form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory && (
+            <div className="space-y-1.5">
+              <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">Category</label>
+              <Select value={form.category_id} onValueChange={(value) => updateForm('category_id', value)}>
+                <SelectTrigger><SelectValue placeholder="No category" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No category</SelectItem>
+                  {filteredCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            )}
           </div>
 
+          {!(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) && (
           <div className={cn('grid gap-3', form.type === 'transfer' ? 'grid-cols-1' : 'grid-cols-2')}>
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -588,6 +603,7 @@ function RecurringRuleModal({
               </Select>
             </div>
           </div>
+          )}
 
           {form.type === 'transfer' && (
             <div className="grid grid-cols-2 gap-3">
@@ -744,7 +760,7 @@ function RecurringRuleModal({
           </div>
         </div>
 
-        <DialogFooter className="mt-2">
+        <DialogFooter className="mt-4 border-t border-border/50 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
