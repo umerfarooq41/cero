@@ -106,7 +106,7 @@ export default function useRecurringItems({
             const finiteDebt = normalizeRuleType(rule.type) === "transfer";
             const totalDebt = Math.max(0, Number(rule.total_amount || 0));
             const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
-            const debtPaidOff = finiteDebt && totalDebt > 0 && paidTotal >= totalDebt;
+            const debtPaidOff = finiteDebt && totalDebt > 0 && paidTotal >= totalDebt - 0.005;
 
             // The recurring plan is the source of truth. A liability account can start at
             // zero, so never hide an unpaid plan merely because its account balance is zero.
@@ -204,7 +204,7 @@ export default function useRecurringItems({
           : Math.max(0, Number(destinationAccount.balance || 0))
         : null;
 
-      if (isFiniteDebt && outstandingDebt <= 0) {
+      if (isFiniteDebt && outstandingDebt <= 0.005) {
         await recurringTransactionsApi.update(rule.id, {
           is_active: false,
           completed_at: rule.completed_at || todayIsoDate(),
@@ -231,7 +231,7 @@ export default function useRecurringItems({
         const postingAmount = isFiniteDebt
           ? Math.min(scheduledAmount, outstandingDebt)
           : scheduledAmount;
-        const completesDebt = isFiniteDebt && postingAmount >= outstandingDebt;
+        const completesDebt = isFiniteDebt && postingAmount >= outstandingDebt - 0.005;
 
         const transactionPayload = {
           amount: postingAmount,
@@ -321,12 +321,12 @@ export default function useRecurringItems({
     const outstandingDebt = totalDebt > 0
       ? Math.max(0, totalDebt - paidTotal)
       : Math.max(0, Number(toAccount?.balance || 0));
-    if (outstandingDebt <= 0) {
+    if (outstandingDebt <= 0.005) {
       toast.error("This debt is already paid off");
       return;
     }
     const amount = Math.min(requestedAmount, outstandingDebt);
-    const completesDebt = amount >= outstandingDebt;
+    const completesDebt = amount >= outstandingDebt - 0.005;
     setPostingId(rule.id);
 
     try {
