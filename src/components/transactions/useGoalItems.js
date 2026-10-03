@@ -121,7 +121,8 @@ export default function useGoalItems({
               month_remaining_amount: monthRemainingAmount,
               is_completed: remaining <= 0 || progress >= 100,
             };
-          }),
+          })
+          .filter((goal) => !goal.is_completed),
       ),
     [
       allocations,
