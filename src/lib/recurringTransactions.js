@@ -93,6 +93,30 @@ export function calculateNextDueDate(currentDueDate, frequency = 'monthly') {
   return format(nextDate, 'yyyy-MM-dd');
 }
 
+export function calculateDueDateAfterOccurrences(startDate, frequency = 'monthly', occurrenceCount = 0) {
+  let dueDate = startDate || todayIsoDate();
+  const count = Math.max(0, Math.floor(Number(occurrenceCount || 0)));
+
+  for (let index = 0; index < count; index += 1) {
+    dueDate = calculateNextDueDate(dueDate, frequency);
+  }
+
+  return dueDate;
+}
+
+export function getFixedDebtNextDueDate(rule, postedOccurrenceCount = 0) {
+  if (!rule || rule.payment_mode === 'flexible') return rule?.next_due_date || null;
+
+  const firstDueDate = rule.start_date || rule.next_due_date;
+  if (!firstDueDate) return null;
+
+  return calculateDueDateAfterOccurrences(
+    firstDueDate,
+    rule.frequency || 'monthly',
+    postedOccurrenceCount,
+  );
+}
+
 export function sortRecurringByDueDate(rules = []) {
   return [...rules].sort((a, b) => {
     if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
