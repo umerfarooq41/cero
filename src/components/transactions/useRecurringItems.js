@@ -61,6 +61,7 @@ export default function useRecurringItems({
   accounts = [],
   allocations = [],
   monthTransactions = [],
+  allTransactions = [],
 }) {
   const queryClient = useQueryClient();
   const [postingId, setPostingId] = useState(null);
@@ -74,6 +75,10 @@ export default function useRecurringItems({
     () => sumRecurringPostedByRule(monthTransactions),
     [monthTransactions],
   );
+  const allRecurringPaymentsByRule = useMemo(
+    () => sumRecurringPostedByRule(allTransactions),
+    [allTransactions],
+  );
 
   const activeRecurring = useMemo(
     () =>
@@ -81,16 +86,13 @@ export default function useRecurringItems({
         recurringTransactions
           .filter((rule) => !rule.is_archived)
           .filter((rule) => {
-            const toAccount = accounts.find(
-              (account) => account.id === rule.to_account_id,
-            );
             const finiteDebt = normalizeRuleType(rule.type) === "transfer";
-            const debtPaidOff =
-              finiteDebt &&
-              Math.max(0, Number(toAccount?.balance || 0)) <= 0;
+            const totalDebt = Math.max(0, Number(rule.total_amount || 0));
+            const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
+            const debtPaidOff = finiteDebt && totalDebt > 0 && paidTotal >= totalDebt;
 
-            // A completed finite debt is history, not a future scheduled item.
-            // Keep manually paused ongoing rules visible, but remove paid-off debts.
+            // The recurring plan is the source of truth. A liability account can start at
+            // zero, so never hide an unpaid plan merely because its account balance is zero.
             return !debtPaidOff && !rule.completed_at;
           })
           .map((rule) => {
@@ -116,7 +118,7 @@ export default function useRecurringItems({
             };
           }),
       ),
-    [accounts, allocations, recurringPaymentsByRule, recurringTransactions],
+    [accounts, allocations, allRecurringPaymentsByRule, recurringPaymentsByRule, recurringTransactions],
   );
 
   const recurringByType = useMemo(() => {
@@ -166,8 +168,12 @@ export default function useRecurringItems({
       const transactionType = normalizeRuleType(rule.type);
       const destinationAccount = accounts.find((account) => account.id === rule.to_account_id);
       const isFiniteDebt = transactionType === "transfer" && destinationAccount;
+      const totalDebt = Math.max(0, Number(rule.total_amount || 0));
+      const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
       const outstandingDebt = isFiniteDebt
-        ? Math.max(0, Number(destinationAccount.balance || 0))
+        ? totalDebt > 0
+          ? Math.max(0, totalDebt - paidTotal)
+          : Math.max(0, Number(destinationAccount.balance || 0))
         : null;
 
       if (isFiniteDebt && outstandingDebt <= 0) {
@@ -224,7 +230,7 @@ export default function useRecurringItems({
         setPostingId(null);
       }
     },
-    [accounts, queryClient],
+    [accounts, allRecurringPaymentsByRule, queryClient],
   );
 
   const submitPaymentDialog = useCallback(async () => {
@@ -262,7 +268,11 @@ export default function useRecurringItems({
       return;
     }
 
-    const outstandingDebt = Math.max(0, Number(toAccount?.balance || 0));
+    const totalDebt = Math.max(0, Number(rule.total_amount || 0));
+    const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
+    const outstandingDebt = totalDebt > 0
+      ? Math.max(0, totalDebt - paidTotal)
+      : Math.max(0, Number(toAccount?.balance || 0));
     if (outstandingDebt <= 0) {
       toast.error("This debt is already paid off");
       return;
@@ -328,6 +338,7 @@ export default function useRecurringItems({
     }
   }, [
     accounts,
+    allRecurringPaymentsByRule,
     closePaymentDialog,
     paymentAmount,
     paymentDate,
