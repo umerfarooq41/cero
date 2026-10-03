@@ -109,7 +109,6 @@ const emptyForm = (type = 'expense') => ({
   amount: '',
   total_amount: '',
   duration_count: '',
-  duration_unit: 'months',
   payment_mode: 'fixed',
   type,
   category_id: 'none',
@@ -197,7 +196,6 @@ function RecurringRuleModal({
         amount: String(editingRule.amount ?? ''),
         total_amount: String(editingRule.total_amount ?? Math.max(0, Number(accounts.find((account) => account.id === editingRule.to_account_id)?.balance || 0))),
         duration_count: String(editingRule.duration_count ?? ''),
-        duration_unit: editingRule.duration_unit || (editingRule.frequency === 'weekly' ? 'weeks' : editingRule.frequency === 'yearly' ? 'years' : 'months'),
         payment_mode: editingRule.payment_mode || 'fixed',
         type: normalizeRuleType(editingRule.type),
         category_id: editingRule.category_id || 'none',
@@ -286,7 +284,7 @@ function RecurringRuleModal({
       amount,
       total_amount: form.type === 'transfer' ? totalAmount : null,
       duration_count: form.type === 'transfer' && durationCount > 0 ? durationCount : null,
-      duration_unit: form.type === 'transfer' && durationCount > 0 ? form.duration_unit : null,
+      duration_unit: form.type === 'transfer' && durationCount > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null,
       completed_at: null,
       payment_mode: form.type === 'transfer' ? form.payment_mode : null,
       type: form.type,
@@ -392,7 +390,7 @@ function RecurringRuleModal({
                 <p className="text-sm font-semibold">Debt payoff plan</p>
                 <p className="text-xs text-muted-foreground">Set the full debt and how long you want the plan to run. Cero will stop the rule when the liability reaches zero.</p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total debt</label>
                   <Input value={form.total_amount} onChange={(event) => {
@@ -401,24 +399,11 @@ function RecurringRuleModal({
                   }} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">For</label>
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Installments</label>
                   <Input value={form.duration_count} onChange={(event) => {
                     const count = Math.max(0, Math.floor(Number(event.target.value || 0)));
                     setForm((current) => ({ ...current, duration_count: event.target.value, amount: count > 0 && Number(current.total_amount) > 0 ? (Number(current.total_amount) / count).toFixed(2) : current.amount }));
                   }} type="number" min="1" step="1" inputMode="numeric" placeholder="4" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Period</label>
-                  <Select value={form.duration_unit} onValueChange={(value) => {
-                    setForm((current) => ({ ...current, duration_unit: value, frequency: value === 'weeks' ? 'weekly' : value === 'years' ? 'yearly' : 'monthly' }));
-                  }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weeks">Weeks</SelectItem>
-                      <SelectItem value="months">Months</SelectItem>
-                      <SelectItem value="years">Years</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
             </div>
@@ -432,6 +417,7 @@ function RecurringRuleModal({
               <Input
                 value={form.amount}
                 onChange={(event) => updateForm('amount', event.target.value)}
+                readOnly={form.type === 'transfer' && form.payment_mode === 'fixed'}
                 type="number"
                 min="0"
                 step="0.01"
@@ -442,7 +428,7 @@ function RecurringRuleModal({
 
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Frequency
+                {form.type === 'transfer' ? 'Installment frequency' : 'Frequency'}
               </label>
               <Select value={form.frequency} onValueChange={(value) => updateForm('frequency', value)}>
                 <SelectTrigger>
@@ -544,7 +530,7 @@ function RecurringRuleModal({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Next Due Date
+              {form.type === 'transfer' ? 'First installment due date' : 'Next Due Date'}
             </label>
             <Input
               value={form.next_due_date}
