@@ -361,7 +361,7 @@ function RecurringRuleModal({
     <Dialog open={open} onOpenChange={(nextOpen) => !saving && !nextOpen && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule'}</DialogTitle>
+          <DialogTitle>{isDebt ? (isEditing ? 'Edit Debt' : 'New Debt') : (isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex items-center gap-3 rounded-2xl app-card-surface-soft p-3">
@@ -371,11 +371,15 @@ function RecurringRuleModal({
               {form.name.trim() || 'Recurring Rule'}
             </div>
             <div className="text-xs text-muted-foreground">
-              {isDebt
-                ? hasPostedDebtHistory
-                  ? `Fixed debt · ${postedInstallments} of ${debtInstallments || '—'} paid · ${formatCurrency?.(debtRemaining) || debtRemaining} remaining`
-                  : `${form.payment_mode === 'fixed' ? 'Fixed debt' : 'Flexible debt'} · ${getRecurringFrequencyLabel(form.frequency)}`
-                : `${TYPE_LABELS[form.type] || 'Expense'} · ${getRecurringFrequencyLabel(form.frequency)}`}
+              {isDebt && hasPostedDebtHistory ? (
+                <>
+                  Fixed debt · {postedInstallments} of {debtInstallments || '—'} paid · {formatCurrency ? formatCurrency(debtRemaining) : debtRemaining} remaining
+                </>
+              ) : isDebt ? (
+                <>{form.payment_mode === 'fixed' ? 'Fixed debt' : 'Flexible debt'} · {getRecurringFrequencyLabel(form.frequency)}</>
+              ) : (
+                <>{TYPE_LABELS[form.type] || 'Expense'} · {getRecurringFrequencyLabel(form.frequency)}</>
+              )}
             </div>
           </div>
         </div>
@@ -454,6 +458,18 @@ function RecurringRuleModal({
                     : 'Set the original debt and installment schedule. The first installment is recorded on the selected start date.'}
                 </p>
               </div>
+              {hasPostedDebtHistory && (
+                <div className="grid grid-cols-2 gap-3 rounded-xl bg-muted/35 px-3 py-2.5">
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">First installment</p>
+                    <p className="mt-1 text-sm font-medium">{formatRecurringDate(editingRule?.start_date || form.next_due_date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Final installment</p>
+                    <p className="mt-1 text-sm font-medium">{finalInstallmentDate ? formatRecurringDate(finalInstallmentDate) : '—'}</p>
+                  </div>
+                </div>
+              )}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total debt</label>
