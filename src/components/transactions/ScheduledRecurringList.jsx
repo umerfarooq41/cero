@@ -211,7 +211,7 @@ function ScheduledRecurringRow({
       }
       meta={
         <>
-          {fixedDebt && rule.duration_count ? `Payment ${Math.min(Number(rule.duration_count), Math.floor(Number(rule.total_amount || 0) > 0 ? (Number(rule.total_amount || 0) - Math.max(0, Number(toAccount?.balance || 0))) / Math.max(0.01, Number(rule.amount || 0)) + 1 : 1))} of ${rule.duration_count} · ` : ""}Next {formatRecurringDate(rule.next_due_date)}
+          {fixedDebt && rule.duration_count ? `Payment ${Math.min(Number(rule.duration_count), Math.floor(Number(rule.total_paid_amount || 0) / Math.max(0.01, Number(rule.amount || 0))) + 1)} of ${rule.duration_count} · ` : ""}Next {formatRecurringDate(rule.next_due_date)}
           {type === "transfer"
             ? ` · ${toAccount?.name || "Debt account"}`
             : account
