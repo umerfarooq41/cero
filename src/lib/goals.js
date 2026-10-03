@@ -6,6 +6,46 @@ export function getGoalStartDate(goal) {
   return goal?.start_date || goal?.created_at?.slice?.(0, 10) || todayIsoDate();
 }
 
+export function addGoalOccurrence(dateValue, frequency = 'monthly', count = 1) {
+  const date = new Date(`${String(dateValue || todayIsoDate()).slice(0, 10)}T00:00:00`);
+  const steps = Math.max(0, Math.floor(Number(count || 0)));
+
+  for (let index = 0; index < steps; index += 1) {
+    if (frequency === 'weekly') date.setDate(date.getDate() + 7);
+    else if (frequency === 'biweekly') date.setDate(date.getDate() + 14);
+    else if (frequency === 'quarterly') date.setMonth(date.getMonth() + 3);
+    else if (frequency === 'yearly') date.setFullYear(date.getFullYear() + 1);
+    else date.setMonth(date.getMonth() + 1);
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+export function getFixedGoalContributionAmount(goal) {
+  const target = Math.max(0, Number(goal?.target_amount || 0));
+  const starting = Math.max(0, Number(goal?.starting_amount || 0));
+  const count = Math.max(0, Math.floor(Number(goal?.duration_count || 0)));
+  if (!count) return 0;
+  return Math.max(0, target - starting) / count;
+}
+
+export function getFixedGoalNextDueDate(goal, postedOccurrenceCount = 0) {
+  const firstDue = goal?.start_date || goal?.next_due_date;
+  if (!firstDue) return null;
+  return addGoalOccurrence(firstDue, goal?.frequency || 'monthly', postedOccurrenceCount);
+}
+
+export function getGoalOccurrenceStatus(goal, referenceDate = todayIsoDate()) {
+  const dueDate = goal?.next_due_date;
+  if (!dueDate) return { key: 'upcoming', label: 'No contribution date', daysUntilDue: null };
+  const due = new Date(`${dueDate}T00:00:00`);
+  const ref = new Date(`${referenceDate}T00:00:00`);
+  const days = Math.round((due.getTime() - ref.getTime()) / 86400000);
+  if (days < 0) return { key: 'overdue', label: `Overdue by ${Math.abs(days)}d`, daysUntilDue: days };
+  if (days === 0) return { key: 'due_today', label: 'Due today', daysUntilDue: 0 };
+  return { key: 'upcoming', label: `Due in ${days}d`, daysUntilDue: days };
+}
+
 export function getMonthKey(value) {
   return value ? String(value).slice(0, 7) : '';
 }
