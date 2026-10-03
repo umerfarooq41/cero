@@ -499,7 +499,7 @@ function RecurringRuleModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            {!(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) ? (
+            {!(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) && (
               <div className="space-y-1.5">
                 <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {form.type === 'transfer' ? 'Payment amount' : 'Amount'}
@@ -514,19 +514,7 @@ function RecurringRuleModal({
                   placeholder="0.00"
                 />
               </div>
-            ) : (
-              <div className="space-y-1.5">
-                <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Payment amount
-                </label>
-                <div className="flex h-10 items-center px-1 text-sm font-medium">
-                  {Number(form.amount || 0) > 0
-                    ? (formatCurrency ? formatCurrency(Number(form.amount)) : form.amount)
-                    : 'Calculated automatically'}
-                </div>
-              </div>
             )}
-
             <div className="space-y-1.5">
               <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Frequency
@@ -546,7 +534,7 @@ function RecurringRuleModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={cn('grid gap-3', form.type === 'transfer' ? 'grid-cols-1' : 'grid-cols-2')}>
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Category
@@ -566,9 +554,9 @@ function RecurringRuleModal({
               </Select>
             </div>
 
-            <div className="space-y-1.5">
+            <div className={cn('space-y-1.5', form.type === 'transfer' && 'hidden')}>
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {form.type === 'transfer' ? 'Pay from' : 'Account'}
+                Account
               </label>
               <Select value={form.account_id} onValueChange={(value) => updateForm('account_id', value)}>
                 <SelectTrigger>
@@ -601,8 +589,20 @@ function RecurringRuleModal({
             </div>
           </div>
 
-          <div className={cn('grid gap-3', form.type === 'transfer' && 'grid-cols-2')}>
-            {form.type === 'transfer' && (
+          {form.type === 'transfer' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="min-w-0 space-y-1.5">
+                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Pay from</label>
+                <Select value={form.account_id} onValueChange={(value) => updateForm('account_id', value)}>
+                  <SelectTrigger className="min-w-0"><SelectValue placeholder="Select account" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Select account</SelectItem>
+                    {checkingAccounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>{getAccountLabel(account)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="min-w-0 space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Debt account
@@ -628,9 +628,10 @@ function RecurringRuleModal({
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            </div>
+          )}
 
-            <div className="min-w-0 space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {form.type === 'transfer' ? (hasPostedDebtHistory ? 'Next installment' : 'First installment') : 'Next due date'}
               </label>
@@ -640,7 +641,6 @@ function RecurringRuleModal({
                 type="date"
                 className="min-w-0"
               />
-            </div>
           </div>
 
           {isDebt && form.payment_mode === 'fixed' && debtInstallments > 0 && Number(form.amount || 0) > 0 && (
