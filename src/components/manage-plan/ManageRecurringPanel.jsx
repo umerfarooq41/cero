@@ -944,15 +944,9 @@ export default function ManageRecurringPanel() {
 
     try {
       if (editingRule?.id) {
+        // Editing schedule metadata must never reset the live liability
+        // balance; the transaction ledger owns paid/remaining debt state.
         await recurringTransactionsApi.update(editingRule.id, rulePayload);
-
-        if (rulePayload.type === 'transfer' && rulePayload.to_account_id && Number(debtTotal) > 0) {
-          const liability = accounts.find((account) => account.id === rulePayload.to_account_id);
-          if (liability) {
-            await accountsApi.update(liability.id, { balance: Number(debtTotal) });
-          }
-        }
-
         toast.success('Recurring rule updated');
       } else {
         const createdRule = await recurringTransactionsApi.create(rulePayload);
