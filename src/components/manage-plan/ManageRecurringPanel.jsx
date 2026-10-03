@@ -194,9 +194,9 @@ function RecurringRuleModal({
       setForm({
         name: editingRule.name || '',
         amount: String(editingRule.amount ?? ''),
-        total_amount: String(Math.max(0, Number(accounts.find((account) => account.id === editingRule.to_account_id)?.balance || 0))),
-        duration_count: '',
-        duration_unit: editingRule.frequency === 'weekly' ? 'weeks' : editingRule.frequency === 'yearly' ? 'years' : 'months',
+        total_amount: String(editingRule.total_amount ?? Math.max(0, Number(accounts.find((account) => account.id === editingRule.to_account_id)?.balance || 0))),
+        duration_count: String(editingRule.duration_count ?? ''),
+        duration_unit: editingRule.duration_unit || (editingRule.frequency === 'weekly' ? 'weeks' : editingRule.frequency === 'yearly' ? 'years' : 'months'),
         type: normalizeRuleType(editingRule.type),
         category_id: editingRule.category_id || 'none',
         account_id: editingRule.account_id || 'none',
@@ -280,9 +280,12 @@ function RecurringRuleModal({
     }
 
     await onSave({
-      __debt_total: form.type === 'transfer' ? totalAmount : null,
       name: form.name.trim(),
       amount,
+      total_amount: form.type === 'transfer' ? totalAmount : null,
+      duration_count: form.type === 'transfer' && durationCount > 0 ? durationCount : null,
+      duration_unit: form.type === 'transfer' && durationCount > 0 ? form.duration_unit : null,
+      completed_at: null,
       type: form.type,
       category_id: form.category_id === 'none' ? null : form.category_id,
       account_id: form.account_id === 'none' ? null : form.account_id,
@@ -871,7 +874,8 @@ export default function ManageRecurringPanel() {
   const handleSave = async (payload) => {
     setSaving(true);
 
-    const { __debt_total: debtTotal, ...rulePayload } = payload;
+    const rulePayload = payload;
+    const debtTotal = payload.type === 'transfer' ? Number(payload.total_amount || 0) : 0;
 
     try {
       if (editingRule?.id) {
