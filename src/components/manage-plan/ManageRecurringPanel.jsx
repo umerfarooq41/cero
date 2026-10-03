@@ -711,10 +711,8 @@ function RecurringRuleModal({
                       type="button"
                       onClick={() => updateForm('color', item)}
                       className={cn(
-                        'aspect-square w-full min-w-0 rounded-lg border border-border transition-all',
-                        form.color === item
-                          ? 'ring-2 ring-primary ring-offset-2'
-                          : 'hover:scale-105'
+                        'aspect-square w-full min-w-0 rounded-full border border-border transition-transform',
+                        form.color === item ? 'scale-90' : 'hover:scale-95'
                       )}
                       style={{ backgroundColor: item }}
                       aria-label={`Use color ${item}`}
@@ -732,10 +730,7 @@ function RecurringRuleModal({
                       type="button"
                       onClick={() => updateForm('icon', item)}
                       className={cn(
-                        'flex aspect-square min-w-0 items-center justify-center rounded-lg border transition-all',
-                        form.icon === item
-                          ? 'border-primary bg-primary/10 ring-1 ring-primary'
-                          : 'border-transparent hover:border-border hover:bg-accent'
+                        'flex aspect-square min-w-0 items-center justify-center border border-transparent bg-transparent transition-colors'
                       )}
                       title={item}
                     >
