@@ -79,6 +79,7 @@ export default function ScheduledTransactions() {
     accounts,
     allocations,
     monthTransactions,
+    allTransactions,
   });
 
   const goals = useGoalItems({
