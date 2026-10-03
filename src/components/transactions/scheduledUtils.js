@@ -114,6 +114,44 @@ export function sumRecurringPostedByRule(rows = []) {
   }, {});
 }
 
+export function countVerifiedRecurringOccurrencesByRule(rows = []) {
+  const occurrences = new Map();
+
+  rows.forEach((row) => {
+    const ruleId = row?.recurring_transaction_id || null;
+    if (!ruleId) return;
+
+    // Only a transaction explicitly linked to the rule can verify payment.
+    // Prefer the immutable scheduled occurrence date. For older linked rows
+    // that predate that field, the transaction itself is still proof of one
+    // posting, but it is never matched by amount/category/name.
+    const occurrenceKey = row?.recurring_posted_for_date
+      ? `due:${String(row.recurring_posted_for_date).slice(0, 10)}`
+      : `tx:${row.id || `${row.date || ""}:${row.amount || ""}`}`;
+
+    if (!occurrences.has(ruleId)) occurrences.set(ruleId, new Set());
+    occurrences.get(ruleId).add(occurrenceKey);
+  });
+
+  return Object.fromEntries(
+    [...occurrences.entries()].map(([ruleId, values]) => [ruleId, values.size]),
+  );
+}
+
+export function countVerifiedGoalContributionsByGoal(rows = []) {
+  return rows.reduce((totals, row) => {
+    const goalId = row?.savings_goal_id || row?.goal_id || null;
+    if (!goalId || row?.type !== "transfer" || isGoalFundUseTransaction(row)) {
+      return totals;
+    }
+
+    // A goal occurrence is verified only by a transaction explicitly linked
+    // to that goal. Do not infer contributions from amount/category/name.
+    totals[goalId] = (totals[goalId] || 0) + 1;
+    return totals;
+  }, {});
+}
+
 export function getGoalPlanRow(goal, allocations = []) {
   return allocations.find((allocation) => {
     const sourceType = String(allocation?.source_type || "").toLowerCase();
