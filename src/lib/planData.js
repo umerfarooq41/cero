@@ -324,25 +324,40 @@ export function getTrackedForCategory({ transactions = [], categoryId }) {
 
 
 function getScheduledRecurringAmount(rule, currentMonth, allTransactions = []) {
-  if (!rule || !currentMonth || rule.is_archived || rule.is_active === false) return 0;
+  if (!rule || !currentMonth || rule.is_archived) return 0;
   const type = normalizePlanType(rule.type);
   if (type === 'debt' && (rule.payment_mode || 'fixed') === 'flexible') return null;
   const amount = Math.max(0, Number(rule.amount || 0));
-  if (!amount) return 0;
 
   if (type === 'debt' && (rule.payment_mode || 'fixed') === 'fixed') {
-    const totalOccurrences = Math.max(0, Number(rule.duration_count || 0));
+    const linkedTransactions = allTransactions.filter(
+      (transaction) => transaction.recurring_transaction_id === rule.id
+    );
     const postedDates = [...new Set(
-      allTransactions
-        .filter((transaction) => transaction.recurring_transaction_id === rule.id)
+      linkedTransactions
         .map((transaction) => transaction.recurring_posted_for_date)
         .filter(Boolean)
         .map((date) => String(date).slice(0, 10))
     )].sort();
 
-    // Posted occurrence dates are immutable history. Never regenerate those
-    // months from a later-edited/migrated rule start date.
-    const postedInMonth = postedDates.filter((date) => date.slice(0, 7) === currentMonth).length;
+    // A posted transaction is the immutable snapshot of that debt occurrence.
+    // Use its persisted due date AND amount for historical Plan months so later
+    // rule edits, next_due_date advances, or completion cannot rewrite history.
+    const historicalPlanned = linkedTransactions.reduce((sum, transaction) => {
+      const postedFor = String(transaction.recurring_posted_for_date || '').slice(0, 10);
+      if (!postedFor || postedFor.slice(0, 7) !== currentMonth) return sum;
+      return sum + Math.max(0, Number(transaction.amount || 0));
+    }, 0);
+
+    // Completed/paused debt rules still own their posted history, but they must
+    // never generate new future occurrences.
+    if (rule.is_active === false) {
+      return historicalPlanned;
+    }
+
+    if (!amount) return historicalPlanned;
+
+    const totalOccurrences = Math.max(0, Number(rule.duration_count || 0));
     const remainingOccurrences = totalOccurrences > 0
       ? Math.max(0, totalOccurrences - postedDates.length)
       : 0;
@@ -362,9 +377,11 @@ function getScheduledRecurringAmount(rule, currentMonth, allTransactions = []) {
     }
 
     if (postedDates.length > 0 || rule.next_due_date) {
-      return (postedInMonth + futureInMonth) * amount;
+      return historicalPlanned + futureInMonth * amount;
     }
   }
+
+  if (rule.is_active === false || !amount) return 0;
 
   const start = rule.start_date || rule.next_due_date;
   if (!start) return 0;
