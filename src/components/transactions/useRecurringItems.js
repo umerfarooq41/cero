@@ -104,12 +104,16 @@ export default function useRecurringItems({
               allocations,
             );
             const paidThisMonth = recurringPaymentsByRule[rule.id] || 0;
+            const paidTotal = allRecurringPaymentsByRule[rule.id] || 0;
+            const totalDebt = Math.max(0, Number(rule.total_amount || 0));
             const isFlexiblePayment = normalizeRuleType(rule.type) === "transfer" && (rule.payment_mode || "fixed") === "flexible";
 
             return {
               ...rule,
               month_planned_amount: plannedThisMonth,
               month_paid_amount: paidThisMonth,
+              total_paid_amount: paidTotal,
+              debt_remaining_amount: totalDebt > 0 ? Math.max(0, totalDebt - paidTotal) : null,
               month_remaining_amount: isFlexiblePayment
                 ? Math.max(0, Number(plannedThisMonth || 0) - paidThisMonth)
                 : null,
