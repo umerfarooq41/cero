@@ -110,6 +110,7 @@ const emptyForm = (type = 'expense') => ({
   total_amount: '',
   duration_count: '',
   duration_unit: 'months',
+  payment_mode: 'fixed',
   type,
   category_id: 'none',
   account_id: 'none',
@@ -197,6 +198,7 @@ function RecurringRuleModal({
         total_amount: String(editingRule.total_amount ?? Math.max(0, Number(accounts.find((account) => account.id === editingRule.to_account_id)?.balance || 0))),
         duration_count: String(editingRule.duration_count ?? ''),
         duration_unit: editingRule.duration_unit || (editingRule.frequency === 'weekly' ? 'weeks' : editingRule.frequency === 'yearly' ? 'years' : 'months'),
+        payment_mode: editingRule.payment_mode || 'fixed',
         type: normalizeRuleType(editingRule.type),
         category_id: editingRule.category_id || 'none',
         account_id: editingRule.account_id || 'none',
@@ -286,6 +288,7 @@ function RecurringRuleModal({
       duration_count: form.type === 'transfer' && durationCount > 0 ? durationCount : null,
       duration_unit: form.type === 'transfer' && durationCount > 0 ? form.duration_unit : null,
       completed_at: null,
+      payment_mode: form.type === 'transfer' ? form.payment_mode : null,
       type: form.type,
       category_id: form.category_id === 'none' ? null : form.category_id,
       account_id: form.account_id === 'none' ? null : form.account_id,
@@ -368,6 +371,20 @@ function RecurringRuleModal({
               })}
             </div>
           </div>
+
+          {form.type === 'transfer' && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Payment mode</label>
+              <Select value={form.payment_mode} onValueChange={(value) => updateForm('payment_mode', value)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fixed">Fixed installments</SelectItem>
+                  <SelectItem value="flexible">Flexible payments</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{form.payment_mode === 'fixed' ? 'Each payment completes one installment. You can also pay the next installment early.' : 'Pay any amount, as many times as needed. Every payment reduces the remaining debt.'}</p>
+            </div>
+          )}
 
           {form.type === 'transfer' && (
             <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
