@@ -231,7 +231,7 @@ export default function useRecurringItems({
     if (!selectedRecurringPayment) return;
 
     const rule = selectedRecurringPayment;
-    const amount = Number(paymentAmount || 0);
+    const requestedAmount = Number(paymentAmount || 0);
     const fromAccount = accounts.find(
       (account) => account.id === rule.account_id,
     );
@@ -245,9 +245,9 @@ export default function useRecurringItems({
     const wasMonthCovered =
       plannedThisMonth > 0 && alreadyPaidThisMonth >= plannedThisMonth;
     const willMonthBeCovered =
-      plannedThisMonth > 0 && alreadyPaidThisMonth + amount >= plannedThisMonth;
+      plannedThisMonth > 0 && alreadyPaidThisMonth + requestedAmount >= plannedThisMonth;
 
-    if (!amount || amount <= 0) {
+    if (!requestedAmount || requestedAmount <= 0) {
       toast.error("Enter a valid payment amount");
       return;
     }
@@ -262,6 +262,13 @@ export default function useRecurringItems({
       return;
     }
 
+    const outstandingDebt = Math.max(0, Number(toAccount?.balance || 0));
+    if (outstandingDebt <= 0) {
+      toast.error("This debt is already paid off");
+      return;
+    }
+    const amount = Math.min(requestedAmount, outstandingDebt);
+    const completesDebt = amount >= outstandingDebt;
     setPostingId(rule.id);
 
     try {
@@ -284,7 +291,14 @@ export default function useRecurringItems({
       const transaction = await transactionsApi.create(transactionPayload);
       await updateAccountBalances(transactionPayload, accounts);
 
-      if (!wasMonthCovered && willMonthBeCovered) {
+      if (completesDebt) {
+        await recurringTransactionsApi.update(rule.id, {
+          last_posted_date: todayIsoDate(),
+          last_posted_transaction_id: transaction.id,
+          is_active: false,
+          completed_at: todayIsoDate(),
+        });
+      } else if (!wasMonthCovered && willMonthBeCovered) {
         await recurringTransactionsApi.update(rule.id, {
           last_posted_date: todayIsoDate(),
           last_posted_transaction_id: transaction.id,
@@ -300,9 +314,11 @@ export default function useRecurringItems({
       invalidateScheduledQueries(queryClient);
       closePaymentDialog();
       toast.success(
-        willMonthBeCovered
-          ? "Credit card payment posted"
-          : "Partial credit card payment posted",
+        completesDebt
+          ? "Final debt payment posted. Plan completed."
+          : willMonthBeCovered
+            ? "Debt payment posted"
+            : "Partial debt payment posted",
       );
     } catch (error) {
       console.error("Credit card payment failed:", error);
