@@ -97,7 +97,8 @@ const emptyGoalForm = () => ({
   current_amount: '',
   target_date: '',
   duration_count: '',
-  duration_unit: 'months',
+  frequency: 'monthly',
+  start_date: new Date().toISOString().slice(0, 10),
   contribution_mode: 'flexible',
   from_account_id: 'none',
   to_account_id: 'none',
@@ -346,7 +347,8 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
         current_amount: String(editingGoal.starting_amount ?? editingGoal.current_amount ?? ''),
         target_date: editingGoal.target_date || '',
         duration_count: String(editingGoal.duration_count ?? ''),
-        duration_unit: editingGoal.duration_unit || 'months',
+        frequency: editingGoal.frequency || (editingGoal.duration_unit === 'weeks' ? 'weekly' : editingGoal.duration_unit === 'years' ? 'yearly' : 'monthly'),
+        start_date: editingGoal.start_date || editingGoal.next_due_date || new Date().toISOString().slice(0, 10),
         contribution_mode: editingGoal.contribution_mode || 'flexible',
         from_account_id: editingGoal.from_account_id || 'none',
         to_account_id: editingGoal.to_account_id || 'none',
@@ -421,7 +423,10 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       current_amount: currentAmount,
       target_date: form.target_date || null,
       duration_count: Number(form.duration_count) > 0 ? Math.floor(Number(form.duration_count)) : null,
-      duration_unit: Number(form.duration_count) > 0 ? form.duration_unit : null,
+      duration_unit: Number(form.duration_count) > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null,
+      frequency: form.contribution_mode === 'fixed' ? form.frequency : null,
+      start_date: form.contribution_mode === 'fixed' ? form.start_date : null,
+      next_due_date: form.contribution_mode === 'fixed' ? form.start_date : null,
       completed_at: null,
       contribution_mode: form.contribution_mode,
       from_account_id: form.from_account_id === 'none' ? null : form.from_account_id,
@@ -516,34 +521,37 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
             <p className="text-xs text-muted-foreground">{form.contribution_mode === 'fixed' ? 'Each planned contribution completes one scheduled occurrence.' : 'Contribute any amount, multiple times whenever you want.'}</p>
           </div>
 
-          <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
-            <div>
-              <p className="text-sm font-semibold">Savings plan length</p>
-              <p className="text-xs text-muted-foreground">Instead of choosing a date manually, set how long you want to save. Cero calculates the target date and required contribution.</p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">For</label>
-                <Input value={form.duration_count} onChange={(event) => {
-                  const value = event.target.value;
-                  setForm((current) => ({ ...current, duration_count: value, target_date: Number(value) > 0 ? addGoalDuration(value, current.duration_unit) : current.target_date }));
-                }} type="number" min="1" step="1" inputMode="numeric" placeholder="12" />
+          {form.contribution_mode === 'fixed' && (
+            <div className="rounded-2xl app-card-surface-soft p-3 space-y-3">
+              <div>
+                <p className="text-sm font-semibold">Contribution schedule</p>
+                <p className="text-xs text-muted-foreground">Set the number of contributions, their frequency, and the first contribution due date.</p>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Period</label>
-                <Select value={form.duration_unit} onValueChange={(value) => {
-                  setForm((current) => ({ ...current, duration_unit: value, target_date: Number(current.duration_count) > 0 ? addGoalDuration(current.duration_count, value) : current.target_date }));
-                }}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weeks">Weeks</SelectItem>
-                    <SelectItem value="months">Months</SelectItem>
-                    <SelectItem value="years">Years</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Contributions</label>
+                  <Input value={form.duration_count} onChange={(event) => updateForm('duration_count', event.target.value)} type="number" min="1" step="1" inputMode="numeric" placeholder="12" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Contribution frequency</label>
+                  <Select value={form.frequency} onValueChange={(value) => updateForm('frequency', value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Biweekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">First contribution due</label>
+                  <Input value={form.start_date} onChange={(event) => updateForm('start_date', event.target.value)} type="date" />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
