@@ -10,6 +10,7 @@ import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import PlanOverview from '@/components/plan/PlanOverview';
 import {
   useAllocations,
+  useAllTransactions,
   useBudgetSummary,
   useCategories,
   useGoalContributions,
@@ -42,6 +43,7 @@ export default function Plan() {
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
   const { data: transactions = [] } = useTransactions(currentMonth);
+  const { data: allTransactions = [] } = useAllTransactions();
   const { data: goalContributions = [] } = useGoalContributions();
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
@@ -58,10 +60,11 @@ export default function Plan() {
         categories,
         savingsGoals,
         recurringTransactions,
+        allTransactions,
         transactions,
         currentMonth,
       }),
-    [allocations, categories, currentMonth, recurringTransactions, savingsGoals, transactions]
+    [allocations, allTransactions, categories, currentMonth, recurringTransactions, savingsGoals, transactions]
   );
 
   const leftToAllocate = plannedTotals.leftToAllocate;
@@ -127,6 +130,7 @@ export default function Plan() {
             goalContributions={goalContributions}
             savingsGoals={savingsGoals}
             recurringTransactions={recurringTransactions}
+            allTransactions={allTransactions}
             currentMonth={currentMonth}
           />
         </div>
