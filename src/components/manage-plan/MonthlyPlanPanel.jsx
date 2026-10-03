@@ -208,14 +208,26 @@ function getRecurringAmountForMonth(rule, month, allTransactions = []) {
   const amount = Number(rule?.amount || 0);
 
   if (type === 'debt' && (rule?.payment_mode || 'fixed') === 'fixed') {
+    const linkedTransactions = allTransactions.filter(
+      (transaction) => transaction.recurring_transaction_id === rule.id
+    );
     const postedDates = [...new Set(
-      allTransactions
-        .filter((transaction) => transaction.recurring_transaction_id === rule.id)
+      linkedTransactions
         .map((transaction) => transaction.recurring_posted_for_date)
         .filter(Boolean)
         .map((date) => String(date).slice(0, 10))
     )].sort();
-    const postedInMonth = postedDates.filter((date) => date.slice(0, 7) === month).length;
+
+    // Historical debt plan values come from the posted occurrence itself.
+    // This keeps Manage Plan aligned with Plan after a rule advances/completes.
+    const historicalPlanned = linkedTransactions.reduce((sum, transaction) => {
+      const postedFor = String(transaction.recurring_posted_for_date || '').slice(0, 10);
+      if (!postedFor || postedFor.slice(0, 7) !== month) return sum;
+      return sum + Math.max(0, Number(transaction.amount || 0));
+    }, 0);
+
+    if (!isRuleActive(rule)) return historicalPlanned;
+
     const totalOccurrences = Math.max(0, Number(rule?.duration_count || 0));
     const remaining = Math.max(0, totalOccurrences - postedDates.length);
     let futureInMonth = 0;
@@ -228,9 +240,11 @@ function getRecurringAmountForMonth(rule, month, allTransactions = []) {
       }
     }
     if (postedDates.length > 0 || rule?.next_due_date) {
-      return (postedInMonth + futureInMonth) * amount;
+      return historicalPlanned + futureInMonth * amount;
     }
   }
+
+  if (!isRuleActive(rule)) return 0;
 
   return getMonthOccurrenceAmount({
     startDate: rule?.start_date || rule?.next_due_date,
@@ -410,7 +424,10 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const standaloneRecurring = [];
 
     recurringTransactions
-      .filter((rule) => isRuleActive(rule))
+      .filter((rule) => {
+        if (isRuleActive(rule)) return true;
+        return Number(getRecurringAmountForMonth(rule, currentMonth, allTransactions) || 0) > 0;
+      })
       .forEach((rule) => {
         const ruleCategoryId = getRuleCategoryId(rule);
         const category = categories.find((item) => item.id === ruleCategoryId);
