@@ -569,13 +569,36 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
 function GoalRow({ goal, onAction, formatCurrency }) {
   const progress = getGoalProgress(goal);
   const target = Number(goal.target_amount || 0);
-  const monthlyRequired = getMonthlyRequiredSaving(goal);
   const remaining = getGoalRemaining(goal);
-  const status = getGoalStatus(goal);
   const color = goal.color_key || '#276FE4';
   const isArchived = Boolean(goal.is_archived);
   const isCompleted = remaining <= 0 || progress >= 100;
-  const statusLabel = status.key === 'due' ? 'Target passed' : status.label;
+  const isFixed = (goal.contribution_mode || 'flexible') === 'fixed';
+  const monthlyRequired = getMonthlyRequiredSaving(goal);
+  const displayAmount = monthlyRequired === null
+    ? null
+    : Math.min(Math.max(0, Number(monthlyRequired || 0)), remaining);
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const daysUntil = (value) => value
+    ? Math.ceil((new Date(`${value}T00:00:00`).getTime() - todayStart.getTime()) / 86400000)
+    : null;
+  const monthsFromDays = (days) => Math.max(1, Math.ceil(days / 30.44));
+  const countdownDays = daysUntil(isFixed ? goal.next_due_date : goal.target_date);
+  const usesMonths = isFixed
+    ? ['quarterly', 'yearly'].includes(goal.frequency)
+    : countdownDays !== null && countdownDays >= 30;
+  const countdown = countdownDays === null
+    ? null
+    : countdownDays > 0
+      ? isFixed
+        ? `Due in ${usesMonths ? `${monthsFromDays(countdownDays)}mo` : `${countdownDays}d`}`
+        : `${usesMonths ? `${monthsFromDays(countdownDays)}mo` : `${countdownDays}d`} left`
+      : countdownDays === 0
+        ? 'Due today'
+        : isFixed
+          ? `Overdue ${Math.abs(countdownDays)}d`
+          : `${Math.abs(countdownDays)}d overdue`;
 
   return (
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
@@ -591,20 +614,20 @@ function GoalRow({ goal, onAction, formatCurrency }) {
             'shrink-0 text-right text-sm font-semibold tabular-nums',
             isCompleted ? 'text-green-700 dark:text-green-400' : 'text-foreground'
           )}>
-            {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrency(monthlyRequired)}
+            {isCompleted ? 'Completed' : displayAmount === null ? 'Set target' : formatCurrency(displayAmount)}
           </div>
         </div>
 
         <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
           {isArchived
-            ? `Archived · ${progress}% complete`
+            ? `Archived · ${progress}%`
             : isCompleted
-              ? `Completed${goal.completed_at ? ` · ${formatGoalDate(goal.completed_at)}` : ''}`
-              : `${statusLabel} · ${progress}% complete`}
+              ? '100%'
+              : `${progress}%${countdown ? ` · ${countdown}` : ''}`}
         </p>
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
-          Target {formatCurrency(target)}
+          {formatCurrency(Math.max(0, target - remaining))} / {formatCurrency(target)}
         </p>
       </div>
 
