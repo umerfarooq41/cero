@@ -896,7 +896,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
         </p>
       </div>
 
-      <div className="self-start text-center text-sm font-medium tabular-nums text-foreground">
+      <div className="self-center w-full text-right text-sm font-medium tabular-nums text-foreground">
         {formatCurrency(amount)}
       </div>
 
