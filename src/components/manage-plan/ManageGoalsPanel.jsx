@@ -317,7 +317,12 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       duration_count: preserveFixedSchedule ? editingGoal.duration_count : (Number(form.duration_count) > 0 ? Math.floor(Number(form.duration_count)) : null),
       duration_unit: preserveFixedSchedule ? editingGoal.duration_unit : (Number(form.duration_count) > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null),
       frequency: preserveFixedSchedule ? editingGoal.frequency : (form.contribution_mode === 'fixed' ? form.frequency : null),
-      start_date: preserveFixedSchedule ? editingGoal.start_date : (form.contribution_mode === 'fixed' ? form.start_date : null),
+      // savings_goals.start_date is NOT NULL in Supabase. Flexible goals do
+      // not use it as a due-date schedule, but still need a valid lifecycle
+      // start date for persistence and reporting.
+      start_date: preserveFixedSchedule
+        ? editingGoal.start_date
+        : (form.contribution_mode === 'fixed' ? form.start_date : (editingGoal?.start_date || todayIsoDate())),
       next_due_date: preserveFixedSchedule ? editingGoal.next_due_date : (form.contribution_mode === 'fixed' ? form.start_date : null),
       completed_at: editingGoal?.completed_at || null,
       contribution_mode: preserveFixedSchedule ? 'fixed' : form.contribution_mode,
