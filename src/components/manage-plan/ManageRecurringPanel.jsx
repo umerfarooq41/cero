@@ -758,7 +758,7 @@ function RecurringRuleModal({
           </div>
         </div>
 
-        <DialogFooter className="sticky bottom-0 z-10 -mx-6 mt-4 border-t border-border/50 bg-card/95 px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
+        <DialogFooter className="app-dialog-actions">
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
