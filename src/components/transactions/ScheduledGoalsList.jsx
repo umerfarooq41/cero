@@ -36,6 +36,11 @@ function GoalContributionDialog({
 
   if (!goal) return null;
 
+  const isFixed = (goal.contribution_mode || "flexible") === "fixed";
+  const remainingAmount = Math.max(0, Number(dialog.remainingAmount || 0));
+  const enteredAmount = Number(dialog.amount || 0);
+  const exceedsRemaining = !isFixed && enteredAmount > remainingAmount;
+
   return (
     <Dialog open={dialog.open} onOpenChange={(open) => !open && dialog.closeDialog()}>
       <DialogContent className="max-w-lg rounded-3xl app-card-surface-strong backdrop-blur-xl">
@@ -69,11 +74,18 @@ function GoalContributionDialog({
               type="number"
               min="0"
               step="0.01"
+              max={!isFixed ? remainingAmount : undefined}
               inputMode="decimal"
               value={dialog.amount}
               onChange={(event) => dialog.setAmount(event.target.value)}
               placeholder="0.00"
             />
+            {!isFixed && (
+              <p className={`text-xs ${exceedsRemaining ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                {exceedsRemaining ? "Amount exceeds remaining goal. " : "Maximum contribution: "}
+                {formatCurrencyElement(remainingAmount, currency)}
+              </p>
+            )}
             {dialog.suggestedAmount && (
               <p className="text-xs text-muted-foreground">
                 Suggested monthly amount:{" "}
@@ -116,7 +128,7 @@ function GoalContributionDialog({
           </Button>
           <Button
             onClick={dialog.submit}
-            disabled={saving || !fromAccount || !toAccount}
+            disabled={saving || !fromAccount || !toAccount || exceedsRemaining}
           >
             {saving ? "Contributing..." : "Contribute"}
           </Button>
