@@ -1,4 +1,4 @@
-import { getGoalPlannedAmountForMonth } from "@/lib/goals";
+import { getGoalPlannedAmountForMonth, todayIsoDate } from "@/lib/goals";
 
 export const RECURRING_SECTIONS = [
   { type: "income", label: "Income" },
@@ -7,7 +7,7 @@ export const RECURRING_SECTIONS = [
 ];
 
 export function getCurrentMonthKey() {
-  return new Date().toISOString().slice(0, 7);
+  return todayIsoDate().slice(0, 7);
 }
 
 export function addDelta(deltas, accountId, amount) {
