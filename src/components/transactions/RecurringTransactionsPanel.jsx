@@ -35,9 +35,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { accountsApi, recurringTransactionsApi, transactionsApi } from '@/lib/budgetData';
+import { recurringTransactionsApi } from '@/lib/budgetData';
+import { supabase } from '@/lib/supabase';
 import {
-  calculateNextDueDate,
   formatRecurringDate,
   FREQUENCY_OPTIONS,
   getRecurringFrequencyLabel,
@@ -94,41 +94,6 @@ function isSavingsAccount(account) {
   const accountType = getAccountType(account);
 
   return accountType === 'savings' || accountType === 'investment';
-}
-
-function addDelta(deltas, accountId, amount) {
-  if (!accountId || !amount) return;
-  deltas[accountId] = (deltas[accountId] || 0) + amount;
-}
-
-function getTransactionDeltas(transaction, accounts) {
-  const deltas = {};
-  const amount = Number(transaction.amount) || 0;
-
-  const source = accounts.find((a) => a.id === transaction.account_id);
-  const destination = accounts.find((a) => a.id === transaction.to_account_id);
-
-  if (source) {
-    const sourceDelta =
-      transaction.type === 'income'
-        ? source.category === 'liability'
-          ? -amount
-          : amount
-        : source.category === 'liability'
-          ? amount
-          : -amount;
-
-    addDelta(deltas, source.id, sourceDelta);
-  }
-
-  if (transaction.type === 'transfer' && destination) {
-    const destinationDelta =
-      destination.category === 'liability' ? -amount : amount;
-
-    addDelta(deltas, destination.id, destinationDelta);
-  }
-
-  return deltas;
 }
 
 function getTypeIcon(type) {
@@ -585,38 +550,15 @@ export default function RecurringTransactionsPanel({
 
     try {
       const postedForDate = rule.next_due_date || todayIsoDate();
-      const transactionPayload = {
-        amount: Number(rule.amount || 0),
-        type: rule.type,
-        date: postedForDate,
-        note: rule.note || `${rule.name} · Recurring`,
-        category_id: rule.category_id || null,
-        account_id: rule.account_id || null,
-        to_account_id: rule.type === 'transfer' ? rule.to_account_id || null : null,
-        recurring_transaction_id: rule.id,
-        recurring_posted_for_date: postedForDate,
-      };
-
-      const transaction = await transactionsApi.create(transactionPayload);
-      const deltas = getTransactionDeltas(transactionPayload, accounts);
-
-      await Promise.all(
-        Object.entries(deltas).map(([accountId, delta]) => {
-          const account = accounts.find((item) => item.id === accountId);
-
-          if (!account) return Promise.resolve();
-
-          return accountsApi.update(accountId, {
-            balance: (Number(account.balance) || 0) + delta,
-          });
-        })
-      );
-
-      await recurringTransactionsApi.update(rule.id, {
-        last_posted_date: todayIsoDate(),
-        last_posted_transaction_id: transaction.id,
-        next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
+      const { error } = await supabase.rpc('cero_post_recurring_transaction', {
+        p_recurring_transaction_id: rule.id,
+        p_amount: null,
+        p_transaction_date: todayIsoDate(),
+        p_posted_for_date: postedForDate,
+        p_note: rule.note || `${rule.name} · Recurring`,
       });
+
+      if (error) throw error;
 
       invalidateData();
       toast.success('Recurring transaction posted');
