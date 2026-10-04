@@ -192,11 +192,11 @@ function ScheduledGoalRow({
     ? null
     : flexibleDaysLeft > 0
       ? flexibleDaysLeft < 30
-        ? `${flexibleDaysLeft} ${flexibleDaysLeft === 1 ? "day" : "days"} left`
+        ? `${flexibleDaysLeft}d left`
         : `${monthsFromDays(flexibleDaysLeft)} mo left`
       : flexibleDaysLeft === 0
         ? "Due today"
-        : `${Math.abs(flexibleDaysLeft)} ${Math.abs(flexibleDaysLeft) === 1 ? "day" : "days"} overdue`;
+        : `${Math.abs(flexibleDaysLeft)}d overdue`;
 
   const fixedDaysLeft = daysUntil(goal.next_due_date);
   const fixedUsesMonths = ["quarterly", "yearly"].includes(goal.frequency);
@@ -205,10 +205,10 @@ function ScheduledGoalRow({
     : fixedDaysLeft > 0
       ? fixedUsesMonths
         ? `Due in ${monthsFromDays(fixedDaysLeft)} mo`
-        : `Due in ${fixedDaysLeft} ${fixedDaysLeft === 1 ? "day" : "days"}`
+        : `Due in ${fixedDaysLeft}d`
       : fixedDaysLeft === 0
         ? "Due today"
-        : `Overdue ${Math.abs(fixedDaysLeft)} ${Math.abs(fixedDaysLeft) === 1 ? "day" : "days"}`;
+        : `Overdue ${Math.abs(fixedDaysLeft)}d`;
 
   return (
     <ScheduledItemCard
