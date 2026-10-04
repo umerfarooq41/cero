@@ -237,14 +237,17 @@ function RecurringRuleModal({
   const debtTotal = Math.max(0, Number(form.total_amount || 0));
   const debtInstallments = Math.max(0, Math.floor(Number(form.duration_count || 0)));
   const debtRemaining = Math.max(0, debtTotal - paidDebtAmount);
+  const remainingDebtInstallments = hasPostedDebtHistory
+    ? Math.max(0, debtInstallments - postedInstallments)
+    : debtInstallments;
   const finalInstallmentDate = useMemo(() => {
-    if (!isDebt || !form.next_due_date || debtInstallments <= 0) return null;
+    if (!isDebt || !form.next_due_date || remainingDebtInstallments <= 0) return null;
     let date = form.next_due_date;
-    for (let index = 1; index < debtInstallments; index += 1) {
+    for (let index = 1; index < remainingDebtInstallments; index += 1) {
       date = calculateNextDueDate(date, form.frequency);
     }
     return date;
-  }, [debtInstallments, form.frequency, form.next_due_date, isDebt]);
+  }, [form.frequency, form.next_due_date, isDebt, remainingDebtInstallments]);
 
   useEffect(() => {
     if (!open) return;
@@ -684,7 +687,7 @@ function RecurringRuleModal({
           {!isCompletedDebt && isDebt && form.payment_mode === 'fixed' && debtInstallments > 0 && Number(form.amount || 0) > 0 && (
             <div className="rounded-2xl app-card-surface-soft px-4 py-3">
               <p className="text-sm font-semibold">
-                {hasPostedDebtHistory ? Math.max(0, debtInstallments - postedInstallments) : debtInstallments} {getRecurringFrequencyLabel(form.frequency).toLowerCase()} payments of {formatCurrency ? formatCurrency(Number(form.amount || 0)) : Number(form.amount || 0)}
+                {remainingDebtInstallments} {getRecurringFrequencyLabel(form.frequency).toLowerCase()} payments of {formatCurrency ? formatCurrency(Number(form.amount || 0)) : Number(form.amount || 0)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {formatRecurringDate(form.next_due_date)}
