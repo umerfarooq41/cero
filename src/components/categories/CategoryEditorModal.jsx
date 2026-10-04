@@ -244,10 +244,9 @@ export default function CategoryEditorModal({
                   type="button"
                   onClick={() => setColor(item)}
                   className={cn(
-                    'h-8 w-8 rounded-xl border border-border transition-all',
+                    'app-color-swatch',
                     color === item
-                      ? 'ring-2 ring-offset-2 ring-primary scale-110'
-                      : 'hover:scale-105'
+                      ? 'is-selected' : ''
                   )}
                   style={{ backgroundColor: item }}
                 />
@@ -267,10 +266,7 @@ export default function CategoryEditorModal({
                   type="button"
                   onClick={() => setIcon(item)}
                   className={cn(
-                    'h-10 rounded-xl transition-all flex items-center justify-center border',
-                    icon === item
-                      ? 'bg-primary/10 border-primary ring-1 ring-primary scale-105'
-                      : 'border-transparent hover:bg-accent hover:border-border'
+                    'app-icon-choice', icon === item && 'is-selected'
                   )}
                   title={item}
                 >
@@ -278,6 +274,7 @@ export default function CategoryEditorModal({
                     icon={item}
                     color={icon === item ? color : '#888'}
                     size="sm"
+                    bare
                   />
                 </button>
               ))}
