@@ -209,7 +209,7 @@ const iconAliases = {
 
 export const iconNames = Object.keys(iconMap);
 
-export default function CategoryIcon({ icon, color, size = 'md', className }) {
+export default function CategoryIcon({ icon, color, size = 'md', className, bare = false }) {
   const normalizedIcon = iconAliases[icon] || icon;
   const IconComponent = iconMap[normalizedIcon] || Tag;
 
@@ -234,7 +234,7 @@ export default function CategoryIcon({ icon, color, size = 'md', className }) {
         sizes[size] || sizes.md,
         className
       )}
-      style={{ backgroundColor: `${color || '#0078D4'}18` }}
+      style={{ backgroundColor: bare ? 'transparent' : `${color || '#0078D4'}18` }}
     >
       <IconComponent
         className={cn(iconSizes[size] || iconSizes.md, 'stroke-[2]')}
