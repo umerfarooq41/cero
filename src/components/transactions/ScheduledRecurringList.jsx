@@ -174,6 +174,20 @@ function ScheduledRecurringRow({
     : fixedDebt
       ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
       : dueNow && !posting && rule.is_active;
+  const debtTotal = Math.max(0, Number(rule.total_amount || rule.total_debt || 0));
+  const debtPaid = Math.max(
+    0,
+    Number(rule.paid_amount || rule.total_paid_amount || rule.completed_amount || 0),
+  );
+  const fixedPaidCount = Math.min(
+    Math.max(0, Number(rule.duration_count || 0)),
+    Math.max(0, Number(rule.posted_occurrence_count || 0)),
+  );
+  const debtProgressMeta = fixedDebt && rule.duration_count
+    ? `${fixedPaidCount} of ${rule.duration_count} paid`
+    : flexibleCreditCard && debtTotal > 0
+      ? `${formatCurrencyElement(debtPaid, currency)} / ${debtTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} paid`
+      : null;
 
   const handleAction = () => {
     if (flexibleCreditCard) {
@@ -211,12 +225,11 @@ function ScheduledRecurringRow({
       }
       meta={
         <>
-          {fixedDebt && rule.duration_count ? `Payment ${Math.min(Number(rule.duration_count), Number(rule.posted_occurrence_count || 0) + 1)} of ${rule.duration_count} · ` : ""}Next {formatRecurringDate(rule.next_due_date)}
-          {type === "transfer"
-            ? ` · ${toAccount?.name || "Debt account"}`
-            : account
-              ? ` · ${account.name}`
-              : ""}
+          {isDebt && debtProgressMeta
+            ? debtProgressMeta
+            : <>Next {formatRecurringDate(rule.next_due_date)}
+              {account ? ` · ${account.name}` : ""}
+            </>}
         </>
       }
       amount={formatCurrencyElement(displayAmount, currency)}
