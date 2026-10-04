@@ -1231,10 +1231,7 @@ export default function ManageRecurringPanel() {
         {completedDebtRules.length > 0 && (
           <div className="overflow-hidden rounded-2xl app-card-surface">
             <div className="flex items-center justify-between px-5 py-3.5">
-              <div>
-                <h3 className="text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</h3>
-                <p className="mt-0.5 text-xs text-muted-foreground">Paid-off debt history</p>
-              </div>
+              <h3 className="text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</h3>
               <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
                 {completedDebtRules.length}
               </span>
@@ -1244,7 +1241,7 @@ export default function ManageRecurringPanel() {
                 const liability = accounts.find((account) => account.id === rule.to_account_id);
                 const category = categories.find((item) => item.id === rule.category_id);
                 return (
-                  <div key={rule.id} className="flex items-start gap-3 px-4 py-3.5">
+                  <div key={rule.id} className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
                     <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
@@ -1252,13 +1249,21 @@ export default function ManageRecurringPanel() {
                         <div className="shrink-0 text-sm font-semibold text-green-700 dark:text-green-400">Completed</div>
                       </div>
                       <p className="mt-1 text-xs font-medium text-muted-foreground">
-                        Paid off{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
+                        Completed{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
                         Original debt {formatCurrency(Math.abs(Number(rule.total_amount || 0)))}
                         {liability ? ` · ${liability.name}` : ''}
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAction(rule)}
+                      className="-mr-1 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+                      aria-label={`Open actions for ${rule.name}`}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
                   </div>
                 );
               })}
