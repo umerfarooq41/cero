@@ -191,7 +191,7 @@ function ScheduledGoalRow({
           ? "100%"
           : isFixed && occurrenceStatus
             ? `${occurrenceStatus.label} · ${progress}%`
-            : `${progress}%${goal.target_date ? ` · Target ${formatGoalDate(goal.target_date).replace(/, \d{4}$/, "")}` : ""}`
+            : `${progress}%${goal.target_date ? ` · Target ${formatGoalDate(goal.target_date)}` : ""}`
       }
       meta={
         <>
