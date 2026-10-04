@@ -69,6 +69,8 @@ async function listTransactionsByDateRange(startDate, endDate) {
       .gte("date", startDate)
       .lte("date", endDate)
       .order("date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .range(from, from + LIST_PAGE_SIZE - 1);
 
     logAndThrow("Supabase transactions date-range list error:", error);
