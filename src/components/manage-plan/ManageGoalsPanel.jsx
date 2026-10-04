@@ -522,8 +522,8 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
                   type="button"
                   onClick={() => updateForm('color_key', item)}
                   className={cn(
-                    'h-8 w-8 rounded-xl border border-border transition-all',
-                    form.color_key === item ? 'scale-110 ring-2 ring-primary ring-offset-2' : 'hover:scale-105'
+                    'app-color-swatch',
+                    form.color_key === item ? 'is-selected' : ''
                   )}
                   style={{ backgroundColor: item }}
                 />
@@ -548,7 +548,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
                   )}
                   title={item}
                 >
-                  <CategoryIcon icon={item} color={form.icon_key === item ? form.color_key : '#888'} size="sm" />
+                  <CategoryIcon icon={item} color={form.icon_key === item ? form.color_key : '#888'} size="sm" bare />
                 </button>
               ))}
             </div>
