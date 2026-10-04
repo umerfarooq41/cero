@@ -39,10 +39,8 @@ import EmptyState from '@/components/shared/EmptyState';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { accountsApi, transactionsApi } from '@/lib/budgetData';
-import {
-  deleteTransactionWithEffects,
-  getTransactionDeltas,
-} from '@/lib/transactionEffects';
+import { getTransactionDeltas } from '@/lib/transactionEffects';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -203,11 +201,11 @@ export default function AccountDetail() {
     }
 
     try {
-      await deleteTransactionWithEffects({
-        transaction,
-        accounts,
-        savingsGoals,
+      const { error } = await supabase.rpc('cero_delete_transaction', {
+        p_transaction_id: transaction.id,
       });
+
+      if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
@@ -215,6 +213,8 @@ export default function AccountDetail() {
       queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
       queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
       queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
 
       toast.success('Transaction deleted');
     } catch (error) {
