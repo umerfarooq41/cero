@@ -242,7 +242,7 @@ export default function AddAccount() {
               Color
             </label>
 
-            <div className="grid grid-cols-8 gap-2 rounded-xl border border-border/60 app-card-surface-soft p-3 backdrop-blur-xl">
+            <div className="grid grid-cols-8 gap-2 py-1">
               {colors.map((item) => (
                 <button
                   key={item}
@@ -250,9 +250,7 @@ export default function AddAccount() {
                   onClick={() => setColor(item)}
                   className={cn(
                     'app-color-swatch',
-                    color === item
-                      ? 'scale-110 ring-2 ring-primary ring-offset-2'
-                      : 'hover:scale-105'
+                    color === item ? 'is-selected' : ''
                   )}
                   style={{
                     backgroundColor: item,
