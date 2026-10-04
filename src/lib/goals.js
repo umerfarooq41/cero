@@ -10,6 +10,24 @@ export function getGoalStartDate(goal) {
   return goal?.start_date || goal?.created_at?.slice?.(0, 10) || todayIsoDate();
 }
 
+function addCalendarMonthsClamped(date, months) {
+  const originalDay = date.getDate();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + months);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  date.setDate(Math.min(originalDay, lastDay));
+}
+
+function addCalendarYearsClamped(date, years) {
+  const month = date.getMonth();
+  const day = date.getDate();
+  date.setDate(1);
+  date.setFullYear(date.getFullYear() + years);
+  date.setMonth(month);
+  const lastDay = new Date(date.getFullYear(), month + 1, 0).getDate();
+  date.setDate(Math.min(day, lastDay));
+}
+
 export function addGoalOccurrence(dateValue, frequency = 'monthly', count = 1) {
   const date = new Date(`${String(dateValue || todayIsoDate()).slice(0, 10)}T00:00:00`);
   const steps = Math.max(0, Math.floor(Number(count || 0)));
@@ -17,12 +35,17 @@ export function addGoalOccurrence(dateValue, frequency = 'monthly', count = 1) {
   for (let index = 0; index < steps; index += 1) {
     if (frequency === 'weekly') date.setDate(date.getDate() + 7);
     else if (frequency === 'biweekly') date.setDate(date.getDate() + 14);
-    else if (frequency === 'quarterly') date.setMonth(date.getMonth() + 3);
-    else if (frequency === 'yearly') date.setFullYear(date.getFullYear() + 1);
-    else date.setMonth(date.getMonth() + 1);
+    else if (frequency === 'quarterly') addCalendarMonthsClamped(date, 3);
+    else if (frequency === 'yearly') addCalendarYearsClamped(date, 1);
+    else addCalendarMonthsClamped(date, 1);
   }
 
   return todayIsoDate(date);
+}
+
+export function getFixedGoalTargetDate(startDate, count, frequency = 'monthly') {
+  if (!startDate || Number(count) <= 0) return '';
+  return addGoalOccurrence(startDate, frequency, Math.max(0, Math.floor(Number(count)) - 1));
 }
 
 export function getFixedGoalContributionAmount(goal) {
