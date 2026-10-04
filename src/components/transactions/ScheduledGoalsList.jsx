@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  formatGoalDate,
   getGoalProgress,
   getGoalRemaining,
   getGoalStatus,
@@ -166,7 +167,12 @@ function ScheduledGoalRow({
   const isFixed = (goal.contribution_mode || "flexible") === "fixed";
   const displayAmount = isFixed
     ? Math.min(Number(goal.fixed_contribution_amount || 0), remaining)
-    : remaining;
+    : hasMonthlyPlan && monthRemaining > 0
+      ? Math.min(monthRemaining, remaining)
+      : Math.min(
+          Number(goal.month_planned_amount || remaining),
+          remaining,
+        );
   const totalContributions = Math.max(1, Number(goal.duration_count || 0));
   const completedContributions = Math.min(
     totalContributions,
@@ -187,7 +193,15 @@ function ScheduledGoalRow({
             ? `${occurrenceStatus.label} · ${progress}% complete`
             : `${statusLabel} · ${progress}% complete`
       }
-      meta={<>{isFixed && goal.duration_count ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · Next ${goal.next_due_date || "No date"} · ` : ""}Target {formatCurrencyElement(target, currency)}</>}
+      meta={
+        <>
+          {isFixed && goal.duration_count
+            ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · Next ${goal.next_due_date || "No date"} · `
+            : ""}
+          Target {formatCurrencyElement(target, currency)}
+          {goal.target_date ? ` · Target date ${formatGoalDate(goal.target_date)}` : ""}
+        </>
+      }
       amount={
         isCompleted
           ? "Completed"
