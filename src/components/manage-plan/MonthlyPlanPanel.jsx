@@ -741,7 +741,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
           <div
             className={cn(
-              'shrink-0 text-right text-sm font-semibold tabular-nums',
+              'shrink-0 text-center text-sm font-medium tabular-nums',
               config.text
             )}
           >
@@ -771,7 +771,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                       </div>
                     </div>
 
-                    <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+                    <div className="shrink-0 text-center text-sm font-medium tabular-nums text-foreground">
                       {formatCurrency(sectionTotal || 0)}
                     </div>
                   </div>
