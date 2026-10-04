@@ -22,7 +22,12 @@ function normalizeBadgeTone(tone) {
 export default function SourceBadge({ type, tone = 'transfer', compact = false, className }) {
   if (!type) return null;
 
-  const isGoal = type === 'goal' || type === 'savings_goal';
+  const normalizedType = String(type).toLowerCase();
+  const isGoal = normalizedType === 'goal' || normalizedType === 'savings_goal';
+  const isRecurring = normalizedType === 'recurring';
+
+  // Category/manual plan rows are not recurring sources and should not carry a badge.
+  if (!isGoal && !isRecurring) return null;
   const normalizedTone = normalizeBadgeTone(tone);
   const toneClass =
     sourceBadgeToneClasses[normalizedTone] || sourceBadgeToneClasses.transfer;
