@@ -461,7 +461,7 @@ function RecurringRuleModal({
                 <p className="text-sm font-semibold">Payment plan</p>
                 <p className="text-xs text-muted-foreground">
                   {isFixedDebtLocked
-                    ? 'Fixed installment terms are locked after creation. Payments may be posted early, but the amount, count, frequency, and installment dates do not change.'
+                    ? 'Fixed installment terms can’t be changed after creation.'
                     : hasPostedDebtHistory
                       ? 'Paid installments stay unchanged. You can adjust only the remaining flexible payment plan.'
                       : 'Set the original debt and installment schedule. The first installment is recorded on the selected start date.'}
