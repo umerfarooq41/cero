@@ -2,9 +2,9 @@ import { useCallback, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { accountsApi, recurringTransactionsApi, transactionsApi } from "@/lib/budgetData";
+import { recurringTransactionsApi, transactionsApi } from "@/lib/budgetData";
+import { supabase } from "@/lib/supabase";
 import {
-  calculateNextDueDate,
   getFixedDebtNextDueDate,
   getRecurringStatus,
   sortRecurringByDueDate,
@@ -13,7 +13,6 @@ import {
 import {
   countVerifiedRecurringOccurrencesByRule,
   getRecurringMonthlyPlanAmount,
-  getTransactionDeltas,
   isDueNow,
   normalizeRuleType,
   RECURRING_SECTIONS,
@@ -30,33 +29,6 @@ function invalidateScheduledQueries(queryClient) {
   queryClient.invalidateQueries({ queryKey: ["allocations"] });
   queryClient.invalidateQueries({ queryKey: ["all-allocations"] });
   queryClient.invalidateQueries({ queryKey: ["budget-summary"] });
-}
-
-export async function updateAccountBalances(transactionPayload, accounts = []) {
-  const deltas = getTransactionDeltas(transactionPayload, accounts);
-
-  await Promise.all(
-    Object.entries(deltas).map(([accountId, delta]) => {
-      const account = accounts.find((item) => item.id === accountId);
-
-      if (!account) return Promise.resolve();
-
-      return accountsApi.update(accountId, {
-        balance: (Number(account.balance) || 0) + delta,
-      });
-    }),
-  );
-}
-
-function shouldAdvanceLastPostedPointer(rule, postedForDate, allTransactions = []) {
-  const currentLatestOccurrence = allTransactions
-    .filter((transaction) => transaction.recurring_transaction_id === rule?.id)
-    .map((transaction) => String(transaction.recurring_posted_for_date || '').slice(0, 10))
-    .filter(Boolean)
-    .sort()
-    .at(-1);
-
-  return !currentLatestOccurrence || String(postedForDate || '') >= currentLatestOccurrence;
 }
 
 function getSuggestedPaymentAmount(rule) {
@@ -183,6 +155,7 @@ export default function useRecurringItems({
 
       const isDebt = normalizeRuleType(rule.type) === "transfer";
       const isFixedDebt = isDebt && (rule.payment_mode || "fixed") === "fixed";
+
       if (!isDueNow(status) && !isFixedDebt) {
         toast.error("This recurring item is not due yet");
         return;
@@ -193,29 +166,7 @@ export default function useRecurringItems({
         return;
       }
 
-      const transactionType = normalizeRuleType(rule.type);
-      const destinationAccount = accounts.find((account) => account.id === rule.to_account_id);
-      const isFiniteDebt = transactionType === "transfer" && destinationAccount;
-      const totalDebt = Math.max(0, Number(rule.total_amount || 0));
-      const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
-      const outstandingDebt = isFiniteDebt
-        ? totalDebt > 0
-          ? Math.max(0, totalDebt - paidTotal)
-          : Math.max(0, Number(destinationAccount.balance || 0))
-        : null;
-
-      if (isFiniteDebt && outstandingDebt <= 0.005) {
-        await recurringTransactionsApi.update(rule.id, {
-          is_active: false,
-          completed_at: rule.completed_at || todayIsoDate(),
-          next_due_date: null,
-        });
-        invalidateScheduledQueries(queryClient);
-        toast.success("Debt is paid off. Recurring rule completed.");
-        return;
-      }
-
-      if (transactionType === "transfer" && !rule.to_account_id) {
+      if (normalizeRuleType(rule.type) === "transfer" && !rule.to_account_id) {
         toast.error("This recurring transfer is missing a destination account");
         return;
       }
@@ -223,54 +174,26 @@ export default function useRecurringItems({
       setPostingId(rule.id);
 
       try {
-        const postedOccurrences = Math.max(0, Number(verifiedOccurrencesByRule[rule.id] || 0));
+        const postedOccurrences = Math.max(
+          0,
+          Number(verifiedOccurrencesByRule[rule.id] || 0),
+        );
         const postedForDate = isFixedDebt
           ? getFixedDebtNextDueDate(rule, postedOccurrences)
           : rule.next_due_date || todayIsoDate();
-        const scheduledAmount = Math.max(0, Number(rule.amount || 0));
-        const postingAmount = isFiniteDebt
-          ? Math.min(scheduledAmount, outstandingDebt)
-          : scheduledAmount;
-        const completesDebt = isFiniteDebt && postingAmount >= outstandingDebt - 0.005;
 
-        const transactionPayload = {
-          amount: postingAmount,
-          type: transactionType,
-          date: todayIsoDate(),
-          note: rule.note || `${rule.name} · Recurring`,
-          category_id: rule.category_id || null,
-          account_id: rule.account_id || null,
-          to_account_id:
-            transactionType === "transfer" ? rule.to_account_id || null : null,
-          recurring_transaction_id: rule.id,
-          recurring_posted_for_date: postedForDate,
-        };
-
-        const transaction = await transactionsApi.create(transactionPayload);
-        await updateAccountBalances(transactionPayload, accounts);
-
-        const advancePointer = shouldAdvanceLastPostedPointer(
-          rule,
-          postedForDate,
-          allTransactions
-        );
-        await recurringTransactionsApi.update(rule.id, {
-          ...(advancePointer
-            ? {
-                last_posted_date: todayIsoDate(),
-                last_posted_transaction_id: transaction.id,
-              }
-            : {}),
-          next_due_date: completesDebt
-            ? null
-            : calculateNextDueDate(postedForDate, rule.frequency),
-          ...(completesDebt
-            ? { is_active: false, completed_at: transactionPayload.date }
-            : {}),
+        const { error } = await supabase.rpc("cero_post_recurring_transaction", {
+          p_recurring_transaction_id: rule.id,
+          p_amount: null,
+          p_transaction_date: todayIsoDate(),
+          p_posted_for_date: postedForDate,
+          p_note: rule.note || `${rule.name} · Recurring`,
         });
 
+        if (error) throw error;
+
         invalidateScheduledQueries(queryClient);
-        toast.success(completesDebt ? "Final debt payment posted. Plan completed." : "Recurring transaction posted");
+        toast.success("Recurring transaction posted");
       } catch (error) {
         console.error("Recurring post failed:", error);
         toast.error(error.message || "Could not post recurring transaction");
@@ -278,7 +201,7 @@ export default function useRecurringItems({
         setPostingId(null);
       }
     },
-    [accounts, allRecurringPaymentsByRule, allTransactions, queryClient, verifiedOccurrencesByRule],
+    [queryClient, verifiedOccurrencesByRule],
   );
 
   const submitPaymentDialog = useCallback(async () => {
