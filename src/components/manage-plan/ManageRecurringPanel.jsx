@@ -488,7 +488,7 @@ function RecurringRuleModal({
                   }} disabled={hasPostedDebtHistory || isFixedDebtLocked} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{hasPostedDebtHistory ? 'Remaining installments' : 'Installments'}</label>
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{hasPostedDebtHistory ? 'Installments left' : 'Installments'}</label>
                   <Input
                     value={hasPostedDebtHistory ? Math.max(0, debtInstallments - postedInstallments) : form.duration_count}
                     onChange={(event) => {
