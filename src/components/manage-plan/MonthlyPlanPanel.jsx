@@ -325,13 +325,13 @@ function PlanAmountRow({
         </div>
 
         {(row.description || lastMonthHint > 0) && (
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 whitespace-nowrap text-[11px] leading-4 text-muted-foreground">
+          <div className="mt-0.5 flex min-w-0 items-center gap-1 whitespace-nowrap text-[10px] leading-3.5 text-muted-foreground">
             {row.description && (
-              <span>{row.description}</span>
+              <span className="shrink-0">{row.description}</span>
             )}
 
             {lastMonthHint > 0 && (
-              <span className="tabular-nums">
+              <span className="shrink-0 tabular-nums">
                 Last month: {formatCurrency(lastMonthHint)}
               </span>
             )}
@@ -339,7 +339,7 @@ function PlanAmountRow({
         )}
       </div>
 
-      <div className="w-24 shrink-0">
+      <div className="w-20 shrink-0">
         {row.isGenerated ? (
           <div className="h-8 rounded-md border border-border/50 bg-muted/35 px-3 text-right text-sm font-medium leading-8 tabular-nums text-muted-foreground">
             {formatMoneyText(value || 0)}
