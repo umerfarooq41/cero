@@ -599,7 +599,10 @@ function GoalRow({ goal, onAction, formatCurrency }) {
             {goal.name}
           </h3>
 
-          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+          <div className={cn(
+            'shrink-0 text-right text-sm font-semibold tabular-nums',
+            isCompleted ? 'text-green-700 dark:text-green-400' : 'text-foreground'
+          )}>
             {isCompleted ? 'Completed' : monthlyRequired === null ? 'Set target' : formatCurrency(monthlyRequired)}
           </div>
         </div>
@@ -608,7 +611,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
           {isArchived
             ? `Archived · ${progress}% complete`
             : isCompleted
-              ? '100% complete'
+              ? `Completed${goal.completed_at ? ` · ${formatGoalDate(goal.completed_at)}` : ''}`
               : `${statusLabel} · ${progress}% complete`}
         </p>
 
