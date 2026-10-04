@@ -85,7 +85,6 @@ export default function ManagePlan() {
       <PageHeader
         title="Manage Plan"
         subtitle="Configure categories, monthly amounts, recurring rules, and savings goals"
-        icon={Settings2}
       />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 lg:py-8">
