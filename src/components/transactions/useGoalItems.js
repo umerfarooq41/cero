@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import {
   getFixedGoalContributionAmount,
-  getFixedGoalNextDueDate,
   getGoalOccurrenceStatus,
   getGoalProgress,
   getGoalRemaining,
@@ -110,11 +109,12 @@ export default function useGoalItems({
               0,
               Number(verifiedContributionsByGoal[goal.id] || 0),
             );
+            // For fixed goals the database owns schedule state. Never
+            // reconstruct next_due_date from transaction counts here: deleted,
+            // early, or out-of-order occurrences can make that calculation
+            // disagree with the atomic posting/deletion RPCs.
             const nextDueDate = contributionMode === "fixed"
-              ? (
-                  goal.next_due_date ||
-                  getFixedGoalNextDueDate(goalWithProgress, postedOccurrences)
-                )
+              ? (goal.next_due_date || null)
               : null;
             return {
               ...goalWithProgress,
