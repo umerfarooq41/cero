@@ -111,7 +111,10 @@ export default function useGoalItems({
               Number(verifiedContributionsByGoal[goal.id] || 0),
             );
             const nextDueDate = contributionMode === "fixed"
-              ? getFixedGoalNextDueDate(goalWithProgress, postedOccurrences)
+              ? (
+                  goal.next_due_date ||
+                  getFixedGoalNextDueDate(goalWithProgress, postedOccurrences)
+                )
               : null;
             return {
               ...goalWithProgress,
@@ -150,7 +153,10 @@ export default function useGoalItems({
     }
     setSelectedGoal(goal);
     setContributionAmount(isFixed ? String(goal?.fixed_contribution_amount || "") : getSuggestedContributionAmount(goal));
-    setContributionDate(isFixed ? (goal?.next_due_date || todayIsoDate()) : todayIsoDate());
+    // The scheduled occurrence date and the date money actually moves are
+    // separate. Fixed contributions can be paid early, including several
+    // future installments on the same day.
+    setContributionDate(todayIsoDate());
     setContributionNote(goal ? `Contribution to ${goal.name}` : "");
   }, []);
 
