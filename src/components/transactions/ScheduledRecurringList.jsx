@@ -168,7 +168,7 @@ function ScheduledRecurringRow({
     ? posting ? "Saving…" : isMonthCovered ? "Add extra" : "Pay"
     : fixedDebt
       ? posting ? "Posting…" : dueNow ? "Pay installment" : "Pay next early"
-      : posting ? "Posting…" : dueNow ? "Post" : "Future";
+      : posting ? "Posting…" : dueNow ? "Post" : "Upcoming";
   const canUseAction = flexibleCreditCard
     ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
     : fixedDebt
