@@ -515,7 +515,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
 
-            <div className="grid grid-cols-10 gap-2 rounded-xl app-card-surface-soft p-2">
+            <div className="grid grid-cols-8 gap-2 py-1">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -534,17 +534,14 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
 
-            <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl app-card-surface-soft p-2 sm:grid-cols-7 md:grid-cols-8">
+            <div className="grid max-h-52 grid-cols-7 gap-2 overflow-y-auto py-1">
               {iconNames.map((item) => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => updateForm('icon_key', item)}
                   className={cn(
-                    'flex h-10 items-center justify-center rounded-xl border transition-all',
-                    form.icon_key === item
-                      ? 'scale-105 border-primary bg-primary/10 ring-1 ring-primary'
-                      : 'border-transparent hover:border-border hover:bg-accent'
+                    'app-icon-choice', form.icon_key === item && 'is-selected'
                   )}
                   title={item}
                 >
@@ -565,7 +562,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           </div>
         </div>
 
-        <DialogFooter className="mt-4 border-t border-border/50 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <DialogFooter className="app-dialog-actions">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancel
           </Button>
