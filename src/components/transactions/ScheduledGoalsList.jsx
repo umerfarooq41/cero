@@ -180,20 +180,35 @@ function ScheduledGoalRow({
   );
   const occurrenceStatus = goal.occurrence_status;
   const fixedScheduleDone = isFixed && completedContributions >= totalContributions;
-  const flexibleDaysLeft = goal.target_date
-    ? Math.ceil(
-        (new Date(`${goal.target_date}T00:00:00`).getTime() -
-          new Date(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}T00:00:00`).getTime()) /
-          86400000,
-      )
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const daysUntil = (value) => value
+    ? Math.ceil((new Date(`${value}T00:00:00`).getTime() - todayStart.getTime()) / 86400000)
     : null;
+  const monthsFromDays = (days) => Math.max(1, Math.ceil(days / 30.44));
+
+  const flexibleDaysLeft = daysUntil(goal.target_date);
   const flexibleCountdown = flexibleDaysLeft === null
     ? null
     : flexibleDaysLeft > 0
-      ? `${flexibleDaysLeft} ${flexibleDaysLeft === 1 ? "day" : "days"} left`
+      ? flexibleDaysLeft < 30
+        ? `${flexibleDaysLeft} ${flexibleDaysLeft === 1 ? "day" : "days"} left`
+        : `${monthsFromDays(flexibleDaysLeft)} mo left`
       : flexibleDaysLeft === 0
         ? "Due today"
         : `${Math.abs(flexibleDaysLeft)} ${Math.abs(flexibleDaysLeft) === 1 ? "day" : "days"} overdue`;
+
+  const fixedDaysLeft = daysUntil(goal.next_due_date);
+  const fixedUsesMonths = ["quarterly", "yearly"].includes(goal.frequency);
+  const fixedCountdown = fixedDaysLeft === null
+    ? occurrenceStatus?.label || null
+    : fixedDaysLeft > 0
+      ? fixedUsesMonths
+        ? `Due in ${monthsFromDays(fixedDaysLeft)} mo`
+        : `Due in ${fixedDaysLeft} ${fixedDaysLeft === 1 ? "day" : "days"}`
+      : fixedDaysLeft === 0
+        ? "Due today"
+        : `Overdue ${Math.abs(fixedDaysLeft)} ${Math.abs(fixedDaysLeft) === 1 ? "day" : "days"}`;
 
   return (
     <ScheduledItemCard
@@ -203,8 +218,8 @@ function ScheduledGoalRow({
       subtitle={
         isCompleted
           ? "100%"
-          : isFixed && occurrenceStatus
-            ? `${progress}% · ${occurrenceStatus.label.replace(/d$/, " days").replace("Overdue by ", "Overdue ")}`
+          : isFixed && fixedCountdown
+            ? `${progress}% · ${fixedCountdown}`
             : `${progress}%${flexibleCountdown ? ` · ${flexibleCountdown}` : ""}`
       }
       meta={
