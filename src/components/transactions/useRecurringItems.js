@@ -2,10 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { accountsApi, recurringTransactionsApi, transactionsApi } from "@/lib/budgetData";
 import { supabase } from "@/lib/supabase";
 import {
-  calculateNextDueDate,
   getFixedDebtNextDueDate,
   getRecurringStatus,
   sortRecurringByDueDate,
@@ -14,7 +12,6 @@ import {
 import {
   countVerifiedRecurringOccurrencesByRule,
   getRecurringMonthlyPlanAmount,
-  getTransactionDeltas,
   isDueNow,
   normalizeRuleType,
   RECURRING_SECTIONS,
@@ -31,32 +28,6 @@ function invalidateScheduledQueries(queryClient) {
   queryClient.invalidateQueries({ queryKey: ["allocations"] });
   queryClient.invalidateQueries({ queryKey: ["all-allocations"] });
   queryClient.invalidateQueries({ queryKey: ["budget-summary"] });
-}
-
-export async function updateAccountBalances(transactionPayload, accounts = []) {
-  const deltas = getTransactionDeltas(transactionPayload, accounts);
-
-  await Promise.all(
-    Object.entries(deltas).map(([accountId, delta]) => {
-      const account = accounts.find((item) => item.id === accountId);
-      if (!account) return Promise.resolve();
-
-      return accountsApi.update(accountId, {
-        balance: (Number(account.balance) || 0) + delta,
-      });
-    }),
-  );
-}
-
-function shouldAdvanceLastPostedPointer(rule, postedForDate, allTransactions = []) {
-  const currentLatestOccurrence = allTransactions
-    .filter((transaction) => transaction.recurring_transaction_id === rule?.id)
-    .map((transaction) => String(transaction.recurring_posted_for_date || "").slice(0, 10))
-    .filter(Boolean)
-    .sort()
-    .at(-1);
-
-  return !currentLatestOccurrence || String(postedForDate || "") >= currentLatestOccurrence;
 }
 
 function getSuggestedPaymentAmount(rule) {
@@ -247,10 +218,9 @@ export default function useRecurringItems({
     const plannedThisMonth = Number(
       rule.month_planned_amount || rule.amount || 0,
     );
-    const wasMonthCovered =
-      plannedThisMonth > 0 && alreadyPaidThisMonth >= plannedThisMonth;
     const willMonthBeCovered =
-      plannedThisMonth > 0 && alreadyPaidThisMonth + requestedAmount >= plannedThisMonth;
+      plannedThisMonth > 0 &&
+      alreadyPaidThisMonth + requestedAmount >= plannedThisMonth;
 
     if (!requestedAmount || requestedAmount <= 0) {
       toast.error("Enter a valid payment amount");
@@ -268,14 +238,20 @@ export default function useRecurringItems({
     }
 
     const totalDebt = Math.max(0, Number(rule.total_amount || 0));
-    const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
-    const outstandingDebt = totalDebt > 0
-      ? Math.max(0, totalDebt - paidTotal)
-      : Math.max(0, Number(toAccount?.balance || 0));
+    const paidTotal = Math.max(
+      0,
+      Number(allRecurringPaymentsByRule[rule.id] || 0),
+    );
+    const outstandingDebt =
+      totalDebt > 0
+        ? Math.max(0, totalDebt - paidTotal)
+        : Math.max(0, Number(toAccount?.balance || 0));
+
     if (outstandingDebt <= 0.005) {
       toast.error("This debt is already paid off");
       return;
     }
+
     const amount = Math.min(requestedAmount, outstandingDebt);
     const completesDebt = amount >= outstandingDebt - 0.005;
     setPostingId(rule.id);
@@ -285,48 +261,15 @@ export default function useRecurringItems({
       const postedForDate = rule.next_due_date || date;
       const note = paymentNote || `${rule.name} · Recurring`;
 
-      const transactionPayload = {
-        amount,
-        type: "transfer",
-        date,
-        note,
-        category_id: rule.category_id || null,
-        account_id: fromAccount.id,
-        to_account_id: toAccount.id,
-        recurring_transaction_id: rule.id,
-        recurring_posted_for_date: postedForDate,
-      };
+      const { error } = await supabase.rpc("cero_post_recurring_transaction", {
+        p_recurring_transaction_id: rule.id,
+        p_amount: amount,
+        p_transaction_date: date,
+        p_posted_for_date: postedForDate,
+        p_note: note,
+      });
 
-      const transaction = await transactionsApi.create(transactionPayload);
-      await updateAccountBalances(transactionPayload, accounts);
-
-      const advancePointer = shouldAdvanceLastPostedPointer(
-        rule,
-        postedForDate,
-        allTransactions
-      );
-      const pointerUpdate = advancePointer
-        ? {
-            last_posted_date: todayIsoDate(),
-            last_posted_transaction_id: transaction.id,
-          }
-        : {};
-
-      if (completesDebt) {
-        await recurringTransactionsApi.update(rule.id, {
-          ...pointerUpdate,
-          is_active: false,
-          completed_at: date,
-          next_due_date: null,
-        });
-      } else if (!wasMonthCovered && willMonthBeCovered) {
-        await recurringTransactionsApi.update(rule.id, {
-          ...pointerUpdate,
-          next_due_date: calculateNextDueDate(postedForDate, rule.frequency),
-        });
-      } else if (advancePointer) {
-        await recurringTransactionsApi.update(rule.id, pointerUpdate);
-      }
+      if (error) throw error;
 
       invalidateScheduledQueries(queryClient);
       closePaymentDialog();
@@ -346,7 +289,6 @@ export default function useRecurringItems({
   }, [
     accounts,
     allRecurringPaymentsByRule,
-    allTransactions,
     closePaymentDialog,
     paymentAmount,
     paymentDate,
