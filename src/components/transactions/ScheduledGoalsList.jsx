@@ -180,6 +180,20 @@ function ScheduledGoalRow({
   );
   const occurrenceStatus = goal.occurrence_status;
   const fixedScheduleDone = isFixed && completedContributions >= totalContributions;
+  const flexibleDaysLeft = goal.target_date
+    ? Math.ceil(
+        (new Date(`${goal.target_date}T00:00:00`).getTime() -
+          new Date(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}T00:00:00`).getTime()) /
+          86400000,
+      )
+    : null;
+  const flexibleCountdown = flexibleDaysLeft === null
+    ? null
+    : flexibleDaysLeft > 0
+      ? `${flexibleDaysLeft} ${flexibleDaysLeft === 1 ? "day" : "days"} left`
+      : flexibleDaysLeft === 0
+        ? "Due today"
+        : `${Math.abs(flexibleDaysLeft)} ${Math.abs(flexibleDaysLeft) === 1 ? "day" : "days"} overdue`;
 
   return (
     <ScheduledItemCard
@@ -190,15 +204,15 @@ function ScheduledGoalRow({
         isCompleted
           ? "100%"
           : isFixed && occurrenceStatus
-            ? `${occurrenceStatus.label} · ${progress}%`
-            : `${progress}%${goal.target_date ? ` · Target ${formatGoalDate(goal.target_date)}` : ""}`
+            ? `${progress}% · ${occurrenceStatus.label.replace(/d$/, " days").replace("Overdue by ", "Overdue ")}`
+            : `${progress}%${flexibleCountdown ? ` · ${flexibleCountdown}` : ""}`
       }
       meta={
         <>
           {isFixed && goal.duration_count
             ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · Next ${goal.next_due_date || "No date"} · `
             : ""}
-          Target {formatCurrencyElement(target, currency)}
+          {formatCurrencyElement(Math.max(0, target - remaining), currency)} / {Number(target).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </>
       }
       amount={
