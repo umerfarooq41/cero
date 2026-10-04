@@ -707,7 +707,7 @@ function RecurringRuleModal({
             <div className="space-y-4 pb-3 pt-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
-                <div className="grid grid-cols-8 gap-2 py-1 sm:grid-cols-10">
+                <div className="grid grid-cols-8 gap-2 py-1">
                   {COLORS.map((item) => (
                     <button
                       key={item}
@@ -726,7 +726,7 @@ function RecurringRuleModal({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
-                <div className="grid max-h-44 grid-cols-7 gap-1.5 overflow-y-auto py-1">
+                <div className="grid max-h-52 grid-cols-7 gap-2 overflow-y-auto py-1">
                   {iconNames.map((item) => (
                     <button
                       key={item}
