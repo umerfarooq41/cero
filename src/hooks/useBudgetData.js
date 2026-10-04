@@ -24,6 +24,7 @@ import {
   getBudgetMonthCloseDate,
   getCurrentBudgetMonth,
   getPreviousBudgetMonth,
+  isTwentyFifthRuleEnabled,
   hasAutoSweepForMonth,
   isAutoSweepSurplusEnabled,
 } from '@/lib/budgetLogic';
@@ -91,20 +92,50 @@ export function useUserSettings() {
   });
 }
 
+function getCalendarMonthDateRange(month) {
+  const [year, monthNumber] = String(month || '').split('-').map(Number);
+
+  if (!year || !monthNumber || monthNumber < 1 || monthNumber > 12) {
+    return null;
+  }
+
+  const lastDay = new Date(year, monthNumber, 0).getDate();
+
+  return {
+    startDate: `${year}-${String(monthNumber).padStart(2, '0')}-01`,
+    endDate: `${year}-${String(monthNumber).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
+  };
+}
+
+function getBudgetMonthDateRange(month, settings = {}) {
+  const calendarRange = getCalendarMonthDateRange(month);
+  if (!calendarRange || !isTwentyFifthRuleEnabled(settings)) {
+    return calendarRange;
+  }
+
+  const previousMonth = getPreviousBudgetMonth(month);
+  const previousRange = getCalendarMonthDateRange(previousMonth);
+
+  return {
+    startDate: `${previousMonth}-25`,
+    endDate: `${month}-24`,
+  };
+}
+
 export function useTransactions(month) {
   const { session } = useAuth();
 
   return useQuery({
     queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
-      const [all, settings] = await Promise.all([
-        transactionsApi.list(),
-        getUserSettings(),
-      ]);
+      const settings = await getUserSettings();
+      const range = getBudgetMonthDateRange(month, settings || {});
 
-      return filterTransactionsByBudgetMonth(all, month, settings || {});
+      if (!range) return [];
+
+      return transactionsApi.listByDateRange(range.startDate, range.endDate);
     },
-    enabled: Boolean(session?.user?.id),
+    enabled: Boolean(session?.user?.id && month),
     initialData: [],
   });
 }
