@@ -29,21 +29,27 @@ function getActionLabel(type) {
 }
 
 function getStatusLabel(type, rawPercent, isOverBudget, tracked) {
-  if (tracked <= 0) return 'Unused';
-
-  const isFullyTracked = Math.abs(rawPercent - 100) < 0.01;
-
-  if (type === 'income' && rawPercent >= 100) return 'Received';
-
-  if (type === 'savings' && rawPercent >= 100) return 'Saved';
-
-  if (type === 'debt' && rawPercent >= 100) return 'Paid';
-
-  if (type === 'expense') {
-    if (isOverBudget) return 'Over budget';
-    if (isFullyTracked) return 'Spent';
-    if (rawPercent >= 75) return 'Near limit';
+  if (type === 'income') {
+    if (tracked <= 0) return 'Not received';
+    if (rawPercent >= 100) return 'Received';
+    return 'Part received';
   }
+
+  if (type === 'savings') {
+    if (tracked <= 0) return 'Not saved';
+    if (rawPercent >= 100) return 'Saved';
+    return 'Part saved';
+  }
+
+  if (type === 'debt') {
+    if (tracked <= 0) return 'Not paid';
+    if (rawPercent >= 100) return 'Paid';
+    return 'Part paid';
+  }
+
+  if (tracked <= 0) return 'Not started';
+  if (isOverBudget) return 'Over budget';
+  if (rawPercent >= 100) return 'Fully spent';
 
   return 'On track';
 }
