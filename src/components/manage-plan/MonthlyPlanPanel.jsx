@@ -287,7 +287,7 @@ function PlanAmountRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/30',
+        'flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-accent/30',
         row.isSubcategory && 'pl-14'
       )}
     >
@@ -325,13 +325,13 @@ function PlanAmountRow({
         </div>
 
         {(row.description || lastMonthHint > 0) && (
-          <div className="mt-0.5 flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap text-xs text-muted-foreground">
+          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 whitespace-nowrap text-[11px] leading-4 text-muted-foreground">
             {row.description && (
-              <span className="truncate">{row.description}</span>
+              <span>{row.description}</span>
             )}
 
             {lastMonthHint > 0 && (
-              <span className="min-w-0 truncate tabular-nums">
+              <span className="tabular-nums">
                 Last month: {formatCurrency(lastMonthHint)}
               </span>
             )}
@@ -339,7 +339,7 @@ function PlanAmountRow({
         )}
       </div>
 
-      <div className="w-28 shrink-0">
+      <div className="w-24 shrink-0">
         {row.isGenerated ? (
           <div className="h-8 rounded-md border border-border/50 bg-muted/35 px-3 text-right text-sm font-medium leading-8 tabular-nums text-muted-foreground">
             {formatMoneyText(value || 0)}
