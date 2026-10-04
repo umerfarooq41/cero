@@ -17,27 +17,48 @@ export function isAutoSweepSurplusEnabled(settings = {}) {
   );
 }
 
-export function getBudgetMonth(date, settings = {}) {
-  if (!date) return null;
+function parseIsoDateParts(value) {
+  const match = String(value || '')
+    .slice(0, 10)
+    .match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
 
-  const parsedDate = new Date(date);
+  if (!match) return null;
 
-  if (Number.isNaN(parsedDate.getTime())) {
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+
+  if (
+    !Number.isInteger(year) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > new Date(year, month, 0).getDate()
+  ) {
     return null;
   }
 
-  const budgetDate = new Date(parsedDate);
+  return { year, month, day };
+}
 
-  // 25th Rule:
-  // transactions dated on/after the 25th are assigned to next budget month.
-  if (isTwentyFifthRuleEnabled(settings) && budgetDate.getDate() >= 25) {
-    budgetDate.setMonth(budgetDate.getMonth() + 1);
-  }
+function shiftMonthKey(year, month, offset) {
+  const absoluteMonth = year * 12 + (month - 1) + offset;
+  const shiftedYear = Math.floor(absoluteMonth / 12);
+  const shiftedMonth = ((absoluteMonth % 12) + 12) % 12 + 1;
 
-  const year = budgetDate.getFullYear();
-  const month = String(budgetDate.getMonth() + 1).padStart(2, '0');
+  return `${shiftedYear}-${String(shiftedMonth).padStart(2, '0')}`;
+}
 
-  return `${year}-${month}`;
+export function getBudgetMonth(date, settings = {}) {
+  if (!date) return null;
+
+  const parts = parseIsoDateParts(date);
+  if (!parts) return null;
+
+  const offset =
+    isTwentyFifthRuleEnabled(settings) && parts.day >= 25 ? 1 : 0;
+
+  return shiftMonthKey(parts.year, parts.month, offset);
 }
 
 export function isTransactionInBudgetMonth(
@@ -72,30 +93,30 @@ export function filterTransactionsByBudgetYear(
   );
 }
 
+function parseMonthKey(month) {
+  const match = String(month || '').match(/^(\\d{4})-(\\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const monthNumber = Number(match[2]);
+
+  if (monthNumber < 1 || monthNumber > 12) return null;
+
+  return { year, month: monthNumber };
+}
+
 export function getNextBudgetMonth(month) {
-  if (!month) return null;
+  const parts = parseMonthKey(month);
+  if (!parts) return null;
 
-  const [year, monthNumber] = month.split('-').map(Number);
-  const date = new Date(year, monthNumber - 1);
-
-  date.setMonth(date.getMonth() + 1);
-
-  return `${date.getFullYear()}-${String(
-    date.getMonth() + 1
-  ).padStart(2, '0')}`;
+  return shiftMonthKey(parts.year, parts.month, 1);
 }
 
 export function getPreviousBudgetMonth(month) {
-  if (!month) return null;
+  const parts = parseMonthKey(month);
+  if (!parts) return null;
 
-  const [year, monthNumber] = month.split('-').map(Number);
-  const date = new Date(year, monthNumber - 1);
-
-  date.setMonth(date.getMonth() - 1);
-
-  return `${date.getFullYear()}-${String(
-    date.getMonth() + 1
-  ).padStart(2, '0')}`;
+  return shiftMonthKey(parts.year, parts.month, -1);
 }
 
 export function calculateMonthSurplus({
