@@ -203,6 +203,11 @@ function RecurringRuleModal({
   const [form, setForm] = useState(() => emptyForm(initialType));
   const isEditing = !!editingRule;
   const isDebt = form.type === 'transfer';
+  const isFixedDebtLocked = Boolean(
+    isEditing &&
+    normalizeRuleType(editingRule?.type) === 'transfer' &&
+    (editingRule?.payment_mode || 'fixed') === 'fixed'
+  );
   const postedDebtTransactions = useMemo(
     () => isEditing && normalizeRuleType(editingRule?.type) === 'transfer'
       ? allTransactions.filter((transaction) =>
@@ -336,25 +341,34 @@ function RecurringRuleModal({
       return;
     }
 
+    const lockedFixedDebt = isFixedDebtLocked ? editingRule : null;
+    const savedFrequency = lockedFixedDebt?.frequency || form.frequency;
+    const savedDurationCount = lockedFixedDebt
+      ? lockedFixedDebt.duration_count
+      : (form.type === 'transfer' && durationCount > 0 ? durationCount : null);
+
     await onSave({
       name: form.name.trim(),
-      amount,
-      total_amount: form.type === 'transfer' ? totalAmount : null,
-      duration_count: form.type === 'transfer' && durationCount > 0 ? durationCount : null,
-      duration_unit: form.type === 'transfer' && durationCount > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null,
+      amount: lockedFixedDebt ? Number(lockedFixedDebt.amount) : amount,
+      total_amount: lockedFixedDebt ? lockedFixedDebt.total_amount : (form.type === 'transfer' ? totalAmount : null),
+      duration_count: savedDurationCount,
+      duration_unit: lockedFixedDebt
+        ? lockedFixedDebt.duration_unit
+        : (form.type === 'transfer' && durationCount > 0 ? (form.frequency === 'weekly' ? 'weeks' : form.frequency === 'yearly' ? 'years' : 'months') : null),
       completed_at: editingRule?.completed_at || null,
-      payment_mode: form.type === 'transfer' ? form.payment_mode : null,
-      type: form.type,
+      payment_mode: lockedFixedDebt ? 'fixed' : (form.type === 'transfer' ? form.payment_mode : null),
+      type: lockedFixedDebt ? 'transfer' : form.type,
       category_id: form.category_id === 'none' ? null : form.category_id,
       account_id: form.account_id === 'none' ? null : form.account_id,
       to_account_id:
         form.type === 'transfer' ? form.to_account_id : null,
-      frequency: form.frequency,
-      start_date:
-        form.type === 'transfer'
-          ? (editingRule?.start_date || form.next_due_date)
-          : (editingRule?.start_date || form.next_due_date),
-      next_due_date: form.next_due_date,
+      frequency: savedFrequency,
+      start_date: lockedFixedDebt
+        ? lockedFixedDebt.start_date
+        : (editingRule?.start_date || form.next_due_date),
+      next_due_date: lockedFixedDebt
+        ? lockedFixedDebt.next_due_date
+        : form.next_due_date,
       is_active: form.is_active,
       icon: form.icon,
       color: form.color,
@@ -415,7 +429,7 @@ function RecurringRuleModal({
               tabs={TYPE_TABS}
               value={form.type}
               onChange={(value) => {
-                if (hasPostedDebtHistory) return;
+                if (hasPostedDebtHistory || isFixedDebtLocked) return;
                 updateForm('type', value);
                 updateForm('category_id', 'none');
                 updateForm('account_id', 'none');
@@ -423,14 +437,14 @@ function RecurringRuleModal({
               }}
               size="sm"
               layoutId="recurring-type-highlight"
-              className={cn(hasPostedDebtHistory && 'pointer-events-none opacity-70')}
+              className={cn((hasPostedDebtHistory || isFixedDebtLocked) && 'pointer-events-none opacity-70')}
             />
           </div>
 
           {form.type === 'transfer' && !isCompletedDebt && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Payment mode</label>
-              <Select value={form.payment_mode} disabled={hasPostedDebtHistory} onValueChange={(value) => updateForm('payment_mode', value)}>
+              <Select value={form.payment_mode} disabled={hasPostedDebtHistory || isFixedDebtLocked} onValueChange={(value) => updateForm('payment_mode', value)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fixed">Fixed installments</SelectItem>
@@ -446,9 +460,11 @@ function RecurringRuleModal({
               <div>
                 <p className="text-sm font-semibold">Payment plan</p>
                 <p className="text-xs text-muted-foreground">
-                  {hasPostedDebtHistory
-                    ? 'Paid installments stay unchanged. You can adjust only the remaining payment plan.'
-                    : 'Set the original debt and installment schedule. The first installment is recorded on the selected start date.'}
+                  {isFixedDebtLocked
+                    ? 'Fixed installment terms are locked after creation. Payments may be posted early, but the amount, count, frequency, and installment dates do not change.'
+                    : hasPostedDebtHistory
+                      ? 'Paid installments stay unchanged. You can adjust only the remaining flexible payment plan.'
+                      : 'Set the original debt and installment schedule. The first installment is recorded on the selected start date.'}
                 </p>
               </div>
               {hasPostedDebtHistory && (
@@ -469,7 +485,7 @@ function RecurringRuleModal({
                   <Input value={form.total_amount} onChange={(event) => {
                     const total = Number(event.target.value || 0);
                     setForm((current) => ({ ...current, total_amount: event.target.value, amount: Number(current.duration_count) > 0 && total > 0 ? (total / Number(current.duration_count)).toFixed(2) : current.amount }));
-                  }} disabled={hasPostedDebtHistory} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
+                  }} disabled={hasPostedDebtHistory || isFixedDebtLocked} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{hasPostedDebtHistory ? 'Remaining installments' : 'Installments'}</label>
@@ -490,6 +506,7 @@ function RecurringRuleModal({
                           : current.amount,
                       }));
                     }}
+                    disabled={isFixedDebtLocked}
                     type="number"
                     min="1"
                     step="1"
@@ -510,6 +527,7 @@ function RecurringRuleModal({
                 <Input
                   value={form.amount}
                   onChange={(event) => updateForm('amount', event.target.value)}
+                  disabled={isFixedDebtLocked}
                   type="number"
                   min="0"
                   step="0.01"
@@ -522,7 +540,7 @@ function RecurringRuleModal({
               <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Frequency
               </label>
-              <Select value={form.frequency} onValueChange={(value) => updateForm('frequency', value)}>
+              <Select value={form.frequency} disabled={isFixedDebtLocked} onValueChange={(value) => updateForm('frequency', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -658,6 +676,7 @@ function RecurringRuleModal({
                 value={form.next_due_date}
                 onChange={(event) => updateForm('next_due_date', event.target.value)}
                 type="date"
+                disabled={isFixedDebtLocked}
                 className="min-w-0"
               />
           </div>}
