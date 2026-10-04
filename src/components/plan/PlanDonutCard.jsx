@@ -60,6 +60,15 @@ function DonutTooltip({ active, payload, currency, tab }) {
   );
 }
 
+function getEmptyLegendLabel(tab) {
+  if (tab?.key === 'income') return 'No income received yet';
+  if (tab?.key === 'expense') return 'No spending recorded yet';
+  if (tab?.key === 'savings') return 'No savings recorded yet';
+  if (tab?.key === 'debt') return 'No debt payments recorded yet';
+
+  return 'No activity recorded yet';
+}
+
 export default function PlanDonutCard({
   tab,
   donutChartData,
@@ -191,7 +200,7 @@ export default function PlanDonutCard({
           </div>
         ) : (
           <p className="text-center text-[11px] font-medium text-muted-foreground">
-            No tracked categories yet
+            {getEmptyLegendLabel(tab)}
           </p>
         )}
       </div>
