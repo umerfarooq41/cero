@@ -199,7 +199,6 @@ function ScheduledGoalRow({
             ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · Next ${goal.next_due_date || "No date"} · `
             : ""}
           Target {formatCurrencyElement(target, currency)}
-          {goal.target_date ? ` · Target date ${formatGoalDate(goal.target_date)}` : ""}
         </>
       }
       amount={
