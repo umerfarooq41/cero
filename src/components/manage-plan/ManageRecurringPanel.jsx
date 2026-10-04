@@ -228,6 +228,7 @@ function RecurringRuleModal({
     [postedDebtTransactions]
   );
   const hasPostedDebtHistory = isDebt && isEditing && postedDebtTransactions.length > 0;
+  const isCompletedDebt = isDebt && isEditing && Boolean(editingRule?.completed_at);
   const debtTotal = Math.max(0, Number(form.total_amount || 0));
   const debtInstallments = Math.max(0, Math.floor(Number(form.duration_count || 0)));
   const debtRemaining = Math.max(0, debtTotal - paidDebtAmount);
@@ -375,7 +376,9 @@ function RecurringRuleModal({
               {form.name.trim() || 'Recurring Rule'}
             </div>
             <div className="text-xs text-muted-foreground">
-              {isDebt && hasPostedDebtHistory ? (
+              {isCompletedDebt ? (
+                <>Completed · {formatCurrency ? formatCurrency(debtTotal) : debtTotal} paid in full</>
+              ) : isDebt && hasPostedDebtHistory ? (
                 <>
                   Fixed debt · {postedInstallments} of {debtInstallments || '—'} paid · {formatCurrency ? formatCurrency(debtRemaining) : debtRemaining} remaining
                 </>
@@ -424,7 +427,7 @@ function RecurringRuleModal({
             />
           </div>
 
-          {form.type === 'transfer' && (
+          {form.type === 'transfer' && !isCompletedDebt && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Payment mode</label>
               <Select value={form.payment_mode} disabled={hasPostedDebtHistory} onValueChange={(value) => updateForm('payment_mode', value)}>
@@ -438,7 +441,7 @@ function RecurringRuleModal({
             </div>
           )}
 
-          {form.type === 'transfer' && (
+          {form.type === 'transfer' && !isCompletedDebt && (
             <div className="space-y-3">
               <div>
                 <p className="text-sm font-semibold">Payment plan</p>
@@ -498,7 +501,7 @@ function RecurringRuleModal({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          {!isCompletedDebt && <div className="grid grid-cols-2 gap-3">
             {!(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) && (
               <div className="space-y-1.5">
                 <label className="whitespace-nowrap text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -546,9 +549,9 @@ function RecurringRuleModal({
               </Select>
             </div>
             )}
-          </div>
+          </div>}
 
-          {!(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) && (
+          {!isCompletedDebt && !(form.type === 'transfer' && form.payment_mode === 'fixed' && !hasPostedDebtHistory) && (
           <div className={cn('grid gap-3', form.type === 'transfer' ? 'grid-cols-1' : 'grid-cols-2')}>
             <div className="space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -605,7 +608,7 @@ function RecurringRuleModal({
           </div>
           )}
 
-          {form.type === 'transfer' && (
+          {form.type === 'transfer' && !isCompletedDebt && (
             <div className="grid grid-cols-2 gap-3">
               <div className="min-w-0 space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Pay from</label>
@@ -647,7 +650,7 @@ function RecurringRuleModal({
             </div>
           )}
 
-          <div className="min-w-0 space-y-1.5">
+          {!isCompletedDebt && <div className="min-w-0 space-y-1.5">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {form.type === 'transfer' ? (hasPostedDebtHistory ? 'Next installment' : 'First installment') : 'Next due date'}
               </label>
@@ -657,9 +660,9 @@ function RecurringRuleModal({
                 type="date"
                 className="min-w-0"
               />
-          </div>
+          </div>}
 
-          {isDebt && form.payment_mode === 'fixed' && debtInstallments > 0 && Number(form.amount || 0) > 0 && (
+          {!isCompletedDebt && isDebt && form.payment_mode === 'fixed' && debtInstallments > 0 && Number(form.amount || 0) > 0 && (
             <div className="rounded-2xl app-card-surface-soft px-4 py-3">
               <p className="text-sm font-semibold">
                 {hasPostedDebtHistory ? Math.max(0, debtInstallments - postedInstallments) : debtInstallments} {getRecurringFrequencyLabel(form.frequency).toLowerCase()} payments of {formatCurrency ? formatCurrency(Number(form.amount || 0)) : Number(form.amount || 0)}
@@ -672,7 +675,7 @@ function RecurringRuleModal({
             </div>
           )}
 
-          <label className="flex items-center justify-between border-t border-border/50 px-1 py-3 text-sm">
+          {!isCompletedDebt && <label className="flex items-center justify-between border-t border-border/50 px-1 py-3 text-sm">
             <span>
               <span className="font-medium">{isDebt ? 'Payment schedule active' : 'Active rule'}</span>
               <span className="block text-xs text-muted-foreground">
@@ -687,7 +690,7 @@ function RecurringRuleModal({
               onChange={(event) => updateForm('is_active', event.target.checked)}
               className="h-4 w-4 accent-primary"
             />
-          </label>
+          </label>}
 
           <details className="group border-t border-border/50">
             <summary className="flex cursor-pointer list-none items-center justify-between px-1 py-3">
@@ -755,7 +758,7 @@ function RecurringRuleModal({
           </div>
         </div>
 
-        <DialogFooter className="mt-4 border-t border-border/50 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <DialogFooter className="sticky bottom-0 z-10 -mx-6 mt-4 border-t border-border/50 bg-card/95 px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
