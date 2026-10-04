@@ -2,9 +2,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { recurringTransactionsApi, transactionsApi } from "@/lib/budgetData";
+import { accountsApi, recurringTransactionsApi, transactionsApi } from "@/lib/budgetData";
 import { supabase } from "@/lib/supabase";
 import {
+  calculateNextDueDate,
   getFixedDebtNextDueDate,
   getRecurringStatus,
   sortRecurringByDueDate,
@@ -13,6 +14,7 @@ import {
 import {
   countVerifiedRecurringOccurrencesByRule,
   getRecurringMonthlyPlanAmount,
+  getTransactionDeltas,
   isDueNow,
   normalizeRuleType,
   RECURRING_SECTIONS,
@@ -29,6 +31,32 @@ function invalidateScheduledQueries(queryClient) {
   queryClient.invalidateQueries({ queryKey: ["allocations"] });
   queryClient.invalidateQueries({ queryKey: ["all-allocations"] });
   queryClient.invalidateQueries({ queryKey: ["budget-summary"] });
+}
+
+export async function updateAccountBalances(transactionPayload, accounts = []) {
+  const deltas = getTransactionDeltas(transactionPayload, accounts);
+
+  await Promise.all(
+    Object.entries(deltas).map(([accountId, delta]) => {
+      const account = accounts.find((item) => item.id === accountId);
+      if (!account) return Promise.resolve();
+
+      return accountsApi.update(accountId, {
+        balance: (Number(account.balance) || 0) + delta,
+      });
+    }),
+  );
+}
+
+function shouldAdvanceLastPostedPointer(rule, postedForDate, allTransactions = []) {
+  const currentLatestOccurrence = allTransactions
+    .filter((transaction) => transaction.recurring_transaction_id === rule?.id)
+    .map((transaction) => String(transaction.recurring_posted_for_date || "").slice(0, 10))
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+
+  return !currentLatestOccurrence || String(postedForDate || "") >= currentLatestOccurrence;
 }
 
 function getSuggestedPaymentAmount(rule) {
