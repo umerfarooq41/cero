@@ -429,7 +429,6 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       debt: [],
     };
 
-    const recurringByCategory = new Map();
     const standaloneRecurring = [];
 
     recurringTransactions
@@ -445,22 +444,6 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         const scheduledAmount = getRecurringAmountForMonth(rule, currentMonth, allTransactions);
         const isGenerated = scheduledAmount !== null;
         const amount = isGenerated ? Number(scheduledAmount || 0) : Number(rule.amount || 0);
-
-        if (ruleCategoryId && leafCategoryIds.has(ruleCategoryId)) {
-          const current = recurringByCategory.get(ruleCategoryId) || {
-            amount: 0,
-            names: [],
-            descriptions: [],
-            isGenerated: true,
-          };
-
-          current.amount += amount;
-          current.isGenerated = current.isGenerated && isGenerated;
-          current.names.push(rule.name);
-          current.descriptions.push(getRecurringPlanDescription(rule));
-          recurringByCategory.set(ruleCategoryId, current);
-          return;
-        }
 
         standaloneRecurring.push({
           key: `recurring:${rule.id}`,
@@ -509,8 +492,6 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
         if (subs.length > 0) {
           const childRows = subs.map((sub) => {
-            const recurring = recurringByCategory.get(sub.id);
-
             return {
               key: `category:${sub.id}`,
               id: sub.id,
@@ -521,12 +502,10 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
               color: sub.color || parent.color,
               isSubcategory: true,
               parentColor: parent.color,
-              sourceType: recurring ? 'recurring' : null,
-              isGenerated: Boolean(recurring?.isGenerated),
-              suggestedAmount: recurring?.amount || 0,
-              description: recurring
-                ? [...new Set(recurring.descriptions)].join(' · ')
-                : '',
+              sourceType: 'category',
+              isGenerated: false,
+              suggestedAmount: 0,
+              description: '',
             };
           });
 
@@ -545,8 +524,6 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           return;
         }
 
-        const recurring = recurringByCategory.get(parent.id);
-
         result[type].push({
           key: `category:${parent.id}`,
           id: parent.id,
@@ -555,12 +532,10 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           type,
           icon: parent.icon,
           color: parent.color,
-          sourceType: recurring ? 'recurring' : null,
-          isGenerated: Boolean(recurring?.isGenerated),
-          suggestedAmount: recurring?.amount || 0,
-          description: recurring
-            ? [...new Set(recurring.descriptions)].join(' · ')
-            : '',
+          sourceType: 'category',
+          isGenerated: false,
+          suggestedAmount: 0,
+          description: '',
         });
       });
     });
