@@ -13,10 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  formatGoalDate,
   getGoalProgress,
   getGoalRemaining,
-  getGoalStatus,
 } from "@/lib/goals";
 import ScheduledItemCard, { ScheduledSectionCard } from "./ScheduledItemCard";
 
@@ -151,10 +149,8 @@ function ScheduledGoalRow({
   const progress = getGoalProgress(goal);
   const target = Number(goal.target_amount || 0);
   const remaining = getGoalRemaining(goal);
-  const status = getGoalStatus(goal);
   const color = goal.color_key || "#276FE4";
   const isCompleted = remaining <= 0 || progress >= 100;
-  const statusLabel = status.key === "due" ? "Target passed" : status.label;
   const missingAccounts = !fromAccount || !toAccount;
   const plannedAmountRaw = goal.month_planned_amount;
   const plannedThisMonth = Number(plannedAmountRaw || 0);
@@ -163,7 +159,6 @@ function ScheduledGoalRow({
   const monthRemaining = hasMonthlyPlan
     ? Math.max(0, plannedThisMonth - contributedThisMonth)
     : null;
-  const isMonthDone = !isCompleted && hasMonthlyPlan && monthRemaining <= 0;
   const isFixed = (goal.contribution_mode || "flexible") === "fixed";
   const displayAmount = isFixed
     ? Math.min(Number(goal.fixed_contribution_amount || 0), remaining)
@@ -224,9 +219,6 @@ function ScheduledGoalRow({
       }
       meta={
         <>
-          {isFixed && goal.duration_count
-            ? `Contribution ${Math.min(totalContributions, completedContributions + 1)} of ${totalContributions} · Next ${goal.next_due_date || "No date"} · `
-            : ""}
           {formatCurrencyElement(Math.max(0, target - remaining), currency)} / {Number(target).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </>
       }
