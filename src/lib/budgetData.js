@@ -23,23 +23,63 @@ function logAndThrow(label, error) {
   }
 }
 
+const LIST_PAGE_SIZE = 1000;
+
 export async function listRows(table, { orderBy = "created_at", ascending = false, filters = {} } = {}) {
   const userId = await currentUserId();
-  let query = supabase.from(table).select("*").eq("user_id", userId);
+  const rows = [];
 
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      query = query.eq(key, value);
+  for (let from = 0; ; from += LIST_PAGE_SIZE) {
+    let query = supabase
+      .from(table)
+      .select("*")
+      .eq("user_id", userId);
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        query = query.eq(key, value);
+      }
+    });
+
+    if (orderBy) {
+      query = query.order(orderBy, { ascending });
     }
-  });
 
-  if (orderBy) {
-    query = query.order(orderBy, { ascending });
+    const { data, error } = await query.range(from, from + LIST_PAGE_SIZE - 1);
+    logAndThrow(`Supabase ${table} list error:`, error);
+
+    const page = data || [];
+    rows.push(...page);
+
+    if (page.length < LIST_PAGE_SIZE) break;
   }
 
-  const { data, error } = await query;
-  logAndThrow(`Supabase ${table} list error:`, error);
-  return data || [];
+  return rows;
+}
+
+async function listTransactionsByDateRange(startDate, endDate) {
+  const userId = await currentUserId();
+  const rows = [];
+
+  for (let from = 0; ; from += LIST_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("date", startDate)
+      .lte("date", endDate)
+      .order("date", { ascending: false })
+      .range(from, from + LIST_PAGE_SIZE - 1);
+
+    logAndThrow("Supabase transactions date-range list error:", error);
+
+    const page = data || [];
+    rows.push(...page);
+
+    if (page.length < LIST_PAGE_SIZE) break;
+  }
+
+  return rows;
 }
 
 export async function createRow(table, values) {
@@ -101,6 +141,7 @@ export const categoriesApi = {
 
 export const transactionsApi = {
   list: () => listRows("transactions", { orderBy: "date", ascending: false }),
+  listByDateRange: (startDate, endDate) => listTransactionsByDateRange(startDate, endDate),
   create: (values) => createRow("transactions", values),
   update: (id, values) => updateRow("transactions", id, values),
   delete: (id) => deleteRow("transactions", id),
