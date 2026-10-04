@@ -36,11 +36,9 @@ import {
   useAccounts,
   useAllTransactions,
   useCategories,
-  useSavingsGoals,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
-import { accountsApi, transactionsApi } from '@/lib/budgetData';
-import { deleteTransactionWithEffects } from '@/lib/transactionEffects';
+import { supabase } from '@/lib/supabase';
 import { getCurrencyCode, getCurrencySymbol } from '@/lib/currencies';
 
 const typeOptions = [
@@ -108,39 +106,6 @@ function TransactionTypeSelector({ value, onChange }) {
   );
 }
 
-function addDelta(deltas, accountId, amount) {
-  if (!accountId || !amount) return;
-  deltas[accountId] = (deltas[accountId] || 0) + amount;
-}
-
-function getTransactionDeltas(transaction, accounts) {
-  const deltas = {};
-  const amount = Number(transaction.amount) || 0;
-
-  const source = accounts.find((account) => account.id === transaction.account_id);
-  const destination = accounts.find((account) => account.id === transaction.to_account_id);
-
-  if (source) {
-    const sourceDelta =
-      transaction.type === 'income'
-        ? source.category === 'liability'
-          ? -amount
-          : amount
-        : source.category === 'liability'
-          ? amount
-          : -amount;
-
-    addDelta(deltas, source.id, sourceDelta);
-  }
-
-  if (transaction.type === 'transfer' && destination) {
-    const destinationDelta = destination.category === 'liability' ? -amount : amount;
-    addDelta(deltas, destination.id, destinationDelta);
-  }
-
-  return deltas;
-}
-
 function normalizeCategoryType(type) {
   if (type === 'saving') return 'savings';
   if (type === 'liability') return 'debt';
@@ -182,7 +147,6 @@ export default function AddTransaction() {
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: allTransactions = [] } = useAllTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
 
   const existingTransaction = allTransactions.find((transaction) => transaction.id === id);
   const currency = useCurrency();
@@ -351,37 +315,26 @@ export default function AddTransaction() {
         to_account_id: type === 'transfer' ? toAccountId || null : null,
       };
 
+      const rpcName = isEditing
+        ? 'cero_update_transaction'
+        : 'cero_create_transaction';
+
+      const rpcPayload = {
+        p_amount: data.amount,
+        p_type: data.type,
+        p_date: data.date,
+        p_account_id: data.account_id,
+        p_to_account_id: data.to_account_id,
+        p_category_id: data.category_id,
+        p_note: data.note,
+      };
+
       if (isEditing) {
-        await transactionsApi.update(id, data);
-      } else {
-        await transactionsApi.create(data);
+        rpcPayload.p_transaction_id = id;
       }
 
-      const newDeltas = getTransactionDeltas(data, accounts);
-      const oldDeltas =
-        isEditing && existingTransaction
-          ? getTransactionDeltas(existingTransaction, accounts)
-          : {};
-
-      const allAccountIds = new Set([
-        ...Object.keys(newDeltas),
-        ...Object.keys(oldDeltas),
-      ]);
-
-      const balanceUpdates = [...allAccountIds].map((changedAccountId) => {
-        const account = accounts.find((item) => item.id === changedAccountId);
-        if (!account) return Promise.resolve();
-
-        const delta =
-          (newDeltas[changedAccountId] || 0) -
-          (oldDeltas[changedAccountId] || 0);
-
-        return accountsApi.update(changedAccountId, {
-          balance: (Number(account.balance) || 0) + delta,
-        });
-      });
-
-      await Promise.all(balanceUpdates);
+      const { error } = await supabase.rpc(rpcName, rpcPayload);
+      if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
@@ -409,11 +362,11 @@ export default function AddTransaction() {
     setDeleting(true);
 
     try {
-      await deleteTransactionWithEffects({
-        transaction: existingTransaction,
-        accounts,
-        savingsGoals,
+      const { error } = await supabase.rpc('cero_delete_transaction', {
+        p_transaction_id: existingTransaction.id,
       });
+
+      if (error) throw error;
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['transactions'] }),
@@ -712,8 +665,8 @@ export default function AddTransaction() {
 
           <div className="space-y-3 px-6 py-5">
             <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm leading-6 text-muted-foreground">
-              Linked goal contribution effects will also be reversed when this transaction
-              belongs to a savings goal.
+              Recurring and goal-linked transactions are protected and must be changed through
+              their own recurring or goal workflow.
             </div>
           </div>
 
