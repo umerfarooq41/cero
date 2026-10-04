@@ -12,12 +12,14 @@ import { format } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import {
   useBudgetSummary,
+  useAllocations,
   useAllTransactions,
   useRecurringTransactions,
   useSavingsGoals,
 } from '@/hooks/useBudgetData';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { attachGoalFundingProgress } from '@/lib/goals';
+import { buildPlanTotals } from '@/lib/planData';
 
 const validTabs = new Set(['overview', 'reflect']);
 
@@ -41,6 +43,7 @@ export default function Dashboard() {
   const transactions = budget.transactions || [];
   const categories = budget.categories || [];
   const accounts = budget.accounts || [];
+  const { data: allocations = [] } = useAllocations(currentMonth);
   const { data: recurringTransactions = [] } = useRecurringTransactions();
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { data: allTransactions = [] } = useAllTransactions();
@@ -49,6 +52,41 @@ export default function Dashboard() {
     [allTransactions, savingsGoals]
   );
   const formatCurrency = useCurrencyFormatter();
+
+  const planTotals = useMemo(
+    () =>
+      buildPlanTotals({
+        allocations,
+        categories,
+        savingsGoals,
+        recurringTransactions,
+        allTransactions,
+        transactions,
+        currentMonth,
+      }),
+    [
+      allocations,
+      allTransactions,
+      categories,
+      currentMonth,
+      recurringTransactions,
+      savingsGoals,
+      transactions,
+    ]
+  );
+
+  const dashboardBudget = useMemo(
+    () => ({
+      ...budget,
+      totalPlannedIncome: planTotals.income,
+      totalPlannedExpenses: planTotals.expense,
+      totalPlannedSavings: planTotals.savings,
+      totalPlannedDebt: planTotals.debt,
+      assignablePlannedDebt: planTotals.assignableDebt,
+      leftToAllocate: planTotals.leftToAllocate,
+    }),
+    [budget, planTotals]
+  );
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
@@ -62,7 +100,7 @@ export default function Dashboard() {
       <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:px-8 lg:py-8">
         <div className="hidden animate-child lg:block">
           <DashboardHero
-            budget={budget}
+            budget={dashboardBudget}
             transactions={transactions}
             recurringTransactions={recurringTransactions}
             goals={goalsWithFunding}
@@ -82,7 +120,7 @@ export default function Dashboard() {
               ) : (
                 <DashboardOverview
                   currentMonth={currentMonth}
-                  budget={budget}
+                  budget={dashboardBudget}
                   transactions={transactions}
                   categories={categories}
                   accounts={accounts}
