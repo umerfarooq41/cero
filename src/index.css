@@ -981,6 +981,67 @@ main,
     box-shadow: none !important;
   }
 
+  /* Shared appearance controls */
+  .app-color-swatch {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 2.25rem;
+    border-radius: 9999px;
+    border: 2px solid transparent !important;
+    box-shadow: none !important;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  }
+
+  .app-color-swatch.is-selected {
+    transform: scale(0.88);
+    border-color: hsl(var(--card)) !important;
+    box-shadow: 0 0 0 2px hsl(var(--foreground) / 0.72) !important;
+  }
+
+  .app-color-swatch.is-selected::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 0.48rem;
+    height: 0.8rem;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: translate(-50%, -60%) rotate(45deg);
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.35));
+  }
+
+  .app-icon-choice {
+    display: flex;
+    aspect-ratio: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    border: 0 !important;
+    border-radius: 0.75rem;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .app-icon-choice.is-selected {
+    background: hsl(var(--primary) / 0.10) !important;
+  }
+
+
+  /* Only explicit surface classes are cards. Rounded layout helpers do not get
+     promoted into outlined cards automatically. */
+  :where(
+    [class*='rounded-2xl'][class*='bg-card'],
+    [class*='rounded-3xl'][class*='bg-card'],
+    [class*='rounded-xl'][class*='bg-card'],
+    [class*='rounded-2xl'][class*='bg-background'],
+    [class*='rounded-3xl'][class*='bg-background'],
+    [class*='rounded-xl'][class*='bg-background']
+  ):not(.app-card-surface):not(.app-card-surface-strong):not(.app-floating-surface) {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
   .app-floating-surface,
   .app-chart-tooltip-surface,
   [data-radix-popper-content-wrapper] :where([role='dialog'], [role='menu'], [role='listbox'], [data-radix-select-content]) {
