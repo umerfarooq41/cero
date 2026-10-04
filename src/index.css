@@ -965,6 +965,22 @@ main,
     -webkit-backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
   }
 
+  /* Surface hierarchy: nested surfaces use tone rather than a second outline. */
+  .app-card-surface-soft {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .app-card-surface .app-card-surface-soft,
+  .app-card-surface-strong .app-card-surface-soft,
+  .app-card-surface .app-card-surface,
+  .app-card-surface-strong .app-card-surface {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+
   .app-floating-surface,
   .app-chart-tooltip-surface,
   [data-radix-popper-content-wrapper] :where([role='dialog'], [role='menu'], [role='listbox'], [data-radix-select-content]) {
