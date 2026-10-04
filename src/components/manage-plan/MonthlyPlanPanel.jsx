@@ -325,13 +325,13 @@ function PlanAmountRow({
         </div>
 
         {(row.description || lastMonthHint > 0) && (
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+          <div className="mt-0.5 flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap text-xs text-muted-foreground">
             {row.description && (
               <span className="truncate">{row.description}</span>
             )}
 
             {lastMonthHint > 0 && (
-              <span className="tabular-nums">
+              <span className="min-w-0 truncate tabular-nums">
                 Last month: {formatCurrency(lastMonthHint)}
               </span>
             )}
