@@ -227,9 +227,7 @@ function ScheduledRecurringRow({
         <>
           {isDebt && debtProgressMeta
             ? debtProgressMeta
-            : <>Next {formatRecurringDate(rule.next_due_date)}
-              {account ? ` · ${account.name}` : ""}
-            </>}
+            : account?.name || "Account"}
         </>
       }
       amount={formatCurrencyElement(displayAmount, currency)}
