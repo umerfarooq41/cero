@@ -141,6 +141,14 @@ export default function DashboardOverview({
   const navigate = useNavigate();
 
   const goalsWithFunding = goals;
+  const recurringById = useMemo(
+    () => new Map(recurringTransactions.map((rule) => [rule.id, rule])),
+    [recurringTransactions]
+  );
+  const goalsById = useMemo(
+    () => new Map(goals.map((goal) => [goal.id, goal])),
+    [goals]
+  );
 
   const plannedOutflow =
     Number(budget.totalPlannedExpenses || 0) +
@@ -288,6 +296,8 @@ export default function DashboardOverview({
                       category={getTransactionCategory(transaction, categories)}
                       account={getTransactionAccount(transaction, accounts)}
                       toAccount={getTransactionToAccount(transaction, accounts)}
+                      recurringRule={recurringById.get(transaction.recurring_transaction_id)}
+                      goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                       formatCurrency={formatCurrency}
                       compactSourceBadges
                       flush
