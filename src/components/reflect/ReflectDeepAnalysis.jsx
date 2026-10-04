@@ -8,6 +8,7 @@ import {
   getGoalRemaining,
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
+  todayIsoDate,
 } from '@/lib/goals';
 import ReflectCard from './ReflectCard.jsx';
 import {
@@ -204,7 +205,7 @@ function getGoalTrackState(goal) {
     return { label: 'No deadline', tone: 'default' };
   }
 
-  const fallbackStart = new Date().toISOString().slice(0, 10);
+  const fallbackStart = todayIsoDate();
   const start = new Date(
     `${goal.start_date || goal.created_at?.slice(0, 10) || fallbackStart}T00:00:00`
   );
