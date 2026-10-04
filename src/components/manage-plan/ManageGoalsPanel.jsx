@@ -46,6 +46,7 @@ import {
   formatGoalDate,
   getGoalProgress,
   getGoalRemaining,
+  todayIsoDate,
   getGoalStatus,
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
@@ -98,7 +99,7 @@ const emptyGoalForm = () => ({
   target_date: '',
   duration_count: '',
   frequency: 'monthly',
-  start_date: new Date().toISOString().slice(0, 10),
+  start_date: todayIsoDate(),
   contribution_mode: 'flexible',
   from_account_id: 'none',
   to_account_id: 'none',
@@ -140,7 +141,7 @@ function addGoalDuration(count, unit) {
   if (unit === 'weeks') date.setDate(date.getDate() + amount * 7);
   else if (unit === 'years') date.setFullYear(date.getFullYear() + amount);
   else date.setMonth(date.getMonth() + amount);
-  return date.toISOString().slice(0, 10);
+  return todayIsoDate(date);
 }
 
 function getFixedGoalTargetDate(startDate, count, frequency) {
