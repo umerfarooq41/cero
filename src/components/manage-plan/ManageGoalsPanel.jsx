@@ -610,7 +610,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
           </h3>
 
           <div className={cn(
-            'shrink-0 text-right text-sm font-semibold tabular-nums',
+            'shrink-0 text-center text-sm font-medium tabular-nums',
             isCompleted ? 'text-green-700 dark:text-green-400' : 'text-foreground'
           )}>
             {isCompleted ? 'Completed' : displayAmount === null ? 'Set target' : formatCurrency(displayAmount)}
