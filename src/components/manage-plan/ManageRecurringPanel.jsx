@@ -860,10 +860,19 @@ function RecurringActionSheet({ rule, open, onClose, onEdit, onArchive, onDelete
   );
 }
 
-function RecurringRow({ rule, account, category, onAction, formatCurrency }) {
+function RecurringRow({ rule, account, category, onAction, formatCurrency, paidAmount = 0, postedOccurrences = 0 }) {
   const status = getRecurringStatus(rule);
   const fallbackIcon = normalizeRuleType(rule.type) === 'income' ? 'income' : normalizeRuleType(rule.type) === 'transfer' ? 'loan' : 'receipt';
   const amount = Math.abs(Number(rule.amount || 0));
+  const type = normalizeRuleType(rule.type);
+  const isDebt = type === 'transfer';
+  const isFixedDebt = isDebt && (rule.payment_mode || 'fixed') === 'fixed';
+  const debtTotal = Math.max(0, Number(rule.total_amount || 0));
+  const debtMeta = isFixedDebt && rule.duration_count
+    ? `${Math.min(Number(rule.duration_count), postedOccurrences)} of ${rule.duration_count} paid`
+    : isDebt && debtTotal > 0
+      ? `${formatCurrency(Math.min(paidAmount, debtTotal))} / ${formatCurrency(debtTotal)} paid`
+      : null;
 
   return (
     <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
@@ -888,8 +897,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency }) {
         </p>
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          Next {formatRecurringDate(rule.next_due_date)}
-          {account ? ` · ${account.name}` : ''}
+          {debtMeta || account?.name || 'Account'}
         </p>
       </div>
 
@@ -905,7 +913,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency }) {
   );
 }
 
-function RecurringSection({ type, label, rules, accounts, categories, defaultExpanded = false, onAddNew, onAction, formatCurrency }) {
+function RecurringSection({ type, label, rules, accounts, categories, defaultExpanded = false, onAddNew, onAction, formatCurrency, recurringPaidByRule, verifiedOccurrencesByRule }) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
   const Icon = TYPE_ICONS[type] || ArrowUpRight;
 
@@ -977,6 +985,8 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
                     category={categories.find((category) => category.id === rule.category_id)}
                     onAction={onAction}
                     formatCurrency={formatCurrency}
+                    paidAmount={Math.max(0, Number(recurringPaidByRule?.[rule.id] || 0))}
+                    postedOccurrences={Math.max(0, Number(verifiedOccurrencesByRule?.[rule.id] || 0))}
                   />
                 ))}
               </div>
@@ -1203,15 +1213,15 @@ export default function ManageRecurringPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-3xl app-card-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl app-card-surface p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-semibold">Recurring</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h2 className="text-sm font-semibold">Recurring</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
             Create and manage predictable income, bills, subscriptions, and debt payments. Posting happens from Transactions → Scheduled.
           </p>
         </div>
-        <Button onClick={() => openNew('expense')} className="rounded-2xl">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button onClick={() => openNew('expense')} size="sm" className="gap-2 rounded-xl text-xs font-semibold">
+          <Plus className="h-3.5 w-3.5" />
           Add Rule
         </Button>
       </div>
@@ -1227,6 +1237,8 @@ export default function ManageRecurringPanel() {
           onAddNew={openNew}
           onAction={handleAction}
           formatCurrency={formatCurrency}
+          recurringPaidByRule={recurringPaidByRule}
+          verifiedOccurrencesByRule={verifiedOccurrencesByRule}
         />
 
         <RecurringSection
@@ -1239,6 +1251,8 @@ export default function ManageRecurringPanel() {
           onAddNew={openNew}
           onAction={handleAction}
           formatCurrency={formatCurrency}
+          recurringPaidByRule={recurringPaidByRule}
+          verifiedOccurrencesByRule={verifiedOccurrencesByRule}
         />
 
         <RecurringSection
@@ -1251,6 +1265,8 @@ export default function ManageRecurringPanel() {
           onAddNew={openNew}
           onAction={handleAction}
           formatCurrency={formatCurrency}
+          recurringPaidByRule={recurringPaidByRule}
+          verifiedOccurrencesByRule={verifiedOccurrencesByRule}
         />
 
         {completedDebtRules.length > 0 && (
