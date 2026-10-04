@@ -38,6 +38,8 @@ import {
 import {
   useAccounts,
   useCategories,
+  useRecurringTransactions,
+  useSavingsGoals,
   useTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -337,6 +339,17 @@ export default function TransactionHistory() {
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
+  const { data: savingsGoals = [] } = useSavingsGoals();
+
+  const recurringById = useMemo(
+    () => new Map(recurringTransactions.map((rule) => [rule.id, rule])),
+    [recurringTransactions]
+  );
+  const goalsById = useMemo(
+    () => new Map(savingsGoals.map((goal) => [goal.id, goal])),
+    [savingsGoals]
+  );
 
   const formatCurrency = (amount) => (
     <CurrencyAmount amount={amount} currency={currency} compact />
@@ -608,6 +621,8 @@ export default function TransactionHistory() {
                     toAccount={accounts.find(
                       (account) => account.id === transaction.to_account_id
                     )}
+                    recurringRule={recurringById.get(transaction.recurring_transaction_id)}
+                    goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                     formatCurrency={formatCurrency}
                     onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
                   />
