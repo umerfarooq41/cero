@@ -30,6 +30,7 @@ import {
   useAccounts,
   useAllTransactions,
   useCategories,
+  useRecurringTransactions,
   useSavingsGoals,
 } from '@/hooks/useBudgetData';
 
@@ -174,6 +175,10 @@ export default function AccountDetail() {
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: categories = [] } = useCategories();
   const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
+
+  const recurringById = new Map(recurringTransactions.map((rule) => [rule.id, rule]));
+  const goalsById = new Map(savingsGoals.map((goal) => [goal.id, goal]));
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [replacementAccountId, setReplacementAccountId] = useState('');
@@ -378,6 +383,8 @@ export default function AccountDetail() {
                   toAccount={accounts.find(
                     (a) => a.id === transaction.to_account_id
                   )}
+                  recurringRule={recurringById.get(transaction.recurring_transaction_id)}
+                  goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                   formatCurrency={formatCurrency}
                   onDelete={() => handleDeleteTransaction(transaction.id)}
                   onClick={() =>
