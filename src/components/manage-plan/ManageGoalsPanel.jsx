@@ -48,7 +48,6 @@ import {
   getGoalRemaining,
   getFixedGoalTargetDate,
   todayIsoDate,
-  getGoalStatus,
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
 } from '@/lib/goals';
