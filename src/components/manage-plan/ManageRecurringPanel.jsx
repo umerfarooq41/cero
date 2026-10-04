@@ -883,11 +883,11 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
       />
 
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start justify-between gap-2">
           <div className="min-w-0 truncate text-sm font-semibold leading-tight">
             {rule.name}
           </div>
-          <div className="shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+          <div className="ml-auto shrink-0 text-right text-sm font-medium tabular-nums text-foreground">
             {formatCurrency(amount)}
           </div>
         </div>
@@ -904,7 +904,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
       <button
         type="button"
         onClick={() => onAction(rule)}
-        className="-mr-1 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        className="-ml-1 -mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
         aria-label={`Open actions for ${rule.name}`}
       >
         <MoreVertical className="h-4 w-4" />
