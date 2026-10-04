@@ -249,7 +249,7 @@ export default function AddAccount() {
                   type="button"
                   onClick={() => setColor(item)}
                   className={cn(
-                    'h-8 w-8 rounded-xl border border-border transition-all',
+                    'app-color-swatch',
                     color === item
                       ? 'scale-110 ring-2 ring-primary ring-offset-2'
                       : 'hover:scale-105'
