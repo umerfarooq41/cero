@@ -77,7 +77,7 @@ export default function PlanBreakdownRow({ item, currency }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1.5">
-            <p className="min-w-0 truncate text-sm font-bold leading-5 text-foreground">
+            <p className="min-w-0 truncate text-sm font-medium leading-5 text-foreground">
               {item.name}
             </p>
 
@@ -87,9 +87,9 @@ export default function PlanBreakdownRow({ item, currency }) {
             />
           </div>
 
-          <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] font-medium leading-4 text-muted-foreground tabular-nums">
+          <div className="mt-1 flex min-w-0 items-center gap-1 text-[10px] font-normal leading-3.5 text-muted-foreground tabular-nums">
             <span>{actionLabel}</span>
-            <span className="font-semibold text-muted-foreground">
+            <span className="font-normal text-muted-foreground">
               <PlanMoney amount={tracked} currency={currency} compact />
             </span>
             <span className="text-muted-foreground/70">·</span>
@@ -100,7 +100,7 @@ export default function PlanBreakdownRow({ item, currency }) {
         </div>
 
         <p
-          className="shrink-0 self-center text-right text-sm font-bold tabular-nums"
+          className="shrink-0 self-center text-right text-sm font-medium tabular-nums"
           style={{ color: amountColor }}
         >
           <PlanMoney amount={planned} currency={currency} compact />
