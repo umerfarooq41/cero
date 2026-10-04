@@ -3,15 +3,11 @@ import {
   goalContributionsApi,
   transactionsApi,
 } from '@/lib/budgetData';
-import { getDefaultSavingsCategory } from '@/lib/goals';
+import { getDefaultSavingsCategory, todayIsoDate } from '@/lib/goals';
 import {
   getTransactionDeltas,
   recalculateGoalCurrentAmount,
 } from '@/lib/transactionEffects';
-
-function todayIsoDate() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function safeAmount(value) {
   return Math.max(0, Number(value || 0));
