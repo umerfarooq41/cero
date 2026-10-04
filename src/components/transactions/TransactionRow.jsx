@@ -77,6 +77,8 @@ export default function TransactionRow({
   category,
   account,
   toAccount,
+  recurringRule,
+  goal,
   formatCurrency,
   onClick,
   compactSourceBadges = false,
@@ -114,23 +116,33 @@ export default function TransactionRow({
   );
 
   const accountName = account?.name || 'Account';
+  const destinationName = toAccount?.name || '';
   const transactionTypeLabel = formatTransactionType(transaction.type);
   const transferTitle = [accountName, toAccount?.name].filter(Boolean).join(' → ');
 
   const noteLabel = cleanGeneratedNote(transaction.note);
 
-  const transferDetailLabel = isGoalContribution
-    ? getGoalName(transaction, category)
-    : category?.name || noteLabel;
+  const goalName = goal?.name || getGoalName(transaction, category);
+  const recurringName = recurringRule?.name || noteLabel || category?.name;
+  const sourceName = isGoalContribution
+    ? goalName
+    : isRecurring
+      ? recurringName
+      : null;
 
   const title = isTransfer
-    ? transferTitle || 'Transfer'
-    : category?.name || noteLabel || 'Uncategorized';
+    ? sourceName || transferTitle || 'Transfer'
+    : sourceName || category?.name || noteLabel || 'Uncategorized';
+
+  const movementLabel = [accountName, destinationName].filter(Boolean).join(' → ');
+  const transferKindLabel = isGoalContribution
+    ? 'Goal contribution'
+    : isRecurring && getTransferType(account, toAccount) === 'Debt'
+      ? 'Debt payment'
+      : 'Transfer';
 
   const primarySubtitle = isTransfer
-    ? transferDetailLabel
-      ? `Transfer - ${transferDetailLabel}`
-      : 'Transfer'
+    ? [movementLabel, transferKindLabel].filter(Boolean).join(' · ')
     : `${transactionTypeLabel} - ${accountName}`;
 
   const sourceBadgeType = isGoalContribution ? 'goal' : isRecurring ? 'recurring' : null;
@@ -186,7 +198,10 @@ export default function TransactionRow({
         </div>
 
         {primarySubtitle && (
-          <div className="truncate text-[11px] text-muted-foreground sm:text-xs">
+          <div
+            className="line-clamp-2 break-words pr-1 text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-4"
+            title={primarySubtitle}
+          >
             {primarySubtitle}
           </div>
         )}
