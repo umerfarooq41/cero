@@ -176,8 +176,13 @@ export default function useGoalItems({
       getGoalRemaining(selectedGoal),
     );
     const requestedAmount = Number(contributionAmount || 0);
+    const remainingAmount = getGoalRemaining(selectedGoal);
     if (isFixed && fixedAmount <= 0) {
       toast.error("This scheduled contribution is already complete");
+      return;
+    }
+    if (!isFixed && requestedAmount > remainingAmount) {
+      toast.error(`Maximum contribution is ${remainingAmount.toFixed(2)}`);
       return;
     }
     setSavingGoalId(selectedGoal.id);
@@ -234,6 +239,7 @@ export default function useGoalItems({
       closeDialog: closeContributionDialog,
       submit: submitContribution,
       suggestedAmount: getSuggestedContributionAmount(selectedGoal),
+      remainingAmount: selectedGoal ? getGoalRemaining(selectedGoal) : 0,
     },
   };
 }
