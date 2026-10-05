@@ -23,13 +23,17 @@ import ReflectInsightCard from '@/components/reflect/ReflectInsightCard.jsx';
 import {
   useAccounts,
   useAllTransactions,
+  useAllocations,
   useBudgetSummary,
   useCategories,
+  useRecurringTransactions,
   useSavingsGoals,
   useUserSettings,
   useYearBudgetSummary,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
+import { buildPlanTotals } from '@/lib/planData';
+import { filterTransactionsByBudgetMonth } from '@/lib/budgetLogic';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
 
 const tooltipStyle = {
@@ -313,6 +317,7 @@ export default function DashboardReflect() {
   const { data: accounts = [] } = useAccounts();
   const { data: settings = {} } = useUserSettings();
   const { data: savingsGoals = [] } = useSavingsGoals();
+  const { data: recurringTransactions = [] } = useRecurringTransactions();
 
   const isYearView = periodMode === 'year';
   const analysisMonth = isYearView ? 'all' : selectedMonth;
@@ -323,6 +328,54 @@ export default function DashboardReflect() {
 
   const monthBudget = useBudgetSummary(currentMonthKey);
   const yearBudget = useYearBudgetSummary(selectedYear);
+  const { data: monthAllocations = [] } = useAllocations(currentMonthKey);
+
+  const monthTransactions = useMemo(
+    () =>
+      currentMonthKey
+        ? filterTransactionsByBudgetMonth(allTransactions, currentMonthKey, settings)
+        : [],
+    [allTransactions, currentMonthKey, settings]
+  );
+
+  const monthPlanTotals = useMemo(
+    () =>
+      currentMonthKey
+        ? buildPlanTotals({
+            allocations: monthAllocations,
+            categories,
+            savingsGoals,
+            recurringTransactions,
+            allTransactions,
+            transactions: monthTransactions,
+            currentMonth: currentMonthKey,
+          })
+        : null,
+    [
+      allTransactions,
+      categories,
+      currentMonthKey,
+      monthAllocations,
+      monthTransactions,
+      recurringTransactions,
+      savingsGoals,
+    ]
+  );
+
+  const reflectBudget = useMemo(() => {
+    if (isYearView || !monthPlanTotals) return yearBudget;
+
+    return {
+      ...monthBudget,
+      transactions: monthTransactions,
+      totalPlannedIncome: monthPlanTotals.income,
+      totalPlannedExpenses: monthPlanTotals.expense,
+      totalPlannedSavings: monthPlanTotals.savings,
+      totalPlannedDebt: monthPlanTotals.debt,
+      assignablePlannedDebt: monthPlanTotals.assignableDebt,
+      leftToAllocate: monthPlanTotals.leftToAllocate,
+    };
+  }, [isYearView, monthBudget, monthPlanTotals, monthTransactions, yearBudget]);
 
   const analysis = useReflectAnalysis({
     selectedYear,
@@ -330,7 +383,7 @@ export default function DashboardReflect() {
     allTransactions,
     accounts,
     categories,
-    budget: isYearView ? yearBudget : monthBudget,
+    budget: reflectBudget,
     settings,
   });
 
