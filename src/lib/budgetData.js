@@ -842,26 +842,10 @@ export async function exportFinancialReport() {
 }
 
 export async function resetUserData() {
-  const userId = await currentUserId();
-
-  // Delete child/source rows first so foreign-key references do not block a full reset.
-  // This keeps the authenticated user account, but clears every Cero data table
-  // used by the app before Settings recreates a fresh onboarding settings row.
-  const tablesInDeleteOrder = [
-    "goal_contributions",
-    "budget_plans",
-    "transactions",
-    "recurring_transactions",
-    "savings_goals",
-    "accounts",
-    "categories",
-    "user_settings",
-  ];
-
-  for (const table of tablesInDeleteOrder) {
-    const { error } = await supabase.from(table).delete().eq("user_id", userId);
-    logAndThrow(`Supabase ${table} reset error:`, error);
-  }
+  // Reset all Cero data atomically in the database. If any delete fails,
+  // PostgreSQL rolls the entire reset back instead of leaving partial data.
+  const { error } = await supabase.rpc("cero_reset_user_data");
+  logAndThrow("Supabase reset error:", error);
 
   return true;
 }
