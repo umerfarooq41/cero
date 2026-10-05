@@ -902,7 +902,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
         {formatCurrency(amount)}
       </div>
 
-      <div className="-ml-1 flex w-6 shrink-0 items-center justify-end">
+      <div className="-ml-2 flex w-6 shrink-0 items-center justify-end">
         <button
           type="button"
           onClick={() => onAction(rule)}
@@ -1317,13 +1317,12 @@ export default function ManageRecurringPanel() {
                 const liability = accounts.find((account) => account.id === rule.to_account_id);
                 const category = categories.find((item) => item.id === rule.category_id);
                 return (
-                  <div key={rule.id} className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
-                    <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
+                  <div key={rule.id} className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+                    <div className="shrink-0 self-start">
+                      <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="truncate text-sm font-semibold">{rule.name}</div>
-                        <div className="shrink-0 text-sm font-semibold text-green-700 dark:text-green-400">Completed</div>
-                      </div>
+                      <div className="truncate text-sm font-semibold">{rule.name}</div>
                       <p className="mt-1 text-xs font-medium text-muted-foreground">
                         Completed{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
                       </p>
@@ -1332,14 +1331,19 @@ export default function ManageRecurringPanel() {
                         {liability ? ` · ${liability.name}` : ''}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleAction(rule)}
-                      className="-mr-1 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
-                      aria-label={`Open actions for ${rule.name}`}
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </button>
+                    <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium text-green-700 dark:text-green-400">
+                      Completed
+                    </div>
+                    <div className="-ml-2 flex w-6 shrink-0 items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={() => handleAction(rule)}
+                        className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+                        aria-label={`Open actions for ${rule.name}`}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
