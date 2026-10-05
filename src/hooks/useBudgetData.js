@@ -20,7 +20,6 @@ import {
   filterTransactionsByBudgetMonth,
   filterTransactionsByBudgetYear,
   findAutoSweepTargets,
-  getAutoSweepMarker,
   getBudgetMonthCloseDate,
   getCurrentBudgetMonth,
   getPreviousBudgetMonth,
@@ -29,6 +28,7 @@ import {
   isAutoSweepSurplusEnabled,
 } from '@/lib/budgetLogic';
 import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export function useCategories() {
   const { session } = useAuth();
@@ -497,27 +497,18 @@ export function useAutoSweepSurplus() {
           return;
         }
 
-        const marker = getAutoSweepMarker(closedMonth);
         const sweepDate = getBudgetMonthCloseDate(closedMonth, settings);
 
-        await transactionsApi.create({
-          amount: sweepAmount,
-          type: 'transfer',
-          date: sweepDate,
-          note: `${marker} Month-end surplus moved to savings`,
-          category_id: savingsCategory.id,
-          account_id: sourceAccount.id,
-          to_account_id: destinationAccount.id,
+        const { error } = await supabase.rpc('cero_post_auto_sweep', {
+          p_month: closedMonth,
+          p_amount: sweepAmount,
+          p_transaction_date: sweepDate,
+          p_source_account_id: sourceAccount.id,
+          p_destination_account_id: destinationAccount.id,
+          p_category_id: savingsCategory.id,
         });
 
-        await Promise.all([
-          accountsApi.update(sourceAccount.id, {
-            balance: (Number(sourceAccount.balance) || 0) - sweepAmount,
-          }),
-          accountsApi.update(destinationAccount.id, {
-            balance: (Number(destinationAccount.balance) || 0) + sweepAmount,
-          }),
-        ]);
+        if (error) throw error;
 
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
