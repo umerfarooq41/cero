@@ -373,6 +373,9 @@ function RecurringRuleModal({
       next_due_date: lockedFixedDebt
         ? lockedFixedDebt.next_due_date
         : form.next_due_date,
+      schedule_anchor_day: lockedFixedDebt
+        ? lockedFixedDebt.schedule_anchor_day
+        : Number(form.next_due_date.slice(8, 10)),
       is_active: form.is_active,
       icon: form.icon,
       color: form.color,
