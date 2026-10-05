@@ -875,14 +875,16 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
       : null;
 
   return (
-    <div className="group grid grid-cols-[auto_minmax(0,1fr)_6.75rem_2rem] items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
-      <CategoryIcon
-        icon={rule.icon || category?.icon || fallbackIcon}
-        color={rule.color || category?.color || COLORS[0]}
-        size="sm"
-      />
+    <div className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+      <div className="shrink-0 self-start">
+        <CategoryIcon
+          icon={rule.icon || category?.icon || fallbackIcon}
+          color={rule.color || category?.color || COLORS[0]}
+          size="sm"
+        />
+      </div>
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="min-w-0 truncate text-sm font-semibold leading-tight">
           {rule.name}
         </div>
@@ -896,18 +898,20 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
         </p>
       </div>
 
-      <div className="self-center w-full text-right text-sm font-medium tabular-nums text-foreground">
+      <div className="flex w-[6.75rem] shrink-0 items-center justify-end text-right text-sm font-medium tabular-nums text-foreground">
         {formatCurrency(amount)}
       </div>
 
-      <button
-        type="button"
-        onClick={() => onAction(rule)}
-        className="justify-self-end -mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
-        aria-label={`Open actions for ${rule.name}`}
-      >
-        <MoreVertical className="h-4 w-4" />
-      </button>
+      <div className="flex w-8 shrink-0 items-center justify-end">
+        <button
+          type="button"
+          onClick={() => onAction(rule)}
+          className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+          aria-label={`Open actions for ${rule.name}`}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
