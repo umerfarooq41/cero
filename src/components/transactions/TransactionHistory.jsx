@@ -429,6 +429,8 @@ export default function TransactionHistory() {
       transaction.note?.toLowerCase().includes(searchValue) ||
       fromAccount?.name?.toLowerCase().includes(searchValue) ||
       toAccount?.name?.toLowerCase().includes(searchValue) ||
+      transaction.account_name_snapshot?.toLowerCase().includes(searchValue) ||
+      transaction.to_account_name_snapshot?.toLowerCase().includes(searchValue) ||
       transaction.type?.toLowerCase().includes(searchValue) ||
       sourceLabels.some((label) => label.includes(searchValue));
 
