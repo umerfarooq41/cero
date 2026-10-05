@@ -199,6 +199,8 @@ export default function AccountDetail() {
     savingsGoals.some(
       (goal) => goal.from_account_id === accountId || goal.to_account_id === accountId
     );
+  const accountHasBalance = Math.abs(Number(account?.balance) || 0) > 0;
+  const accountNeedsReplacement = accountHasFutureReferences || accountHasBalance;
 
   const handleDeleteTransaction = async (id) => {
     const transaction = allTransactions.find((item) => item.id === id);
@@ -234,8 +236,8 @@ export default function AccountDetail() {
   const handleDeleteAccount = async () => {
     if (!account) return;
 
-    if (accountHasFutureReferences && !replacementAccountId) {
-      toast.error('Select another account for recurring rules or goals');
+    if (accountNeedsReplacement && !replacementAccountId) {
+      toast.error('Select another account before deleting this account');
       return;
     }
 
@@ -404,15 +406,17 @@ export default function AccountDetail() {
               </DialogTitle>
 
               <p className="text-sm text-muted-foreground">
-                {accountHasFutureReferences
-                  ? 'This account is used by recurring rules or goals. Choose another account for future activity before deleting.'
-                  : accountTransactions.length > 0
-                    ? 'Historical transactions will be kept, but this account reference will be removed from them.'
-                    : 'This account is not in use and can be deleted safely.'}
+                {accountHasBalance
+                  ? 'This account has a remaining balance. Choose another account to receive that balance before deleting.'
+                  : accountHasFutureReferences
+                    ? 'This account is used by recurring rules or goals. Choose another account for future activity before deleting.'
+                    : accountTransactions.length > 0
+                      ? 'Historical transactions will be kept, but this account reference will be removed from them.'
+                      : 'This account is not in use and can be deleted safely.'}
               </p>
             </DialogHeader>
 
-            {accountHasFutureReferences && (
+            {accountNeedsReplacement && (
               <div className="space-y-2 py-2">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Replace account with
@@ -436,7 +440,9 @@ export default function AccountDetail() {
                 </Select>
 
                 <p className="text-xs text-muted-foreground">
-                  Recurring rules and goals will use this account for future activity. Historical transactions will not be reassigned.
+                  {accountHasBalance
+                    ? 'The remaining balance will move to this account. Recurring rules and goals will also move here where needed. Historical transactions will not be reassigned.'
+                    : 'Recurring rules and goals will use this account for future activity. Historical transactions will not be reassigned.'}
                 </p>
               </div>
             )}
@@ -454,7 +460,7 @@ export default function AccountDetail() {
                 onClick={handleDeleteAccount}
                 disabled={
                   deleting ||
-                  (accountHasFutureReferences && !replacementAccountId)
+                  (accountNeedsReplacement && !replacementAccountId)
                 }
               >
                 {deleting ? 'Deleting...' : 'Delete Account'}
