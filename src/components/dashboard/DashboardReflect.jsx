@@ -374,6 +374,7 @@ export default function DashboardReflect() {
     selectedYear,
     selectedMonth: analysisMonth,
     allTransactions,
+    periodTransactions: isYearView ? undefined : monthTransactions,
     accounts,
     categories,
     budget: reflectBudget,
