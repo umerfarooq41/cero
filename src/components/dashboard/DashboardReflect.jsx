@@ -28,6 +28,7 @@ import {
   useCategories,
   useRecurringTransactions,
   useSavingsGoals,
+  useTransactionsForMonths,
   useUserSettings,
   useYearBudgetSummary,
 } from '@/hooks/useBudgetData';
@@ -329,6 +330,33 @@ export default function DashboardReflect() {
   const yearBudget = useYearBudgetSummary(selectedYear);
   const { data: monthAllocations = [] } = useAllocations(currentMonthKey);
 
+  const analysisMonths = useMemo(() => {
+    if (isYearView) {
+      return Array.from(
+        { length: 12 },
+        (_, index) => `${selectedYear}-${String(index + 1).padStart(2, '0')}`
+      );
+    }
+
+    const selectedDate = new Date(
+      Number(selectedYear),
+      Number(selectedMonth) - 1,
+      1
+    );
+
+    return Array.from({ length: 3 }, (_, index) => {
+      const date = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth() - (2 - index),
+        1
+      );
+      return format(date, 'yyyy-MM');
+    });
+  }, [isYearView, selectedMonth, selectedYear]);
+
+  const { data: analysisTransactions = [] } =
+    useTransactionsForMonths(analysisMonths);
+
   const monthTransactions = monthBudget.transactions || [];
 
   const monthPlanTotals = useMemo(
@@ -373,7 +401,7 @@ export default function DashboardReflect() {
   const analysis = useReflectAnalysis({
     selectedYear,
     selectedMonth: analysisMonth,
-    allTransactions,
+    allTransactions: analysisTransactions,
     periodTransactions: isYearView ? undefined : monthTransactions,
     accounts,
     categories,
