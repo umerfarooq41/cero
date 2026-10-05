@@ -20,7 +20,7 @@ export function isAutoSweepSurplusEnabled(settings = {}) {
 function parseIsoDateParts(value) {
   const match = String(value || '')
     .slice(0, 10)
-    .match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+    .match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
   if (!match) return null;
 
@@ -94,7 +94,7 @@ export function filterTransactionsByBudgetYear(
 }
 
 function parseMonthKey(month) {
-  const match = String(month || '').match(/^(\\d{4})-(\\d{2})$/);
+  const match = String(month || '').match(/^(\d{4})-(\d{2})$/);
   if (!match) return null;
 
   const year = Number(match[1]);
