@@ -902,7 +902,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
         {formatCurrency(amount)}
       </div>
 
-      <div className="flex w-6 shrink-0 items-center justify-end">
+      <div className="-ml-1 flex w-6 shrink-0 items-center justify-end">
         <button
           type="button"
           onClick={() => onAction(rule)}
