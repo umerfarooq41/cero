@@ -85,10 +85,9 @@ export function useUserSettings() {
     queryKey: ['user-settings', session?.user?.id],
     queryFn: async () => {
       const settings = await getUserSettings();
-      return normalizeUserSettings(settings || {});
+      return settings ? normalizeUserSettings(settings) : null;
     },
     enabled: Boolean(session?.user?.id),
-    initialData: normalizeUserSettings(),
   });
 }
 
