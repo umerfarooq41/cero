@@ -1324,10 +1324,10 @@ export default function ManageRecurringPanel() {
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold">{rule.name}</div>
                       <p className="mt-1 text-xs font-medium text-muted-foreground">
-                        Completed{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
+                        Paid off{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                        Original debt {formatCurrency(Math.abs(Number(rule.total_amount || 0)))}
+                        {formatCurrency(Math.abs(Number(rule.total_amount || 0)))}
                         {liability ? ` · ${liability.name}` : ''}
                       </p>
                     </div>
