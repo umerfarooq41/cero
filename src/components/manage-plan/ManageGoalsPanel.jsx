@@ -150,6 +150,43 @@ function sumPostedGoalTransactionsByGoal(transactions = []) {
   }, {});
 }
 
+function getGoalCompletionDates(goals = [], transactions = []) {
+  const transactionsByGoal = transactions.reduce((groups, transaction) => {
+    const goalId = getGoalTransactionGoalId(transaction);
+    if (!goalId || transaction?.type !== 'transfer') return groups;
+    (groups[goalId] ||= []).push(transaction);
+    return groups;
+  }, {});
+
+  return goals.reduce((dates, goal) => {
+    const target = Math.max(0, Number(goal.target_amount || 0));
+    if (target <= 0) return dates;
+
+    const goalTransactions = [...(transactionsByGoal[goal.id] || [])]
+      .sort((a, b) => String(a.date || a.created_at || '').localeCompare(String(b.date || b.created_at || '')));
+
+    const postedTotal = goalTransactions.reduce(
+      (sum, transaction) => sum + Math.max(0, Number(transaction.amount || 0)),
+      0
+    );
+    const startingAmount = Math.max(
+      0,
+      Number(goal.starting_amount ?? (Number(goal.current_amount || 0) - postedTotal))
+    );
+
+    let funded = startingAmount;
+    for (const transaction of goalTransactions) {
+      funded += Math.max(0, Number(transaction.amount || 0));
+      if (funded >= target) {
+        dates[goal.id] = transaction.date || String(transaction.created_at || '').slice(0, 10);
+        break;
+      }
+    }
+
+    return dates;
+  }, {});
+}
+
 
 
 function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
@@ -565,7 +602,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
   );
 }
 
-function GoalRow({ goal, onAction, formatCurrency }) {
+function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
   const progress = getGoalProgress(goal);
   const target = Number(goal.target_amount || 0);
   const remaining = getGoalRemaining(goal);
@@ -614,7 +651,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
           {isArchived
             ? `Archived · ${progress}%`
             : isCompleted
-              ? 'Target reached'
+              ? `Reached${completionDate ? ` · ${formatGoalDate(completionDate)}` : ''}`
               : `${progress}%${countdown ? ` · ${countdown}` : ''}`}
         </p>
 
@@ -652,7 +689,7 @@ function GoalRow({ goal, onAction, formatCurrency }) {
   );
 }
 
-function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, onAddNew, onAction, formatCurrency }) {
+function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, onAddNew, onAction, formatCurrency, completionDates = {} }) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
 
   const toneClass =
@@ -718,7 +755,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
             ) : (
               <div className="divide-y divide-border/50 border-t border-border/50">
                 {goals.map((goal) => (
-                  <GoalRow key={goal.id} goal={goal} onAction={onAction} formatCurrency={formatCurrency} />
+                  <GoalRow key={goal.id} goal={goal} onAction={onAction} formatCurrency={formatCurrency} completionDate={completionDates[goal.id]} />
                 ))}
               </div>
             )}
@@ -745,6 +782,12 @@ export default function ManageGoalsPanel() {
     () => sumPostedGoalTransactionsByGoal(allTransactions),
     [allTransactions]
   );
+
+  const goalCompletionDates = useMemo(
+    () => getGoalCompletionDates(savingsGoals, allTransactions),
+    [allTransactions, savingsGoals]
+  );
+
 
   const normalizedGoals = useMemo(
     () => savingsGoals.map((goal) => {
@@ -880,6 +923,7 @@ export default function ManageGoalsPanel() {
           onAddNew={openNew}
           onAction={setActionTarget}
           formatCurrency={formatCurrency}
+          completionDates={goalCompletionDates}
         />
 
         <GoalSection
@@ -890,6 +934,7 @@ export default function ManageGoalsPanel() {
           emptyText="Completed goals will appear here."
           onAction={setActionTarget}
           formatCurrency={formatCurrency}
+          completionDates={goalCompletionDates}
         />
 
         {groupedGoals.archived.length > 0 && (
@@ -900,6 +945,7 @@ export default function ManageGoalsPanel() {
             emptyText="Archived goals will appear here."
             onAction={setActionTarget}
             formatCurrency={formatCurrency}
+            completionDates={goalCompletionDates}
           />
         )}
       </div>
