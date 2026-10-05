@@ -619,9 +619,15 @@ function GoalRow({ goal, onAction, formatCurrency }) {
         </p>
 
         <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
-          {isCompleted
-            ? `${formatCurrency(Math.max(0, target - remaining))} saved`
-            : `${formatCurrency(Math.max(0, target - remaining))} / ${formatCurrency(target)}`}
+          {isCompleted ? (
+            <>
+              {formatCurrency(Math.max(0, target - remaining))} saved
+            </>
+          ) : (
+            <>
+              {formatCurrency(Math.max(0, target - remaining))} / {formatCurrency(target)}
+            </>
+          )}
         </p>
       </div>
 
