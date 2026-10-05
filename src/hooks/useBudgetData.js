@@ -143,6 +143,36 @@ export function useTransactions(month) {
   });
 }
 
+export function useTransactionsForMonths(months = []) {
+  const { session } = useAuth();
+  const monthKey = months.filter(Boolean).join(',');
+
+  return useQuery({
+    queryKey: ['transactions-for-months', session?.user?.id, monthKey],
+    queryFn: async () => {
+      const settings = normalizeUserSettings((await getUserSettings()) || {});
+      const uniqueMonths = [...new Set(months.filter(Boolean))];
+
+      const monthRows = await Promise.all(
+        uniqueMonths.map(async (month) => {
+          const range = getBudgetMonthDateRange(month, settings);
+          if (!range) return [];
+          return transactionsApi.listByDateRange(range.startDate, range.endDate);
+        })
+      );
+
+      const byId = new Map();
+      monthRows.flat().forEach((transaction) => {
+        if (transaction?.id) byId.set(transaction.id, transaction);
+      });
+
+      return [...byId.values()];
+    },
+    enabled: Boolean(session?.user?.id && months.length),
+    initialData: [],
+  });
+}
+
 export function useAllTransactions() {
   const { session } = useAuth();
 
