@@ -37,6 +37,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { recurringTransactionsApi } from '@/lib/budgetData';
 import { supabase } from '@/lib/supabase';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 import {
   formatRecurringDate,
   FREQUENCY_OPTIONS,
@@ -486,12 +487,7 @@ export default function RecurringTransactionsPanel({
     return limit ? sorted.slice(0, limit) : sorted;
   }, [limit, recurringTransactions]);
 
-  const invalidateData = () => {
-    queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['accounts'] });
-  };
+  const invalidateData = () => invalidateScheduledQueries(queryClient);
 
   const openCreateDialog = () => {
     setEditingRule(null);
