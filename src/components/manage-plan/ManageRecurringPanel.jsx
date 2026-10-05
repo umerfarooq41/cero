@@ -34,7 +34,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { accountsApi, recurringTransactionsApi, transactionsApi } from '@/lib/budgetData';
+import { accountsApi, recurringTransactionsApi } from '@/lib/budgetData';
+import { supabase } from '@/lib/supabase';
 import {
   calculateNextDueDate,
   formatRecurringDate,
@@ -1098,88 +1099,41 @@ export default function ManageRecurringPanel() {
 
   const handleSave = async (payload) => {
     setSaving(true);
-
     const rulePayload = payload;
-    const debtTotal = payload.type === 'transfer' ? Number(payload.total_amount || 0) : 0;
 
     try {
       if (editingRule?.id) {
-        // Editing schedule metadata must never reset the live liability
-        // balance; the transaction ledger owns paid/remaining debt state.
         await recurringTransactionsApi.update(editingRule.id, rulePayload);
         toast.success('Recurring rule updated');
+      } else if (rulePayload.type === 'transfer') {
+        const { error } = await supabase.rpc('cero_create_debt_rule', {
+          p_name: rulePayload.name,
+          p_amount: Number(rulePayload.amount),
+          p_total_amount: Number(rulePayload.total_amount),
+          p_duration_count: rulePayload.duration_count ?? null,
+          p_duration_unit: rulePayload.duration_unit ?? null,
+          p_payment_mode: rulePayload.payment_mode || 'fixed',
+          p_category_id: rulePayload.category_id || null,
+          p_account_id: rulePayload.account_id,
+          p_to_account_id: rulePayload.to_account_id,
+          p_frequency: rulePayload.frequency,
+          p_start_date: rulePayload.start_date || rulePayload.next_due_date,
+          p_next_due_date: rulePayload.next_due_date,
+          p_is_active: rulePayload.is_active !== false,
+          p_icon: rulePayload.icon || null,
+          p_color: rulePayload.color || null,
+          p_note: rulePayload.note || null,
+        });
+        if (error) throw error;
+        toast.success('Recurring rule created');
       } else {
-        const createdRule = await recurringTransactionsApi.create(rulePayload);
-
-        if (rulePayload.type === 'transfer' && rulePayload.to_account_id && Number(debtTotal) > 0) {
-          const liability = accounts.find((account) => account.id === rulePayload.to_account_id);
-          if (liability) {
-            // A debt rule adds its outstanding principal to the selected
-            // liability. Never replace the account's existing balance because
-            // the same liability can contain older/manual debt or other rules.
-            await accountsApi.update(liability.id, {
-              balance: Math.max(0, Number(liability.balance) || 0) + Number(debtTotal),
-            });
-          }
-
-          // For fixed debt, the selected start date means installment 1 was
-          // actually paid on that date. Record it immediately and advance the
-          // schedule to installment 2 without changing the schedule anchor.
-          if ((rulePayload.payment_mode || 'fixed') === 'fixed') {
-            const firstPaymentDate = rulePayload.start_date || rulePayload.next_due_date;
-            const firstPaymentAmount = Math.min(
-              Math.max(0, Number(rulePayload.amount || 0)),
-              Math.max(0, Number(debtTotal))
-            );
-            const transactionPayload = {
-              amount: firstPaymentAmount,
-              type: 'transfer',
-              date: firstPaymentDate,
-              note: rulePayload.note || `${rulePayload.name} · Recurring`,
-              category_id: rulePayload.category_id || null,
-              account_id: rulePayload.account_id || null,
-              to_account_id: rulePayload.to_account_id || null,
-              recurring_transaction_id: createdRule.id,
-              recurring_posted_for_date: firstPaymentDate,
-            };
-            const transaction = await transactionsApi.create(transactionPayload);
-            const fromAccount = accounts.find((account) => account.id === rulePayload.account_id);
-
-            if (fromAccount) {
-              await accountsApi.update(fromAccount.id, {
-                balance: (Number(fromAccount.balance) || 0) - firstPaymentAmount,
-              });
-            }
-            if (liability) {
-              await accountsApi.update(liability.id, {
-                balance: Math.max(
-                  0,
-                  (Number(liability.balance) || 0) + Number(debtTotal) - firstPaymentAmount
-                ),
-              });
-            }
-
-            const completesDebt = firstPaymentAmount >= Number(debtTotal) - 0.005;
-            await recurringTransactionsApi.update(createdRule.id, {
-              last_posted_date: todayIsoDate(),
-              last_posted_transaction_id: transaction.id,
-              next_due_date: completesDebt
-                ? null
-                : calculateNextDueDate(firstPaymentDate, rulePayload.frequency),
-              ...(completesDebt
-                ? { is_active: false, completed_at: firstPaymentDate }
-                : {}),
-            });
-          }
-        }
-
+        await recurringTransactionsApi.create(rulePayload);
         toast.success('Recurring rule created');
       }
 
       await queryClient.invalidateQueries({ queryKey: ['accounts'] });
       await queryClient.invalidateQueries({ queryKey: ['transactions'] });
       await queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-
       await refresh();
       setModalOpen(false);
       setEditingRule(null);
