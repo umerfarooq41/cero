@@ -115,10 +115,10 @@ export default function TransactionRow({
       transaction.goal_contribution_id
   );
 
-  const accountName = account?.name || 'Account';
-  const destinationName = toAccount?.name || '';
+  const accountName = account?.name || transaction.account_name_snapshot || 'Account';
+  const destinationName = toAccount?.name || transaction.to_account_name_snapshot || '';
   const transactionTypeLabel = formatTransactionType(transaction.type);
-  const transferTitle = [accountName, toAccount?.name].filter(Boolean).join(' → ');
+  const transferTitle = [accountName, destinationName].filter(Boolean).join(' → ');
 
   const noteLabel = cleanGeneratedNote(transaction.note);
 
