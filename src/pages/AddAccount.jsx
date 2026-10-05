@@ -23,46 +23,52 @@ import { cn } from '@/lib/utils';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const accountTypes = [
-  { value: 'checking', label: 'Checking' },
-  { value: 'savings', label: 'Savings' },
-  { value: 'credit_card', label: 'Credit Card' },
-  { value: 'cash', label: 'Cash' },
-  { value: 'investment', label: 'Investment' },
-  { value: 'loan', label: 'Loan' },
-  { value: 'other', label: 'Other' },
+  { value: 'checking', label: 'Checking', category: 'asset' },
+  { value: 'savings', label: 'Savings', category: 'asset' },
+  { value: 'cash', label: 'Cash', category: 'asset' },
+  { value: 'investment', label: 'Investment', category: 'asset' },
+  { value: 'credit_card', label: 'Credit Card', category: 'liability' },
+  { value: 'loan', label: 'Loan', category: 'liability' },
+  { value: 'other', label: 'Other', category: 'asset' },
 ];
 
+function getAccountCategory(type) {
+  return accountTypes.find((item) => item.value === type)?.category || 'asset';
+}
+
 const colors = [
-  '#0078D4',
-  '#107C10',
-  '#C50F1F',
-  '#8764B8',
-  '#CA5010',
-  '#008272',
-  '#4F6BED',
-  '#69797E',
-  '#D83B01',
-  '#E3008C',
-  '#00B294',
-  '#FFB900',
-  '#744DA9',
-  '#038387',
-  '#0099BC',
-  '#E83E8C',
-  '#00B7C3',
-  '#5C2D91',
-  '#498205',
-  '#A80000',
-  '#2D7D9A',
-  '#6B7280',
-  '#111827',
-  '#16A34A',
-  '#EA580C',
-  '#9333EA',
-  '#DB2777',
-  '#0891B2',
-  '#65A30D',
-  '#F59E0B',
+  '#276FE4',
+  '#16AAFE',
+  '#5FCEF3',
+  '#18D1C8',
+  '#1B8989',
+  '#2898BB',
+  '#8CBC95',
+  '#9CB3C7',
+  '#6F979F',
+  '#54887C',
+  '#72AA00',
+  '#38C17D',
+  '#3BA40E',
+  '#634E4A',
+  '#A85539',
+  '#A58F85',
+  '#EEB82D',
+  '#FFB800',
+  '#FF8B00',
+  '#FF6D10',
+  '#F84C00',
+  '#FB2C2C',
+  '#E40335',
+  '#B1003B',
+  '#E98ABE',
+  '#F39AB5',
+  '#FA5C8C',
+  '#E33BA3',
+  '#B393EA',
+  '#8C7EF0',
+  '#6970ED',
+  '#8845F5',
 ];
 
 export default function AddAccount() {
@@ -79,7 +85,6 @@ export default function AddAccount() {
 
   const [name, setName] = useState('');
   const [type, setType] = useState('');
-  const [category, setCategory] = useState('asset');
   const [balance, setBalance] = useState('');
   const [color, setColor] = useState(colors[0]);
   const [saving, setSaving] = useState(false);
@@ -89,7 +94,6 @@ export default function AddAccount() {
 
     setName(existingAccount.name || '');
     setType(existingAccount.type || '');
-    setCategory(existingAccount.category || 'asset');
     setBalance(String(existingAccount.balance ?? ''));
     setColor(existingAccount.color || colors[0]);
   }, [existingAccount]);
@@ -106,7 +110,7 @@ export default function AddAccount() {
       const payload = {
         name: name.trim(),
         type,
-        category,
+        category: getAccountCategory(type),
         balance: parseFloat(balance) || 0,
         color,
       };
@@ -206,22 +210,6 @@ export default function AddAccount() {
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Category
-            </label>
-
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="asset">Asset</SelectItem>
-                <SelectItem value="liability">Liability</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
