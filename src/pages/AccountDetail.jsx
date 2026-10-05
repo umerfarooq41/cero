@@ -190,7 +190,9 @@ export default function AccountDetail() {
 
   const transactions = accountTransactions.slice(0, 50);
 
-  const replacementAccounts = accounts.filter((a) => a.id !== accountId);
+  const replacementAccounts = accounts.filter(
+    (a) => a.id !== accountId && a.category === account?.category
+  );
 
   const accountHasFutureReferences =
     recurringTransactions.some(
