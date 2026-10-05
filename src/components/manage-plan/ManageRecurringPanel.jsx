@@ -1110,8 +1110,12 @@ export default function ManageRecurringPanel() {
         if (rulePayload.type === 'transfer' && rulePayload.to_account_id && Number(debtTotal) > 0) {
           const liability = accounts.find((account) => account.id === rulePayload.to_account_id);
           if (liability) {
-            // A newly-created debt starts at the original debt balance.
-            await accountsApi.update(liability.id, { balance: Number(debtTotal) });
+            // A debt rule adds its outstanding principal to the selected
+            // liability. Never replace the account's existing balance because
+            // the same liability can contain older/manual debt or other rules.
+            await accountsApi.update(liability.id, {
+              balance: Math.max(0, Number(liability.balance) || 0) + Number(debtTotal),
+            });
           }
 
           // For fixed debt, the selected start date means installment 1 was
@@ -1144,7 +1148,10 @@ export default function ManageRecurringPanel() {
             }
             if (liability) {
               await accountsApi.update(liability.id, {
-                balance: Math.max(0, Number(debtTotal) - firstPaymentAmount),
+                balance: Math.max(
+                  0,
+                  (Number(liability.balance) || 0) + Number(debtTotal) - firstPaymentAmount
+                ),
               });
             }
 
@@ -1196,7 +1203,32 @@ export default function ManageRecurringPanel() {
 
   const handleDelete = async (rule) => {
     try {
+      // Removing a debt plan must also remove only that plan's outstanding
+      // principal from the liability. Posted payments remain historical
+      // transactions and must not be reversed here.
+      if (normalizeRuleType(rule.type) === 'transfer' && rule.to_account_id) {
+        const liability = accounts.find((account) => account.id === rule.to_account_id);
+        const paidAmount = allTransactions
+          .filter(
+            (transaction) =>
+              transaction.recurring_transaction_id === rule.id &&
+              transaction.type === 'transfer'
+          )
+          .reduce(
+            (sum, transaction) => sum + Math.max(0, Number(transaction.amount || 0)),
+            0
+          );
+        const outstanding = Math.max(0, Number(rule.total_amount || 0) - paidAmount);
+
+        if (liability && outstanding > 0) {
+          await accountsApi.update(liability.id, {
+            balance: Math.max(0, (Number(liability.balance) || 0) - outstanding),
+          });
+        }
+      }
+
       await recurringTransactionsApi.delete(rule.id);
+      await queryClient.invalidateQueries({ queryKey: ['accounts'] });
       await refresh();
       toast.success('Recurring rule deleted');
     } catch (error) {
