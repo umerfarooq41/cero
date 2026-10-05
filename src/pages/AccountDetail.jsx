@@ -192,8 +192,7 @@ export default function AccountDetail() {
 
   const replacementAccounts = accounts.filter((a) => a.id !== accountId);
 
-  const accountHasReferences =
-    accountTransactions.length > 0 ||
+  const accountHasFutureReferences =
     recurringTransactions.some(
       (rule) => rule.account_id === accountId || rule.to_account_id === accountId
     ) ||
@@ -235,8 +234,8 @@ export default function AccountDetail() {
   const handleDeleteAccount = async () => {
     if (!account) return;
 
-    if (accountHasReferences && !replacementAccountId) {
-      toast.error('Select another account for existing references');
+    if (accountHasFutureReferences && !replacementAccountId) {
+      toast.error('Select another account for recurring rules or goals');
       return;
     }
 
@@ -405,13 +404,15 @@ export default function AccountDetail() {
               </DialogTitle>
 
               <p className="text-sm text-muted-foreground">
-                {accountHasReferences
-                  ? 'This account is still used by transactions, recurring rules, or goals. Choose another account to preserve those references before deleting.'
-                  : 'This account is not in use and can be deleted safely.'}
+                {accountHasFutureReferences
+                  ? 'This account is used by recurring rules or goals. Choose another account for future activity before deleting.'
+                  : accountTransactions.length > 0
+                    ? 'Historical transactions will be kept, but this account reference will be removed from them.'
+                    : 'This account is not in use and can be deleted safely.'}
               </p>
             </DialogHeader>
 
-            {accountHasReferences && (
+            {accountHasFutureReferences && (
               <div className="space-y-2 py-2">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Replace account with
@@ -435,7 +436,7 @@ export default function AccountDetail() {
                 </Select>
 
                 <p className="text-xs text-muted-foreground">
-                  Existing transaction history, recurring rules, and goals will be reassigned where needed.
+                  Recurring rules and goals will use this account for future activity. Historical transactions will not be reassigned.
                 </p>
               </div>
             )}
@@ -453,7 +454,7 @@ export default function AccountDetail() {
                 onClick={handleDeleteAccount}
                 disabled={
                   deleting ||
-                  (accountHasReferences && !replacementAccountId)
+                  (accountHasFutureReferences && !replacementAccountId)
                 }
               >
                 {deleting ? 'Deleting...' : 'Delete Account'}
