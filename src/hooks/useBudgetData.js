@@ -397,9 +397,7 @@ export function useYearBudgetSummary(year) {
     (sum, monthAllocations) => {
       const month = monthAllocations[0]?.month;
       const monthTransactions = month
-        ? yearTransactions.filter((transaction) =>
-            String(transaction?.date || '').startsWith(month)
-          )
+        ? filterTransactionsByBudgetMonth(yearTransactions, month, settings)
         : [];
       const monthTotals = buildPlanTotals({
         allocations: monthAllocations,
