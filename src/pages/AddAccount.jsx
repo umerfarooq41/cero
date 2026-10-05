@@ -29,11 +29,11 @@ const accountTypes = [
   { value: 'investment', label: 'Investment', category: 'asset' },
   { value: 'credit_card', label: 'Credit Card', category: 'liability' },
   { value: 'loan', label: 'Loan', category: 'liability' },
-  { value: 'other', label: 'Other', category: 'asset' },
+  { value: 'other', label: 'Other', category: null },
 ];
 
-function getAccountCategory(type) {
-  return accountTypes.find((item) => item.value === type)?.category || 'asset';
+function getAccountCategory(type, otherCategory = 'asset') {
+  return accountTypes.find((item) => item.value === type)?.category || otherCategory;
 }
 
 const colors = [
@@ -85,6 +85,7 @@ export default function AddAccount() {
 
   const [name, setName] = useState('');
   const [type, setType] = useState('');
+  const [otherCategory, setOtherCategory] = useState('asset');
   const [balance, setBalance] = useState('');
   const [color, setColor] = useState(colors[0]);
   const [saving, setSaving] = useState(false);
@@ -94,6 +95,7 @@ export default function AddAccount() {
 
     setName(existingAccount.name || '');
     setType(existingAccount.type || '');
+    setOtherCategory(existingAccount.category || 'asset');
     setBalance(String(existingAccount.balance ?? ''));
     setColor(existingAccount.color || colors[0]);
   }, [existingAccount]);
@@ -104,14 +106,33 @@ export default function AddAccount() {
       return;
     }
 
+    const nextCategory = getAccountCategory(type, otherCategory);
+    const existingCategory = existingAccount?.category || null;
+
+    if (isEditing && existingCategory && nextCategory !== existingCategory) {
+      toast.error('An existing account cannot switch between asset and liability');
+      return;
+    }
+
+    const numericBalance = Number(balance || 0);
+    if (!Number.isFinite(numericBalance)) {
+      toast.error('Enter a valid balance');
+      return;
+    }
+
+    if (nextCategory === 'liability' && numericBalance < 0) {
+      toast.error('Enter the amount owed as a positive balance');
+      return;
+    }
+
     setSaving(true);
 
     try {
       const payload = {
         name: name.trim(),
         type,
-        category: getAccountCategory(type),
-        balance: parseFloat(balance) || 0,
+        category: nextCategory,
+        balance: numericBalance,
         color,
       };
 
@@ -210,6 +231,25 @@ export default function AddAccount() {
             </Select>
           </div>
 
+
+          {type === 'other' && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Category
+              </label>
+
+              <Select value={otherCategory} onValueChange={setOtherCategory}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="asset">Asset</SelectItem>
+                  <SelectItem value="liability">Liability</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
