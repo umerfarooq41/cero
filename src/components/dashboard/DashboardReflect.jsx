@@ -33,7 +33,6 @@ import {
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import { buildPlanTotals } from '@/lib/planData';
-import { filterTransactionsByBudgetMonth } from '@/lib/budgetLogic';
 import useReflectAnalysis from '@/hooks/useReflectAnalysis.js';
 
 const tooltipStyle = {
@@ -330,13 +329,7 @@ export default function DashboardReflect() {
   const yearBudget = useYearBudgetSummary(selectedYear);
   const { data: monthAllocations = [] } = useAllocations(currentMonthKey);
 
-  const monthTransactions = useMemo(
-    () =>
-      currentMonthKey
-        ? filterTransactionsByBudgetMonth(allTransactions, currentMonthKey, settings)
-        : [],
-    [allTransactions, currentMonthKey, settings]
-  );
+  const monthTransactions = monthBudget.transactions || [];
 
   const monthPlanTotals = useMemo(
     () =>
