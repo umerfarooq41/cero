@@ -208,6 +208,7 @@ export default function useReflectAnalysis({
   selectedYear,
   selectedMonth,
   allTransactions = [],
+  periodTransactions: suppliedPeriodTransactions,
   accounts = [],
   categories = [],
   budget,
@@ -219,6 +220,10 @@ export default function useReflectAnalysis({
   );
 
   const periodTransactions = useMemo(() => {
+    if (!isYear && Array.isArray(suppliedPeriodTransactions)) {
+      return suppliedPeriodTransactions;
+    }
+
     if (isYear) {
       return filterTransactionsByBudgetYear(
         allTransactions,
@@ -232,7 +237,14 @@ export default function useReflectAnalysis({
       monthKey,
       settings
     );
-  }, [allTransactions, isYear, selectedYear, monthKey, settings]);
+  }, [
+    allTransactions,
+    isYear,
+    selectedYear,
+    monthKey,
+    settings,
+    suppliedPeriodTransactions,
+  ]);
 
   const income = useMemo(() => {
     return periodTransactions
