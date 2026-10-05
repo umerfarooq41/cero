@@ -600,22 +600,15 @@ function GoalRow({ goal, onAction, formatCurrency }) {
           : `${Math.abs(countdownDays)}d overdue`;
 
   return (
-    <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
-      <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
+    <div className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+      <div className="shrink-0 self-start">
+        <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
+      </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between gap-3">
-          <h3 className={cn('min-w-0 truncate text-sm font-semibold leading-tight', isArchived && 'text-muted-foreground line-through')}>
-            {goal.name}
-          </h3>
-
-          <div className={cn(
-            'shrink-0 text-center text-sm font-medium tabular-nums',
-            isCompleted ? 'text-green-700 dark:text-green-400' : 'text-foreground'
-          )}>
-            {isCompleted ? 'Completed' : displayAmount === null ? 'Set target' : formatCurrency(displayAmount)}
-          </div>
-        </div>
+        <h3 className={cn('min-w-0 truncate text-sm font-semibold leading-tight', isArchived && 'text-muted-foreground line-through')}>
+          {goal.name}
+        </h3>
 
         <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
           {isArchived
@@ -630,14 +623,23 @@ function GoalRow({ goal, onAction, formatCurrency }) {
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={() => onAction(goal)}
-        className="-mr-1 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
-        aria-label={`Open actions for ${goal.name}`}
-      >
-        <MoreVertical className="h-4 w-4" />
-      </button>
+      <div className={cn(
+        'flex shrink-0 items-center justify-end text-right text-sm font-medium tabular-nums',
+        isCompleted ? 'text-green-700 dark:text-green-400' : 'text-foreground'
+      )}>
+        {isCompleted ? 'Completed' : displayAmount === null ? 'Set target' : formatCurrency(displayAmount)}
+      </div>
+
+      <div className="-ml-2 flex w-6 shrink-0 items-center justify-end">
+        <button
+          type="button"
+          onClick={() => onAction(goal)}
+          className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+          aria-label={`Open actions for ${goal.name}`}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
