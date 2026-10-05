@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { supabase } from "@/lib/supabase";
+import { invalidateScheduledQueries } from "@/lib/queryInvalidation";
 import {
   getFixedDebtNextDueDate,
   getRecurringStatus,
@@ -17,18 +18,6 @@ import {
   RECURRING_SECTIONS,
   sumRecurringPostedByRule,
 } from "./scheduledUtils";
-
-function invalidateScheduledQueries(queryClient) {
-  queryClient.invalidateQueries({ queryKey: ["transactions"] });
-  queryClient.invalidateQueries({ queryKey: ["all-transactions"] });
-  queryClient.invalidateQueries({ queryKey: ["accounts"] });
-  queryClient.invalidateQueries({ queryKey: ["recurring-transactions"] });
-  queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
-  queryClient.invalidateQueries({ queryKey: ["goal-contributions"] });
-  queryClient.invalidateQueries({ queryKey: ["allocations"] });
-  queryClient.invalidateQueries({ queryKey: ["all-allocations"] });
-  queryClient.invalidateQueries({ queryKey: ["budget-summary"] });
-}
 
 function getSuggestedPaymentAmount(rule) {
   if (!rule) return "";
