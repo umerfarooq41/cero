@@ -128,16 +128,15 @@ export function useTransactions(month) {
   return useQuery({
     queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
-      const [transactions, settings] = await Promise.all([
-        transactionsApi.list(),
-        getUserSettings(),
-      ]);
-
-      return filterTransactionsByBudgetMonth(
-        transactions,
+      const settings = await getUserSettings();
+      const range = getBudgetMonthDateRange(
         month,
         normalizeUserSettings(settings || {})
       );
+
+      if (!range) return [];
+
+      return transactionsApi.listByDateRange(range.startDate, range.endDate);
     },
     enabled: Boolean(session?.user?.id && month),
     initialData: [],
