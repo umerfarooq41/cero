@@ -62,6 +62,8 @@ const AuthenticatedApp = () => {
   const {
     data: userSettings,
     isFetched: settingsFetched,
+    isError: settingsError,
+    refetch: refetchSettings,
   } = useUserSettings();
 
   useAutoSweepSurplus();
@@ -82,6 +84,29 @@ const AuthenticatedApp = () => {
 
   if (!settingsFetched) {
     return <LoadingScreen />;
+  }
+
+  if (settingsError) {
+    return (
+      <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
+        <div className="flex max-w-sm flex-col items-center text-center">
+          <Logo size={64} priority />
+          <h1 className="mt-4 text-xl font-semibold text-foreground">
+            Couldn't load your settings
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Check your connection and try again. Your Cero data has not been changed.
+          </p>
+          <button
+            type="button"
+            className="mt-6 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            onClick={() => refetchSettings()}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const onboardingComplete = userSettings?.onboarding_complete === true;
