@@ -151,22 +151,21 @@ export function useTransactionsForMonths(months = []) {
     queryKey: ['transactions-for-months', session?.user?.id, monthKey],
     queryFn: async () => {
       const settings = normalizeUserSettings((await getUserSettings()) || {});
-      const uniqueMonths = [...new Set(months.filter(Boolean))];
+      const uniqueMonths = [...new Set(months.filter(Boolean))].sort();
+      if (!uniqueMonths.length) return [];
 
-      const monthRows = await Promise.all(
-        uniqueMonths.map(async (month) => {
-          const range = getBudgetMonthDateRange(month, settings);
-          if (!range) return [];
-          return transactionsApi.listByDateRange(range.startDate, range.endDate);
-        })
+      const firstRange = getBudgetMonthDateRange(uniqueMonths[0], settings);
+      const lastRange = getBudgetMonthDateRange(
+        uniqueMonths[uniqueMonths.length - 1],
+        settings
       );
 
-      const byId = new Map();
-      monthRows.flat().forEach((transaction) => {
-        if (transaction?.id) byId.set(transaction.id, transaction);
-      });
+      if (!firstRange || !lastRange) return [];
 
-      return [...byId.values()];
+      return transactionsApi.listByDateRange(
+        firstRange.startDate,
+        lastRange.endDate
+      );
     },
     enabled: Boolean(session?.user?.id && months.length),
     initialData: [],
