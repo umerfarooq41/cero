@@ -603,6 +603,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
 }
 
 function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
+  const completedDate = completionDate || goal.target_date || null;
   const progress = getGoalProgress(goal);
   const target = Number(goal.target_amount || 0);
   const remaining = getGoalRemaining(goal);
@@ -651,7 +652,7 @@ function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
           {isArchived
             ? `Archived · ${progress}%`
             : isCompleted
-              ? `Reached${completionDate ? ` · ${formatGoalDate(completionDate)}` : ''}`
+              ? `Reached${completedDate ? ` · ${formatGoalDate(completedDate)}` : ''}`
               : `${progress}%${countdown ? ` · ${countdown}` : ''}`}
         </p>
 
