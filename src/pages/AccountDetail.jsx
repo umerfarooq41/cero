@@ -38,7 +38,7 @@ import TransactionRow from '@/components/transactions/TransactionRow';
 import EmptyState from '@/components/shared/EmptyState';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { accountsApi, transactionsApi } from '@/lib/budgetData';
+import { transactionsApi } from '@/lib/budgetData';
 import { getTransactionDeltas } from '@/lib/transactionEffects';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -192,6 +192,15 @@ export default function AccountDetail() {
 
   const replacementAccounts = accounts.filter((a) => a.id !== accountId);
 
+  const accountHasReferences =
+    accountTransactions.length > 0 ||
+    recurringTransactions.some(
+      (rule) => rule.account_id === accountId || rule.to_account_id === accountId
+    ) ||
+    savingsGoals.some(
+      (goal) => goal.from_account_id === accountId || goal.to_account_id === accountId
+    );
+
   const handleDeleteTransaction = async (id) => {
     const transaction = allTransactions.find((item) => item.id === id);
 
@@ -226,37 +235,28 @@ export default function AccountDetail() {
   const handleDeleteAccount = async () => {
     if (!account) return;
 
-    if (accountTransactions.length > 0 && !replacementAccountId) {
-      toast.error('Select another account for existing transactions');
+    if (accountHasReferences && !replacementAccountId) {
+      toast.error('Select another account for existing references');
       return;
     }
 
     setDeleting(true);
 
     try {
-      if (accountTransactions.length > 0) {
-        await Promise.all(
-          accountTransactions.map((transaction) => {
-            const payload = {};
+      const { error } = await supabase.rpc('cero_delete_account', {
+        p_account_id: accountId,
+        p_replacement_account_id: replacementAccountId || null,
+      });
 
-            if (transaction.account_id === accountId) {
-              payload.account_id = replacementAccountId;
-            }
-
-            if (transaction.to_account_id === accountId) {
-              payload.to_account_id = replacementAccountId;
-            }
-
-            return transactionsApi.update(transaction.id, payload);
-          })
-        );
-      }
-
-      await accountsApi.delete(accountId);
+      if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
+      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
 
       toast.success('Account deleted');
       navigate('/accounts');
@@ -405,16 +405,16 @@ export default function AccountDetail() {
               </DialogTitle>
 
               <p className="text-sm text-muted-foreground">
-                {accountTransactions.length > 0
-                  ? 'This account has transactions. Choose another account to move them before deleting.'
-                  : 'This account has no transactions and can be deleted safely.'}
+                {accountHasReferences
+                  ? 'This account is still used by transactions, recurring rules, or goals. Choose another account to preserve those references before deleting.'
+                  : 'This account is not in use and can be deleted safely.'}
               </p>
             </DialogHeader>
 
-            {accountTransactions.length > 0 && (
+            {accountHasReferences && (
               <div className="space-y-2 py-2">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Move transactions to
+                  Replace account with
                 </label>
 
                 <Select
@@ -435,8 +435,7 @@ export default function AccountDetail() {
                 </Select>
 
                 <p className="text-xs text-muted-foreground">
-                  {accountTransactions.length} transaction
-                  {accountTransactions.length > 1 ? 's' : ''} will be reassigned.
+                  Existing transaction history, recurring rules, and goals will be reassigned where needed.
                 </p>
               </div>
             )}
@@ -454,7 +453,7 @@ export default function AccountDetail() {
                 onClick={handleDeleteAccount}
                 disabled={
                   deleting ||
-                  (accountTransactions.length > 0 && !replacementAccountId)
+                  (accountHasReferences && !replacementAccountId)
                 }
               >
                 {deleting ? 'Deleting...' : 'Delete Account'}
