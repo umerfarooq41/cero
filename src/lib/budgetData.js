@@ -212,7 +212,22 @@ export const budgetPlansApi = {
       return updateRow("budget_plans", id, payload);
     }
 
-    return createRow("budget_plans", payload);
+    if (!source_id) {
+      throw new Error("Budget plan source is required.");
+    }
+
+    const userId = await currentUserId();
+    const { data, error } = await supabase
+      .from("budget_plans")
+      .upsert(
+        { ...payload, user_id: userId },
+        { onConflict: "user_id,month,source_type,source_id" }
+      )
+      .select()
+      .single();
+
+    logAndThrow("Supabase budget_plans upsert error:", error);
+    return data;
   },
   delete: (id) => deleteRow("budget_plans", id),
 };
