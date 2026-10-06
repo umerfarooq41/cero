@@ -45,6 +45,7 @@ import {
   restoreCeroBackup,
   validateCeroBackup,
   resetUserData,
+  listRows,
 } from '@/lib/budgetData';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -353,9 +354,16 @@ export default function Settings() {
     budgetLogic: {
       twentyFifthRule: false,
       autoSweepSurplus: false,
+      autoSweepSourceAccountId: '',
+      autoSweepDestinationAccountId: '',
+      autoSweepExecutionMode: 'ask',
+      autoSweepAmountMode: 'surplus',
+      autoSweepValue: 0,
+      autoSweepMinimumBalance: 0,
     },
   });
 
+  const [accounts, setAccounts] = useState([]);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -375,7 +383,11 @@ export default function Settings() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const saved = await getUserSettings();
+        const [saved, accountRows] = await Promise.all([
+          getUserSettings(),
+          listRows('accounts', { orderBy: 'name', ascending: true }),
+        ]);
+        setAccounts((accountRows || []).filter((account) => !account.is_archived));
 
         if (saved) {
           const loadedTheme = saved?.theme || theme || 'system';
@@ -396,6 +408,12 @@ export default function Settings() {
                 saved,
                 prev.budgetLogic.autoSweepSurplus
               ),
+              autoSweepSourceAccountId: saved.auto_sweep_source_account_id || '',
+              autoSweepDestinationAccountId: saved.auto_sweep_destination_account_id || '',
+              autoSweepExecutionMode: saved.auto_sweep_execution_mode || 'ask',
+              autoSweepAmountMode: saved.auto_sweep_amount_mode || 'surplus',
+              autoSweepValue: Number(saved.auto_sweep_value || 0),
+              autoSweepMinimumBalance: Number(saved.auto_sweep_minimum_balance || 0),
             },
           }));
         }
@@ -417,6 +435,12 @@ export default function Settings() {
       theme: newSettings.theme,
       shift25th: newSettings.budgetLogic.twentyFifthRule,
       auto_sweep: newSettings.budgetLogic.autoSweepSurplus,
+      auto_sweep_source_account_id: newSettings.budgetLogic.autoSweepSourceAccountId || null,
+      auto_sweep_destination_account_id: newSettings.budgetLogic.autoSweepDestinationAccountId || null,
+      auto_sweep_execution_mode: newSettings.budgetLogic.autoSweepExecutionMode,
+      auto_sweep_amount_mode: newSettings.budgetLogic.autoSweepAmountMode,
+      auto_sweep_value: Number(newSettings.budgetLogic.autoSweepValue || 0),
+      auto_sweep_minimum_balance: Number(newSettings.budgetLogic.autoSweepMinimumBalance || 0),
     });
 
     queryClient.invalidateQueries();
@@ -785,13 +809,52 @@ export default function Settings() {
           <SettingRow
             icon={ShieldCheck}
             tone="emerald"
-            label="Auto-Sweep (configuration required)"
-            description="Automatic transfers are paused until explicit source, destination and execution settings are available."
+            label="Auto-Sweep"
+            description="Move money between your Cero accounts after a month closes."
           >
             <Switch
-              checked={false}
-              disabled
+              checked={settings.budgetLogic.autoSweepSurplus}
+              disabled={!settings.budgetLogic.autoSweepSourceAccountId || !settings.budgetLogic.autoSweepDestinationAccountId}
+              onCheckedChange={(value) => updateBudgetLogicSetting('autoSweepSurplus', value)}
             />
+          </SettingRow>
+
+          <SettingRow icon={CircleDollarSign} tone="emerald" label="From account" description="Account the sweep will leave." stackOnMobile>
+            <Select value={settings.budgetLogic.autoSweepSourceAccountId || undefined} onValueChange={(value) => updateBudgetLogicSetting('autoSweepSourceAccountId', value)}>
+              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue placeholder="Choose account" /></SelectTrigger>
+              <SelectContent>{accounts.filter((a) => a.id !== settings.budgetLogic.autoSweepDestinationAccountId).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </SettingRow>
+
+          <SettingRow icon={CircleDollarSign} tone="emerald" label="To account" description="Account that receives the sweep." stackOnMobile>
+            <Select value={settings.budgetLogic.autoSweepDestinationAccountId || undefined} onValueChange={(value) => updateBudgetLogicSetting('autoSweepDestinationAccountId', value)}>
+              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue placeholder="Choose account" /></SelectTrigger>
+              <SelectContent>{accounts.filter((a) => a.id !== settings.budgetLogic.autoSweepSourceAccountId).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </SettingRow>
+
+          <SettingRow icon={ShieldCheck} tone="blue" label="Execution" description="Ask first is the safer default." stackOnMobile>
+            <Select value={settings.budgetLogic.autoSweepExecutionMode} onValueChange={(value) => updateBudgetLogicSetting('autoSweepExecutionMode', value)}>
+              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="ask">Ask me first</SelectItem><SelectItem value="automatic">Run automatically</SelectItem></SelectContent>
+            </Select>
+          </SettingRow>
+
+          <SettingRow icon={Calculator} tone="amber" label="Amount" description="Choose how Cero calculates each sweep." stackOnMobile>
+            <Select value={settings.budgetLogic.autoSweepAmountMode} onValueChange={(value) => updateBudgetLogicSetting('autoSweepAmountMode', value)}>
+              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="surplus">Surplus</SelectItem><SelectItem value="fixed">Fixed amount</SelectItem><SelectItem value="percent">Percent of surplus</SelectItem></SelectContent>
+            </Select>
+          </SettingRow>
+
+          {settings.budgetLogic.autoSweepAmountMode !== 'surplus' && (
+            <SettingRow icon={Calculator} tone="amber" label={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percentage' : 'Fixed amount'} description={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percentage of calculated surplus.' : 'Amount to sweep each month.'} stackOnMobile>
+              <input type="number" min="0" max={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 100 : undefined} step="0.01" value={settings.budgetLogic.autoSweepValue} onChange={(event) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepValue:event.target.value}}))} onBlur={(event) => updateBudgetLogicSetting('autoSweepValue', Number(event.target.value || 0))} className="h-10 w-full rounded-2xl border border-input bg-background px-3 text-sm sm:w-[190px]" />
+            </SettingRow>
+          )}
+
+          <SettingRow icon={ShieldCheck} tone="emerald" label="Keep in source" description="Cero will never sweep below this balance." stackOnMobile>
+            <input type="number" min="0" step="0.01" value={settings.budgetLogic.autoSweepMinimumBalance} onChange={(event) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepMinimumBalance:event.target.value}}))} onBlur={(event) => updateBudgetLogicSetting('autoSweepMinimumBalance', Number(event.target.value || 0))} className="h-10 w-full rounded-2xl border border-input bg-background px-3 text-sm sm:w-[190px]" />
           </SettingRow>
         </SettingsSection>
 
