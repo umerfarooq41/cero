@@ -838,7 +838,7 @@ export default function Settings() {
             label="Restore Backup"
             description="Validate and replace your Cero cloud data from a versioned JSON backup."
           >
-            <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-input bg-background px-3 py-2 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
+            <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
               Restore
               <input
                 type="file"
