@@ -116,7 +116,7 @@ export function getCurrentBudgetMonth(_settings = {}, date = new Date()) {
 
 
 
-export function getBudgetMonthCloseDate(month, settings = {}) {
+export function getBudgetMonthCloseDate(month) {
   if (!month) return null;
 
   const [year, monthNumber] = month.split('-').map(Number);
