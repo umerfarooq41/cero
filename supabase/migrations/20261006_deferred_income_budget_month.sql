@@ -46,9 +46,18 @@ SET budget_month = CASE
   WHEN coalesce(s.shift25th, false) AND extract(day FROM t.date) >= 25
     THEN to_char(t.date + interval '1 month', 'YYYY-MM')
   ELSE to_char(t.date, 'YYYY-MM')
-END, budget_month_override = false
-FROM public.user_settings s
-WHERE t.user_id = s.user_id AND t.type = 'income' AND t.budget_month IS NULL;
+END,
+budget_month_override = false
+FROM (
+  SELECT
+    u.id AS user_id,
+    coalesce(us.shift25th, false) AS shift25th
+  FROM auth.users u
+  LEFT JOIN public.user_settings us ON us.user_id = u.id
+) s
+WHERE t.user_id = s.user_id
+  AND t.type = 'income'
+  AND t.budget_month IS NULL;
 
 UPDATE public.transactions
 SET budget_month = NULL, budget_month_override = false
