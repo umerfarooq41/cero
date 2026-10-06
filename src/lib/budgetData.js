@@ -141,11 +141,33 @@ export const categoriesApi = {
   delete: (id) => deleteRow("categories", id),
 };
 
+async function withIncomeBudgetAssignment(values = {}) {
+  const payload = { ...values };
+
+  if (payload.type !== "income") {
+    payload.budget_month = null;
+    payload.budget_month_override = false;
+    return payload;
+  }
+
+  const { data, error } = await supabase.rpc("cero_income_budget_month", {
+    p_transaction_date: payload.date,
+    p_type: payload.type,
+    p_requested_budget_month: payload.budget_month || null,
+    p_override: Boolean(payload.budget_month_override),
+  });
+
+  logAndThrow("Supabase income budget-month assignment error:", error);
+  payload.budget_month = data;
+  payload.budget_month_override = Boolean(payload.budget_month_override);
+  return payload;
+}
+
 export const transactionsApi = {
   list: () => listRows("transactions", { orderBy: "date", ascending: false }),
   listByDateRange: (startDate, endDate) => listTransactionsByDateRange(startDate, endDate),
-  create: (values) => createRow("transactions", values),
-  update: (id, values) => updateRow("transactions", id, values),
+  create: async (values) => createRow("transactions", await withIncomeBudgetAssignment(values)),
+  update: async (id, values) => updateRow("transactions", id, await withIncomeBudgetAssignment(values)),
   delete: (id) => deleteRow("transactions", id),
 };
 
