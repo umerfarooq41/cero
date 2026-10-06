@@ -323,12 +323,36 @@ function buildBudgetSummary({
 }
 
 export function useBudgetSummary(month) {
-  const { data: categories = [] } = useCategories();
-  const { data: transactions = [] } = useTransactions(month);
-  const { data: allocations = [] } = useAllocations(month);
-  const { data: accounts = [] } = useAccounts();
+  const categoriesQuery = useCategories();
+  const transactionsQuery = useTransactions(month);
+  const allocationsQuery = useAllocations(month);
+  const accountsQuery = useAccounts();
 
-  return buildBudgetSummary({ categories, transactions, allocations, accounts });
+  const isLoading =
+    categoriesQuery.isLoading ||
+    transactionsQuery.isLoading ||
+    allocationsQuery.isLoading ||
+    accountsQuery.isLoading;
+
+  const isFetching =
+    categoriesQuery.isFetching ||
+    transactionsQuery.isFetching ||
+    allocationsQuery.isFetching ||
+    accountsQuery.isFetching;
+
+  const summary = buildBudgetSummary({
+    categories: categoriesQuery.data || [],
+    transactions: transactionsQuery.data || [],
+    allocations: allocationsQuery.data || [],
+    accounts: accountsQuery.data || [],
+  });
+
+  return {
+    ...summary,
+    isLoading,
+    isFetching,
+    isReady: !isLoading,
+  };
 }
 
 export function useYearBudgetSummary(year) {
