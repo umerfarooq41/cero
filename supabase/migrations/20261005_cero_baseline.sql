@@ -2661,6 +2661,9 @@ CREATE POLICY "user_settings_insert_own" ON public."user_settings" FOR INSERT WI
 CREATE POLICY "user_settings_select_own" ON public."user_settings" FOR SELECT USING ((user_id = auth.uid()));
 CREATE POLICY "user_settings_update_own" ON public."user_settings" FOR UPDATE USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
 
+-- Fresh Supabase projects may grant EXECUTE directly to API roles by default.
+-- Clear those direct grants before restoring Cero's intended RPC permissions.
+REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public."cero_create_debt_rule"(p_name text, p_amount numeric, p_total_amount numeric, p_duration_count integer, p_duration_unit text, p_payment_mode text, p_category_id uuid, p_account_id uuid, p_to_account_id uuid, p_frequency text, p_start_date date, p_next_due_date date, p_is_active boolean, p_icon text, p_color text, p_note text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public."cero_create_debt_rule"(p_name text, p_amount numeric, p_total_amount numeric, p_duration_count integer, p_duration_unit text, p_payment_mode text, p_category_id uuid, p_account_id uuid, p_to_account_id uuid, p_frequency text, p_start_date date, p_next_due_date date, p_is_active boolean, p_icon text, p_color text, p_note text) TO authenticated;
 REVOKE ALL ON FUNCTION public."cero_create_transaction"(p_amount numeric, p_type text, p_date date, p_account_id uuid, p_to_account_id uuid, p_category_id uuid, p_note text) FROM PUBLIC;
