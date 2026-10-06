@@ -336,7 +336,12 @@ export default function TransactionHistory() {
   const [sortBy, setSortBy] = useState('newest');
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
-  const { data: transactions = [] } = useTransactions(currentMonth);
+  const {
+    data: transactions = [],
+    isPending: transactionsPending,
+    isError: transactionsError,
+    refetch: refetchTransactions,
+  } = useTransactions(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
@@ -584,7 +589,21 @@ export default function TransactionHistory() {
         </div>
       )}
 
-      {!hasTransactions ? (
+      {transactionsPending ? (
+        <div className="animate-child flex min-h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
+        </div>
+      ) : transactionsError ? (
+        <div className="animate-child">
+          <EmptyState
+            icon={ArrowLeftRight}
+            title="Couldn't load transactions"
+            description="Your data has not been changed. Check your connection and try again."
+            actionLabel="Retry"
+            onAction={() => refetchTransactions()}
+          />
+        </div>
+      ) : !hasTransactions ? (
         <div className="animate-child">
           <EmptyState
             icon={ArrowLeftRight}
