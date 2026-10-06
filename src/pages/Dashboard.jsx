@@ -80,6 +80,7 @@ export default function Dashboard() {
       ...budget,
       totalPlannedIncome: planTotals.income,
       realizedIncome: planTotals.realizedIncome,
+      budgetFunding: planTotals.budgetFunding,
       totalPlannedExpenses: planTotals.expense,
       totalPlannedSavings: planTotals.savings,
       totalPlannedDebt: planTotals.debt,
