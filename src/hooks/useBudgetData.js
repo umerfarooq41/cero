@@ -425,7 +425,7 @@ export function useAutoSweepSurplus() {
 
         if (!isAutoSweepSurplusEnabled(settings)) return;
 
-        const currentBudgetMonth = getCurrentBudgetMonth(settings);
+        const currentBudgetMonth = getCurrentBudgetMonth();
         const closedMonth = getPreviousBudgetMonth(currentBudgetMonth);
 
         if (!closedMonth) return;
