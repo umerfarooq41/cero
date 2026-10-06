@@ -912,6 +912,51 @@ export async function exportCeroBackup() {
   };
 }
 
+
+export function validateCeroBackup(backup) {
+  const sections = [
+    "accounts",
+    "categories",
+    "transactions",
+    "budget_plans",
+    "recurring_transactions",
+    "savings_goals",
+    "goal_contributions",
+    "user_settings",
+  ];
+
+  if (!backup || backup.format !== "cero-backup" || backup.version !== 1) {
+    throw new Error("This is not a supported Cero backup.");
+  }
+
+  if (!backup.data || typeof backup.data !== "object") {
+    throw new Error("Cero backup data is missing.");
+  }
+
+  sections.forEach((section) => {
+    if (!Array.isArray(backup.data[section])) {
+      throw new Error(`Cero backup section "${section}" is missing or invalid.`);
+    }
+  });
+
+  if (backup.data.user_settings.length > 1) {
+    throw new Error("Cero backup contains multiple settings records.");
+  }
+
+  return true;
+}
+
+export async function restoreCeroBackup(backup) {
+  validateCeroBackup(backup);
+
+  const { data, error } = await supabase.rpc("cero_restore_backup", {
+    p_backup: backup,
+  });
+  logAndThrow("Supabase backup restore error:", error);
+
+  return data;
+}
+
 export async function resetUserData() {
   // Reset all Cero data atomically in the database. If any delete fails,
   // PostgreSQL rolls the entire reset back instead of leaving partial data.
