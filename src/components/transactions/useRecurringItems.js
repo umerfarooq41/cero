@@ -196,53 +196,57 @@ export default function useRecurringItems({
     if (!selectedRecurringPayment) return;
 
     const rule = selectedRecurringPayment;
+    const type = normalizeRuleType(rule.type);
+    const isIncome = type === "income";
     const requestedAmount = Number(paymentAmount || 0);
-    const fromAccount = accounts.find(
-      (account) => account.id === rule.account_id,
-    );
-    const toAccount = accounts.find(
-      (account) => account.id === rule.to_account_id,
-    );
-    const alreadyPaidThisMonth = Number(rule.month_paid_amount || 0);
-    const plannedThisMonth = Number(
-      rule.month_planned_amount || rule.amount || 0,
-    );
+    const fromAccount = accounts.find((account) => account.id === rule.account_id);
+    const toAccount = accounts.find((account) => account.id === rule.to_account_id);
+    const alreadyPostedThisMonth = Number(rule.month_paid_amount || 0);
+    const plannedThisMonth = Number(rule.month_planned_amount || rule.amount || 0);
     const willMonthBeCovered =
       plannedThisMonth > 0 &&
-      alreadyPaidThisMonth + requestedAmount >= plannedThisMonth;
+      alreadyPostedThisMonth + requestedAmount >= plannedThisMonth - 0.005;
 
     if (!requestedAmount || requestedAmount <= 0) {
-      toast.error("Enter a valid payment amount");
+      toast.error("Enter a valid amount");
       return;
     }
 
-    if (!fromAccount || !toAccount) {
-      toast.error("This credit card payment is missing its from/to accounts");
+    if (!fromAccount) {
+      toast.error(isIncome ? "This income is missing its account" : "This payment is missing its from account");
       return;
     }
 
-    if (fromAccount.id === toAccount.id) {
+    if (!isIncome && !toAccount) {
+      toast.error("This credit card payment is missing its destination account");
+      return;
+    }
+
+    if (!isIncome && fromAccount.id === toAccount.id) {
       toast.error("Payment from/to accounts must be different");
       return;
     }
 
-    const totalDebt = Math.max(0, Number(rule.total_amount || 0));
-    const paidTotal = Math.max(
-      0,
-      Number(allRecurringPaymentsByRule[rule.id] || 0),
-    );
-    const outstandingDebt =
-      totalDebt > 0
-        ? Math.max(0, totalDebt - paidTotal)
-        : Math.max(0, Number(toAccount?.balance || 0));
+    let amount = requestedAmount;
+    let completesDebt = false;
 
-    if (outstandingDebt <= 0.005) {
-      toast.error("This debt is already paid off");
-      return;
+    if (!isIncome) {
+      const totalDebt = Math.max(0, Number(rule.total_amount || 0));
+      const paidTotal = Math.max(0, Number(allRecurringPaymentsByRule[rule.id] || 0));
+      const outstandingDebt =
+        totalDebt > 0
+          ? Math.max(0, totalDebt - paidTotal)
+          : Math.max(0, Number(toAccount?.balance || 0));
+
+      if (outstandingDebt <= 0.005) {
+        toast.error("This debt is already paid off");
+        return;
+      }
+
+      amount = Math.min(requestedAmount, outstandingDebt);
+      completesDebt = amount >= outstandingDebt - 0.005;
     }
 
-    const amount = Math.min(requestedAmount, outstandingDebt);
-    const completesDebt = amount >= outstandingDebt - 0.005;
     setPostingId(rule.id);
 
     try {
@@ -262,16 +266,21 @@ export default function useRecurringItems({
 
       invalidateScheduledQueries(queryClient);
       closePaymentDialog();
-      toast.success(
-        completesDebt
-          ? "Final debt payment posted. Plan completed."
-          : willMonthBeCovered
-            ? "Debt payment posted"
-            : "Partial debt payment posted",
-      );
+
+      if (isIncome) {
+        toast.success(willMonthBeCovered ? "Income received" : "Partial income received");
+      } else {
+        toast.success(
+          completesDebt
+            ? "Final debt payment posted. Plan completed."
+            : willMonthBeCovered
+              ? "Debt payment posted"
+              : "Partial debt payment posted",
+        );
+      }
     } catch (error) {
-      console.error("Credit card payment failed:", error);
-      toast.error(error.message || "Could not post credit card payment");
+      console.error(isIncome ? "Recurring income failed:" : "Credit card payment failed:", error);
+      toast.error(error.message || (isIncome ? "Could not post recurring income" : "Could not post credit card payment"));
     } finally {
       setPostingId(null);
     }

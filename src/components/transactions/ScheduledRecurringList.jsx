@@ -44,33 +44,42 @@ function RecurringPaymentDialog({
   );
 
   if (!rule) return null;
+  const isIncome = normalizeRuleType(rule.type) === "income";
 
   return (
     <Dialog open={dialog.open} onOpenChange={(open) => !open && dialog.closeDialog()}>
       <DialogContent className="max-w-lg rounded-3xl app-card-surface-strong backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>
-            {remainingAmount > 0
-              ? `Pay ${rule.name}`
-              : `Add extra to ${rule.name}`}
+            {isIncome
+              ? `Receive ${rule.name}`
+              : remainingAmount > 0
+                ? `Pay ${rule.name}`
+                : `Add extra to ${rule.name}`}
           </DialogTitle>
           <DialogDescription>
-            This posts a credit card payment transfer using the saved recurring
-            accounts.
+            {isIncome
+              ? "Confirm the amount actually received. You can post part now and the remaining income later without changing the recurring rule."
+              : "This posts a credit card payment transfer using the saved recurring accounts."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-1">
           <div className="rounded-2xl app-card-surface-soft p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Payment path
+              {isIncome ? "Deposit account" : "Payment path"}
             </p>
             <p className="mt-1 text-sm font-bold text-foreground">
-              {fromAccount?.name || "Missing from account"} →{" "}
-              {toAccount?.name || "Missing credit card"}
+              {isIncome
+                ? fromAccount?.name || "Missing account"
+                : <>{fromAccount?.name || "Missing from account"} →{" "}{toAccount?.name || "Missing credit card"}</>}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Checking decreases and the credit card liability decreases.
+              {isIncome
+                ? remainingAmount > 0
+                  ? `${remainingAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} remaining from the planned amount.`
+                  : "The planned amount is already covered for this period."
+                : "Checking decreases and the credit card liability decreases."}
             </p>
           </div>
 
@@ -123,9 +132,9 @@ function RecurringPaymentDialog({
           </Button>
           <Button
             onClick={dialog.submit}
-            disabled={saving || !fromAccount || !toAccount}
+            disabled={saving || !fromAccount || (!isIncome && !toAccount)}
           >
-            {saving ? "Saving..." : remainingAmount > 0 ? "Pay" : "Add extra"}
+            {saving ? "Saving..." : isIncome ? "Post Income" : remainingAmount > 0 ? "Pay" : "Add extra"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -149,27 +158,32 @@ function ScheduledRecurringRow({
   const baseAmount = Math.abs(Number(rule.amount || 0));
   const type = normalizeRuleType(rule.type);
   const isDebt = type === "transfer";
+  const isIncome = type === "income";
   const flexibleCreditCard = isDebt && (rule.payment_mode || "fixed") === "flexible";
   const fixedDebt = isDebt && !flexibleCreditCard;
   const plannedThisMonth = Number(rule.month_planned_amount ?? baseAmount);
   const paidThisMonth = Number(rule.month_paid_amount || 0);
   const monthRemaining = Math.max(0, plannedThisMonth - paidThisMonth);
   const isMonthCovered =
-    flexibleCreditCard && plannedThisMonth > 0 && monthRemaining <= 0;
-  const displayAmount = flexibleCreditCard
+    (flexibleCreditCard || isIncome) && plannedThisMonth > 0 && monthRemaining <= 0;
+  const displayAmount = (flexibleCreditCard || isIncome)
     ? isMonthCovered
       ? plannedThisMonth
       : monthRemaining
     : baseAmount;
   const fallbackIcon =
     type === "income" ? "income" : type === "transfer" ? "loan" : "receipt";
-  const buttonLabel = flexibleCreditCard
-    ? posting ? "Saving…" : isMonthCovered ? "Add extra" : "Pay"
+  const buttonLabel = isIncome
+    ? posting ? "Saving…" : paidThisMonth > 0 ? "Receive remaining" : "Receive"
+    : flexibleCreditCard
+      ? posting ? "Saving…" : isMonthCovered ? "Add extra" : "Pay"
     : fixedDebt
       ? posting ? "Posting…" : dueNow ? "Pay installment" : "Pay next early"
       : posting ? "Posting…" : dueNow ? "Post" : "Upcoming";
-  const canUseAction = flexibleCreditCard
-    ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
+  const canUseAction = isIncome
+    ? dueNow && !posting && rule.is_active && Boolean(rule.account_id)
+    : flexibleCreditCard
+      ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
     : fixedDebt
       ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
       : dueNow && !posting && rule.is_active;
@@ -189,7 +203,7 @@ function ScheduledRecurringRow({
       : null;
 
   const handleAction = () => {
-    if (flexibleCreditCard) {
+    if (flexibleCreditCard || isIncome) {
       paymentDialog.openDialog(rule);
       return;
     }
