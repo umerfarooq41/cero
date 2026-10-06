@@ -465,6 +465,59 @@ function RecurringRuleDialog({
   );
 }
 
+function PostRecurringDialog({ open, onOpenChange, rule, accounts, onPost, posting }) {
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(todayIsoDate());
+  const [note, setNote] = useState('');
+
+  useEffect(() => {
+    if (!open || !rule) return;
+    setAmount(String(rule.amount ?? ''));
+    setDate(todayIsoDate());
+    setNote(rule.note || `${rule.name} · Recurring`);
+  }, [open, rule]);
+
+  if (!rule) return null;
+  const account = accounts.find((item) => item.id === rule.account_id);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Post {rule.name}</DialogTitle>
+          <DialogDescription>
+            Confirm the amount actually received or paid. Changing it here does not change the recurring rule.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Amount</label>
+            <Input type="number" min="0" step="0.01" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Account</label>
+            <Input value={account?.name || 'Account'} disabled />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Date</label>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Note</label>
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={posting}>Cancel</Button>
+          <Button onClick={() => onPost({ amount: Number(amount || 0), date, note })} disabled={posting}>
+            {posting ? 'Posting...' : rule.type === 'income' ? 'Post Income' : 'Post Transaction'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function RecurringTransactionsPanel({
   recurringTransactions = [],
   categories = [],
@@ -481,6 +534,7 @@ export default function RecurringTransactionsPanel({
   const [editingRule, setEditingRule] = useState(null);
   const [saving, setSaving] = useState(false);
   const [postingId, setPostingId] = useState(null);
+  const [postingRule, setPostingRule] = useState(null);
 
   const sortedRules = useMemo(() => {
     const sorted = sortRecurringByDueDate(recurringTransactions);
@@ -536,27 +590,39 @@ export default function RecurringTransactionsPanel({
     }
   };
 
-  const handlePost = async (rule) => {
+  const handlePost = (rule) => {
     if (!rule.is_active) {
       toast.error('This recurring transaction is paused');
       return;
     }
+    setPostingRule(rule);
+  };
+
+  const confirmPost = async ({ amount, date, note }) => {
+    const rule = postingRule;
+    if (!rule) return;
+    if (!amount || amount <= 0) {
+      toast.error('Enter a valid amount');
+      return;
+    }
+    if (!date) {
+      toast.error('Select a transaction date');
+      return;
+    }
 
     setPostingId(rule.id);
-
     try {
-      const postedForDate = rule.next_due_date || todayIsoDate();
+      const postedForDate = rule.next_due_date || date;
       const { error } = await supabase.rpc('cero_post_recurring_transaction', {
         p_recurring_transaction_id: rule.id,
-        p_amount: null,
-        p_transaction_date: todayIsoDate(),
+        p_amount: amount,
+        p_transaction_date: date,
         p_posted_for_date: postedForDate,
-        p_note: rule.note || `${rule.name} · Recurring`,
+        p_note: note || `${rule.name} · Recurring`,
       });
-
       if (error) throw error;
-
       invalidateData();
+      setPostingRule(null);
       toast.success('Recurring transaction posted');
     } catch (error) {
       console.error('Recurring post failed:', error);
@@ -697,6 +763,17 @@ export default function RecurringTransactionsPanel({
           })}
         </div>
       )}
+
+      <PostRecurringDialog
+        open={Boolean(postingRule)}
+        onOpenChange={(value) => {
+          if (!value && !postingId) setPostingRule(null);
+        }}
+        rule={postingRule}
+        accounts={accounts}
+        onPost={confirmPost}
+        posting={Boolean(postingId)}
+      />
 
       <RecurringRuleDialog
         open={open}
