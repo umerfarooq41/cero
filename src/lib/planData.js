@@ -114,7 +114,12 @@ export function getAssignablePlannedDebt(plannedDebt = 0, fundedDebtPayments = 0
 }
 
 export function calculateLeftToAllocateFromTotals(totals = {}) {
-  const income = Number(totals.income || totals.totalIncome || 0);
+  const income = Number(
+    totals.realizedIncome ??
+      totals.income ??
+      totals.totalIncome ??
+      0
+  );
   const expense = Number(totals.expense || totals.totalExpenses || 0);
   const savings = Number(totals.savings || totals.totalSavings || 0);
   const debt = Number(totals.debt || totals.totalDebt || 0);
@@ -843,13 +848,18 @@ export function buildPlanTotals({
 
   const fundedDebtPayments = getFundedDebtPaymentTotal(transactions);
   const assignableDebt = getAssignablePlannedDebt(totals.debt, fundedDebtPayments);
+  const realizedIncome = transactions
+    .filter((transaction) => transaction?.type === 'income')
+    .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 
   return {
     ...totals,
+    realizedIncome,
     fundedDebtPayments,
     assignableDebt,
     leftToAllocate: calculateLeftToAllocateFromTotals({
       ...totals,
+      realizedIncome,
       fundedDebtPayments,
     }),
   };
