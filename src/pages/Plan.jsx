@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { PencilLine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/layout/PageHeader';
 import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
@@ -40,7 +41,7 @@ export default function Plan() {
   const currency = useCurrency();
   const formatCurrency = useCurrencyFormatter();
 
-  useBudgetSummary(currentMonth);
+  const budgetSummary = useBudgetSummary(currentMonth);
   const { data: categories = [] } = useCategories();
   const { data: allocations = [] } = useAllocations(currentMonth);
   const { data: transactions = [] } = useTransactions(currentMonth);
@@ -130,6 +131,22 @@ export default function Plan() {
 
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
+
+  if (budgetSummary.isLoading) {
+    return (
+      <div ref={scope} className="min-h-screen bg-transparent">
+        <PageHeader
+          title="Plan"
+          subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
+        />
+        <main className="mx-auto w-full max-w-7xl space-y-4 px-4 py-4 pb-28 md:px-6 lg:py-8">
+          <Skeleton className="mx-auto h-12 w-56 rounded-xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          <Skeleton className="h-72 w-full rounded-2xl" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
