@@ -6,6 +6,7 @@ import {
   Check,
   CircleDollarSign,
   Download,
+  Upload,
   Fingerprint,
   Globe,
   LayoutGrid,
@@ -41,6 +42,8 @@ import {
   saveUserSettings,
   exportFinancialReport,
   exportCeroBackup,
+  restoreCeroBackup,
+  validateCeroBackup,
   resetUserData,
 } from '@/lib/budgetData';
 import { toast } from 'sonner';
@@ -355,6 +358,9 @@ export default function Settings() {
 
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [restoreFile, setRestoreFile] = useState(null);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -500,6 +506,42 @@ export default function Settings() {
       toast.error(error.message || 'Could not create backup');
     } finally {
       setBackingUp(false);
+    }
+  };
+
+  const handleRestoreFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    try {
+      const backup = JSON.parse(await file.text());
+      validateCeroBackup(backup);
+      setRestoreFile({ name: file.name, backup });
+      setShowRestoreDialog(true);
+    } catch (error) {
+      console.error('Backup validation failed:', error);
+      toast.error(error.message || 'Could not read Cero backup');
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    if (!restoreFile?.backup) return;
+    setRestoring(true);
+
+    try {
+      await restoreCeroBackup(restoreFile.backup);
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      toast.success('Cero backup restored successfully');
+      setShowRestoreDialog(false);
+      setRestoreFile(null);
+      window.location.reload();
+    } catch (error) {
+      console.error('Backup restore failed:', error);
+      toast.error(error.message || 'Could not restore Cero backup');
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -791,6 +833,24 @@ export default function Settings() {
           </SettingRow>
 
           <SettingRow
+            icon={Upload}
+            tone="amber"
+            label="Restore Backup"
+            description="Validate and replace your Cero cloud data from a versioned JSON backup."
+          >
+            <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-input bg-background px-3 py-2 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
+              Restore
+              <input
+                type="file"
+                accept=".json,application/json"
+                className="sr-only"
+                onChange={handleRestoreFile}
+                disabled={restoring}
+              />
+            </label>
+          </SettingRow>
+
+          <SettingRow
             icon={Download}
             tone="blue"
             label="Export Report"
@@ -828,6 +888,42 @@ export default function Settings() {
             </Button>
           </SettingRow>
         </SettingsSection>
+
+        <Dialog open={showRestoreDialog} onOpenChange={(open) => {
+          if (!restoring) {
+            setShowRestoreDialog(open);
+            if (!open) setRestoreFile(null);
+          }
+        }}>
+          <DialogContent className="overflow-hidden rounded-3xl app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+            <DialogHeader className="border-b border-border/50 px-6 py-5">
+              <DialogTitle className="flex items-center gap-3 text-lg font-bold">
+                <IconTile icon={Upload} tone="amber" />
+                Restore Cero Backup
+              </DialogTitle>
+              <DialogDescription className="pt-2 text-sm leading-6">
+                {restoreFile?.name} passed the client format check. Restoring will replace all Cero cloud data for this account. The database restore is atomic: if any validation or insert fails, your existing data is kept.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 px-6 py-5 sm:gap-2">
+              <Button
+                variant="outline"
+                className="rounded-2xl"
+                disabled={restoring}
+                onClick={() => setShowRestoreDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="rounded-2xl"
+                disabled={restoring}
+                onClick={handleRestoreBackup}
+              >
+                {restoring ? 'Restoring…' : 'Restore backup'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
           <DialogContent className="overflow-hidden rounded-3xl app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
