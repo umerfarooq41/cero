@@ -2696,6 +2696,9 @@ REVOKE ALL ON FUNCTION public."set_updated_at"() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public."set_updated_at"() TO PUBLIC;
 REVOKE ALL ON FUNCTION public."sync_savings_goal_current_amount"() FROM PUBLIC;
 
+-- Fresh Supabase projects may grant broad table privileges directly to API roles by default.
+-- Clear those direct grants before restoring Cero's intended table permissions.
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM anon, authenticated, service_role;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE public."accounts" TO anon;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE public."accounts" TO authenticated;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE public."accounts" TO service_role;
