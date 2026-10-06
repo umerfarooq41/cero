@@ -25,6 +25,7 @@ import Accounts from '@/pages/Accounts';
 import ManagePlan from '@/pages/ManagePlan';
 
 import { useUserSettings } from '@/hooks/useBudgetData';
+import AutoSweepPrompt from '@/components/AutoSweepPrompt';
 
 // Lazy-load secondary pages that are opened less often.
 const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
@@ -217,6 +218,7 @@ function App() {
         <AuthenticatedApp />
       </Router>
 
+      <AutoSweepPrompt />
       <ConnectionStatus />
       <Toaster />
     </QueryClientProvider>
