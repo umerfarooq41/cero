@@ -1,4 +1,3 @@
-import React from 'react';
 import { Pencil, Archive, Trash2, ArchiveRestore } from 'lucide-react';
 import {
   Dialog,
