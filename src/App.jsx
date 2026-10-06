@@ -24,7 +24,7 @@ import Transactions from '@/pages/Transactions';
 import Accounts from '@/pages/Accounts';
 import ManagePlan from '@/pages/ManagePlan';
 
-import { useAutoSweepSurplus, useUserSettings } from '@/hooks/useBudgetData';
+import { useUserSettings } from '@/hooks/useBudgetData';
 
 // Lazy-load secondary pages that are opened less often.
 const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
@@ -66,7 +66,6 @@ const AuthenticatedApp = () => {
     refetch: refetchSettings,
   } = useUserSettings();
 
-  useAutoSweepSurplus();
 
   if (isLoadingAuth) {
     return <LoadingScreen />;
