@@ -167,7 +167,29 @@ export const transactionsApi = {
   list: () => listRows("transactions", { orderBy: "date", ascending: false }),
   listByDateRange: (startDate, endDate) => listTransactionsByDateRange(startDate, endDate),
   create: async (values) => createRow("transactions", await withIncomeBudgetAssignment(values)),
-  update: async (id, values) => updateRow("transactions", id, await withIncomeBudgetAssignment(values)),
+  update: async (id, values) => {
+    const userId = await currentUserId();
+    const { data: existing, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
+
+    logAndThrow("Supabase transaction load-before-update error:", error);
+
+    // Budget-month assignment depends on the transaction type and date.
+    // Merge the persisted row first so partial updates cannot accidentally
+    // clear deferred-income metadata or call the assignment RPC without a date.
+    const merged = { ...existing, ...values };
+    const assigned = await withIncomeBudgetAssignment(merged);
+
+    return updateRow("transactions", id, {
+      ...values,
+      budget_month: assigned.budget_month,
+      budget_month_override: assigned.budget_month_override,
+    });
+  },
   delete: (id) => deleteRow("transactions", id),
 };
 
