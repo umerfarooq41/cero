@@ -15,9 +15,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </React.StrictMode>
 );
 
-// ✅ Register Service Worker (PWA)
-if ("serviceWorker" in navigator) {
+// Register the production service worker without letting a registration
+// failure interrupt application startup.
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js");
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.error("Service worker registration failed:", error);
+    });
   });
 }
