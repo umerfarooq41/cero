@@ -1,4 +1,3 @@
-import React from 'react';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
