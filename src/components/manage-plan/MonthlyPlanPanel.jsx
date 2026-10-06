@@ -10,6 +10,7 @@ import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { budgetPlansApi } from '@/lib/budgetData';
 import {
   useAllocations,
@@ -364,17 +365,30 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
 
-  const { data: categories = [] } = useCategories();
-  const { data: allocations = [] } = useAllocations(currentMonth);
-  const { data: recurringTransactions = [] } = useRecurringTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: allTransactions = [] } = useAllTransactions();
+  const categoriesQuery = useCategories();
+  const allocationsQuery = useAllocations(currentMonth);
+  const recurringQuery = useRecurringTransactions();
+  const goalsQuery = useSavingsGoals();
+  const transactionsQuery = useAllTransactions();
+  const categories = categoriesQuery.data || [];
+  const allocations = allocationsQuery.data || [];
+  const recurringTransactions = recurringQuery.data || [];
+  const savingsGoals = goalsQuery.data || [];
+  const allTransactions = transactionsQuery.data || [];
 
   const prevMonth = format(
     subMonths(new Date(`${currentMonth}-01T00:00:00`), 1),
     'yyyy-MM'
   );
-  const { data: prevAllocations = [] } = useAllocations(prevMonth);
+  const prevAllocationsQuery = useAllocations(prevMonth);
+  const prevAllocations = prevAllocationsQuery.data || [];
+  const isPlanLoading =
+    categoriesQuery.isLoading ||
+    allocationsQuery.isLoading ||
+    recurringQuery.isLoading ||
+    goalsQuery.isLoading ||
+    transactionsQuery.isLoading ||
+    prevAllocationsQuery.isLoading;
 
   const currentMonthTransactions = useMemo(() => {
     return allTransactions.filter((transaction) =>
@@ -715,7 +729,17 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const total = sumType(type);
     const count = items.filter((item) => !item.isSectionHeader).length;
 
+    if (isPlanLoading) {
     return (
+      <div className="space-y-4">
+        <Skeleton className="mx-auto h-12 w-56 rounded-xl" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <Skeleton className="h-80 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  return (
       <section className="overflow-hidden rounded-2xl app-card-surface">
         <button
           type="button"
