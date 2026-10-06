@@ -8,7 +8,6 @@ import {
   MoreVertical,
   Pencil,
   Plus,
-  Target,
   Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
