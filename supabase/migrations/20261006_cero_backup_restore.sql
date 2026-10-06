@@ -156,7 +156,7 @@ BEGIN
   INSERT INTO public.transactions(
     id,user_id,account_id,to_account_id,category_id,amount,type,date,note,created_at,updated_at,recurring_transaction_id,
     recurring_posted_for_date,savings_goal_id,goal_contribution_id,source_type,recurring_occurrence_key,
-    account_name_snapshot,to_account_name_snapshot)
+    account_name_snapshot,to_account_name_snapshot,budget_month,budget_month_override)
   SELECT COALESCE((id_maps->'transactions'->>r.id::text)::uuid, r.id::text::uuid),uid,
     COALESCE((id_maps->'accounts'->>r.account_id::text)::uuid, r.account_id::text::uuid),
     CASE WHEN r.to_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.to_account_id::text)::uuid, r.to_account_id::text::uuid) END,
@@ -164,12 +164,12 @@ BEGIN
     CASE WHEN r.recurring_transaction_id IS NULL THEN NULL ELSE COALESCE((id_maps->'recurring_transactions'->>r.recurring_transaction_id::text)::uuid, r.recurring_transaction_id::text::uuid) END,
     r.recurring_posted_for_date,
     CASE WHEN r.savings_goal_id IS NULL THEN NULL ELSE COALESCE((id_maps->'savings_goals'->>r.savings_goal_id::text)::uuid, r.savings_goal_id::text::uuid) END,NULL,r.source_type,r.recurring_occurrence_key,
-    r.account_name_snapshot,r.to_account_name_snapshot
+    r.account_name_snapshot,r.to_account_name_snapshot,r.budget_month,coalesce(r.budget_month_override,false)
   FROM jsonb_to_recordset(d->'transactions') AS r(
     id uuid,user_id uuid,account_id uuid,to_account_id uuid,category_id uuid,amount numeric,type text,date date,note text,
     created_at timestamptz,updated_at timestamptz,recurring_transaction_id uuid,recurring_posted_for_date date,
     savings_goal_id uuid,goal_contribution_id uuid,source_type text,recurring_occurrence_key text,
-    account_name_snapshot text,to_account_name_snapshot text);
+    account_name_snapshot text,to_account_name_snapshot text,budget_month text,budget_month_override boolean);
 
   INSERT INTO public.goal_contributions
   SELECT COALESCE((id_maps->'goal_contributions'->>r.id::text)::uuid, r.id::text::uuid),uid,
