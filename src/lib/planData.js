@@ -114,19 +114,16 @@ export function getAssignablePlannedDebt(plannedDebt = 0, fundedDebtPayments = 0
 }
 
 export function calculateLeftToAllocateFromTotals(totals = {}) {
-  const income = Number(
-    totals.realizedIncome ??
-      totals.income ??
-      totals.totalIncome ??
-      0
-  );
+  const expectedIncome = Number(totals.income ?? totals.totalIncome ?? 0);
+  const realizedIncome = Number(totals.realizedIncome ?? expectedIncome);
+  const budgetFunding = Math.max(expectedIncome, realizedIncome);
   const expense = Number(totals.expense || totals.totalExpenses || 0);
   const savings = Number(totals.savings || totals.totalSavings || 0);
   const debt = Number(totals.debt || totals.totalDebt || 0);
   const fundedDebtPayments = Number(totals.fundedDebtPayments || 0);
   const assignableDebt = getAssignablePlannedDebt(debt, fundedDebtPayments);
 
-  return income - expense - savings - assignableDebt;
+  return budgetFunding - expense - savings - assignableDebt;
 }
 
 export function isSourceLinkedTransaction(transaction) {
@@ -873,6 +870,7 @@ export function buildPlanTotals({
   return {
     ...totals,
     realizedIncome,
+    budgetFunding: Math.max(totals.income, realizedIncome),
     fundedDebtPayments,
     assignableDebt,
     leftToAllocate: calculateLeftToAllocateFromTotals({
