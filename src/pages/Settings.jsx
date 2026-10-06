@@ -796,8 +796,8 @@ export default function Settings() {
           <SettingRow
             icon={Calculator}
             tone="amber"
-            label="25th Rule"
-            description="Transactions dated on or after the 25th count toward the next budget month."
+            label="Defer late-month income"
+            description="Income received on or after the 25th is available for next month’s budget. Other transactions stay on their actual dates."
           >
             <Switch
               checked={settings.budgetLogic.twentyFifthRule}
