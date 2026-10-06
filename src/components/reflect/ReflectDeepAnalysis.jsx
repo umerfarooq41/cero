@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Target } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import {
   getGoalProgress,
-  getGoalRemaining,
   getMonthlyRequiredSaving,
   sortGoalsByPriority,
   todayIsoDate,
