@@ -4,6 +4,7 @@ export function invalidateScheduledQueries(queryClient) {
   [
     ['transactions'],
     ['all-transactions'],
+    ['transactions-for-months'],
     ['accounts'],
     ['recurring-transactions'],
     ['savings-goals'],
