@@ -105,19 +105,8 @@ function getCalendarMonthDateRange(month) {
   };
 }
 
-function getBudgetMonthDateRange(month, settings = {}) {
-  const calendarRange = getCalendarMonthDateRange(month);
-  if (!calendarRange || !isTwentyFifthRuleEnabled(settings)) {
-    return calendarRange;
-  }
-
-  const previousMonth = getPreviousBudgetMonth(month);
-  const previousRange = getCalendarMonthDateRange(previousMonth);
-
-  return {
-    startDate: `${previousMonth}-25`,
-    endDate: `${month}-24`,
-  };
+function getBudgetMonthDateRange(month) {
+  return getCalendarMonthDateRange(month);
 }
 
 export function useTransactions(month) {
@@ -127,10 +116,7 @@ export function useTransactions(month) {
     queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
       const settings = await getUserSettings();
-      const range = getBudgetMonthDateRange(
-        month,
-        normalizeUserSettings(settings || {})
-      );
+      const range = getBudgetMonthDateRange(month);
 
       if (!range) return [];
 
@@ -147,15 +133,11 @@ export function useTransactionsForMonths(months = []) {
   return useQuery({
     queryKey: ['transactions-for-months', session?.user?.id, monthKey],
     queryFn: async () => {
-      const settings = normalizeUserSettings((await getUserSettings()) || {});
       const uniqueMonths = [...new Set(months.filter(Boolean))].sort();
       if (!uniqueMonths.length) return [];
 
-      const firstRange = getBudgetMonthDateRange(uniqueMonths[0], settings);
-      const lastRange = getBudgetMonthDateRange(
-        uniqueMonths[uniqueMonths.length - 1],
-        settings
-      );
+      const firstRange = getBudgetMonthDateRange(uniqueMonths[0]);
+      const lastRange = getBudgetMonthDateRange(uniqueMonths[uniqueMonths.length - 1]);
 
       if (!firstRange || !lastRange) return [];
 
