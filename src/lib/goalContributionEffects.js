@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { todayIsoDate } from '@/lib/goals';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 
 function safeAmount(value) {
   return Math.max(0, Number(value || 0));
@@ -59,17 +60,6 @@ export async function postGoalContribution({
 export function invalidateGoalContributionQueries(queryClient) {
   if (!queryClient) return;
 
-  [
-    ['transactions'],
-    ['all-transactions'],
-    ['accounts'],
-    ['savings-goals'],
-    ['manage-savings-goals'],
-    ['goal-contributions'],
-    ['allocations'],
-    ['all-allocations'],
-    ['budget-summary'],
-  ].forEach((queryKey) => {
-    queryClient.invalidateQueries({ queryKey });
-  });
+  invalidateScheduledQueries(queryClient);
+  queryClient.invalidateQueries({ queryKey: ['manage-savings-goals'] });
 }
