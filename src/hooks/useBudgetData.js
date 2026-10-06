@@ -363,6 +363,8 @@ export function useYearBudgetSummary(year) {
         allocations: monthAllocations,
         categories,
         transactions: monthTransactions,
+        allTransactions: transactions,
+        currentMonth: month,
       });
 
       return {
