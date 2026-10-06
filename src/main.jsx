@@ -15,12 +15,30 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </React.StrictMode>
 );
 
-// Register the production service worker without letting a registration
-// failure interrupt application startup.
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((error) => {
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register("/sw.js");
+
+      const announceUpdate = () => {
+        if (registration.waiting) {
+          window.dispatchEvent(
+            new CustomEvent("cero:pwa-update", { detail: { registration } })
+          );
+        }
+      };
+
+      announceUpdate();
+      registration.addEventListener("updatefound", () => {
+        const worker = registration.installing;
+        worker?.addEventListener("statechange", () => {
+          if (worker.state === "installed" && navigator.serviceWorker.controller) {
+            announceUpdate();
+          }
+        });
+      });
+    } catch (error) {
       console.error("Service worker registration failed:", error);
-    });
+    }
   });
 }
