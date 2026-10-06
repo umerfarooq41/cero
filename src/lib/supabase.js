@@ -20,4 +20,21 @@ if (parsedSupabaseUrl.protocol !== "https:") {
   throw new Error("VITE_SUPABASE_URL must use HTTPS.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const onlineOnlyFetch = (input, init = {}) => {
+  const method = String(init.method || "GET").toUpperCase();
+  const isReadRequest = method === "GET" || method === "HEAD";
+
+  if (!isReadRequest && typeof navigator !== "undefined" && !navigator.onLine) {
+    return Promise.reject(
+      new Error("Cero is offline. Reconnect before making changes.")
+    );
+  }
+
+  return fetch(input, init);
+};
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    fetch: onlineOnlyFetch,
+  },
+});
