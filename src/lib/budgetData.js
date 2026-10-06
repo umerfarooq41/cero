@@ -868,6 +868,7 @@ export async function exportCeroBackup() {
     recurringTransactions,
     savingsGoals,
     goalContributions,
+    autoSweepDecisions,
     settings,
   ] = await Promise.all([
     listRows("accounts", { orderBy: "created_at", ascending: true }),
@@ -877,13 +878,14 @@ export async function exportCeroBackup() {
     listRows("recurring_transactions", { orderBy: "created_at", ascending: true }),
     listRows("savings_goals", { orderBy: "created_at", ascending: true }),
     listRows("goal_contributions", { orderBy: "created_at", ascending: true }),
+    listRows("auto_sweep_decisions", { orderBy: "created_at", ascending: true }),
     getUserSettings(),
   ]);
 
   const exportedAt = new Date();
   const backup = {
     format: "cero-backup",
-    version: 1,
+    version: 2,
     exported_at: exportedAt.toISOString(),
     data: {
       accounts,
@@ -893,6 +895,7 @@ export async function exportCeroBackup() {
       recurring_transactions: recurringTransactions,
       savings_goals: savingsGoals,
       goal_contributions: goalContributions,
+      auto_sweep_decisions: autoSweepDecisions,
       user_settings: settings ? [settings] : [],
     },
   };
@@ -922,10 +925,15 @@ export function validateCeroBackup(backup) {
     "recurring_transactions",
     "savings_goals",
     "goal_contributions",
+    ...(backup.version >= 2 ? ["auto_sweep_decisions"] : []),
     "user_settings",
   ];
 
-  if (!backup || backup.format !== "cero-backup" || backup.version !== 1) {
+  if (
+    !backup ||
+    backup.format !== "cero-backup" ||
+    ![1, 2].includes(Number(backup.version))
+  ) {
     throw new Error("This is not a supported Cero backup.");
   }
 
