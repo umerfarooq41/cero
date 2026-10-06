@@ -49,60 +49,39 @@ function shiftMonthKey(year, month, offset) {
   return `${shiftedYear}-${String(shiftedMonth).padStart(2, '0')}`;
 }
 
-export function getBudgetMonth(date, settings = {}) {
+export function getBudgetMonth(date) {
   if (!date) return null;
-
   const parts = parseIsoDateParts(date);
   if (!parts) return null;
-
-  const offset =
-    isTwentyFifthRuleEnabled(settings) && parts.day >= 25 ? 1 : 0;
-
-  return shiftMonthKey(parts.year, parts.month, offset);
+  return shiftMonthKey(parts.year, parts.month, 0);
 }
 
-export function isTransactionInBudgetMonth(
-  transaction,
-  month,
-  settings = {}
-) {
-  return getBudgetMonth(transaction?.date, settings) === month;
+export function getTransactionBudgetMonth(transaction) {
+  if (!transaction) return null;
+
+  if (transaction.type === 'income' && transaction.budget_month) {
+    return transaction.budget_month;
+  }
+
+  return getBudgetMonth(transaction.date);
 }
 
-export function filterTransactionsByBudgetMonth(
-  transactions = [],
-  month,
-  settings = {}
-) {
+export function isTransactionInBudgetMonth(transaction, month) {
+  return getTransactionBudgetMonth(transaction) === month;
+}
+
+export function filterTransactionsByBudgetMonth(transactions = [], month) {
   if (!month) return transactions;
-
   return transactions.filter((transaction) =>
-    isTransactionInBudgetMonth(transaction, month, settings)
+    isTransactionInBudgetMonth(transaction, month)
   );
 }
 
-export function filterTransactionsByBudgetYear(
-  transactions = [],
-  year,
-  settings = {}
-) {
+export function filterTransactionsByBudgetYear(transactions = [], year) {
   if (!year) return transactions;
-
   return transactions.filter((transaction) =>
-    getBudgetMonth(transaction?.date, settings)?.startsWith(`${year}-`)
+    getTransactionBudgetMonth(transaction)?.startsWith(`${year}-`)
   );
-}
-
-function parseMonthKey(month) {
-  const match = String(month || '').match(/^(\d{4})-(\d{2})$/);
-  if (!match) return null;
-
-  const year = Number(match[1]);
-  const monthNumber = Number(match[2]);
-
-  if (monthNumber < 1 || monthNumber > 12) return null;
-
-  return { year, month: monthNumber };
 }
 
 export function getNextBudgetMonth(month) {
@@ -129,8 +108,10 @@ export function calculateMonthSurplus({
   );
 }
 
-export function getCurrentBudgetMonth(settings = {}, date = new Date()) {
-  return getBudgetMonth(date, settings);
+export function getCurrentBudgetMonth(_settings = {}, date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
 }
 
 
@@ -142,11 +123,7 @@ export function getBudgetMonthCloseDate(month, settings = {}) {
 
   if (!year || !monthNumber) return null;
 
-  if (isTwentyFifthRuleEnabled(settings)) {
-    return `${year}-${String(monthNumber).padStart(2, '0')}-24`;
-  }
-
-  const lastDay = new Date(year, monthNumber, 0).getDate();
+   const lastDay = new Date(year, monthNumber, 0).getDate();
 
   return `${year}-${String(monthNumber).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 }
