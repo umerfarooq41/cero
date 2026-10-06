@@ -785,14 +785,12 @@ export default function Settings() {
           <SettingRow
             icon={ShieldCheck}
             tone="emerald"
-            label="Auto-Sweep Surplus"
-            description="At month close, Cero can move leftover surplus into savings when accounts and categories are available."
+            label="Auto-Sweep (configuration required)"
+            description="Automatic transfers are paused until explicit source, destination and execution settings are available."
           >
             <Switch
-              checked={settings.budgetLogic.autoSweepSurplus}
-              onCheckedChange={(value) =>
-                updateBudgetLogicSetting('autoSweepSurplus', value)
-              }
+              checked={false}
+              disabled
             />
           </SettingRow>
         </SettingsSection>
