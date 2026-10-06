@@ -1,6 +1,5 @@
 import CategoryIconBadge from '@/components/shared/CategoryIcon';
 import SourceBadge from '@/components/shared/SourceBadge';
-import { cn } from '@/lib/utils';
 import PlanMoney from './PlanMoney';
 
 function getBudgetType(item) {
