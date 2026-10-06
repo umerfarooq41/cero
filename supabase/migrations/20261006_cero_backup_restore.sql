@@ -153,6 +153,11 @@ BEGIN
     archived_at timestamptz,total_amount numeric,duration_count integer,duration_unit text,completed_at date,
     payment_mode text,schedule_anchor_day smallint);
 
+  -- Restore transaction rows with their backed-up budget assignment metadata.
+  -- The integrity trigger protects normal writes, but a backup is already the
+  -- source of truth and may contain a deliberate budget_month override.
+  ALTER TABLE public.transactions DISABLE TRIGGER transactions_budget_month_integrity;
+
   INSERT INTO public.transactions(
     id,user_id,account_id,to_account_id,category_id,amount,type,date,note,created_at,updated_at,recurring_transaction_id,
     recurring_posted_for_date,savings_goal_id,goal_contribution_id,source_type,recurring_occurrence_key,
@@ -170,6 +175,8 @@ BEGIN
     created_at timestamptz,updated_at timestamptz,recurring_transaction_id uuid,recurring_posted_for_date date,
     savings_goal_id uuid,goal_contribution_id uuid,source_type text,recurring_occurrence_key text,
     account_name_snapshot text,to_account_name_snapshot text,budget_month text,budget_month_override boolean);
+
+  ALTER TABLE public.transactions ENABLE TRIGGER transactions_budget_month_integrity;
 
   INSERT INTO public.goal_contributions
   SELECT COALESCE((id_maps->'goal_contributions'->>r.id::text)::uuid, r.id::text::uuid),uid,
