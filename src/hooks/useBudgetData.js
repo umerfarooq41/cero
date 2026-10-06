@@ -41,7 +41,6 @@ export function useCategories() {
       return categories.filter(c => !c.is_archived);
     },
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
@@ -55,7 +54,6 @@ export function useAccounts() {
       return accounts.filter(a => !a.is_archived);
     },
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
@@ -139,7 +137,6 @@ export function useTransactions(month) {
       return transactionsApi.listByDateRange(range.startDate, range.endDate);
     },
     enabled: Boolean(session?.user?.id && month),
-    initialData: [],
   });
 }
 
@@ -168,7 +165,6 @@ export function useTransactionsForMonths(months = []) {
       );
     },
     enabled: Boolean(session?.user?.id && months.length),
-    initialData: [],
   });
 }
 
@@ -179,7 +175,6 @@ export function useAllTransactions() {
     queryKey: ['all-transactions', session?.user?.id],
     queryFn: () => transactionsApi.list(),
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
@@ -190,7 +185,6 @@ export function useRecurringTransactions() {
     queryKey: ['recurring-transactions', session?.user?.id],
     queryFn: () => recurringTransactionsApi.list(),
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
@@ -204,7 +198,6 @@ export function useSavingsGoals() {
       return goals.filter((goal) => !goal.is_archived);
     },
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
@@ -215,7 +208,6 @@ export function useGoalContributions() {
     queryKey: ['goal-contributions', session?.user?.id],
     queryFn: () => goalContributionsApi.list(),
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
@@ -226,7 +218,6 @@ export function useAllocations(month) {
     queryKey: ['allocations', session?.user?.id, month],
     queryFn: () => budgetPlansApi.list(month),
     enabled: Boolean(session?.user?.id && month),
-    initialData: [],
   });
 }
 
@@ -237,7 +228,6 @@ export function useAllAllocations() {
     queryKey: ['all-allocations', session?.user?.id],
     queryFn: () => budgetPlansApi.list(),
     enabled: Boolean(session?.user?.id),
-    initialData: [],
   });
 }
 
