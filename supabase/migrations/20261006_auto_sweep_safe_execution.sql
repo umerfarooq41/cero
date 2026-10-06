@@ -75,7 +75,12 @@ BEGIN
     coalesce(sum(CASE WHEN t.type='debt' THEN abs(t.amount) ELSE 0 END),0)
   INTO v_income,v_expenses,v_savings,v_debt
   FROM public.transactions t
-  WHERE t.user_id = uid AND to_char(t.date,'YYYY-MM') = p_month
+  WHERE t.user_id = uid
+    AND (
+      (t.type = 'income' AND coalesce(t.budget_month, to_char(t.date,'YYYY-MM')) = p_month)
+      OR
+      (t.type <> 'income' AND to_char(t.date,'YYYY-MM') = p_month)
+    )
     AND t.type <> 'transfer';
 
   v_unused_budget := greatest(0, v_planned_expenses - v_expenses);
@@ -237,10 +242,9 @@ BEGIN
     RETURN QUERY SELECT 'already_done'::text,v_tx,v_amount,NULL::text; RETURN;
   END IF;
 
-  -- The month-close date follows Cero's 25th Rule.
-  v_date := CASE WHEN coalesce(s.shift25th,false)
-    THEN (to_date(p_month||'-01','YYYY-MM-DD') + interval '1 month' - interval '8 days')::date
-    ELSE (to_date(p_month||'-01','YYYY-MM-DD') + interval '1 month' - interval '1 day')::date END;
+  -- The 25th Rule only changes which budget month income funds.
+  -- Expenses, transfers, and month close remain calendar-based.
+  v_date := (to_date(p_month||'-01','YYYY-MM-DD') + interval '1 month' - interval '1 day')::date;
 
   INSERT INTO public.transactions(user_id,account_id,to_account_id,amount,type,date,note,source_type,recurring_occurrence_key,
     account_name_snapshot,to_account_name_snapshot)
