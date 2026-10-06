@@ -1,3 +1,23 @@
+import { useQuery } from '@tanstack/react-query';
+import {
+  accountsApi,
+  budgetPlansApi,
+  categoriesApi,
+  recurringTransactionsApi,
+  savingsGoalsApi,
+  goalContributionsApi,
+  transactionsApi,
+  getUserSettings,
+} from '@/lib/budgetData';
+import {
+  buildPlanTotals,
+  calculateLeftToAllocateFromTotals,
+  isGoalFundUseTransaction,
+} from '@/lib/planData';
+import {
+  filterTransactionsByBudgetMonth,
+  filterTransactionsByBudgetYear,
+} from '@/lib/budgetLogic';
 import { useAuth } from '@/lib/AuthContext';
 
 export function useCategories() {
