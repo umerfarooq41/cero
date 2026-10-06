@@ -116,7 +116,9 @@ export function getAssignablePlannedDebt(plannedDebt = 0, fundedDebtPayments = 0
 export function calculateLeftToAllocateFromTotals(totals = {}) {
   const expectedIncome = Number(totals.income ?? totals.totalIncome ?? 0);
   const realizedIncome = Number(totals.realizedIncome ?? expectedIncome);
-  const budgetFunding = Math.max(expectedIncome, realizedIncome);
+  const budgetFunding = Number(
+    totals.budgetFunding ?? Math.max(expectedIncome, realizedIncome)
+  );
   const expense = Number(totals.expense || totals.totalExpenses || 0);
   const savings = Number(totals.savings || totals.totalSavings || 0);
   const debt = Number(totals.debt || totals.totalDebt || 0);
@@ -867,15 +869,27 @@ export function buildPlanTotals({
     })
     .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 
+  // Active/future months are allowed to plan against expected income while
+  // money is still arriving. Once a month is closed, reconcile funding to the
+  // income actually assigned to that budget month. Extra realized income is
+  // available immediately in either case.
+  const today = new Date();
+  const activeMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const isClosedMonth = Boolean(currentMonth && currentMonth < activeMonth);
+  const budgetFunding = isClosedMonth
+    ? realizedIncome
+    : Math.max(totals.income, realizedIncome);
+
   return {
     ...totals,
     realizedIncome,
-    budgetFunding: Math.max(totals.income, realizedIncome),
+    budgetFunding,
     fundedDebtPayments,
     assignableDebt,
     leftToAllocate: calculateLeftToAllocateFromTotals({
       ...totals,
       realizedIncome,
+      budgetFunding,
       fundedDebtPayments,
     }),
   };
