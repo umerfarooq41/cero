@@ -40,6 +40,7 @@ import {
   getUserSettings,
   saveUserSettings,
   exportFinancialReport,
+  exportCeroBackup,
   resetUserData,
 } from '@/lib/budgetData';
 import { toast } from 'sonner';
@@ -353,6 +354,7 @@ export default function Settings() {
   });
 
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -484,6 +486,20 @@ export default function Settings() {
       toast.error(error.message || 'Could not export report');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleBackup = async () => {
+    setBackingUp(true);
+
+    try {
+      const result = await exportCeroBackup();
+      toast.success(`Backup downloaded: ${result.filename}`);
+    } catch (error) {
+      console.error('Backup export failed:', error);
+      toast.error(error.message || 'Could not create backup');
+    } finally {
+      setBackingUp(false);
     }
   };
 
@@ -757,6 +773,23 @@ export default function Settings() {
           description="Export your information and keep a backup outside Cero."
           tone="blue"
         >
+          <SettingRow
+            icon={ShieldCheck}
+            tone="emerald"
+            label="Cero Backup"
+            description="Download a complete versioned JSON backup of your Cero cloud data."
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-2xl"
+              onClick={handleBackup}
+              disabled={backingUp}
+            >
+              {backingUp ? 'Backing up…' : 'Backup'}
+            </Button>
+          </SettingRow>
+
           <SettingRow
             icon={Download}
             tone="blue"
