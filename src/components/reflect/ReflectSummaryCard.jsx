@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Activity, BarChart3, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
