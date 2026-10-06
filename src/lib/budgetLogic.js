@@ -1,13 +1,3 @@
-export function isTwentyFifthRuleEnabled(settings = {}) {
-  return (
-    settings?.shift25th === true ||
-    settings?.twentyFifthRule === true ||
-    settings?.budgetLogic?.twentyFifthRule === true ||
-    settings?.budget_logic?.twenty_fifth_rule === true
-  );
-}
-
-
 export function isAutoSweepSurplusEnabled(settings = {}) {
   return (
     settings?.autoSweepSurplus === true ||
