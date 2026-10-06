@@ -180,7 +180,7 @@ export default function DashboardOverview({
       <div className="animate-child lg:hidden">
           <LeftToAllocateBanner
             leftToAllocate={budget.leftToAllocate}
-            totalIncome={budget.realizedIncome ?? budget.totalIncome}
+            totalIncome={budget.budgetFunding ?? budget.totalPlannedIncome ?? budget.totalIncome}
             formatCurrency={formatCurrency}
           />
         </div>
