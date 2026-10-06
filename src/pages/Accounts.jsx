@@ -96,7 +96,38 @@ function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurr
 export default function Accounts() {
   const scope = usePageEntrance();
   const formatCurrency = useCurrencyFormatter();
-  const { data: accounts = [] } = useAccounts();
+  const {
+    data: accounts = [],
+    isPending: accountsPending,
+    isError: accountsError,
+    refetch: refetchAccounts,
+  } = useAccounts();
+
+  if (accountsPending) {
+    return (
+      <div ref={scope} className="min-h-screen bg-transparent">
+        <PageHeader title="Accounts" subtitle="Your money, savings, and debt" />
+        <main className="mx-auto flex min-h-[50vh] w-full max-w-7xl items-center justify-center px-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
+        </main>
+      </div>
+    );
+  }
+
+  if (accountsError) {
+    return (
+      <div ref={scope} className="min-h-screen bg-transparent">
+        <PageHeader title="Accounts" subtitle="Your money, savings, and debt" />
+        <main className="mx-auto flex min-h-[50vh] w-full max-w-7xl flex-col items-center justify-center gap-3 px-4 text-center">
+          <h2 className="text-lg font-semibold">Couldn't load accounts</h2>
+          <p className="text-sm text-muted-foreground">Your data has not been changed. Check your connection and try again.</p>
+          <button type="button" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => refetchAccounts()}>
+            Retry
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   const [collapsedGroups, setCollapsedGroups] = useState({
     assets: false,
