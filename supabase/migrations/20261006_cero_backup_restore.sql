@@ -213,13 +213,19 @@ BEGIN
     id uuid,user_id uuid,onboarding_complete boolean,currency text,currency_placement text,number_format text,
     date_format text,theme text,shift25th boolean,auto_sweep boolean,created_at timestamptz,updated_at timestamptz);
 
-  -- Contribution triggers intentionally recompute current_amount. It must
-  -- match the backup state; otherwise the restore is rejected and rolled back.
-  IF EXISTS (
-    SELECT 1 FROM public.savings_goals g
-    JOIN jsonb_to_recordset(d->'savings_goals') AS r(id uuid,current_amount numeric) ON COALESCE((id_maps->'savings_goals'->>r.id::text)::uuid, r.id::text::uuid)=g.id
-    WHERE g.user_id=uid AND g.current_amount IS DISTINCT FROM r.current_amount
-  ) THEN RAISE EXCEPTION 'Backup goal totals do not reconcile with contributions'; END IF;
+  -- Contribution triggers recompute current_amount using the application's
+  -- canonical rule: starting_amount + contributions, clamped to [0, target].
+  -- Historical backups can contain a stale derived current_amount, so normalize
+  -- restored goals from their source-of-truth rows instead of rejecting the
+  -- otherwise valid backup.
+  FOR item IN SELECT value FROM jsonb_array_elements(d->'savings_goals') LOOP
+    PERFORM public.recalculate_savings_goal_current_amount(
+      COALESCE(
+        (id_maps->'savings_goals'->>(item->>'id'))::uuid,
+        (item->>'id')::uuid
+      )
+    );
+  END LOOP;
 
   FOREACH section IN ARRAY expected_sections LOOP
     counts := counts || jsonb_build_object(section,jsonb_array_length(d->section));
