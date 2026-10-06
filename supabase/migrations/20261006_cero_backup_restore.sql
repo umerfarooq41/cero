@@ -23,11 +23,13 @@ DECLARE
     'accounts','categories','transactions','budget_plans',
     'recurring_transactions','savings_goals','goal_contributions','user_settings'
   ];
+  backup_version integer;
 BEGIN
   IF uid IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;
   IF p_backup IS NULL OR jsonb_typeof(p_backup) <> 'object' THEN RAISE EXCEPTION 'Invalid backup file'; END IF;
   IF p_backup->>'format' <> 'cero-backup' THEN RAISE EXCEPTION 'Not a Cero backup'; END IF;
-  IF COALESCE((p_backup->>'version')::integer, 0) <> 1 THEN RAISE EXCEPTION 'Unsupported Cero backup version'; END IF;
+  IF COALESCE((p_backup->>'version')::integer, 0) NOT IN (1,2) THEN RAISE EXCEPTION 'Unsupported Cero backup version'; END IF;
+  backup_version := COALESCE((p_backup->>'version')::integer, 0);
   d := p_backup->'data';
   IF d IS NULL OR jsonb_typeof(d) <> 'object' THEN RAISE EXCEPTION 'Backup data is missing'; END IF;
 
@@ -36,6 +38,10 @@ BEGIN
       RAISE EXCEPTION 'Backup section % is missing or invalid', section;
     END IF;
   END LOOP;
+
+  IF backup_version >= 2 AND (NOT (d ? 'auto_sweep_decisions') OR jsonb_typeof(d->'auto_sweep_decisions') <> 'array') THEN
+    RAISE EXCEPTION 'Backup section auto_sweep_decisions is missing or invalid';
+  END IF;
 
   IF jsonb_array_length(d->'user_settings') > 1 THEN
     RAISE EXCEPTION 'Backup contains multiple user settings rows';
@@ -95,6 +101,7 @@ BEGIN
   UPDATE public.recurring_transactions SET last_posted_transaction_id=NULL
     WHERE user_id=uid AND last_posted_transaction_id IS NOT NULL;
 
+  DELETE FROM public.auto_sweep_decisions WHERE user_id=uid;
   DELETE FROM public.goal_contributions WHERE user_id=uid;
   DELETE FROM public.budget_plans WHERE user_id=uid;
   DELETE FROM public.transactions WHERE user_id=uid;
@@ -206,12 +213,36 @@ BEGIN
     id uuid,user_id uuid,category_id uuid,month text,planned_amount numeric,created_at timestamptz,updated_at timestamptz,
     source_type text,source_id uuid,budget_type text,label text,icon text,color text);
 
-  INSERT INTO public.user_settings
+  INSERT INTO public.user_settings(
+    id,user_id,onboarding_complete,currency,currency_placement,number_format,date_format,theme,
+    shift25th,auto_sweep,created_at,updated_at,auto_sweep_source_account_id,auto_sweep_destination_account_id,
+    auto_sweep_execution_mode,auto_sweep_amount_mode,auto_sweep_value,auto_sweep_minimum_balance)
   SELECT COALESCE((id_maps->'user_settings'->>r.id::text)::uuid, r.id::text::uuid),uid,r.onboarding_complete,r.currency,r.currency_placement,r.number_format,r.date_format,r.theme,
-    r.shift25th,r.auto_sweep,r.created_at,r.updated_at
+    r.shift25th,r.auto_sweep,r.created_at,r.updated_at,
+    CASE WHEN r.auto_sweep_source_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.auto_sweep_source_account_id::text)::uuid, r.auto_sweep_source_account_id::text::uuid) END,
+    CASE WHEN r.auto_sweep_destination_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.auto_sweep_destination_account_id::text)::uuid, r.auto_sweep_destination_account_id::text::uuid) END,
+    COALESCE(r.auto_sweep_execution_mode,'ask'),COALESCE(r.auto_sweep_amount_mode,'surplus'),COALESCE(r.auto_sweep_value,0),COALESCE(r.auto_sweep_minimum_balance,0)
   FROM jsonb_to_recordset(d->'user_settings') AS r(
     id uuid,user_id uuid,onboarding_complete boolean,currency text,currency_placement text,number_format text,
-    date_format text,theme text,shift25th boolean,auto_sweep boolean,created_at timestamptz,updated_at timestamptz);
+    date_format text,theme text,shift25th boolean,auto_sweep boolean,created_at timestamptz,updated_at timestamptz,
+    auto_sweep_source_account_id uuid,auto_sweep_destination_account_id uuid,auto_sweep_execution_mode text,
+    auto_sweep_amount_mode text,auto_sweep_value numeric,auto_sweep_minimum_balance numeric);
+
+  IF backup_version >= 2 THEN
+    INSERT INTO public.auto_sweep_decisions(
+      id,user_id,month,status,source_account_id,destination_account_id,proposed_amount,posted_amount,
+      transaction_id,reason,created_at,updated_at,amount_mode,execution_mode,calculated_amount,decided_at)
+    SELECT r.id,uid,r.month,r.status,
+      CASE WHEN r.source_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.source_account_id::text)::uuid, r.source_account_id::text::uuid) END,
+      CASE WHEN r.destination_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.destination_account_id::text)::uuid, r.destination_account_id::text::uuid) END,
+      r.proposed_amount,r.posted_amount,
+      CASE WHEN r.transaction_id IS NULL THEN NULL ELSE COALESCE((id_maps->'transactions'->>r.transaction_id::text)::uuid, r.transaction_id::text::uuid) END,
+      r.reason,r.created_at,r.updated_at,r.amount_mode,r.execution_mode,r.calculated_amount,r.decided_at
+    FROM jsonb_to_recordset(d->'auto_sweep_decisions') AS r(
+      id uuid,user_id uuid,month text,status text,source_account_id uuid,destination_account_id uuid,
+      proposed_amount numeric,posted_amount numeric,transaction_id uuid,reason text,created_at timestamptz,
+      updated_at timestamptz,amount_mode text,execution_mode text,calculated_amount numeric,decided_at timestamptz);
+  END IF;
 
   -- Contribution triggers recompute current_amount using the application's
   -- canonical rule: starting_amount + contributions, clamped to [0, target].
@@ -230,7 +261,10 @@ BEGIN
   FOREACH section IN ARRAY expected_sections LOOP
     counts := counts || jsonb_build_object(section,jsonb_array_length(d->section));
   END LOOP;
-  RETURN jsonb_build_object('ok',true,'version',1,'counts',counts);
+  IF backup_version >= 2 THEN
+    counts := counts || jsonb_build_object('auto_sweep_decisions',jsonb_array_length(d->'auto_sweep_decisions'));
+  END IF;
+  RETURN jsonb_build_object('ok',true,'version',backup_version,'counts',counts);
 END;
 $function$;
 
