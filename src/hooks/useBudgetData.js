@@ -29,6 +29,7 @@ import {
 } from '@/lib/budgetLogic';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 
 export function useCategories() {
   const { session } = useAuth();
@@ -510,9 +511,7 @@ export function useAutoSweepSurplus() {
 
         if (error) throw error;
 
-        queryClient.invalidateQueries({ queryKey: ['transactions'] });
-        queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-        queryClient.invalidateQueries({ queryKey: ['accounts'] });
+        invalidateScheduledQueries(queryClient);
       } catch (error) {
         console.error('Auto-sweep surplus failed:', error);
       }
