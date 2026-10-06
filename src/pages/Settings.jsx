@@ -360,6 +360,7 @@ export default function Settings() {
   const [backingUp, setBackingUp] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [restoreFile, setRestoreFile] = useState(null);
+  const [restoreError, setRestoreError] = useState('');
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
@@ -517,6 +518,7 @@ export default function Settings() {
     try {
       const backup = JSON.parse(await file.text());
       validateCeroBackup(backup);
+      setRestoreError('');
       setRestoreFile({ name: file.name, backup });
       setShowRestoreDialog(true);
     } catch (error) {
@@ -527,6 +529,7 @@ export default function Settings() {
 
   const handleRestoreBackup = async () => {
     if (!restoreFile?.backup) return;
+    setRestoreError('');
     setRestoring(true);
 
     try {
@@ -539,7 +542,15 @@ export default function Settings() {
       window.location.reload();
     } catch (error) {
       console.error('Backup restore failed:', error);
-      toast.error(error.message || 'Could not restore Cero backup');
+      const details = [
+        error?.message,
+        error?.details,
+        error?.hint,
+        error?.code ? `Code: ${error.code}` : null,
+      ].filter(Boolean).join(' · ');
+      const message = details || 'Could not restore Cero backup';
+      setRestoreError(message);
+      toast.error('Restore failed. See the error in the Restore dialog.');
     } finally {
       setRestoring(false);
     }
@@ -905,6 +916,15 @@ export default function Settings() {
                 {restoreFile?.name} passed the client format check. Restoring will replace all Cero cloud data for this account. The database restore is atomic: if any validation or insert fails, your existing data is kept.
               </DialogDescription>
             </DialogHeader>
+            {restoreError && (
+              <div
+                role="alert"
+                className="mx-6 mt-5 rounded-2xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm leading-5 text-destructive"
+              >
+                <div className="font-semibold">Restore failed</div>
+                <div className="mt-1 break-words">{restoreError}</div>
+              </div>
+            )}
             <DialogFooter className="gap-2 px-6 py-5 sm:gap-2">
               <Button
                 variant="outline"
