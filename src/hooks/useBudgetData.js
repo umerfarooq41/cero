@@ -115,7 +115,6 @@ export function useTransactions(month) {
   return useQuery({
     queryKey: ['transactions', session?.user?.id, month],
     queryFn: async () => {
-      const settings = await getUserSettings();
       const range = getBudgetMonthDateRange(month);
 
       if (!range) return [];
