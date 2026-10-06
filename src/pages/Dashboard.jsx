@@ -6,6 +6,7 @@ import DashboardReflect from '@/components/dashboard/DashboardReflect';
 import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import DashboardHero from '@/components/dashboard/DashboardHero';
 import PageHeader from '@/components/layout/PageHeader';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import { format } from 'date-fns';
@@ -53,6 +54,8 @@ export default function Dashboard() {
   );
   const formatCurrency = useCurrencyFormatter();
 
+  const isBudgetLoading = budget.isLoading;
+
   const planTotals = useMemo(
     () =>
       buildPlanTotals({
@@ -89,6 +92,25 @@ export default function Dashboard() {
     }),
     [budget, planTotals]
   );
+
+  if (isBudgetLoading) {
+    return (
+      <div ref={scope} className="min-h-screen bg-transparent">
+        <div className="lg:hidden">
+          <PageHeader title="Dashboard" subtitle="Your financial command center" />
+        </div>
+        <main className="mx-auto w-full max-w-7xl space-y-4 px-4 py-4 pb-28 md:px-6 lg:px-8 lg:py-8">
+          <Skeleton className="h-28 w-full rounded-2xl" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-24 w-full rounded-2xl" />
+            ))}
+          </div>
+          <Skeleton className="h-64 w-full rounded-2xl" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
