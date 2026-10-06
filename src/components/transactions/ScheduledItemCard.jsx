@@ -113,7 +113,7 @@ export default function ScheduledItemCard({
   actions,
 }) {
   return (
-    <div className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
       <CategoryIcon icon={icon} color={color} size="sm" />
 
       <div className="min-w-0 flex-1 pt-0.5">
@@ -134,7 +134,7 @@ export default function ScheduledItemCard({
         )}
       </div>
 
-      <div className="ml-2 flex shrink-0 flex-col items-end gap-2 text-right">
+      <div className="ml-1 flex max-w-[9.75rem] flex-col items-end gap-2 text-right">
         <div className="text-sm font-semibold tabular-nums text-foreground">
           {amount}
         </div>
