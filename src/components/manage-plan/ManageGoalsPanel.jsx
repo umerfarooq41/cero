@@ -839,8 +839,6 @@ export default function ManageGoalsPanel() {
     setSaving(true);
 
     try {
-      let savedGoal;
-
       if (editingGoal?.id) {
         const postedTotal = Number(postedGoalTotals[editingGoal.id] || 0);
         const goalPayload = {
@@ -848,7 +846,7 @@ export default function ManageGoalsPanel() {
           current_amount: Number(payload.starting_amount || 0) + postedTotal,
         };
 
-        savedGoal = await savingsGoalsApi.update(editingGoal.id, goalPayload);
+        await savingsGoalsApi.update(editingGoal.id, goalPayload);
         toast.success('Savings goal updated');
       } else {
         const goalPayload = {
@@ -856,7 +854,7 @@ export default function ManageGoalsPanel() {
           current_amount: Number(payload.starting_amount || 0),
         };
 
-        savedGoal = await savingsGoalsApi.create(goalPayload);
+        await savingsGoalsApi.create(goalPayload);
         toast.success('Savings goal created');
       }
 
