@@ -848,8 +848,26 @@ export function buildPlanTotals({
 
   const fundedDebtPayments = getFundedDebtPaymentTotal(transactions);
   const assignableDebt = getAssignablePlannedDebt(totals.debt, fundedDebtPayments);
-  const realizedIncome = transactions
-    .filter((transaction) => transaction?.type === 'income')
+  // Realized income is funded by the month assigned to the income, not
+  // necessarily its transaction date. This is what makes deferred income from
+  // the 25th Rule fund the next month exactly once.
+  const realizedIncomeSource =
+    currentMonth && allTransactions.length > 0 ? allTransactions : transactions;
+  const realizedIncome = realizedIncomeSource
+    .filter((transaction) => {
+      if (transaction?.type !== 'income') return false;
+      if (!currentMonth) return true;
+
+      const budgetMonth =
+        transaction.budget_month ||
+        getMonthKey(
+          transaction.date ||
+            transaction.transaction_date ||
+            transaction.created_at
+        );
+
+      return budgetMonth === currentMonth;
+    })
     .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 
   return {
