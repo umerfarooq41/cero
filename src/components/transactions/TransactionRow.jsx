@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import SourceBadge from '@/components/shared/SourceBadge';
