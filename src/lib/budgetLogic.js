@@ -31,6 +31,17 @@ function parseIsoDateParts(value) {
   return { year, month, day };
 }
 
+function parseMonthKey(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!Number.isInteger(year) || month < 1 || month > 12) return null;
+
+  return { year, month };
+}
+
 function shiftMonthKey(year, month, offset) {
   const absoluteMonth = year * 12 + (month - 1) + offset;
   const shiftedYear = Math.floor(absoluteMonth / 12);
