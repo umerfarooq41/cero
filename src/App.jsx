@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -157,6 +157,59 @@ const AuthenticatedApp = () => {
   );
 };
 
+function ConnectionStatus() {
+  const [online, setOnline] = useState(() => navigator.onLine);
+  const [updateRegistration, setUpdateRegistration] = useState(null);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setOnline(true);
+      queryClientInstance.invalidateQueries();
+    };
+    const handleOffline = () => setOnline(false);
+    const handleUpdate = (event) => setUpdateRegistration(event.detail?.registration || null);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('cero:pwa-update', handleUpdate);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('cero:pwa-update', handleUpdate);
+    };
+  }, []);
+
+  const applyUpdate = () => {
+    const worker = updateRegistration?.waiting;
+    if (!worker) return;
+
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+    worker.postMessage({ type: 'SKIP_WAITING' });
+  };
+
+  if (online && !updateRegistration) return null;
+
+  return (
+    <div className="fixed left-1/2 top-3 z-[100] flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-background/95 px-4 py-2 text-xs font-medium text-foreground shadow-lg backdrop-blur">
+      {!online && <span>Offline · changes are disabled until you reconnect</span>}
+      {online && updateRegistration && (
+        <>
+          <span>A new Cero version is ready</span>
+          <button type="button" className="font-semibold text-primary" onClick={applyUpdate}>
+            Update
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
@@ -164,6 +217,7 @@ function App() {
         <AuthenticatedApp />
       </Router>
 
+      <ConnectionStatus />
       <Toaster />
     </QueryClientProvider>
   );
