@@ -103,6 +103,11 @@ export default function Accounts() {
     refetch: refetchAccounts,
   } = useAccounts();
 
+  const [collapsedGroups, setCollapsedGroups] = useState({
+    assets: false,
+    liabilities: false,
+  });
+
   if (accountsPending) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
@@ -128,11 +133,6 @@ export default function Accounts() {
       </div>
     );
   }
-
-  const [collapsedGroups, setCollapsedGroups] = useState({
-    assets: false,
-    liabilities: false,
-  });
 
   const assets = accounts.filter((account) => account.category === 'asset');
   const liabilities = accounts.filter(
