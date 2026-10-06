@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -69,7 +69,7 @@ const COLORS = [
   '#8845F5',
 ];
 
-const randomColor = () => colors[Math.floor(Math.random() * colors.length)];
+const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
 export default function CategoryCreatorModal({
   open,
@@ -83,7 +83,7 @@ export default function CategoryCreatorModal({
   const [name, setName] = useState('');
   const [type, setType] = useState(initialType || 'expense');
   const [icon, setIcon] = useState('tag');
-  const [color, setColor] = useState(colors[0]);
+  const [color, setColor] = useState(COLORS[0]);
   const [parentId, setParentId] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -216,7 +216,7 @@ export default function CategoryCreatorModal({
             </label>
 
             <div className="grid grid-cols-8 gap-2 py-1">
-              {colors.map((item) => (
+              {COLORS.map((item) => (
                 <button
                   key={item}
                   type="button"
