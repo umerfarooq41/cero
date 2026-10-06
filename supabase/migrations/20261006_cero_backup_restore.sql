@@ -16,6 +16,9 @@ DECLARE
   item jsonb;
   backup_uid uuid;
   counts jsonb := '{}'::jsonb;
+  id_maps jsonb := '{}'::jsonb;
+  old_id uuid;
+  new_id uuid;
   expected_sections text[] := ARRAY[
     'accounts','categories','transactions','budget_plans',
     'recurring_transactions','savings_goals','goal_contributions','user_settings'
@@ -63,6 +66,29 @@ BEGIN
     WHERE NOT EXISTS (SELECT 1 FROM jsonb_array_elements(d->'savings_goals') g WHERE g->>'id'=c->>'goal_id')
   ) THEN RAISE EXCEPTION 'Backup has a contribution with a missing goal'; END IF;
 
+  -- Build collision-safe ID maps. A backup may come from another user in the
+  -- same database, so preserving its UUIDs can collide with rows still owned
+  -- by that source user. Remap only IDs that already exist after destination
+  -- cleanup; all foreign-key inserts below resolve through these maps.
+  FOREACH section IN ARRAY ARRAY['categories','accounts','savings_goals','recurring_transactions','transactions','goal_contributions','budget_plans','user_settings'] LOOP
+    id_maps := id_maps || jsonb_build_object(section, '{}'::jsonb);
+    FOR item IN SELECT value FROM jsonb_array_elements(d->section) LOOP
+      old_id := (item->>'id')::uuid;
+      new_id := old_id;
+      CASE section
+        WHEN 'categories' THEN IF EXISTS (SELECT 1 FROM public.categories WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'accounts' THEN IF EXISTS (SELECT 1 FROM public.accounts WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'savings_goals' THEN IF EXISTS (SELECT 1 FROM public.savings_goals WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'recurring_transactions' THEN IF EXISTS (SELECT 1 FROM public.recurring_transactions WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'transactions' THEN IF EXISTS (SELECT 1 FROM public.transactions WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'goal_contributions' THEN IF EXISTS (SELECT 1 FROM public.goal_contributions WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'budget_plans' THEN IF EXISTS (SELECT 1 FROM public.budget_plans WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+        WHEN 'user_settings' THEN IF EXISTS (SELECT 1 FROM public.user_settings WHERE id=old_id AND user_id<>uid) THEN new_id:=gen_random_uuid(); END IF;
+      END CASE;
+      id_maps := jsonb_set(id_maps, ARRAY[section,old_id::text], to_jsonb(new_id::text), true);
+    END LOOP;
+  END LOOP;
+
   -- Break cyclic FKs first, then remove current user data.
   UPDATE public.transactions SET goal_contribution_id=NULL
     WHERE user_id=uid AND goal_contribution_id IS NOT NULL;
@@ -79,20 +105,23 @@ BEGIN
   DELETE FROM public.user_settings WHERE user_id=uid;
 
   INSERT INTO public.categories
-  SELECT r.id,uid,r.parent_id,r.name,r.type,r.icon,r.color,r.is_archived,r.created_at,r.updated_at
+  SELECT COALESCE((id_maps->'categories'->>r.id::text)::uuid, r.id::text::uuid),uid,
+    CASE WHEN r.parent_id IS NULL THEN NULL ELSE COALESCE((id_maps->'categories'->>r.parent_id::text)::uuid, r.parent_id::text::uuid) END,r.name,r.type,r.icon,r.color,r.is_archived,r.created_at,r.updated_at
   FROM jsonb_to_recordset(d->'categories') AS r(
     id uuid,user_id uuid,parent_id uuid,name text,type text,icon text,color text,is_archived boolean,
     created_at timestamptz,updated_at timestamptz);
 
   INSERT INTO public.accounts
-  SELECT r.id,uid,r.name,r.type,r.category,r.balance,r.color,r.is_archived,r.created_at,r.updated_at
+  SELECT COALESCE((id_maps->'accounts'->>r.id::text)::uuid, r.id::text::uuid),uid,r.name,r.type,r.category,r.balance,r.color,r.is_archived,r.created_at,r.updated_at
   FROM jsonb_to_recordset(d->'accounts') AS r(
     id uuid,user_id uuid,name text,type text,category text,balance numeric,color text,is_archived boolean,
     created_at timestamptz,updated_at timestamptz);
 
   INSERT INTO public.savings_goals
-  SELECT r.id,uid,r.name,r.target_amount,r.current_amount,r.start_date,r.target_date,r.note,r.color_key,r.icon_key,
-    r.is_archived,r.created_at,r.updated_at,r.archived_at,r.from_account_id,r.to_account_id,r.starting_amount,
+  SELECT COALESCE((id_maps->'savings_goals'->>r.id::text)::uuid, r.id::text::uuid),uid,r.name,r.target_amount,r.current_amount,r.start_date,r.target_date,r.note,r.color_key,r.icon_key,
+    r.is_archived,r.created_at,r.updated_at,r.archived_at,
+    CASE WHEN r.from_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.from_account_id::text)::uuid, r.from_account_id::text::uuid) END,
+    CASE WHEN r.to_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.to_account_id::text)::uuid, r.to_account_id::text::uuid) END,r.starting_amount,
     r.duration_count,r.duration_unit,r.completed_at,r.contribution_mode,r.next_due_date,r.frequency
   FROM jsonb_to_recordset(d->'savings_goals') AS r(
     id uuid,user_id uuid,name text,target_amount numeric,current_amount numeric,start_date date,target_date date,note text,
@@ -104,7 +133,10 @@ BEGIN
     id,user_id,name,amount,type,account_id,to_account_id,category_id,frequency,start_date,next_due_date,end_date,note,
     is_active,last_posted_date,last_posted_transaction_id,created_at,updated_at,icon,color,is_archived,archived_at,
     total_amount,duration_count,duration_unit,completed_at,payment_mode,schedule_anchor_day)
-  SELECT r.id,uid,r.name,r.amount,r.type,r.account_id,r.to_account_id,r.category_id,r.frequency,r.start_date,r.next_due_date,
+  SELECT COALESCE((id_maps->'recurring_transactions'->>r.id::text)::uuid, r.id::text::uuid),uid,r.name,r.amount,r.type,
+    COALESCE((id_maps->'accounts'->>r.account_id::text)::uuid, r.account_id::text::uuid),
+    CASE WHEN r.to_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.to_account_id::text)::uuid, r.to_account_id::text::uuid) END,
+    CASE WHEN r.category_id IS NULL THEN NULL ELSE COALESCE((id_maps->'categories'->>r.category_id::text)::uuid, r.category_id::text::uuid) END,r.frequency,r.start_date,r.next_due_date,
     r.end_date,r.note,r.is_active,r.last_posted_date,NULL,r.created_at,r.updated_at,r.icon,r.color,r.is_archived,r.archived_at,
     r.total_amount,r.duration_count,r.duration_unit,r.completed_at,r.payment_mode,r.schedule_anchor_day
   FROM jsonb_to_recordset(d->'recurring_transactions') AS r(
@@ -118,8 +150,13 @@ BEGIN
     id,user_id,account_id,to_account_id,category_id,amount,type,date,note,created_at,updated_at,recurring_transaction_id,
     recurring_posted_for_date,savings_goal_id,goal_contribution_id,source_type,recurring_occurrence_key,
     account_name_snapshot,to_account_name_snapshot)
-  SELECT r.id,uid,r.account_id,r.to_account_id,r.category_id,r.amount,r.type,r.date,r.note,r.created_at,r.updated_at,
-    r.recurring_transaction_id,r.recurring_posted_for_date,r.savings_goal_id,NULL,r.source_type,r.recurring_occurrence_key,
+  SELECT COALESCE((id_maps->'transactions'->>r.id::text)::uuid, r.id::text::uuid),uid,
+    COALESCE((id_maps->'accounts'->>r.account_id::text)::uuid, r.account_id::text::uuid),
+    CASE WHEN r.to_account_id IS NULL THEN NULL ELSE COALESCE((id_maps->'accounts'->>r.to_account_id::text)::uuid, r.to_account_id::text::uuid) END,
+    CASE WHEN r.category_id IS NULL THEN NULL ELSE COALESCE((id_maps->'categories'->>r.category_id::text)::uuid, r.category_id::text::uuid) END,r.amount,r.type,r.date,r.note,r.created_at,r.updated_at,
+    CASE WHEN r.recurring_transaction_id IS NULL THEN NULL ELSE COALESCE((id_maps->'recurring_transactions'->>r.recurring_transaction_id::text)::uuid, r.recurring_transaction_id::text::uuid) END,
+    r.recurring_posted_for_date,
+    CASE WHEN r.savings_goal_id IS NULL THEN NULL ELSE COALESCE((id_maps->'savings_goals'->>r.savings_goal_id::text)::uuid, r.savings_goal_id::text::uuid) END,NULL,r.source_type,r.recurring_occurrence_key,
     r.account_name_snapshot,r.to_account_name_snapshot
   FROM jsonb_to_recordset(d->'transactions') AS r(
     id uuid,user_id uuid,account_id uuid,to_account_id uuid,category_id uuid,amount numeric,type text,date date,note text,
@@ -128,7 +165,9 @@ BEGIN
     account_name_snapshot text,to_account_name_snapshot text);
 
   INSERT INTO public.goal_contributions
-  SELECT r.id,uid,r.goal_id,r.account_id,r.amount,r.contribution_date,r.note,r.transaction_id,r.created_at,r.updated_at,r.occurrence_key
+  SELECT COALESCE((id_maps->'goal_contributions'->>r.id::text)::uuid, r.id::text::uuid),uid,
+    COALESCE((id_maps->'savings_goals'->>r.goal_id::text)::uuid, r.goal_id::text::uuid),COALESCE((id_maps->'accounts'->>r.account_id::text)::uuid, r.account_id::text::uuid),r.amount,r.contribution_date,r.note,
+    CASE WHEN r.transaction_id IS NULL THEN NULL ELSE COALESCE((id_maps->'transactions'->>r.transaction_id::text)::uuid, r.transaction_id::text::uuid) END,r.created_at,r.updated_at,r.occurrence_key
   FROM jsonb_to_recordset(d->'goal_contributions') AS r(
     id uuid,user_id uuid,goal_id uuid,account_id uuid,amount numeric,contribution_date date,note text,transaction_id uuid,
     created_at timestamptz,updated_at timestamptz,occurrence_key text);
@@ -136,21 +175,39 @@ BEGIN
   -- Restore the two cyclic links after both sides exist.
   UPDATE public.transactions t SET goal_contribution_id=r.goal_contribution_id
   FROM jsonb_to_recordset(d->'transactions') AS r(id uuid,goal_contribution_id uuid)
-  WHERE t.user_id=uid AND t.id=r.id AND r.goal_contribution_id IS NOT NULL;
+  WHERE t.user_id=uid AND t.id=COALESCE((id_maps->'transactions'->>r.id::text)::uuid, r.id::text::uuid)
+    AND r.goal_contribution_id IS NOT NULL
+    AND (COALESCE((id_maps->'goal_contributions'->>r.goal_contribution_id::text)::uuid, r.goal_contribution_id::text::uuid)) IS NOT NULL;
+  UPDATE public.transactions t
+  SET goal_contribution_id=COALESCE((id_maps->'goal_contributions'->>r.goal_contribution_id::text)::uuid, r.goal_contribution_id::text::uuid)
+  FROM jsonb_to_recordset(d->'transactions') AS r(id uuid,goal_contribution_id uuid)
+  WHERE t.user_id=uid AND t.id=COALESCE((id_maps->'transactions'->>r.id::text)::uuid, r.id::text::uuid) AND r.goal_contribution_id IS NOT NULL;
 
   UPDATE public.recurring_transactions rt SET last_posted_transaction_id=r.last_posted_transaction_id
   FROM jsonb_to_recordset(d->'recurring_transactions') AS r(id uuid,last_posted_transaction_id uuid)
-  WHERE rt.user_id=uid AND rt.id=r.id AND r.last_posted_transaction_id IS NOT NULL;
+  WHERE rt.user_id=uid AND rt.id=COALESCE((id_maps->'recurring_transactions'->>r.id::text)::uuid, r.id::text::uuid)
+    AND r.last_posted_transaction_id IS NOT NULL;
+  UPDATE public.recurring_transactions rt
+  SET last_posted_transaction_id=COALESCE((id_maps->'transactions'->>r.last_posted_transaction_id::text)::uuid, r.last_posted_transaction_id::text::uuid)
+  FROM jsonb_to_recordset(d->'recurring_transactions') AS r(id uuid,last_posted_transaction_id uuid)
+  WHERE rt.user_id=uid AND rt.id=COALESCE((id_maps->'recurring_transactions'->>r.id::text)::uuid, r.id::text::uuid) AND r.last_posted_transaction_id IS NOT NULL;
 
   INSERT INTO public.budget_plans
-  SELECT r.id,uid,r.category_id,r.month,r.planned_amount,r.created_at,r.updated_at,r.source_type,r.source_id,
+  SELECT COALESCE((id_maps->'budget_plans'->>r.id::text)::uuid, r.id::text::uuid),uid,
+    CASE WHEN r.category_id IS NULL THEN NULL ELSE COALESCE((id_maps->'categories'->>r.category_id::text)::uuid, r.category_id::text::uuid) END,r.month,r.planned_amount,r.created_at,r.updated_at,r.source_type,
+    CASE
+      WHEN r.source_id IS NULL THEN NULL
+      WHEN r.source_type='recurring' THEN COALESCE((id_maps->'recurring_transactions'->>r.source_id::text)::uuid, r.source_id::text::uuid)
+      WHEN r.source_type='goal' THEN COALESCE((id_maps->'savings_goals'->>r.source_id::text)::uuid, r.source_id::text::uuid)
+      ELSE r.source_id
+    END,
     r.budget_type,r.label,r.icon,r.color
   FROM jsonb_to_recordset(d->'budget_plans') AS r(
     id uuid,user_id uuid,category_id uuid,month text,planned_amount numeric,created_at timestamptz,updated_at timestamptz,
     source_type text,source_id uuid,budget_type text,label text,icon text,color text);
 
   INSERT INTO public.user_settings
-  SELECT r.id,uid,r.onboarding_complete,r.currency,r.currency_placement,r.number_format,r.date_format,r.theme,
+  SELECT COALESCE((id_maps->'user_settings'->>r.id::text)::uuid, r.id::text::uuid),uid,r.onboarding_complete,r.currency,r.currency_placement,r.number_format,r.date_format,r.theme,
     r.shift25th,r.auto_sweep,r.created_at,r.updated_at
   FROM jsonb_to_recordset(d->'user_settings') AS r(
     id uuid,user_id uuid,onboarding_complete boolean,currency text,currency_placement text,number_format text,
@@ -160,7 +217,7 @@ BEGIN
   -- match the backup state; otherwise the restore is rejected and rolled back.
   IF EXISTS (
     SELECT 1 FROM public.savings_goals g
-    JOIN jsonb_to_recordset(d->'savings_goals') AS r(id uuid,current_amount numeric) ON r.id=g.id
+    JOIN jsonb_to_recordset(d->'savings_goals') AS r(id uuid,current_amount numeric) ON COALESCE((id_maps->'savings_goals'->>r.id::text)::uuid, r.id::text::uuid)=g.id
     WHERE g.user_id=uid AND g.current_amount IS DISTINCT FROM r.current_amount
   ) THEN RAISE EXCEPTION 'Backup goal totals do not reconcile with contributions'; END IF;
 
