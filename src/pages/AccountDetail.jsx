@@ -41,6 +41,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { transactionsApi } from '@/lib/budgetData';
 import { getTransactionDeltas } from '@/lib/transactionEffects';
 import { supabase } from '@/lib/supabase';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -219,14 +220,7 @@ export default function AccountDetail() {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
-      queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
+      invalidateScheduledQueries(queryClient);
 
       toast.success('Transaction deleted');
     } catch (error) {
@@ -253,13 +247,7 @@ export default function AccountDetail() {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-      queryClient.invalidateQueries({ queryKey: ['goal-contributions'] });
-      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
+      invalidateScheduledQueries(queryClient);
 
       toast.success('Account deleted');
       navigate('/accounts');
