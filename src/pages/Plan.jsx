@@ -166,7 +166,7 @@ export default function Plan() {
         <div className="animate-child space-y-4 pt-4">
           <LeftToAllocateBanner
             leftToAllocate={leftToAllocate}
-            totalIncome={plannedTotals.income}
+            totalIncome={plannedTotals.realizedIncome}
             isEditMode={false}
             formatCurrency={formatCurrency}
             sticky={false}
