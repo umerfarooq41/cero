@@ -364,6 +364,7 @@ export default function Settings() {
   });
 
   const [accounts, setAccounts] = useState([]);
+  const [showAutoSweepDialog, setShowAutoSweepDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -810,52 +811,24 @@ export default function Settings() {
             icon={ShieldCheck}
             tone="emerald"
             label="Auto-Sweep"
-            description="Move money between your Cero accounts after a month closes."
+            description={settings.budgetLogic.autoSweepSurplus
+              ? `${accounts.find((a) => a.id === settings.budgetLogic.autoSweepSourceAccountId)?.name || 'From'} → ${accounts.find((a) => a.id === settings.budgetLogic.autoSweepDestinationAccountId)?.name || 'To'} · ${settings.budgetLogic.autoSweepAmountMode === 'fixed' ? 'Fixed' : settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percent' : 'Surplus'} · ${settings.budgetLogic.autoSweepExecutionMode === 'automatic' ? 'Automatic' : 'Ask first'}`
+              : 'Move money between your Cero accounts after a month closes.'}
+            onClick={() => setShowAutoSweepDialog(true)}
           >
             <Switch
               checked={settings.budgetLogic.autoSweepSurplus}
-              disabled={!settings.budgetLogic.autoSweepSourceAccountId || !settings.budgetLogic.autoSweepDestinationAccountId}
-              onCheckedChange={(value) => updateBudgetLogicSetting('autoSweepSurplus', value)}
+              onClick={(event) => event.stopPropagation()}
+              onCheckedChange={(value) => {
+                if (value) {
+                  setShowAutoSweepDialog(true);
+                } else {
+                  updateBudgetLogicSetting('autoSweepSurplus', false);
+                }
+              }}
             />
           </SettingRow>
 
-          <SettingRow icon={CircleDollarSign} tone="emerald" label="From account" description="Account the sweep will leave." stackOnMobile>
-            <Select value={settings.budgetLogic.autoSweepSourceAccountId || undefined} onValueChange={(value) => updateBudgetLogicSetting('autoSweepSourceAccountId', value)}>
-              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue placeholder="Choose account" /></SelectTrigger>
-              <SelectContent>{accounts.filter((a) => a.id !== settings.budgetLogic.autoSweepDestinationAccountId).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
-            </Select>
-          </SettingRow>
-
-          <SettingRow icon={CircleDollarSign} tone="emerald" label="To account" description="Account that receives the sweep." stackOnMobile>
-            <Select value={settings.budgetLogic.autoSweepDestinationAccountId || undefined} onValueChange={(value) => updateBudgetLogicSetting('autoSweepDestinationAccountId', value)}>
-              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue placeholder="Choose account" /></SelectTrigger>
-              <SelectContent>{accounts.filter((a) => a.id !== settings.budgetLogic.autoSweepSourceAccountId).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
-            </Select>
-          </SettingRow>
-
-          <SettingRow icon={ShieldCheck} tone="blue" label="Execution" description="Ask first is the safer default." stackOnMobile>
-            <Select value={settings.budgetLogic.autoSweepExecutionMode} onValueChange={(value) => updateBudgetLogicSetting('autoSweepExecutionMode', value)}>
-              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="ask">Ask me first</SelectItem><SelectItem value="automatic">Run automatically</SelectItem></SelectContent>
-            </Select>
-          </SettingRow>
-
-          <SettingRow icon={Calculator} tone="amber" label="Amount" description="Choose how Cero calculates each sweep." stackOnMobile>
-            <Select value={settings.budgetLogic.autoSweepAmountMode} onValueChange={(value) => updateBudgetLogicSetting('autoSweepAmountMode', value)}>
-              <SelectTrigger className="h-10 w-full rounded-2xl sm:w-[190px]"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="surplus">Surplus</SelectItem><SelectItem value="fixed">Fixed amount</SelectItem><SelectItem value="percent">Percent of surplus</SelectItem></SelectContent>
-            </Select>
-          </SettingRow>
-
-          {settings.budgetLogic.autoSweepAmountMode !== 'surplus' && (
-            <SettingRow icon={Calculator} tone="amber" label={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percentage' : 'Fixed amount'} description={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percentage of calculated surplus.' : 'Amount to sweep each month.'} stackOnMobile>
-              <input type="number" min="0" max={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 100 : undefined} step="0.01" value={settings.budgetLogic.autoSweepValue} onChange={(event) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepValue:event.target.value}}))} onBlur={(event) => updateBudgetLogicSetting('autoSweepValue', Number(event.target.value || 0))} className="h-10 w-full rounded-2xl border border-input bg-background px-3 text-sm sm:w-[190px]" />
-            </SettingRow>
-          )}
-
-          <SettingRow icon={ShieldCheck} tone="emerald" label="Keep in source" description="Cero will never sweep below this balance." stackOnMobile>
-            <input type="number" min="0" step="0.01" value={settings.budgetLogic.autoSweepMinimumBalance} onChange={(event) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepMinimumBalance:event.target.value}}))} onBlur={(event) => updateBudgetLogicSetting('autoSweepMinimumBalance', Number(event.target.value || 0))} className="h-10 w-full rounded-2xl border border-input bg-background px-3 text-sm sm:w-[190px]" />
-          </SettingRow>
         </SettingsSection>
 
         <SettingsSection
@@ -960,6 +933,89 @@ export default function Settings() {
             </Button>
           </SettingRow>
         </SettingsSection>
+
+        <Dialog open={showAutoSweepDialog} onOpenChange={setShowAutoSweepDialog}>
+          <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{settings.budgetLogic.autoSweepSurplus ? 'Edit Auto-Sweep' : 'Set up Auto-Sweep'}</DialogTitle>
+              <DialogDescription>
+                Move money between your Cero accounts after a budget month closes. Nothing moves until the sweep is confirmed or passes your automatic rules.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">From account</label>
+                  <Select value={settings.budgetLogic.autoSweepSourceAccountId || undefined} onValueChange={(value) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepSourceAccountId:value,autoSweepDestinationAccountId:value === prev.budgetLogic.autoSweepDestinationAccountId ? '' : prev.budgetLogic.autoSweepDestinationAccountId}}))}>
+                    <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                    <SelectContent>{accounts.filter((a) => a.id !== settings.budgetLogic.autoSweepDestinationAccountId).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">To account</label>
+                  <Select value={settings.budgetLogic.autoSweepDestinationAccountId || undefined} onValueChange={(value) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepDestinationAccountId:value,autoSweepSourceAccountId:value === prev.budgetLogic.autoSweepSourceAccountId ? '' : prev.budgetLogic.autoSweepSourceAccountId}}))}>
+                    <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                    <SelectContent>{accounts.filter((a) => a.id !== settings.budgetLogic.autoSweepSourceAccountId).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Sweep amount</label>
+                <Select value={settings.budgetLogic.autoSweepAmountMode} onValueChange={(value) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepAmountMode:value}}))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="surplus">Surplus</SelectItem><SelectItem value="fixed">Fixed amount</SelectItem><SelectItem value="percent">Percent of surplus</SelectItem></SelectContent>
+                </Select>
+              </div>
+
+              {settings.budgetLogic.autoSweepAmountMode !== 'surplus' && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">{settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percentage' : 'Fixed amount'}</label>
+                  <input type="number" min="0" max={settings.budgetLogic.autoSweepAmountMode === 'percent' ? 100 : undefined} step="0.01" inputMode="decimal" value={settings.budgetLogic.autoSweepValue} onChange={(event) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepValue:event.target.value}}))} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Mode</label>
+                <Select value={settings.budgetLogic.autoSweepExecutionMode} onValueChange={(value) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepExecutionMode:value}}))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="ask">Ask me first</SelectItem><SelectItem value="automatic">Run automatically</SelectItem></SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Keep in source</label>
+                <input type="number" min="0" step="0.01" inputMode="decimal" value={settings.budgetLogic.autoSweepMinimumBalance} onChange={(event) => setSettings((prev) => ({...prev,budgetLogic:{...prev.budgetLogic,autoSweepMinimumBalance:event.target.value}}))} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                <p className="text-xs text-muted-foreground">Cero will never sweep below this balance.</p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutoSweepDialog(false)}>Cancel</Button>
+              <Button
+                onClick={async () => {
+                  if (!settings.budgetLogic.autoSweepSourceAccountId || !settings.budgetLogic.autoSweepDestinationAccountId) {
+                    toast.error('Choose both accounts');
+                    return;
+                  }
+                  const enabled = {...settings,budgetLogic:{...settings.budgetLogic,autoSweepSurplus:true,autoSweepValue:Number(settings.budgetLogic.autoSweepValue || 0),autoSweepMinimumBalance:Number(settings.budgetLogic.autoSweepMinimumBalance || 0)}};
+                  try {
+                    await saveSettings(enabled);
+                    setSettings(enabled);
+                    setShowAutoSweepDialog(false);
+                    toast.success('Auto-Sweep saved');
+                  } catch (error) {
+                    console.error('Auto-Sweep save failed:', error);
+                    toast.error(error.message || 'Could not save Auto-Sweep');
+                  }
+                }}
+              >
+                Save & Enable
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={showRestoreDialog} onOpenChange={(open) => {
           if (!restoring) {
