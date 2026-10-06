@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, AlertTriangle, CircleDollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrencyNumberText } from '@/lib/currencies';
