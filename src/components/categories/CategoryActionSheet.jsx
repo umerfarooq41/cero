@@ -5,7 +5,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 
 export default function CategoryActionSheet({ category, open, onClose, onEdit, onArchive, onDelete }) {
