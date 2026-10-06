@@ -22,6 +22,7 @@ import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 import { getCurrencyNoun as getCurrencyName } from '@/lib/currencies';
 import { buildPlanTotals } from '@/lib/planData';
+import { getTransactionBudgetMonth } from '@/lib/budgetLogic';
 
 export default function Plan() {
   const scope = usePageEntrance();
@@ -69,7 +70,10 @@ export default function Plan() {
           transaction?.created_at ||
           ''
       ).slice(0, 7);
-      const effectiveMonth = occurrenceMonth || transactionMonth;
+      const incomeBudgetMonth = transaction?.type === 'income'
+        ? getTransactionBudgetMonth(transaction)
+        : null;
+      const effectiveMonth = incomeBudgetMonth || occurrenceMonth || transactionMonth;
 
       if (effectiveMonth === currentMonth) {
         byId.set(
@@ -86,7 +90,11 @@ export default function Plan() {
       const occurrenceMonth = transaction?.recurring_posted_for_date
         ? String(transaction.recurring_posted_for_date).slice(0, 7)
         : null;
-      if (occurrenceMonth && occurrenceMonth !== currentMonth) return;
+      const incomeBudgetMonth = transaction?.type === 'income'
+        ? getTransactionBudgetMonth(transaction)
+        : null;
+      if (incomeBudgetMonth && incomeBudgetMonth !== currentMonth) return;
+      if (!incomeBudgetMonth && occurrenceMonth && occurrenceMonth !== currentMonth) return;
 
       byId.set(
         transaction.id ||
