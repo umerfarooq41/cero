@@ -468,7 +468,7 @@ export function useAutoSweepSurplus() {
           return;
         }
 
-        const sweepDate = getBudgetMonthCloseDate(closedMonth, settings);
+        const sweepDate = getBudgetMonthCloseDate(closedMonth);
 
         const { error } = await supabase.rpc('cero_post_auto_sweep', {
           p_month: closedMonth,
