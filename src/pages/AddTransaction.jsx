@@ -39,6 +39,7 @@ import {
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/lib/supabase';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 import { getCurrencyCode, getCurrencySymbol } from '@/lib/currencies';
 
 const typeOptions = [
@@ -336,11 +337,7 @@ export default function AddTransaction() {
       const { error } = await supabase.rpc(rpcName, rpcPayload);
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['all-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
-      queryClient.invalidateQueries({ queryKey: ['plan-data'] });
+      invalidateScheduledQueries(queryClient);
 
       toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
       navigate('/transactions');
@@ -368,15 +365,7 @@ export default function AddTransaction() {
 
       if (error) throw error;
 
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['transactions'] }),
-        queryClient.invalidateQueries({ queryKey: ['all-transactions'] }),
-        queryClient.invalidateQueries({ queryKey: ['accounts'] }),
-        queryClient.invalidateQueries({ queryKey: ['savings-goals'] }),
-        queryClient.invalidateQueries({ queryKey: ['goal-contributions'] }),
-        queryClient.invalidateQueries({ queryKey: ['budget-summary'] }),
-        queryClient.invalidateQueries({ queryKey: ['plan-data'] }),
-      ]);
+      invalidateScheduledQueries(queryClient);
 
       toast.success('Transaction deleted');
       setDeleteOpen(false);
