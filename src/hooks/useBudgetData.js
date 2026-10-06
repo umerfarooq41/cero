@@ -23,7 +23,6 @@ import {
   getBudgetMonthCloseDate,
   getCurrentBudgetMonth,
   getPreviousBudgetMonth,
-  isTwentyFifthRuleEnabled,
   hasAutoSweepForMonth,
   isAutoSweepSurplusEnabled,
 } from '@/lib/budgetLogic';
