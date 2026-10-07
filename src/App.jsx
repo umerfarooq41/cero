@@ -44,25 +44,56 @@ const LoadingScreen = () => (
   </div>
 );
 
-const OfflineColdStart = () => (
-  <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
-    <div className="flex max-w-sm flex-col items-center text-center">
-      <Logo size={64} priority />
-      <h1 className="mt-4 text-xl font-semibold text-foreground">Connect to open Cero</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Cero does not store your financial data on this device for offline cold starts.
-        Reconnect to load your latest data safely.
-      </p>
-      <button
-        type="button"
-        className="mt-6 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        onClick={() => window.location.reload()}
-      >
-        Try again
-      </button>
+const OfflineColdStart = ({ onRetry }) => {
+  useEffect(() => {
+    const handleOnline = () => onRetry();
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [onRetry]);
+
+  return (
+    <div
+      data-cero-offline-cold-start
+      className="app-page-surface fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto px-6 py-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]"
+    >
+      <div className="flex w-full max-w-sm flex-col items-center text-center">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted/70">
+          <svg viewBox="0 0 64 64" className="h-12 w-12 text-muted-foreground" aria-hidden="true">
+            <path d="M12 25c12-11 28-11 40 0M19 34c8-7 18-7 26 0M27 43c3-3 7-3 10 0" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+            <path d="M14 13l36 38" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" className="text-destructive" />
+          </svg>
+        </div>
+
+        <Logo size={52} priority className="mt-8" />
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">Cero</h1>
+        <p className="mt-1 text-sm font-medium text-muted-foreground">Zero-Based Budgeting</p>
+
+        <h2 className="mt-10 text-3xl font-bold tracking-tight text-foreground">You're offline</h2>
+        <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
+          Connect to the internet to load your Cero data. Your financial information hasn't been changed.
+        </p>
+
+        <div className="mt-8 w-full rounded-2xl border border-border bg-card/70 p-5 text-left shadow-sm">
+          <p className="text-sm font-semibold text-foreground">Your data is safe</p>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">
+            Cero will load your latest accounts, transactions and budget when you're back online.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm"
+          onClick={onRetry}
+        >
+          Try again
+        </button>
+        <p className="mt-4 text-xs leading-5 text-muted-foreground">
+          We'll automatically continue when your connection returns.
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const RouteLoadingState = () => (
   <div className="flex min-h-[50vh] items-center justify-center p-6">
@@ -104,14 +135,14 @@ const AuthenticatedApp = () => {
 
   if (!settingsFetched) {
     if (!navigator.onLine) {
-      return <OfflineColdStart />;
+      return <OfflineColdStart onRetry={() => refetchSettings()} />;
     }
     return <LoadingScreen />;
   }
 
   if (settingsError) {
     if (!navigator.onLine) {
-      return <OfflineColdStart />;
+      return <OfflineColdStart onRetry={() => refetchSettings()} />;
     }
     return (
       <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
@@ -222,9 +253,14 @@ function ConnectionStatus() {
 
   if (online && !updateRegistration) return null;
 
+  const coldStartOffline =
+    !online && Boolean(document.querySelector('[data-cero-offline-cold-start]'));
+
+  if (coldStartOffline && !updateRegistration) return null;
+
   return (
-    <div className="fixed left-1/2 top-3 z-[100] flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-background/95 px-4 py-2 text-xs font-medium text-foreground shadow-lg backdrop-blur">
-      {!online && <span>Offline · changes are disabled until you reconnect</span>}
+    <div className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.5rem)] z-[100] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur">
+      {!online && <span>Offline · viewing saved session data · changes disabled</span>}
       {online && updateRegistration && (
         <>
           <span>A new Cero version is ready</span>
