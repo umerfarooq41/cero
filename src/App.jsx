@@ -328,7 +328,7 @@ function ConnectionStatus() {
     <>
       {offlineWarning && (
         <div
-          className="fixed left-4 right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-[120] mx-auto flex max-w-md items-start gap-3 rounded-2xl border border-border bg-background px-4 py-4 text-foreground shadow-lg"
+          className="fixed left-4 right-4 top-[calc(env(safe-area-inset-top)+4.75rem)] z-[120] mx-auto flex max-w-md items-start gap-3 rounded-2xl border border-border/70 bg-background/85 px-4 py-4 text-foreground shadow-lg backdrop-blur-md"
           role="alert"
         >
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
