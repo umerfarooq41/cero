@@ -52,6 +52,7 @@ import {
 } from '@/lib/goals';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import { useAccounts, useAllTransactions } from '@/hooks/useBudgetData';
+import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 
 const COLORS = [
@@ -769,13 +770,15 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
 export default function ManageGoalsPanel() {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
   const { data: accounts = [] } = useAccounts();
   const { data: allTransactions = [] } = useAllTransactions();
 
   const { data: savingsGoals = [] } = useQuery({
-    queryKey: ['manage-savings-goals'],
+    queryKey: ['manage-savings-goals', userId],
     queryFn: () => savingsGoalsApi.list(),
-    initialData: [],
+    enabled: Boolean(userId),
   });
 
   const postedGoalTotals = useMemo(
@@ -822,7 +825,7 @@ export default function ManageGoalsPanel() {
   }, [normalizedGoals]);
 
   const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['manage-savings-goals'] });
+    queryClient.invalidateQueries({ queryKey: ['manage-savings-goals', userId] });
     queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
     queryClient.invalidateQueries({ queryKey: ['allocations'] });
     queryClient.invalidateQueries({ queryKey: ['all-allocations'] });
