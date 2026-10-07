@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { format, addMonths, subMonths } from 'date-fns';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { queryClientInstance } from '@/lib/query-client';
+import { toast } from 'sonner';
 
 export default function MonthSelector({
   currentMonth,
@@ -14,12 +16,30 @@ export default function MonthSelector({
 }) {
   const date = new Date(`${currentMonth}-01`);
 
+  const changeMonth = (nextMonth) => {
+    if (!navigator.onLine) {
+      const cached = queryClientInstance
+        .getQueryCache()
+        .getAll()
+        .some((query) => query.queryKey?.includes(nextMonth) && query.state?.data !== undefined);
+
+      if (!cached) {
+        toast.info('This period isn\'t available offline', {
+          description: `Reconnect to load ${format(new Date(`${nextMonth}-01`), 'MMMM yyyy')}.`,
+        });
+        return;
+      }
+    }
+
+    onChange?.(nextMonth);
+  };
+
   const goToPreviousMonth = () => {
-    onChange?.(format(subMonths(date, 1), 'yyyy-MM'));
+    changeMonth(format(subMonths(date, 1), 'yyyy-MM'));
   };
 
   const goToNextMonth = () => {
-    onChange?.(format(addMonths(date, 1), 'yyyy-MM'));
+    changeMonth(format(addMonths(date, 1), 'yyyy-MM'));
   };
 
   return (
