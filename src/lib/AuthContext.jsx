@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { queryClientInstance } from "@/lib/query-client";
+import { clearReadCache } from "@/lib/offline-read-cache";
 
 const AuthContext = createContext();
 
@@ -85,6 +87,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
+    const userId = session?.user?.id;
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -92,6 +95,10 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
 
+    if (userId) {
+      await clearReadCache(userId);
+    }
+    queryClientInstance.clear();
     setSession(null);
     setUser(null);
   };
