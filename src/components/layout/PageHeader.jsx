@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Settings } from 'lucide-react';
+import { Settings, WifiOff } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { cn } from '@/lib/utils';
 
@@ -101,6 +101,17 @@ export default function PageHeader({
         {action ? (
           <div className="shrink-0">{action}</div>
         ) : (
+          <div className="flex shrink-0 items-center gap-1 lg:hidden">
+            {!navigator.onLine && (
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/80"
+                role="status"
+                aria-label="Offline"
+                title="Offline"
+              >
+                <WifiOff className="h-[1.15rem] w-[1.15rem] stroke-[2.25]" aria-hidden="true" />
+              </span>
+            )}
           <Link
             to="/settings"
             aria-label="Open settings"
@@ -154,6 +165,7 @@ export default function PageHeader({
               />
             </motion.span>
           </Link>
+          </div>
         )}
       </div>
     </header>
