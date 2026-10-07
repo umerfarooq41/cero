@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { WifiOff } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -219,26 +219,67 @@ const AuthenticatedApp = () => {
 
 function ConnectionStatus() {
   const [online, setOnline] = useState(() => navigator.onLine);
+  const [offlineWarning, setOfflineWarning] = useState(false);
   const [updateRegistration, setUpdateRegistration] = useState(null);
 
   useEffect(() => {
     const handleOnline = () => {
       setOnline(true);
+      setOfflineWarning(false);
       queryClientInstance.invalidateQueries();
     };
     const handleOffline = () => setOnline(false);
     const handleUpdate = (event) => setUpdateRegistration(event.detail?.registration || null);
+    const showOfflineWarning = () => setOfflineWarning(true);
+
+    const guardOfflineAction = (event) => {
+      if (navigator.onLine) return;
+
+      const target = event.target instanceof Element ? event.target.closest('a,button') : null;
+      if (!target) return;
+
+      const href = target.getAttribute('href') || '';
+      const label = [
+        target.getAttribute('aria-label'),
+        target.getAttribute('title'),
+        target.textContent,
+      ].filter(Boolean).join(' ').trim();
+
+      const guardedRoute =
+        href === '/add-transaction' ||
+        href === '/add-account' ||
+        /^\/transactions\/[^/]+\/edit$/.test(href) ||
+        /^\/accounts\/[^/]+\/edit$/.test(href);
+
+      const guardedAction = /^(add|create|save|delete|remove|edit|post|pay|contribute|copy|receive|skip|confirm|archive|pause|resume|reset|restore)\b/i.test(label);
+
+      if (!guardedRoute && !guardedAction) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      setOfflineWarning(true);
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     window.addEventListener('cero:pwa-update', handleUpdate);
+    window.addEventListener('cero:offline-write-blocked', showOfflineWarning);
+    document.addEventListener('click', guardOfflineAction, true);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('cero:pwa-update', handleUpdate);
+      window.removeEventListener('cero:offline-write-blocked', showOfflineWarning);
+      document.removeEventListener('click', guardOfflineAction, true);
     };
   }, []);
+
+  useEffect(() => {
+    if (!offlineWarning) return undefined;
+    const timer = window.setTimeout(() => setOfflineWarning(false), 5000);
+    return () => window.clearTimeout(timer);
+  }, [offlineWarning]);
 
   const applyUpdate = () => {
     const worker = updateRegistration?.waiting;
@@ -253,39 +294,39 @@ function ConnectionStatus() {
     worker.postMessage({ type: 'SKIP_WAITING' });
   };
 
-  if (online && !updateRegistration) return null;
-
-  const hasLoadedSessionData = queryClientInstance
-    .getQueriesData({ queryKey: ['user-settings'] })
-    .some(([, data]) => Boolean(data));
-
-  if (!online && !hasLoadedSessionData && !updateRegistration) return null;
+  if (!offlineWarning && (!online || !updateRegistration)) return null;
 
   return (
-    <div className={online
-      ? "fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.5rem)] z-[100] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur"
-      : "fixed right-3 top-[calc(env(safe-area-inset-top)+0.65rem)] z-[100] flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/90 text-muted-foreground shadow-sm backdrop-blur lg:right-5"
-    }>
-      {!online && (
-        <button
-          type="button"
-          className="flex h-full w-full items-center justify-center rounded-full"
-          aria-label="Offline. Some information may be unavailable and changes are disabled."
-          title="Offline · some information may be unavailable · changes disabled"
-          onClick={() => toast.info('Offline', { description: 'Some information may be unavailable. Changes are disabled until you reconnect.' })}
+    <>
+      {offlineWarning && (
+        <div
+          className="fixed left-4 right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-[120] mx-auto flex max-w-md items-start gap-3 rounded-2xl border border-border bg-background px-4 py-4 text-foreground shadow-lg"
+          role="alert"
         >
-          <WifiOff className="h-4 w-4" />
-        </button>
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <p className="min-w-0 flex-1 text-sm leading-5">
+            The Internet connection appears to be offline.
+          </p>
+          <button
+            type="button"
+            className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            onClick={() => setOfflineWarning(false)}
+            aria-label="Dismiss offline warning"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       )}
+
       {online && updateRegistration && (
-        <>
+        <div className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.5rem)] z-[100] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur">
           <span>A new Cero version is ready</span>
           <button type="button" className="font-semibold text-primary" onClick={applyUpdate}>
             Update
           </button>
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
