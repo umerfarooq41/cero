@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import { WifiOff } from 'lucide-react';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -260,8 +261,21 @@ function ConnectionStatus() {
   if (!online && !hasLoadedSessionData && !updateRegistration) return null;
 
   return (
-    <div className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.5rem)] z-[100] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur">
-      {!online && <span>Offline · viewing saved session data · changes disabled</span>}
+    <div className={online
+      ? "fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.5rem)] z-[100] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur"
+      : "fixed right-3 top-[calc(env(safe-area-inset-top)+0.65rem)] z-[100] flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/90 text-muted-foreground shadow-sm backdrop-blur lg:right-5"
+    }>
+      {!online && (
+        <button
+          type="button"
+          className="flex h-full w-full items-center justify-center rounded-full"
+          aria-label="Offline. Some information may be unavailable and changes are disabled."
+          title="Offline · some information may be unavailable · changes disabled"
+          onClick={() => window.dispatchEvent(new CustomEvent('cero:offline-info'))}
+        >
+          <WifiOff className="h-4 w-4" />
+        </button>
+      )}
       {online && updateRegistration && (
         <>
           <span>A new Cero version is ready</span>
