@@ -253,10 +253,11 @@ function ConnectionStatus() {
 
   if (online && !updateRegistration) return null;
 
-  const coldStartOffline =
-    !online && Boolean(document.querySelector('[data-cero-offline-cold-start]'));
+  const hasLoadedSessionData = queryClientInstance
+    .getQueriesData({ queryKey: ['user-settings'] })
+    .some(([, data]) => Boolean(data));
 
-  if (coldStartOffline && !updateRegistration) return null;
+  if (!online && !hasLoadedSessionData && !updateRegistration) return null;
 
   return (
     <div className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.5rem)] z-[100] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur">
