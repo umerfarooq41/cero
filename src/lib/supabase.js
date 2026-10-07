@@ -25,6 +25,9 @@ const onlineOnlyFetch = (input, init = {}) => {
   const isReadRequest = method === "GET" || method === "HEAD";
 
   if (!isReadRequest && typeof navigator !== "undefined" && !navigator.onLine) {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("cero:offline-write-blocked"));
+    }
     return Promise.reject(
       new Error("Cero is offline. Reconnect before making changes.")
     );
