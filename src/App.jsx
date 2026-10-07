@@ -44,6 +44,26 @@ const LoadingScreen = () => (
   </div>
 );
 
+const OfflineColdStart = () => (
+  <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
+    <div className="flex max-w-sm flex-col items-center text-center">
+      <Logo size={64} priority />
+      <h1 className="mt-4 text-xl font-semibold text-foreground">Connect to open Cero</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Cero does not store your financial data on this device for offline cold starts.
+        Reconnect to load your latest data safely.
+      </p>
+      <button
+        type="button"
+        className="mt-6 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        onClick={() => window.location.reload()}
+      >
+        Try again
+      </button>
+    </div>
+  </div>
+);
+
 const RouteLoadingState = () => (
   <div className="flex min-h-[50vh] items-center justify-center p-6">
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
@@ -83,10 +103,16 @@ const AuthenticatedApp = () => {
   }
 
   if (!settingsFetched) {
+    if (!navigator.onLine) {
+      return <OfflineColdStart />;
+    }
     return <LoadingScreen />;
   }
 
   if (settingsError) {
+    if (!navigator.onLine) {
+      return <OfflineColdStart />;
+    }
     return (
       <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
         <div className="flex max-w-sm flex-col items-center text-center">
