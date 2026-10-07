@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
+import { restoreReadCache, subscribeReadCache } from '@/lib/offline-read-cache';
 import {
   BrowserRouter as Router,
   Route,
@@ -110,8 +111,31 @@ const LazyPage = ({ children }) => (
 );
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isAuthenticated } = useAuth();
+  const { isLoadingAuth, isAuthenticated, session } = useAuth();
   const location = useLocation();
+  const [cacheRestored, setCacheRestored] = useState(false);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) {
+      setCacheRestored(false);
+      return undefined;
+    }
+
+    let active = true;
+    let unsubscribe = () => {};
+
+    restoreReadCache(queryClientInstance, userId).finally(() => {
+      if (!active) return;
+      setCacheRestored(true);
+      unsubscribe = subscribeReadCache(queryClientInstance, userId);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [session?.user?.id]);
 
   const {
     data: userSettings,
@@ -133,6 +157,10 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<Auth />} />
       </Routes>
     );
+  }
+
+  if (!cacheRestored && isAuthenticated) {
+    return <LoadingScreen />;
   }
 
   if (!settingsFetched) {
