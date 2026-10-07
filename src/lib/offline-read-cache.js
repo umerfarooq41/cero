@@ -3,6 +3,22 @@ const DB_VERSION = 1;
 const STORE_NAME = 'query-cache';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
+const CACHEABLE_QUERY_ROOTS = new Set([
+  'accounts',
+  'categories',
+  'user-settings',
+  'currency-code',
+  'transactions',
+  'transactions-for-months',
+  'all-transactions',
+  'recurring-transactions',
+  'savings-goals',
+  'goal-contributions',
+  'allocations',
+  'all-allocations',
+  'manage-savings-goals',
+]);
+
 const openDb = () =>
   new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -35,7 +51,7 @@ const runStore = async (mode, action) => {
 const isCacheableQuery = (query, userId) => {
   if (query.state.status !== 'success' || query.state.data === undefined) return false;
   const key = Array.isArray(query.queryKey) ? query.queryKey : [];
-  return key.includes(userId);
+  return CACHEABLE_QUERY_ROOTS.has(key[0]) && key[1] === userId;
 };
 
 export async function restoreReadCache(queryClient, userId) {
