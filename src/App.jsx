@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { WifiOff } from 'lucide-react';
+import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -271,7 +272,7 @@ function ConnectionStatus() {
           className="flex h-full w-full items-center justify-center rounded-full"
           aria-label="Offline. Some information may be unavailable and changes are disabled."
           title="Offline · some information may be unavailable · changes disabled"
-          onClick={() => window.dispatchEvent(new CustomEvent('cero:offline-info'))}
+          onClick={() => toast.info('Offline', { description: 'Some information may be unavailable. Changes are disabled until you reconnect.' })}
         >
           <WifiOff className="h-4 w-4" />
         </button>
