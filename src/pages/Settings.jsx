@@ -375,6 +375,24 @@ export default function Settings() {
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [exporting, setExporting] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [online, setOnline] = useState(() => navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const requireOnline = () => {
+    if (online) return true;
+    window.dispatchEvent(new CustomEvent('cero:offline-write-blocked'));
+    return false;
+  };
 
   const selectedCurrency = useMemo(
     () => currencies.find((item) => item.code === settings.currency) || currencies[0],
@@ -485,9 +503,10 @@ export default function Settings() {
     }
   };
 
-  const handleThemeChange = async (nextTheme) => {
+  const handleThemeChange = (nextTheme) => {
     setTheme(nextTheme);
-    await updateSetting('theme', nextTheme);
+    setSettings((prev) => ({ ...prev, theme: nextTheme }));
+    toast.success('Appearance updated');
   };
 
   const handleThemeStyleChange = (nextStyle) => {
@@ -755,9 +774,12 @@ export default function Settings() {
           >
             <Select
               value={settings.currency}
-              onValueChange={(value) => updateSetting('currency', value)}
+              onValueChange={(value) => {
+                if (!requireOnline()) return;
+                updateSetting('currency', value);
+              }}
             >
-              <SelectTrigger className="h-10 w-auto min-w-[112px] gap-2 rounded-2xl px-3">
+              <SelectTrigger disabled={!online} className="h-10 w-auto min-w-[112px] gap-2 rounded-2xl px-3">
                 <SelectValue />
               </SelectTrigger>
 
@@ -801,9 +823,11 @@ export default function Settings() {
           >
             <Switch
               checked={settings.budgetLogic.twentyFifthRule}
-              onCheckedChange={(value) =>
-                updateBudgetLogicSetting('twentyFifthRule', value)
-              }
+              disabled={!online}
+              onCheckedChange={(value) => {
+                if (!requireOnline()) return;
+                updateBudgetLogicSetting('twentyFifthRule', value);
+              }}
             />
           </SettingRow>
 
@@ -814,12 +838,17 @@ export default function Settings() {
             description={settings.budgetLogic.autoSweepSurplus
               ? `${accounts.find((a) => a.id === settings.budgetLogic.autoSweepSourceAccountId)?.name || 'From'} → ${accounts.find((a) => a.id === settings.budgetLogic.autoSweepDestinationAccountId)?.name || 'To'} · ${settings.budgetLogic.autoSweepAmountMode === 'fixed' ? 'Fixed' : settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percent' : 'Surplus'} · ${settings.budgetLogic.autoSweepExecutionMode === 'automatic' ? 'Automatic' : 'Ask first'}`
               : 'Move money between your Cero accounts after a month closes.'}
-            onClick={() => setShowAutoSweepDialog(true)}
+            onClick={() => {
+              if (!requireOnline()) return;
+              setShowAutoSweepDialog(true);
+            }}
           >
             <Switch
               checked={settings.budgetLogic.autoSweepSurplus}
+              disabled={!online}
               onClick={(event) => event.stopPropagation()}
               onCheckedChange={(value) => {
+                if (!requireOnline()) return;
                 if (value) {
                   setShowAutoSweepDialog(true);
                 } else {
@@ -870,8 +899,11 @@ export default function Settings() {
               variant="outline"
               size="sm"
               className="rounded-2xl"
-              onClick={handleBackup}
-              disabled={backingUp}
+              onClick={() => {
+                if (!requireOnline()) return;
+                handleBackup();
+              }}
+              disabled={backingUp || !online}
             >
               {backingUp ? 'Backing up…' : 'Backup'}
             </Button>
@@ -883,14 +915,17 @@ export default function Settings() {
             label="Restore Backup"
             description="Validate and replace your Cero cloud data from a versioned JSON backup."
           >
-            <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+            <label className={cn(
+                'inline-flex items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+                online ? 'cursor-pointer hover:bg-accent hover:text-accent-foreground' : 'cursor-not-allowed opacity-50'
+              )}>
               Restore
               <input
                 type="file"
                 accept=".json,application/json"
                 className="sr-only"
                 onChange={handleRestoreFile}
-                disabled={restoring}
+                disabled={restoring || !online}
               />
             </label>
           </SettingRow>
@@ -905,7 +940,11 @@ export default function Settings() {
               variant="outline"
               size="sm"
               className="rounded-2xl"
-              onClick={() => setShowExportDialog(true)}
+              onClick={() => {
+                if (!requireOnline()) return;
+                setShowExportDialog(true);
+              }}
+              disabled={!online}
             >
               Export
             </Button>
@@ -927,7 +966,11 @@ export default function Settings() {
               variant="destructive"
               size="sm"
               className="rounded-2xl"
-              onClick={() => setShowResetDialog(true)}
+              onClick={() => {
+                if (!requireOnline()) return;
+                setShowResetDialog(true);
+              }}
+              disabled={!online}
             >
               Reset
             </Button>
