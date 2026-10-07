@@ -26,6 +26,7 @@ import Plan from '@/pages/Plan';
 import Transactions from '@/pages/Transactions';
 import Accounts from '@/pages/Accounts';
 import ManagePlan from '@/pages/ManagePlan';
+import Settings from '@/pages/Settings';
 
 import { useUserSettings } from '@/hooks/useBudgetData';
 import AutoSweepPrompt from '@/components/AutoSweepPrompt';
@@ -34,7 +35,6 @@ import AutoSweepPrompt from '@/components/AutoSweepPrompt';
 const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
 const AccountDetail = lazy(() => import('@/pages/AccountDetail'));
 const AddAccount = lazy(() => import('@/pages/AddAccount'));
-const Settings = lazy(() => import('@/pages/Settings'));
 
 const LoadingScreen = () => (
   <div className="app-page-surface fixed inset-0 flex items-center justify-center p-6">
@@ -233,7 +233,7 @@ const AuthenticatedApp = () => {
           path="/categories"
           element={<Navigate to="/manage-plan?tab=categories" replace />}
         />
-        <Route path="/settings" element={<LazyPage><Settings /></LazyPage>} />
+        <Route path="/settings" element={<Settings />} />
         <Route
           path="/reflect"
           element={<Navigate to="/?tab=reflect" replace />}
