@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -15,9 +16,18 @@ export default function FloatingActionButton({
   className,
 }) {
   const [mounted, setMounted] = useState(false);
+  const [online, setOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
     setMounted(true);
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   const baseClassName = cn(
@@ -70,7 +80,13 @@ export default function FloatingActionButton({
 
   if (!mounted) return null;
 
-  const fab = to ? (
+  const showOfflineMessage = () => {
+    toast.info('Unavailable offline', {
+      description: 'Reconnect to add or change data.',
+    });
+  };
+
+  const fab = to && online ? (
     <MotionLink
       to={to}
       aria-label={ariaLabel}
@@ -82,9 +98,9 @@ export default function FloatingActionButton({
   ) : (
     <motion.button
       type="button"
-      onClick={onClick}
-      aria-label={ariaLabel}
-      className={baseClassName}
+      onClick={online ? onClick : showOfflineMessage}
+      aria-label={online ? ariaLabel : `${ariaLabel} unavailable offline`}
+      className={cn(baseClassName, !online && 'opacity-55 shadow-none')}
       {...motionProps}
     >
       {content}
