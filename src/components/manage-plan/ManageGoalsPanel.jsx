@@ -846,7 +846,10 @@ export default function ManageGoalsPanel() {
         const postedTotal = Number(postedGoalTotals[editingGoal.id] || 0);
         const goalPayload = {
           ...payload,
-          current_amount: Number(payload.starting_amount || 0) + postedTotal,
+          current_amount: Math.min(
+            Number(payload.target_amount),
+            Number(payload.starting_amount || 0) + postedTotal
+          ),
         };
 
         await savingsGoalsApi.update(editingGoal.id, goalPayload);
