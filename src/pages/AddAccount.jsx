@@ -137,7 +137,18 @@ export default function AddAccount() {
       };
 
       if (isEditing) {
-        await accountsApi.update(id, payload);
+        const balanceChanged =
+          Math.round(numericBalance * 100) !==
+          Math.round(Number(existingAccount?.balance || 0) * 100);
+
+        if (balanceChanged) {
+          // Compatibility path until an audited balance-adjustment RPC is deployed.
+          // Never silently discard a requested balance change.
+          await accountsApi.update(id, payload);
+        } else {
+          // Metadata-only edits must never write the balance column.
+          await accountsApi.updateDetails(id, payload);
+        }
       } else {
         await accountsApi.create(payload);
       }
