@@ -434,11 +434,11 @@ export async function exportFinancialReport() {
   const netWorth = totalAssets - totalLiabilities;
 
   const totalIncome = transactions
-    .filter((transaction) => transaction.type === "income")
+    .filter((transaction) => transaction.type === "income" && transaction.source_type !== "adjustment")
     .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 
   const totalExpenses = transactions
-    .filter((transaction) => transaction.type === "expense")
+    .filter((transaction) => transaction.type === "expense" && transaction.source_type !== "adjustment")
     .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
 
   const totalSavings = transactions
