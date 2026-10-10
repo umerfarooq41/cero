@@ -30,7 +30,7 @@ BEGIN
       'name','target_amount','starting_amount','current_amount',
       'target_date','duration_count','duration_unit','frequency',
       'start_date','contribution_mode','from_account_id','to_account_id',
-      'icon_key','color_key','note','is_archived','archived_at'
+      'icon_key','color_key','note','is_archived','archived_at','next_due_date'
     ]))
   ) THEN RAISE EXCEPTION 'Unsupported goal field'; END IF;
 
@@ -73,14 +73,15 @@ BEGIN
     INSERT INTO public.savings_goals (
       user_id,name,target_amount,current_amount,starting_amount,
       start_date,target_date,duration_count,duration_unit,frequency,
-      contribution_mode,from_account_id,to_account_id,icon_key,color_key,note
+      contribution_mode,from_account_id,to_account_id,icon_key,color_key,note,next_due_date
     ) VALUES (
       v_uid,v_data->>'name',v_target,v_start,v_start,
       COALESCE((v_data->>'start_date')::date,CURRENT_DATE),
       (v_data->>'target_date')::date,
       (v_data->>'duration_count')::integer,v_data->>'duration_unit',
       v_data->>'frequency',v_mode,v_from,v_to,
-      v_data->>'icon_key',v_data->>'color_key',v_data->>'note'
+      v_data->>'icon_key',v_data->>'color_key',v_data->>'note',
+      (v_data->>'next_due_date')::date
     ) RETURNING * INTO v_goal;
   ELSE
     UPDATE public.savings_goals SET
@@ -97,6 +98,7 @@ BEGIN
       from_account_id=v_from,to_account_id=v_to,
       icon_key=v_data->>'icon_key',color_key=v_data->>'color_key',
       note=v_data->>'note',
+      next_due_date=(v_data->>'next_due_date')::date,
       is_archived=COALESCE((v_data->>'is_archived')::boolean,is_archived),
       archived_at=(v_data->>'archived_at')::timestamptz,
       updated_at=now()
