@@ -264,8 +264,22 @@ export const recurringTransactionsApi = {
       orderBy: "next_due_date",
       ascending: true,
     }),
-  create: (values) => createRow("recurring_transactions", values),
-  update: (id, values) => updateRow("recurring_transactions", id, values),
+  create: async (values) => {
+    const { data, error } = await supabase.rpc("cero_save_recurring_rule", {
+      p_rule_id: null,
+      p_values: values,
+    });
+    logAndThrow("Supabase recurring rule create error:", error);
+    return data;
+  },
+  update: async (id, values) => {
+    const { data, error } = await supabase.rpc("cero_save_recurring_rule", {
+      p_rule_id: id,
+      p_values: values,
+    });
+    logAndThrow("Supabase recurring rule update error:", error);
+    return data;
+  },
   delete: async (id) => {
     const { error } = await supabase.rpc("cero_delete_recurring_rule", {
       p_rule_id: id,
