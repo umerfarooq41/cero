@@ -177,11 +177,11 @@ export function calculateAutoSweepSurplus({
   categories = [],
 }) {
   const trackedIncome = transactions
-    .filter((transaction) => transaction.type === 'income')
+    .filter((transaction) => transaction.type === 'income' && transaction.source_type !== 'adjustment')
     .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
 
   const trackedExpenses = transactions
-    .filter((transaction) => transaction.type === 'expense')
+    .filter((transaction) => transaction.type === 'expense' && transaction.source_type !== 'adjustment')
     .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
 
   const trackedSavings = sumTransactionsByCategoryType(
