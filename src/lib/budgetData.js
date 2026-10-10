@@ -303,7 +303,9 @@ export const savingsGoalsApi = {
   create: async (values) => {
     const { data, error } = await supabase.rpc("cero_save_savings_goal", {
       p_goal_id: null,
-      p_values: values,
+      p_values: Object.fromEntries(
+        Object.entries(values).filter(([key]) => key !== "completed_at")
+      ),
     });
     logAndThrow("Supabase savings goal create error:", error);
     return data;
@@ -311,7 +313,9 @@ export const savingsGoalsApi = {
   update: async (id, values) => {
     const { data, error } = await supabase.rpc("cero_save_savings_goal", {
       p_goal_id: id,
-      p_values: values,
+      p_values: Object.fromEntries(
+        Object.entries(values).filter(([key]) => key !== "completed_at")
+      ),
     });
     logAndThrow("Supabase savings goal update error:", error);
     return data;
