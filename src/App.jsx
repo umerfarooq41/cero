@@ -27,7 +27,6 @@ import Transactions from '@/pages/Transactions';
 import Accounts from '@/pages/Accounts';
 import ManagePlan from '@/pages/ManagePlan';
 import Settings from '@/pages/Settings';
-import Settings from '@/pages/Settings';
 
 import { useUserSettings } from '@/hooks/useBudgetData';
 import AutoSweepPrompt from '@/components/AutoSweepPrompt';
