@@ -34,7 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { accountsApi, recurringTransactionsApi } from '@/lib/budgetData';
+import { recurringTransactionsApi } from '@/lib/budgetData';
 import { supabase } from '@/lib/supabase';
 import {
   calculateNextDueDate,
@@ -1164,30 +1164,6 @@ export default function ManageRecurringPanel() {
 
   const handleDelete = async (rule) => {
     try {
-      // Removing a debt plan must also remove only that plan's outstanding
-      // principal from the liability. Posted payments remain historical
-      // transactions and must not be reversed here.
-      if (normalizeRuleType(rule.type) === 'transfer' && rule.to_account_id) {
-        const liability = accounts.find((account) => account.id === rule.to_account_id);
-        const paidAmount = allTransactions
-          .filter(
-            (transaction) =>
-              transaction.recurring_transaction_id === rule.id &&
-              transaction.type === 'transfer'
-          )
-          .reduce(
-            (sum, transaction) => sum + Math.max(0, Number(transaction.amount || 0)),
-            0
-          );
-        const outstanding = Math.max(0, Number(rule.total_amount || 0) - paidAmount);
-
-        if (liability && outstanding > 0) {
-          await accountsApi.update(liability.id, {
-            balance: Math.max(0, (Number(liability.balance) || 0) - outstanding),
-          });
-        }
-      }
-
       await recurringTransactionsApi.delete(rule.id);
       await queryClient.invalidateQueries({ queryKey: ['accounts'] });
       await refresh();
