@@ -282,7 +282,6 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
       setForm(emptyGoalForm());
     }
 
-    setTimeout(() => nameRef.current?.focus(), 80);
   }, [editingGoal, open]);
 
   const checkingAccounts = useMemo(
@@ -375,7 +374,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[min(90dvh,900px)] flex-col overflow-hidden rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
+      <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Goal' : 'New Goal'}</DialogTitle>
         </DialogHeader>
