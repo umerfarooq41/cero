@@ -150,9 +150,15 @@ export default function AddAccount() {
         await accountsApi.create(payload);
       }
 
-      queryClient.invalidateQueries({
-        queryKey: ['accounts'],
-      });
+      // Account creation and balance edits can also insert adjustment transactions.
+      // Refresh every transaction view before navigating so history updates
+      // immediately without a browser reload.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['accounts'] }),
+        queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['all-transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['transactions-for-months'] }),
+      ]);
 
       toast.success(isEditing ? 'Account updated' : 'Account created');
 
