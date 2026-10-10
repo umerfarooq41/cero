@@ -139,7 +139,13 @@ export const accountsApi = {
     logAndThrow("Supabase account creation error:", error);
     return data;
   },
-  update: (id, values) => updateRow("accounts", id, values),
+  // Prevent callers from bypassing the audited balance-adjustment ledger.
+  update: async (id, values) => {
+    if ('balance' in (values || {}) || 'category' in (values || {}) || 'user_id' in (values || {})) {
+      throw new Error('Use the dedicated account adjustment workflow for financial changes.');
+    }
+    return accountsApi.updateDetails(id, values);
+  },
   adjustBalance: async (id, targetBalance, note = null) => {
     const { data, error } = await supabase.rpc("cero_adjust_account_balance", {
       p_account_id: id,
