@@ -130,6 +130,15 @@ export const accountsApi = {
   list: () => listRows("accounts", { orderBy: "name", ascending: true }),
   create: (values) => createRow("accounts", values),
   update: (id, values) => updateRow("accounts", id, values),
+  adjustBalance: async (id, targetBalance, note = null) => {
+    const { data, error } = await supabase.rpc("cero_adjust_account_balance", {
+      p_account_id: id,
+      p_target_balance: targetBalance,
+      p_note: note,
+    });
+    logAndThrow("Supabase account balance adjustment error:", error);
+    return data;
+  },
   updateDetails: async (id, { name, type, color }) => {
     const { data, error } = await supabase.rpc("cero_update_account_details", {
       p_account_id: id,
