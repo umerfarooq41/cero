@@ -209,31 +209,53 @@ async function withIncomeBudgetAssignment(values = {}) {
 export const transactionsApi = {
   list: () => listRows("transactions", { orderBy: "date", ascending: false }),
   listByDateRange: (startDate, endDate) => listTransactionsByDateRange(startDate, endDate),
-  create: async (values) => createRow("transactions", await withIncomeBudgetAssignment(values)),
+  create: async (values) => {
+    const assigned = await withIncomeBudgetAssignment(values);
+    const { data, error } = await supabase.rpc("cero_create_transaction", {
+      p_amount: assigned.amount,
+      p_type: assigned.type,
+      p_date: assigned.date,
+      p_account_id: assigned.account_id,
+      p_to_account_id: assigned.to_account_id ?? null,
+      p_category_id: assigned.category_id ?? null,
+      p_note: assigned.note ?? null,
+    });
+    logAndThrow("Supabase transaction create RPC error:", error);
+    return data;
+  },
   update: async (id, values) => {
     const userId = await currentUserId();
-    const { data: existing, error } = await supabase
+    const { data: existing, error: loadError } = await supabase
       .from("transactions")
       .select("*")
       .eq("id", id)
       .eq("user_id", userId)
       .single();
-
-    logAndThrow("Supabase transaction load-before-update error:", error);
-
-    // Budget-month assignment depends on the transaction type and date.
-    // Merge the persisted row first so partial updates cannot accidentally
-    // clear deferred-income metadata or call the assignment RPC without a date.
+    logAndThrow("Supabase transaction load-before-update error:", loadError);
+    if (existing.source_type === "adjustment") {
+      throw new Error("Adjustment transactions cannot be edited as ordinary transactions.");
+    }
     const merged = { ...existing, ...values };
     const assigned = await withIncomeBudgetAssignment(merged);
-
-    return updateRow("transactions", id, {
-      ...values,
-      budget_month: assigned.budget_month,
-      budget_month_override: assigned.budget_month_override,
+    const { data, error } = await supabase.rpc("cero_update_transaction", {
+      p_transaction_id: id,
+      p_amount: assigned.amount,
+      p_type: assigned.type,
+      p_date: assigned.date,
+      p_account_id: assigned.account_id,
+      p_to_account_id: assigned.to_account_id ?? null,
+      p_category_id: assigned.category_id ?? null,
+      p_note: assigned.note ?? null,
     });
+    logAndThrow("Supabase transaction update RPC error:", error);
+    return data;
   },
-  delete: (id) => deleteRow("transactions", id),
+  delete: async (id) => {
+    const { error } = await supabase.rpc("cero_delete_transaction", {
+      p_transaction_id: id,
+    });
+    logAndThrow("Supabase transaction delete RPC error:", error);
+  },
 };
 
 export const recurringTransactionsApi = {
