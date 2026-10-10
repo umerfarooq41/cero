@@ -128,7 +128,17 @@ export async function deleteRow(table, id) {
 
 export const accountsApi = {
   list: () => listRows("accounts", { orderBy: "name", ascending: true }),
-  create: (values) => createRow("accounts", values),
+  create: async ({ name, type, category, balance = 0, color = null }) => {
+    const { data, error } = await supabase.rpc("cero_create_account", {
+      p_name: name,
+      p_type: type,
+      p_category: category,
+      p_balance: balance,
+      p_color: color,
+    });
+    logAndThrow("Supabase account creation error:", error);
+    return data;
+  },
   update: (id, values) => updateRow("accounts", id, values),
   adjustBalance: async (id, targetBalance, note = null) => {
     const { data, error } = await supabase.rpc("cero_adjust_account_balance", {
