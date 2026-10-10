@@ -61,9 +61,26 @@ BEGIN
     WHERE id=(v_data->>'category_id')::uuid AND user_id=v_uid
   ) THEN RAISE EXCEPTION 'Category not found'; END IF;
   IF p_rule_id IS NULL THEN
-    INSERT INTO public.recurring_transactions
-    SELECT * FROM jsonb_populate_record(NULL::public.recurring_transactions,v_data)
-    RETURNING * INTO v_rule;
+    INSERT INTO public.recurring_transactions (
+      user_id,name,amount,type,account_id,to_account_id,category_id,
+      frequency,start_date,next_due_date,end_date,note,is_active,
+      icon,color,total_amount,duration_count,duration_unit,payment_mode,
+      schedule_anchor_day,is_archived,archived_at
+    ) VALUES (
+      v_uid,v_data->>'name',(v_data->>'amount')::numeric,v_data->>'type',
+      (v_data->>'account_id')::uuid,(v_data->>'to_account_id')::uuid,
+      (v_data->>'category_id')::uuid,
+      COALESCE(v_data->>'frequency','monthly'),
+      COALESCE((v_data->>'start_date')::date,CURRENT_DATE),
+      (v_data->>'next_due_date')::date,(v_data->>'end_date')::date,
+      v_data->>'note',COALESCE((v_data->>'is_active')::boolean,true),
+      COALESCE(v_data->>'icon','Receipt'),COALESCE(v_data->>'color','#64748b'),
+      (v_data->>'total_amount')::numeric,(v_data->>'duration_count')::integer,
+      v_data->>'duration_unit',COALESCE(v_data->>'payment_mode','fixed'),
+      (v_data->>'schedule_anchor_day')::smallint,
+      COALESCE((v_data->>'is_archived')::boolean,false),
+      (v_data->>'archived_at')::timestamptz
+    ) RETURNING * INTO v_rule;
   ELSE
     UPDATE public.recurring_transactions AS r SET
       name=COALESCE(v_data->>'name',r.name),
