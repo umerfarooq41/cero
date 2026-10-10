@@ -98,7 +98,12 @@ export default function TransactionRow({
     },
   };
 
-  const config = typeConfig[transaction.type] || typeConfig.expense;
+  const isAdjustment = transaction.source_type === 'adjustment' ||
+    /^(Account balance adjustment|Debt principal removed:)/i.test(transaction.note || '');
+  const isDebtRemoval = isAdjustment && /^Debt principal removed:/i.test(transaction.note || '');
+  const config = isAdjustment
+    ? { color: 'text-muted-foreground', sign: isDebtRemoval ? '−' : transaction.type === 'income' ? '+' : '−' }
+    : typeConfig[transaction.type] || typeConfig.expense;
   const isTransfer = transaction.type === 'transfer';
 
   const isRecurring = Boolean(
@@ -129,7 +134,7 @@ export default function TransactionRow({
       ? recurringName
       : null;
 
-  const title = isTransfer
+  const title = isAdjustment ? (noteLabel || 'Balance adjustment') : isTransfer
     ? sourceName || transferTitle || 'Transfer'
     : sourceName || category?.name || noteLabel || 'Uncategorized';
 
@@ -140,7 +145,9 @@ export default function TransactionRow({
       ? 'Debt payment'
       : 'Transfer';
 
-  const primarySubtitle = isTransfer
+  const primarySubtitle = isAdjustment
+    ? `${isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment'} - ${accountName}${isDebtRemoval ? ' · owed' : ''}`
+    : isTransfer
     ? [movementLabel, transferKindLabel].filter(Boolean).join(' · ')
     : `${transactionTypeLabel} - ${accountName}`;
 
