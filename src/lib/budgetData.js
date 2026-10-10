@@ -228,7 +228,12 @@ export const recurringTransactionsApi = {
     }),
   create: (values) => createRow("recurring_transactions", values),
   update: (id, values) => updateRow("recurring_transactions", id, values),
-  delete: (id) => deleteRow("recurring_transactions", id),
+  delete: async (id) => {
+    const { error } = await supabase.rpc("cero_delete_recurring_rule", {
+      p_rule_id: id,
+    });
+    logAndThrow("Supabase recurring rule delete error:", error);
+  },
 };
 
 export const savingsGoalsApi = {
