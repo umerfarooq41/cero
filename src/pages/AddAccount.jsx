@@ -141,13 +141,10 @@ export default function AddAccount() {
           Math.round(numericBalance * 100) !==
           Math.round(Number(existingAccount?.balance || 0) * 100);
 
+        // Save account metadata without ever writing the balance column.
+        await accountsApi.updateDetails(id, payload);
         if (balanceChanged) {
-          // Compatibility path until an audited balance-adjustment RPC is deployed.
-          // Never silently discard a requested balance change.
-          await accountsApi.update(id, payload);
-        } else {
-          // Metadata-only edits must never write the balance column.
-          await accountsApi.updateDetails(id, payload);
+          await accountsApi.adjustBalance(id, numericBalance);
         }
       } else {
         await accountsApi.create(payload);
