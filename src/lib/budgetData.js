@@ -481,8 +481,8 @@ export async function exportFinancialReport() {
 
     item.transactions += 1;
 
-    if (transaction.type === "income") item.income += amount;
-    if (transaction.type === "expense") item.expenses += amount;
+    if (transaction.type === "income" && transaction.source_type !== "adjustment") item.income += amount;
+    if (transaction.type === "expense" && transaction.source_type !== "adjustment") item.expenses += amount;
     if (transaction.type === "savings") item.savings += amount;
     if (transaction.type === "debt") item.debt += amount;
 
