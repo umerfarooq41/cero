@@ -130,6 +130,16 @@ export const accountsApi = {
   list: () => listRows("accounts", { orderBy: "name", ascending: true }),
   create: (values) => createRow("accounts", values),
   update: (id, values) => updateRow("accounts", id, values),
+  updateDetails: async (id, { name, type, color }) => {
+    const { data, error } = await supabase.rpc("cero_update_account_details", {
+      p_account_id: id,
+      p_name: name,
+      p_type: type,
+      p_color: color,
+    });
+    logAndThrow("Supabase account details update error:", error);
+    return data;
+  },
   // Account deletion must preserve history and reconcile linked rules in the
   // database transaction. Never delete an account directly through PostgREST.
   delete: async (id, replacementAccountId = null) => {
