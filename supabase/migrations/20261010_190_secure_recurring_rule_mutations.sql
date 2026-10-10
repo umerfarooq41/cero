@@ -33,9 +33,13 @@ BEGIN
     SELECT * INTO v_rule FROM public.recurring_transactions
     WHERE id=p_rule_id AND user_id=v_uid FOR UPDATE;
     IF NOT FOUND THEN RAISE EXCEPTION 'Recurring rule not found'; END IF;
-    IF v_rule.type='transfer' AND
-       (p_values ?| ARRAY['amount','total_amount','account_id','to_account_id','type'])
-    THEN
+    IF v_rule.type='transfer' AND (
+      (p_values ? 'amount' AND (p_values->>'amount')::numeric IS DISTINCT FROM v_rule.amount)
+      OR (p_values ? 'total_amount' AND (p_values->>'total_amount')::numeric IS DISTINCT FROM v_rule.total_amount)
+      OR (p_values ? 'account_id' AND (p_values->>'account_id')::uuid IS DISTINCT FROM v_rule.account_id)
+      OR (p_values ? 'to_account_id' AND (p_values->>'to_account_id')::uuid IS DISTINCT FROM v_rule.to_account_id)
+      OR (p_values ? 'type' AND p_values->>'type' IS DISTINCT FROM v_rule.type)
+    ) THEN
       RAISE EXCEPTION 'Debt financial details cannot be changed using rule editor';
     END IF;
     v_data := to_jsonb(v_rule) || p_values;
