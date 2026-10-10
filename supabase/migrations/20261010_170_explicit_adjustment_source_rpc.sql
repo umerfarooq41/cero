@@ -3,7 +3,6 @@
 BEGIN;
 -- Phase 1B: atomic, auditable account balance adjustment.
 -- Deploy before changing the frontend. No direct write privileges are revoked here.
-BEGIN;
 CREATE OR REPLACE FUNCTION public.cero_adjust_account_balance(
   p_account_id uuid,
   p_target_balance numeric,
@@ -60,7 +59,6 @@ TO authenticated;
 
 -- Phase 1B: delete a recurring rule and reconcile outstanding debt atomically.
 -- Run before deploying the matching frontend commit.
-BEGIN;
 CREATE OR REPLACE FUNCTION public.cero_delete_recurring_rule(p_rule_id uuid)
 RETURNS void
 LANGUAGE plpgsql
