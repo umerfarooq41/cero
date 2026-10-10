@@ -16,7 +16,7 @@ DECLARE
     'name','amount','type','account_id','to_account_id','category_id',
     'frequency','start_date','next_due_date','end_date','note','is_active',
     'icon','color','total_amount','duration_count','duration_unit',
-    'payment_mode','schedule_anchor_day','is_archived','archived_at'
+    'payment_mode','schedule_anchor_day','is_archived','archived_at','completed_at'
   ];
 BEGIN
   IF v_uid IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;
@@ -41,6 +41,9 @@ BEGIN
       OR (p_values ? 'type' AND p_values->>'type' IS DISTINCT FROM v_rule.type)
     ) THEN
       RAISE EXCEPTION 'Debt financial details cannot be changed using rule editor';
+    END IF;
+    IF p_values ? 'completed_at' AND (p_values->>'completed_at')::date IS DISTINCT FROM v_rule.completed_at THEN
+      RAISE EXCEPTION 'Completion status cannot be edited manually';
     END IF;
     v_data := to_jsonb(v_rule) || p_values;
     v_data := v_data - 'id' - 'created_at' - 'updated_at' - 'last_posted_date'
