@@ -29,10 +29,6 @@ export async function uploadAttachment(file, bucket = DEFAULT_BUCKET) {
   return { ...data, bucket, path };
 }
 
-export function getPublicAttachmentUrl(path, bucket = DEFAULT_BUCKET) {
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-}
 
 export async function getSignedAttachmentUrl(path, expiresIn = 3600, bucket = DEFAULT_BUCKET) {
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
