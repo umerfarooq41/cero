@@ -267,7 +267,10 @@ export const recurringTransactionsApi = {
   create: async (values) => {
     const { data, error } = await supabase.rpc("cero_save_recurring_rule", {
       p_rule_id: null,
-      p_values: values,
+      // Completion is database-managed; older forms include it as read-only data.
+      p_values: Object.fromEntries(
+        Object.entries(values).filter(([key]) => key !== "completed_at")
+      ),
     });
     logAndThrow("Supabase recurring rule create error:", error);
     return data;
@@ -275,7 +278,10 @@ export const recurringTransactionsApi = {
   update: async (id, values) => {
     const { data, error } = await supabase.rpc("cero_save_recurring_rule", {
       p_rule_id: id,
-      p_values: values,
+      // Completion is database-managed; older forms include it as read-only data.
+      p_values: Object.fromEntries(
+        Object.entries(values).filter(([key]) => key !== "completed_at")
+      ),
     });
     logAndThrow("Supabase recurring rule update error:", error);
     return data;
