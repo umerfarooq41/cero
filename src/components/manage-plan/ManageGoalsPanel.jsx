@@ -255,7 +255,7 @@ function GoalActionSheet({ goal, open, onClose, onEdit, onArchive, onDelete }) {
   );
 }
 
-function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts = [] }) {
+function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving, accounts = [] }) {
   const nameRef = useRef(null);
   const [form, setForm] = useState(emptyGoalForm);
 
@@ -588,6 +588,11 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saving, accounts 
           </div>
         </div>
 
+        {saveError && (
+          <p role="alert" className="shrink-0 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive break-words">
+            {saveError}
+          </p>
+        )}
         <DialogFooter className="app-dialog-actions shrink-0 border-t border-border/40 bg-background/95 pt-3">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancel
@@ -810,6 +815,7 @@ export default function ManageGoalsPanel() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [goalSaveError, setGoalSaveError] = useState('');
   const [actionTarget, setActionTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -833,11 +839,13 @@ export default function ManageGoalsPanel() {
   };
 
   const openNew = () => {
+    setGoalSaveError('');
     setEditingGoal(null);
     setDialogOpen(true);
   };
 
   const handleSave = async (payload) => {
+    setGoalSaveError('');
     setSaving(true);
 
     try {
@@ -868,7 +876,9 @@ export default function ManageGoalsPanel() {
       setEditingGoal(null);
     } catch (error) {
       console.error('Savings goal save failed:', error);
-      toast.error(error.message || 'Could not save savings goal');
+      const details = [error?.message, error?.details, error?.hint].filter(Boolean).join(' · ');
+      setGoalSaveError(details || 'Could not save savings goal');
+      toast.error(details || 'Could not save savings goal');
     } finally {
       setSaving(false);
     }
@@ -961,6 +971,7 @@ export default function ManageGoalsPanel() {
         }}
         editingGoal={editingGoal}
         onSave={handleSave}
+        saveError={goalSaveError}
         saving={saving}
         accounts={accounts}
       />
