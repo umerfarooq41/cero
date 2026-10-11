@@ -145,6 +145,9 @@ export default function useGoalItems({
               occurrence_status: contributionMode === "fixed"
                 ? getGoalOccurrenceStatus({ ...goalWithProgress, next_due_date: nextDueDate })
                 : null,
+              next_suggested_contribution: contributionMode === "flexible"
+                ? Number(getSuggestedContributionAmount({ ...goalWithProgress, posted_occurrence_count: postedOccurrences }) || 0)
+                : null,
               month_planned_amount: plannedThisMonth,
               month_contributed_amount: contributedThisMonth,
               month_remaining_amount: monthRemainingAmount,
