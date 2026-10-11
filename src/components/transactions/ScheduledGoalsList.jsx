@@ -85,12 +85,7 @@ function GoalContributionDialog({
                 {formatCurrencyElement(remainingAmount, currency)}
               </p>
             )}
-            {dialog.suggestedAmount && (
-              <p className="text-xs text-muted-foreground">
-                Suggested monthly amount:{" "}
-                {formatCurrencyElement(Number(dialog.suggestedAmount), currency)}
-              </p>
-            )}
+
           </div>
 
           <div className="space-y-1.5">
