@@ -136,7 +136,7 @@ export function getGoalScheduledMonthlySaving(goal) {
 
   if (months === null) return null;
 
-  return Math.ceil(amountToFund / months);
+  return Math.floor(Math.round(amountToFund * 100) / months) / 100;
 }
 
 export function getMonthlyRequiredSavingForMonth(goal, month) {
@@ -153,7 +153,7 @@ export function getMonthlyRequiredSavingForMonth(goal, month) {
 
   if (months === null) return null;
 
-  return Math.ceil(remaining / months);
+  return Math.floor(Math.round(remaining * 100) / months) / 100;
 }
 
 export function getGoalPlannedAmountForMonth(goal, month) {
