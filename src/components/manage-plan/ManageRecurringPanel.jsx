@@ -199,6 +199,7 @@ function RecurringRuleModal({
   allTransactions = [],
   formatCurrency,
   saving = false,
+  saveError = '',
 }) {
   const nameRef = useRef(null);
   const [form, setForm] = useState(() => emptyForm(initialType));
@@ -784,6 +785,7 @@ function RecurringRuleModal({
           </div>
         </div>
 
+        {saveError && <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive break-words">{saveError}</p>}
         <DialogFooter className="app-dialog-actions">
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
@@ -1019,6 +1021,7 @@ export default function ManageRecurringPanel() {
   const [editingRule, setEditingRule] = useState(null);
   const [initialType, setInitialType] = useState('expense');
   const [saving, setSaving] = useState(false);
+  const [recurringSaveError, setRecurringSaveError] = useState('');
   const recurringPaidByRule = useMemo(
     () => sumRecurringPostedByRule(allTransactions),
     [allTransactions]
@@ -1101,6 +1104,7 @@ export default function ManageRecurringPanel() {
   };
 
   const handleSave = async (payload) => {
+    setRecurringSaveError('');
     setSaving(true);
     const rulePayload = payload;
 
@@ -1143,7 +1147,9 @@ export default function ManageRecurringPanel() {
       setSelectedRule(null);
     } catch (error) {
       console.error('Recurring rule save failed:', error);
-      toast.error(error.message || 'Could not save recurring rule');
+      const message = [error?.message, error?.details, error?.hint].filter(Boolean).join(' · ') || 'Could not save recurring rule';
+      setRecurringSaveError(message);
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -1299,6 +1305,7 @@ export default function ManageRecurringPanel() {
         allTransactions={allTransactions}
         formatCurrency={formatCurrency}
         saving={saving}
+        saveError={recurringSaveError}
       />
 
       <RecurringActionSheet
