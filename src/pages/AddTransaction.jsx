@@ -153,6 +153,7 @@ export default function AddTransaction() {
   const currency = useCurrency();
   const isRecurringDateCorrection = isEditing && (Boolean(existingTransaction?.recurring_transaction_id) || Boolean(existingTransaction?.savings_goal_id));
   const [occurrenceDate, setOccurrenceDate] = useState('');
+  const [linkedFixed, setLinkedFixed] = useState(true);
 
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
@@ -227,6 +228,24 @@ export default function AddTransaction() {
   }, [categories, existingTransaction]);
 
   useEffect(() => {
+    if (!isRecurringDateCorrection || !existingTransaction) return;
+    let active = true;
+    const load = async () => {
+      if (existingTransaction.recurring_transaction_id) {
+        const { data } = await supabase.from('recurring_transactions')
+          .select('payment_mode,type').eq('id', existingTransaction.recurring_transaction_id).maybeSingle();
+        if (active) setLinkedFixed(data?.type === 'transfer' && (data?.payment_mode || 'fixed') === 'fixed');
+      } else if (existingTransaction.savings_goal_id) {
+        const { data } = await supabase.from('savings_goals')
+          .select('contribution_mode').eq('id', existingTransaction.savings_goal_id).maybeSingle();
+        if (active) setLinkedFixed((data?.contribution_mode || 'flexible') === 'fixed');
+      }
+    };
+    load();
+    return () => { active = false; };
+  }, [isRecurringDateCorrection, existingTransaction?.recurring_transaction_id, existingTransaction?.savings_goal_id]);
+
+  useEffect(() => {
     if (type !== 'transfer') return;
 
     const currentPurposeAllowed = transferPurposeOptions.some(
@@ -265,13 +284,15 @@ export default function AddTransaction() {
 
   const handleSubmit = async () => {
     if (isRecurringDateCorrection) {
-      if (!date) { toast.error('Select a payment date'); return; }
+      if (!date || !occurrenceDate || !(Number(amount) > 0)) { toast.error('Enter a valid amount and both dates'); return; }
       setSaving(true);
       try {
-        const { error } = await supabase.rpc('cero_correct_scheduled_payment', {
+        const { error } = await supabase.rpc('cero_edit_linked_payment', {
           p_transaction_id: id,
           p_actual_date: date,
           p_occurrence_date: occurrenceDate,
+          p_amount: Number(amount),
+          p_note: note || null,
         });
         if (error) throw error;
         invalidateScheduledQueries(queryClient);
@@ -425,7 +446,12 @@ export default function AddTransaction() {
       {isRecurringDateCorrection ? (
         <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24">
           <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
-            <p className="text-sm text-muted-foreground">Correct the actual payment date and scheduled installment. Amount and balances stay unchanged.</p>
+            <p className="text-sm text-muted-foreground">Correct the payment amount, actual date, and scheduled installment. Changes to amounts automatically adjust balances.</p>
+            <div className="space-y-1.5">
+              <label htmlFor="linked-payment-amount" className="text-sm font-medium">Payment amount</label>
+              <Input id="linked-payment-amount" type="number" min="0.01" step="0.01" value={amount} disabled={linkedFixed} onChange={(event) => setAmount(event.target.value)} />
+              {linkedFixed && <p className="text-xs text-muted-foreground">Fixed installment amount cannot be changed.</p>}
+            </div>
             <div className="space-y-1.5">
               <label htmlFor="recurring-payment-date" className="text-sm font-medium">Actual payment date</label>
               <Input id="recurring-payment-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
@@ -434,8 +460,12 @@ export default function AddTransaction() {
               <label htmlFor="scheduled-occurrence-date" className="text-sm font-medium">Scheduled installment date</label>
               <Input id="scheduled-occurrence-date" type="date" value={occurrenceDate} onChange={(event) => setOccurrenceDate(event.target.value)} />
             </div>
-            <Button className="w-full" disabled={saving || !date || !occurrenceDate} onClick={handleSubmit}>
-              {saving ? 'Saving…' : 'Save payment date'}
+            <div className="space-y-1.5">
+              <label htmlFor="linked-payment-note" className="text-sm font-medium">Note</label>
+              <Textarea id="linked-payment-note" value={note} onChange={(event) => setNote(event.target.value)} />
+            </div>
+            <Button className="w-full" disabled={saving || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
+              {saving ? 'Saving…' : 'Save changes'}
             </Button>
           </div>
         </main>
