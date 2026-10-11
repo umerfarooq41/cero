@@ -32,7 +32,18 @@ BEGIN
       'start_date','contribution_mode','from_account_id','to_account_id',
       'icon_key','color_key','note','is_archived','archived_at','next_due_date'
     ]))
-  ) THEN RAISE EXCEPTION 'Unsupported goal field'; END IF;
+  ) THEN
+    RAISE EXCEPTION 'Unsupported goal field(s): %', (
+      SELECT string_agg(k.key, ', ' ORDER BY k.key)
+      FROM jsonb_object_keys(p_values) AS k(key)
+      WHERE NOT (k.key = ANY(ARRAY[
+        'name','target_amount','starting_amount','current_amount',
+        'target_date','duration_count','duration_unit','frequency',
+        'start_date','contribution_mode','from_account_id','to_account_id',
+        'icon_key','color_key','note','is_archived','archived_at','next_due_date'
+      ]))
+    );
+  END IF;
 
   IF p_goal_id IS NOT NULL THEN
     SELECT * INTO v_goal FROM public.savings_goals
