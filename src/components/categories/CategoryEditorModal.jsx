@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -79,7 +79,7 @@ export default function CategoryEditorModal({
   initialType = 'expense',
   editingCategory = null,
 }) {
-  const nameRef = useRef(null);
+
 
   const [name, setName] = useState('');
   const [type, setType] = useState(initialType);
@@ -107,7 +107,7 @@ export default function CategoryEditorModal({
       setParentId('');
     }
 
-    setTimeout(() => nameRef.current?.focus(), 80);
+
   }, [open, editingCategory, initialType]);
 
   const handleSave = async () => {
@@ -168,7 +168,7 @@ export default function CategoryEditorModal({
               Name
             </label>
             <Input
-              ref={nameRef}
+              
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Groceries"
