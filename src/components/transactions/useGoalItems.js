@@ -29,7 +29,22 @@ function getSuggestedContributionAmount(goal) {
   const remainingCents = Math.max(0, targetCents - currentCents);
   if (!remainingCents) return "";
 
-  const count = Math.max(1, Math.floor(Number(goal.duration_count || 0)));
+  const explicitCount = Math.floor(Number(goal.duration_count || 0));
+  const start = String(goal.start_date || "").slice(0, 10);
+  const end = String(goal.target_date || "").slice(0, 10);
+  const startMonth = /^\\d{4}-\\d{2}-\\d{2}$/.test(start)
+    ? Number(start.slice(0, 4)) * 12 + Number(start.slice(5, 7))
+    : null;
+  const endMonth = /^\\d{4}-\\d{2}-\\d{2}$/.test(end)
+    ? Number(end.slice(0, 4)) * 12 + Number(end.slice(5, 7))
+    : null;
+  // Flexible goals have no duration_count: use the inclusive calendar-month
+  // span from start to target (Oct through Dec = three planned contributions).
+  const count = explicitCount > 0
+    ? explicitCount
+    : startMonth !== null && endMonth !== null
+      ? Math.max(1, endMonth - startMonth + 1)
+      : 1;
   const regularCents = Math.max(1, Math.floor(Math.max(0, targetCents - startingCents) / count));
   const postedCount = Math.max(0, Number(goal.posted_occurrence_count || 0));
   // For flexible goals, payments may be made on the same day. Suggest the
