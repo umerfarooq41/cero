@@ -53,7 +53,15 @@ export function getFixedGoalContributionAmount(goal) {
   const starting = Math.max(0, Number(goal?.starting_amount || 0));
   const count = Math.max(0, Math.floor(Number(goal?.duration_count || 0)));
   if (!count) return 0;
-  return Math.max(0, target - starting) / count;
+  const total = Math.max(0, target - starting);
+  // Match the database's whole-unit or cent-rounded fixed installment.
+  const regular = Number.isInteger(total)
+    ? Math.ceil(total / count)
+    : Math.round((total / count) * 100) / 100;
+  // The final installment is always the exact outstanding amount.
+  const posted = Math.max(0, Math.floor(Number(goal?.posted_occurrence_count || 0)));
+  const remaining = Math.max(0, target - Math.max(starting, Number(goal?.current_amount || 0)));
+  return Math.max(0, Math.min(regular, remaining, posted >= count - 1 ? remaining : regular));
 }
 
 export function getFixedGoalNextDueDate(goal, postedOccurrenceCount = 0) {
