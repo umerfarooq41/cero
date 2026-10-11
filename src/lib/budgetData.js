@@ -329,7 +329,12 @@ export const savingsGoalsApi = {
     logAndThrow("Supabase savings goal update error:", error);
     return data;
   },
-  delete: (id) => deleteRow("savings_goals", id),
+  delete: async (id) => {
+    const { error } = await supabase.rpc("cero_delete_empty_savings_goal", {
+      p_goal_id: id,
+    });
+    logAndThrow("Supabase savings goal delete error:", error);
+  },
 };
 
 export const goalContributionsApi = {
