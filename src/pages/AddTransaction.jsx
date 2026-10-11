@@ -151,6 +151,7 @@ export default function AddTransaction() {
 
   const existingTransaction = allTransactions.find((transaction) => transaction.id === id);
   const currency = useCurrency();
+  const isRecurringDateCorrection = isEditing && existingTransaction?.source_type === 'recurring' && Boolean(existingTransaction?.recurring_transaction_id);
 
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
@@ -261,6 +262,25 @@ export default function AddTransaction() {
   });
 
   const handleSubmit = async () => {
+    if (isRecurringDateCorrection) {
+      if (!date) { toast.error('Select a payment date'); return; }
+      setSaving(true);
+      try {
+        const { error } = await supabase.rpc('cero_update_recurring_payment_date', {
+          p_transaction_id: id,
+          p_transaction_date: date,
+        });
+        if (error) throw error;
+        invalidateScheduledQueries(queryClient);
+        toast.success('Payment date updated');
+        navigate('/transactions');
+      } catch (error) {
+        toast.error(error.message || 'Could not update payment date');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const parsedAmount = Number(amount || 0);
 
     if (!parsedAmount || parsedAmount <= 0) {
@@ -399,6 +419,20 @@ export default function AddTransaction() {
         }
       />
 
+      {isRecurringDateCorrection ? (
+        <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24">
+          <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
+            <p className="text-sm text-muted-foreground">Correct the date you actually paid. The scheduled installment, amount, and account balances will not change.</p>
+            <div className="space-y-1.5">
+              <label htmlFor="recurring-payment-date" className="text-sm font-medium">Actual payment date</label>
+              <Input id="recurring-payment-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+            </div>
+            <Button className="w-full" disabled={saving || !date} onClick={handleSubmit}>
+              {saving ? 'Saving…' : 'Save payment date'}
+            </Button>
+          </div>
+        </main>
+      ) : (
       <main className="mx-auto w-full max-w-3xl px-4 py-3 pb-24 lg:py-8">
         <div className="mb-3">
           <TransactionTypeSelector
@@ -635,6 +669,7 @@ export default function AddTransaction() {
           </Button>
         )}
       </main>
+      )
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="overflow-hidden rounded-3xl border border-destructive/25 app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(127,29,29,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
