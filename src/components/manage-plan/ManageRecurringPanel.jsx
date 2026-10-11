@@ -1018,6 +1018,7 @@ export default function ManageRecurringPanel() {
   const [modalOpen, setModalOpen] = useState(false);
   const [actionSheetOpen, setActionSheetOpen] = useState(false);
   const [selectedRule, setSelectedRule] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingRule, setEditingRule] = useState(null);
   const [initialType, setInitialType] = useState('expense');
   const [saving, setSaving] = useState(false);
@@ -1314,8 +1315,18 @@ export default function ManageRecurringPanel() {
         onClose={() => setActionSheetOpen(false)}
         onEdit={openEdit}
         onArchive={handleArchive}
-        onDelete={handleDelete}
+        onDelete={setDeleteTarget}
       />
+      <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader><DialogTitle>{deleteTarget?.type === 'transfer' ? 'Delete debt?' : 'Delete recurring rule?'}</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">{deleteTarget?.type === 'transfer' && (Number(deleteTarget.total_amount || 0) - Number(recurringPaidByRule[deleteTarget.id] || 0) > 0.005 || allTransactions.some((tx) => tx.recurring_transaction_id === deleteTarget.id)) ? 'This debt has an outstanding balance or payment history. It cannot be deleted. Archive it instead.' : 'Delete this recurring rule? Existing posted transactions will remain in your history. This cannot be undone.'}</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            {deleteTarget?.type === 'transfer' && (Number(deleteTarget.total_amount || 0) - Number(recurringPaidByRule[deleteTarget.id] || 0) > 0.005 || allTransactions.some((tx) => tx.recurring_transaction_id === deleteTarget.id)) ? <Button onClick={() => { handleArchive(deleteTarget); setDeleteTarget(null); }}>Archive Debt</Button> : <Button variant="destructive" onClick={() => { const rule = deleteTarget; setDeleteTarget(null); handleDelete(rule); }}>Delete</Button>}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
