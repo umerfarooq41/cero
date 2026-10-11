@@ -470,8 +470,18 @@ export default function AddTransaction() {
               <Textarea id="linked-payment-note" value={note} onChange={(event) => setNote(event.target.value)} />
             </div>
             {linkedSaveError && <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{linkedSaveError}</div>}
-            <Button type="button" className="w-full" disabled={saving || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
+            <Button type="button" className="w-full" disabled={saving || deleting || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save changes'}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setDeleteOpen(true)}
+              disabled={saving || deleting || !existingTransaction}
+              className="h-12 w-full text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Transaction
             </Button>
           </div>
         </main>
@@ -732,8 +742,9 @@ export default function AddTransaction() {
 
           <div className="space-y-3 px-6 py-5">
             <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm leading-6 text-muted-foreground">
-              Recurring and goal-linked transactions are protected and must be changed through
-              their own recurring or goal workflow.
+              {isRecurringDateCorrection
+                ? 'This also removes the linked recurring payment or goal contribution and updates its schedule or progress. Account balance effects will be reversed.'
+                : 'The account balance effects of this transaction will be reversed.'}
             </div>
           </div>
 
