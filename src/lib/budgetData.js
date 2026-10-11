@@ -343,9 +343,17 @@ export const goalContributionsApi = {
       orderBy: "contribution_date",
       ascending: false,
     }),
-  create: (values) => createRow("goal_contributions", values),
-  update: (id, values) => updateRow("goal_contributions", id, values),
-  delete: (id) => deleteRow("goal_contributions", id),
+  // Contributions must be posted/reversed through financial RPCs that
+  // atomically update accounts, goal progress, and linked transactions.
+  create: async () => {
+    throw new Error("Direct goal contribution creation is disabled. Use the goal contribution posting workflow.");
+  },
+  update: async () => {
+    throw new Error("Direct goal contribution editing is disabled. Reverse and repost using the financial workflow.");
+  },
+  delete: async () => {
+    throw new Error("Direct goal contribution deletion is disabled. Use the linked transaction reversal workflow.");
+  },
 };
 
 export const budgetPlansApi = {
