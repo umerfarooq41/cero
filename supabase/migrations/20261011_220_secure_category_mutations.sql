@@ -28,7 +28,7 @@ BEGIN
   v_parent := CASE WHEN p_values ? 'parent_id'
     THEN (p_values->>'parent_id')::uuid ELSE v_category.parent_id END;
   IF NULLIF(btrim(v_name),'') IS NULL THEN RAISE EXCEPTION 'Category name required'; END IF;
-  IF v_type NOT IN ('income','expense') THEN RAISE EXCEPTION 'Invalid category type'; END IF;
+  IF v_type NOT IN ('income','expense','savings','debt') THEN RAISE EXCEPTION 'Invalid category type'; END IF;
   IF v_parent IS NOT NULL AND (
     v_parent = p_category_id OR NOT EXISTS (
       SELECT 1 FROM public.categories
