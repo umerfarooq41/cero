@@ -164,6 +164,7 @@ export default function AddTransaction() {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [linkedSaveError, setLinkedSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -285,6 +286,7 @@ export default function AddTransaction() {
   const handleSubmit = async () => {
     if (isRecurringDateCorrection) {
       if (!date || !occurrenceDate || !(Number(amount) > 0)) { toast.error('Enter a valid amount and both dates'); return; }
+      setLinkedSaveError('');
       setSaving(true);
       try {
         const { error } = await supabase.rpc('cero_edit_linked_payment', {
@@ -299,7 +301,10 @@ export default function AddTransaction() {
         toast.success('Payment schedule corrected');
         navigate('/transactions');
       } catch (error) {
-        toast.error(error.message || 'Could not update payment date');
+        console.error('Linked payment save failed:', error);
+        const message = error?.message || 'Could not save the payment';
+        setLinkedSaveError(message);
+        toast.error(message);
       } finally {
         setSaving(false);
       }
@@ -464,7 +469,8 @@ export default function AddTransaction() {
               <label htmlFor="linked-payment-note" className="text-sm font-medium">Note</label>
               <Textarea id="linked-payment-note" value={note} onChange={(event) => setNote(event.target.value)} />
             </div>
-            <Button className="w-full" disabled={saving || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
+            {linkedSaveError && <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{linkedSaveError}</div>}
+            <Button type="button" className="w-full" disabled={saving || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save changes'}
             </Button>
           </div>
