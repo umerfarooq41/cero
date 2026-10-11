@@ -48,6 +48,7 @@ import {
   getFixedGoalTargetDate,
   todayIsoDate,
   getMonthlyRequiredSaving,
+  getGoalScheduledMonthlySaving,
   sortGoalsByPriority,
 } from '@/lib/goals';
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
@@ -615,10 +616,14 @@ function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
   const isArchived = Boolean(goal.is_archived);
   const isCompleted = remaining <= 0 || progress >= 100;
   const isFixed = (goal.contribution_mode || 'flexible') === 'fixed';
-  const monthlyRequired = getMonthlyRequiredSaving(goal);
+  const monthlyRequired = isFixed ? getMonthlyRequiredSaving(goal) : getGoalScheduledMonthlySaving(goal);
+  const contributionCount = Number(goal.posted_occurrence_count || 0);
+  const plannedCount = Math.max(1, Number(goal.duration_count || 0) || (() => { const start = String(goal.start_date || '').slice(0, 7); const end = String(goal.target_date || '').slice(0, 7); return /^\d{4}-\d{2}$/.test(start) && /^\d{4}-\d{2}$/.test(end) ? Math.max(1, (Number(end.slice(0, 4)) - Number(start.slice(0, 4))) * 12 + Number(end.slice(5, 7)) - Number(start.slice(5, 7)) + 1) : 1; })());
   const displayAmount = monthlyRequired === null
     ? null
-    : Math.min(Math.max(0, Number(monthlyRequired || 0)), remaining);
+    : !isFixed && contributionCount >= plannedCount - 1
+      ? remaining
+      : Math.min(Math.max(0, Number(monthlyRequired || 0)), remaining);
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const daysUntil = (value) => value
@@ -807,9 +812,10 @@ export default function ManageGoalsPanel() {
       return {
         ...goal,
         starting_amount: startingAmount,
+        posted_occurrence_count: allTransactions.filter((tx) => tx.savings_goal_id === goal.id && Number(tx.amount) > 0).length,
       };
     }),
-    [postedGoalTotals, savingsGoals]
+    [postedGoalTotals, savingsGoals, allTransactions]
   );
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -993,17 +999,16 @@ export default function ManageGoalsPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete savings goal?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the goal definition. Existing linked history may not be recoverable from this screen.
+              {deleteTarget && (Number(deleteTarget.current_amount || 0) > Number(deleteTarget.starting_amount || 0) + 0.005 || allTransactions.some((tx) => tx.savings_goal_id === deleteTarget.id))
+                ? 'This goal has contributions and cannot be deleted. Archive it to preserve its history.'
+                : 'Delete this empty savings goal? This cannot be undone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => handleDelete(deleteTarget)}
-            >
-              Delete Goal
-            </AlertDialogAction>
+            {deleteTarget && (Number(deleteTarget.current_amount || 0) > Number(deleteTarget.starting_amount || 0) + 0.005 || allTransactions.some((tx) => tx.savings_goal_id === deleteTarget.id))
+              ? <AlertDialogAction onClick={() => { handleArchive(deleteTarget); setDeleteTarget(null); }}>Archive Goal</AlertDialogAction>
+              : <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDelete(deleteTarget)}>Delete Goal</AlertDialogAction>}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
