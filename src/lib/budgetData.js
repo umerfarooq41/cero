@@ -178,10 +178,33 @@ export const accountsApi = {
 
 export const categoriesApi = {
   list: () => listRows("categories", { orderBy: "name", ascending: true }),
-  create: (values) => createRow("categories", values),
-  bulkCreate: (rows) => createRows("categories", rows),
-  update: (id, values) => updateRow("categories", id, values),
-  delete: (id) => deleteRow("categories", id),
+  create: async (values) => {
+    const { data, error } = await supabase.rpc("cero_save_category", {
+      p_category_id: null, p_values: values,
+    });
+    logAndThrow("Supabase category create RPC error:", error);
+    return data;
+  },
+  bulkCreate: async (rows) => {
+    const { data, error } = await supabase.rpc("cero_create_categories", {
+      p_rows: rows,
+    });
+    logAndThrow("Supabase category bulk create RPC error:", error);
+    return data;
+  },
+  update: async (id, values) => {
+    const { data, error } = await supabase.rpc("cero_save_category", {
+      p_category_id: id, p_values: values,
+    });
+    logAndThrow("Supabase category update RPC error:", error);
+    return data;
+  },
+  delete: async (id) => {
+    const { error } = await supabase.rpc("cero_delete_category", {
+      p_category_id: id,
+    });
+    logAndThrow("Supabase category delete RPC error:", error);
+  },
 };
 
 async function withIncomeBudgetAssignment(values = {}) {
