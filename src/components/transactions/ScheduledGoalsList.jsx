@@ -157,12 +157,7 @@ function ScheduledGoalRow({
   const isFixed = (goal.contribution_mode || "flexible") === "fixed";
   const displayAmount = isFixed
     ? Math.min(Number(goal.fixed_contribution_amount || 0), remaining)
-    : hasMonthlyPlan && monthRemaining > 0
-      ? Math.min(monthRemaining, remaining)
-      : Math.min(
-          Number(goal.month_planned_amount || remaining),
-          remaining,
-        );
+    : Math.min(Math.max(0, Number(goal.next_suggested_contribution ?? remaining)), remaining);
   const totalContributions = Math.max(1, Number(goal.duration_count || 0));
   const completedContributions = Math.min(
     totalContributions,
