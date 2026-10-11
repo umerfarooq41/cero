@@ -24,16 +24,18 @@ import {
 function getSuggestedContributionAmount(goal) {
   if (!goal) return "";
 
-  const remainingThisMonth = Number(goal.month_remaining_amount || 0);
-  if (remainingThisMonth > 0) return String(remainingThisMonth);
+  const remaining = Math.max(0, Number(goal.target_amount || 0) - Number(goal.current_amount || 0));
+  if (remaining <= 0) return "";
 
-  const plannedThisMonth = Number(goal.month_planned_amount || 0);
-  const contributedThisMonth = Number(goal.month_contributed_amount || 0);
-  if (plannedThisMonth > 0 && contributedThisMonth <= 0) {
-    return String(plannedThisMonth);
-  }
+  // Prefer the outstanding monthly plan, but never leave the flexible
+  // contribution blank merely because this month's suggested amount was paid.
+  const monthRemaining = Math.max(0, Number(goal.month_remaining_amount || 0));
+  if (monthRemaining > 0) return String(Math.min(remaining, Math.round(monthRemaining * 100) / 100));
 
-  return "";
+  const scheduledCount = Math.max(1, Math.floor(Number(goal.duration_count || 0)));
+  const planned = Math.max(0, Number(goal.month_planned_amount || 0));
+  const suggested = planned > 0 ? planned : remaining / scheduledCount;
+  return String(Math.min(remaining, Math.ceil(suggested * 100) / 100));
 }
 
 export default function useGoalItems({
