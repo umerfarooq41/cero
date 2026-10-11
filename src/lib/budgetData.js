@@ -294,6 +294,19 @@ export const recurringTransactionsApi = {
   },
 };
 
+const SAVINGS_GOAL_SAVE_FIELDS = new Set([
+  "name", "target_amount", "starting_amount", "current_amount",
+  "target_date", "duration_count", "duration_unit", "frequency",
+  "start_date", "contribution_mode", "from_account_id", "to_account_id",
+  "icon_key", "color_key", "note", "is_archived", "archived_at",
+  "next_due_date",
+]);
+
+const goalSavePayload = (values) =>
+  Object.fromEntries(
+    Object.entries(values || {}).filter(([key]) => SAVINGS_GOAL_SAVE_FIELDS.has(key))
+  );
+
 export const savingsGoalsApi = {
   list: () =>
     listRows("savings_goals", {
@@ -303,9 +316,7 @@ export const savingsGoalsApi = {
   create: async (values) => {
     const { data, error } = await supabase.rpc("cero_save_savings_goal", {
       p_goal_id: null,
-      p_values: Object.fromEntries(
-        Object.entries(values).filter(([key]) => key !== "completed_at")
-      ),
+      p_values: goalSavePayload(values),
     });
     logAndThrow("Supabase savings goal create error:", error);
     return data;
@@ -313,9 +324,7 @@ export const savingsGoalsApi = {
   update: async (id, values) => {
     const { data, error } = await supabase.rpc("cero_save_savings_goal", {
       p_goal_id: id,
-      p_values: Object.fromEntries(
-        Object.entries(values).filter(([key]) => key !== "completed_at")
-      ),
+      p_values: goalSavePayload(values),
     });
     logAndThrow("Supabase savings goal update error:", error);
     return data;
