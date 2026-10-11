@@ -32,10 +32,10 @@ function getSuggestedContributionAmount(goal) {
   const explicitCount = Math.floor(Number(goal.duration_count || 0));
   const start = String(goal.start_date || "").slice(0, 10);
   const end = String(goal.target_date || "").slice(0, 10);
-  const startMonth = /^\\d{4}-\\d{2}-\\d{2}$/.test(start)
+  const startMonth = /^\d{4}-\d{2}-\d{2}$/.test(start)
     ? Number(start.slice(0, 4)) * 12 + Number(start.slice(5, 7))
     : null;
-  const endMonth = /^\\d{4}-\\d{2}-\\d{2}$/.test(end)
+  const endMonth = /^\d{4}-\d{2}-\d{2}$/.test(end)
     ? Number(end.slice(0, 4)) * 12 + Number(end.slice(5, 7))
     : null;
   // Flexible goals have no duration_count: use the inclusive calendar-month
