@@ -23,23 +23,20 @@ import {
 
 function getSuggestedContributionAmount(goal) {
   if (!goal) return "";
-
-  const remainingCents = Math.max(0, Math.round(
-    (Number(goal.target_amount || 0) - Number(goal.current_amount || 0)) * 100,
-  ));
+  const targetCents = Math.round(Number(goal.target_amount || 0) * 100);
+  const startingCents = Math.round(Number(goal.starting_amount || 0) * 100);
+  const currentCents = Math.round(Number(goal.current_amount || 0) * 100);
+  const remainingCents = Math.max(0, targetCents - currentCents);
   if (!remainingCents) return "";
 
   const count = Math.max(1, Math.floor(Number(goal.duration_count || 0)));
-  const startingCents = Math.round(Number(goal.starting_amount || 0) * 100);
-  const totalCents = Math.max(0, Math.round(Number(goal.target_amount || 0) * 100) - startingCents);
-  // Use cents, not floating-point division or ceiling. The final suggestion
-  // becomes the exact remaining balance (333.33 + 333.33 + 333.34).
-  const regularCents = Math.max(1, Math.floor(totalCents / count));
-  const monthRemainingCents = Math.max(0, Math.round(Number(goal.month_remaining_amount || 0) * 100));
-  const suggestedCents = monthRemainingCents > 0
-    ? Math.min(regularCents, monthRemainingCents)
-    : regularCents;
-  return (Math.min(remainingCents, suggestedCents) / 100).toFixed(2);
+  const regularCents = Math.max(1, Math.floor(Math.max(0, targetCents - startingCents) / count));
+  const postedCount = Math.max(0, Number(goal.posted_occurrence_count || 0));
+  // For flexible goals, payments may be made on the same day. Suggest the
+  // regular cent-precise share until the last planned contribution, then
+  // suggest exactly what remains. The user may still edit the amount.
+  const suggestedCents = postedCount >= count - 1 ? remainingCents : Math.min(regularCents, remainingCents);
+  return (suggestedCents / 100).toFixed(2);
 }
 
 export default function useGoalItems({
@@ -110,11 +107,13 @@ export default function useGoalItems({
             const remaining = getGoalRemaining(goalWithProgress);
 
             const contributionMode = goal.contribution_mode || "flexible";
-            const fixedAmount = contributionMode === "fixed" ? getFixedGoalContributionAmount(goalWithProgress) : 0;
             const postedOccurrences = Math.max(
               0,
               Number(verifiedContributionsByGoal[goal.id] || 0),
             );
+            const fixedAmount = contributionMode === "fixed"
+              ? getFixedGoalContributionAmount({ ...goalWithProgress, posted_occurrence_count: postedOccurrences })
+              : 0;
             // For fixed goals the database owns schedule state. Never
             // reconstruct next_due_date from transaction counts here: deleted,
             // early, or out-of-order occurrences can make that calculation
