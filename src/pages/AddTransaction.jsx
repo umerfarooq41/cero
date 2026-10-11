@@ -151,7 +151,8 @@ export default function AddTransaction() {
 
   const existingTransaction = allTransactions.find((transaction) => transaction.id === id);
   const currency = useCurrency();
-  const isRecurringDateCorrection = isEditing && existingTransaction?.source_type === 'recurring' && Boolean(existingTransaction?.recurring_transaction_id);
+  const isRecurringDateCorrection = isEditing && (Boolean(existingTransaction?.recurring_transaction_id) || Boolean(existingTransaction?.savings_goal_id));
+  const [occurrenceDate, setOccurrenceDate] = useState('');
 
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
@@ -221,6 +222,7 @@ export default function AddTransaction() {
         : TRANSFER_PURPOSES.normal
     );
     setDate(existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
+    setOccurrenceDate(existingTransaction.recurring_posted_for_date || existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setNote(existingTransaction.note || '');
   }, [categories, existingTransaction]);
 
@@ -266,13 +268,14 @@ export default function AddTransaction() {
       if (!date) { toast.error('Select a payment date'); return; }
       setSaving(true);
       try {
-        const { error } = await supabase.rpc('cero_update_recurring_payment_date', {
+        const { error } = await supabase.rpc('cero_correct_scheduled_payment', {
           p_transaction_id: id,
-          p_transaction_date: date,
+          p_actual_date: date,
+          p_occurrence_date: occurrenceDate,
         });
         if (error) throw error;
         invalidateScheduledQueries(queryClient);
-        toast.success('Payment date updated');
+        toast.success('Payment schedule corrected');
         navigate('/transactions');
       } catch (error) {
         toast.error(error.message || 'Could not update payment date');
@@ -422,12 +425,16 @@ export default function AddTransaction() {
       {isRecurringDateCorrection ? (
         <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24">
           <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
-            <p className="text-sm text-muted-foreground">Correct the date you actually paid. The scheduled installment, amount, and account balances will not change.</p>
+            <p className="text-sm text-muted-foreground">Correct the actual payment date and scheduled installment. Amount and balances stay unchanged.</p>
             <div className="space-y-1.5">
               <label htmlFor="recurring-payment-date" className="text-sm font-medium">Actual payment date</label>
               <Input id="recurring-payment-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             </div>
-            <Button className="w-full" disabled={saving || !date} onClick={handleSubmit}>
+            <div className="space-y-1.5">
+              <label htmlFor="scheduled-occurrence-date" className="text-sm font-medium">Scheduled installment date</label>
+              <Input id="scheduled-occurrence-date" type="date" value={occurrenceDate} onChange={(event) => setOccurrenceDate(event.target.value)} />
+            </div>
+            <Button className="w-full" disabled={saving || !date || !occurrenceDate} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save payment date'}
             </Button>
           </div>
