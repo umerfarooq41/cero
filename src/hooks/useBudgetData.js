@@ -427,8 +427,7 @@ export function useYearBudgetSummary(year) {
       accounts,
       plannedTotals,
     });
-  }
-  
   }, [categories, transactions, allocations, accounts, settings, year]);
+}
 
 export { useCurrencyFormatter, formatCurrency } from '@/hooks/useCurrency';
