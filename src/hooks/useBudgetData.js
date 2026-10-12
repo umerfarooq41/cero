@@ -344,12 +344,15 @@ export function useBudgetSummary(month) {
     allocationsQuery.isFetching ||
     accountsQuery.isFetching;
 
-  const summary = buildBudgetSummary({
-    categories: categoriesQuery.data || [],
-    transactions: transactionsQuery.data || [],
-    allocations: allocationsQuery.data || [],
-    accounts: accountsQuery.data || [],
-  });
+  const summary = useMemo(
+    () => buildBudgetSummary({
+      categories: categoriesQuery.data || EMPTY_LIST,
+      transactions: transactionsQuery.data || EMPTY_LIST,
+      allocations: allocationsQuery.data || EMPTY_LIST,
+      accounts: accountsQuery.data || EMPTY_LIST,
+    }),
+    [categoriesQuery.data, transactionsQuery.data, allocationsQuery.data, accountsQuery.data]
+  );
 
   return {
     ...summary,
