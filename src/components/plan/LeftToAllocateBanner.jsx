@@ -41,7 +41,7 @@ export default function LeftToAllocateBanner({
       <div className="relative grid grid-cols-2 items-center">
         <div className="min-w-0 pr-3 text-center sm:pr-4">
           <div className="mb-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
-            Income
+            Budget funding
           </div>
 
           <div className="inline-flex max-w-full items-center justify-center gap-1 truncate text-sm font-bold tracking-tight text-foreground tabular-nums sm:text-lg [&_svg]:h-[1em] [&_svg]:w-[1em]">
