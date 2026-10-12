@@ -254,6 +254,13 @@ function buildBudgetSummary({
   plannedTotals,
 }) {
   const accountsById = getAccountById(accounts);
+  // Resolve category and parent types in O(1) per transaction rather than
+  // repeatedly scanning the category list during summary calculations.
+  const categoriesById = new Map(categories.map((category) => [category.id, category]));
+  const categoryTypeById = new Map(categories.map((category) => {
+    const parent = categoriesById.get(category.parent_id);
+    return [category.id, category.type || parent?.type || null];
+  }));
 
   const getCategorySpent = (categoryId) => {
     return transactions
@@ -276,7 +283,7 @@ function buildBudgetSummary({
 
         if (type === 'savings' && isGoalTransfer(transaction)) return true;
         if (type === 'debt' && isDebtTransfer(transaction, accountsById)) return true;
-        return getCategoryType(categories, transaction.category_id) === type;
+        return (categoryTypeById.get(transaction.category_id) || null) === type;
       })
       .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
   };
