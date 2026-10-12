@@ -32,7 +32,7 @@ export default function FloatingActionButton({
 
   const baseClassName = cn(
     // Forced viewport position
-    '!fixed z-[9999]',
+    '!fixed z-40',
     '!left-auto !right-5',
     '!bottom-[calc(5.75rem+env(safe-area-inset-bottom))]',
     'lg:!right-8 lg:!bottom-8',
@@ -78,6 +78,8 @@ export default function FloatingActionButton({
     whileTap: { scale: 0.94 },
   };
 
+  // Radix dialogs/sheets mark the page inert while open. Keep the FAB
+  // behind their overlay instead of allowing its portal to cover controls.
   if (!mounted) return null;
 
   const showOfflineMessage = () => {
