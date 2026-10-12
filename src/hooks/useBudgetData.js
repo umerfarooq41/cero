@@ -1,4 +1,8 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
+const EMPTY_LIST = [];
+const EMPTY_SETTINGS = {};
 import {
   accountsApi,
   budgetPlansApi,
@@ -356,73 +360,75 @@ export function useBudgetSummary(month) {
 }
 
 export function useYearBudgetSummary(year) {
-  const { data: categories = [] } = useCategories();
-  const { data: transactions = [] } = useAllTransactions();
-  const { data: allocations = [] } = useAllAllocations();
-  const { data: accounts = [] } = useAccounts();
+  const { data: categories = EMPTY_LIST } = useCategories();
+  const { data: transactions = EMPTY_LIST } = useAllTransactions();
+  const { data: allocations = EMPTY_LIST } = useAllAllocations();
+  const { data: accounts = EMPTY_LIST } = useAccounts();
 
-  const { data: settings = {} } = useUserSettings();
+  const { data: settings = EMPTY_SETTINGS } = useUserSettings();
 
-  const yearTransactions = filterTransactionsByBudgetYear(
-    transactions,
-    year,
-    settings
-  );
-  const yearAllocations = allocations.filter(a => a.month?.startsWith(`${year}-`));
-  const allocationsByMonth = yearAllocations.reduce((groups, allocation) => {
-    const month = allocation.month;
-    if (!month) return groups;
-    groups[month] = groups[month] || [];
-    groups[month].push(allocation);
-    return groups;
-  }, {});
-
-  const plannedTotals = Object.values(allocationsByMonth).reduce(
-    (sum, monthAllocations) => {
-      const month = monthAllocations[0]?.month;
-      const monthTransactions = month
-        ? filterTransactionsByBudgetMonth(yearTransactions, month, settings)
-        : [];
-      const monthTotals = buildPlanTotals({
-        allocations: monthAllocations,
-        categories,
-        transactions: monthTransactions,
-        allTransactions: transactions,
-        currentMonth: month,
-      });
-
-      return {
-        income: sum.income + monthTotals.income,
-        expense: sum.expense + monthTotals.expense,
-        savings: sum.savings + monthTotals.savings,
-        debt: sum.debt + monthTotals.debt,
-        fundedDebtPayments:
-          (sum.fundedDebtPayments || 0) + Number(monthTotals.fundedDebtPayments || 0),
-        assignableDebt:
-          (sum.assignableDebt || 0) + Number(monthTotals.assignableDebt || 0),
-        leftToAllocate:
-          (sum.leftToAllocate || 0) + Number(monthTotals.leftToAllocate || 0),
-      };
-    },
-    {
-      income: 0,
-      expense: 0,
-      savings: 0,
-      debt: 0,
-      fundedDebtPayments: 0,
-      assignableDebt: 0,
-      leftToAllocate: 0,
-    }
-  );
-
-  return buildBudgetSummary({
-    categories,
-    transactions: yearTransactions,
-    allocations: yearAllocations,
-    accounts,
-    plannedTotals,
-  });
-}
-
+  return useMemo(() => {
+    const yearTransactions = filterTransactionsByBudgetYear(
+      transactions,
+      year,
+      settings
+    );
+    const yearAllocations = allocations.filter(a => a.month?.startsWith(`${year}-`));
+    const allocationsByMonth = yearAllocations.reduce((groups, allocation) => {
+      const month = allocation.month;
+      if (!month) return groups;
+      groups[month] = groups[month] || [];
+      groups[month].push(allocation);
+      return groups;
+    }, {});
+  
+    const plannedTotals = Object.values(allocationsByMonth).reduce(
+      (sum, monthAllocations) => {
+        const month = monthAllocations[0]?.month;
+        const monthTransactions = month
+          ? filterTransactionsByBudgetMonth(yearTransactions, month, settings)
+          : [];
+        const monthTotals = buildPlanTotals({
+          allocations: monthAllocations,
+          categories,
+          transactions: monthTransactions,
+          allTransactions: transactions,
+          currentMonth: month,
+        });
+  
+        return {
+          income: sum.income + monthTotals.income,
+          expense: sum.expense + monthTotals.expense,
+          savings: sum.savings + monthTotals.savings,
+          debt: sum.debt + monthTotals.debt,
+          fundedDebtPayments:
+            (sum.fundedDebtPayments || 0) + Number(monthTotals.fundedDebtPayments || 0),
+          assignableDebt:
+            (sum.assignableDebt || 0) + Number(monthTotals.assignableDebt || 0),
+          leftToAllocate:
+            (sum.leftToAllocate || 0) + Number(monthTotals.leftToAllocate || 0),
+        };
+      },
+      {
+        income: 0,
+        expense: 0,
+        savings: 0,
+        debt: 0,
+        fundedDebtPayments: 0,
+        assignableDebt: 0,
+        leftToAllocate: 0,
+      }
+    );
+  
+    return buildBudgetSummary({
+      categories,
+      transactions: yearTransactions,
+      allocations: yearAllocations,
+      accounts,
+      plannedTotals,
+    });
+  }
+  
+  }, [categories, transactions, allocations, accounts, settings, year]);
 
 export { useCurrencyFormatter, formatCurrency } from '@/hooks/useCurrency';
