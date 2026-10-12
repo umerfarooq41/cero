@@ -208,7 +208,7 @@ export default function DashboardOverview({
           >
             <div className="divide-y divide-border/40">
               <StatPill
-                label="Income"
+                label="Received income"
                 value={formatCurrency(budget.totalIncome || 0)}
                 icon={TrendingUp}
                 tone="good"
