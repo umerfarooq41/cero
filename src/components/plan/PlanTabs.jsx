@@ -22,6 +22,7 @@ export default function PlanTabs({ activeTab, onChange }) {
       value={activeTab}
       onChange={onChange}
       size="sm"
+      buttonClassName="!gap-1 !px-1 !text-[10px] min-[380px]:!text-[11px] sm:!gap-2 sm:!px-3 sm:!text-sm"
       layoutId="plan-tab-highlight"
     />
   );
