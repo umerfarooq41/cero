@@ -413,14 +413,24 @@ export default function TransactionHistory() {
       : null,
   ].filter(Boolean);
 
+  const accountsById = useMemo(
+    () => new Map(accounts.map((account) => [account.id, account])),
+    [accounts]
+  );
+  const categoriesById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories]
+  );
+  const searchValue = search.trim().toLowerCase();
+
+  const { filtered, grouped, sortedDates } = useMemo(() => {
   const filtered = transactions.filter((transaction) => {
-    const category = categories.find((c) => c.id === transaction.category_id);
-    const fromAccount = accounts.find((a) => a.id === transaction.account_id);
-    const toAccount = accounts.find((a) => a.id === transaction.to_account_id);
+    const category = categoriesById.get(transaction.category_id);
+    const fromAccount = accountsById.get(transaction.account_id);
+    const toAccount = accountsById.get(transaction.to_account_id);
 
     const recurring = isRecurringTransaction(transaction);
     const goal = isGoalContribution(transaction);
-    const searchValue = search.trim().toLowerCase();
 
     const sourceLabels = [
       recurring ? 'recurring bill income post' : '',
@@ -493,6 +503,12 @@ export default function TransactionHistory() {
     if (sortBy === 'oldest') return a.localeCompare(b);
     return b.localeCompare(a);
   });
+    return { filtered, grouped, sortedDates };
+  }, [
+    transactions, accountsById, categoriesById, searchValue,
+    filterType, selectedDate, accountFilter, categoryFilter, sourceFilter, sortBy,
+  ]);
+
   const hasTransactions = sortedDates.length > 0;
 
   const clearAdvancedFilters = () => {
