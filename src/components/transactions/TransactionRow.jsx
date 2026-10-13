@@ -81,6 +81,7 @@ export default function TransactionRow({
   formatCurrency,
   onClick,
   compactSourceBadges = false,
+  dateLabel = "",
   flush = false,
 }) {
   const typeConfig = {
@@ -151,6 +152,10 @@ export default function TransactionRow({
     ? [movementLabel, transferKindLabel].filter(Boolean).join(' · ')
     : `${transactionTypeLabel} - ${accountName}`;
 
+  const subtitleText = dateLabel && primarySubtitle
+    ? `${dateLabel} · ${primarySubtitle}`
+    : primarySubtitle;
+
   const sourceBadgeType = isGoalContribution ? 'goal' : isRecurring ? 'recurring' : null;
 
   const sourceBadgeTone = (() => {
@@ -203,12 +208,12 @@ export default function TransactionRow({
           />
         </div>
 
-        {primarySubtitle && (
+        {subtitleText && (
           <div
             className="line-clamp-2 break-words pr-1 text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-4"
-            title={primarySubtitle}
+            title={subtitleText}
           >
-            {primarySubtitle}
+            {subtitleText}
           </div>
         )}
       </div>
