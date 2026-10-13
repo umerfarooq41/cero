@@ -11,6 +11,8 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
+  ReferenceLine,
+  ReferenceDot,
   Tooltip,
   XAxis,
   YAxis,
@@ -459,11 +461,14 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
               {safeSpendingTrend.length > 0 ? (
                 <>
-                {activeDay ? <div className="mb-2 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">{isYear ? activeDay.label : `Day ${activeDay.label}`}</span>
-                  <span className="font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></span>
+                {activeDay ? <div className="mb-3 flex items-center gap-2">
+                  <span className="h-9 w-1 shrink-0 rounded-full bg-primary" />
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-muted-foreground">{isYear ? activeDay.label : `Day ${Number(activeDay.label)}`} · Spent</p>
+                    <p className="text-lg font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></p>
+                  </div>
                 </div> : null}
-                <div className={`${CHART_WRAP_CLASS} h-44 min-h-[176px] sm:h-48 sm:min-h-[192px]`}>
+                <div className={`${CHART_WRAP_CLASS} h-48 min-h-[192px] touch-pan-y sm:h-52 sm:min-h-[208px]`}>
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
@@ -501,19 +506,23 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                         <Tooltip
                           {...tooltipProps}
-                          cursor={{ stroke: "hsl(var(--primary) / 0.6)", strokeWidth: 1 }}
-                          contentStyle={{
-                            ...tooltipStyle,
-                            maxWidth: 150,
-                            whiteSpace: 'normal',
-                          }}
-                          formatter={(value) => (
-                            <TooltipCurrencyValue value={value} currency={currency} />
-                          )}
-                          labelFormatter={(label) =>
-                            isYear ? label : `Day ${label}`
-                          }
+                          cursor={false}
+                          content={() => null}
                         />
+                        {activeDay && (
+                          <>
+                            <ReferenceLine x={activeDay.label} stroke="hsl(var(--primary) / 0.6)" strokeWidth={1.5} ifOverflow="extendDomain" />
+                            <ReferenceDot
+                              x={activeDay.label}
+                              y={Number(activeDay.amount || 0)}
+                              r={5.5}
+                              fill="hsl(var(--primary))"
+                              stroke="hsl(var(--card))"
+                              strokeWidth={2}
+                              ifOverflow="visible"
+                            />
+                          </>
+                        )}
 
                         <Area
                           type="monotone"
