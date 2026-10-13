@@ -543,7 +543,6 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           setDateTo={setDateTo}
           setSelectedDate={(date) => {
             setSelectedDate(date);
-            if (date) onMonthChange(format(new Date(date), 'yyyy-MM'));
           }}
           sortBy={sortBy}
           setSortBy={setSortBy}
@@ -577,11 +576,11 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         </div>
       )}
 
-      {transactionsPending ? (
+      {(globalScope ? allTransactionsPending : transactionsPending) ? (
         <div className="animate-child flex min-h-64 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
         </div>
-      ) : transactionsError ? (
+      ) : (globalScope ? allTransactionsError : transactionsError) ? (
         <div className="animate-child">
           <EmptyState
             icon={ArrowLeftRight}
