@@ -55,11 +55,11 @@ export default function PlanOverview({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PlanTabs activeTab={activeTab} onChange={setActiveTab} />
 
       <AnimatePresence mode="wait" initial={false}>
-        <AppTabPanel key={activeTab} className="space-y-4">
+        <AppTabPanel key={activeTab} className="space-y-3">
           <PlanDonutCard
             tab={tab}
             chartData={planData.chartData}
