@@ -180,7 +180,13 @@ function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
       const fixed = goal.contribution_mode === 'fixed';
       const remaining = getGoalRemaining(goal);
       const progress = getGoalProgress(goal);
-      const amount = Math.min(remaining, Math.max(0, Number(fixed ? goal.fixed_contribution_amount : goal.next_suggested_contribution) || 0));
+      const monthlyTarget = Math.max(0, Number(goal.month_planned_amount || 0));
+      const savedThisMonth = Math.max(0, Number(goal.month_contributed_amount || 0));
+      const hasMonthlyTarget = !fixed && monthlyTarget > 0;
+      const monthlyLeft = Math.max(0, Math.round((monthlyTarget - savedThisMonth) * 100) / 100);
+      const monthlyReached = hasMonthlyTarget && monthlyLeft <= 0;
+      const monthlyAhead = monthlyReached && savedThisMonth > monthlyTarget + 0.005;
+      const amount = Math.min(remaining, Math.max(0, Number(fixed ? goal.fixed_contribution_amount : hasMonthlyTarget ? monthlyLeft : goal.next_suggested_contribution) || 0));
       const from = accounts.find(a => a.id === goal.from_account_id);
       const to = accounts.find(a => a.id === goal.to_account_id);
       const date = fixed ? goal.next_due_date : goal.target_date;
@@ -194,8 +200,9 @@ function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
           <div className="flex min-w-0 items-center gap-1.5"><p className="truncate text-xs font-semibold text-foreground sm:text-sm">{goal.name}</p>{status?.label && <Badge variant="outline" className="shrink-0 rounded-full border-primary/20 bg-primary/10 px-1.5 py-0 text-[9px] font-bold leading-4 text-primary">{status.label}</Badge>}</div>
           <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground">{schedule}{date ? ` · ${fixed ? 'Due' : 'Target'} ${formatGoalDate(date)}` : ''}</p>
           <p className="truncate text-[11px] leading-4 text-muted-foreground/85">{from?.name || 'Account'} → {to?.name || 'Savings'} · {progress}% funded</p>
+          {!fixed && (monthlyReached ? <p className="flex items-center gap-1 text-[11px] leading-4 text-emerald-600 dark:text-emerald-400"><span aria-hidden="true">✓</span>{monthlyAhead ? 'Ahead of monthly target' : 'Monthly target reached'}</p> : savedThisMonth > 0 ? <p className="truncate text-[11px] leading-4 text-muted-foreground">Saved this month <Money value={savedThisMonth} formatCurrency={formatCurrency}/></p> : null)}
         </div>
-        <div className="shrink-0 text-right text-[11px] font-semibold tabular-nums text-primary sm:text-sm"><Money value={amount} formatCurrency={formatCurrency}/></div>
+        <div className="shrink-0 text-right text-[11px] font-semibold tabular-nums text-primary sm:text-sm">{monthlyReached ? <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Done for month</span> : <div><Money value={amount} formatCurrency={formatCurrency}/>{!fixed && hasMonthlyTarget && <p className="text-[10px] font-normal text-muted-foreground">Suggested left</p>}</div>}</div>
       </Link>;
     })}</div>
   </Section>;
