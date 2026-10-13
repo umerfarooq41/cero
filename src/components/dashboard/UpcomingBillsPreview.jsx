@@ -42,33 +42,17 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
-function getRuleMonthKey(rule) {
-  return String(rule?.next_due_date || '').slice(0, 7);
-}
-
-function getTransactionMonthKey(transaction) {
-  return String(
-    transaction?.recurring_posted_for_date ||
-      transaction?.date ||
-      transaction?.transaction_date ||
-      transaction?.created_at ||
-      ''
-  ).slice(0, 7);
-}
-
 function isRuleAlreadyPosted(rule, transactions = []) {
-  const ruleMonth = getRuleMonthKey(rule);
-  if (!ruleMonth) return false;
-
-  return transactions.some((transaction) => {
-    const sameRule =
-      transaction?.recurring_transaction_id === rule.id ||
-      transaction?.source_id === rule.id ||
-      transaction?.source_type === 'recurring';
-
+  const due = String(rule?.next_due_date || '').slice(0, 10);
+  if (!due) return false;
+  return transactions.some(transaction => {
+    // Do not match every recurring transaction in the same month.
+    const sameRule = transaction?.recurring_transaction_id === rule.id ||
+      transaction?.source_id === rule.id;
     if (!sameRule) return false;
-
-    return getTransactionMonthKey(transaction) === ruleMonth;
+    // Occurrence date is authoritative, particularly for weekly rules and early payments.
+    const postedFor = String(transaction?.recurring_posted_for_date || '').slice(0, 10);
+    return postedFor ? postedFor === due : String(transaction?.date || '').slice(0, 10) === due;
   });
 }
 
