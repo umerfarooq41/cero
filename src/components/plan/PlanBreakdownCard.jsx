@@ -2,9 +2,9 @@ import PlanBreakdownRow from './PlanBreakdownRow';
 
 export default function PlanBreakdownCard({ activeTab, tab, rows, currency }) {
   return (
-    <div className="overflow-hidden rounded-3xl app-card-surface">
-      <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-bold uppercase tracking-wide">
+    <div className="overflow-hidden rounded-2xl app-card-surface">
+      <div className="border-b border-border/40 px-3.5 py-2.5">
+        <h3 className="text-xs font-semibold uppercase tracking-wide">
           {activeTab === 'savings'
             ? 'Savings & Goals Breakdown'
             : `${tab.title} Breakdown`}
