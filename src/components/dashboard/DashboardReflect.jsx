@@ -18,7 +18,6 @@ import ReflectSummaryCards, {
 } from '@/components/reflect/ReflectSummaryCard.jsx';
 import ReflectCharts from '@/components/reflect/ReflectCharts.jsx';
 import ReflectDeepAnalysis from '@/components/reflect/ReflectDeepAnalysis.jsx';
-import ReflectInsightCard from '@/components/reflect/ReflectInsightCard.jsx';
 
 import {
   useAccounts,
@@ -537,19 +536,32 @@ export default function DashboardReflect() {
       </div>
 
       <div className="animate-child">
-        <div className="grid gap-3 md:grid-cols-2 lg:gap-4">
-          {insights.map((insight, index) => (
-            <ReflectInsightCard
-              key={`${isYear ? 'year' : 'month'}-${insight.title}`}
-              icon={insight.icon}
-              title={insight.title}
-              text={insight.text}
-              tone={insight.tone}
-              metric={insight.metric}
-              accentIndex={index}
-            />
-          ))}
-        </div>
+        <section className="overflow-hidden rounded-2xl app-card-surface px-3.5 py-3" aria-label="Financial insights">
+          <h3 className="mb-1 text-sm font-semibold text-foreground">Insights</h3>
+          {insights.map((insight, index) => {
+            const Icon = insight.icon;
+            const metricTone = insight.tone === 'good'
+              ? 'text-[hsl(var(--success))] bg-[hsl(var(--success)/0.08)]'
+              : insight.tone === 'bad'
+                ? 'text-destructive bg-destructive/10'
+                : insight.tone === 'warning'
+                  ? 'text-amber-600 bg-amber-500/10'
+                  : 'text-primary bg-primary/10';
+            return (
+              <div key={`${isYear ? 'year' : 'month'}-${insight.title}`}
+                className={`py-3 ${index > 0 ? 'border-t border-border/60' : ''}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                    <h4 className="text-xs font-semibold leading-5 text-foreground">{insight.title}</h4>
+                  </div>
+                  {insight.metric && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${metricTone}`}>{insight.metric}</span>}
+                </div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{insight.text}</p>
+              </div>
+            );
+          })}
+        </section>
       </div>
     </>
   );
