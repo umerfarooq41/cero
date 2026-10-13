@@ -52,7 +52,7 @@ export default function MonthSelector({
         if (info.offset.x > 40) goToPreviousMonth();
       }}
       className={cn(
-        'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1.5 rounded-2xl app-card-surface p-1.5 shadow-sm backdrop-blur-xl',
+        'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1 rounded-2xl app-card-surface p-1 shadow-sm backdrop-blur-xl',
         className
       )}
     >
@@ -60,7 +60,7 @@ export default function MonthSelector({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-9 w-9 shrink-0 rounded-xl"
+        className="h-8 w-8 shrink-0 rounded-xl"
         onClick={goToPreviousMonth}
       >
         <ChevronLeft className="h-4 w-4" />
@@ -71,7 +71,7 @@ export default function MonthSelector({
         disabled={!onLabelClick}
         onClick={onLabelClick}
         className={cn(
-          'flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-3 py-1.5 text-center transition-colors',
+          'flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-2 py-1 text-center transition-colors',
           onLabelClick
             ? 'hover:bg-secondary/70'
             : 'cursor-default disabled:opacity-100'
@@ -98,7 +98,7 @@ export default function MonthSelector({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-9 w-9 shrink-0 rounded-xl"
+        className="h-8 w-8 shrink-0 rounded-xl"
         onClick={goToNextMonth}
       >
         <ChevronRight className="h-4 w-4" />
