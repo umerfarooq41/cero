@@ -29,7 +29,7 @@ function getDateLabel(value) {
 function Money({ value, formatCurrency, className = '' }) {
   // Cero's formatter returns a React element (SAR uses an SVG mask), not a string.
   // Rendering that element directly preserves the selected currency and prevents .match crashes.
-  return <span className={className + ' tabular-nums'}>{formatCurrency(num(value))}</span>;
+  return <span className={className + ' inline-flex items-center tabular-nums [&>span]:gap-[0.18em] [&>span>span]:font-inherit [&>span>span]:leading-none [&>span>span:first-child]:!h-[0.86em] [&>span>span:first-child]:!w-[0.86em]'}>{formatCurrency(num(value))}</span>;
 }
 function Entrance({ children, index }) {
   const reduced = useReducedMotion();
@@ -104,7 +104,7 @@ function SafeCard({ allocations, categories, transactions, currentMonth, formatC
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
-  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-3 px-4 py-4">
+  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2.5 px-4 py-3.5">
     <div className="flex items-center justify-between gap-2">
       <p className="text-sm font-semibold tracking-tight">Safe to spend today</p>
       <Badge variant="secondary" className={`shrink-0 rounded-full border-0 px-3 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
@@ -113,7 +113,7 @@ function SafeCard({ allocations, categories, transactions, currentMonth, formatC
     </div>
     <div className="space-y-1">
       <div className="flex items-baseline gap-1.5">
-        <Money value={pace.allowance} formatCurrency={formatCurrency} className="text-[2rem] font-normal leading-none tracking-tight sm:text-4xl"/>
+        <Money value={pace.allowance} formatCurrency={formatCurrency} className="text-[2rem] font-medium leading-none tracking-tight sm:text-4xl"/>
         <span className="text-sm text-muted-foreground">/ day</span>
       </div>
       <p className="text-xs text-muted-foreground">{pace.overBudget ? 'Budget used up' : <><Money value={pace.leftToday} formatCurrency={formatCurrency}/> left today</>}</p>
@@ -125,9 +125,11 @@ function SafeCard({ allocations, categories, transactions, currentMonth, formatC
       </div>
       <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
     </div>
-    {driverName && pace.topDriver.share >= 40 && <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">{driverName}</span> is {Math.round(pace.topDriver.share)}% of your spending</p>}
-    <div className="flex justify-end">
-      <Button variant="ghost" size="sm" className="-mr-2 min-h-11 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
+    <div className="flex min-h-9 items-center justify-between gap-2">
+      {driverName && pace.topDriver.share >= 40
+        ? <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground"><span className="font-medium text-foreground">{driverName}</span> is {Math.round(pace.topDriver.share)}% of your spending</p>
+        : <span className="min-w-0 flex-1"/>}
+      <Button variant="ghost" size="sm" className="-mr-2 min-h-9 shrink-0 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
     </div>
     <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
   </CardContent></Card>;
