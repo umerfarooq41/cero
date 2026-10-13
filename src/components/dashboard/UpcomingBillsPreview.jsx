@@ -43,22 +43,21 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
-function isRuleAlreadyPosted(rule, transactions = []) {
+function getOutstandingOccurrence(rule, transactions) {
   const due = String(rule?.next_due_date || '').slice(0, 10);
-  if (!due) return false;
-  return transactions.some(transaction => {
-    // Do not match every recurring transaction in the same month.
-    const sameRule = transaction?.recurring_transaction_id === rule.id ||
-      transaction?.source_id === rule.id;
-    if (!sameRule) return false;
-    // Occurrence date is authoritative, particularly for weekly rules and early payments.
-    const postedFor = String(transaction?.recurring_posted_for_date || '').slice(0, 10);
-    return postedFor ? postedFor === due : String(transaction?.date || '').slice(0, 10) === due;
+  const linked = transactions.filter(tx => tx?.recurring_transaction_id === rule.id || tx?.source_id === rule.id);
+  const sameOccurrence = linked.filter(tx => {
+    const postedFor = String(tx?.recurring_posted_for_date || '').slice(0, 10);
+    return postedFor ? postedFor === due : String(tx?.date || '').slice(0, 10) === due;
   });
+  const paid = sameOccurrence.reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  const planned = Math.max(0, Number(rule.amount || 0));
+  const remaining = Math.max(0, Math.round((planned - paid) * 100) / 100);
+  return { paid, planned, remaining, hasPosting: sameOccurrence.length > 0 };
 }
 
-function RuleAmount({ rule, formatCurrency }) {
-  const amount = Math.abs(Number(rule.amount || 0));
+function RuleAmount({ rule, amount, formatCurrency }) {
+  const displayAmount = Math.abs(Number(amount ?? rule.amount ?? 0));
 
   return (
     <span
@@ -72,7 +71,7 @@ function RuleAmount({ rule, formatCurrency }) {
       )}
     >
       {rule.type === 'income' ? '+' : rule.type === 'expense' ? '-' : ''}
-      {formatCurrency(amount)}
+      {formatCurrency(displayAmount)}
     </span>
   );
 }
@@ -88,9 +87,17 @@ export default function UpcomingBillsPreview({
   className,
 }) {
   const previewRules = sortRecurringByDueDate(recurringTransactions)
-    .filter((rule) => rule.is_active !== false)
-    .filter((rule) => { const days = getRecurringStatus(rule, todayIsoDate()).daysUntilDue; return days !== null && days <= 10; })
-    .filter((rule) => !isRuleAlreadyPosted(rule, transactions))
+    .filter(rule => rule.is_active !== false && !rule.completed_at && !rule.is_archived)
+    .map(rule => {
+      const occurrence = getOutstandingOccurrence(rule, transactions);
+      const flexible = rule.payment_mode === 'flexible' || rule.type === 'income';
+      const pending = flexible ? occurrence.remaining > 0.005 : !occurrence.hasPosting;
+      return { rule, occurrence, pending };
+    })
+    .filter(({ rule, pending }) => {
+      const days = getRecurringStatus(rule, todayIsoDate()).daysUntilDue;
+      return pending && days !== null && days <= 10;
+    })
     .slice(0, limit);
 
   return (
@@ -119,7 +126,7 @@ export default function UpcomingBillsPreview({
         </div>
       ) : (
         <div className="min-w-0 divide-y divide-border/50">
-          {previewRules.map((rule) => {
+          {previewRules.map(({ rule, occurrence }) => {
             const status = getRecurringStatus(rule);
             const Icon = getTypeIcon(rule.type);
             const category = categories.find((item) => item.id === rule.category_id);
@@ -162,19 +169,19 @@ export default function UpcomingBillsPreview({
                     </div>
 
                     <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground sm:text-xs">
-                      {getRecurringFrequencyLabel(rule.frequency)} · Due{' '}
+                      {occurrence.paid > 0 && occurrence.remaining > 0.005 ? 'Partially paid · ' : ''}{getRecurringFrequencyLabel(rule.frequency)} · Due{' '}
                       {formatRecurringDate(rule.next_due_date)}
                     </p>
 
                     <p className="truncate text-[11px] leading-4 text-muted-foreground/85 sm:text-xs">
-                      {rule.type === 'transfer'
+                      {occurrence.paid > 0 && occurrence.remaining > 0.005 && (rule.type === 'income' || rule.payment_mode === 'flexible') ? `${formatCurrency(occurrence.paid)} received/paid of ${formatCurrency(occurrence.planned)}` : rule.type === 'transfer'
                         ? `${account?.name || 'Account'} → ${toAccount?.name || 'Account'}`
                         : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
                     </p>
                   </div>
 
                   <div className="shrink-0 text-right">
-                    <RuleAmount rule={rule} formatCurrency={formatCurrency} />
+                    <RuleAmount rule={rule} amount={rule.type === 'income' || rule.payment_mode === 'flexible' ? occurrence.remaining : undefined} formatCurrency={formatCurrency} />
                   </div>
                 </div>
               </div>
