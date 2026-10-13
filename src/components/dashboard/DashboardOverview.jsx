@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ArrowRight, ChevronRight, Plus, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, Gauge, LayoutDashboard, ArrowRight, ChevronRight, Plus, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -100,7 +100,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     transactions, currentMonth, now: new Date(),
   });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4">
-    <div className="flex items-center justify-between gap-2"><p className="text-sm font-semibold">Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
+    <div className="flex items-center justify-between gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
@@ -109,7 +109,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2.5 px-4 py-3.5">
     <div className="flex items-center justify-between gap-2">
-      <p className="text-sm font-semibold tracking-tight">Safe to spend today</p>
+      <p className="flex items-center gap-2 text-sm font-semibold tracking-tight"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Safe to spend today</p>
       <Badge variant="secondary" className={`shrink-0 rounded-full border-0 px-3 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
       </Badge>
@@ -158,7 +158,7 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
       <Money value={value} formatCurrency={formatCurrency} className={`shrink-0 text-sm font-medium ${valueTone}`}/>
     </div>
   );
-  return <Section title="Budget snapshot">
+  return <Section title="Budget snapshot" icon={LayoutDashboard}>
     <div className="space-y-1">
       {row({ label: 'Received income', value: num(budget.realizedIncome ?? budget.totalIncome), icon: TrendingUp, tone: 'text-emerald-600 bg-emerald-500/10', valueTone: 'text-emerald-600 dark:text-emerald-400' })}
       {row({ label: 'Total expenses', value: expenses, icon: TrendingDown, tone: 'text-destructive bg-destructive/10', valueTone: 'text-destructive',
