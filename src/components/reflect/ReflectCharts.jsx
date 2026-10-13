@@ -412,93 +412,18 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="flex flex-col items-center gap-4 sm:gap-5 lg:min-h-[208px] lg:justify-center">
-                  <div className="relative h-40 w-40 shrink-0 sm:h-44 sm:w-44 lg:h-48 lg:w-48 xl:h-52 xl:w-52">
-                    <div className={`${CHART_WRAP_CLASS} h-40 w-40 sm:h-44 sm:w-44 lg:h-48 lg:w-48 xl:h-52 xl:w-52`}>
-                      {isVisible ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart
-                            margin={{
-                              top: 0,
-                              right: 0,
-                              bottom: 0,
-                              left: 0,
-                            }}
-                          >
-                            <Pie
-                              data={groupedSpendingBreakdown}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius="56%"
-                              outerRadius="82%"
-                              paddingAngle={3}
-                              dataKey="value"
-                              stroke="hsl(var(--card))"
-                              strokeWidth={2}
-                              activeShape={false}
-                              activeIndex={-1}
-                              {...getChartAnimation(isVisible)}
-                            >
-                              {groupedSpendingBreakdown.map((entry) => (
-                                <Cell
-                                  key={entry.id || entry.name}
-                                  fill={entry.color || getThemeChartColor(0)}
-                                  tabIndex={-1}
-                                  focusable="false"
-                                  style={{ outline: 'none' }}
-                                />
-                              ))}
-                            </Pie>
-
-                            <Tooltip
-                              {...donutTooltipProps}
-                              content={<DonutTooltip currency={currency} />}
-                              cursor={false}
-                              offset={12}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <ChartShell className="h-full" />
-                      )}
+                <div className="space-y-3">
+                  {groupedSpendingBreakdown.map(category => (
+                    <div key={category.id || category.name} className="space-y-1">
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="min-w-0 truncate text-foreground">{category.name}</span>
+                        <span className="shrink-0 font-semibold tabular-nums"><CurrencyAmount amount={category.value} currency={currency} compact /></span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, category.percent)}%`, backgroundColor: category.color }} />
+                      </div>
                     </div>
-
-                    <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center text-center">
-                      <span className="max-w-[86px] text-sm font-bold leading-none tracking-tight tabular-nums sm:max-w-[96px] sm:text-base lg:max-w-[104px] lg:text-lg">
-                        <CurrencyAmount
-                          amount={totalCategorySpend}
-                          currency={currency}
-                          compact
-                        />
-                      </span>
-                      <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                        tracked
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full flex-wrap items-center justify-center gap-1.5 text-center sm:gap-2">
-                    {groupedSpendingBreakdown.map((category) => {
-                      const categoryColor = category.color || getThemeChartColor(0);
-
-                      return (
-                        <div
-                          key={category.id || category.name}
-                          className="inline-flex min-h-7 max-w-[9.5rem] items-center justify-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-2.5 py-1 text-center shadow-sm transition-colors hover:bg-background/90"
-                          title={category.name}
-                        >
-                          <span
-                            className="h-1.5 w-1.5 shrink-0 rounded-full"
-                            style={{ backgroundColor: categoryColor }}
-                          />
-
-                          <span className="min-w-0 whitespace-normal break-words text-[10px] font-semibold leading-tight text-muted-foreground">
-                            {category.name}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  ))}
                 </div>
               ) : (
                 <div className="py-8 text-center">
@@ -531,7 +456,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               />
 
               {safeSpendingTrend.length > 0 ? (
-                <div className={`${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px]`}>
+                <div className={`${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
