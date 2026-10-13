@@ -127,14 +127,14 @@ function FilterPill({ active, children, icon: Icon, onClick }) {
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-medium transition-colors',
+        'inline-flex min-h-10 min-w-0 items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] font-medium transition-colors sm:gap-1.5 sm:px-2 sm:text-xs',
         active
           ? 'bg-primary/10 text-primary'
           : 'bg-muted/35 text-muted-foreground hover:bg-muted/60 hover:text-foreground'
       )}
     >
-      {Icon && <Icon className="h-3.5 w-3.5" />}
-      {children}
+      {Icon && <Icon className="size-4 shrink-0" strokeWidth={2} />}
+      <span className="whitespace-nowrap">{children}</span>
     </button>
   );
 }
