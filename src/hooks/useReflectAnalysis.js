@@ -212,6 +212,7 @@ export default function useReflectAnalysis({
   accounts = [],
   categories = [],
   budget,
+  categoryAllocations = [],
   settings = {},
 }) {
   const { start, end, monthKey, isYear } = useMemo(
@@ -345,6 +346,7 @@ export default function useReflectAnalysis({
         if (!categorySpending[name]) {
           categorySpending[name] = {
             name,
+            categoryId,
             value: 0,
             color,
           };
@@ -353,8 +355,13 @@ export default function useReflectAnalysis({
         categorySpending[name].value += amount;
       });
 
-    return Object.values(categorySpending).sort((a, b) => b.value - a.value);
-  }, [periodTransactions, categories]);
+    return Object.values(categorySpending).map(item => {
+      const planned = categoryAllocations
+        .filter(a => a.category_id === item.categoryId && (a.source_type === 'category' || (!a.source_type && !a.source_id)))
+        .reduce((sum, a) => sum + Number(a.planned_amount || 0), 0);
+      return { ...item, planned };
+    }).sort((a, b) => b.value - a.value);
+  }, [periodTransactions, categories, categoryAllocations]);
 
   const cashFlow = useMemo(() => {
     if (isYear) {
@@ -428,10 +435,16 @@ export default function useReflectAnalysis({
         days[day] = (days[day] || 0) + (Number(transaction.amount) || 0);
       });
 
-    return Object.entries(days)
-      .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([day, amount]) => ({ label: day, amount }));
-  }, [isYear, selectedYear, allTransactions, periodTransactions, settings]);
+    const now = new Date();
+    const year = Number(selectedYear);
+    const month = Number(selectedMonth);
+    const isCurrent = year === now.getFullYear() && month === now.getMonth() + 1;
+    const lastDay = isCurrent ? now.getDate() : new Date(year, month, 0).getDate();
+    return Array.from({ length: lastDay }, (_, i) => {
+      const label = String(i + 1).padStart(2, '0');
+      return { label, amount: days[label] || 0 };
+    });
+  }, [isYear, selectedYear, selectedMonth, allTransactions, periodTransactions, settings]);
 
   return {
     start,
