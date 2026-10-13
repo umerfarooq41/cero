@@ -169,14 +169,9 @@ export default function UpcomingBillsPreview({
                     </div>
 
                     <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground sm:text-xs">
-                      {occurrence.paid > 0 && occurrence.remaining > 0.005 ? 'Partially paid · ' : ''}{getRecurringFrequencyLabel(rule.frequency)} · Due{' '}
-                      {formatRecurringDate(rule.next_due_date)}
-                    </p>
-
-                    <p className="truncate text-[11px] leading-4 text-muted-foreground/85 sm:text-xs">
-                      {occurrence.paid > 0 && occurrence.remaining > 0.005 && (rule.type === 'income' || rule.payment_mode === 'flexible') ? <><span className="inline-flex items-center gap-1">{formatCurrency(occurrence.paid)} {rule.type === 'income' ? 'received' : 'paid'} of {formatCurrency(occurrence.planned)}</span></> : rule.type === 'transfer'
-                        ? `${account?.name || 'Account'} → ${toAccount?.name || 'Account'}`
-                        : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
+                      {occurrence.paid > 0 && occurrence.remaining > 0.005
+                        ? (rule.type === 'income' ? 'Partially received' : 'Partially paid') + ' · '
+                        : ''}Due {formatRecurringDate(rule.next_due_date)}
                     </p>
                   </div>
 
