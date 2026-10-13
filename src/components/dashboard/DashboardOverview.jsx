@@ -107,7 +107,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
   const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of your spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
-  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2.5 px-4 py-3.5">
+  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2 px-4 py-3">
     <div className="flex items-center justify-between gap-2">
       <p className="flex items-center gap-2 text-sm font-semibold tracking-tight"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Safe to spend today</p>
       <Badge variant="secondary" className={`shrink-0 rounded-full border-0 px-3 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
@@ -131,7 +131,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     </div>
     <div className="flex min-h-9 items-center justify-between gap-2">
       <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{insight}</p>
-      <Button variant="ghost" size="sm" className="-mr-2 min-h-9 shrink-0 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
+      <Button variant="ghost" size="sm" className="-mr-2 min-h-8 shrink-0 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
     </div>
     <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
   </CardContent></Card>;
@@ -152,7 +152,7 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
         <span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span>
         <div className="min-w-0">
           <p className="text-sm">{label}</p>
-          {helper && <p className="mt-0.5 flex flex-wrap gap-x-1.5 text-[10px] leading-4 text-muted-foreground">{helper}</p>}
+          {helper && <p className="mt-0.5 flex flex-wrap gap-x-1 text-[10px] leading-4 text-muted-foreground">{helper}</p>}
         </div>
       </div>
       <Money value={value} formatCurrency={formatCurrency} className={`shrink-0 text-sm font-medium ${valueTone}`}/>
@@ -162,14 +162,14 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
     <div className="space-y-1">
       {row({ label: 'Received income', value: num(budget.realizedIncome ?? budget.totalIncome), icon: TrendingUp, tone: 'text-emerald-600 bg-emerald-500/10', valueTone: 'text-emerald-600 dark:text-emerald-400' })}
       {row({ label: 'Total expenses', value: expenses, icon: TrendingDown, tone: 'text-destructive bg-destructive/10', valueTone: 'text-destructive',
-        helper: <><span>Variable <Money value={variablePaid} formatCurrency={formatCurrency}/></span><span>·</span><span>Recurring <Money value={recurringPaid} formatCurrency={formatCurrency}/></span></> })}
+        helper: <><span className="whitespace-nowrap">Variable <Money value={variablePaid} formatCurrency={formatCurrency}/></span><span className="whitespace-nowrap">· Recurring <Money value={recurringPaid} formatCurrency={formatCurrency}/></span></> })}
       <div className="grid grid-cols-2 gap-2 py-1">
         <div className="min-w-0 rounded-xl bg-muted/40 px-3 py-2.5">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><PiggyBank size={15}/>Savings</div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"><PiggyBank size={16}/></span>Savings</div>
           <Money value={savings} formatCurrency={formatCurrency} className="mt-1 text-sm font-semibold"/>
         </div>
         <div className="min-w-0 rounded-xl bg-muted/40 px-3 py-2.5">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CreditCard size={15}/>Debt paid</div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400"><CreditCard size={16}/></span>Debt paid</div>
           <Money value={debt} formatCurrency={formatCurrency} className="mt-1 text-sm font-semibold"/>
         </div>
       </div>
