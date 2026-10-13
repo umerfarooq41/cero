@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import {
   ArrowLeftRight,
   CalendarDays,
-  Check,
   Repeat,
   Search,
   SlidersHorizontal,
@@ -128,15 +127,14 @@ function FilterPill({ active, children, icon: Icon, onClick }) {
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200',
+        'inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-medium transition-colors',
         active
-          ? 'border-primary/20 bg-primary/10 text-primary shadow-sm'
-          : 'app-card-surface text-muted-foreground hover:brightness-105 hover:text-foreground'
+          ? 'bg-primary/10 text-primary'
+          : 'bg-muted/35 text-muted-foreground hover:bg-muted/60 hover:text-foreground'
       )}
     >
       {Icon && <Icon className="h-3.5 w-3.5" />}
       {children}
-      {active && <Check className="h-3.5 w-3.5" />}
     </button>
   );
 }
@@ -179,7 +177,7 @@ function AdvancedFilterSheet({
           type="button"
           variant="secondary"
           className={cn(
-            'h-11 shrink-0 rounded-2xl px-3 shadow-sm',
+            'h-10 shrink-0 rounded-xl px-3',
             activeCount > 0 && 'bg-primary/10 text-primary hover:bg-primary/15'
           )}
           aria-label="Open advanced transaction filters"
@@ -195,126 +193,77 @@ function AdvancedFilterSheet({
 
       <SheetContent
         side="bottom"
-        className="max-h-[88vh] overflow-y-auto rounded-t-[2rem] border-border/60 app-card-surface-strong px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-6 backdrop-blur-xl sm:mx-auto sm:max-w-xl"
+        className="flex max-h-[88dvh] flex-col overflow-hidden rounded-t-[1.75rem] border-0 bg-background px-4 pb-[env(safe-area-inset-bottom)] pt-4 shadow-xl sm:mx-auto sm:max-w-xl"
       >
-        <SheetHeader className="text-left">
-          <SheetTitle>Advanced filters</SheetTitle>
-          <SheetDescription>
-            Narrow history by source, account, category, date, or sort order.
-          </SheetDescription>
+        <SheetHeader className="shrink-0 pb-3 text-left">
+          <SheetTitle className="text-lg font-semibold">Filter transactions</SheetTitle>
+          <SheetDescription className="sr-only">Filter transaction history by source, account, category, date, and sort order.</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-3">
           <section>
-            <div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-              Source
-            </div>
-            <div className="grid grid-cols-2 gap-2">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Source</label>
+            <div className="grid grid-cols-4 gap-1.5">
               {sourceFilters.map((option) => (
-                <FilterPill
-                  key={option.value}
-                  active={sourceFilter === option.value}
-                  icon={option.icon}
-                  onClick={() => setSourceFilter(option.value)}
-                >
-                  {option.shortLabel}
+                <FilterPill key={option.value} active={sourceFilter === option.value}
+                  icon={option.icon} onClick={() => setSourceFilter(option.value)}>
+                  {option.value === 'all' ? 'All' : option.shortLabel}
                 </FilterPill>
               ))}
             </div>
           </section>
 
-          <section className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                Account
-              </label>
+          <section className="grid grid-cols-2 gap-2">
+            <div className="min-w-0">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Account</label>
               <Select value={accountFilter} onValueChange={setAccountFilter}>
-                <SelectTrigger className="h-11 rounded-2xl app-card-surface">
+                <SelectTrigger className="h-10 w-full rounded-xl bg-muted/35 px-2.5 text-xs">
                   <SelectValue placeholder="All accounts" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All accounts</SelectItem>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
-                      {account.name}
-                    </SelectItem>
-                  ))}
+                  {accounts.map((account) => <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                Category
-              </label>
+            <div className="min-w-0">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Category</label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="h-11 rounded-2xl app-card-surface">
+                <SelectTrigger className="h-10 w-full rounded-xl bg-muted/35 px-2.5 text-xs">
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
+                  {categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </section>
 
-          <section className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                Exact date
-              </label>
-              <div className="relative">
-                <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
-                  className="h-11 rounded-2xl app-card-surface pl-9"
-                />
-              </div>
+          <section className="grid grid-cols-2 gap-2">
+            <div className="min-w-0">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Exact date</label>
+              <Input type="date" value={selectedDate}
+                onChange={(event) => setSelectedDate(event.target.value)}
+                className="h-10 w-full min-w-0 rounded-xl bg-muted/35 px-2 text-xs" />
             </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                Sort
-              </label>
+            <div className="min-w-0">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Sort by</label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-11 rounded-2xl app-card-surface">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="h-10 w-full rounded-xl bg-muted/35 px-2.5 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {sortOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {sortOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </section>
         </div>
 
-        <SheetFooter className="mt-6 gap-2 sm:gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-2xl"
-            onClick={onClearAdvanced}
-          >
-            Clear filters
-          </Button>
-          <Button
-            type="button"
-            className="rounded-2xl"
-            onClick={() => onOpenChange(false)}
-          >
-            Show results
-          </Button>
+        <SheetFooter className="shrink-0 flex-row gap-2 border-t border-border/40 py-3 sm:gap-2">
+          <Button type="button" variant="ghost" className="h-10 flex-1 rounded-xl text-muted-foreground"
+            onClick={onClearAdvanced}>Clear</Button>
+          <Button type="button" className="h-10 flex-[2] rounded-xl"
+            onClick={() => onOpenChange(false)}>Show results</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
