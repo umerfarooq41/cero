@@ -84,20 +84,26 @@ export default function PlanDonutCard({
 
   return (
     <div className="rounded-2xl app-card-surface p-3">
-      <div className="grid grid-cols-2 gap-2">
-        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-2 py-2 text-center">
-          <p className="text-[11px] text-muted-foreground">Tracked</p>
-          <p className="mt-1 text-base font-semibold tabular-nums" style={{ color: tab.color || 'hsl(var(--foreground))' }}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-muted-foreground">Tracked</p>
+          <h2
+            className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
+            style={{ color: tab.color || donutChartData?.[0]?.color || 'hsl(var(--foreground))' }}
+          >
             <PlanMoney amount={totalTracked} currency={currency} />
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {tab.label} of <PlanMoney amount={totalPlanned} currency={currency} compact />
           </p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">{tab.label} of <PlanMoney amount={totalPlanned} currency={currency} compact /></p>
         </div>
-        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-2 py-2 text-center">
-          <p className="text-[11px] text-muted-foreground">{totalRemaining >= 0 ? 'Left' : 'Over'}</p>
-          <p className={cn('mt-1 text-base font-semibold tabular-nums', totalRemaining < 0 ? 'text-red-600' : 'text-foreground')}>
+        <div className="shrink-0 text-right">
+          <p className="text-xs font-medium text-muted-foreground">
+            {totalRemaining >= 0 ? 'Left' : 'Over'}
+          </p>
+          <p className={cn('mt-1 text-base font-bold tracking-tight tabular-nums sm:text-lg', totalRemaining < 0 ? 'text-red-600' : 'text-foreground')}>
             <PlanMoney amount={Math.abs(totalRemaining)} currency={currency} compact />
           </p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">{Math.round(progress)}% {tab.label.toLowerCase()}</p>
         </div>
       </div>
 
