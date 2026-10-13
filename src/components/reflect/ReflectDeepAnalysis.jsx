@@ -287,11 +287,11 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   );
 
   return (
-    <ReflectCard className="overflow-hidden p-3 sm:p-4">
+    <ReflectCard className="overflow-hidden p-3">
       <SectionHeading
         icon={Target}
-        title="Goal Progress Analysis"
-        subtitle="Goals, contributions, and required monthly pace."
+        title="Goal progress"
+        subtitle="Scheduled contributions and progress."
       />
 
       {reflectGoals.length === 0 ? (
@@ -449,7 +449,7 @@ export default function ReflectDeepAnalysis({
   currency,
 }) {
   return (
-    <section className="mb-5 space-y-3">
+    <section className="mb-3 space-y-2">
       <GoalProgressAnalysis
         isYear={isYear}
         selectedYear={selectedYear}
