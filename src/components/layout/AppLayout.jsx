@@ -14,7 +14,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="app-page-surface flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
+    <div className="app-page-surface flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden" style={location.pathname === '/' ? { '--app-mobile-page-header-height': '0px' } : undefined}>
       <ScrollManager />
 
       <DesktopTopNav />
