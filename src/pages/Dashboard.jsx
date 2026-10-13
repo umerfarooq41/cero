@@ -144,16 +144,8 @@ export default function Dashboard() {
         <div className="mx-auto max-w-3xl px-4 pb-2"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
       </div>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:px-8 lg:py-8">
-        <div className="hidden animate-child lg:block">
-          <DashboardHero
-            budget={dashboardBudget}
-            transactions={transactions}
-            recurringTransactions={recurringTransactions}
-            goals={goalsWithFunding}
-            formatCurrency={formatCurrency}
-          />
-        </div>
+      <main className="mx-auto w-full max-w-7xl px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+        
 
         
 
