@@ -81,15 +81,15 @@ export default function ReflectPeriodSelector({
   };
   return (
     <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
-      <div className="flex items-center rounded-xl bg-muted/60 p-0.5">
+      <div className="flex items-center rounded-2xl bg-muted/60 p-1">
         {['month', 'year'].map(mode => <button key={mode} type="button" onClick={() => changeMode(mode)}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${periodMode === mode ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
+          className={`rounded-xl px-4 py-2 text-sm font-semibold ${periodMode === mode ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
       </div>
       <div className="flex min-w-0 items-center gap-1">
         <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60"><ChevronLeft className="h-4 w-4" /></button>
         <Select value={periodMode === 'year' ? String(year) : `${year}-${selectedMonth.value}`}
           onValueChange={value => { if (periodMode === 'year') onYearChange(value); else { const [y,m] = value.split('-'); onYearChange(y); onMonthChange(m); } }}>
-          <SelectTrigger aria-label="Select reporting period" className="h-8 w-[110px] rounded-lg border-0 bg-transparent px-1 text-xs font-semibold shadow-none">
+          <SelectTrigger aria-label="Select reporting period" className="h-10 w-[120px] rounded-2xl border-0 bg-card px-2 text-center text-sm font-semibold shadow-sm [&>span]:flex [&>span]:flex-1 [&>span]:justify-center">
             <SelectValue placeholder="Period" />
           </SelectTrigger>
           <SelectContent>
