@@ -154,7 +154,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   const rows = [...transactions]
     .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
     .slice(0, 5);
-  return <Section title="Recent transactions" icon={Receipt} action={<div className="flex items-center gap-1"><Action to="/add-transaction"><Plus size={14}/> Add</Action><Action to="/transactions" boxed>View all <ArrowRight size={14}/></Action></div>}>
+  return <Section title="Recent transactions" icon={Receipt} action={<Action to="/transactions">View all <ChevronRight size={14}/></Action>}>
     {rows.length ? <div className="divide-y divide-border/40">{rows.map(transaction =>
       <TransactionRow
         key={transaction.id}
