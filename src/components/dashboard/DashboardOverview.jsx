@@ -127,6 +127,13 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
         <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
       </div>
       <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
+      {(() => {
+        const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum,t) => sum + num(t.amount), 0);
+        const otherExpenses = Math.max(0, Math.round((totalExpenses - pace.spent) * 100) / 100);
+        return otherExpenses > 0.005 ? (
+          <p className="text-[11px] text-muted-foreground">Other expenses <Money value={otherExpenses} formatCurrency={formatCurrency}/> · Total expenses <Money value={totalExpenses} formatCurrency={formatCurrency}/></p>
+        ) : null;
+      })()}
     </div>
     <div className="flex min-h-9 items-center justify-between gap-2">
       <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{insight}</p>
