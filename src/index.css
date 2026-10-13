@@ -466,9 +466,9 @@ main,
     --app-canvas-after-animation: none;
     --app-canvas-bg-size: cover;
 
-    --app-surface-main-alpha: 0.78;
-    --app-surface-strong-alpha: 0.78;
-    --app-surface-soft-alpha: 0.78;
+    --app-surface-main-alpha: 0.92;
+    --app-surface-strong-alpha: 0.92;
+    --app-surface-soft-alpha: 0.92;
     --app-surface-floating-alpha: 0.98;
     --app-control-alpha: 0.78;
 
@@ -511,9 +511,9 @@ main,
     --app-bg-color: #030303;
     --app-bg-image: url('/backgrounds/ember-noir-dark.svg');
 
-    --app-surface-main-alpha: 0.62;
-    --app-surface-strong-alpha: 0.62;
-    --app-surface-soft-alpha: 0.62;
+    --app-surface-main-alpha: 0.88;
+    --app-surface-strong-alpha: 0.88;
+    --app-surface-soft-alpha: 0.88;
     --app-surface-floating-alpha: 0.98;
     --app-control-alpha: 0.62;
 
@@ -932,8 +932,7 @@ main,
     border: 1px solid hsl(var(--border) / var(--app-surface-border-alpha)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow:
-      0 12px 30px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)),
-      inset 0 1px 0 hsl(var(--foreground) / 0.035) !important;
+      0 12px 30px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-alpha)) !important;
     backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
     -webkit-backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
   }
@@ -943,8 +942,7 @@ main,
     border: 1px solid hsl(var(--border) / var(--app-surface-border-alpha)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow:
-      0 18px 48px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-strong-alpha)),
-      inset 0 1px 0 hsl(var(--foreground) / 0.04) !important;
+      0 18px 48px hsl(var(--app-surface-shadow-color) / var(--app-surface-shadow-strong-alpha)) !important;
     backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
     -webkit-backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
   }
@@ -959,8 +957,7 @@ main,
     border: 1px solid hsl(var(--border) / var(--app-surface-border-alpha)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow:
-      0 8px 22px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.55)),
-      inset 0 1px 0 hsl(var(--foreground) / 0.03) !important;
+      0 8px 22px hsl(var(--app-surface-shadow-color) / calc(var(--app-surface-shadow-alpha) * 0.55)) !important;
     backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
     -webkit-backdrop-filter: blur(var(--app-surface-blur)) saturate(var(--app-surface-saturate)) !important;
   }
@@ -976,6 +973,14 @@ main,
   .app-card-surface-strong .app-card-surface-soft,
   .app-card-surface .app-card-surface,
   .app-card-surface-strong .app-card-surface {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* One visible outline per card group; inner surfaces remain tonal only. */
+  :where(.app-card-surface, .app-card-surface-strong, .surface, .surface-card, .card-soft, .glass)
+    :where(.app-card-surface, .app-card-surface-strong, .app-card-surface-soft, .surface, .surface-card, .card-soft, .glass) {
     border: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
