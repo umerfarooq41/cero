@@ -12,7 +12,8 @@ import CategoryIcon from '@/components/shared/CategoryIcon';
 import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
-import { getGoalProgress, getGoalRemaining, isGoalPlannedForMonth, sortGoalsByPriority } from '@/lib/goals';
+import { getGoalProgress, getGoalRemaining, getGoalOccurrenceStatus, formatGoalDate } from '@/lib/goals';
+import useGoalItems from '@/components/transactions/useGoalItems';
 import { getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
 
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -173,32 +174,40 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
     )}</div> : <p className="py-5 text-center text-sm text-muted-foreground">No transactions this month.</p>}
   </Section>;
 }
-export default function DashboardOverview({ currentMonth, allocations = [], budget = {}, transactions = [], categories = [], accounts = [], recurringTransactions = [], goals = [], formatCurrency }) {
-  // Retain the exact goal funding/progress calculations used throughout Cero.
-  // A database goal is not necessarily an active, scheduled goal this month.
-  const activeGoal = sortGoalsByPriority(goals.filter(goal =>
-    goal && !goal.is_archived && goal.is_active !== false &&
-    Number(goal.target_amount || 0) > 0 &&
-    getGoalRemaining(goal) > 0 &&
-    isGoalPlannedForMonth(goal, currentMonth)
-  ))[0] || null;
-  const progress = activeGoal ? getGoalProgress(activeGoal) : 0;
+function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
+  return <Section title="Savings goals" icon={Target} action={<div className="-mr-2.5"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
+    <div className="divide-y divide-border/50">{goals.slice(0, 3).map(goal => {
+      const fixed = goal.contribution_mode === 'fixed';
+      const remaining = getGoalRemaining(goal);
+      const progress = getGoalProgress(goal);
+      const amount = Math.min(remaining, Math.max(0, Number(fixed ? goal.fixed_contribution_amount : goal.next_suggested_contribution) || 0));
+      const from = accounts.find(a => a.id === goal.from_account_id);
+      const to = accounts.find(a => a.id === goal.to_account_id);
+      const date = fixed ? goal.next_due_date : goal.target_date;
+      const status = fixed ? (goal.occurrence_status || getGoalOccurrenceStatus(goal)) : null;
+      const count = Math.max(0, Number(goal.duration_count || 0));
+      const posted = Math.max(0, Number(goal.posted_occurrence_count || 0));
+      const schedule = fixed ? (count ? `Fixed · ${Math.min(posted + 1, count)} of ${count}` : 'Fixed') : 'Flexible';
+      return <Link key={goal.id} to="/transactions?tab=scheduled" className="flex min-w-0 items-center gap-2 py-2.5 first:pt-0 last:pb-0">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600"><Target className="h-3.5 w-3.5"/></span>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-1.5"><p className="truncate text-xs font-semibold text-foreground sm:text-sm">{goal.name}</p>{status?.label && <Badge variant="outline" className="shrink-0 rounded-full border-primary/20 bg-primary/10 px-1.5 py-0 text-[9px] font-bold leading-4 text-primary">{status.label}</Badge>}</div>
+          <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground">{schedule}{date ? ` · ${fixed ? 'Due' : 'Target'} ${formatGoalDate(date)}` : ''}</p>
+          <p className="truncate text-[11px] leading-4 text-muted-foreground/85">{from?.name || 'Account'} → {to?.name || 'Savings'} · {progress}% funded</p>
+        </div>
+        <div className="shrink-0 text-right text-[11px] font-semibold tabular-nums text-primary sm:text-sm"><Money value={amount} formatCurrency={formatCurrency}/></div>
+      </Link>;
+    })}</div>
+  </Section>;
+}
+export default function DashboardOverview({ currentMonth, allocations = [], budget = {}, transactions = [], allTransactions = [], categories = [], accounts = [], recurringTransactions = [], goals = [], savingsGoals = [], formatCurrency }) {
+  const { activeGoals } = useGoalItems({ savingsGoals, allocations, currentMonth, monthTransactions: transactions, allTransactions, accounts, categories });
   return <div className="mx-auto max-w-3xl space-y-3">
     <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
     <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 whitespace-nowrap text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
     <Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></Entrance>
     <Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance>
-    {activeGoal && <Entrance index={5}>
-      <Section title="Savings goals" icon={Target} action={<div className="-mr-2.5"><Action to="/manage-plan?tab=goals">View all <ChevronRight size={14}/></Action></div>}>
-        <Link to="/manage-plan?tab=goals" className="flex min-h-12 items-center gap-3 rounded-lg py-1 transition-colors hover:bg-secondary/30">
-          <span className="min-w-0 flex-1 truncate text-sm font-medium">{activeGoal.name}</span>
-          <div className="h-1.5 w-20 shrink-0 rounded-full bg-primary/10" role="progressbar" aria-label={`${activeGoal.name} progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
-            <div className="h-full rounded-full bg-primary" style={{width: `${Math.min(100, Math.max(0, progress))}%`}}/>
-          </div>
-          <span className="w-10 shrink-0 text-right text-xs tabular-nums text-muted-foreground">{Math.round(progress)}%</span>
-        </Link>
-      </Section>
-    </Entrance>}
+    {activeGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={activeGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}
   </div>;
 }
