@@ -83,7 +83,7 @@ export default function PlanDonutCard({
   );
 
   return (
-    <div className="rounded-3xl app-card-surface p-4">
+    <div className="rounded-2xl app-card-surface p-3.5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">Tracked</p>
@@ -123,15 +123,15 @@ export default function PlanDonutCard({
         </div>
       </div>
 
-      <div className="relative mx-auto mt-4 flex h-52 w-full max-w-[280px] items-center justify-center [&_.recharts-wrapper]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none">
+      <div className="relative mx-auto mt-2 flex h-44 w-full max-w-[220px] items-center justify-center [&_.recharts-wrapper]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={donutChartData}
               dataKey="value"
               nameKey="name"
-              innerRadius={66}
-              outerRadius={92}
+              innerRadius={54}
+              outerRadius={76}
               paddingAngle={donutChartData.length > 1 ? 3 : 0}
               stroke="none"
               isAnimationActive
@@ -178,13 +178,13 @@ export default function PlanDonutCard({
         </div>
       </div>
 
-      <div className="mt-3 flex justify-center pb-0.5">
+      <div className="mt-2 flex justify-center pb-0.5">
         {legendItems.length > 0 ? (
           <div className="flex w-full flex-wrap items-center justify-center gap-1.5 text-center">
             {legendItems.map((item) => (
               <div
                 key={item.id || item.name}
-                className="inline-flex min-h-7 max-w-[9.5rem] items-center justify-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-2.5 py-1 text-center shadow-sm"
+                className="inline-flex min-h-6 max-w-[9.5rem] items-center justify-center gap-1 rounded-full bg-muted/40 px-2 py-0.5 text-center"
                 title={item.name}
               >
                 <span
