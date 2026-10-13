@@ -104,33 +104,30 @@ function SafeCard({ allocations, categories, transactions, currentMonth, formatC
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
-  const chipAmount = pace.status === 'over' ? pace.difference : pace.status === 'under' ? Math.abs(pace.difference) : null;
-  return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2.5 p-4">
+  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-3 px-4 py-4">
     <div className="flex items-center justify-between gap-2">
-      <p className="text-sm font-semibold">Safe to spend today</p>
-      <Badge variant="secondary" className={`flex max-w-[60%] shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] ${pace.status === 'overBudget' ? 'bg-destructive/10 text-destructive' : pace.status === 'over' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
-        {chipAmount !== null && <Money value={chipAmount} formatCurrency={formatCurrency}/>}<span>{chip}</span>
+      <p className="text-sm font-semibold tracking-tight">Safe to spend today</p>
+      <Badge variant="secondary" className={`shrink-0 rounded-full border-0 px-3 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
+        {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
       </Badge>
     </div>
-    <div>
-      <div className="flex items-baseline gap-2"><Money value={pace.allowance} formatCurrency={formatCurrency} className="text-3xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
-      <p className="mt-1.5 text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/> · {pace.overBudget ? <span className="font-medium text-destructive">Budget used up</span> : <span className="font-medium text-foreground"><Money value={pace.leftToday} formatCurrency={formatCurrency}/> left today</span>}</p>
+    <div className="space-y-1">
+      <div className="flex items-baseline gap-1.5">
+        <Money value={pace.allowance} formatCurrency={formatCurrency} className="text-[2rem] font-normal leading-none tracking-tight sm:text-4xl"/>
+        <span className="text-sm text-muted-foreground">/ day</span>
+      </div>
+      <p className="text-xs text-muted-foreground">{pace.overBudget ? 'Budget used up' : <><Money value={pace.leftToday} formatCurrency={formatCurrency}/> left today</>}</p>
     </div>
-    <div>
-      <div className="relative h-2 rounded-full bg-primary/10" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
+    <div className="space-y-1.5">
+      <div className="relative h-1.5 rounded-full bg-primary/5" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
         <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
-        <span className="absolute -top-1 h-4 w-[2px] rounded-full bg-foreground/80" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
+        <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
       </div>
-      <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span>Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></span>
-        <span className="shrink-0 font-medium tabular-nums">{Math.round(pace.spentPct)}%</span>
-      </div>
+      <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
     </div>
-    <p className="text-xs text-muted-foreground">You're spending <Money value={pace.averageDaily} formatCurrency={formatCurrency} className="font-medium"/>/day · safe is <Money value={pace.allowance} formatCurrency={formatCurrency} className="font-medium"/></p>
-    {driverName && pace.topDriver.share >= 40 && <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">{driverName}</span> is {Math.round(pace.topDriver.share)}% of discretionary spending</p>}
-    <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-1">
-      <p className="min-w-0 truncate text-xs text-muted-foreground">Projected <Money value={pace.projected} formatCurrency={formatCurrency}/> at this pace</p>
-      <Button variant="ghost" size="sm" className="-mr-2 min-h-11 shrink-0 gap-0.5 px-2 text-xs" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={14}/></Button>
+    {driverName && pace.topDriver.share >= 40 && <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">{driverName}</span> is {Math.round(pace.topDriver.share)}% of your spending</p>}
+    <div className="flex justify-end">
+      <Button variant="ghost" size="sm" className="-mr-2 min-h-11 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
     </div>
     <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
   </CardContent></Card>;
