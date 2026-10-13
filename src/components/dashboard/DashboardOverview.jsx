@@ -206,7 +206,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   const upcomingGoals = activeGoals
     .filter(goal => {
       const date = String(goal.contribution_mode === 'fixed' ? goal.next_due_date : goal.target_date || '').slice(0, 10);
-      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) return false;
+      if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)) return false;
       const [year, month, day] = date.split('-').map(Number);
       const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
       const days = Math.round((Date.UTC(year, month - 1, day) - Date.UTC(todayYear, todayMonth - 1, todayDay)) / 86400000);
