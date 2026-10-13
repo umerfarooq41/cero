@@ -249,8 +249,8 @@ function AdvancedFilterSheet({
 
           <section>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Date</label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {[['any', 'Any date'], ['exact', 'Exact'], ['range', 'Range']].map(([value, label]) => (
+            <div className="grid grid-cols-4 gap-1.5">
+              {[['month', 'Month'], ['any', 'Any date'], ['exact', 'Exact'], ['range', 'Range']].map(([value, label]) => (
                 <button key={value} type="button" onClick={() => setDateMode(value)}
                   className={cn('h-9 rounded-xl text-xs font-medium', dateMode === value ? 'bg-primary/10 text-primary' : 'bg-muted/35 text-muted-foreground')}>
                   {label}
@@ -291,7 +291,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const currency = useCurrency();
 
   const [selectedDate, setSelectedDate] = useState('');
-  const [dateMode, setDateMode] = useState('any');
+  const [dateMode, setDateMode] = useState('month');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [search, setSearch] = useState('');
@@ -308,7 +308,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     isError: transactionsError,
     refetch: refetchTransactions,
   } = useTransactions(currentMonth);
-  const { data: allTransactions = [] } = useAllTransactions();
+  const { data: allTransactions = [], isPending: allTransactionsPending, isError: allTransactionsError } = useAllTransactions();
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
@@ -368,10 +368,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
       ? {
           key: 'date',
           label: format(new Date(selectedDate), 'MMM d'),
-          onClear: () => { setSelectedDate(''); setDateMode('any'); },
+          onClear: () => { setSelectedDate(''); setDateMode('month'); },
         }
       : null,
-    dateMode === 'range' && (dateFrom || dateTo) ? { key: 'range', label: `${dateFrom || 'Start'} – ${dateTo || 'End'}`, onClear: () => { setDateFrom(''); setDateTo(''); setDateMode('any'); } } : null,
+    dateMode === 'range' && (dateFrom || dateTo) ? { key: 'range', label: `${dateFrom || 'Start'} – ${dateTo || 'End'}`, onClear: () => { setDateFrom(''); setDateTo(''); setDateMode('month'); } } : null,
     sortBy !== 'newest'
       ? {
           key: 'sort',
@@ -390,9 +390,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     [categories]
   );
   const searchValue = search.trim().toLowerCase();
+  const globalScope = Boolean(searchValue) || dateMode !== "month" || sourceFilter !== "all" || accountFilter !== "all" || categoryFilter !== "all";
 
   const { filtered, grouped, sortedDates } = useMemo(() => {
-  const visibleTransactions = dateMode === "range" && (dateFrom || dateTo) ? allTransactions : transactions;
+  const visibleTransactions = globalScope ? allTransactions : transactions;
   const filtered = visibleTransactions.filter((transaction) => {
     const category = categoriesById.get(transaction.category_id);
     const fromAccount = accountsById.get(transaction.account_id);
@@ -474,7 +475,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   });
     return { filtered, grouped, sortedDates };
   }, [
-    transactions, allTransactions, dateMode, dateFrom, dateTo, accountsById, categoriesById, searchValue,
+    transactions, allTransactions, globalScope, dateMode, dateFrom, dateTo, accountsById, categoriesById, searchValue,
     filterType, selectedDate, accountFilter, categoryFilter, sourceFilter, sortBy,
   ]);
 
@@ -485,7 +486,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     setAccountFilter('all');
     setCategoryFilter('all');
     setSelectedDate('');
-    setDateMode('any');
+    setDateMode('month');
     setDateFrom('');
     setDateTo('');
     setSortBy('newest');
@@ -498,7 +499,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
   return (
     <div>
-      <div className="mb-2 text-xs text-muted-foreground">{filtered.length} posted transactions</div>
+      <div className="mb-2 text-xs text-muted-foreground">{globalScope ? `${filtered.length} transactions found · All history` : `${filtered.length} posted transactions · ${format(new Date(`${currentMonth}-01T12:00:00`), "MMMM yyyy")}`}</div>
       <div className="mb-2 flex gap-2 animate-child">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
