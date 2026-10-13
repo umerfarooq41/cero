@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ArrowRight, ChevronRight, Plus, Receipt, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ArrowRight, ChevronRight, Plus, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -127,12 +127,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
         <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
       </div>
       <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
-      {(() => {
-        const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum,t) => sum + num(t.amount), 0);
-        return totalExpenses > pace.spent + 0.005 ? (
-          <p className="flex items-center gap-1 whitespace-nowrap text-[11px] text-muted-foreground">Total expenses <Money value={totalExpenses} formatCurrency={formatCurrency}/></p>
-        ) : null;
-      })()}
+
     </div>
     <div className="flex min-h-9 items-center justify-between gap-2">
       <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{insight}</p>
@@ -141,16 +136,49 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
   </CardContent></Card>;
 }
-function Snapshot({ budget, formatCurrency }) {
+function Snapshot({ budget, transactions = [], formatCurrency }) {
+  const expenses = num(budget.totalExpenses);
+  const recurringPaid = transactions
+    .filter(t => t.type === 'expense' && (t.recurring_transaction_id || t.source_type === 'recurring'))
+    .reduce((sum, t) => sum + num(t.amount), 0);
+  const variablePaid = Math.max(0, expenses - recurringPaid);
+  const savings = num(budget.totalTrackedSavings);
+  const debt = num(budget.totalTrackedDebt);
   const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
-  const tracked = num(budget.totalExpenses) + num(budget.totalTrackedSavings) + num(budget.totalTrackedDebt);
-  const rows = [
-    { label: 'Received income', value: num(budget.realizedIncome ?? budget.totalIncome), icon: TrendingUp, tone: 'text-emerald-600 bg-emerald-500/10' },
-    { label: 'Expenses', value: num(budget.totalExpenses), icon: TrendingDown, tone: 'text-destructive bg-destructive/10' },
-    { label: 'Planned', value: planned, icon: Receipt, tone: 'text-blue-600 bg-blue-500/10' },
-    { label: 'Tracked', value: tracked, icon: WalletCards, tone: 'text-amber-600 bg-amber-500/10' },
-  ];
-  return <Section title="Budget snapshot"><div>{rows.map(({ label, value, icon: Icon, tone }) => <div key={label} className="flex min-h-12 items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span><span className="text-sm">{label}</span></div><Money value={value} formatCurrency={formatCurrency} className={`shrink-0 text-sm font-medium ${label === "Received income" ? "text-emerald-600 dark:text-emerald-400" : label === "Expenses" ? "text-destructive" : label === "Planned" ? "text-blue-600 dark:text-blue-400" : "text-amber-600 dark:text-amber-400"}`}/></div>)}</div></Section>;
+  const tracked = expenses + savings + debt;
+  const row = ({ label, value, icon: Icon, tone, valueTone = '', helper }) => (
+    <div className="flex min-h-12 items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span>
+        <div className="min-w-0">
+          <p className="text-sm">{label}</p>
+          {helper && <p className="mt-0.5 flex flex-wrap gap-x-1.5 text-[10px] leading-4 text-muted-foreground">{helper}</p>}
+        </div>
+      </div>
+      <Money value={value} formatCurrency={formatCurrency} className={`shrink-0 text-sm font-medium ${valueTone}`}/>
+    </div>
+  );
+  return <Section title="Budget snapshot">
+    <div className="space-y-1">
+      {row({ label: 'Received income', value: num(budget.realizedIncome ?? budget.totalIncome), icon: TrendingUp, tone: 'text-emerald-600 bg-emerald-500/10', valueTone: 'text-emerald-600 dark:text-emerald-400' })}
+      {row({ label: 'Total expenses', value: expenses, icon: TrendingDown, tone: 'text-destructive bg-destructive/10', valueTone: 'text-destructive',
+        helper: <><span>Variable <Money value={variablePaid} formatCurrency={formatCurrency}/></span><span>·</span><span>Recurring <Money value={recurringPaid} formatCurrency={formatCurrency}/></span></> })}
+      <div className="grid grid-cols-2 gap-2 py-1">
+        <div className="min-w-0 rounded-xl bg-muted/40 px-3 py-2.5">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><PiggyBank size={15}/>Savings</div>
+          <Money value={savings} formatCurrency={formatCurrency} className="mt-1 text-sm font-semibold"/>
+        </div>
+        <div className="min-w-0 rounded-xl bg-muted/40 px-3 py-2.5">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><CreditCard size={15}/>Debt paid</div>
+          <Money value={debt} formatCurrency={formatCurrency} className="mt-1 text-sm font-semibold"/>
+        </div>
+      </div>
+      <div className="mt-2 space-y-2 border-t border-border/50 pt-3">
+        <div className="flex items-center justify-between gap-2 text-sm"><span className="font-medium">Planned total</span><Money value={planned} formatCurrency={formatCurrency} className="font-semibold"/></div>
+        <div className="flex items-center justify-between gap-2 text-sm"><span className="font-medium">Tracked total</span><Money value={tracked} formatCurrency={formatCurrency} className="font-semibold"/></div>
+      </div>
+    </div>
+  </Section>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
   const navigate = useNavigate();
@@ -229,7 +257,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="mx-auto max-w-3xl space-y-3">
     <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
-    <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
+    <Entrance index={1}><Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/></Entrance>
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}
     <Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></Entrance>
     <Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance>
