@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { BarChart3, ChartPie, LineChart, Target } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import {
@@ -204,6 +204,7 @@ export default function ReflectCharts({
     ? spendingBreakdown
     : [];
   const safeSpendingTrend = Array.isArray(spendingTrend) ? spendingTrend : [];
+  const [selectedDay, setSelectedDay] = useState(null);
 
   const safeEfficiency = Number.isFinite(Number(efficiency))
     ? Number(efficiency)
@@ -214,6 +215,7 @@ export default function ReflectCharts({
     ? Number(plannedExpenses)
     : 0;
 
+  const activeDay = safeSpendingTrend.find(item => item.label === selectedDay) || safeSpendingTrend[safeSpendingTrend.length - 1];
   const totalTrackedIncome = useMemo(
     () =>
       safeCashFlow.reduce(
@@ -262,10 +264,9 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
     const withPercents = sorted.map((item, index) => ({
       ...item,
       color: getThemeChartColor(index),
-      percent:
-        totalCategorySpend > 0
-          ? (Number(item.value || 0) / totalCategorySpend) * 100
-          : 0,
+      percent: Number(item.planned || 0) > 0
+        ? (Number(item.value || 0) / Number(item.planned)) * 100
+        : (Math.max(...sorted.map(c => Number(c.value || 0)), 1) > 0 ? Number(item.value || 0) / Math.max(...sorted.map(c => Number(c.value || 0)), 1) * 100 : 0),
     }));
 
     if (withPercents.length <= 4) {
@@ -407,8 +408,8 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               <ChartHeading
                 icon={ChartPie}
                 tone="warning"
-                title="Top Spending Categories"
-                subtitle="Where your tracked expenses are concentrated"
+                title="Spending categories"
+                subtitle="Budget usage where planned; otherwise relative spending"
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
@@ -419,6 +420,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         <span className="min-w-0 truncate text-foreground">{category.name}</span>
                         <span className="shrink-0 font-semibold tabular-nums"><CurrencyAmount amount={category.value} currency={currency} compact /></span>
                       </div>
+                      {category.planned > 0 ? <p className="text-[10px] text-muted-foreground">of <CurrencyAmount amount={category.planned} currency={currency} compact /> planned · {Math.round(category.percent)}% used</p> : null}
                       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                         <div className="h-full rounded-full" style={{ width: `${Math.min(100, category.percent)}%`, backgroundColor: category.color }} />
                       </div>
@@ -456,11 +458,18 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               />
 
               {safeSpendingTrend.length > 0 ? (
-                <div className={`${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
+                <>
+                {activeDay ? <div className="mb-2 flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{isYear ? activeDay.label : `Day ${activeDay.label}`}</span>
+                  <span className="font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></span>
+                </div> : null}
+                <div className={`${CHART_WRAP_CLASS} h-44 min-h-[176px] sm:h-48 sm:min-h-[192px]`}>
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
                         data={safeSpendingTrend}
+                        onMouseMove={state => { if (state?.activePayload?.[0]?.payload?.label) setSelectedDay(state.activePayload[0].payload.label); }}
+                        onTouchMove={state => { if (state?.activePayload?.[0]?.payload?.label) setSelectedDay(state.activePayload[0].payload.label); }}
                         margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
                       >
                         <CartesianGrid
@@ -513,7 +522,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           fill="hsl(var(--primary))"
                           fillOpacity={0.14}
                           strokeWidth={2.5}
-                          activeDot={false}
+                          activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--card))" }}
                           dot={false}
                           style={{
                             outline: 'none',
@@ -527,6 +536,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <ChartShell className="h-full" />
                   )}
                 </div>
+                </>
               ) : (
                 <div className="py-8 text-center">
                   <p className="text-sm font-medium">No spending data yet</p>
