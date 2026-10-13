@@ -406,6 +406,7 @@ export default function DashboardReflect() {
     accounts,
     categories,
     budget: reflectBudget,
+    categoryAllocations: monthAllocations,
     settings,
   });
 
