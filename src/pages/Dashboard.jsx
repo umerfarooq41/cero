@@ -144,6 +144,8 @@ export default function Dashboard() {
                   accounts={accounts}
                   recurringTransactions={recurringTransactions}
                   goals={goalsWithFunding}
+                  savingsGoals={savingsGoals}
+                  allTransactions={allTransactions}
                   formatCurrency={formatCurrency}
                 />
               )}
