@@ -21,7 +21,6 @@ import {
 } from '@/hooks/useBudgetData';
 import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
-import { getCurrencyNoun as getCurrencyName } from '@/lib/currencies';
 import { buildPlanTotals } from '@/lib/planData';
 import { getTransactionBudgetMonth } from '@/lib/budgetLogic';
 
@@ -137,9 +136,9 @@ export default function Plan() {
       <div ref={scope} className="min-h-screen bg-transparent">
         <PageHeader
           title="Plan"
-          subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
+          
         />
-        <main className="mx-auto w-full max-w-7xl space-y-4 px-4 py-4 pb-28 md:px-6 lg:py-8">
+        <main className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:py-8">
           <Skeleton className="mx-auto h-12 w-56 rounded-xl" />
           <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-72 w-full rounded-2xl" />
@@ -152,22 +151,22 @@ export default function Plan() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title="Plan"
-        subtitle={`Give every ${getCurrencyName(currency)} a purpose`}
+        
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:py-8">
-        <div className="mb-4 animate-child">
+      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:py-6">
+        <div className="mb-3 animate-child">
           <div className="flex items-center justify-center">
             <MonthSelector
               currentMonth={currentMonth}
               onChange={handleMonthChange}
-              subtitle="Budget period"
+              subtitle=""
               trailingAction={
                 <Button
                   type="button"
                   variant="secondary"
                   size="icon"
-                  className="h-9 w-9 shrink-0 rounded-xl"
+                  className="h-8 w-8 shrink-0 rounded-xl"
                   onClick={() =>
                     navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)
                   }
@@ -180,7 +179,7 @@ export default function Plan() {
           </div>
         </div>
 
-        <div className="animate-child space-y-4 pt-4">
+        <div className="animate-child space-y-3">
           <LeftToAllocateBanner
             leftToAllocate={leftToAllocate}
             totalIncome={plannedTotals.budgetFunding}
