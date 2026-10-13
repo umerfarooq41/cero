@@ -365,9 +365,9 @@ export default function ReflectSummaryCard({
   const remaining = plannedExpenses - expenses;
   const money = (amount) => <CurrencyAmount amount={amount} currency={currency} compact />;
   const metric = (label, value, color = '') => (
-    <div className="min-w-0 rounded-xl bg-muted/45 px-3 py-2.5">
+    <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/45 px-3 py-2.5 text-center">
       <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className={`mt-1 text-base font-semibold tabular-nums ${color}`}>{money(value)}</p>
+      <p className={`mt-1 flex justify-center text-base font-semibold tabular-nums ${color}`}>{money(value)}</p>
     </div>
   );
   return (
