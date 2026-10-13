@@ -357,292 +357,55 @@ function HeroCashFlowCard({
 }
 
 export default function ReflectSummaryCard({
-  isYear,
-  selectedYear,
-  selectedMonth,
-  income,
-  expenses,
-  trackedSavings = 0,
-  trackedDebt = 0,
-  plannedExpenses,
-  plannedSavings = 0,
-  plannedDebt = 0,
-  totalPlannedOutflow,
-  totalTrackedOutflow,
-  netCashFlow,
-  netWorth,
-  totalAssets,
-  totalLiabilities,
-  currency,
+  isYear, income = 0, expenses = 0, trackedSavings = 0, trackedDebt = 0,
+  plannedExpenses = 0, totalTrackedOutflow = 0, netCashFlow = 0,
+  netWorth = 0, totalAssets = 0, totalLiabilities = 0, currency,
 }) {
-  const computed = useMemo(() => {
-    const periodProgress = getSelectedPeriodProgress({
-      selectedYear,
-      selectedMonth,
-      isYear,
-    });
-
-    const netWorthHealth =
-      totalAssets > 0
-        ? Math.max(
-            0,
-            Math.min(((totalAssets - totalLiabilities) / totalAssets) * 100, 100)
-          )
-        : 0;
-
-    const monthlyBudgetDifference = plannedExpenses - expenses;
-    const monthlyBudgetUsed =
-      plannedExpenses > 0 ? Math.min((expenses / plannedExpenses) * 100, 100) : 0;
-
-    const dailyLimit =
-      monthlyBudgetDifference > 0
-        ? monthlyBudgetDifference / periodProgress.daysLeft
-        : 0;
-
-    const monthlyStatus =
-      plannedExpenses === 0
-        ? 'Tracked'
-        : monthlyBudgetUsed <= periodProgress.monthElapsedPercent
-          ? 'Excellent'
-          : monthlyBudgetUsed <= periodProgress.monthElapsedPercent + 10
-            ? 'On Track'
-            : 'Warning';
-
-    const monthlyTone =
-      plannedExpenses === 0
-        ? 'info'
-        : monthlyBudgetUsed <= periodProgress.monthElapsedPercent
-          ? 'good'
-          : monthlyBudgetUsed <= periodProgress.monthElapsedPercent + 10
-            ? 'warning'
-            : 'bad';
-
-    const yearlyPlanCap =
-      Number(totalPlannedOutflow ?? plannedExpenses + plannedSavings + plannedDebt) || 0;
-
-    const yearlyTotalYtd =
-      Number(totalTrackedOutflow ?? expenses + trackedSavings + trackedDebt) || 0;
-
-    const yearlyPlanUsedPercent =
-      yearlyPlanCap > 0 ? Math.min((yearlyTotalYtd / yearlyPlanCap) * 100, 100) : 0;
-
-    const monthlyAverage = yearlyTotalYtd / periodProgress.monthsPassed;
-    const paceDifference = periodProgress.yearElapsedPercent - yearlyPlanUsedPercent;
-
-    const yearlyStatus =
-      yearlyPlanCap === 0
-        ? 'No Plan Yet'
-        : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent
-          ? 'Ahead of Plan'
-          : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent + 10
-            ? 'On Track'
-            : 'Behind Plan';
-
-    const yearlyTone =
-      yearlyPlanCap === 0
-        ? 'info'
-        : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent
-          ? 'good'
-          : yearlyPlanUsedPercent <= periodProgress.yearElapsedPercent + 10
-            ? 'warning'
-            : 'bad';
-
-    return {
-      ...periodProgress,
-      netWorthHealth,
-      monthlyBudgetDifference,
-      monthlyBudgetUsed,
-      dailyLimit,
-      monthlyStatus,
-      monthlyTone,
-      yearlyPlanCap,
-      yearlyTotalYtd,
-      yearlyPlanUsedPercent,
-      monthlyAverage,
-      paceDifference,
-      yearlyStatus,
-      yearlyTone,
-    };
-  }, [
-    isYear,
-    selectedYear,
-    selectedMonth,
-    expenses,
-    plannedExpenses,
-    plannedSavings,
-    plannedDebt,
-    totalAssets,
-    totalLiabilities,
-    trackedSavings,
-    trackedDebt,
-    totalPlannedOutflow,
-    totalTrackedOutflow,
-  ]);
-
-  const netWorthTone = netWorth >= 0 ? 'info' : 'bad';
-  const healthTone = isYear ? computed.yearlyTone : computed.monthlyTone;
-  const healthToneClasses = getToneClasses(healthTone);
-  const monthlyBudgetIsPositive = computed.monthlyBudgetDifference >= 0;
-
+  const used = plannedExpenses > 0 ? (expenses / plannedExpenses) * 100 : 0;
+  const remaining = plannedExpenses - expenses;
+  const money = (amount) => <CurrencyAmount amount={amount} currency={currency} compact />;
+  const metric = (label, value, color = '') => (
+    <div className="min-w-0 rounded-xl bg-muted/45 px-3 py-2.5">
+      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className={`mt-1 text-base font-semibold tabular-nums ${color}`}>{money(value)}</p>
+    </div>
+  );
   return (
-    <div className="mb-4 grid grid-cols-1 items-start gap-2.5 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-4">
-      <HeroCashFlowCard
-        isYear={isYear}
-        income={income}
-        expenses={expenses}
-        trackedSavings={trackedSavings}
-        trackedDebt={trackedDebt}
-        netCashFlow={netCashFlow}
-        currency={currency}
-      />
-
-      <SummaryCard
-        icon={Wallet}
-        title="Net Worth"
-        subtitle="Assets compared with liabilities."
-        value={<CurrencyAmount amount={netWorth} currency={currency} />}
-        valueTone={netWorthTone}
-      >
-        <div className="space-y-1.5">
-          <MoneyRow
-            label="Assets"
-            amount={totalAssets}
-            currency={currency}
-            tone="text-[hsl(var(--success))]"
-          />
-
-          <MoneyRow
-            label="Liabilities"
-            amount={totalLiabilities}
-            currency={currency}
-            tone="text-destructive"
-          />
+    <div className="mb-3 grid gap-3 lg:grid-cols-2">
+      <section className="rounded-2xl app-card-surface p-3.5">
+        <div className="mb-3 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-muted-foreground" /><h3 className="text-sm font-semibold">Financial summary</h3></div>
+        <p className="text-[11px] text-muted-foreground">Operating cash flow</p>
+        <p className={`mt-1 text-xl font-bold tabular-nums ${netCashFlow >= 0 ? 'text-[hsl(var(--success))]' : 'text-destructive'}`}>{money(netCashFlow)}</p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {metric('Income received', income, 'text-[hsl(var(--success))]')}
+          {metric('Expenses', expenses)}
         </div>
-
-        <div className="space-y-2.5 pt-1">
-          <MetricProgressRow
-            label="Asset"
-            value={computed.netWorthHealth}
-            valueText={`${Math.round(computed.netWorthHealth)}%`}
-            className="bg-primary"
-            delay="delay-300"
-            valueClassName="text-primary"
-          />
+        <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3">
+          <div><p className="text-[11px] text-muted-foreground">Total outflow</p><p className="text-sm font-semibold">{money(totalTrackedOutflow)}</p></div>
+          <div className="text-right text-[11px] text-muted-foreground">
+            <p>Debt paid: {money(trackedDebt)}</p><p className="mt-1">Goal savings: {money(trackedSavings)}</p>
+          </div>
         </div>
-      </SummaryCard>
-
-      <SummaryCard
-        icon={Activity}
-        title={isYear ? 'Yearly Performance' : 'Budget Health'}
-        subtitle={isYear ? 'Tracked outflow against yearly planned pace.' : 'Tracked expenses against your monthly plan.'}
-        value={
-          isYear ? (
-            <CurrencyAmount amount={computed.yearlyTotalYtd} currency={currency} />
-          ) : (
-            <>
-              <CurrencyAmount
-                amount={Math.abs(computed.monthlyBudgetDifference)}
-                currency={currency}
-              />{' '}
-              <span className="text-[0.72em] font-semibold">
-                {monthlyBudgetIsPositive ? 'Left' : 'Over'}
-              </span>
-            </>
-          )
-        }
-        valueTone={healthTone}
-        action={
-          <StatusPill tone={healthTone}>
-            {isYear ? computed.yearlyStatus : computed.monthlyStatus}
-          </StatusPill>
-        }
-      >
-        {isYear ? (
-          <>
-            <div className="space-y-1.5">
-              <MoneyRow
-                label="Monthly Avg"
-                amount={computed.monthlyAverage}
-                currency={currency}
-                tone="text-muted-foreground"
-              />
-
-              <MoneyRow
-                label="Annual Cap"
-                amount={computed.yearlyPlanCap}
-                currency={currency}
-                tone="text-muted-foreground"
-              />
-            </div>
-
-            <div className="space-y-2.5">
-              <PercentBar
-                label="Year Passed"
-                value={computed.yearElapsedPercent}
-                className="bg-primary/35"
-                delay="delay-300"
-              />
-
-              <PercentBar
-                label="Plan Used"
-                value={computed.yearlyPlanUsedPercent}
-                className={healthToneClasses.bar}
-                delay="delay-500"
-              />
-            </div>
-
-            <p className="text-[11px] leading-4 text-muted-foreground">
-              {computed.yearlyPlanCap === 0
-                ? 'Add plans to compare usage against the year.'
-                : computed.paceDifference >= 0
-                  ? `${Math.round(computed.paceDifference)}% ahead of yearly pace.`
-                  : `${Math.abs(Math.round(computed.paceDifference))}% behind yearly pace.`}
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="space-y-1.5">
-              <MoneyRow
-                label="Planned"
-                amount={plannedExpenses}
-                currency={currency}
-                tone="text-muted-foreground"
-              />
-
-              <MoneyRow
-                label="Tracked"
-                amount={expenses}
-                currency={currency}
-                tone={monthlyBudgetIsPositive ? 'text-[hsl(var(--success))]' : 'text-destructive'}
-              />
-            </div>
-
-            {plannedExpenses > 0 ? (
-              <div className="space-y-2.5 pt-1">
-                <MetricProgressRow
-                  label="Used"
-                  value={computed.monthlyBudgetUsed}
-                  valueText={`${Math.round(computed.monthlyBudgetUsed)}%`}
-                  className="bg-primary"
-                  delay="delay-500"
-                  valueClassName="text-primary"
-                />
-
-                <p className="text-left text-[11px] leading-4 text-muted-foreground">
-                  Daily{' '}
-                  <span className="font-semibold text-foreground">
-                    <CurrencyAmount amount={computed.dailyLimit} currency={currency} compact />
-                  </span>
-                </p>
-              </div>
-            ) : (
-              <p className="text-[11px] leading-4 text-muted-foreground">
-                No planned expense budget for this month.
-              </p>
-            )}
-          </>
-        )}
-      </SummaryCard>
+        <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3">
+          <div><p className="text-[11px] text-muted-foreground">Current net worth</p><p className="text-base font-semibold">{money(netWorth)}</p></div>
+          <div className="text-right text-[11px] text-muted-foreground">
+            <p>Assets: {money(totalAssets)}</p><p className="mt-1">Liabilities: {money(totalLiabilities)}</p>
+          </div>
+        </div>
+      </section>
+      <section className="rounded-2xl app-card-surface p-3.5">
+        <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="text-sm font-semibold">Budget health</h3></div>
+        {plannedExpenses > 0 ? <>
+          <div className="flex items-end justify-between gap-2">
+            <div><p className="text-[11px] text-muted-foreground">Expense budget {remaining >= 0 ? 'remaining' : 'over'}</p>
+              <p className={`mt-1 text-xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div>
+            <span className="text-xs font-semibold tabular-nums">{Math.round(used)}% used</span>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, used))}%` }} /></div>
+          <div className="mt-2 flex justify-between gap-2 text-[11px] text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div>
+        </> : <p className="text-xs text-muted-foreground">No expense budget planned for this period.</p>}
+        {isYear ? <p className="mt-3 text-[11px] text-muted-foreground">Yearly budget figures for the selected reporting year.</p> : null}
+      </section>
     </div>
   );
 }
