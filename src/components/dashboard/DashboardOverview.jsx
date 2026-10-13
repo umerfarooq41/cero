@@ -189,6 +189,16 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 whitespace-nowrap text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
     <Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></Entrance>
     <Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance>
-    {activeGoal && <Entrance index={5}><Link to="/manage-plan?tab=goals" className={`flex min-h-14 items-center gap-3 border px-3 ${cardStyle}`}><Target size={17} className="shrink-0 text-primary"/><span className="min-w-0 flex-1 truncate text-sm">{activeGoal.name}</span><div className="h-1.5 w-14 rounded-full bg-primary/10"><div className="h-full rounded-full bg-primary" style={{width: `${progress}%`}}/></div><span className="text-xs text-muted-foreground">{progress}%</span></Link></Entrance>}
+    {activeGoal && <Entrance index={5}>
+      <Section title="Savings goals" icon={Target} action={<div className="-mr-2.5"><Action to="/manage-plan?tab=goals">View all <ChevronRight size={14}/></Action></div>}>
+        <Link to="/manage-plan?tab=goals" className="flex min-h-12 items-center gap-3 rounded-lg py-1 transition-colors hover:bg-secondary/30">
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">{activeGoal.name}</span>
+          <div className="h-1.5 w-20 shrink-0 rounded-full bg-primary/10" role="progressbar" aria-label={`${activeGoal.name} progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
+            <div className="h-full rounded-full bg-primary" style={{width: `${Math.min(100, Math.max(0, progress))}%`}}/>
+          </div>
+          <span className="w-10 shrink-0 text-right text-xs tabular-nums text-muted-foreground">{Math.round(progress)}%</span>
+        </Link>
+      </Section>
+    </Entrance>}
   </div>;
 }
