@@ -39,14 +39,14 @@ export default function FloatingActionButton({
 
     // Size / shape
     'flex items-center justify-center',
-    'h-14 w-14',
+    'h-12 w-12',
     'lg:h-12 lg:w-auto lg:px-5 lg:gap-2',
     'rounded-2xl',
     'relative overflow-hidden',
 
     // Visual
     'bg-primary text-primary-foreground',
-    'shadow-[0_8px_32px_hsl(var(--primary)/0.45)]',
+    'shadow-[0_6px_20px_hsl(var(--primary)/0.30)]',
     'dark:shadow-[0_8px_32px_hsl(var(--primary)/0.35)]',
 
     'transition-none',
