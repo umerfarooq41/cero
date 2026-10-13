@@ -1,7 +1,7 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { format, parseISO } from 'date-fns';
+import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ChevronRight, Plus, Receipt, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,15 @@ import { getAllocationSourceType, normalizeSourceType, getPlanCategoryType } fro
 
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const cardStyle = 'rounded-2xl border-border/50 bg-card/70 shadow-sm backdrop-blur-xl';
-const amountStyle = 'font-["DM_Mono",monospace] tabular-nums tracking-tight';
-const formatDate = value => {
-  if (!value || !/^\\d{4}-\\d{2}-\\d{2}/.test(String(value))) return '—';
-  return format(parseISO(String(value).slice(0, 10)), 'MMM d');
-};
+function getDateLabel(value) {
+  const raw = String(value || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return '';
+  const date = parseISO(raw);
+  if (Number.isNaN(date.getTime())) return '';
+  if (isToday(date)) return 'Today';
+  if (isYesterday(date)) return 'Yesterday';
+  return format(date, date.getFullYear() === new Date().getFullYear() ? 'MMM d' : 'MMM d, yyyy');
+}
 function Money({ value, formatCurrency, className = '' }) {
   // Cero's formatter returns a React element (SAR uses an SVG mask), not a string.
   // Rendering that element directly preserves the selected currency and prevents .match crashes.
@@ -65,22 +69,26 @@ function getPace({ allocations, categories, transactions, currentMonth }) {
   const projected = average * days;
   const difference = projected - budget;
   const tolerance = Math.max(1, budget * 0.025);
-  return { budget, spent, left: Math.max(0, budget - spent), daily: Math.max(0, (budget - spent) / Math.max(1, daysRemaining)), daysRemaining, average, projected, difference, status: difference > tolerance ? 'over' : difference < -tolerance ? 'under' : 'track', spentPct: Math.min(100, spent / budget * 100), timePct: Math.min(100, day / days * 100), hasDiscretionary: categoryIds.size > 0 };
+  const overBudget = spent > budget + 0.005;
+  return { budget, spent, left: Math.max(0, budget - spent), daily: Math.max(0, (budget - spent) / Math.max(1, daysRemaining)), daysRemaining, average, projected, difference, status: overBudget ? 'overBudget' : difference > tolerance ? 'over' : difference < -tolerance ? 'under' : 'track', spentPct: Math.min(100, spent / budget * 100), timePct: Math.min(100, day / days * 100), hasDiscretionary: categoryIds.size > 0 };
 }
 function SafeCard({ allocations, categories, transactions, currentMonth, formatCurrency }) {
   const pace = getPace({ allocations, categories, transactions, currentMonth });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4"><div className="flex items-center justify-between gap-2"><p className="text-xs font-semibold">Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div><p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p></CardContent></Card>;
   const chip = pace.status === 'over' ? <Money value={pace.difference} formatCurrency={formatCurrency}/> : pace.status === 'under' ? <Money value={Math.abs(pace.difference)} formatCurrency={formatCurrency}/> : null;
+  const fillClass = pace.status === "overBudget" ? "bg-destructive" : pace.status === "over" ? "bg-amber-500" : "bg-primary";
   return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2.5 p-4">
     <div className="flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">Safe to spend today</p>
-      <Badge variant="secondary" className={`max-w-[58%] rounded-full px-2 py-1 text-[10px] ${pace.status === 'over' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>{chip}{chip ? (pace.status === 'over' ? ' over pace' : ' under pace') : 'On track'}</Badge>
+      <Badge variant="secondary" className={`flex max-w-[60%] shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] ${pace.status === 'overBudget' ? 'bg-destructive/10 text-destructive' : pace.status === 'over' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
+        {pace.status === 'overBudget' ? 'Over budget' : <>{chip}<span>{chip ? (pace.status === 'over' ? 'over pace' : 'under pace') : 'On track'}</span></>}
+      </Badge>
     </div>
     <div className="flex items-baseline gap-2"><Money value={pace.daily} formatCurrency={formatCurrency} className="text-3xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
-    <p className="text-xs text-muted-foreground"><Money value={pace.left} formatCurrency={formatCurrency}/> left · {pace.daysRemaining} days to go</p>
-    <div className="relative h-2 rounded-full bg-primary/10">
-      <motion.div className="h-full rounded-full bg-primary" initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
-      <span className="absolute -top-1 h-4 w-[2px] rounded-full bg-foreground/80" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-label="Today pace marker"/>
+    <p className="text-xs text-muted-foreground"><Money value={pace.left} formatCurrency={formatCurrency}/> left · {pace.daysRemaining} {pace.daysRemaining === 1 ? "day" : "days"} to go</p>
+    <div className="relative h-2 rounded-full bg-primary/10" role="progressbar" aria-label="Share of discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
+      <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
+      <span className="absolute -top-1 h-4 w-[2px] rounded-full bg-foreground/80" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
     </div>
     <p className="text-xs text-muted-foreground">Projected <Money value={pace.projected} formatCurrency={formatCurrency}/> at <Money value={pace.average} formatCurrency={formatCurrency}/> a day</p>
     <p className="text-[10px] text-muted-foreground">Discretionary category pace · excludes scheduled recurring payments, transfers, debt and goals</p>
@@ -95,7 +103,7 @@ function Snapshot({ budget, formatCurrency }) {
     { label: 'Planned', value: planned, icon: Receipt, tone: 'text-blue-600 bg-blue-500/10' },
     { label: 'Tracked', value: tracked, icon: WalletCards, tone: 'text-amber-600 bg-amber-500/10' },
   ];
-  return <Section title="Budget snapshot"><div>{rows.map(({ label, value, icon: Icon, tone }) => <div key={label} className="flex min-h-12 items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span><span className="text-sm">{label}</span></div><Money value={value} formatCurrency={formatCurrency} className="shrink-0 text-sm font-medium"/></div>)}</div></Section>;
+  return <Section title="Budget snapshot"><div>{rows.map(({ label, value, icon: Icon, tone }) => <div key={label} className="flex min-h-12 items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span><span className="text-sm">{label}</span></div><Money value={value} formatCurrency={formatCurrency} className={`shrink-0 text-sm font-medium ${label === "Received income" ? "text-emerald-600 dark:text-emerald-400" : label === "Expenses" ? "text-destructive" : label === "Planned" ? "text-blue-600 dark:text-blue-400" : "text-amber-600 dark:text-amber-400"}`}/></div>)}</div></Section>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
   const navigate = useNavigate();
@@ -105,7 +113,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   const goalsById = new Map(goals.map(item => [item.id, item]));
   const rows = [...transactions]
     .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
-    .slice(0, 4);
+    .slice(0, 5);
   return <Section title="Recent transactions" action={<div className="flex items-center"><Action to="/add-transaction"><Plus size={14}/> Add</Action><Action to="/transactions">View all</Action></div>}>
     {rows.length ? <div className="divide-y divide-border/40">{rows.map(transaction =>
       <TransactionRow
@@ -117,6 +125,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
         recurringRule={recurringById.get(transaction.recurring_transaction_id)}
         goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
         formatCurrency={formatCurrency}
+        dateLabel={getDateLabel(transaction.date)}
         compactSourceBadges
         flush
         onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
