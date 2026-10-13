@@ -137,6 +137,7 @@ export default function Dashboard() {
               ) : (
                 <DashboardOverview
                   currentMonth={currentMonth}
+                  allocations={allocations}
                   budget={dashboardBudget}
                   transactions={transactions}
                   categories={categories}
