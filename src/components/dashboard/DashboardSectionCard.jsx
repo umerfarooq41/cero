@@ -13,18 +13,18 @@ export default function DashboardSectionCard({
   return (
     <section
       className={cn(
-        'app-card-surface overflow-hidden rounded-3xl p-3 sm:p-4 md:p-5',
+        'rounded-2xl border border-border/50 bg-card/70 shadow-sm backdrop-blur-xl px-4 pb-3 pt-4',
         className
       )}
     >
-      <div className="mb-3 flex min-w-0 items-start justify-between gap-2.5 sm:mb-4 sm:gap-3">
+      <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
             {Icon ? (
               <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             ) : null}
 
-            <h2 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground md:text-base">
+            <h2 className="min-w-0 truncate text-sm font-semibold tracking-tight text-foreground">
               {title}
             </h2>
           </div>
