@@ -16,5 +16,5 @@ const before=run([]),after=run([tx('food',40,'2026-10-13')]);near(before.allowan
 r=run([tx('food',25,'')]);near(r.spent,0);near(r.spentToday,0);
 r=run([tx('food',100,'2026-09-10')],now,'2026-09');assert.equal(r.daysRemaining,0);near(r.leftToday,0);
 r=run([tx('food',0.1,'2026-10-13'),tx('food',0.2,'2026-10-13')]);near(r.spentToday,0.3);
-r=run([tx('food',4024,'2026-10-13')]);assert.equal(r.status,'track'===r.status?'track':r.status);assert.equal(r.overBudget,false);
+r=run([tx('food',4024,'2026-10-13')]);assert.equal(r.status,'over');assert.equal(r.overBudget,false);
 console.log('dashboard pace edge cases passed');
