@@ -170,7 +170,7 @@ function ChartShell({ className = '' }) {
 
 function ChartHeading({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-3 min-w-0">
+    <div className="mb-2 min-w-0">
       <div className="flex min-w-0 items-center gap-2">
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
@@ -180,7 +180,7 @@ function ChartHeading({ icon: Icon, title, subtitle }) {
       </div>
 
       {subtitle ? (
-        <p className="mt-1 truncate text-left text-xs leading-4 text-muted-foreground">
+        <p className="mt-1 text-left text-[11px] leading-4 text-muted-foreground">
           {subtitle}
         </p>
       ) : null}
@@ -296,7 +296,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
   return (
     <>
-      <div className="mb-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
+      <div className="mb-3 grid gap-3 lg:grid-cols-2">
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-3 sm:p-4">
