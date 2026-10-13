@@ -14,7 +14,7 @@ import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { getGoalProgress, getGoalRemaining, getGoalOccurrenceStatus, formatGoalDate, todayIsoDate } from '@/lib/goals';
 import useGoalItems from '@/components/transactions/useGoalItems';
-import { getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
+import { buildAuthoritativeScheduledAllocations, getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
 
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const cardStyle = 'rounded-2xl border-border/50 bg-card/70 shadow-sm backdrop-blur-xl';
@@ -91,11 +91,12 @@ function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurren
     </SheetContent>
   </Sheet>;
 }
-function SafeCard({ allocations, categories, transactions, currentMonth, formatCurrency }) {
+function SafeCard({ allocations, categories, transactions, recurringTransactions, savingsGoals, allTransactions, currentMonth, formatCurrency }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const categoriesById = useMemo(() => new Map(categories.map(c => [c.id, c])), [categories]);
+  const authoritativeAllocations = buildAuthoritativeScheduledAllocations({ allocations, recurringTransactions, savingsGoals, currentMonth, allTransactions });
   const pace = calculateDiscretionaryPace({
-    allocations: getDiscretionaryAllocations(allocations, categories),
+    allocations: getDiscretionaryAllocations(authoritativeAllocations, categories),
     transactions, currentMonth, now: new Date(),
   });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4">
@@ -117,14 +118,14 @@ function SafeCard({ allocations, categories, transactions, currentMonth, formatC
         <Money value={pace.allowance} formatCurrency={formatCurrency} className="text-[2rem] font-medium leading-none tracking-tight sm:text-4xl"/>
         <span className="text-sm text-muted-foreground">/ day</span>
       </div>
-      <p className="text-xs text-muted-foreground">{pace.overBudget ? 'Budget used up' : <><Money value={pace.leftToday} formatCurrency={formatCurrency}/> left today</>}</p>
+      <p className="text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/></p>
     </div>
     <div className="space-y-1.5">
       <div className="relative h-1.5 rounded-full bg-primary/5" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
         <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
         <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
       </div>
-      <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
+      <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/> discretionary budget</p>
     </div>
     <div className="flex min-h-9 items-center justify-between gap-2">
       {driverName && pace.topDriver.share >= 40
@@ -215,7 +216,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="mx-auto max-w-3xl space-y-3">
-    <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
+    <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
     <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}
     <Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></Entrance>
