@@ -39,6 +39,7 @@ import {
   useRecurringTransactions,
   useSavingsGoals,
   useTransactions,
+  useAllTransactions,
 } from '@/hooks/useBudgetData';
 import { useCurrency } from '@/hooks/useCurrency';
 import {
@@ -165,6 +166,12 @@ function AdvancedFilterSheet({
   setCategoryFilter,
   selectedDate,
   setSelectedDate,
+  dateMode,
+  setDateMode,
+  dateFrom,
+  setDateFrom,
+  dateTo,
+  setDateTo,
   sortBy,
   setSortBy,
   onClearAdvanced,
@@ -240,22 +247,31 @@ function AdvancedFilterSheet({
             </div>
           </section>
 
-          <section className="grid grid-cols-2 gap-2">
-            <div className="min-w-0">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Exact date</label>
-              <Input type="date" value={selectedDate}
-                onChange={(event) => setSelectedDate(event.target.value)}
-                className="h-10 w-full min-w-0 rounded-xl bg-muted/35 px-2 text-xs" />
+          <section>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Date</label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[['any', 'Any date'], ['exact', 'Exact'], ['range', 'Range']].map(([value, label]) => (
+                <button key={value} type="button" onClick={() => setDateMode(value)}
+                  className={cn('h-9 rounded-xl text-xs font-medium', dateMode === value ? 'bg-primary/10 text-primary' : 'bg-muted/35 text-muted-foreground')}>
+                  {label}
+                </button>
+              ))}
             </div>
-            <div className="min-w-0">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Sort by</label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-10 w-full rounded-xl bg-muted/35 px-2.5 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {dateMode === 'exact' && <Input aria-label="Exact date" type="date" value={selectedDate}
+              onChange={(event) => setSelectedDate(event.target.value)} className="mt-2 h-10 rounded-xl bg-muted/35 text-xs"/>}
+            {dateMode === 'range' && <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="min-w-0"><label className="mb-1 block text-[11px] text-muted-foreground">From</label>
+                <Input aria-label="From date" type="date" value={dateFrom} max={dateTo || undefined} onChange={(event) => setDateFrom(event.target.value)} className="h-10 min-w-0 rounded-xl bg-muted/35 px-2 text-xs"/></div>
+              <div className="min-w-0"><label className="mb-1 block text-[11px] text-muted-foreground">To</label>
+                <Input aria-label="To date" type="date" value={dateTo} min={dateFrom || undefined} onChange={(event) => setDateTo(event.target.value)} className="h-10 min-w-0 rounded-xl bg-muted/35 px-2 text-xs"/></div>
+            </div>}
+          </section>
+          <section>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Sort by</label>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-10 w-full rounded-xl bg-muted/35 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>{sortOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+            </Select>
           </section>
         </div>
 
@@ -275,6 +291,9 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const currency = useCurrency();
 
   const [selectedDate, setSelectedDate] = useState('');
+  const [dateMode, setDateMode] = useState('any');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -289,6 +308,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     isError: transactionsError,
     refetch: refetchTransactions,
   } = useTransactions(currentMonth);
+  const { data: allTransactions = [] } = useAllTransactions();
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
@@ -316,7 +336,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     sourceFilter !== 'all',
     accountFilter !== 'all',
     categoryFilter !== 'all',
-    Boolean(selectedDate),
+    (dateMode === "exact" && Boolean(selectedDate)) || (dateMode === "range" && Boolean(dateFrom || dateTo)),
     sortBy !== 'newest',
   ].filter(Boolean).length;
 
@@ -344,13 +364,14 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           onClear: () => setCategoryFilter('all'),
         }
       : null,
-    selectedDate
+    dateMode === "exact" && selectedDate
       ? {
           key: 'date',
           label: format(new Date(selectedDate), 'MMM d'),
-          onClear: () => setSelectedDate(''),
+          onClear: () => { setSelectedDate(''); setDateMode('any'); },
         }
       : null,
+    dateMode === 'range' && (dateFrom || dateTo) ? { key: 'range', label: `${dateFrom || 'Start'} – ${dateTo || 'End'}`, onClear: () => { setDateFrom(''); setDateTo(''); setDateMode('any'); } } : null,
     sortBy !== 'newest'
       ? {
           key: 'sort',
@@ -371,7 +392,8 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const searchValue = search.trim().toLowerCase();
 
   const { filtered, grouped, sortedDates } = useMemo(() => {
-  const filtered = transactions.filter((transaction) => {
+  const visibleTransactions = dateMode === "range" && (dateFrom || dateTo) ? allTransactions : transactions;
+  const filtered = visibleTransactions.filter((transaction) => {
     const category = categoriesById.get(transaction.category_id);
     const fromAccount = accountsById.get(transaction.account_id);
     const toAccount = accountsById.get(transaction.to_account_id);
@@ -397,7 +419,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
       sourceLabels.some((label) => label.includes(searchValue));
 
     const matchType = filterType === 'all' || transaction.type === filterType;
-    const matchDate = !selectedDate || transaction.date === selectedDate;
+    const matchDate = dateMode === "range" ? (!dateFrom || transaction.date >= dateFrom) && (!dateTo || transaction.date <= dateTo) : dateMode !== "exact" || !selectedDate || transaction.date === selectedDate;
     const matchAccount =
       accountFilter === 'all' ||
       transaction.account_id === accountFilter ||
@@ -452,7 +474,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   });
     return { filtered, grouped, sortedDates };
   }, [
-    transactions, accountsById, categoriesById, searchValue,
+    transactions, allTransactions, dateMode, dateFrom, dateTo, accountsById, categoriesById, searchValue,
     filterType, selectedDate, accountFilter, categoryFilter, sourceFilter, sortBy,
   ]);
 
@@ -463,6 +485,9 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     setAccountFilter('all');
     setCategoryFilter('all');
     setSelectedDate('');
+    setDateMode('any');
+    setDateFrom('');
+    setDateTo('');
     setSortBy('newest');
   };
 
@@ -509,6 +534,12 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
           selectedDate={selectedDate}
+          dateMode={dateMode}
+          setDateMode={setDateMode}
+          dateFrom={dateFrom}
+          setDateFrom={setDateFrom}
+          dateTo={dateTo}
+          setDateTo={setDateTo}
           setSelectedDate={(date) => {
             setSelectedDate(date);
             if (date) onMonthChange(format(new Date(date), 'yyyy-MM'));
