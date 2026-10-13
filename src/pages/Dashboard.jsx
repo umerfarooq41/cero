@@ -5,8 +5,7 @@ import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import DashboardReflect from '@/components/dashboard/DashboardReflect';
 import DashboardTabs from '@/components/dashboard/DashboardTabs';
 
-import { Settings, WifiOff } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import PageHeader from '@/components/layout/PageHeader';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
@@ -28,15 +27,12 @@ const validTabs = new Set(['overview', 'reflect']);
 
 export default function Dashboard() {
   const scope = usePageEntrance();
-  const [online, setOnline] = useState(() => navigator.onLine);
   const [today, setToday] = useState(() => new Date());
   useEffect(() => {
-    const sync = () => { setOnline(navigator.onLine); setToday(new Date()); };
+    const sync = () => setToday(new Date());
     const timer = window.setInterval(sync, 60000);
-    window.addEventListener('online', sync);
-    window.addEventListener('offline', sync);
     document.addEventListener('visibilitychange', sync);
-    return () => { window.clearInterval(timer); window.removeEventListener('online', sync); window.removeEventListener('offline', sync); document.removeEventListener('visibilitychange', sync); };
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', sync); };
   }, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab');
@@ -108,17 +104,9 @@ export default function Dashboard() {
   if (isBudgetLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
-        <div className="sticky top-0 z-30 border-b border-border/30 bg-background/75 backdrop-blur-xl">
-        <div className="mx-auto flex h-9 max-w-3xl items-center justify-between px-4">
-          <span className="text-xs font-medium sm:text-sm">{format(today, 'EEEE, MMMM d, yyyy')}</span>
-          <div className="flex items-center gap-1">
-            {!online && <WifiOff className="size-4 text-muted-foreground" aria-label="Offline" />}
-            <Link to="/settings" aria-label="Settings" className="grid size-9 place-items-center rounded-xl"><Settings className="size-5" /></Link>
-          </div>
-        </div>
-        <div className="mx-auto max-w-3xl px-4 pb-1"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
-      </div>
-        <main className="mx-auto w-full max-w-7xl space-y-4 px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+        <PageHeader title={format(today, 'EEEE, MMMM d, yyyy')} className="[&_h1]:text-sm [&_h1]:font-semibold [&_h1]:tracking-normal sm:[&_h1]:text-base [&_.app-page-header]:bg-transparent" />
+        <main className="mx-auto w-full max-w-7xl space-y-3 px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+          <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
           <Skeleton className="h-28 w-full rounded-2xl" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
@@ -133,18 +121,10 @@ export default function Dashboard() {
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <div className="sticky top-0 z-30 border-b border-border/30 bg-background/75 backdrop-blur-xl">
-        <div className="mx-auto flex h-9 max-w-3xl items-center justify-between px-4">
-          <span className="text-xs font-medium sm:text-sm">{format(today, 'EEEE, MMMM d, yyyy')}</span>
-          <div className="flex items-center gap-1">
-            {!online && <WifiOff className="size-4 text-muted-foreground" aria-label="Offline" />}
-            <Link to="/settings" aria-label="Settings" className="grid size-9 place-items-center rounded-xl"><Settings className="size-5" /></Link>
-          </div>
-        </div>
-        <div className="mx-auto max-w-3xl px-4 pb-1"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
-      </div>
+      <PageHeader title={format(today, 'EEEE, MMMM d, yyyy')} className="[&_h1]:text-sm [&_h1]:font-semibold [&_h1]:tracking-normal sm:[&_h1]:text-base" />
 
-      <main className="mx-auto w-full max-w-7xl px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+      <main className="mx-auto w-full max-w-7xl px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+        <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
         
 
         
