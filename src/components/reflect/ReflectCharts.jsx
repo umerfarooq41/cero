@@ -315,7 +315,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 }
               />
 
-              <div className={`${CHART_WRAP_CLASS} h-52 min-h-[208px] sm:h-56 sm:min-h-[224px]`}>
+              <div className={`${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -356,7 +356,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         cursor={false}
                         contentStyle={{
                           ...tooltipStyle,
-                          maxWidth: 150,
+                          maxWidth: 220,
                           whiteSpace: 'normal',
                         }}
                         formatter={(value) => (
