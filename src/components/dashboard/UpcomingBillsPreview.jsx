@@ -81,12 +81,14 @@ export default function UpcomingBillsPreview({
   accounts = [],
   categories = [],
   transactions = [],
+  currentMonth,
   formatCurrency,
   limit = 3,
   className,
 }) {
   const previewRules = sortRecurringByDueDate(recurringTransactions)
     .filter((rule) => rule.is_active !== false)
+    .filter((rule) => String(rule.next_due_date || "").slice(0, 7) === currentMonth)
     .filter((rule) => !isRuleAlreadyPosted(rule, transactions))
     .slice(0, limit);
 
@@ -109,9 +111,9 @@ export default function UpcomingBillsPreview({
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Clock3 className="h-5 w-5" />
           </div>
-          <p className="mt-3 text-sm font-semibold text-foreground">No upcoming items</p>
+          <p className="mt-3 text-sm font-semibold text-foreground">No upcoming items this month</p>
           <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
-            Add recurring rules in Manage Plan, then post them from Transactions → Scheduled.
+            Only unpaid recurring bills and income due this month appear here.
           </p>
         </div>
       ) : (
