@@ -1,12 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format } from 'date-fns';
-import { PencilLine } from 'lucide-react';
+import { format, addMonths, subMonths } from 'date-fns';
+import { PencilLine, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/layout/PageHeader';
-import MonthSelector from '@/components/shared/MonthSelector';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import PlanOverview from '@/components/plan/PlanOverview';
 import {
@@ -135,11 +133,22 @@ export default function Plan() {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
         <PageHeader
-          title="Plan"
-          
-        />
+        title={
+          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg">
+            <button type="button" aria-label="Previous month" className="grid size-8 shrink-0 place-items-center rounded-full hover:bg-muted/60" onClick={() => handleMonthChange(format(subMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronLeft className="size-4" /></button>
+            <span className="min-w-0 truncate whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
+            <button type="button" aria-label="Next month" className="grid size-8 shrink-0 place-items-center rounded-full hover:bg-muted/60" onClick={() => handleMonthChange(format(addMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronRight className="size-4" /></button>
+          </span>
+        }
+        action={
+          <div className="flex items-center gap-1">
+            <button type="button" aria-label="Edit monthly plan" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
+            {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
+            <button type="button" aria-label="Open settings" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
+          </div>
+        }
+      />
         <main className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:py-8">
-          <Skeleton className="mx-auto h-12 w-56 rounded-xl" />
           <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-72 w-full rounded-2xl" />
         </main>
@@ -150,35 +159,23 @@ export default function Plan() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        title="Plan"
-        
+        title={
+          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg">
+            <button type="button" aria-label="Previous month" className="grid size-8 shrink-0 place-items-center rounded-full hover:bg-muted/60" onClick={() => handleMonthChange(format(subMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronLeft className="size-4" /></button>
+            <span className="min-w-0 truncate whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
+            <button type="button" aria-label="Next month" className="grid size-8 shrink-0 place-items-center rounded-full hover:bg-muted/60" onClick={() => handleMonthChange(format(addMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronRight className="size-4" /></button>
+          </span>
+        }
+        action={
+          <div className="flex items-center gap-1">
+            <button type="button" aria-label="Edit monthly plan" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
+            {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
+            <button type="button" aria-label="Open settings" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
+          </div>
+        }
       />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:py-6">
-        <div className="mb-3 animate-child">
-          <div className="flex items-center justify-center">
-            <MonthSelector
-              currentMonth={currentMonth}
-              onChange={handleMonthChange}
-              subtitle=""
-              trailingAction={
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-xl"
-                  onClick={() =>
-                    navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)
-                  }
-                  aria-label="Manage monthly plan"
-                >
-                  <PencilLine className="h-4 w-4" />
-                </Button>
-              }
-            />
-          </div>
-        </div>
-
         <div className="animate-child space-y-3">
           <LeftToAllocateBanner
             leftToAllocate={leftToAllocate}
