@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { getGoalProgress, getGoalRemaining, isGoalPlannedForMonth, sortGoalsByPriority } from '@/lib/goals';
+import { getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
 
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const cardStyle = 'rounded-2xl border-border/50 bg-card/70 shadow-sm backdrop-blur-xl';
@@ -32,21 +33,57 @@ function Section({ title, action, children }) {
 function Action({ to, children }) {
   return <Button asChild variant="ghost" size="sm" className="min-h-11 px-2 text-xs"><Link to={to}>{children}</Link></Button>;
 }
-function SafeCard({ budget, formatCurrency }) {
-  // This is NOT a safe-to-spend estimate. Display only known monthly budget
-  // numbers until discretionary allocations and protected funds are reconciled.
-  const planned = Math.max(0, num(budget.totalPlannedExpenses));
-  const spent = Math.max(0, num(budget.totalExpenses));
-  const remaining = Math.max(0, planned - spent);
-  const percentage = planned > 0 ? Math.min(100, spent / planned * 100) : 0;
-  return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2.5 p-3.5">
+function getPace({ allocations, categories, transactions, currentMonth }) {
+  // Only category-based expense allocations are discretionary candidates.
+  // Recurring/fixed rule allocations, savings and debt are deliberately excluded.
+  const categoriesById = new Map(categories.map(c => [c.id, c]));
+  const discretionary = allocations.filter(a =>
+    normalizeSourceType(getAllocationSourceType(a)) === 'category' &&
+    getPlanCategoryType(categoriesById.get(a.category_id), categories) === 'expense' &&
+    Number(a.planned_amount) > 0
+  );
+  const categoryIds = new Set(discretionary.map(a => a.category_id));
+  const budget = discretionary.reduce((sum, a) => sum + num(a.planned_amount), 0);
+  const spent = transactions.filter(t =>
+    t.type === 'expense' &&
+    categoryIds.has(t.category_id) &&
+    !t.recurring_transaction_id &&
+    !t.recurring_posted_for_date &&
+    !t.goal_contribution_id &&
+    !t.savings_goal_id &&
+    !t.goal_id
+  ).reduce((sum, t) => sum + Math.max(0, num(t.amount)), 0);
+  const now = new Date();
+  const [year, month] = String(currentMonth || '').split('-').map(Number);
+  const validPeriod = Number.isInteger(year) && Number.isInteger(month) && month >= 1 && month <= 12;
+  if (!validPeriod || budget <= 0) return null;
+  const days = new Date(year, month, 0).getDate();
+  const day = now.getFullYear() === year && now.getMonth() + 1 === month ? now.getDate() : (now < new Date(year, month - 1, 1) ? 0 : days);
+  const daysRemaining = Math.max(0, days - day + (day > 0 && day <= days ? 1 : 0));
+  const elapsed = Math.max(1, day);
+  const average = spent / elapsed;
+  const projected = average * days;
+  const difference = projected - budget;
+  const tolerance = Math.max(1, budget * 0.025);
+  return { budget, spent, left: Math.max(0, budget - spent), daily: Math.max(0, (budget - spent) / Math.max(1, daysRemaining)), daysRemaining, average, projected, difference, status: difference > tolerance ? 'over' : difference < -tolerance ? 'under' : 'track', spentPct: Math.min(100, spent / budget * 100), timePct: Math.min(100, day / days * 100), hasDiscretionary: categoryIds.size > 0 };
+}
+function SafeCard({ allocations, categories, transactions, currentMonth, formatCurrency }) {
+  const pace = getPace({ allocations, categories, transactions, currentMonth });
+  if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4"><div className="flex items-center justify-between gap-2"><p className="text-xs font-semibold">Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div><p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p></CardContent></Card>;
+  const chip = pace.status === 'over' ? <Money value={pace.difference} formatCurrency={formatCurrency}/> : pace.status === 'under' ? <Money value={Math.abs(pace.difference)} formatCurrency={formatCurrency}/> : null;
+  return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2.5 p-4">
     <div className="flex items-center justify-between gap-2">
-      <p className="text-xs font-semibold text-muted-foreground">Monthly expense budget remaining</p>
-      <span className="text-[10px] text-muted-foreground">{planned > 0 ? Math.round(percentage) + '% spent' : 'No expense plan'}</span>
+      <p className="text-sm font-semibold">Safe to spend today</p>
+      <Badge variant="secondary" className={`max-w-[58%] rounded-full px-2 py-1 text-[10px] ${pace.status === 'over' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>{chip}{chip ? (pace.status === 'over' ? ' over pace' : ' under pace') : 'On track'}</Badge>
     </div>
-    <Money value={remaining} formatCurrency={formatCurrency} className="text-2xl font-semibold leading-tight"/>
-    <div className="h-1.5 overflow-hidden rounded-full bg-primary/10"><motion.div className="h-full rounded-full bg-primary" initial={{width: 0}} animate={{width: percentage + '%'}} transition={{duration: 0.45}}/></div>
-    <p className="text-[11px] text-muted-foreground">Expense plan only · Not a safe-to-spend allowance</p>
+    <div className="flex items-baseline gap-2"><Money value={pace.daily} formatCurrency={formatCurrency} className="text-3xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
+    <p className="text-xs text-muted-foreground"><Money value={pace.left} formatCurrency={formatCurrency}/> left · {pace.daysRemaining} days to go</p>
+    <div className="relative h-2 rounded-full bg-primary/10">
+      <motion.div className="h-full rounded-full bg-primary" initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
+      <span className="absolute -top-1 h-4 w-[2px] rounded-full bg-foreground/80" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-label="Today pace marker"/>
+    </div>
+    <p className="text-xs text-muted-foreground">Projected <Money value={pace.projected} formatCurrency={formatCurrency}/> at <Money value={pace.average} formatCurrency={formatCurrency}/> a day</p>
+    <p className="text-[10px] text-muted-foreground">Discretionary category pace · excludes scheduled recurring payments, transfers, debt and goals</p>
   </CardContent></Card>;
 }
 function Snapshot({ budget, formatCurrency }) {
@@ -87,7 +124,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
     )}</div> : <p className="py-5 text-center text-sm text-muted-foreground">No transactions this month.</p>}
   </Section>;
 }
-export default function DashboardOverview({ currentMonth, budget = {}, transactions = [], categories = [], accounts = [], recurringTransactions = [], goals = [], formatCurrency }) {
+export default function DashboardOverview({ currentMonth, allocations = [], budget = {}, transactions = [], categories = [], accounts = [], recurringTransactions = [], goals = [], formatCurrency }) {
   // Retain the exact goal funding/progress calculations used throughout Cero.
   // A database goal is not necessarily an active, scheduled goal this month.
   const activeGoal = sortGoalsByPriority(goals.filter(goal =>
@@ -98,7 +135,7 @@ export default function DashboardOverview({ currentMonth, budget = {}, transacti
   ))[0] || null;
   const progress = activeGoal ? getGoalProgress(activeGoal) : 0;
   return <div className="mx-auto max-w-3xl space-y-3">
-    <Entrance index={0}><SafeCard budget={budget} formatCurrency={formatCurrency}/></Entrance>
+    <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
     <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="text-sm font-medium"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/> left to allocate</span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
     <Entrance index={3}><div className="[&_.dashboard-section-subtitle]:hidden"><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></div></Entrance>
