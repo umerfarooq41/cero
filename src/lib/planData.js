@@ -470,7 +470,7 @@ function getScheduledGoalAmount(goal, currentMonth) {
   return total;
 }
 
-function buildAuthoritativeScheduledAllocations({
+export function buildAuthoritativeScheduledAllocations({
   recurringTransactions = [],
   savingsGoals = [],
   allocations = [],
