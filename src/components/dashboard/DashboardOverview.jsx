@@ -1,11 +1,15 @@
 
 import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ChevronRight, Plus, Receipt, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import CategoryIcon from '@/components/shared/CategoryIcon';
+import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { getGoalProgress, getGoalRemaining, isGoalPlannedForMonth, sortGoalsByPriority } from '@/lib/goals';
@@ -37,61 +41,98 @@ function Section({ title, action, children }) {
 function Action({ to, children }) {
   return <Button asChild variant="ghost" size="sm" className="min-h-11 px-2 text-xs"><Link to={to}>{children}</Link></Button>;
 }
-function getPace({ allocations, categories, transactions, currentMonth }) {
-  // Only category-based expense allocations are discretionary candidates.
-  // Recurring/fixed rule allocations, savings and debt are deliberately excluded.
+function getDiscretionaryAllocations(allocations, categories) {
   const categoriesById = new Map(categories.map(c => [c.id, c]));
-  const discretionary = allocations.filter(a =>
+  return allocations.filter(a =>
     normalizeSourceType(getAllocationSourceType(a)) === 'category' &&
     getPlanCategoryType(categoriesById.get(a.category_id), categories) === 'expense' &&
     Number(a.planned_amount) > 0
   );
-  const categoryIds = new Set(discretionary.map(a => a.category_id));
-  const budget = discretionary.reduce((sum, a) => sum + num(a.planned_amount), 0);
-  const spent = transactions.filter(t =>
-    t.type === 'expense' &&
-    categoryIds.has(t.category_id) &&
-    !t.recurring_transaction_id &&
-    !t.recurring_posted_for_date &&
-    !t.goal_contribution_id &&
-    !t.savings_goal_id &&
-    !t.goal_id
-  ).reduce((sum, t) => sum + Math.max(0, num(t.amount)), 0);
-  const now = new Date();
-  const [year, month] = String(currentMonth || '').split('-').map(Number);
-  const validPeriod = Number.isInteger(year) && Number.isInteger(month) && month >= 1 && month <= 12;
-  if (!validPeriod || budget <= 0) return null;
-  const days = new Date(year, month, 0).getDate();
-  const day = now.getFullYear() === year && now.getMonth() + 1 === month ? now.getDate() : (now < new Date(year, month - 1, 1) ? 0 : days);
-  const daysRemaining = Math.max(0, days - day + (day > 0 && day <= days ? 1 : 0));
-  const elapsed = Math.max(1, day);
-  const average = spent / elapsed;
-  const projected = average * days;
-  const difference = projected - budget;
-  const tolerance = Math.max(1, budget * 0.025);
-  const overBudget = spent > budget + 0.005;
-  return { budget, spent, left: Math.max(0, budget - spent), daily: Math.max(0, (budget - spent) / Math.max(1, daysRemaining)), daysRemaining, average, projected, difference, status: overBudget ? 'overBudget' : difference > tolerance ? 'over' : difference < -tolerance ? 'under' : 'track', spentPct: Math.min(100, spent / budget * 100), timePct: Math.min(100, day / days * 100), hasDiscretionary: categoryIds.size > 0 };
+}
+function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurrency }) {
+  return <Sheet open={open} onOpenChange={onOpenChange}>
+    <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-3xl px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5">
+      <SheetHeader className="pr-8 text-left">
+        <SheetTitle className="text-base">Discretionary spending</SheetTitle>
+        <SheetDescription className="text-xs">Expense-category allocations only. Recurring bills, transfers, debt and goals are funded separately and excluded.</SheetDescription>
+      </SheetHeader>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        {[
+          ['Spent', pace.spent],
+          ['Budget', pace.budget],
+          [pace.overBudget ? 'Over by' : 'Remaining', pace.overBudget ? pace.spent - pace.budget : pace.remaining],
+        ].map(([label, value]) => <div key={label} className="rounded-xl bg-secondary/60 px-2 py-2.5">
+          <p className="text-[11px] text-muted-foreground">{label}</p>
+          <Money value={value} formatCurrency={formatCurrency} className="text-sm font-semibold"/>
+        </div>)}
+      </div>
+      <div className="mt-4 divide-y divide-border/40">
+        {pace.categories.map(item => {
+          const category = categoriesById.get(item.categoryId);
+          const over = item.remaining < 0;
+          return <div key={item.categoryId} className="py-3">
+            <div className="flex items-center gap-3">
+              <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{category?.name || 'Uncategorized'}</p>
+                <p className="text-xs text-muted-foreground"><Money value={item.spent} formatCurrency={formatCurrency}/> of <Money value={item.planned} formatCurrency={formatCurrency}/> · {Math.round(item.percentUsed)}%</p>
+              </div>
+              <div className={`shrink-0 text-right text-xs font-medium ${over ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {over ? <>Over by <Money value={Math.abs(item.remaining)} formatCurrency={formatCurrency}/></> : <><Money value={item.remaining} formatCurrency={formatCurrency}/> left</>}
+              </div>
+            </div>
+            <div className="mt-2 h-1.5 rounded-full bg-primary/10">
+              <div className={`h-full rounded-full ${over ? 'bg-destructive' : item.percentUsed >= 85 ? 'bg-amber-500' : 'bg-primary'}`} style={{width: `${Math.min(100, item.percentUsed)}%`}}/>
+            </div>
+          </div>;
+        })}
+      </div>
+    </SheetContent>
+  </Sheet>;
 }
 function SafeCard({ allocations, categories, transactions, currentMonth, formatCurrency }) {
-  const pace = getPace({ allocations, categories, transactions, currentMonth });
-  if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4"><div className="flex items-center justify-between gap-2"><p className="text-xs font-semibold">Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div><p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p></CardContent></Card>;
-  const chip = pace.status === 'over' ? <Money value={pace.difference} formatCurrency={formatCurrency}/> : pace.status === 'under' ? <Money value={Math.abs(pace.difference)} formatCurrency={formatCurrency}/> : null;
-  const fillClass = pace.status === "overBudget" ? "bg-destructive" : pace.status === "over" ? "bg-amber-500" : "bg-primary";
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const categoriesById = useMemo(() => new Map(categories.map(c => [c.id, c])), [categories]);
+  const pace = calculateDiscretionaryPace({
+    allocations: getDiscretionaryAllocations(allocations, categories),
+    transactions, currentMonth, now: new Date(),
+  });
+  if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4">
+    <div className="flex items-center justify-between gap-2"><p className="text-sm font-semibold">Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
+    <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
+  </CardContent></Card>;
+  const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
+  const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
+  const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
+  const chipAmount = pace.status === 'over' ? pace.difference : pace.status === 'under' ? Math.abs(pace.difference) : null;
   return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2.5 p-4">
     <div className="flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">Safe to spend today</p>
       <Badge variant="secondary" className={`flex max-w-[60%] shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] ${pace.status === 'overBudget' ? 'bg-destructive/10 text-destructive' : pace.status === 'over' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
-        {pace.status === 'overBudget' ? 'Over budget' : <>{chip}<span>{chip ? (pace.status === 'over' ? 'over pace' : 'under pace') : 'On track'}</span></>}
+        {chipAmount !== null && <Money value={chipAmount} formatCurrency={formatCurrency}/>}<span>{chip}</span>
       </Badge>
     </div>
-    <div className="flex items-baseline gap-2"><Money value={pace.daily} formatCurrency={formatCurrency} className="text-3xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
-    <p className="text-xs text-muted-foreground"><Money value={pace.left} formatCurrency={formatCurrency}/> left · {pace.daysRemaining} {pace.daysRemaining === 1 ? "day" : "days"} to go</p>
-    <div className="relative h-2 rounded-full bg-primary/10" role="progressbar" aria-label="Share of discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
-      <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
-      <span className="absolute -top-1 h-4 w-[2px] rounded-full bg-foreground/80" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
+    <div>
+      <div className="flex items-baseline gap-2"><Money value={pace.allowance} formatCurrency={formatCurrency} className="text-3xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
+      <p className="mt-1.5 text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/> · {pace.overBudget ? <span className="font-medium text-destructive">Budget used up</span> : <span className="font-medium text-foreground"><Money value={pace.leftToday} formatCurrency={formatCurrency}/> left today</span>}</p>
     </div>
-    <p className="text-xs text-muted-foreground">Projected <Money value={pace.projected} formatCurrency={formatCurrency}/> at <Money value={pace.average} formatCurrency={formatCurrency}/> a day</p>
-    <p className="text-[10px] text-muted-foreground">Discretionary category pace · excludes scheduled recurring payments, transfers, debt and goals</p>
+    <div>
+      <div className="relative h-2 rounded-full bg-primary/10" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
+        <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
+        <span className="absolute -top-1 h-4 w-[2px] rounded-full bg-foreground/80" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
+      </div>
+      <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></span>
+        <span className="shrink-0 font-medium tabular-nums">{Math.round(pace.spentPct)}%</span>
+      </div>
+    </div>
+    <p className="text-xs text-muted-foreground">You're spending <Money value={pace.averageDaily} formatCurrency={formatCurrency} className="font-medium"/>/day · safe is <Money value={pace.allowance} formatCurrency={formatCurrency} className="font-medium"/></p>
+    {driverName && pace.topDriver.share >= 40 && <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">{driverName}</span> is {Math.round(pace.topDriver.share)}% of discretionary spending</p>}
+    <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-1">
+      <p className="min-w-0 truncate text-xs text-muted-foreground">Projected <Money value={pace.projected} formatCurrency={formatCurrency}/> at this pace</p>
+      <Button variant="ghost" size="sm" className="-mr-2 min-h-11 shrink-0 gap-0.5 px-2 text-xs" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={14}/></Button>
+    </div>
+    <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
   </CardContent></Card>;
 }
 function Snapshot({ budget, formatCurrency }) {
