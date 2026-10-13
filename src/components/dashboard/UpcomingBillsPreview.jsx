@@ -16,6 +16,7 @@ import {
   formatRecurringDate,
   getRecurringFrequencyLabel,
   getRecurringStatus,
+  todayIsoDate,
   sortRecurringByDueDate,
 } from '@/lib/recurringTransactions';
 import { cn } from '@/lib/utils';
@@ -88,7 +89,7 @@ export default function UpcomingBillsPreview({
 }) {
   const previewRules = sortRecurringByDueDate(recurringTransactions)
     .filter((rule) => rule.is_active !== false)
-    .filter((rule) => String(rule.next_due_date || "").slice(0, 7) === currentMonth)
+    .filter((rule) => { const days = getRecurringStatus(rule, todayIsoDate()).daysUntilDue; return days !== null && days <= 10; })
     .filter((rule) => !isRuleAlreadyPosted(rule, transactions))
     .slice(0, limit);
 
@@ -111,9 +112,9 @@ export default function UpcomingBillsPreview({
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Clock3 className="h-5 w-5" />
           </div>
-          <p className="mt-3 text-sm font-semibold text-foreground">No upcoming items this month</p>
+          <p className="mt-3 text-sm font-semibold text-foreground">Nothing due in the next 10 days</p>
           <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
-            Only unpaid recurring bills and income due this month appear here.
+            Unpaid bills and income due within 10 days appear here. Overdue items remain visible.
           </p>
         </div>
       ) : (
