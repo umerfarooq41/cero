@@ -108,15 +108,15 @@ export default function Dashboard() {
   if (isBudgetLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
-        <div className="sticky top-0 z-30 border-b border-border/40 bg-background/85 backdrop-blur-xl" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="mx-auto flex min-h-12 max-w-3xl items-center justify-between px-4">
+        <div className="sticky top-0 z-30 border-b border-border/30 bg-background/75 backdrop-blur-xl">
+        <div className="mx-auto flex h-9 max-w-3xl items-center justify-between px-4">
           <span className="text-xs font-medium sm:text-sm">{format(today, 'EEEE, MMMM d, yyyy')}</span>
           <div className="flex items-center gap-1">
             {!online && <WifiOff className="size-4 text-muted-foreground" aria-label="Offline" />}
-            <Link to="/settings" aria-label="Settings" className="grid size-11 place-items-center rounded-xl"><Settings className="size-5" /></Link>
+            <Link to="/settings" aria-label="Settings" className="grid size-9 place-items-center rounded-xl"><Settings className="size-5" /></Link>
           </div>
         </div>
-        <div className="mx-auto max-w-3xl px-4 pb-2"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
+        <div className="mx-auto max-w-3xl px-4 pb-1"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
       </div>
         <main className="mx-auto w-full max-w-7xl space-y-4 px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
           <Skeleton className="h-28 w-full rounded-2xl" />
@@ -133,15 +133,15 @@ export default function Dashboard() {
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <div className="sticky top-0 z-30 border-b border-border/40 bg-background/85 backdrop-blur-xl" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="mx-auto flex min-h-12 max-w-3xl items-center justify-between px-4">
+      <div className="sticky top-0 z-30 border-b border-border/30 bg-background/75 backdrop-blur-xl">
+        <div className="mx-auto flex h-9 max-w-3xl items-center justify-between px-4">
           <span className="text-xs font-medium sm:text-sm">{format(today, 'EEEE, MMMM d, yyyy')}</span>
           <div className="flex items-center gap-1">
             {!online && <WifiOff className="size-4 text-muted-foreground" aria-label="Offline" />}
-            <Link to="/settings" aria-label="Settings" className="grid size-11 place-items-center rounded-xl"><Settings className="size-5" /></Link>
+            <Link to="/settings" aria-label="Settings" className="grid size-9 place-items-center rounded-xl"><Settings className="size-5" /></Link>
           </div>
         </div>
-        <div className="mx-auto max-w-3xl px-4 pb-2"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
+        <div className="mx-auto max-w-3xl px-4 pb-1"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
       </div>
 
       <main className="mx-auto w-full max-w-7xl px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
@@ -149,7 +149,7 @@ export default function Dashboard() {
 
         
 
-        <div className="mt-4">
+        <div className="mt-1">
           <AnimatePresence mode="wait" initial={false}>
             <AppTabPanel key={activeTab}>
               {activeTab === 'reflect' ? (
