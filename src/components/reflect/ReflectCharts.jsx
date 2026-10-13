@@ -207,6 +207,17 @@ export default function ReflectCharts({
     : [];
   const safeSpendingTrend = Array.isArray(spendingTrend) ? spendingTrend : [];
   const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedCashFlow, setSelectedCashFlow] = useState(null);
+  const dailyChartRef = useRef(null);
+  const selectDailyAt = (clientX) => {
+    const rect = dailyChartRef.current?.getBoundingClientRect();
+    if (!rect || safeSpendingTrend.length === 0) return;
+    const plotLeft = rect.left + 70;
+    const plotWidth = Math.max(1, rect.width - 78);
+    const ratio = Math.max(0, Math.min(1, (clientX - plotLeft) / plotWidth));
+    const index = Math.round(ratio * (safeSpendingTrend.length - 1));
+    setSelectedDay(safeSpendingTrend[index].label);
+  };
 
   const safeEfficiency = Number.isFinite(Number(efficiency))
     ? Number(efficiency)
@@ -266,9 +277,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
     const withPercents = sorted.map((item, index) => ({
       ...item,
       color: getThemeChartColor(index),
-      percent: Number(item.planned || 0) > 0
-        ? (Number(item.value || 0) / Number(item.planned)) * 100
-        : (Math.max(...sorted.map(c => Number(c.value || 0)), 1) > 0 ? Number(item.value || 0) / Math.max(...sorted.map(c => Number(c.value || 0)), 1) * 100 : 0),
+      percent: totalCategorySpend > 0 ? (Number(item.value || 0) / totalCategorySpend) * 100 : 0,
     }));
 
     if (withPercents.length <= 4) {
@@ -318,11 +327,17 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 }
               />
 
+              {selectedCashFlow && <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                <span className="font-semibold">{selectedCashFlow.month}</span>
+                <span>Income: <CurrencyAmount amount={selectedCashFlow.income} currency={currency} compact /></span>
+                <span>Expenses: <CurrencyAmount amount={selectedCashFlow.expenses} currency={currency} compact /></span>
+              </div>}
               <div className={`${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={safeCashFlow}
+                      onClick={state => { if (state?.activePayload?.[0]?.payload) setSelectedCashFlow(state.activePayload[0].payload); }}
                       barGap={6}
                       barCategoryGap="32%"
                       margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
@@ -411,7 +426,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 icon={ChartPie}
                 tone="warning"
                 title="Spending categories"
-                subtitle="Budget usage where planned; otherwise relative spending"
+                subtitle="Share of total tracked expenses"
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
@@ -422,7 +437,6 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         <span className="min-w-0 truncate text-foreground">{category.name}</span>
                         <span className="shrink-0 font-semibold tabular-nums"><CurrencyAmount amount={category.value} currency={currency} compact /></span>
                       </div>
-                      {category.planned > 0 ? <p className="text-[10px] text-muted-foreground">of <CurrencyAmount amount={category.planned} currency={currency} compact /> planned · {Math.round(category.percent)}% used</p> : null}
                       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                         <div className="h-full rounded-full" style={{ width: `${Math.min(100, category.percent)}%`, backgroundColor: category.color }} />
                       </div>
@@ -468,7 +482,10 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <p className="text-lg font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></p>
                   </div>
                 </div> : null}
-                <div className={`${CHART_WRAP_CLASS} h-48 min-h-[192px] touch-pan-y sm:h-52 sm:min-h-[208px]`}>
+                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px]`}
+                  onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
+                  onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
+                >
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
@@ -544,6 +561,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   ) : (
                     <ChartShell className="h-full" />
                   )}
+                  <div className="absolute inset-0 z-10 touch-pan-y" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }} onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }} />
                 </div>
                 </>
               ) : (
