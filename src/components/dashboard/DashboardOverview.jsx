@@ -1,84 +1,350 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'framer-motion';
-import { format, parseISO } from 'date-fns';
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ChevronRight, Plus, Receipt, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { sortRecurringByDueDate } from '@/lib/recurringTransactions';
+import {
+  ArrowRight,
+  Landmark,
+  ListPlus,
+  Plus,
+  Receipt,
+  SlidersHorizontal,
+  TrendingUp,
+  Target,
+  TrendingDown,
+  WalletCards,
+} from 'lucide-react';
 
-const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const cardStyle = 'rounded-2xl border-border/50 bg-card/70 shadow-sm backdrop-blur-xl';
-const amountStyle = 'font-["DM_Mono",monospace] tabular-nums tracking-tight';
-const formatDate = value => {
-  if (!value || !/^\\d{4}-\\d{2}-\\d{2}/.test(String(value))) return '—';
-  return format(parseISO(String(value).slice(0, 10)), 'MMM d');
-};
-function Money({ value, formatCurrency, className = '' }) {
-  const str = formatCurrency(num(value));
-  const match = str.match(/[-−+]?\\d[\\d\\s,.\u0660-\u0669]*/);
-  if (!match || match.index == null) return <span className={className}>{str}</span>;
-  const start = match.index;
-  return <span className={className}><span className="font-sans">{str.slice(0, start)}</span><span className={amountStyle}>{match[0]}</span><span className="font-sans">{str.slice(start + match[0].length)}</span></span>;
+import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
+import TransactionRow from '@/components/transactions/TransactionRow';
+import SpendingVelocityWidget from '@/components/dashboard/SpendingVelocityWidget';
+import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
+import TopGoalPreview from '@/components/dashboard/TopGoalPreview';
+import { Button } from '@/components/ui/button';
+import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard';
+import { cn } from '@/lib/utils';
+
+function DashboardCard(props) {
+  return <DashboardSectionCard {...props} />;
 }
-function Entrance({ children, index }) {
-  const reduced = useReducedMotion();
-  return <motion.div initial={reduced ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 190, damping: 24, delay: index * 0.06 }}>{children}</motion.div>;
+
+function EmptyDashboardState({ icon: Icon, title, description, action }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border/70 app-card-surface-soft px-4 py-6 text-center">
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+      </div>
+
+      <p className="mt-3 text-sm font-semibold text-foreground">{title}</p>
+
+      <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
+        {description}
+      </p>
+
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
 }
-function Section({ title, action, children }) {
-  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 pb-1 pt-4"><CardTitle className="text-sm font-semibold">{title}</CardTitle>{action}</CardHeader><CardContent className="px-4 pb-3 pt-1">{children}</CardContent></Card>;
+
+function QuickAction({ to, icon: Icon, title, subtitle }) {
+  return (
+    <Link
+      to={to}
+      className="group rounded-2xl app-card-surface-soft p-3 transition-all hover:-translate-y-0.5 hover:brightness-105 hover:shadow-sm sm:p-4"
+    >
+      <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-10 sm:w-10 sm:rounded-2xl">
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+        </span>
+
+        <div className="min-w-0">
+          <p className="truncate text-xs font-bold text-foreground sm:text-sm">{title}</p>
+
+          <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-5">
+            {subtitle}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
 }
-function Action({ to, children }) {
-  return <Button asChild variant="ghost" size="sm" className="min-h-11 px-2 text-xs"><Link to={to}>{children}</Link></Button>;
+
+function StatPill({ label, value, icon: Icon, tone = 'default' }) {
+  const iconClass =
+  tone === 'good'
+    ? 'text-[hsl(var(--success))] bg-[hsl(var(--success)/0.08)]'
+    : tone === 'danger'
+      ? 'text-destructive bg-destructive/10'
+      : tone === 'warning'
+        ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10'
+        : tone === 'info'
+          ? 'text-blue-600 bg-blue-500/10 dark:text-blue-400'
+          : 'text-foreground bg-secondary';
+
+const valueClass =
+  tone === 'good'
+    ? 'text-[hsl(var(--success))]'
+    : tone === 'danger'
+      ? 'text-destructive'
+      : tone === 'warning'
+        ? 'text-amber-500 dark:text-amber-400'
+        : tone === 'info'
+          ? 'text-blue-600 dark:text-blue-400'
+          : 'text-foreground';
+
+  return (
+    <div className="flex items-center justify-between gap-2 py-2">
+      <div className="flex min-w-0 items-center gap-2">
+        {Icon && (
+          <span className={cn('rounded-lg p-1.5', iconClass)}>
+            <Icon className="h-3.5 w-3.5" />
+          </span>
+        )}
+
+        <span className="truncate text-sm font-bold tracking-tight text-muted-foreground sm:text-base">
+          {label}
+        </span>
+      </div>
+
+      <span
+        className={cn(
+          'shrink-0 text-sm font-bold tabular-nums tracking-tight sm:text-base',
+          valueClass
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
 }
-function SafeCard({ formatCurrency }) {
-  // A safe daily allowance requires verified discretionary funding and liquid reserves.
-  // Do not infer it from total income, balances, or planned expenses.
-  return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-3 p-4">
-    <div className="flex items-center justify-between gap-2"><p className="text-xs font-medium text-muted-foreground">Safe to spend today</p><Badge variant="secondary" className="rounded-full text-[10px]">Awaiting funding data</Badge></div>
-    <div className="flex items-baseline gap-2"><Money value={0} formatCurrency={formatCurrency} className="text-4xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
-    <p className="text-xs text-muted-foreground">Discretionary funds must be verified before a safe amount can be shown.</p>
-    <div className="relative h-2 rounded-full bg-primary/10"><motion.div className="h-full rounded-full bg-primary/40" initial={{ width: 0 }} animate={{ width: 0 }} /></div>
-    <p className="text-xs text-muted-foreground">Projection unavailable until fixed and discretionary expenses are separated.</p>
-  </CardContent></Card>;
+
+function getTransactionCategory(transaction, categories) {
+  return categories.find((category) => category.id === transaction.category_id);
 }
-function Snapshot({ budget, formatCurrency }) {
-  const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
-  const tracked = num(budget.totalExpenses) + num(budget.totalTrackedSavings) + num(budget.totalTrackedDebt);
-  const rows = [
-    { label: 'Received income', value: num(budget.realizedIncome ?? budget.totalIncome), icon: TrendingUp, tone: 'text-emerald-600 bg-emerald-500/10' },
-    { label: 'Expenses', value: num(budget.totalExpenses), icon: TrendingDown, tone: 'text-destructive bg-destructive/10' },
-    { label: 'Planned', value: planned, icon: Receipt, tone: 'text-blue-600 bg-blue-500/10' },
-    { label: 'Tracked', value: tracked, icon: WalletCards, tone: 'text-amber-600 bg-amber-500/10' },
-  ];
-  return <Section title="Budget snapshot"><div>{rows.map(({ label, value, icon: Icon, tone }) => <div key={label} className="flex min-h-12 items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span><span className="text-sm">{label}</span></div><Money value={value} formatCurrency={formatCurrency} className="shrink-0 text-sm font-medium"/></div>)}</div></Section>;
+
+function getTransactionAccount(transaction, accounts) {
+  return accounts.find((account) => account.id === transaction.account_id);
 }
-function Upcoming({ rules, accounts, formatCurrency }) {
-  const names = new Map(accounts.map(a => [a.id, a.name]));
-  const rows = sortRecurringByDueDate(rules).filter(r => r.is_active !== false && !r.completed_at && r.next_due_date).slice(0, 3);
-  return <Section title="Upcoming" action={<Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action>}>
-    {rows.length ? rows.map(r => { const transfer = r.type === 'transfer'; const Icon = transfer ? ArrowLeftRight : CalendarClock; return <div key={r.id} className="flex min-h-14 items-center justify-between gap-2 border-b border-border/30 last:border-0"><div className="flex min-w-0 items-center gap-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-xl ${transfer ? 'bg-blue-500/10 text-blue-600' : 'bg-secondary text-muted-foreground'}`}><Icon size={17}/></span><div className="min-w-0"><p className="truncate text-sm font-medium">{transfer ? `Transfer to ${names.get(r.to_account_id) || 'account'}` : r.name}</p><p className="text-xs text-muted-foreground">{formatDate(r.next_due_date)}</p></div></div><Money value={Math.abs(num(r.amount))} formatCurrency={formatCurrency} className="shrink-0 text-sm"/></div>; }) : <p className="py-5 text-center text-sm text-muted-foreground">No upcoming payments.</p>}
-  </Section>;
+
+function getTransactionToAccount(transaction, accounts) {
+  return accounts.find((account) => account.id === transaction.to_account_id);
 }
-function Recent({ transactions, categories, formatCurrency }) {
-  const names = new Map(categories.map(c => [c.id, c.name]));
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const yesterday = format(new Date(Date.now() - 86400000), 'yyyy-MM-dd');
-  const rows = [...transactions].sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0,4);
-  return <Section title="Recent transactions" action={<div className="flex items-center"><Action to="/add-transaction"><Plus size={14}/> Add</Action><Action to="/transactions">View all</Action></div>}>
-    {rows.length ? rows.map(t => { const income = t.type === 'income', transfer = t.type === 'transfer'; const Icon = transfer ? ArrowLeftRight : income ? ArrowDownLeft : ArrowUpRight; const day = String(t.date || '').slice(0,10); return <Link to={`/transactions/${t.id}/edit`} key={t.id} className="flex min-h-14 items-center justify-between gap-2 border-b border-border/30 last:border-0"><div className="flex min-w-0 items-center gap-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-xl ${income ? 'bg-emerald-500/10 text-emerald-600' : transfer ? 'bg-blue-500/10 text-blue-600' : 'bg-destructive/10 text-destructive'}`}><Icon size={17}/></span><div className="min-w-0"><p className="flex items-center gap-1 truncate text-sm font-medium">{names.get(t.category_id) || (transfer ? 'Transfer' : income ? 'Income' : 'Expense')}{t.recurring_transaction_id && <Badge variant="secondary" className="h-4 px-1 text-[9px]">R</Badge>}</p><p className="text-xs text-muted-foreground">{day === today ? 'Today' : day === yesterday ? 'Yesterday' : formatDate(day)}</p></div></div><span className={`shrink-0 text-sm font-medium ${income ? 'text-emerald-600' : transfer ? '' : 'text-destructive'}`}>{income ? '+' : transfer ? '' : '−'}<Money value={Math.abs(num(t.amount))} formatCurrency={formatCurrency}/></span></Link>; }) : <p className="py-5 text-center text-sm text-muted-foreground">No transactions yet.</p>}
-  </Section>;
-}
-export default function DashboardOverview({ budget = {}, transactions = [], categories = [], accounts = [], recurringTransactions = [], goals = [], formatCurrency }) {
-  const activeGoal = goals.find(g => !g.is_archived && num(g.current_amount) < num(g.target_amount));
-  const pct = activeGoal && num(activeGoal.target_amount) > 0 ? Math.min(100, Math.max(0, 100 * num(activeGoal.current_amount) / num(activeGoal.target_amount))) : 0;
-  return <div className="mx-auto max-w-3xl space-y-3">
-    <Entrance index={0}><SafeCard formatCurrency={formatCurrency}/></Entrance>
-    <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
-    {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="text-sm font-medium"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/> left to allocate</span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
-    <Entrance index={3}><Upcoming rules={recurringTransactions} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>
-    <Entrance index={4}><Recent transactions={transactions} categories={categories} formatCurrency={formatCurrency}/></Entrance>
-    {activeGoal && <Entrance index={5}><Link to="/plan" className={`flex min-h-14 items-center gap-3 border px-3 ${cardStyle}`}><Target size={17} className="shrink-0 text-primary"/><span className="min-w-0 flex-1 truncate text-sm">{activeGoal.name}</span><div className="h-1.5 w-14 rounded-full bg-primary/10"><div className="h-full rounded-full bg-primary" style={{width: `${pct}%`}}/></div><span className="text-xs text-muted-foreground">{Math.round(pct)}%</span></Link></Entrance>}
-  </div>;
+
+export default function DashboardOverview({
+  currentMonth,
+  budget = {},
+  transactions = [],
+  categories = [],
+  accounts = [],
+  recurringTransactions = [],
+  goals = [],
+  formatCurrency,
+}) {
+  const navigate = useNavigate();
+
+  const goalsWithFunding = goals;
+  const recurringById = useMemo(
+    () => new Map(recurringTransactions.map((rule) => [rule.id, rule])),
+    [recurringTransactions]
+  );
+  const goalsById = useMemo(
+    () => new Map(goals.map((goal) => [goal.id, goal])),
+    [goals]
+  );
+
+  const plannedOutflow =
+    Number(budget.totalPlannedExpenses || 0) +
+    Number(budget.totalPlannedSavings || 0) +
+    Number(budget.assignablePlannedDebt ?? budget.totalPlannedDebt ?? 0);
+
+  const trackedOutflow =
+    Number(budget.totalExpenses || 0) +
+    Number(budget.totalTrackedSavings || 0) +
+    Number(budget.totalTrackedDebt || 0);
+
+  const recentTransactions = useMemo(
+    () =>
+      [...transactions]
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+        .slice(0, 5),
+    [transactions]
+  );
+
+  const handleTransactionClick = useCallback(
+    (transactionId) => {
+      navigate(`/transactions/${transactionId}/edit`);
+    },
+    [navigate]
+  );
+
+  return (
+    <>
+      <div className="animate-child lg:hidden">
+          <LeftToAllocateBanner
+            leftToAllocate={budget.leftToAllocate}
+            totalIncome={budget.budgetFunding ?? budget.totalPlannedIncome ?? budget.totalIncome}
+            formatCurrency={formatCurrency}
+          />
+        </div>
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          <DashboardCard
+            title="Spending velocity"
+            subtitle="Compare time passed with actual expense pace."
+            icon={TrendingDown}
+            className="animate-child"
+          >
+            <SpendingVelocityWidget
+              totalExpenses={budget.totalExpenses || 0}
+              plannedExpenses={budget.totalPlannedExpenses || 0}
+              currentMonth={currentMonth}
+              formatCurrency={formatCurrency}
+            />
+          </DashboardCard>
+
+          <DashboardCard
+            title="Budget snapshot"
+            subtitle="A quick summary of the current budget period."
+            icon={Landmark}
+            className="animate-child"
+          >
+            <div className="divide-y divide-border/40">
+              <StatPill
+                label="Received income"
+                value={formatCurrency(budget.totalIncome || 0)}
+                icon={TrendingUp}
+                tone="good"
+              />
+
+              <StatPill
+                label="Expenses"
+                value={formatCurrency(budget.totalExpenses || 0)}
+                icon={TrendingDown}
+                tone="danger"
+              />
+
+              <StatPill
+                label="Planned"
+                value={formatCurrency(plannedOutflow || 0)}
+                icon={Receipt}
+                tone="info"
+              />
+
+              <StatPill
+                label="Tracked"
+                value={formatCurrency(trackedOutflow || 0)}
+                icon={WalletCards}
+                tone="warning"
+              />
+            </div>
+          </DashboardCard>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <UpcomingBillsPreview
+            recurringTransactions={recurringTransactions}
+            categories={categories}
+            accounts={accounts}
+            transactions={transactions}
+            formatCurrency={formatCurrency}
+            limit={3}
+            className="animate-child"
+          />
+
+          <TopGoalPreview
+            goals={goalsWithFunding}
+            formatCurrency={formatCurrency}
+            className="animate-child"
+          />
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <DashboardCard
+            title="Recent transactions"
+            subtitle="Latest activity from the current budget month."
+            icon={Receipt}
+            action={
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-xs"
+              >
+                <Link to="/transactions">
+                  View all
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            }
+            className="animate-child"
+          >
+            {recentTransactions.length === 0 ? (
+              <EmptyDashboardState
+                icon={Receipt}
+                title="No transactions this month"
+                description="Add income, expenses, savings, debt payments, or transfers to start tracking."
+                action={
+                  <Button asChild size="sm" className="rounded-xl">
+                    <Link to="/add-transaction">Add Transaction</Link>
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="min-w-0 divide-y divide-border/50">
+                  {recentTransactions.map((transaction) => (
+                    <TransactionRow
+                      key={transaction.id}
+                      transaction={transaction}
+                      category={getTransactionCategory(transaction, categories)}
+                      account={getTransactionAccount(transaction, accounts)}
+                      toAccount={getTransactionToAccount(transaction, accounts)}
+                      recurringRule={recurringById.get(transaction.recurring_transaction_id)}
+                      goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
+                      formatCurrency={formatCurrency}
+                      compactSourceBadges
+                      flush
+                      onClick={() => handleTransactionClick(transaction.id)}
+                    />
+                  ))}
+              </div>
+            )}
+          </DashboardCard>
+
+          <DashboardCard
+            title="Quick actions"
+            subtitle="Jump into the most common money tasks."
+            icon={ListPlus}
+            className="animate-child"
+          >
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <QuickAction
+                to="/add-transaction"
+                icon={Plus}
+                title="Add transaction"
+                subtitle="Track income or spending"
+              />
+
+              <QuickAction
+                to="/plan"
+                icon={Target}
+                title="Review plan"
+                subtitle="Assign your money"
+              />
+
+              <QuickAction
+                to="/accounts"
+                icon={WalletCards}
+                title="Accounts"
+                subtitle="Check balances"
+              />
+
+              <QuickAction
+                to="/manage-plan"
+                icon={SlidersHorizontal}
+                title="Manage Plan"
+                subtitle="Configure budget setup"
+              />
+            </div>
+          </DashboardCard>
+        </div>
+    </>
+  );
 }
