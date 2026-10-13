@@ -105,6 +105,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
+  const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of your spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2.5 px-4 py-3.5">
     <div className="flex items-center justify-between gap-2">
@@ -118,19 +119,17 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
         <Money value={pace.allowance} formatCurrency={formatCurrency} className="text-[2rem] font-medium leading-none tracking-tight sm:text-4xl"/>
         <span className="text-sm text-muted-foreground">/ day</span>
       </div>
-      <p className="text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/></p>
+      {pace.spentToday > 0 && <p className="text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/> · <Money value={pace.leftToday} formatCurrency={formatCurrency}/> left</p>}
     </div>
     <div className="space-y-1.5">
       <div className="relative h-1.5 rounded-full bg-primary/5" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
         <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
         <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
       </div>
-      <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/> discretionary budget</p>
+      <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
     </div>
     <div className="flex min-h-9 items-center justify-between gap-2">
-      {driverName && pace.topDriver.share >= 40
-        ? <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground"><span className="font-medium text-foreground">{driverName}</span> is {Math.round(pace.topDriver.share)}% of your spending</p>
-        : <span className="min-w-0 flex-1"/>}
+      <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{insight}</p>
       <Button variant="ghost" size="sm" className="-mr-2 min-h-9 shrink-0 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
     </div>
     <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
