@@ -96,7 +96,7 @@ export default function UpcomingBillsPreview({
       icon={CalendarClock}
       className={className}
       action={
-        <DashboardGhostAction className="min-h-9 h-9 gap-1 rounded-none border-0 bg-transparent px-2 text-xs font-medium shadow-none">
+        <DashboardGhostAction className="min-h-9 h-9 gap-1 rounded-none border-0 bg-transparent pl-2 pr-0 text-xs font-medium shadow-none">
           <Link to="/transactions?tab=scheduled">
             View all
             <ChevronRight className="h-3.5 w-3.5" />
