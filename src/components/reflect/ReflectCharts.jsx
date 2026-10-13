@@ -206,7 +206,9 @@ export default function ReflectCharts({
     : [];
   const safeSpendingTrend = Array.isArray(spendingTrend) ? spendingTrend : [];
   const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedCashFlow, setSelectedCashFlow] = useState(null);
+  const [selectedCashFlowIndex, setSelectedCashFlowIndex] = useState(null);
+  const activeCashFlowIndex = selectedCashFlowIndex != null && selectedCashFlowIndex < safeCashFlow.length ? selectedCashFlowIndex : safeCashFlow.length - 1;
+  const activeCashFlow = safeCashFlow[activeCashFlowIndex];
   const dailyChartRef = useRef(null);
   const selectDailyAt = (clientX) => {
     const rect = dailyChartRef.current?.getBoundingClientRect();
@@ -326,17 +328,22 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 }
               />
 
-              {selectedCashFlow && <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
-                <span className="font-semibold">{selectedCashFlow.month}</span>
-                <span>Income: <CurrencyAmount amount={selectedCashFlow.income} currency={currency} compact /></span>
-                <span>Expenses: <CurrencyAmount amount={selectedCashFlow.expenses} currency={currency} compact /></span>
+              {activeCashFlow && <div className="mb-2 flex items-start gap-2">
+                <span className="mt-1 h-10 w-1 shrink-0 rounded-full bg-primary" />
+                <div className="min-w-0">
+                  <p className="text-[11px] text-muted-foreground">{activeCashFlow.month} · Cash flow</p>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    <span>Income <span className="font-semibold tabular-nums"><CurrencyAmount amount={activeCashFlow.income} currency={currency} compact /></span></span>
+                    <span>Expenses <span className="font-semibold tabular-nums"><CurrencyAmount amount={activeCashFlow.expenses} currency={currency} compact /></span></span>
+                  </div>
+                </div>
               </div>}
-              <div className={`${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
+              <div className={`relative ${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={safeCashFlow}
-                      onClick={state => { if (state?.activePayload?.[0]?.payload) setSelectedCashFlow(state.activePayload[0].payload); }}
+                      onClick={state => { if (Number.isInteger(state?.activeTooltipIndex)) setSelectedCashFlowIndex(state.activeTooltipIndex); }}
                       barGap={6}
                       barCategoryGap="32%"
                       margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
@@ -366,6 +373,12 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           fill: 'hsl(var(--muted-foreground))',
                         }}
                         width={42}
+                        tickFormatter={value => {
+                          const amount = Number(value);
+                          if (!Number.isFinite(amount)) return value;
+                          if (Math.abs(amount) >= 1000) return `${Number((amount / 1000).toFixed(1))}k`;
+                          return String(amount);
+                        }}
                       />
 
                       <Tooltip
@@ -384,7 +397,11 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           WebkitTapHighlightColor: 'transparent',
                         }}
                         {...getChartAnimation(isVisible)}
-                      />
+                      >
+                        {safeCashFlow.map((item, index) => (
+                          <Cell key={item.month || index} fill="hsl(var(--primary))" fillOpacity={index === activeCashFlowIndex ? 1 : 0.65} />
+                        ))}
+                      </Bar>
 
                       <Bar
                         dataKey="expenses"
@@ -396,12 +413,24 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           WebkitTapHighlightColor: 'transparent',
                         }}
                         {...getChartAnimation(isVisible)}
-                      />
+                      >
+                        {safeCashFlow.map((item, index) => (
+                          <Cell key={item.month || index} fill="hsl(var(--primary))" fillOpacity={index === activeCashFlowIndex ? 0.45 : 0.22} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
                   <ChartShell className="h-full" />
                 )}
+                {safeCashFlow.length > 0 && <div className="absolute inset-y-0 right-2 left-[42px] z-10 flex" aria-label="Select cash flow month">
+                  {safeCashFlow.map((item,index) => (
+                    <button key={item.month || index} type="button" aria-label={`Show ${item.month} cash flow`}
+                      aria-pressed={index === activeCashFlowIndex}
+                      onClick={() => setSelectedCashFlowIndex(index)}
+                      className="h-full flex-1 cursor-pointer bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" />
+                  ))}
+                </div>}
               </div>
             </ReflectCard>
           )}
