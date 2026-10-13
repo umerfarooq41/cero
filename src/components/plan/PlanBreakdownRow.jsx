@@ -65,9 +65,9 @@ export default function PlanBreakdownRow({ item, currency }) {
 
   return (
     <div
-      className="px-3 py-3 transition-colors hover:bg-accent/30 sm:px-4"
+      className="px-3 py-2.5 transition-colors hover:bg-accent/30 sm:px-4"
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2.5">
         <CategoryIconBadge
           icon={item.icon || item.category?.icon}
           color={item.categoryColor || item.color}
@@ -86,7 +86,7 @@ export default function PlanBreakdownRow({ item, currency }) {
             />
           </div>
 
-          <div className="mt-1 flex min-w-0 items-center gap-1 text-[10px] font-normal leading-3.5 text-muted-foreground tabular-nums">
+          <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[10px] font-normal leading-3.5 text-muted-foreground tabular-nums">
             <span>{actionLabel}</span>
             <span className="font-normal text-muted-foreground">
               <PlanMoney amount={tracked} currency={currency} compact />
