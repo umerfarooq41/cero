@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import {
   AlertTriangle,
   BarChart3,
-  Brain,
+  Lightbulb,
   CreditCard,
   PiggyBank,
   TrendingDown,
@@ -533,7 +533,7 @@ export default function DashboardReflect() {
 
       <div className="animate-child">
         <section className="overflow-hidden rounded-2xl app-card-surface px-3.5 py-3" aria-label="Financial insights">
-          <h3 className="mb-1 text-sm font-semibold text-foreground">Insights</h3>
+          <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /><h3 className="text-sm font-semibold text-foreground">Insights</h3></div>
           {insights.map((insight, index) => {
             const Icon = insight.icon;
             const metricTone = insight.tone === 'good'
