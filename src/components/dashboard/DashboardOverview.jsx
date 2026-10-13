@@ -175,7 +175,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   </Section>;
 }
 function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
-  return <Section title="Upcoming savings" icon={Target} action={<div className="-mr-2.5"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
+  return <Section title="Savings goals" icon={Target} action={<div className="-mr-2.5"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
     <div className="divide-y divide-border/50">{goals.slice(0, 3).map(goal => {
       const fixed = goal.contribution_mode === 'fixed';
       const remaining = getGoalRemaining(goal);
@@ -205,7 +205,8 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   const today = todayIsoDate();
   const upcomingGoals = activeGoals
     .filter(goal => {
-      const date = String(goal.contribution_mode === 'fixed' ? goal.next_due_date : goal.target_date || '').slice(0, 10);
+      if (goal.contribution_mode !== 'fixed') return true;
+      const date = String(goal.next_due_date || '').slice(0, 10);
       if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)) return false;
       const [year, month, day] = date.split('-').map(Number);
       const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
