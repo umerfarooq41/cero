@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { CalendarDays } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 
 import {
   Select,
@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import DashboardSectionCard from '@/components/dashboard/DashboardSectionCard.jsx';
-import AppTabs from '@/components/shared/AppTabs.jsx';
+
+
 
 const MONTHS = [
   { value: '01', label: 'January', shortLabel: 'Jan' },
@@ -64,94 +64,42 @@ export default function ReflectPeriodSelector({
     onPeriodModeChange?.(nextMode);
   };
 
-  useEffect(() => {
-    if (periodMode === 'year' && month !== 'all') {
-      onMonthChange('all');
+
+  const monthIndex = Number(selectedMonth.value) - 1;
+  const isFuture = (y, m) => Number(y) > currentYear || (Number(y) === currentYear && m > new Date().getMonth());
+  const canAdvance = periodMode === 'year' ? Number(year) < currentYear : !isFuture(year, monthIndex + 1);
+  const navigate = (delta) => {
+    if (periodMode === 'year') {
+      const next = Number(year) + delta;
+      if (next <= currentYear) onYearChange(String(next));
+      return;
     }
-
-    if (periodMode === 'month' && month === 'all') {
-      const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-      onMonthChange(currentMonth);
-    }
-  }, [periodMode, month, onMonthChange]);
-
-  const heading =
-    periodMode === 'year'
-      ? `Year ${year}`
-      : `${selectedMonth.label} ${year}`;
-
+    const next = new Date(Number(year), monthIndex + delta, 1);
+    if (isFuture(next.getFullYear(), next.getMonth())) return;
+    onYearChange(String(next.getFullYear()));
+    onMonthChange(String(next.getMonth() + 1).padStart(2, '0'));
+  };
   return (
-    <DashboardSectionCard
-      className="mb-4"
-      icon={CalendarDays}
-      title="Reporting Period"
-      action={
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={heading}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2 }}
-            className="block shrink-0 text-sm font-semibold text-foreground"
-          >
-            {heading}
-          </motion.span>
-        </AnimatePresence>
-      }
-      contentClassName="space-y-3"
-    >
-      <AppTabs
-        tabs={[
-          { value: 'month', label: 'Month', tone: 'blue' },
-          { value: 'year', label: 'Year', tone: 'blue' },
-        ]}
-        value={periodMode}
-        onChange={changeMode}
-        size="md"
-        layoutId="reflect-period-mode-highlight"
-      />
-
-      <div
-        className={
-          periodMode === 'month'
-            ? 'grid grid-cols-2 gap-3'
-            : 'grid grid-cols-1 gap-3'
-        }
-      >
-        <Select value={String(year)} onValueChange={onYearChange}>
-          <SelectTrigger className="h-11 rounded-2xl app-card-surface backdrop-blur-xl">
-            <SelectValue placeholder="Year" />
+    <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+      <div className="flex items-center rounded-xl bg-muted/60 p-0.5">
+        {['month', 'year'].map(mode => <button key={mode} type="button" onClick={() => changeMode(mode)}
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${periodMode === mode ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
+      </div>
+      <div className="flex min-w-0 items-center gap-1">
+        <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60"><ChevronLeft className="h-4 w-4" /></button>
+        <Select value={periodMode === 'year' ? String(year) : `${year}-${selectedMonth.value}`}
+          onValueChange={value => { if (periodMode === 'year') onYearChange(value); else { const [y,m] = value.split('-'); onYearChange(y); onMonthChange(m); } }}>
+          <SelectTrigger aria-label="Select reporting period" className="h-8 w-[110px] rounded-lg border-0 bg-transparent px-1 text-xs font-semibold shadow-none">
+            <SelectValue placeholder="Period" />
           </SelectTrigger>
-
           <SelectContent>
-            {years.map((item) => (
-              <SelectItem key={item} value={item}>
-                {item}
-              </SelectItem>
-            ))}
+            {years.filter(y => Number(y) <= currentYear).flatMap(y => periodMode === 'year'
+              ? [<SelectItem key={y} value={y}>{y}</SelectItem>]
+              : MONTHS.filter((m,i) => !isFuture(y,i)).map(m => <SelectItem key={`${y}-${m.value}`} value={`${y}-${m.value}`}>{m.shortLabel} {y}</SelectItem>))}
           </SelectContent>
         </Select>
-
-        {periodMode === 'month' && (
-          <Select
-            value={month === 'all' ? selectedMonth.value : month}
-            onValueChange={onMonthChange}
-          >
-            <SelectTrigger className="h-11 rounded-2xl app-card-surface backdrop-blur-xl">
-              <SelectValue placeholder="Month" />
-            </SelectTrigger>
-
-            <SelectContent>
-              {MONTHS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <button type="button" aria-label="Next period" disabled={!canAdvance} onClick={() => navigate(1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
       </div>
-    </DashboardSectionCard>
+    </div>
   );
 }
