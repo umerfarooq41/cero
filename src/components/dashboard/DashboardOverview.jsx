@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ChevronRight, Plus, Receipt, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, ArrowRight, ChevronRight, Plus, Receipt, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,11 +35,11 @@ function Entrance({ children, index }) {
   const reduced = useReducedMotion();
   return <motion.div initial={reduced ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 190, damping: 24, delay: index * 0.06 }}>{children}</motion.div>;
 }
-function Section({ title, action, children }) {
-  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 pb-1 pt-4"><CardTitle className="text-sm font-semibold">{title}</CardTitle>{action}</CardHeader><CardContent className="px-4 pb-3 pt-1">{children}</CardContent></Card>;
+function Section({ title, icon: Icon, action, children }) {
+  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 px-4 pb-2 pt-4"><div className="flex min-w-0 items-center gap-2">{Icon && <Icon className="size-4 shrink-0 text-muted-foreground"/>}<CardTitle className="truncate text-sm font-semibold">{title}</CardTitle></div>{action}</CardHeader><CardContent className="px-4 pb-3 pt-1">{children}</CardContent></Card>;
 }
-function Action({ to, children }) {
-  return <Button asChild variant="ghost" size="sm" className="min-h-11 px-2 text-xs"><Link to={to}>{children}</Link></Button>;
+function Action({ to, children, boxed = false }) {
+  return <Button asChild variant="ghost" size="sm" className={boxed ? "min-h-9 gap-1 rounded-xl border border-border/50 bg-secondary/40 px-3 text-xs font-medium" : "min-h-9 gap-1 px-2 text-xs"}><Link to={to}>{children}</Link></Button>;
 }
 function getDiscretionaryAllocations(allocations, categories) {
   const categoriesById = new Map(categories.map(c => [c.id, c]));
@@ -154,7 +154,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   const rows = [...transactions]
     .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
     .slice(0, 5);
-  return <Section title="Recent transactions" action={<div className="flex items-center"><Action to="/add-transaction"><Plus size={14}/> Add</Action><Action to="/transactions">View all</Action></div>}>
+  return <Section title="Recent transactions" icon={Receipt} action={<div className="flex items-center gap-1"><Action to="/add-transaction"><Plus size={14}/> Add</Action><Action to="/transactions" boxed>View all <ArrowRight size={14}/></Action></div>}>
     {rows.length ? <div className="divide-y divide-border/40">{rows.map(transaction =>
       <TransactionRow
         key={transaction.id}
@@ -186,8 +186,8 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   return <div className="mx-auto max-w-3xl space-y-3">
     <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
     <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
-    {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="text-sm font-medium"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/> left to allocate</span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
-    <Entrance index={3}><div className="[&_.dashboard-section-subtitle]:hidden"><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></div></Entrance>
+    {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-1 text-sm font-medium"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/><span className="whitespace-nowrap">left to allocate</span></span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
+    <Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></Entrance>
     <Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance>
     {activeGoal && <Entrance index={5}><Link to="/manage-plan?tab=goals" className={`flex min-h-14 items-center gap-3 border px-3 ${cardStyle}`}><Target size={17} className="shrink-0 text-primary"/><span className="min-w-0 flex-1 truncate text-sm">{activeGoal.name}</span><div className="h-1.5 w-14 rounded-full bg-primary/10"><div className="h-full rounded-full bg-primary" style={{width: `${progress}%`}}/></div><span className="text-xs text-muted-foreground">{progress}%</span></Link></Entrance>}
   </div>;
