@@ -164,13 +164,13 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
       {row({ label: 'Total expenses', value: expenses, icon: TrendingDown, tone: 'text-destructive bg-destructive/10', valueTone: 'text-destructive',
         helper: <><span className="whitespace-nowrap">Variable <Money value={variablePaid} formatCurrency={formatCurrency}/></span><span className="whitespace-nowrap">· Recurring <Money value={recurringPaid} formatCurrency={formatCurrency}/></span></> })}
       <div className="grid grid-cols-2 gap-2 py-1">
-        <div className="min-w-0 rounded-xl bg-muted/40 px-3 py-2.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400"><PiggyBank size={16}/></span>Savings</div>
-          <Money value={savings} formatCurrency={formatCurrency} className="mt-1 text-sm font-semibold"/>
+        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-3 py-2.5 text-center">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400"><PiggyBank size={16}/></span>Savings</div>
+          <Money value={savings} formatCurrency={formatCurrency} className="mt-1 flex justify-center text-sm font-semibold"/>
         </div>
-        <div className="min-w-0 rounded-xl bg-muted/40 px-3 py-2.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400"><CreditCard size={16}/></span>Debt paid</div>
-          <Money value={debt} formatCurrency={formatCurrency} className="mt-1 text-sm font-semibold"/>
+        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-3 py-2.5 text-center">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400"><CreditCard size={16}/></span>Debt paid</div>
+          <Money value={debt} formatCurrency={formatCurrency} className="mt-1 flex justify-center text-sm font-semibold"/>
         </div>
       </div>
       <div className="mt-2 space-y-2 border-t border-border/50 pt-3">
