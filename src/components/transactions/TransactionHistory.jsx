@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 import EmptyState from '@/components/shared/EmptyState';
-import MonthSelector from '@/components/shared/MonthSelector';
 import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { Button } from '@/components/ui/button';
@@ -322,11 +321,10 @@ function AdvancedFilterSheet({
   );
 }
 
-export default function TransactionHistory() {
+export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const navigate = useNavigate();
   const currency = useCurrency();
 
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [selectedDate, setSelectedDate] = useState('');
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -520,21 +518,14 @@ export default function TransactionHistory() {
   };
 
   const handleMonthChange = (nextMonth) => {
-    setCurrentMonth(nextMonth);
+    onMonthChange(nextMonth);
     setSelectedDate('');
   };
 
   return (
     <div>
-      <div className="mb-4 flex justify-center animate-child">
-        <MonthSelector
-          currentMonth={currentMonth}
-          onChange={handleMonthChange}
-          subtitle={`${filtered.length} posted transactions`}
-        />
-      </div>
-
-      <div className="mb-3 flex gap-2 animate-child">
+      <div className="mb-2 text-xs text-muted-foreground">{filtered.length} posted transactions</div>
+      <div className="mb-2 flex gap-2 animate-child">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -542,7 +533,7 @@ export default function TransactionHistory() {
             placeholder="Find transactions..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="h-11 rounded-2xl app-card-surface pl-9 pr-9 shadow-sm backdrop-blur-xl"
+            className="h-10 rounded-xl app-card-surface pl-9 pr-9"
           />
 
           {search && (
@@ -571,7 +562,7 @@ export default function TransactionHistory() {
           selectedDate={selectedDate}
           setSelectedDate={(date) => {
             setSelectedDate(date);
-            if (date) setCurrentMonth(format(new Date(date), 'yyyy-MM'));
+            if (date) onMonthChange(format(new Date(date), 'yyyy-MM'));
           }}
           sortBy={sortBy}
           setSortBy={setSortBy}
@@ -583,7 +574,7 @@ export default function TransactionHistory() {
       <TransactionTypeTabs
         value={filterType}
         onChange={setFilterType}
-        className="mb-3 animate-child"
+        className="mb-2 animate-child"
       />
 
       {activeFilterChips.length > 0 && (
@@ -630,13 +621,13 @@ export default function TransactionHistory() {
           />
         </div>
       ) : (
-        <div className="animate-child space-y-4">
+        <div className="animate-child space-y-3">
           {sortedDates.map((date) => (
             <div
               key={date}
               className="overflow-hidden rounded-2xl app-card-surface"
             >
-              <div className="border-b border-border/50 app-card-surface-soft px-4 py-2.5 backdrop-blur-xl">
+              <div className="border-b border-border/50 bg-muted/25 px-3 py-2">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {date !== 'No Date'
                     ? format(new Date(date), 'EEEE, MMM d')
