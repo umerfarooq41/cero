@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 import {
   ArrowDownLeft,
   ArrowLeftRight,
-  ArrowRight,
   ArrowUpRight,
   CalendarClock,
   Clock3,
+  ChevronRight,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -96,10 +96,10 @@ export default function UpcomingBillsPreview({
       icon={CalendarClock}
       className={className}
       action={
-        <DashboardGhostAction className="h-9 rounded-xl border border-border/50 bg-secondary/40 px-3 text-xs font-medium">
+        <DashboardGhostAction className="min-h-9 h-9 gap-1 rounded-none border-0 bg-transparent px-2 text-xs font-medium shadow-none">
           <Link to="/transactions?tab=scheduled">
             View all
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </DashboardGhostAction>
       }
