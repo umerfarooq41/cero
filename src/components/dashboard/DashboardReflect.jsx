@@ -160,15 +160,14 @@ function buildReflectInsights({
       metric: <MoneyMetric amount={netCashFlow} currency={currency} signed />,
       text: cashFlowPositive ? (
         <>
-          Income was higher than expenses by{' '}
-          <MoneyText amount={netCashFlow} currency={currency} /> this {periodName},
-          so the period ended with positive net cash flow.
+          Operating inflows exceeded expenditures by{' '}
+          <MoneyText amount={netCashFlow} currency={currency} /> during the selected {periodName}, resulting in a positive operating cash flow balance.
         </>
       ) : (
         <>
-          Expenses were higher than income by{' '}
+          Operating expenditures exceeded inflows by{' '}
           <MoneyText amount={Math.abs(netCashFlow)} currency={currency} /> this{' '}
-          {periodName}, so review the largest spending areas.
+          {periodName}, resulting in a negative operating cash flow balance.
         </>
       ),
       tone: cashFlowPositive ? 'good' : 'bad',
@@ -184,9 +183,8 @@ function buildReflectInsights({
           text:
             totalPlannedOutflow > 0 ? (
               <>
-                You have tracked{' '}
-                <MoneyText amount={totalTrackedOutflow} currency={currency} /> from
-                a planned yearly outflow of{' '}
+                Recorded outflows total{' '}
+                <MoneyText amount={totalTrackedOutflow} currency={currency} /> against a planned annual outflow of{' '}
                 <MoneyText amount={totalPlannedOutflow} currency={currency} />.
               </>
             ) : (
@@ -211,19 +209,19 @@ function buildReflectInsights({
             plannedExpenses > 0 ? (
               monthlyBudgetRemaining >= 0 ? (
                 <>
-                  You still have{' '}
+                  A remaining expenditure allowance of{' '}
                   <MoneyText amount={monthlyBudgetRemaining} currency={currency} />{' '}
-                  left from the planned expense budget of{' '}
+                  is available against the monthly expense plan of{' '}
                   <MoneyText amount={plannedExpenses} currency={currency} />.
                 </>
               ) : (
                 <>
-                  Expenses are over the planned budget by{' '}
+                  Recorded expenditures exceed the monthly expense plan by{' '}
                   <MoneyText
                     amount={Math.abs(monthlyBudgetRemaining)}
                     currency={currency}
                   />
-                  , so optional spending needs attention.
+                  , indicating expenditure above the allocated limit.
                 </>
               )
             ) : (
@@ -241,8 +239,7 @@ function buildReflectInsights({
       ),
       text: topCategory ? (
         <>
-          {topCategory.name} is the largest category, using {topCategoryPercent}% of
-          total expenses this {periodName}.
+          {topCategory.name} represents the largest spending category, accounting for {topCategoryPercent}% of recorded expenses during the selected {periodName}.
         </>
       ) : (
         `No expense category has been recorded for this ${periodName} yet; category insights will appear after transactions are added.`
@@ -262,9 +259,9 @@ function buildReflectInsights({
       metric: hasIncome ? formatPercent(savingsRate) : 'No income',
       text: hasIncome ? (
         <>
-          Your savings and debt rate is {formatPercent(savingsRate)}; this includes{' '}
-          <MoneyText amount={trackedSavings} currency={currency} /> saved and{' '}
-          <MoneyText amount={trackedDebt} currency={currency} /> paid toward debt.
+          The combined savings contribution and debt repayment rate stands at {formatPercent(savingsRate)} of received income, comprising{' '}
+          <MoneyText amount={trackedSavings} currency={currency} /> in savings contributions and{' '}
+          <MoneyText amount={trackedDebt} currency={currency} /> in debt repayments.
         </>
       ) : (
         `Add income transactions to calculate the ${periodName} savings and debt allocation rate.`
@@ -282,8 +279,8 @@ function buildReflectInsights({
       text: isYear ? (
         totalPlannedOutflow > 0 ? (
           <>
-            The year is {Math.round(progressPercent)}% complete and plan usage is{' '}
-            {Math.round(yearlyPlanUsedPercent)}%; remaining planned room is{' '}
+            The selected year is {Math.round(progressPercent)}% complete, while planned outflow utilization stands at{' '}
+            {Math.round(yearlyPlanUsedPercent)}%; the remaining planned allowance is{' '}
             <MoneyText amount={yearlyPlanRemaining} currency={currency} />.
           </>
         ) : (
@@ -291,8 +288,7 @@ function buildReflectInsights({
         )
       ) : plannedExpenses > 0 ? (
         <>
-          You have tracked {Math.round(monthlyBudgetUsedPercent)}% of your planned
-          expense budget this month.
+          Recorded expenditures currently utilize {Math.round(monthlyBudgetUsedPercent)}% of the selected month's planned expense allocation.
         </>
       ) : (
         'Monthly budget usage starts after adding an expense plan for the selected month.'
