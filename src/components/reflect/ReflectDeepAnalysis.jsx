@@ -5,7 +5,7 @@ import { Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   getGoalProgress,
-  getMonthlyRequiredSaving,
+  getGoalPlannedAmountForMonth,
   sortGoalsByPriority,
   todayIsoDate,
 } from '@/lib/goals';
@@ -227,7 +227,7 @@ function getGoalTrackState(goal) {
   return { label: 'Behind pace', tone: 'warning' };
 }
 
-function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = false }) {
+function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = false, selectedYear, selectedMonth }) {
   const reflectGoals = useMemo(
     () =>
       Array.isArray(goals)
@@ -266,7 +266,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
       .filter(isGoalTransferTransaction)
       .reduce((sum, transaction) => sum + Math.max(0, safeNumber(transaction.amount)), 0);
     const monthlyRequired = reflectGoals.reduce((sum, goal) => {
-      const required = getMonthlyRequiredSaving(goal);
+      const required = getGoalPlannedAmountForMonth(goal, `${selectedYear}-${selectedMonth}`);
       return sum + (required === null ? 0 : safeNumber(required));
     }, 0);
     const completed = reflectGoals.filter(isGoalComplete).length;
@@ -352,7 +352,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
                 delay={0.08}
               />
               <MetricLine
-                label="Required/mo"
+                label="Planned/mo"
                 value={<Money value={stats.monthlyRequired} currency={currency} />}
                 subtext={`${stats.completed}/${reflectGoals.length} funded`}
                 delay={0.12}
@@ -364,7 +364,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
             {priorityGoals.map((goal, index) => {
               const progress = getGoalProgress(goal);
               const track = getGoalTrackState(goal);
-              const monthlyRequired = getMonthlyRequiredSaving(goal);
+              const monthlyRequired = getGoalPlannedAmountForMonth(goal, `${selectedYear}-${selectedMonth}`);
 
               return (
                 <motion.div
@@ -442,6 +442,8 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
 
 export default function ReflectDeepAnalysis({
   isYear,
+  selectedYear,
+  selectedMonth,
   goals = [],
   goalTransactions = [],
   currency,
@@ -450,6 +452,8 @@ export default function ReflectDeepAnalysis({
     <section className="mb-5 space-y-3">
       <GoalProgressAnalysis
         isYear={isYear}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
         goals={goals}
         goalTransactions={goalTransactions}
         currency={currency}
