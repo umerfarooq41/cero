@@ -174,7 +174,7 @@ export default function UpcomingBillsPreview({
                     </p>
 
                     <p className="truncate text-[11px] leading-4 text-muted-foreground/85 sm:text-xs">
-                      {occurrence.paid > 0 && occurrence.remaining > 0.005 && (rule.type === 'income' || rule.payment_mode === 'flexible') ? `${formatCurrency(occurrence.paid)} received/paid of ${formatCurrency(occurrence.planned)}` : rule.type === 'transfer'
+                      {occurrence.paid > 0 && occurrence.remaining > 0.005 && (rule.type === 'income' || rule.payment_mode === 'flexible') ? <><span className="inline-flex items-center gap-1">{formatCurrency(occurrence.paid)} {rule.type === 'income' ? 'received' : 'paid'} of {formatCurrency(occurrence.planned)}</span></> : rule.type === 'transfer'
                         ? `${account?.name || 'Account'} → ${toAccount?.name || 'Account'}`
                         : `${category?.name || 'Uncategorized'} · ${account?.name || 'Account'}`}
                     </p>
