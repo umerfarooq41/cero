@@ -11,7 +11,6 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
-  ReferenceLine,
   ReferenceDot,
   Tooltip,
   XAxis,
@@ -372,14 +371,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                       <Tooltip
                         {...tooltipProps}
                         cursor={false}
-                        contentStyle={{
-                          ...tooltipStyle,
-                          maxWidth: 220,
-                          whiteSpace: 'normal',
-                        }}
-                        formatter={(value) => (
-                          <TooltipCurrencyValue value={value} currency={currency} />
-                        )}
+                        content={() => null}
                       />
 
                       <Bar
@@ -528,7 +520,6 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         />
                         {activeDay && (
                           <>
-                            <ReferenceLine x={activeDay.label} stroke="hsl(var(--primary) / 0.6)" strokeWidth={1.5} ifOverflow="extendDomain" />
                             <ReferenceDot
                               x={activeDay.label}
                               y={Number(activeDay.amount || 0)}
