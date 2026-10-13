@@ -32,15 +32,21 @@ function Section({ title, action, children }) {
 function Action({ to, children }) {
   return <Button asChild variant="ghost" size="sm" className="min-h-11 px-2 text-xs"><Link to={to}>{children}</Link></Button>;
 }
-function SafeCard({ formatCurrency }) {
-  // A safe daily allowance requires verified discretionary funding and liquid reserves.
-  // Do not infer it from total income, balances, or planned expenses.
-  return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-3 p-4">
-    <div className="flex items-center justify-between gap-2"><p className="text-xs font-medium text-muted-foreground">Safe to spend today</p><Badge variant="secondary" className="rounded-full text-[10px]">Awaiting funding data</Badge></div>
-    <div className="flex items-baseline gap-2"><Money value={0} formatCurrency={formatCurrency} className="text-4xl font-semibold leading-none"/><span className="text-sm text-muted-foreground">/ day</span></div>
-    <p className="text-xs text-muted-foreground">Discretionary funds must be verified before a safe amount can be shown.</p>
-    <div className="relative h-2 rounded-full bg-primary/10"><motion.div className="h-full rounded-full bg-primary/40" initial={{ width: 0 }} animate={{ width: 0 }} /></div>
-    <p className="text-xs text-muted-foreground">Projection unavailable until fixed and discretionary expenses are separated.</p>
+function SafeCard({ budget, formatCurrency }) {
+  // This is NOT a safe-to-spend estimate. Display only known monthly budget
+  // numbers until discretionary allocations and protected funds are reconciled.
+  const planned = Math.max(0, num(budget.totalPlannedExpenses));
+  const spent = Math.max(0, num(budget.totalExpenses));
+  const remaining = Math.max(0, planned - spent);
+  const percentage = planned > 0 ? Math.min(100, spent / planned * 100) : 0;
+  return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2.5 p-3.5">
+    <div className="flex items-center justify-between gap-2">
+      <p className="text-xs font-semibold text-muted-foreground">Monthly expense budget remaining</p>
+      <span className="text-[10px] text-muted-foreground">{planned > 0 ? Math.round(percentage) + '% spent' : 'No expense plan'}</span>
+    </div>
+    <Money value={remaining} formatCurrency={formatCurrency} className="text-2xl font-semibold leading-tight"/>
+    <div className="h-1.5 overflow-hidden rounded-full bg-primary/10"><motion.div className="h-full rounded-full bg-primary" initial={{width: 0}} animate={{width: percentage + '%'}} transition={{duration: 0.45}}/></div>
+    <p className="text-[11px] text-muted-foreground">Expense plan only · Not a safe-to-spend allowance</p>
   </CardContent></Card>;
 }
 function Snapshot({ budget, formatCurrency }) {
@@ -92,7 +98,7 @@ export default function DashboardOverview({ currentMonth, budget = {}, transacti
   ))[0] || null;
   const progress = activeGoal ? getGoalProgress(activeGoal) : 0;
   return <div className="mx-auto max-w-3xl space-y-3">
-    <Entrance index={0}><SafeCard formatCurrency={formatCurrency}/></Entrance>
+    <Entrance index={0}><SafeCard budget={budget} formatCurrency={formatCurrency}/></Entrance>
     <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="text-sm font-medium"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/> left to allocate</span><Action to="/plan">Assign <ChevronRight size={14}/></Action></div></Entrance>}
     <Entrance index={3}><div className="[&_.dashboard-section-subtitle]:hidden"><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></div></Entrance>
