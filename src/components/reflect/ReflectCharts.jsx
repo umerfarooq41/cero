@@ -501,7 +501,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
                         <Tooltip
                           {...tooltipProps}
-                          cursor={false}
+                          cursor={{ stroke: "hsl(var(--primary) / 0.6)", strokeWidth: 1 }}
                           contentStyle={{
                             ...tooltipStyle,
                             maxWidth: 150,
