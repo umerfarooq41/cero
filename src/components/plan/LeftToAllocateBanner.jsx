@@ -34,7 +34,7 @@ export default function LeftToAllocateBanner({
     <div
       className={cn(
         sticky ? 'sticky top-[72px] z-20' : 'relative z-auto',
-        'rounded-3xl app-card-surface px-3 py-2.5 shadow-md backdrop-blur-xl transition-all duration-300 sm:px-4',
+        'rounded-2xl app-card-surface px-3 py-2 shadow-sm backdrop-blur-xl transition-all duration-300 sm:px-4',
         isEditMode ? bgColor : 'border-border'
       )}
     >
@@ -51,7 +51,7 @@ export default function LeftToAllocateBanner({
           </div>
         </div>
 
-        <div className="absolute left-1/2 top-1/2 h-10 w-px -translate-x-1/2 -translate-y-1/2 bg-border" />
+        <div className="absolute left-1/2 top-1/2 h-8 w-px -translate-x-1/2 -translate-y-1/2 bg-border" />
 
         <div className="min-w-0 pl-3 sm:pl-4">
           <div className="flex min-w-0 items-center justify-center gap-2">
