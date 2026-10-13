@@ -12,7 +12,7 @@ import CategoryIcon from '@/components/shared/CategoryIcon';
 import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
-import { getGoalProgress, getGoalRemaining, getGoalOccurrenceStatus, formatGoalDate } from '@/lib/goals';
+import { getGoalProgress, getGoalRemaining, getGoalOccurrenceStatus, formatGoalDate, todayIsoDate } from '@/lib/goals';
 import useGoalItems from '@/components/transactions/useGoalItems';
 import { getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
 
@@ -175,7 +175,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   </Section>;
 }
 function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
-  return <Section title="Savings goals" icon={Target} action={<div className="-mr-2.5"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
+  return <Section title="Upcoming savings" icon={Target} action={<div className="-mr-2.5"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
     <div className="divide-y divide-border/50">{goals.slice(0, 3).map(goal => {
       const fixed = goal.contribution_mode === 'fixed';
       const remaining = getGoalRemaining(goal);
@@ -202,12 +202,23 @@ function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
 }
 export default function DashboardOverview({ currentMonth, allocations = [], budget = {}, transactions = [], allTransactions = [], categories = [], accounts = [], recurringTransactions = [], goals = [], savingsGoals = [], formatCurrency }) {
   const { activeGoals } = useGoalItems({ savingsGoals, allocations, currentMonth, monthTransactions: transactions, allTransactions, accounts, categories });
+  const today = todayIsoDate();
+  const upcomingGoals = activeGoals
+    .filter(goal => {
+      const date = String(goal.contribution_mode === 'fixed' ? goal.next_due_date : goal.target_date || '').slice(0, 10);
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) return false;
+      const [year, month, day] = date.split('-').map(Number);
+      const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
+      const days = Math.round((Date.UTC(year, month - 1, day) - Date.UTC(todayYear, todayMonth - 1, todayDay)) / 86400000);
+      return days <= 10;
+    })
+    .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="mx-auto max-w-3xl space-y-3">
     <Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance>
     <Entrance index={1}><Snapshot budget={budget} formatCurrency={formatCurrency}/></Entrance>
     {num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}
     <Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3}/></Entrance>
     <Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance>
-    {activeGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={activeGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}
+    {upcomingGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={upcomingGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}
   </div>;
 }
