@@ -83,55 +83,33 @@ export default function PlanDonutCard({
   );
 
   return (
-    <div className="rounded-2xl app-card-surface p-3.5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-muted-foreground">Tracked</p>
-
-          <h2
-            className="mt-1 truncate text-base font-bold tracking-tight tabular-nums sm:text-lg"
-            style={{
-              color: tab.color || donutChartData?.[0]?.color || 'hsl(var(--foreground))',
-            }}
-          >
+    <div className="rounded-2xl app-card-surface p-3">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-2 py-2 text-center">
+          <p className="text-[11px] text-muted-foreground">Tracked</p>
+          <p className="mt-1 text-base font-semibold tabular-nums" style={{ color: tab.color || 'hsl(var(--foreground))' }}>
             <PlanMoney amount={totalTracked} currency={currency} />
-          </h2>
-
-          <p className="mt-1 text-xs text-muted-foreground">
-            {tab.label} of{' '}
-            <PlanMoney amount={totalPlanned} currency={currency} compact />
           </p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">{tab.label} of <PlanMoney amount={totalPlanned} currency={currency} compact /></p>
         </div>
-
-        <div className="shrink-0 text-right">
-          <p className="text-xs font-medium text-muted-foreground">
-            {totalRemaining >= 0 ? 'Left' : 'Over'}
+        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-2 py-2 text-center">
+          <p className="text-[11px] text-muted-foreground">{totalRemaining >= 0 ? 'Left' : 'Over'}</p>
+          <p className={cn('mt-1 text-base font-semibold tabular-nums', totalRemaining < 0 ? 'text-red-600' : 'text-foreground')}>
+            <PlanMoney amount={Math.abs(totalRemaining)} currency={currency} compact />
           </p>
-
-          <p
-            className={cn(
-              'mt-1 text-base font-bold tracking-tight tabular-nums sm:text-lg',
-              totalRemaining < 0 ? 'text-red-600' : 'text-foreground'
-            )}
-          >
-            <PlanMoney
-              amount={Math.abs(totalRemaining)}
-              currency={currency}
-              compact
-            />
-          </p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">{Math.round(progress)}% {tab.label.toLowerCase()}</p>
         </div>
       </div>
 
-      <div className="relative mx-auto mt-2 flex h-44 w-full max-w-[220px] items-center justify-center [&_.recharts-wrapper]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none">
+      <div className="relative mx-auto mt-1 flex h-40 w-full max-w-[190px] items-center justify-center [&_.recharts-wrapper]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={donutChartData}
               dataKey="value"
               nameKey="name"
-              innerRadius={54}
-              outerRadius={76}
+              innerRadius={48}
+              outerRadius={68}
               paddingAngle={donutChartData.length > 1 ? 3 : 0}
               stroke="none"
               isAnimationActive
@@ -178,7 +156,7 @@ export default function PlanDonutCard({
         </div>
       </div>
 
-      <div className="mt-2 flex justify-center pb-0.5">
+      <div className="mt-1 flex justify-center pb-0.5">
         {legendItems.length > 0 ? (
           <div className="flex w-full flex-wrap items-center justify-center gap-1.5 text-center">
             {legendItems.map((item) => (
