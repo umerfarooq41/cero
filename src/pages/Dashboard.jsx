@@ -4,8 +4,9 @@ import { useSearchParams } from 'react-router-dom';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import DashboardReflect from '@/components/dashboard/DashboardReflect';
 import DashboardTabs from '@/components/dashboard/DashboardTabs';
-import DashboardHero from '@/components/dashboard/DashboardHero';
+
 import PageHeader from '@/components/layout/PageHeader';
+import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import { usePageEntrance } from '@/hooks/usePageTransition';
@@ -26,6 +27,13 @@ const validTabs = new Set(['overview', 'reflect']);
 
 export default function Dashboard() {
   const scope = usePageEntrance();
+  const [today, setToday] = useState(() => new Date());
+  useEffect(() => {
+    const sync = () => setToday(new Date());
+    const timer = window.setInterval(sync, 60000);
+    document.addEventListener('visibilitychange', sync);
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', sync); };
+  }, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab');
   const activeTab = validTabs.has(requestedTab) ? requestedTab : 'overview';
@@ -39,7 +47,7 @@ export default function Dashboard() {
     [setSearchParams]
   );
 
-  const currentMonth = format(new Date(), 'yyyy-MM');
+  const currentMonth = format(today, 'yyyy-MM');
   const budget = useBudgetSummary(currentMonth);
   const transactions = budget.transactions || [];
   const categories = budget.categories || [];
@@ -96,10 +104,9 @@ export default function Dashboard() {
   if (isBudgetLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
-        <div className="lg:hidden">
-          <PageHeader title="Dashboard" subtitle="Your financial command center" />
-        </div>
-        <main className="mx-auto w-full max-w-7xl space-y-4 px-4 py-4 pb-28 md:px-6 lg:px-8 lg:py-8">
+        <PageHeader title={format(today, 'EEEE, MMMM d, yyyy')} className="[&_h1]:text-sm [&_h1]:font-semibold [&_h1]:tracking-normal sm:[&_h1]:text-base [&_.app-page-header]:bg-transparent" />
+        <main className="mx-auto w-full max-w-7xl space-y-3 px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+          <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
           <Skeleton className="h-28 w-full rounded-2xl" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
@@ -114,29 +121,15 @@ export default function Dashboard() {
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <div className="lg:hidden">
-        <PageHeader
-          title="Dashboard"
-          subtitle="Your financial command center"
-        />
-      </div>
+      <PageHeader title={format(today, 'EEEE, MMMM d, yyyy')} className="[&_h1]:text-sm [&_h1]:font-semibold [&_h1]:tracking-normal sm:[&_h1]:text-base" />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 lg:px-8 lg:py-8">
-        <div className="hidden animate-child lg:block">
-          <DashboardHero
-            budget={dashboardBudget}
-            transactions={transactions}
-            recurringTransactions={recurringTransactions}
-            goals={goalsWithFunding}
-            formatCurrency={formatCurrency}
-          />
-        </div>
+      <main className="mx-auto w-full max-w-7xl px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
+        <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
+        
 
-        <div className="animate-child lg:mt-6">
-          <DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} />
-        </div>
+        
 
-        <div className="mt-4">
+        <div className="mt-1">
           <AnimatePresence mode="wait" initial={false}>
             <AppTabPanel key={activeTab}>
               {activeTab === 'reflect' ? (
@@ -144,6 +137,7 @@ export default function Dashboard() {
               ) : (
                 <DashboardOverview
                   currentMonth={currentMonth}
+                  allocations={allocations}
                   budget={dashboardBudget}
                   transactions={transactions}
                   categories={categories}
