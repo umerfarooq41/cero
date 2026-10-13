@@ -51,7 +51,7 @@ function isRuleAlreadyPosted(rule, transactions = []) {
       transaction?.source_id === rule.id;
     if (!sameRule) return false;
     // Occurrence date is authoritative, particularly for weekly rules and early payments.
-    const postedFor = String(transaction?.recurring_posted_for_date || transaction?.recurring_occurrence_key || '').slice(0, 10);
+    const postedFor = String(transaction?.recurring_posted_for_date || '').slice(0, 10);
     return postedFor ? postedFor === due : String(transaction?.date || '').slice(0, 10) === due;
   });
 }
