@@ -744,7 +744,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         <button
           type="button"
           onClick={() => toggleSection(type)}
-          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-5 py-3.5 text-left transition-colors hover:bg-accent/30"
+          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-2.5 text-left transition-colors hover:bg-accent/30"
         >
           <div className="flex min-w-0 items-center gap-2.5">
             <ChevronDown
@@ -820,12 +820,13 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex justify-center">
         <MonthSelector
           currentMonth={currentMonth}
           onChange={onMonthChange || (() => {})}
-          subtitle="Planning month"
+          subtitle={null}
+          className="max-w-none py-0.5 shadow-none"
         />
       </div>
 
@@ -837,13 +838,10 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         formatCurrency={formatCurrency}
       />
 
-      <div className="space-y-3 lg:flex lg:items-end lg:justify-between lg:gap-6 lg:space-y-0">
+      <div className="space-y-2 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:space-y-0">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold">Planned amounts</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Recurring and Goal badges show source amounts. Goals appear from their
-            start month onward. Editing any row only changes this month’s plan.
-          </p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">Changes apply to this month only.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end lg:shrink-0">
@@ -852,7 +850,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
             variant="outline"
             size="sm"
             onClick={copyFromPreviousMonth}
-            className="gap-2 rounded-xl text-xs"
+            className="h-9 gap-1.5 rounded-xl px-3 text-xs"
           >
             <Copy className="h-3.5 w-3.5" />
             Copy previous
@@ -863,7 +861,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
             size="sm"
             onClick={handleSave}
             disabled={saving}
-            className="gap-2 rounded-xl text-xs font-semibold"
+            className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold"
           >
             <Save className="h-3.5 w-3.5" />
             {saving ? 'Saving...' : 'Save Plan'}
@@ -871,7 +869,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {renderSection('income')}
         {renderSection('expense')}
         {renderSection('savings')}
