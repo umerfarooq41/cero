@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
   Building,
@@ -9,11 +9,13 @@ import {
   PiggyBank,
   Wallet,
   ChevronDown,
+  Plus,
+  Settings,
+  WifiOff,
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import NetWorthDelta from '@/components/shared/NetWorthDelta';
-import FloatingActionButton from '@/components/shared/FloatingActionButton';
 import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
 import { cn } from '@/lib/utils';
 import { usePageEntrance } from '@/hooks/usePageTransition';
@@ -60,31 +62,31 @@ function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurr
       label: 'Debt',
       value: debtTotal,
       Icon: CreditCard,
-      tone: 'text-red-600 dark:text-red-400',
-      iconClass: 'bg-red-500/10 text-red-600 dark:text-red-400',
+      tone: 'text-purple-600 dark:text-purple-400',
+      iconClass: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
     },
   ];
 
   return (
     <section className="grid grid-cols-3 divide-x divide-border/40 overflow-hidden rounded-2xl app-card-surface">
       {items.map(({ label, value, Icon, tone, iconClass }) => (
-        <div key={label} className="min-w-0 px-3 py-3.5 sm:px-4">
-          <div className="mb-2 flex items-center gap-2">
+        <div key={label} className="flex min-w-0 flex-col items-center justify-center px-1.5 py-2.5 text-center sm:px-3">
+          <div className="mb-1.5 flex flex-col items-center gap-1">
             <span
               className={cn(
-                'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl',
+                'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
                 iconClass
               )}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-4 w-4" />
             </span>
 
-            <span className="min-w-0 truncate text-[11px] font-medium text-muted-foreground sm:text-xs">
+            <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
               {label}
             </span>
           </div>
 
-          <div className={cn('text-sm font-bold tabular-nums sm:text-base', tone)}>
+          <div className={cn('flex min-w-0 justify-center text-[12px] font-semibold tabular-nums sm:text-base', tone)}>
             <InlineMoney>{formatCurrency(Math.abs(value))}</InlineMoney>
           </div>
         </div>
@@ -95,6 +97,12 @@ function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurr
 
 export default function Accounts() {
   const scope = usePageEntrance();
+  const navigate = useNavigate();
+  const header = <PageHeader title="Financial overview" action={<div className="flex items-center gap-1">
+    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account")} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
+    {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
+    <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
+  </div>} />;
   const formatCurrency = useCurrencyFormatter();
   const {
     data: accounts = [],
@@ -111,7 +119,7 @@ export default function Accounts() {
   if (accountsPending) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
-        <PageHeader title="Accounts" subtitle="Your money, savings, and debt" />
+        {header}
         <main className="mx-auto flex min-h-[50vh] w-full max-w-7xl items-center justify-center px-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
         </main>
@@ -122,7 +130,7 @@ export default function Accounts() {
   if (accountsError) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
-        <PageHeader title="Accounts" subtitle="Your money, savings, and debt" />
+        {header}
         <main className="mx-auto flex min-h-[50vh] w-full max-w-7xl flex-col items-center justify-center gap-3 px-4 text-center">
           <h2 className="text-lg font-semibold">Couldn't load accounts</h2>
           <p className="text-sm text-muted-foreground">Your data has not been changed. Check your connection and try again.</p>
@@ -190,7 +198,7 @@ export default function Accounts() {
         <button
           type="button"
           onClick={() => toggleGroup(groupKey)}
-          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-3.5 text-left transition-colors hover:bg-accent/30"
+          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-3 py-2.5 text-left transition-colors hover:bg-accent/30"
         >
           <div className="flex min-w-0 items-center gap-2">
             <ChevronDown
@@ -247,10 +255,10 @@ export default function Accounts() {
                 <Link
                   key={account.id}
                   to={`/accounts/${account.id}`}
-                  className="flex min-h-[4.75rem] items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/20"
+                  className="flex min-h-[3.75rem] items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/20"
                 >
                   <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                     style={{
                       backgroundColor: `${accountColor}15`,
                     }}
@@ -268,12 +276,12 @@ export default function Accounts() {
                       {account.name}
                     </div>
 
-                    <div className="mt-1 truncate text-xs capitalize leading-none text-muted-foreground">
+                    <div className="mt-0.5 truncate text-[11px] capitalize leading-tight text-muted-foreground">
                       {typeLabel} · {isLiability ? 'Liability' : 'Asset'}
                     </div>
                   </div>
 
-                  <div className="flex min-w-[5.75rem] shrink-0 items-center justify-end self-stretch text-right">
+                  <div className="flex min-w-0 shrink-0 items-center justify-end text-right">
                     <div
                       className={cn(
                         'text-sm font-semibold tabular-nums',
@@ -294,10 +302,10 @@ export default function Accounts() {
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <PageHeader title="Accounts" subtitle="Your financial overview" />
+      {header}
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:px-6 md:py-6">
-        <div className="animate-child mb-4">
+      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 md:py-5">
+        <div className="animate-child mb-3">
           <NetWorthDelta
             netWorth={netWorth}
             totalAssets={totalAssets}
@@ -306,7 +314,7 @@ export default function Accounts() {
           />
         </div>
 
-        <div className="animate-child mb-6">
+        <div className="animate-child mb-3">
           <AccountSummaryCard
             cashAvailable={cashAvailable}
             savingsTotal={savingsTotal}
@@ -315,12 +323,11 @@ export default function Accounts() {
           />
         </div>
 
-        <div className="animate-child space-y-4">
+        <div className="animate-child space-y-3">
           {renderGroup('Assets', assets, false)}
           {renderGroup('Liabilities', liabilities, true)}
         </div>
 
-        <FloatingActionButton to="/add-account" ariaLabel="Add account" />
       </main>
     </div>
   );
