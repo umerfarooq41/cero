@@ -94,16 +94,11 @@ export default function ManageCategoriesPanel() {
   const archivedCategories = categories.filter((category) => category.is_archived);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl app-card-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-semibold">Budget structure</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Manage income, expense, savings, and debt categories. Planned amounts belong in Monthly Plan.
-          </p>
-        </div>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2 py-1">
+        <h2 className="text-sm font-semibold">Categories</h2>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex items-center gap-2">
           {archivedCategories.length > 0 && (
             <Button
               type="button"
@@ -121,7 +116,7 @@ export default function ManageCategoriesPanel() {
             type="button"
             size="sm"
             onClick={() => openNew('expense')}
-            className="gap-2 rounded-xl text-xs font-semibold"
+            className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold"
           >
             <Plus className="h-3.5 w-3.5" />
             Add Category
@@ -129,7 +124,7 @@ export default function ManageCategoriesPanel() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <CategorySection
           type="income"
           label="Income"
@@ -248,6 +243,7 @@ export default function ManageCategoriesPanel() {
           setEditorOpen(true);
         }}
         onArchive={handleArchive}
+        onAddSub={openAddSub}
         onDelete={(category) => setDeleteTarget(category)}
       />
 
