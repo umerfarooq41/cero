@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { format, subMonths } from 'date-fns';
-import { ChevronDown, Copy, Save } from 'lucide-react';
+import { ChevronDown, Copy, Save, LockKeyhole } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -264,6 +264,10 @@ function getGoalAmountForMonth(goal, month) {
   return total;
 }
 
+function isProtectedPlanRow(row) {
+  return row.sourceType === 'recurring' || row.sourceType === 'goal';
+}
+
 function PlanAmountRow({
   row,
   value,
@@ -327,7 +331,17 @@ function PlanAmountRow({
       </div>
 
       <div className="w-[84px] shrink-0">
-        {row.isGenerated ? (
+        {isProtectedPlanRow(row) ? (
+          <button
+            type="button"
+            aria-label={`${row.name} is managed in the ${row.sourceType === 'goal' ? 'Goals' : 'Recurring'} tab`}
+            onClick={() => toast.info(`Edit this amount in the ${row.sourceType === 'goal' ? 'Goals' : 'Recurring'} tab.`)}
+            className="flex h-8 w-full items-center justify-end gap-1 rounded-lg border border-border/40 bg-muted/25 px-2 text-sm font-medium tabular-nums text-muted-foreground transition-colors hover:bg-muted/45"
+          >
+            <LockKeyhole className="h-3 w-3 shrink-0 opacity-60" />
+            <span className="truncate">{formatMoneyText(value || 0)}</span>
+          </button>
+        ) : row.isGenerated ? (
           <div className="h-8 rounded-lg border border-border/40 bg-muted/25 px-2 text-right text-sm font-medium leading-8 tabular-nums text-muted-foreground">
             {formatMoneyText(value || 0)}
           </div>
@@ -588,7 +602,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     allRows.forEach((row) => {
       const allocation = allocationByRowKey[row.key];
 
-      initial[row.key] = row.isGenerated
+      initial[row.key] = isProtectedPlanRow(row) || row.isGenerated
         ? Number(row.suggestedAmount || 0)
         : allocation
           ? Number(allocation.planned_amount || 0)
@@ -645,7 +659,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     const nextValues = { ...values };
 
     allRows.forEach((row) => {
-      if (row.isGenerated) return;
+      if (isProtectedPlanRow(row) || row.isGenerated) return;
       const previousValue = prevAllocationByRowKey[row.key]?.planned_amount;
 
       if (previousValue !== undefined && previousValue !== null) {
@@ -663,9 +677,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     try {
       await Promise.all(
         allRows
-          // Scheduled recurring items and fixed goals are derived from their
-          // authoritative rules/ledger. Persist only editable plan rows.
-          .filter((row) => !row.isGenerated)
+          // Recurring rules and goals are managed in their own tabs.
+          // Only manual category allocations may be saved here.
+          .filter((row) => !isProtectedPlanRow(row) && !row.isGenerated)
           .map((row) => {
           const existingAllocation = allocationByRowKey[row.key];
           const sourceType = row.sourceType || 'category';
