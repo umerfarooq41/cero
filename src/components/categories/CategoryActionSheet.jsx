@@ -1,4 +1,4 @@
-import { Pencil, Archive, Trash2, ArchiveRestore, Plus, Plus } from 'lucide-react';
+import { Pencil, Archive, Trash2, ArchiveRestore, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 
-export default function CategoryActionSheet({ category, open, onClose, onEdit, onAddSub, onArchive, onDelete, onAddSub }) {
+export default function CategoryActionSheet({ category, open, onClose, onEdit, onAddSub, onArchive, onDelete }) {
   if (!category) return null;
 
   return (
@@ -25,7 +25,7 @@ export default function CategoryActionSheet({ category, open, onClose, onEdit, o
           </div>
         </DialogHeader>
 
-        <div className="space-y-1 py-1">\n          {!category.parent_id && onAddSub && (\n            <button onClick={() => { onAddSub(category); onClose(); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors text-left">\n              <Plus className="w-4 h-4 text-muted-foreground" />\n              <span className="text-sm font-medium">Add Subcategory</span>\n            </button>\n          )
+        <div className="space-y-1 py-1">
           <button
             onClick={() => { onEdit(category); onClose(); }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors text-left"
