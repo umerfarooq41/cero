@@ -242,6 +242,7 @@ export default function ManageCategoriesPanel() {
           setDefaultType(category.type);
           setEditorOpen(true);
         }}
+        onAddSub={openAddSub}
         onArchive={handleArchive}
         onAddSub={openAddSub}
         onDelete={(category) => setDeleteTarget(category)}
