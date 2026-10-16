@@ -13,15 +13,15 @@ const TYPE_ACCENT = {
 };
 
 const rowClass =
-  'group flex items-center gap-3 px-4 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20';
+  'group flex items-center gap-3 px-3 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20';
 
-function CategoryRow({ cat, subs, onAction, onAddSub }) {
+function CategoryRow({ cat, subs, onAction }) {
   const [subOpen, setSubOpen] = useState(false);
   const hasSubs = subs.length > 0;
 
   return (
     <div>
-      <div className={cn(rowClass, 'py-3')}>
+      <div className={cn(rowClass, 'py-2.5')}>
         <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
 
         <div className="min-w-0 flex-1">
@@ -39,15 +39,6 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
         <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <button
             type="button"
-            onClick={() => onAddSub(cat)}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-            title="Add subcategory"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-
-          <button
-            type="button"
             onClick={() => onAction(cat)}
             className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             title="Category actions"
@@ -60,7 +51,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
           <button
             type="button"
             onClick={() => setSubOpen((value) => !value)}
-            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             aria-label={subOpen ? 'Hide subcategories' : 'Show subcategories'}
           >
             <ChevronRight
@@ -94,7 +85,7 @@ function CategoryRow({ cat, subs, onAction, onAddSub }) {
 
 function SubRow({ sub, onAction }) {
   return (
-    <div className={cn(rowClass, 'border-t border-border/40 py-2.5 pl-[3.5rem]')}>
+    <div className={cn(rowClass, 'border-t border-border/40 py-2 pl-[3.5rem]')}>
       <span
         className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: sub.color || '#888' }}
@@ -134,8 +125,8 @@ export default function CategorySection({
   }, 0);
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface shadow-sm">
-      <div className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20">
+    <div className="overflow-hidden rounded-2xl app-card-surface">
+      <div className="flex items-center justify-between px-3 py-2.5 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20">
         <button
           type="button"
           onClick={() => setIsOpen((value) => !value)}
@@ -153,7 +144,7 @@ export default function CategorySection({
           </h3>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <span className="rounded-full border border-border/50 bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
             {totalCount}
           </span>
@@ -203,7 +194,6 @@ export default function CategorySection({
                       cat={category}
                       subs={subs}
                       onAction={onAction}
-                      onAddSub={onAddSub}
                     />
                   );
                 })}
