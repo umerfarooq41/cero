@@ -111,7 +111,7 @@ export default function Dashboard() {
   if (isBudgetLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
-        <PageHeader title={greetingFor(today)} className="[&_h1]:text-sm [&_h1]:font-semibold [&_h1]:tracking-normal sm:[&_h1]:text-base [&_.app-page-header]:bg-transparent" />
+        <PageHeader title={greetingFor(today)} />
         <main className="mx-auto w-full max-w-7xl space-y-3 px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
           <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
           <Skeleton className="h-28 w-full rounded-2xl" />
@@ -128,7 +128,7 @@ export default function Dashboard() {
 
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
-      <PageHeader title={greetingFor(today)} className="[&_h1]:text-sm [&_h1]:font-semibold [&_h1]:tracking-normal sm:[&_h1]:text-base" />
+      <PageHeader title={greetingFor(today)} />
 
       <main className="mx-auto w-full max-w-7xl px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
         <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
