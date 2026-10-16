@@ -1187,15 +1187,9 @@ export default function ManageRecurringPanel() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl app-card-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-semibold">Recurring</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Create and manage predictable income, bills, subscriptions, and debt payments. Posting happens from Transactions → Scheduled.
-          </p>
-        </div>
-        <Button onClick={() => openNew('expense')} size="sm" className="gap-2 rounded-xl text-xs font-semibold">
+    <div className="space-y-3">
+      <div className="flex items-center justify-end py-1">
+        <Button type="button" onClick={openNew('expense')} size="sm" className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold">
           <Plus className="h-3.5 w-3.5" />
           Add Rule
         </Button>
