@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Settings2 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
@@ -83,12 +82,11 @@ export default function ManagePlan() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        title="Manage Plan"
-        subtitle="Configure categories, monthly amounts, recurring rules, and savings goals"
+        title="Manage"
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 lg:py-8">
-        <div className="animate-child mb-4">
+      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 lg:py-6">
+        <div className="animate-child mb-3">
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>
 
