@@ -96,7 +96,6 @@ export default function ManageCategoriesPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2 py-1">
-        <h2 className="text-sm font-semibold">Categories</h2>
 
         <div className="flex items-center gap-2">
           {archivedCategories.length > 0 && (
