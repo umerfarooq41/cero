@@ -130,7 +130,7 @@ export default function CategorySection({
         <button
           type="button"
           onClick={() => setIsOpen((value) => !value)}
-          className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
         >
           <ChevronDown
             className={cn(
