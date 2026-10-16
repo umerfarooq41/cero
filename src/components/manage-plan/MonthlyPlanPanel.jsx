@@ -22,10 +22,6 @@ import {
 import { useCurrencyFormatter } from '@/hooks/useCurrency';
 import {
   attachGoalFundingProgress,
-  formatGoalDate,
-  getGoalProgress,
-  getGoalStartDate,
-  getGoalStatus,
   getGoalPlannedAmountForMonth,
   isGoalPlannedForMonth,
 } from '@/lib/goals';
@@ -157,19 +153,9 @@ function formatMoneyText(amount) {
 }
 
 function getGoalPlanDescription(goal) {
-  const progress = getGoalProgress(goal);
-  const status = getGoalStatus(goal);
-  const target = formatMoneyText(goal?.target_amount);
-  const startDate = formatGoalDate(getGoalStartDate(goal));
-  const targetDate = goal?.target_date ? formatGoalDate(goal.target_date) : null;
-
-  const statusText =
-    status?.key === 'due' ? 'Target passed' : status?.label || 'Active';
-  const targetText = targetDate
-    ? `Target ${target} · ${targetDate}`
-    : `Target ${target}`;
-
-  return `Starts ${startDate} · ${statusText} · ${progress}% complete · ${targetText}`;
+  const frequency = formatFrequency(goal?.frequency);
+  const nextDate = goal?.next_due_date || goal?.start_date;
+  return `${frequency} · Next ${formatDateText(nextDate)}`;
 }
 
 function getAllocationSourceType(allocation) {
@@ -288,7 +274,7 @@ function PlanAmountRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-accent/30',
+        'flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/30',
         row.isSubcategory && 'pl-14'
       )}
     >
@@ -326,13 +312,13 @@ function PlanAmountRow({
         </div>
 
         {(row.description || lastMonthHint > 0) && (
-          <div className="mt-0.5 flex min-w-0 items-center gap-1 whitespace-nowrap text-[10px] leading-3.5 text-muted-foreground">
+          <div className="mt-0.5 flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap text-[10px] leading-3.5 text-muted-foreground">
             {row.description && (
-              <span className="shrink-0">{row.description}</span>
+              <span className="min-w-0 truncate">{row.description}</span>
             )}
 
             {lastMonthHint > 0 && (
-              <span className="shrink-0 tabular-nums">
+              <span className="min-w-0 truncate tabular-nums">
                 Last month: {formatCurrency(lastMonthHint)}
               </span>
             )}
@@ -340,9 +326,9 @@ function PlanAmountRow({
         )}
       </div>
 
-      <div className="w-20 shrink-0">
+      <div className="w-[84px] shrink-0">
         {row.isGenerated ? (
-          <div className="h-8 rounded-md border border-border/50 bg-muted/35 px-3 text-right text-sm font-medium leading-8 tabular-nums text-muted-foreground">
+          <div className="h-8 rounded-lg border border-border/40 bg-muted/25 px-2 text-right text-sm font-medium leading-8 tabular-nums text-muted-foreground">
             {formatMoneyText(value || 0)}
           </div>
         ) : (
@@ -353,7 +339,7 @@ function PlanAmountRow({
             value={value || ''}
             onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
             placeholder="0.00"
-            className="h-8 text-right text-sm tabular-nums"
+            className="h-8 rounded-lg px-2 text-right text-sm tabular-nums"
           />
         )}
       </div>
@@ -744,7 +730,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         <button
           type="button"
           onClick={() => toggleSection(type)}
-          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-4 py-2.5 text-left transition-colors hover:bg-accent/30"
+          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-3 py-2.5 text-left transition-colors hover:bg-accent/30"
         >
           <div className="flex min-w-0 items-center gap-2.5">
             <ChevronDown
@@ -765,7 +751,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
           <div
             className={cn(
-              'shrink-0 text-center text-sm font-medium tabular-nums',
+              'shrink-0 text-right text-sm font-medium tabular-nums',
               config.text
             )}
           >
@@ -785,7 +771,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
                 return (
                   <div
                     key={row.key}
-                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20"
+                    className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20"
                   >
                     <CategoryIcon icon={row.icon} color={row.color} size="sm" />
 
@@ -821,13 +807,25 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-center">
+      <div className="flex min-w-0 items-center justify-between gap-2">
         <MonthSelector
           currentMonth={currentMonth}
           onChange={onMonthChange || (() => {})}
           subtitle={null}
-          className="max-w-none py-0.5 shadow-none"
+          className="!w-auto min-w-0 flex-1 !max-w-none !rounded-none !border-0 !bg-transparent !p-0 !shadow-none !backdrop-blur-none [&_button]:shrink-0 [&_button]:px-0 [&_button]:text-sm"
         />
+        <div className="flex shrink-0 items-center gap-1">
+          <Button type="button" variant="ghost" size="icon" onClick={copyFromPreviousMonth}
+            aria-label="Copy previous month's planned amounts" title="Copy previous month"
+            className="h-9 w-9 rounded-xl">
+            <Copy className="h-[18px] w-[18px]" />
+          </Button>
+          <Button type="button" variant="ghost" size="icon" onClick={handleSave}
+            disabled={saving} aria-label={saving ? 'Saving plan' : 'Save plan'} title="Save plan"
+            className="h-9 w-9 rounded-xl">
+            <Save className="h-[18px] w-[18px]" />
+          </Button>
+        </div>
       </div>
 
       <LeftToAllocateBanner
@@ -837,37 +835,6 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         isEditMode={true}
         formatCurrency={formatCurrency}
       />
-
-      <div className="space-y-2 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:space-y-0">
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold">Planned amounts</h2>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">Changes apply to this month only.</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end lg:shrink-0">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={copyFromPreviousMonth}
-            className="h-9 gap-1.5 rounded-xl px-3 text-xs"
-          >
-            <Copy className="h-3.5 w-3.5" />
-            Copy previous
-          </Button>
-
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-            className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold"
-          >
-            <Save className="h-3.5 w-3.5" />
-            {saving ? 'Saving...' : 'Save Plan'}
-          </Button>
-        </div>
-      </div>
 
       <div className="space-y-3">
         {renderSection('income')}
