@@ -335,7 +335,7 @@ function PlanAmountRow({
           <button
             type="button"
             aria-label={`${row.name} is managed in the ${row.sourceType === 'goal' ? 'Goals' : 'Recurring'} tab`}
-            onClick={() => toast.info(`Edit this amount in the ${row.sourceType === 'goal' ? 'Goals' : 'Recurring'} tab.`)}
+            onClick={() => toast.info(`Edit in ${row.sourceType === 'goal' ? 'Goals' : 'Recurring'} tab`)}
             className="flex h-8 w-full items-center justify-end gap-1 rounded-lg border border-border/40 bg-muted/25 px-2 text-sm font-medium tabular-nums text-muted-foreground transition-colors hover:bg-muted/45"
           >
             <LockKeyhole className="h-3 w-3 shrink-0 opacity-60" />
