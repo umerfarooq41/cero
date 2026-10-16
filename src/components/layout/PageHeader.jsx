@@ -44,7 +44,7 @@ export default function PageHeader({
           max-w-7xl
           items-center
           justify-between
-          gap-4
+          gap-2
           px-4
           pt-[calc(0.65rem+var(--app-safe-area-top))]
           pb-2
@@ -65,13 +65,13 @@ export default function PageHeader({
               className="
                 min-w-0
                 truncate
-                text-[1.85rem]
-                font-bold
-                leading-none
-                tracking-tight
+                text-lg
+                font-semibold
+                leading-6
+                tracking-normal
                 text-foreground
-                lg:text-4xl
-                lg:leading-[0.95]
+                lg:text-xl
+                lg:leading-7
               "
             >
               {title}
