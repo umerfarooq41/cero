@@ -386,7 +386,7 @@ function RecurringRuleModal({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !saving && !nextOpen && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto overscroll-contain sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isDebt ? (isEditing ? 'Edit Debt' : 'New Debt') : (isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule')}</DialogTitle>
         </DialogHeader>
@@ -734,7 +734,7 @@ function RecurringRuleModal({
             <div className="space-y-4 pb-3 pt-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
-                <div className="grid grid-cols-8 gap-2 py-1">
+                <div className="app-appearance-colors">
                   {COLORS.map((item) => (
                     <button
                       key={item}
@@ -745,6 +745,7 @@ function RecurringRuleModal({
                         form.color === item ? 'is-selected' : ''
                       )}
                       style={{ backgroundColor: item }}
+                      aria-pressed={form.color === item}
                       aria-label={`Use color ${item}`}
                     />
                   ))}
@@ -753,16 +754,16 @@ function RecurringRuleModal({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
-                <div className="grid max-h-52 grid-cols-7 gap-2 overflow-y-auto py-1">
+                <div className="app-appearance-icons">
                   {iconNames.map((item) => (
                     <button
                       key={item}
                       type="button"
                       onClick={() => updateForm('icon', item)}
-                      className={cn(
-                        'app-icon-choice'
-                      )}
+                      className={cn('app-icon-choice', form.icon === item && 'is-selected')}
                       title={item}
+                      aria-label={`Use icon ${item}`}
+                      aria-pressed={form.icon === item}
                     >
                       <CategoryIcon icon={item} color={form.icon === item ? form.color : '#888'} size="sm" bare />
                     </button>
