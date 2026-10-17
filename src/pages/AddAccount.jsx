@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { X } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -206,7 +206,7 @@ export default function AddAccount() {
               focus-visible:ring-offset-2
             "
           >
-            <ArrowLeft className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
+            <X className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
           </button>
         }
       />
@@ -312,7 +312,7 @@ export default function AddAccount() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="animate-child mt-5 h-12 w-full rounded-xl text-sm font-semibold"
+          className="h-11 w-full rounded-xl text-sm font-semibold"
         >
           {saving
             ? 'Saving...'
