@@ -95,33 +95,14 @@ export default function ManageCategoriesPanel() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-end gap-2 py-1">
-
-        <div className="flex items-center gap-2">
-          {archivedCategories.length > 0 && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowArchived((value) => !value)}
-              className="gap-1.5 rounded-xl text-xs text-muted-foreground"
-            >
-              <Archive className="h-3.5 w-3.5" />
-              {showArchived ? 'Hide archived' : `Archived (${archivedCategories.length})`}
-            </Button>
-          )}
-
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => openNew('expense')}
-            className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add Category
+      {archivedCategories.length > 0 && (
+        <div className="flex justify-end">
+          <Button type="button" variant="ghost" size="sm" onClick={() => setShowArchived((value) => !value)} className="gap-1.5 rounded-xl text-xs text-muted-foreground">
+            <Archive className="h-3.5 w-3.5" />
+            {showArchived ? 'Hide archived' : `Archived (${archivedCategories.length})`}
           </Button>
         </div>
-      </div>
+      )}
 
       <div className="space-y-3">
         <CategorySection
