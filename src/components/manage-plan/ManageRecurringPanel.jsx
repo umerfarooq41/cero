@@ -928,39 +928,15 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
 
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
-      <button
-        type="button"
-        onClick={() => setIsOpen((current) => !current)}
-        className="flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-accent/30"
-      >
-        <div className="flex items-center gap-2.5">
-          <ChevronDown
-            className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform duration-200',
-              !isOpen && '-rotate-90'
-            )}
-          />
-          <Icon className={cn('h-4 w-4', TYPE_ACCENT[type])} />
-          <h3 className={cn('text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
-            {rules.length}
-          </span>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onAddNew(type);
-            }}
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-            title="Add recurring rule"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
-      </button>
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+        <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
+          <Icon className={cn('h-4 w-4 shrink-0', TYPE_ACCENT[type])} />
+          <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
+        </button>
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span>
+        <button type="button" onClick={() => onAddNew(type)} aria-label={`Add ${label.toLowerCase()} rule`} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:text-primary"><Plus className="h-4 w-4" /></button>
+      </div>
 
       <AnimatePresence initial={false}>
         {isOpen && (
@@ -1000,6 +976,63 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
                 ))}
               </div>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, onAction }) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="overflow-hidden rounded-2xl app-card-surface">
+      <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left">
+        <span className="flex min-w-0 items-center gap-2.5">
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
+          <span className="truncate text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</span>
+        </span>
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+            <div className="divide-y divide-border/50 border-t border-border/50">
+              {rules.map((rule) => {
+                const liability = accounts.find((account) => account.id === rule.to_account_id);
+                const category = categories.find((item) => item.id === rule.category_id);
+                return (
+                  <div key={rule.id} className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+                    <div className="shrink-0 self-start">
+                      <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold">{rule.name}</div>
+                      <p className="mt-1 text-xs font-medium text-muted-foreground">
+                        Paid off{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {formatCurrency(Math.abs(Number(rule.total_amount || 0)))}
+                        {liability ? ` · ${liability.name}` : ''}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium text-green-700 dark:text-green-400">
+                      Completed
+                    </div>
+                    <div className="-ml-2 flex w-6 shrink-0 items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={() => onAction(rule)}
+                        className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+                        aria-label={`Open actions for ${rule.name}`}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1189,7 +1222,7 @@ export default function ManageRecurringPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-end py-1">
-        <Button type="button" onClick={() => openNew('expense')} size="sm" className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold">
+        <Button type="button" onClick={() => openNew('expense')} size="sm" variant="outline" className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold">
           <Plus className="h-3.5 w-3.5" />
           Add Rule
         </Button>
@@ -1239,50 +1272,7 @@ export default function ManageRecurringPanel() {
         />
 
         {completedDebtRules.length > 0 && (
-          <div className="overflow-hidden rounded-2xl app-card-surface">
-            <div className="flex items-center justify-between px-5 py-3.5">
-              <h3 className="text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</h3>
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
-                {completedDebtRules.length}
-              </span>
-            </div>
-            <div className="divide-y divide-border/50 border-t border-border/50">
-              {completedDebtRules.map((rule) => {
-                const liability = accounts.find((account) => account.id === rule.to_account_id);
-                const category = categories.find((item) => item.id === rule.category_id);
-                return (
-                  <div key={rule.id} className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
-                    <div className="shrink-0 self-start">
-                      <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold">{rule.name}</div>
-                      <p className="mt-1 text-xs font-medium text-muted-foreground">
-                        Paid off{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
-                      </p>
-                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                        {formatCurrency(Math.abs(Number(rule.total_amount || 0)))}
-                        {liability ? ` · ${liability.name}` : ''}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium text-green-700 dark:text-green-400">
-                      Completed
-                    </div>
-                    <div className="-ml-2 flex w-6 shrink-0 items-center justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleAction(rule)}
-                        className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
-                        aria-label={`Open actions for ${rule.name}`}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <CompletedDebtsSection rules={completedDebtRules} accounts={accounts} categories={categories} formatCurrency={formatCurrency} onAction={handleAction} />
         )}
       </div>
 
