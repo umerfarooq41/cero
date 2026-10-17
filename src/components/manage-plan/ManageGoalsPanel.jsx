@@ -711,7 +711,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
 
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
-      <div className="flex w-full items-center justify-between gap-2 px-3 py-2.5">
+      <div className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5">
         <button
           type="button"
           onClick={() => setIsOpen((value) => !value)}
@@ -726,8 +726,8 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
           <h3 className={cn('truncate text-sm font-semibold', toneClass)}>{title}</h3>
         </button>
 
-        <div className="flex items-center gap-3">
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
             {goals.length}
           </span>
 
@@ -735,12 +735,13 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
             <button
               type="button"
               onClick={onAddNew}
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+              className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:text-primary"
               title="Add goal"
             >
               <Plus className="h-4 w-4" />
             </button>
           )}
+          {!onAddNew && <span aria-hidden="true" className="h-8 w-8" />}
         </div>
       </div>
 
