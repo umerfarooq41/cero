@@ -744,7 +744,7 @@ export default function Settings() {
             
             stackOnMobile
           >
-            <div className="grid w-full grid-cols-8 justify-items-center gap-1 sm:w-[320px]">
+            <div className="grid w-full grid-cols-8 justify-items-center gap-1.5 px-1 py-1 sm:w-[320px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
