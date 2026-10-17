@@ -52,26 +52,26 @@ function getDiscretionaryAllocations(allocations, categories) {
 }
 function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurrency }) {
   return <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-3xl px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5">
+    <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-2xl px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4">
       <SheetHeader className="pr-8 text-left">
         <SheetTitle className="text-base">Discretionary spending</SheetTitle>
         <SheetDescription className="text-xs">Expense-category allocations only. Recurring bills, transfers, debt and goals are funded separately and excluded.</SheetDescription>
       </SheetHeader>
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         {[
           ['Spent', pace.spent],
           ['Budget', pace.budget],
           [pace.overBudget ? 'Over by' : 'Remaining', pace.overBudget ? pace.spent - pace.budget : pace.remaining],
-        ].map(([label, value]) => <div key={label} className="rounded-xl bg-secondary/60 px-2 py-2.5">
+        ].map(([label, value]) => <div key={label} className="min-w-0 rounded-xl bg-secondary/50 px-1.5 py-2">
           <p className="text-[11px] text-muted-foreground">{label}</p>
           <Money value={value} formatCurrency={formatCurrency} className="text-sm font-semibold"/>
         </div>)}
       </div>
-      <div className="mt-4 divide-y divide-border/40">
+      <div className="mt-3 divide-y divide-border/40">
         {pace.categories.map(item => {
           const category = categoriesById.get(item.categoryId);
           const over = item.remaining < 0;
-          return <div key={item.categoryId} className="py-3">
+          return <div key={item.categoryId} className="py-2.5">
             <div className="flex items-center gap-3">
               <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>
               <div className="min-w-0 flex-1">
