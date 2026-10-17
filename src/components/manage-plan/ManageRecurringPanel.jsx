@@ -928,13 +928,13 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
 
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+      <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5">
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
           <Icon className={cn('h-4 w-4 shrink-0', TYPE_ACCENT[type])} />
           <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
         </button>
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span>
+        <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span>
         <button type="button" onClick={() => onAddNew(type)} aria-label={`Add ${label.toLowerCase()} rule`} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:text-primary"><Plus className="h-4 w-4" /></button>
       </div>
 
@@ -987,12 +987,12 @@ function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, on
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
-      <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left">
+      <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5 text-left">
         <span className="flex min-w-0 items-center gap-2.5">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
           <span className="truncate text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</span>
         </span>
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span>
+        <span className="flex shrink-0 items-center gap-2"><span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span><span aria-hidden="true" className="h-8 w-8" /></span>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
