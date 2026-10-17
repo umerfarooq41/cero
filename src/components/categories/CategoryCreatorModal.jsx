@@ -125,7 +125,7 @@ export default function CategoryCreatorModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain">
         <DialogHeader>
           <DialogTitle>New Category</DialogTitle>
         </DialogHeader>
@@ -215,7 +215,7 @@ export default function CategoryCreatorModal({
               Color
             </label>
 
-            <div className="grid grid-cols-8 gap-2 py-1">
+            <div className="app-appearance-colors">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -227,6 +227,8 @@ export default function CategoryCreatorModal({
                       ? 'is-selected' : ''
                   )}
                   style={{ backgroundColor: item }}
+                  aria-label={`Use color ${item}`}
+                  aria-pressed={color === item}
                 />
               ))}
             </div>
@@ -237,7 +239,7 @@ export default function CategoryCreatorModal({
               Icon
             </label>
 
-            <div className="grid max-h-52 grid-cols-7 gap-2 overflow-y-auto py-1">
+            <div className="app-appearance-icons">
               {iconNames.map((item) => (
                 <button
                   key={item}
@@ -247,6 +249,8 @@ export default function CategoryCreatorModal({
                     'app-icon-choice', icon === item && 'is-selected'
                   )}
                   title={item}
+                  aria-label={`Use icon ${item}`}
+                  aria-pressed={icon === item}
                 >
                   <CategoryIcon
                     icon={item}
