@@ -449,6 +449,7 @@ export default function AddTransaction() {
       />
 
       {isRecurringDateCorrection ? (
+        <>
         <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-4">
           <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
             <p className="text-sm text-muted-foreground">Correct the payment amount, actual date, and scheduled installment. Changes to amounts automatically adjust balances.</p>
@@ -488,7 +489,9 @@ export default function AddTransaction() {
               Delete Transaction
             </Button>
         </div>
+        </>
       ) : (
+      <>
       <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-3">
         <div className="mb-3">
           <TransactionTypeSelector
@@ -728,6 +731,7 @@ export default function AddTransaction() {
           </Button>
         )}
         </div>
+      </>
       )}
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
