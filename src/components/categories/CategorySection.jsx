@@ -126,11 +126,11 @@ export default function CategorySection({
 
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
-      <div className="flex items-center justify-between px-3 py-2.5 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20">
+      <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5 transition-colors">
         <button
           type="button"
           onClick={() => setIsOpen((value) => !value)}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
         >
           <ChevronDown
             className={cn(
@@ -144,15 +144,15 @@ export default function CategorySection({
           </h3>
         </button>
 
-        <div className="flex items-center gap-1">
-          <span className="rounded-full border border-border/50 bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
             {totalCount}
           </span>
 
           <button
             type="button"
             onClick={() => onAddNew(type)}
-            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:text-foreground"
             title="Add category"
           >
             <Plus className="h-4 w-4" />
