@@ -826,7 +826,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           currentMonth={currentMonth}
           onChange={onMonthChange || (() => {})}
           subtitle={null}
-          className="!w-auto min-w-0 flex-1 !max-w-none !rounded-none !border-0 !bg-transparent !p-0 !shadow-none !backdrop-blur-none [&_button]:shrink-0 [&_button]:px-0 [&_button]:text-sm"
+          bare
+          className="min-w-0 flex-1 [&_button]:shrink-0"
         />
         <div className="flex shrink-0 items-center gap-1">
           <Button type="button" variant="ghost" size="icon" onClick={copyFromPreviousMonth}
