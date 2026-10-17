@@ -142,13 +142,14 @@ export default function CategoryEditorModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Category' : 'New Category'}
           </DialogTitle>
         </DialogHeader>
 
+        <div className="app-dialog-scroll">
         <div className="flex items-center gap-3 p-3 rounded-2xl app-card-surface-soft backdrop-blur-xl">
           <CategoryIcon icon={icon} color={color} size="lg" />
 
@@ -286,6 +287,7 @@ export default function CategoryEditorModal({
           </div>
         </div>
 
+        </div>
         <DialogFooter className="app-dialog-actions">
           <Button variant="outline" onClick={onClose}>
             Cancel
