@@ -897,19 +897,23 @@ export default function Settings() {
             label="Restore Backup"
             description="Replace data from a validated backup."
           >
-            <label className={cn(
-                'inline-flex items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-                online ? 'cursor-pointer hover:bg-accent hover:text-accent-foreground' : 'cursor-not-allowed opacity-50'
-              )}>
-              Restore
-              <input
-                type="file"
-                accept=".json,application/json"
-                className="sr-only"
-                onChange={handleRestoreFile}
-                disabled={restoring || !online}
-              />
-            </label>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className={cn('rounded-2xl', (!online || restoring) && 'pointer-events-none opacity-50')}
+            >
+              <label aria-label="Restore backup from JSON file">
+                {restoring ? 'Restoring…' : 'Restore'}
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="sr-only"
+                  onChange={handleRestoreFile}
+                  disabled={restoring || !online}
+                />
+              </label>
+            </Button>
           </SettingRow>
 
           <SettingRow
