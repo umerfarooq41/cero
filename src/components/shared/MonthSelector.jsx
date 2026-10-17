@@ -13,6 +13,7 @@ export default function MonthSelector({
   onLabelClick,
   trailingAction,
   className,
+  bare = false,
 }) {
   const date = new Date(`${currentMonth}-01`);
 
@@ -52,7 +53,9 @@ export default function MonthSelector({
         if (info.offset.x > 40) goToPreviousMonth();
       }}
       className={cn(
-        'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1 rounded-2xl app-card-surface p-1 shadow-sm backdrop-blur-xl',
+        bare
+          ? 'flex w-full min-w-0 touch-pan-y select-none items-center justify-center gap-1 bg-transparent'
+          : 'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1 rounded-2xl app-card-surface p-1 shadow-sm backdrop-blur-xl',
         className
       )}
     >
@@ -60,7 +63,7 @@ export default function MonthSelector({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 rounded-xl"
+        className="h-8 w-8 shrink-0 rounded-xl [-webkit-tap-highlight-color:transparent] focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
         onClick={goToPreviousMonth}
       >
         <ChevronLeft className="h-4 w-4" />
