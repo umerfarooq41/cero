@@ -542,7 +542,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Color</label>
 
-            <div className="grid grid-cols-8 gap-2 py-1">
+            <div className="app-appearance-colors">
               {COLORS.map((item) => (
                 <button
                   key={item}
@@ -553,6 +553,8 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
                     form.color_key === item ? 'is-selected' : ''
                   )}
                   style={{ backgroundColor: item }}
+                  aria-label={`Use color ${item}`}
+                  aria-pressed={form.color_key === item}
                 />
               ))}
             </div>
@@ -561,7 +563,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Icon</label>
 
-            <div className="grid max-h-52 grid-cols-7 gap-2 overflow-y-auto py-1">
+            <div className="app-appearance-icons">
               {iconNames.map((item) => (
                 <button
                   key={item}
@@ -571,6 +573,8 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
                     'app-icon-choice', form.icon_key === item && 'is-selected'
                   )}
                   title={item}
+                  aria-label={`Use icon ${item}`}
+                  aria-pressed={form.icon_key === item}
                 >
                   <CategoryIcon icon={item} color={form.icon_key === item ? form.color_key : '#888'} size="sm" bare />
                 </button>
