@@ -744,7 +744,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         <button
           type="button"
           onClick={() => toggleSection(type)}
-          className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-3 py-2.5 text-left transition-colors hover:bg-accent/30"
+          className={cn("flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors", !isCollapsed && "border-b border-border/40")}
         >
           <div className="flex min-w-0 items-center gap-2.5">
             <ChevronDown
@@ -758,7 +758,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
               {config.title}
             </h3>
 
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+            <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
               {count}
             </span>
           </div>
