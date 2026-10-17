@@ -919,13 +919,6 @@ export default function ManageGoalsPanel() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-end py-1">
-        <Button type="button" onClick={openNew} size="sm" variant="outline" className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold">
-          <Plus className="h-3.5 w-3.5" />
-          Add Goal
-        </Button>
-      </div>
-
       <div className="space-y-3">
         <GoalSection
           title="Active Goals"
