@@ -284,7 +284,7 @@ export default function AddAccount() {
               Color
             </label>
 
-            <div className="grid grid-cols-8 gap-2 py-1">
+            <div className="app-appearance-colors">
               {colors.map((item) => (
                 <button
                   key={item}
@@ -297,6 +297,8 @@ export default function AddAccount() {
                   style={{
                     backgroundColor: item,
                   }}
+                  aria-label={`Use color ${item}`}
+                  aria-pressed={color === item}
                 />
               ))}
             </div>
