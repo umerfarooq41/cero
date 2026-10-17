@@ -305,6 +305,8 @@ export default function AddAccount() {
           </div>
         </div>
 
+
+      </main>
         <div className="app-route-sheet-footer">
         <Button variant="outline" onClick={() => navigate(-1)} disabled={saving}>Cancel</Button>
         <Button
@@ -319,7 +321,6 @@ export default function AddAccount() {
               : 'Create Account'}
         </Button>
         </div>
-      </main>
     </div>
   );
 }
