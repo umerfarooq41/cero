@@ -1,5 +1,4 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { format, addMonths, subMonths } from 'date-fns';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -59,15 +58,13 @@ export default function MonthSelector({
         className
       )}
     >
-      <Button
+      <button
         type="button"
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 shrink-0 rounded-xl [-webkit-tap-highlight-color:transparent] focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
         onClick={goToPreviousMonth}
       >
         <ChevronLeft className="h-4 w-4" />
-      </Button>
+      </button>
 
       <motion.button
         type="button"
@@ -97,15 +94,13 @@ export default function MonthSelector({
         )}
       </motion.button>
 
-      <Button
+      <button
         type="button"
-        variant="ghost"
-        size="icon"
         className="h-8 w-8 shrink-0 rounded-xl"
         onClick={goToNextMonth}
       >
         <ChevronRight className="h-4 w-4" />
-      </Button>
+      </button>
 
       {trailingAction && (
         <div className="ml-1 flex shrink-0 items-center gap-1">
