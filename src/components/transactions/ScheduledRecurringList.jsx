@@ -48,7 +48,7 @@ function RecurringPaymentDialog({
 
   return (
     <Dialog open={dialog.open} onOpenChange={(open) => !open && dialog.closeDialog()}>
-      <DialogContent className="max-w-lg rounded-3xl app-card-surface-strong backdrop-blur-xl">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {isIncome
@@ -64,7 +64,7 @@ function RecurringPaymentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-1">
+        <div className="app-dialog-scroll space-y-4">
           <div className="rounded-2xl app-card-surface-soft p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {isIncome ? "Deposit account" : "Payment path"}
@@ -122,7 +122,7 @@ function RecurringPaymentDialog({
           </div>
         </div>
 
-        <DialogFooter className="mt-4 border-t border-border/50 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <DialogFooter className="app-dialog-actions">
           <Button
             variant="outline"
             onClick={dialog.closeDialog}
