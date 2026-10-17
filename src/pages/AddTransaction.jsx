@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   ArrowDownLeft,
-  ArrowLeft,
+  X,
   ArrowLeftRight,
   ArrowUpRight,
   AlertTriangle,
@@ -443,7 +443,7 @@ export default function AddTransaction() {
             aria-label="Close"
             className="group relative flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-full text-muted-foreground/80 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <ArrowLeft className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
+            <X className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
           </button>
         }
       />
@@ -713,7 +713,7 @@ export default function AddTransaction() {
         <Button
           onClick={handleSubmit}
           disabled={saving || deleting || !amount}
-          className="mt-5 h-12 w-full text-sm font-semibold"
+          className="h-11 w-full text-sm font-semibold"
         >
           {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
         </Button>
