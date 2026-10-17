@@ -4,7 +4,7 @@ export default function PlanBreakdownCard({ activeTab, tab, rows, currency }) {
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
       <div className="border-b border-border/40 px-3.5 py-2.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wide">
+        <h3 className="text-xs font-semibold tracking-normal">
           {activeTab === 'savings'
             ? 'Savings & Goals Breakdown'
             : `${tab.title} Breakdown`}
