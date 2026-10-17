@@ -386,11 +386,12 @@ function RecurringRuleModal({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !saving && !nextOpen && onClose()}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto overscroll-contain sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isDebt ? (isEditing ? 'Edit Debt' : 'New Debt') : (isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule')}</DialogTitle>
         </DialogHeader>
 
+        <div className="app-dialog-scroll space-y-3">
         <div className="flex items-center gap-3 rounded-2xl app-card-surface-soft p-3">
           <CategoryIcon icon={form.icon} color={form.color} size="lg" />
           <div className="min-w-0">
@@ -786,6 +787,7 @@ function RecurringRuleModal({
           </div>
         </div>
 
+        </div>
         {saveError && <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive break-words">{saveError}</p>}
         <DialogFooter className="app-dialog-actions">
           <Button variant="outline" onClick={onClose} disabled={saving}>
