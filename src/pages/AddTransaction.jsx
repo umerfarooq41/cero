@@ -428,7 +428,7 @@ export default function AddTransaction() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="app-route-sheet">
       <PageHeader
         title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
         subtitle={
@@ -440,7 +440,7 @@ export default function AddTransaction() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
+            aria-label="Close"
             className="group relative flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-full text-muted-foreground/80 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <ArrowLeft className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
@@ -449,7 +449,7 @@ export default function AddTransaction() {
       />
 
       {isRecurringDateCorrection ? (
-        <main className="mx-auto w-full max-w-3xl px-4 py-4 pb-24">
+        <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-4">
           <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
             <p className="text-sm text-muted-foreground">Correct the payment amount, actual date, and scheduled installment. Changes to amounts automatically adjust balances.</p>
             <div className="space-y-1.5">
@@ -470,6 +470,10 @@ export default function AddTransaction() {
               <Textarea id="linked-payment-note" value={note} onChange={(event) => setNote(event.target.value)} />
             </div>
             {linkedSaveError && <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{linkedSaveError}</div>}
+          </div>
+        </main>
+        <div className="app-route-sheet-footer">
+          <Button variant="outline" onClick={() => navigate(-1)} disabled={saving || deleting}>Cancel</Button>
             <Button type="button" className="w-full" disabled={saving || deleting || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save changes'}
             </Button>
@@ -483,10 +487,9 @@ export default function AddTransaction() {
               <Trash2 className="mr-2 h-4 w-4" />
               Delete Transaction
             </Button>
-          </div>
-        </main>
+        </div>
       ) : (
-      <main className="mx-auto w-full max-w-3xl px-4 py-3 pb-24 lg:py-8">
+      <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-3">
         <div className="mb-3">
           <TransactionTypeSelector
             value={type}
@@ -701,6 +704,9 @@ export default function AddTransaction() {
           </div>
         </div>
 
+      </main>
+        <div className="app-route-sheet-footer">
+          <Button variant="outline" onClick={() => navigate(-1)} disabled={saving || deleting}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           disabled={saving || deleting || !amount}
@@ -721,7 +727,7 @@ export default function AddTransaction() {
             Delete Transaction
           </Button>
         )}
-      </main>
+        </div>
       )}
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
