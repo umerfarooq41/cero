@@ -755,13 +755,8 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
             className="overflow-hidden"
           >
             {goals.length === 0 ? (
-              <div className="border-t border-border/50 px-5 py-6 text-center">
+              <div className="border-t border-border/50 px-3 py-3 text-center">
                 <p className="text-xs text-muted-foreground">{emptyText}</p>
-                {onAddNew && (
-                  <button type="button" onClick={onAddNew} className="mt-1 text-xs font-medium text-primary hover:underline">
-                    Add one
-                  </button>
-                )}
               </div>
             ) : (
               <div className="divide-y divide-border/50 border-t border-border/50">
@@ -925,7 +920,7 @@ export default function ManageGoalsPanel() {
           tone="active"
           goals={groupedGoals.active}
           defaultExpanded
-          emptyText="No active savings goals yet."
+          emptyText="No goals yet"
           onAddNew={openNew}
           onAction={setActionTarget}
           formatCurrency={formatCurrency}
@@ -937,7 +932,7 @@ export default function ManageGoalsPanel() {
           tone="completed"
           goals={groupedGoals.completed}
           defaultExpanded={false}
-          emptyText="Completed goals will appear here."
+          emptyText="No completed goals"
           onAction={setActionTarget}
           formatCurrency={formatCurrency}
           completionDates={goalCompletionDates}
@@ -948,7 +943,7 @@ export default function ManageGoalsPanel() {
             title="Archived Goals"
             tone="archived"
             goals={groupedGoals.archived}
-            emptyText="Archived goals will appear here."
+            emptyText="No archived goals"
             onAction={setActionTarget}
             formatCurrency={formatCurrency}
             completionDates={goalCompletionDates}
