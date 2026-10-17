@@ -948,17 +948,8 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
             className="overflow-hidden"
           >
             {rules.length === 0 ? (
-              <div className="border-t border-border/50 px-5 py-6 text-center">
-                <p className="text-xs text-muted-foreground">
-                  No {label.toLowerCase()} recurring rules yet.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onAddNew(type)}
-                  className="mt-1 text-xs font-medium text-primary hover:underline"
-                >
-                  Add one
-                </button>
+              <div className="border-t border-border/50 px-3 py-3 text-center">
+                <p className="text-xs text-muted-foreground">No rules yet</p>
               </div>
             ) : (
               <div className="divide-y divide-border/50 border-t border-border/50">
