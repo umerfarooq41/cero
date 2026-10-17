@@ -125,11 +125,12 @@ export default function CategoryCreatorModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>New Category</DialogTitle>
         </DialogHeader>
 
+        <div className="app-dialog-scroll">
         <div className="flex items-center gap-3 p-3 rounded-2xl app-card-surface-soft backdrop-blur-xl">
           <CategoryIcon icon={icon} color={color} size="lg" />
           <div className="min-w-0">
@@ -264,6 +265,7 @@ export default function CategoryCreatorModal({
           </div>
         </div>
 
+        </div>
         <DialogFooter className="app-dialog-actions">
           <Button variant="outline" onClick={onClose}>
             Cancel
