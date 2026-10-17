@@ -9,7 +9,6 @@ import {
   Upload,
   Fingerprint,
   Globe,
-  LayoutGrid,
   LogOut,
   Monitor,
   Moon,
@@ -199,7 +198,7 @@ function IconTile({ icon: Icon, tone = 'blue', className }) {
   return (
     <div
       className={cn(
-        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1',
+        'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1',
         toneClasses[tone]?.tile || toneClasses.blue.tile,
         className
       )}
@@ -209,23 +208,18 @@ function IconTile({ icon: Icon, tone = 'blue', className }) {
   );
 }
 
-function SettingsSection({ title, description, children, tone = 'blue' }) {
+function SettingsSection({ title, children }) {
   return (
-    <section className="settings-section animate-child mb-4 overflow-hidden rounded-3xl app-card-surface">
-      <div className="settings-section-header flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4">
+    <section className="settings-section animate-child mb-3 overflow-hidden rounded-2xl app-card-surface">
+      <div className="settings-section-header flex items-center border-b border-border/40 px-3.5 py-2.5">
         <div className="min-w-0">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {title}
           </h3>
-          {description && (
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              {description}
-            </p>
-          )}
         </div>
       </div>
 
-      <div className="divide-y divide-border/50 px-4">{children}</div>
+      <div className="divide-y divide-border/40 px-3">{children}</div>
     </section>
   );
 }
@@ -247,14 +241,14 @@ function SettingRow({
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'settings-row w-full px-1 py-3 text-left transition-colors',
+        'settings-row w-full px-0.5 py-2.5 text-left transition-colors',
         onClick && 'rounded-2xl app-surface-hover',
         stackOnMobile
-          ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'
-          : 'flex items-center gap-4'
+          ? 'flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3'
+          : 'flex items-center gap-2.5'
       )}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">
         <IconTile icon={icon} tone={danger ? 'rose' : tone} />
 
         <div className="min-w-0 flex-1">
@@ -267,7 +261,7 @@ function SettingRow({
             {label}
           </div>
           {description && (
-            <div className="mt-0.5 break-words text-xs leading-5 text-muted-foreground">
+            <div className="mt-0.5 break-words text-[11px] leading-4 text-muted-foreground">
               {description}
             </div>
           )}
@@ -285,7 +279,7 @@ function SegmentedOption({ active, onClick, icon: Icon, label }) {
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2 text-xs font-bold transition-all',
+        'inline-flex items-center justify-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-all',
         active
           ? 'app-card-surface-strong text-foreground shadow-sm ring-1 ring-border/60'
           : 'text-muted-foreground app-surface-hover hover:text-foreground'
@@ -307,7 +301,7 @@ function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
           ? 'border-primary/45 ring-2 ring-primary/30 ring-offset-2 ring-offset-background'
           : 'border-border/60 hover:border-border/80'
@@ -339,8 +333,6 @@ export default function Settings() {
     themeStyle,
     setThemeStyle,
     resolvedTheme,
-    compactMode,
-    setCompactMode,
     showDecimals,
     setShowDecimals,
     hapticsEnabled,
@@ -676,10 +668,10 @@ export default function Settings() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title="Settings"
-        subtitle="Personalize Cero, manage budget behavior, and control your data"
+        
       />
 
-      <main className="mx-auto w-full max-w-4xl px-4 py-3 pb-24 lg:py-8">
+      <main className="mx-auto w-full max-w-4xl px-4 py-2 pb-24 lg:py-6">
         <SettingsSection
           title="Account"
           description="Manage sign-in status and account access."
@@ -730,7 +722,7 @@ export default function Settings() {
             icon={Palette}
             tone="purple"
             label="Appearance"
-            description="Choose system, light, or dark mode."
+            
             stackOnMobile
           >
             <div className="grid grid-cols-3 gap-1 rounded-2xl app-card-surface-soft p-1">
@@ -750,10 +742,10 @@ export default function Settings() {
             icon={Brush}
             tone="cyan"
             label="Theme Style"
-            description="Pick a standalone app theme. Backgrounds carry the mood; cards and borders stay neutral."
+            
             stackOnMobile
           >
-            <div className="grid w-full grid-cols-4 justify-items-center gap-2 sm:w-[216px]">
+            <div className="grid w-full grid-cols-8 justify-items-center gap-1 sm:w-[320px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
@@ -770,7 +762,7 @@ export default function Settings() {
             icon={Globe}
             tone="emerald"
             label="Currency"
-            description={`Currently using ${selectedCurrency?.name || 'Saudi Riyal'}.`}
+            
           >
             <Select
               value={settings.currency}
@@ -804,7 +796,7 @@ export default function Settings() {
             icon={CircleDollarSign}
             tone="amber"
             label="Show Decimals"
-            description="Turn off to show whole-number money values in supported amount displays."
+            description="Display amounts without decimals when off."
           >
             <Switch checked={showDecimals} onCheckedChange={setShowDecimals} />
           </SettingRow>
@@ -819,7 +811,7 @@ export default function Settings() {
             icon={Calculator}
             tone="amber"
             label="Defer late-month income"
-            description="Income received on or after the 25th is available for next month’s budget. Other transactions stay on their actual dates."
+            description="Income from the 25th funds next month."
           >
             <Switch
               checked={settings.budgetLogic.twentyFifthRule}
@@ -866,19 +858,10 @@ export default function Settings() {
           tone="cyan"
         >
           <SettingRow
-            icon={LayoutGrid}
-            tone="cyan"
-            label="Compact Mode"
-            description="Tightens spacing across the whole app for a denser layout."
-          >
-            <Switch checked={compactMode} onCheckedChange={setCompactMode} />
-          </SettingRow>
-
-          <SettingRow
             icon={Fingerprint}
             tone="purple"
             label="Haptic Feedback"
-            description="Adds a light vibration on supported mobile devices when tapping buttons."
+            description="Vibrate on supported devices."
           >
             <Switch checked={hapticsEnabled} onCheckedChange={setHapticsEnabled} />
           </SettingRow>
@@ -893,7 +876,7 @@ export default function Settings() {
             icon={ShieldCheck}
             tone="emerald"
             label="Cero Backup"
-            description="Download a complete versioned JSON backup of your Cero cloud data."
+            description="Download your data as a backup."
           >
             <Button
               variant="outline"
@@ -913,7 +896,7 @@ export default function Settings() {
             icon={Upload}
             tone="amber"
             label="Restore Backup"
-            description="Validate and replace your Cero cloud data from a versioned JSON backup."
+            description="Replace data from a validated backup."
           >
             <label className={cn(
                 'inline-flex items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
@@ -934,7 +917,7 @@ export default function Settings() {
             icon={Download}
             tone="blue"
             label="Export Report"
-            description="Download a polished HTML financial report."
+            description="Download a financial report."
           >
             <Button
               variant="outline"
@@ -959,7 +942,7 @@ export default function Settings() {
           <SettingRow
             icon={Trash2}
             label="Reset Everything"
-            description="Permanently delete accounts, transactions, plans, recurring rules, goals, and app settings."
+            description="Permanently delete all Cero data."
             danger
           >
             <Button
