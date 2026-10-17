@@ -172,7 +172,7 @@ export default function AddAccount() {
   };
 
   return (
-    <div ref={scope} className="min-h-screen bg-transparent">
+    <div ref={scope} className="app-route-sheet">
       <PageHeader
         title={isEditing ? 'Edit Account' : 'Add Account'}
         subtitle={
@@ -184,7 +184,7 @@ export default function AddAccount() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
+            aria-label="Close"
             className="
               group
               relative
@@ -211,7 +211,7 @@ export default function AddAccount() {
         }
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-3 pb-24 lg:py-8">
+      <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-3">
         <div className="animate-child space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -305,6 +305,8 @@ export default function AddAccount() {
           </div>
         </div>
 
+        <div className="app-route-sheet-footer">
+        <Button variant="outline" onClick={() => navigate(-1)} disabled={saving}>Cancel</Button>
         <Button
           onClick={handleSave}
           disabled={saving}
@@ -316,6 +318,7 @@ export default function AddAccount() {
               ? 'Save Changes'
               : 'Create Account'}
         </Button>
+        </div>
       </main>
     </div>
   );
