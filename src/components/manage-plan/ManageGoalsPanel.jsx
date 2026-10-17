@@ -375,7 +375,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Goal' : 'New Goal'}</DialogTitle>
         </DialogHeader>
@@ -392,7 +392,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain py-2 pr-1">
+        <div className="app-dialog-scroll space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Name</label>
             <Input
