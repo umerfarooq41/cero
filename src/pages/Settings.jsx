@@ -627,7 +627,6 @@ export default function Settings() {
 
       setTheme('system');
       setThemeStyle('ember-noir');
-      setCompactMode(false);
       setShowDecimals(true);
       setHapticsEnabled(false);
 
