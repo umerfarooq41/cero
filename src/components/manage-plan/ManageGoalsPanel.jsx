@@ -711,7 +711,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
 
   return (
     <div className="overflow-hidden rounded-2xl app-card-surface">
-      <div className="flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-accent/30">
+      <div className="flex w-full items-center justify-between gap-2 px-3 py-2.5">
         <button
           type="button"
           onClick={() => setIsOpen((value) => !value)}
@@ -919,13 +919,13 @@ export default function ManageGoalsPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-end py-1">
-        <Button type="button" onClick={openNew} size="sm" className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold">
+        <Button type="button" onClick={openNew} size="sm" variant="outline" className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold">
           <Plus className="h-3.5 w-3.5" />
           Add Goal
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <GoalSection
           title="Active Goals"
           tone="active"
@@ -942,7 +942,7 @@ export default function ManageGoalsPanel() {
           title="Completed Goals"
           tone="completed"
           goals={groupedGoals.completed}
-          defaultExpanded={groupedGoals.active.length === 0}
+          defaultExpanded={false}
           emptyText="Completed goals will appear here."
           onAction={setActionTarget}
           formatCurrency={formatCurrency}
