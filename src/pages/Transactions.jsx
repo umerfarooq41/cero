@@ -51,9 +51,9 @@ export default function Transactions() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title={activeTab === 'history' ? <span className="flex items-center gap-0.5 text-base font-semibold sm:text-lg">
-          <button type="button" aria-label="Previous month" className="grid size-8 place-items-center rounded-full hover:bg-muted/60" onClick={() => changeMonth(-1)}><ChevronLeft className="size-4"/></button>
+          <button type="button" aria-label="Previous month" className="grid size-8 place-items-center rounded-full hover:bg-muted/60 [-webkit-tap-highlight-color:transparent]" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(-1)}><ChevronLeft className="size-4"/></button>
           <span className="whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
-          <button type="button" aria-label="Next month" className="grid size-8 place-items-center rounded-full hover:bg-muted/60" onClick={() => changeMonth(1)}><ChevronRight className="size-4"/></button>
+          <button type="button" aria-label="Next month" className="grid size-8 place-items-center rounded-full hover:bg-muted/60 [-webkit-tap-highlight-color:transparent]" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(1)}><ChevronRight className="size-4"/></button>
         </span> : <span className="text-base font-semibold">Scheduled</span>}
         action={<div className="flex items-center gap-1">
           {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
