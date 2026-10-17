@@ -448,9 +448,7 @@ function applyBooleanClass(className, enabled) {
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(getStoredTheme);
   const [themeStyle, setThemeStyleState] = useState(getStoredThemeStyle);
-  const [compactMode, setCompactModeState] = useState(() =>
-    getStoredBoolean(COMPACT_MODE_STORAGE_KEY, false)
-  );
+  const compactMode = true;
   const [showDecimals, setShowDecimalsState] = useState(() =>
     getStoredBoolean(SHOW_DECIMALS_STORAGE_KEY, true)
   );
@@ -478,9 +476,9 @@ export function ThemeProvider({ children }) {
   }, [themeStyle, resolvedTheme]);
 
   useEffect(() => {
-    applyBooleanClass('compact-mode', compactMode);
-    localStorage.setItem(COMPACT_MODE_STORAGE_KEY, String(compactMode));
-  }, [compactMode]);
+    applyBooleanClass('compact-mode', true);
+    localStorage.setItem(COMPACT_MODE_STORAGE_KEY, 'true');
+  }, []);
 
   useEffect(() => {
     applyBooleanClass('show-decimals', showDecimals);
@@ -548,7 +546,7 @@ export function ThemeProvider({ children }) {
       themeStyle,
       setThemeStyle,
       compactMode,
-      setCompactMode: setCompactModeState,
+
       showDecimals,
       setShowDecimals: setShowDecimalsState,
       hapticsEnabled,
