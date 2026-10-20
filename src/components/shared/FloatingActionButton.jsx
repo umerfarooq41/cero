@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -15,6 +15,7 @@ export default function FloatingActionButton({
   label = 'Add',
   className,
 }) {
+  const location = useLocation();
   const [mounted, setMounted] = useState(false);
   const [online, setOnline] = useState(() => navigator.onLine);
 
@@ -91,6 +92,7 @@ export default function FloatingActionButton({
   const fab = to && online ? (
     <MotionLink
       to={to}
+      state={{ backgroundLocation: location }}
       aria-label={ariaLabel}
       className={baseClassName}
       {...motionProps}
