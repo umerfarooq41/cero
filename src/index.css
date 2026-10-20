@@ -1304,3 +1304,50 @@ main,
     animation: none !important;
   }
 }
+
+
+/* Cero AppSheet: one bottom-opening shell for forms and read-only breakdowns. */
+:root { --app-sheet-keyboard-offset: 0px; }
+.app-sheet-surface {
+  display: flex;
+  flex-direction: column;
+  max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - 8px));
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+  background: hsl(var(--card) / 0.96);
+  border: 1px solid hsl(var(--border) / 0.32);
+  box-shadow: 0 -12px 48px hsl(var(--foreground) / 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.app-sheet-surface::before {
+  content: "";
+  display: block;
+  flex: none;
+  width: 36px;
+  height: 4px;
+  margin: 8px auto 4px;
+  border-radius: 999px;
+  background: hsl(var(--muted-foreground) / 0.35);
+}
+.app-sheet-surface .app-dialog-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.app-sheet-surface .app-dialog-actions {
+  flex: none;
+  border-top: 1px solid hsl(var(--border) / 0.35);
+  background: hsl(var(--card) / 0.96);
+  padding: 12px 0 max(20px, env(safe-area-inset-bottom)) !important;
+}
+.app-sheet-surface .app-dialog-actions > button:only-child { width: 100%; min-height: 48px; }
+.app-sheet-surface [data-app-sheet-cancel] { display: none; }
+.app-sheet-overlay { background: rgba(0,0,0,0.35) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+@media (max-width: 639px) {
+  .app-sheet-surface { bottom: var(--app-sheet-keyboard-offset) !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-sheet-surface, .app-sheet-overlay { animation: none !important; transition: none !important; }
+}
