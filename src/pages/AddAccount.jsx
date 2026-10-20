@@ -1,6 +1,6 @@
 import { useAppSheetKeyboard } from '@/hooks/useAppSheetKeyboard';
 import { createPortal } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X } from 'lucide-react';
 
@@ -83,6 +83,7 @@ export default function AddAccount() {
 
   const existingAccount = accounts.find((a) => a.id === id);
 
+  const nameInputRef = useRef(null);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [otherCategory, setOtherCategory] = useState('asset');
@@ -99,6 +100,14 @@ export default function AddAccount() {
     setBalance(String(existingAccount.balance ?? ''));
     setColor(existingAccount.color || colors[0]);
   }, [existingAccount]);
+
+  useEffect(() => {
+    // Allow the bottom sheet to finish opening before Android displays the keyboard.
+    const focusTimer = window.setTimeout(() => {
+      nameInputRef.current?.focus({ preventScroll: true });
+    }, 260);
+    return () => window.clearTimeout(focusTimer);
+  }, []);
 
   const handleSave = async () => {
     if (!name.trim() || !type) {
@@ -193,6 +202,7 @@ export default function AddAccount() {
             </label>
 
             <Input
+              ref={nameInputRef}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Main Checking"
@@ -256,7 +266,6 @@ export default function AddAccount() {
           <section className="border-t border-border/50">
             <div className="flex items-center justify-between py-3">
               <span className="text-sm font-medium">Appearance</span>
-              <span className="text-xs text-muted-foreground">Color</span>
             </div>
             <div className="pb-3">
           <div className="space-y-2">
