@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -329,5 +330,5 @@ export default function AddAccount() {
         </Button>
         </div>
     </div>
-  );
+  , document.body);
 }
