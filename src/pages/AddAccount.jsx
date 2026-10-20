@@ -172,7 +172,7 @@ export default function AddAccount() {
     }
   };
 
-  return (
+  return createPortal(
     <div ref={scope} className="app-route-sheet">
       <PageHeader
         title={isEditing ? 'Edit Account' : 'Add Account'}
