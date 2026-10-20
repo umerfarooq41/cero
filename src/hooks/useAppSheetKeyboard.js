@@ -5,6 +5,7 @@ export function useAppSheetKeyboard() {
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return undefined;
+    let scrollFrame;
     const update = () => {
       // Android can resize either viewport; don't also lift the sheet by the keyboard height.
       const visibleHeight = Math.min(window.innerHeight, viewport.height);
@@ -12,12 +13,20 @@ export function useAppSheetKeyboard() {
       document.documentElement.style.setProperty('--app-sheet-visible-height', visibleHeight + 'px');
       document.documentElement.style.setProperty('--app-sheet-keyboard-offset', keyboardOffset + 'px');
       document.documentElement.style.setProperty('--app-sheet-viewport-top', viewport.offsetTop + 'px');
+      cancelAnimationFrame(scrollFrame);
+      scrollFrame = requestAnimationFrame(() => {
+        const focused = document.activeElement;
+        if (focused?.matches?.('.app-sheet-surface input, .app-sheet-surface textarea')) {
+          focused.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      });
     };
     viewport.addEventListener('resize', update);
     viewport.addEventListener('scroll', update);
     window.addEventListener('resize', update);
     update();
     return () => {
+      cancelAnimationFrame(scrollFrame);
       viewport.removeEventListener('resize', update);
       viewport.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
