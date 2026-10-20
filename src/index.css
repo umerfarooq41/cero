@@ -1351,3 +1351,8 @@ main,
 @media (prefers-reduced-motion: reduce) {
   .app-sheet-surface, .app-sheet-overlay { animation: none !important; transition: none !important; }
 }
+
+/* Route forms provide their own handle inside the compact header. */
+.app-route-sheet.app-sheet-surface::before { display: none; }
+.app-route-sheet.app-sheet-surface { top: auto !important; bottom: var(--app-sheet-keyboard-offset) !important; height: auto; max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - 8px)); }
+.app-route-sheet.app-sheet-surface .app-route-sheet-footer { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
