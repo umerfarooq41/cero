@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X } from 'lucide-react';
 
-import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -21,7 +20,6 @@ import { accountsApi } from '@/lib/budgetData';
 import { useAccounts } from '@/hooks/useBudgetData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { usePageEntrance } from '@/hooks/usePageTransition';
 
 const accountTypes = [
   { value: 'checking', label: 'Checking', category: 'asset' },
@@ -73,7 +71,6 @@ const colors = [
 ];
 
 export default function AddAccount() {
-  const scope = usePageEntrance();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -173,44 +170,16 @@ export default function AddAccount() {
   };
 
   return createPortal(
-    <div ref={scope} className="app-route-sheet">
-      <PageHeader
-        title={isEditing ? 'Edit Account' : 'Add Account'}
-        subtitle={
-          isEditing
-            ? 'Update account details and balance'
-            : 'Create a wallet, bank, savings, debt, or investment account'
-        }
-        action={
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            aria-label="Close"
-            className="
-              group
-              relative
-              flex
-              h-9
-              w-9
-              shrink-0
-              touch-manipulation
-              items-center
-              justify-center
-              rounded-full
-              text-muted-foreground/80
-              transition-colors
-              duration-200
-              hover:text-foreground
-              focus-visible:outline-none
-              focus-visible:ring-2
-              focus-visible:ring-ring
-              focus-visible:ring-offset-2
-            "
-          >
-            <X className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
+    <div className="app-route-sheet">
+      <header className="relative flex shrink-0 flex-col border-b border-border/40 bg-card/95 px-4 pb-3 pt-2">
+        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35" aria-hidden="true" />
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-base font-semibold">{isEditing ? 'Edit account' : 'Add account'}</h1>
+          <button type="button" onClick={() => navigate('/accounts')} aria-label="Close" className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted/60">
+            <X className="size-5" />
           </button>
-        }
-      />
+        </div>
+      </header>
 
       <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-3">
         <div className="animate-child space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
@@ -309,14 +278,14 @@ export default function AddAccount() {
                 />
               ))}
             </div>
-          </div>            </div>
+          </div>
+            </div>
           </details>
         </div>
 
 
       </main>
         <div className="app-route-sheet-footer">
-        <Button variant="outline" onClick={() => navigate(-1)} disabled={saving}>Cancel</Button>
         <Button
           onClick={handleSave}
           disabled={saving}
