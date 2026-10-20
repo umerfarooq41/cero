@@ -172,6 +172,8 @@ export default function AddAccount() {
   };
 
   return createPortal(
+    <>
+      <div className="app-route-sheet-backdrop" aria-hidden="true" />
     <div className="app-route-sheet app-sheet-surface">
       <header className="app-sheet-header relative flex shrink-0 flex-col px-5 pb-2 pt-2">
         <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35" aria-hidden="true" />
@@ -301,5 +303,6 @@ export default function AddAccount() {
         </Button>
         </div>
     </div>
+    </>
   , document.body);
 }
