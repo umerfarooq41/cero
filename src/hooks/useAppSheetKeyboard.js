@@ -1,25 +1,26 @@
 import { useEffect } from 'react';
 
-/**
- * Keyboard offset for bottom sheets on Android Chrome.
- * Only compensates when the layout viewport remains taller than the visual viewport.
- */
+/** Keep the entire sheet within the visible viewport when the keyboard opens. */
 export function useAppSheetKeyboard() {
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return undefined;
     const update = () => {
-      const covered = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
-      const keyboard = covered > 100 ? covered : 0;
-      document.documentElement.style.setProperty('--app-sheet-keyboard-offset', keyboard + 'px');
+      // Android can resize either viewport; don't also lift the sheet by the keyboard height.
+      const visibleHeight = Math.min(window.innerHeight, viewport.height);
+      document.documentElement.style.setProperty('--app-sheet-visible-height', visibleHeight + 'px');
+      document.documentElement.style.setProperty('--app-sheet-viewport-top', viewport.offsetTop + 'px');
     };
     viewport.addEventListener('resize', update);
     viewport.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
     update();
     return () => {
       viewport.removeEventListener('resize', update);
       viewport.removeEventListener('scroll', update);
-      document.documentElement.style.setProperty('--app-sheet-keyboard-offset', '0px');
+      window.removeEventListener('resize', update);
+      document.documentElement.style.removeProperty('--app-sheet-visible-height');
+      document.documentElement.style.removeProperty('--app-sheet-viewport-top');
     };
   }, []);
 }
