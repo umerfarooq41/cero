@@ -1379,3 +1379,18 @@ main,
 .app-sheet-surface input:focus, .app-sheet-surface textarea:focus {
   scroll-margin-bottom: 80px;
 }
+
+/* Keep the actual page visible beneath route-based sheets. */
+.app-route-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.app-route-sheet.app-sheet-surface {
+  z-index: 60;
+  background: hsl(var(--card) / 0.96) !important;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.12);
+}
