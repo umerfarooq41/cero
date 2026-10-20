@@ -251,11 +251,11 @@ export default function AddAccount() {
             />
           </div>
 
-          <details className="group border-t border-border/50">
-            <summary className="flex cursor-pointer list-none items-center justify-between py-3">
+          <section className="border-t border-border/50">
+            <div className="flex items-center justify-between py-3">
               <span className="text-sm font-medium">Appearance</span>
-              <span className="text-xs text-muted-foreground">Color <span aria-hidden="true">⌄</span></span>
-            </summary>
+              <span className="text-xs text-muted-foreground">Color</span>
+            </div>
             <div className="pb-3">
           <div className="space-y-2">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -282,7 +282,7 @@ export default function AddAccount() {
             </div>
           </div>
             </div>
-          </details>
+          </section>
         </div>
 
 
