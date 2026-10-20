@@ -1,3 +1,4 @@
+import { useAppSheetKeyboard } from '@/hooks/useAppSheetKeyboard';
 import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -140,6 +141,7 @@ function getTransferPurposeFromCategory(category) {
 }
 
 export default function AddTransaction() {
+  useAppSheetKeyboard();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
