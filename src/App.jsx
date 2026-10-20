@@ -207,8 +207,17 @@ const AuthenticatedApp = () => {
     return <Navigate to="/" replace />;
   }
 
+  // Route forms are overlays: keep the originating page mounted beneath them.
+  const isAccountSheet = location.pathname === '/add-account' || /^\/accounts\/[^/]+\/edit$/.test(location.pathname);
+  const isTransactionSheet = location.pathname === '/add-transaction' || /^\/transactions\/[^/]+\/edit$/.test(location.pathname);
+  const isRouteSheet = isAccountSheet || isTransactionSheet;
+  const backgroundLocation = isRouteSheet
+    ? (location.state?.backgroundLocation || { pathname: isAccountSheet ? '/accounts' : '/transactions', search: '', hash: '', state: null, key: 'sheet-background' })
+    : location;
+
   return (
-    <Routes>
+    <>
+    <Routes location={backgroundLocation}>
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/signup" element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Onboarding />} />
@@ -242,6 +251,15 @@ const AuthenticatedApp = () => {
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    {isRouteSheet && (
+      <Routes>
+        <Route path="/add-transaction" element={<LazyPage><AddTransaction /></LazyPage>} />
+        <Route path="/transactions/:id/edit" element={<LazyPage><AddTransaction /></LazyPage>} />
+        <Route path="/add-account" element={<LazyPage><AddAccount /></LazyPage>} />
+        <Route path="/accounts/:id/edit" element={<LazyPage><AddAccount /></LazyPage>} />
+      </Routes>
+    )}
+    </>
   );
 };
 
