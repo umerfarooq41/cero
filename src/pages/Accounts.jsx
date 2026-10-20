@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   TrendingUp,
   Building,
@@ -98,6 +98,7 @@ function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurr
 export default function Accounts() {
   const scope = usePageEntrance();
   const navigate = useNavigate();
+  const location = useLocation();
   const location = useLocation();
   const header = <PageHeader title="Financial overview" action={<div className="flex items-center gap-1">
     <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
