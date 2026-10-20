@@ -52,10 +52,10 @@ function getDiscretionaryAllocations(allocations, categories) {
 }
 function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurrency }) {
   return <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-2xl px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4">
+    <SheetContent side="bottom" className="!max-h-[90dvh] !overflow-hidden" onOpenAutoFocus={(event) => event.preventDefault()}>
       <SheetHeader className="pr-8 text-left">
         <SheetTitle className="text-base">Discretionary spending</SheetTitle>
-        <SheetDescription className="text-xs">Expense-category allocations only. Recurring bills, transfers, debt and goals are funded separately and excluded.</SheetDescription>
+        <SheetDescription className="text-xs">Spending from your flexible expense categories.</SheetDescription>
       </SheetHeader>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         {[
@@ -67,8 +67,8 @@ function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurren
           <Money value={value} formatCurrency={formatCurrency} className="text-sm font-semibold"/>
         </div>)}
       </div>
-      <div className="mt-3 divide-y divide-border/40">
-        {pace.categories.map(item => {
+      <div className="app-dialog-scroll mt-3 divide-y divide-border/40">
+        {pace.categories.filter(item => Number(item.spent) > 0).map(item => {
           const category = categoriesById.get(item.categoryId);
           const over = item.remaining < 0;
           return <div key={item.categoryId} className="py-2.5">
@@ -87,6 +87,24 @@ function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurren
             </div>
           </div>;
         })}
+        {pace.categories.some(item => Number(item.spent) <= 0) && (
+          <details className="group border-t border-border/40 py-3">
+            <summary className="flex cursor-pointer items-center justify-between text-sm font-medium">
+              Not started ({pace.categories.filter(item => Number(item.spent) <= 0).length})
+              <span className="text-muted-foreground group-open:rotate-180">⌄</span>
+            </summary>
+            <div className="mt-2 space-y-2">
+              {pace.categories.filter(item => Number(item.spent) <= 0).map(item => {
+                const category = categoriesById.get(item.categoryId);
+                return <div key={item.categoryId} className="flex items-center gap-2 py-1 text-sm">
+                  <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>
+                  <span className="min-w-0 flex-1 truncate">{category?.name || 'Uncategorized'}</span>
+                  <span className="text-xs text-muted-foreground"><Money value={item.planned} formatCurrency={formatCurrency}/> budget</span>
+                </div>;
+              })}
+            </div>
+          </details>
+        )}
       </div>
     </SheetContent>
   </Sheet>;
