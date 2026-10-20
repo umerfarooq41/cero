@@ -289,11 +289,8 @@ export default function CategoryEditorModal({
 
         </div>
         <DialogFooter className="app-dialog-actions">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
           <Button onClick={handleSave} disabled={saving || !name.trim()}>
-            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Category'}
+            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create category'}
           </Button>
         </DialogFooter>
       </DialogContent>
