@@ -26,11 +26,22 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
+const DialogContent = React.forwardRef(({ className, children, onOpenAutoFocus, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onOpenAutoFocus={(event) => {
+        if (onOpenAutoFocus) return onOpenAutoFocus(event);
+        event.preventDefault();
+        const dialog = event.currentTarget;
+        if (dialog.querySelector(".app-dialog-scroll input:not([type=hidden]):not([disabled])")) {
+          window.setTimeout(() => {
+            if (!dialog.isConnected) return;
+            dialog.querySelector(".app-dialog-scroll input:not([type=hidden]):not([disabled])")?.focus({ preventScroll: true });
+          }, 260);
+        }
+      }}
       className={cn(
         "app-sheet-surface fixed bottom-0 left-0 z-50 w-full max-w-lg gap-3 p-4 duration-[220ms] ease-out sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:w-[calc(100%-1rem)] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:p-5 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%] sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%] sm:w-full",
         className
