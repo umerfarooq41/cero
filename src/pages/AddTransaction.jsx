@@ -13,7 +13,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import PageHeader from '@/components/layout/PageHeader';
 import AppTabs from '@/components/shared/AppTabs.jsx';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -429,25 +428,14 @@ export default function AddTransaction() {
   };
 
   return createPortal(
-    <div className="app-route-sheet">
-      <PageHeader
-        title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
-        subtitle={
-          isEditing
-            ? 'Update transaction details'
-            : 'Record income, expenses, or transfers'
-        }
-        action={
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            aria-label="Close"
-            className="group relative flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-full text-muted-foreground/80 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <X className="h-[1.15rem] w-[1.15rem] stroke-[2.35]" />
-          </button>
-        }
-      />
+    <div className="app-route-sheet app-sheet-surface">
+      <header className="app-sheet-header shrink-0 px-5 pb-2 pt-2">
+        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35" aria-hidden="true" />
+        <div className="flex items-center justify-between">
+          <h1 className="text-base font-semibold">{isEditing ? 'Edit transaction' : 'Add transaction'}</h1>
+          <button type="button" onClick={() => navigate('/transactions')} aria-label="Close" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><X className="size-5" /></button>
+        </div>
+      </header>
 
       {isRecurringDateCorrection ? (
         <>
@@ -475,7 +463,6 @@ export default function AddTransaction() {
           </div>
         </main>
         <div className="app-route-sheet-footer">
-          <Button variant="outline" onClick={() => navigate(-1)} disabled={saving || deleting}>Cancel</Button>
             <Button type="button" className="w-full" disabled={saving || deleting || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save changes'}
             </Button>
@@ -710,7 +697,6 @@ export default function AddTransaction() {
 
       </main>
         <div className="app-route-sheet-footer">
-          <Button variant="outline" onClick={() => navigate(-1)} disabled={saving || deleting}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           disabled={saving || deleting || !amount}
