@@ -1407,3 +1407,27 @@ main,
 @media (prefers-reduced-motion: reduce) {
   .app-route-sheet.app-sheet-surface { transition: none !important; }
 }
+
+/* AppSheet keyboard behavior for Radix dialogs and route forms. */
+@media (max-width: 639px) {
+  .app-sheet-surface[data-state="open"] {
+    bottom: var(--app-sheet-keyboard-offset, 0px) !important;
+    max-height: min(90dvh, calc(var(--app-sheet-visible-height, 100dvh) - 8px)) !important;
+    transition: bottom 220ms ease-out, max-height 220ms ease-out;
+  }
+  .app-sheet-surface .app-dialog-scroll,
+  .app-route-sheet.app-sheet-surface .app-route-sheet-body {
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scroll-padding-block: 16px 96px;
+  }
+}
+.app-route-sheet.app-sheet-surface,
+.app-sheet-surface[data-state="open"] {
+  background: hsl(var(--card) / 0.985) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-sheet-surface[data-state="open"] { transition: none !important; }
+}
