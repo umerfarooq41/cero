@@ -1,3 +1,4 @@
+import { useAppSheetKeyboard } from '@/hooks/useAppSheetKeyboard';
 import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -71,6 +72,7 @@ const colors = [
 ];
 
 export default function AddAccount() {
+  useAppSheetKeyboard();
   const navigate = useNavigate();
   const { id } = useParams();
 
