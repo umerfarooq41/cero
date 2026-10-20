@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -427,7 +428,7 @@ export default function AddTransaction() {
     }
   };
 
-  return (
+  return createPortal(
     <div className="app-route-sheet">
       <PageHeader
         title={isEditing ? 'Edit Transaction' : 'Add Transaction'}
@@ -782,5 +783,5 @@ export default function AddTransaction() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  , document.body);
 }
