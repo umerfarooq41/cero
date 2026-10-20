@@ -267,11 +267,8 @@ export default function CategoryCreatorModal({
 
         </div>
         <DialogFooter className="app-dialog-actions">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
           <Button onClick={handleSave} disabled={saving || !name.trim()}>
-            {saving ? 'Saving...' : 'Create Category'}
+            {saving ? 'Saving...' : 'Create category'}
           </Button>
         </DialogFooter>
       </DialogContent>
