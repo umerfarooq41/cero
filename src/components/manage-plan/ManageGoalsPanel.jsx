@@ -618,7 +618,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={saving || !form.name.trim()}>
-            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Goal'}
+            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create goal'}
           </Button>
         </DialogFooter>
       </DialogContent>
