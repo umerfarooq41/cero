@@ -1356,3 +1356,26 @@ main,
 .app-route-sheet.app-sheet-surface::before { display: none; }
 .app-route-sheet.app-sheet-surface { top: auto !important; bottom: var(--app-sheet-keyboard-offset) !important; height: auto; max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - 8px)); }
 .app-route-sheet.app-sheet-surface .app-route-sheet-footer { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+
+/* Keyboard: shrink the sheet to the visual viewport; never translate it up by
+   the keyboard height, which hides focused inputs on Android Chrome. */
+:root { --app-sheet-visible-height: 100dvh; --app-sheet-viewport-top: 0px; }
+.app-sheet-surface {
+  max-height: min(90dvh, calc(var(--app-sheet-visible-height) - 8px)) !important;
+}
+@media (max-width: 639px) {
+  .app-sheet-surface, .app-route-sheet.app-sheet-surface {
+    bottom: 0 !important;
+    top: auto !important;
+    max-height: min(90dvh, calc(var(--app-sheet-visible-height) - 8px)) !important;
+  }
+}
+.app-route-sheet.app-sheet-surface .app-route-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-padding-bottom: 24px;
+}
+.app-sheet-surface input:focus, .app-sheet-surface textarea:focus {
+  scroll-margin-bottom: 80px;
+}
