@@ -5,6 +5,7 @@ import { cva } from "class-variance-authority";
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { AppSheetKeyboard } from "@/hooks/useAppSheetKeyboard"
 
 const Sheet = SheetPrimitive.Root
 
@@ -53,6 +54,7 @@ const SheetContent = React.forwardRef(({ side = "right", className, children, ..
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
+      <AppSheetKeyboard />
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
