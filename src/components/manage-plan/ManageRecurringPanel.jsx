@@ -790,11 +790,8 @@ function RecurringRuleModal({
         </div>
         {saveError && <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive break-words">{saveError}</p>}
         <DialogFooter className="app-dialog-actions">
-          <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
           <Button onClick={handleSave} disabled={saving || !form.name.trim()}>
-            {saving ? 'Saving...' : isEditing ? (isDebt ? 'Update Debt' : 'Update Rule') : (isDebt ? 'Create Debt' : 'Create Rule')}
+            {saving ? 'Saving...' : isEditing ? (isDebt ? 'Update Debt' : 'Update Rule') : (isDebt ? 'Create debt' : 'Create rule')}
           </Button>
         </DialogFooter>
       </DialogContent>
