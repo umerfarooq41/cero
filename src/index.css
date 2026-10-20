@@ -1098,6 +1098,36 @@ main,
     background: hsl(var(--background));
     border-radius: 1.5rem 1.5rem 0 0;
   }
+  /* Action routes are portaled outside the animated page and bottom navigation. */
+  .app-route-sheet .app-page-header {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 2;
+    height: auto !important;
+    min-height: 5.5rem;
+    flex: 0 0 auto;
+    pointer-events: auto;
+    background: hsl(var(--card) / 0.96) !important;
+    border-bottom: 1px solid hsl(var(--border) / 0.35) !important;
+  }
+  .app-route-sheet .app-page-header > div {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  .app-route-sheet .app-page-header p {
+    max-width: calc(100vw - 5rem);
+  }
+  .app-route-sheet-footer > button {
+    width: 100%;
+    margin: 0 !important;
+    min-height: 2.75rem;
+  }
+  .app-route-sheet-footer > button:first-child {
+    order: 2;
+  }
+  .app-route-sheet-footer > button:not(:first-child) {
+    order: 1;
+  }
   .app-route-sheet-body {
     min-height: 0;
     flex: 1 1 auto;
