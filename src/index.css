@@ -1394,3 +1394,16 @@ main,
   background: hsl(var(--card) / 0.96) !important;
   box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.12);
 }
+
+/* Android keyboard: present the full sheet first, then lift its bottom edge
+   with the visual viewport and shrink only the scrollable body. */
+@media (max-width: 639px) {
+  .app-route-sheet.app-sheet-surface {
+    bottom: var(--app-sheet-keyboard-offset, 0px) !important;
+    max-height: min(90dvh, calc(var(--app-sheet-visible-height, 100dvh) - 8px)) !important;
+    transition: bottom 220ms ease-out, max-height 220ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-route-sheet.app-sheet-surface { transition: none !important; }
+}
