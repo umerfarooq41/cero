@@ -23,3 +23,8 @@ export function useAppSheetKeyboard() {
     };
   }, []);
 }
+
+export function AppSheetKeyboard() {
+  useAppSheetKeyboard();
+  return null;
+}
