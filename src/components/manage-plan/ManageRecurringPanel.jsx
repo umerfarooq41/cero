@@ -720,8 +720,8 @@ function RecurringRuleModal({
             />
           </label>}
 
-          <details className="group border-t border-border/50">
-            <summary className="flex cursor-pointer list-none items-center justify-between px-1 py-3">
+          <section className="border-t border-border/50">
+            <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-3">
                 <CategoryIcon icon={form.icon} color={form.color} size="sm" />
                 <div>
@@ -729,8 +729,8 @@ function RecurringRuleModal({
                   <p className="text-xs text-muted-foreground">Color and icon</p>
                 </div>
               </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
-            </summary>
+              
+            </div>
 
             <div className="space-y-4 pb-3 pt-2">
               <div className="space-y-1.5">
@@ -772,7 +772,7 @@ function RecurringRuleModal({
                 </div>
               </div>
             </div>
-          </details>
+          </section>
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
