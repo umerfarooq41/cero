@@ -170,8 +170,8 @@ export default function AddAccount() {
   };
 
   return createPortal(
-    <div className="app-route-sheet">
-      <header className="relative flex shrink-0 flex-col border-b border-border/40 bg-card/95 px-4 pb-3 pt-2">
+    <div className="app-route-sheet app-sheet-surface">
+      <header className="app-sheet-header relative flex shrink-0 flex-col px-5 pb-2 pt-2">
         <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35" aria-hidden="true" />
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-base font-semibold">{isEditing ? 'Edit account' : 'Add account'}</h1>
