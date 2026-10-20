@@ -1357,29 +1357,6 @@ main,
 .app-route-sheet.app-sheet-surface { top: auto !important; bottom: var(--app-sheet-keyboard-offset) !important; height: auto; max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - 8px)); }
 .app-route-sheet.app-sheet-surface .app-route-sheet-footer { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
 
-/* Keyboard: shrink the sheet to the visual viewport; never translate it up by
-   the keyboard height, which hides focused inputs on Android Chrome. */
-:root { --app-sheet-visible-height: 100dvh; --app-sheet-viewport-top: 0px; }
-.app-sheet-surface {
-  max-height: min(90dvh, calc(var(--app-sheet-visible-height) - 8px)) !important;
-}
-@media (max-width: 639px) {
-  .app-sheet-surface, .app-route-sheet.app-sheet-surface {
-    bottom: 0 !important;
-    top: auto !important;
-    max-height: min(90dvh, calc(var(--app-sheet-visible-height) - 8px)) !important;
-  }
-}
-.app-route-sheet.app-sheet-surface .app-route-sheet-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  scroll-padding-bottom: 24px;
-}
-.app-sheet-surface input:focus, .app-sheet-surface textarea:focus {
-  scroll-margin-bottom: 80px;
-}
-
 /* Keep the actual page visible beneath route-based sheets. */
 .app-route-sheet-backdrop {
   position: fixed;
@@ -1395,31 +1372,26 @@ main,
   box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.12);
 }
 
-/* Android keyboard: present the full sheet first, then lift its bottom edge
-   with the visual viewport and shrink only the scrollable body. */
-@media (max-width: 639px) {
-  .app-route-sheet.app-sheet-surface {
-    bottom: var(--app-sheet-keyboard-offset, 0px) !important;
-    max-height: min(90dvh, calc(var(--app-sheet-visible-height, 100dvh) - 8px)) !important;
-    transition: bottom 220ms ease-out, max-height 220ms ease-out;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .app-route-sheet.app-sheet-surface { transition: none !important; }
-}
 
-/* AppSheet keyboard behavior for Radix dialogs and route forms. */
+/* Keyboard stays above the sheet; never lift, resize, or move its save footer. */
+:root {
+  --app-sheet-keyboard-offset: 0px;
+}
 @media (max-width: 639px) {
-  .app-sheet-surface[data-state="open"] {
-    bottom: var(--app-sheet-keyboard-offset, 0px) !important;
-    max-height: min(90dvh, calc(var(--app-sheet-visible-height, 100dvh) - 8px)) !important;
-    transition: bottom 220ms ease-out, max-height 220ms ease-out;
+  .app-sheet-surface,
+  .app-sheet-surface[data-state="open"],
+  .app-route-sheet.app-sheet-surface {
+    bottom: 0 !important;
+    top: auto !important;
+    max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - 8px)) !important;
+    transition: none !important;
   }
   .app-sheet-surface .app-dialog-scroll,
   .app-route-sheet.app-sheet-surface .app-route-sheet-body {
+    min-height: 0;
     overflow-y: auto !important;
     overscroll-behavior: contain;
-    scroll-padding-block: 16px 96px;
+    scroll-padding-bottom: 24px;
   }
 }
 .app-route-sheet.app-sheet-surface,
@@ -1427,7 +1399,4 @@ main,
   background: hsl(var(--card) / 0.985) !important;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .app-sheet-surface[data-state="open"] { transition: none !important; }
 }
