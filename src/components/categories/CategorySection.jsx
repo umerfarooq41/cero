@@ -113,7 +113,6 @@ export default function CategorySection({
   categories,
   defaultExpanded = false,
   onAction,
-  onAddSub,
   onAddNew,
 }) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
