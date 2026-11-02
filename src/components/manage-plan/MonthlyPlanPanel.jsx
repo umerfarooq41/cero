@@ -681,28 +681,32 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           // Only manual category allocations may be saved here.
           .filter((row) => !isProtectedPlanRow(row) && !row.isGenerated)
           .map((row) => {
-          const existingAllocation = allocationByRowKey[row.key];
-          const sourceType = row.sourceType || 'category';
-          const sourceId = row.sourceId || row.categoryId || row.id;
+            const sourceType = row.sourceType || 'category';
+            const sourceId = row.sourceId || row.categoryId || row.id;
 
-          return budgetPlansApi.upsert({
-            id: existingAllocation?.id,
-            category_id: row.categoryId || null,
-            month: currentMonth,
-            planned_amount: Number(values[row.key] || 0),
-            source_type: sourceType,
-            source_id: sourceId,
-            budget_type: row.type,
-            label: row.name,
-            icon: row.icon,
-            color: row.color,
-          });
-        })
+            // Always use the natural-key upsert. A cached allocation ID can be
+            // stale after copying/changing months; relying on it for UPDATE can
+            // leave the copied plan unsaved. The database conflict key keeps
+            // this operation idempotent for an existing month/category row.
+            return budgetPlansApi.upsert({
+              category_id: row.categoryId || null,
+              month: currentMonth,
+              planned_amount: Number(values[row.key] || 0),
+              source_type: sourceType,
+              source_id: sourceId,
+              budget_type: row.type,
+              label: row.name,
+              icon: row.icon,
+              color: row.color,
+            });
+          })
       );
 
-      queryClient.invalidateQueries({ queryKey: ['allocations'] });
-      queryClient.invalidateQueries({ queryKey: ['all-allocations'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-summary'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['allocations'] }),
+        queryClient.invalidateQueries({ queryKey: ['all-allocations'] }),
+        queryClient.invalidateQueries({ queryKey: ['budget-summary'] }),
+      ]);
       toast.success('Monthly plan saved');
     } catch (error) {
       console.error('Monthly plan save failed:', error);
