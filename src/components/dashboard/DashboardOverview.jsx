@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarClock, Gauge, LayoutDashboard, ArrowRight, ChevronRight, Plus, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp, Wallet, WalletCards } from 'lucide-react';
+import { Gauge, LayoutDashboard, ChevronRight, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
