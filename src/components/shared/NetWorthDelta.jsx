@@ -4,7 +4,6 @@
  *
  * Drop into Accounts page to replace the static hero card.
  */
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
