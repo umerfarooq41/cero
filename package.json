@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check": "npm run lint && npm run build"
+    "check": "npm run test && npm run lint && npm run build",
+    "test": "node --test",
+    "test:watch": "node --test --watch"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
