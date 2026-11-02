@@ -6,6 +6,7 @@ import {
   Lightbulb,
   CreditCard,
   PiggyBank,
+  Brain,
   TrendingDown,
   TrendingUp,
   Wallet,
