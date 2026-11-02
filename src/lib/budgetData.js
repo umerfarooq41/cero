@@ -414,17 +414,23 @@ export const budgetPlansApi = {
     }
 
     const userId = await currentUserId();
-    const { data, error } = await supabase
+    const { data: existing, error: lookupError } = await supabase
       .from("budget_plans")
-      .upsert(
-        { ...payload, user_id: userId },
-        { onConflict: "user_id,month,source_type,source_id" }
-      )
-      .select()
-      .single();
+      .select("id")
+      .eq("user_id", userId)
+      .eq("month", month)
+      .eq("source_type", source_type)
+      .eq("source_id", source_id)
+      .limit(1)
+      .maybeSingle();
 
-    logAndThrow("Supabase budget_plans upsert error:", error);
-    return data;
+    logAndThrow("Supabase budget_plans lookup error:", lookupError);
+
+    if (existing?.id) {
+      return updateRow("budget_plans", existing.id, payload);
+    }
+
+    return createRow("budget_plans", payload);
   },
   delete: (id) => deleteRow("budget_plans", id),
 };
