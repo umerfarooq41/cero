@@ -33,6 +33,7 @@ const DialogContent = React.forwardRef(({ className, children, onOpenAutoFocus, 
       ref={ref}
       onOpenAutoFocus={(event) => {
         if (onOpenAutoFocus) return onOpenAutoFocus(event);
+        if (window.matchMedia("(min-width: 1024px)").matches) return;
         event.preventDefault();
         const dialog = event.currentTarget;
         if (dialog.querySelector(".app-dialog-scroll input:not([type=hidden]):not([disabled])")) {

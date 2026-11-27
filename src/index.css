@@ -1579,3 +1579,11 @@ main,
  .cero-desktop-workspace .settings-section .settings-row:hover {background-color:hsl(var(--muted)/.35);}
  .cero-desktop-workspace .settings-section {overflow:visible;}
 }
+
+@media (min-width:1024px) {
+ .app-desktop-confirm-overlay {z-index:81!important;background:rgb(0 0 0 / .48)!important;backdrop-filter:none!important;}
+ .app-desktop-modal:is([class~="p-0"]) {padding:0!important;}
+ .app-desktop-modal:not(:has(.app-dialog-scroll)) {overflow-y:auto;}
+ .app-desktop-modal button:focus:not(:focus-visible), .app-desktop-route-form button:focus:not(:focus-visible) {outline:none!important;box-shadow:none!important;}
+ .app-desktop-modal button:focus-visible,.app-desktop-route-form button:focus-visible {outline:2px solid hsl(var(--ring));outline-offset:2px;}
+}
