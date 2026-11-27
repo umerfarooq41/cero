@@ -1463,9 +1463,15 @@ main,
   .cero-desktop-workspace .app-main-scroll .tabular-nums.font-bold { font-weight: 600; }
   .cero-desktop-workspace .app-main-scroll .app-page-header h1 { font-size: 28px; font-weight: 600; }
   .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong) { box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-  .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) { background: transparent !important; border: 0 !important; border-bottom: 1px solid hsl(var(--border)) !important; border-radius: 0 !important; }
+  .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) { background: transparent !important; border: 0 !important; border-radius: 0 !important; }
   .cero-desktop-workspace .app-main-scroll :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea) { font-size: 15px; }
   .cero-desktop-workspace .app-main-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
   .cero-desktop-workspace .app-main-scroll::-webkit-scrollbar { display: block !important; width: 8px !important; }
   .cero-desktop-workspace .app-main-scroll::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 8px; }
+}
+
+@layer utilities {
+ @media (min-width:1024px) {
+  .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong,.app-card-surface-soft):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) { border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; backdrop-filter:none !important; }
+ }
 }

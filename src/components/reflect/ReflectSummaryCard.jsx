@@ -382,7 +382,7 @@ export default function ReflectSummaryCard({
   </div>;
   return (
     <div className="mb-3 grid gap-3 lg:grid-cols-2">
-      <section className="rounded-2xl app-card-surface p-3.5 lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none">
+      <section className="rounded-2xl app-card-surface p-3.5 lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none">
         <div className="mb-3 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-muted-foreground" /><h3 className="text-sm font-semibold">Financial summary</h3></div>
         <p className="text-[11px] text-muted-foreground">Operating cash flow</p>
         <p className={`mt-1 text-xl font-bold tabular-nums ${netCashFlow >= 0 ? 'text-[hsl(var(--success))]' : 'text-destructive'}`}>{money(netCashFlow)}</p>
@@ -403,7 +403,7 @@ export default function ReflectSummaryCard({
           </div>
         </div>
       </section>
-      <section className="rounded-2xl app-card-surface p-3.5 lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none">
+      <section className="rounded-2xl app-card-surface p-3.5 lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none">
         <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="text-sm font-semibold">Budget health</h3></div>
         {plannedExpenses > 0 ? <>
           <div className="flex items-end justify-between gap-2">

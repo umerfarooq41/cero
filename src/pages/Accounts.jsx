@@ -68,7 +68,7 @@ function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurr
   ];
 
   return (
-    <section className="grid grid-cols-3 divide-x divide-border/40 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none lg:py-3">
+    <section className="grid grid-cols-3 divide-x divide-border/40 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none lg:py-3">
       {items.map(({ label, value, Icon, tone, iconClass }) => (
         <div key={label} className="flex min-w-0 flex-col items-center justify-center px-1.5 py-2.5 text-center sm:px-3">
           <div className="mb-1.5 flex flex-col items-center gap-1">
@@ -196,7 +196,7 @@ export default function Accounts() {
     );
 
     return (
-      <section className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+      <section className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
         <button
           type="button"
           onClick={() => toggleGroup(groupKey)}
@@ -318,7 +318,7 @@ export default function Accounts() {
           />
         </div>
 
-        <div className="hidden items-center justify-between gap-4 border-y border-border py-5 lg:flex">
+        <div className="hidden items-center justify-between gap-4 py-5 lg:flex">
           <div><p className="text-xs text-muted-foreground">Net worth</p><p className="mt-1 text-2xl font-semibold tabular-nums">{netWorth < 0 ? '−' : ''}{formatCurrency(Math.abs(netWorth))}</p></div>
           <div><p className="text-xs text-muted-foreground">Total assets</p><p className="mt-1 text-lg font-semibold">{totalAssets < 0 ? '−' : ''}{formatCurrency(Math.abs(totalAssets))}</p></div>
           <div><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
