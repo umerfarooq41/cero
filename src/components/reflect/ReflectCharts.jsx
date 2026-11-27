@@ -314,7 +314,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
       <div className={desktop && report !== "cash" ? "hidden" : "mb-3 grid gap-3"}>
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4 lg:!rounded-none lg:!bg-transparent lg:!shadow-none">
               <ChartHeading
                 icon={BarChart3}
                 tone="info"
@@ -447,7 +447,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
       <div className={desktop && report !== "spending" ? "hidden" : "mb-4 grid gap-3 lg:gap-4"}>
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4 lg:!rounded-none lg:!bg-transparent lg:!shadow-none">
               <ChartHeading
                 icon={ChartPie}
                 tone="warning"
@@ -456,12 +456,12 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-3 lg:max-w-3xl">
                   {groupedSpendingBreakdown.map(category => (
                     <div key={category.id || category.name} className="space-y-1">
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <span className="min-w-0 truncate text-foreground">{category.name}</span>
-                        <span className="shrink-0 font-semibold tabular-nums"><CurrencyAmount amount={category.value} currency={currency} compact /></span>
+                        <span className="flex shrink-0 items-center gap-4 font-semibold tabular-nums"><span className="hidden min-w-12 text-right font-normal text-muted-foreground lg:inline">{formatPercent(category.percent)}</span><CurrencyAmount amount={category.value} currency={currency} compact /></span>
                       </div>
                       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                         <div className="h-full rounded-full" style={{ width: `${Math.min(100, category.percent)}%`, backgroundColor: category.color }} />
@@ -483,7 +483,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4">
+            <ReflectCard className="p-3 sm:p-4 lg:!rounded-none lg:!bg-transparent lg:!shadow-none">
               <ChartHeading
                 icon={LineChart}
                 tone="info"
@@ -509,12 +509,18 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   </div>
                 </div> : null}
                 <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] lg:h-[340px]`}
-                  onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
-                  onPointerMove={event => { if (desktop || event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
+                  onPointerDown={desktop ? undefined : event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
+                  onPointerMove={desktop ? undefined : event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
                 >
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart
+                      {desktop ? <BarChart data={safeSpendingTrend} margin={{top:8,right:12,bottom:0,left:8}} barCategoryGap="25%" maxBarSize={28} onMouseMove={state => { if (state?.activePayload?.[0]?.payload?.label != null) setSelectedDay(state.activePayload[0].payload.label); }}>
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.55}/>
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize:12,fill:'hsl(var(--muted-foreground))'}}/>
+                        <YAxis width={60} axisLine={false} tickLine={false} tick={{fontSize:12,fill:'hsl(var(--muted-foreground))'}}/>
+                        <Tooltip contentStyle={tooltipStyle} formatter={value => [<TooltipCurrencyValue value={value} currency={currency}/>, 'Spent']}/>
+                        <Bar dataKey="amount" name="Spent" fill="hsl(var(--primary))" radius={[3,3,0,0]} {...getChartAnimation(isVisible)}/>
+                      </BarChart> : <AreaChart
                         data={safeSpendingTrend}
                         onMouseMove={state => { if (state?.activePayload?.[0]?.payload?.label) setSelectedDay(state.activePayload[0].payload.label); }}
                         onTouchMove={state => { if (state?.activePayload?.[0]?.payload?.label) setSelectedDay(state.activePayload[0].payload.label); }}
@@ -581,12 +587,12 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           }}
                           {...getChartAnimation(isVisible)}
                         />
-                      </AreaChart>
+                      </AreaChart>}
                     </ResponsiveContainer>
                   ) : (
                     <ChartShell className="h-full" />
                   )}
-                  <div className="absolute inset-0 z-10 touch-pan-y" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }} onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }} />
+                  <div className="absolute inset-0 z-10 touch-pan-y lg:hidden" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }} onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }} />
                 </div>
                 </>
               ) : (
