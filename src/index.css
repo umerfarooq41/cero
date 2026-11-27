@@ -1546,3 +1546,29 @@ main,
     }
   }
 }
+
+@media (min-width:1024px) {
+  .cero-desktop-workspace button:focus:not(:focus-visible) { outline:none !important; box-shadow:none !important; }
+  .cero-desktop-workspace button:focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:3px; }
+  .cero-desktop-workspace .app-main-scroll :is(.text-xs,[class~="text-[10px]"],[class~="text-[11px]"],[class~="text-[12px]"]) { font-size:14px; }
+  .app-desktop-route-form .app-sheet-header { padding:20px 24px 12px; }
+  .app-desktop-route-form .app-sheet-header h1 { font-size:20px; }
+  .app-desktop-route-form .app-route-sheet-body { padding:12px 24px 20px; }
+  .app-desktop-route-form .app-route-sheet-footer > button { order:0; }
+  .app-desktop-route-form .app-route-sheet-footer > button:first-child { order:0; }
+  .app-desktop-route-form .app-route-sheet-footer > button:nth-child(2) { order:2; }
+  .app-desktop-route-form .app-route-sheet-footer > button.text-destructive { margin-right:auto !important; order:-1; }
+  .app-desktop-modal { z-index:80 !important; }
+  .app-sheet-overlay { z-index:79 !important; }
+  .app-desktop-confirm { z-index:82 !important; }
+  .app-desktop-modal[class~="sm:max-w-xs"] { width:min(360px,calc(100vw - 64px)) !important; }
+  .app-desktop-wide-editor { width:min(720px,calc(100vw - 64px)) !important; }
+  .app-desktop-editor .app-dialog-scroll { padding-right:4px; }
+  .app-desktop-route-form .app-amount-input { font-size:28px !important; }
+  :is(.app-desktop-modal,.app-desktop-route-form) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),[role="combobox"],textarea) { border-radius:6px; }
+}
+@layer utilities {
+ @media (min-width:1024px) {
+  .app-desktop-route-form .app-route-sheet-body > .app-card-surface { border:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; }
+ }
+}

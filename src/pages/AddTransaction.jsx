@@ -432,9 +432,9 @@ export default function AddTransaction() {
   return createPortal(
     <>
       <div className="app-route-sheet-backdrop" aria-hidden="true" />
-    <div className="app-route-sheet app-sheet-surface">
+    <div className="app-route-sheet app-sheet-surface app-desktop-route-form">
       <header className="app-sheet-header shrink-0 px-5 pb-2 pt-2">
-        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35" aria-hidden="true" />
+        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35 lg:hidden" aria-hidden="true" />
         <div className="flex items-center justify-between">
           <h1 className="text-base font-semibold">{isEditing ? 'Edit transaction' : 'Add transaction'}</h1>
           <button type="button" onClick={() => navigate('/transactions')} aria-label="Close" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><X className="size-5" /></button>
@@ -444,7 +444,7 @@ export default function AddTransaction() {
       {isRecurringDateCorrection ? (
         <>
         <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-4">
-          <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5">
+          <div className="space-y-4 rounded-2xl app-card-surface p-4 sm:p-5 lg:!rounded-none">
             <p className="text-sm text-muted-foreground">Correct the payment amount, actual date, and scheduled installment. Changes to amounts automatically adjust balances.</p>
             <div className="space-y-1.5">
               <label htmlFor="linked-payment-amount" className="text-sm font-medium">Payment amount</label>
@@ -467,6 +467,7 @@ export default function AddTransaction() {
           </div>
         </main>
         <div className="app-route-sheet-footer">
+          <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate('/transactions')} disabled={saving}>Cancel</Button>
             <Button type="button" className="w-full" disabled={saving || deleting || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save changes'}
             </Button>
@@ -497,8 +498,8 @@ export default function AddTransaction() {
           />
         </div>
 
-        <div className="space-y-3.5 rounded-2xl app-card-surface p-4 sm:p-5">
-          <div className="space-y-1.5">
+        <div className="space-y-3.5 rounded-2xl app-card-surface p-4 sm:p-5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 lg:!rounded-none">
+          <div className="space-y-1.5 lg:col-span-2">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Amount
             </label>
@@ -685,7 +686,7 @@ export default function AddTransaction() {
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 lg:col-span-2">
             <label className="text-xs font-medium text-muted-foreground">
               Note
             </label>
@@ -701,6 +702,7 @@ export default function AddTransaction() {
 
       </main>
         <div className="app-route-sheet-footer">
+          <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate('/transactions')} disabled={saving}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           disabled={saving || deleting || !amount}

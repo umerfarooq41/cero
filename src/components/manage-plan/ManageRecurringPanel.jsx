@@ -386,7 +386,7 @@ function RecurringRuleModal({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !saving && !nextOpen && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md app-desktop-editor">
         <DialogHeader>
           <DialogTitle>{isDebt ? (isEditing ? 'Edit Debt' : 'New Debt') : (isEditing ? 'Edit Recurring Rule' : 'New Recurring Rule')}</DialogTitle>
         </DialogHeader>
@@ -927,7 +927,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
   const Icon = TYPE_ICONS[type] || ArrowUpRight;
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5">
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
@@ -977,7 +977,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
 function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, onAction }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5 text-left">
         <span className="flex min-w-0 items-center gap-2.5">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />

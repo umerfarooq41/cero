@@ -146,7 +146,7 @@ export default function ManageCategoriesPanel() {
         />
 
         {showArchived && archivedCategories.length > 0 && (
-          <div className="overflow-hidden rounded-2xl app-card-surface opacity-75 lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+          <div className="overflow-hidden rounded-2xl app-card-surface opacity-75 lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
             <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
               <Archive className="h-3.5 w-3.5 text-muted-foreground" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

@@ -142,7 +142,7 @@ export default function CategoryEditorModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md app-desktop-editor">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Category' : 'New Category'}

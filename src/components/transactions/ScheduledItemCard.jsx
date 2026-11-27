@@ -38,7 +38,7 @@ export function ScheduledSectionCard({
   const Icon = TYPE_ICONS[type] || Target;
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none">
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}

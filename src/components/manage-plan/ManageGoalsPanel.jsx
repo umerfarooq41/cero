@@ -375,7 +375,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl app-desktop-editor app-desktop-wide-editor">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Goal' : 'New Goal'}</DialogTitle>
         </DialogHeader>
@@ -729,7 +729,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
         : 'text-muted-foreground';
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5">
         <button
           type="button"

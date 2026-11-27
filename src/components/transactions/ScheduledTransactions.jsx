@@ -93,7 +93,7 @@ export default function ScheduledTransactions() {
   });
 
   return (
-    <div className="animate-child space-y-7">
+    <div className="animate-child space-y-7 lg:space-y-8">
       <ScheduledRecurringList
         activeRecurring={recurring.activeRecurring}
         recurringByType={recurring.recurringByType}
