@@ -670,7 +670,7 @@ export default function Settings() {
         
       />
 
-      <main className="mx-auto w-full max-w-4xl px-4 py-2 pb-24 lg:mx-auto lg:max-w-7xl lg:px-8 lg:py-3">
+      <main className="cero-page-content mx-auto w-full max-w-4xl px-4 py-2 pb-24 lg:mx-auto lg:max-w-7xl lg:px-8 lg:py-3">
         <SettingsSection
           title="Account"
           description="Manage sign-in status and account access."

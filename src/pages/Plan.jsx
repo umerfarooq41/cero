@@ -132,7 +132,7 @@ export default function Plan() {
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
-  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><main className="mx-auto w-full max-w-7xl px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
+  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><main className="cero-page-content cero-page-content-no-header mx-auto w-full max-w-7xl px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
   if (budgetSummary.isLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
@@ -152,7 +152,7 @@ export default function Plan() {
           </div>
         }
       />
-        <main className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3">
+        <main className="cero-page-content mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3">
           <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-72 w-full rounded-2xl" />
         </main>
@@ -179,7 +179,7 @@ export default function Plan() {
         }
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3 lg:pb-8">
+      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3 lg:pb-8">
         <div className="animate-child space-y-3">
           <div className="lg:hidden"><LeftToAllocateBanner
             leftToAllocate={leftToAllocate}

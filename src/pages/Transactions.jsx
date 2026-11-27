@@ -53,10 +53,10 @@ export default function Transactions() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        title={activeTab === 'history' ? <span className="flex items-center gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
-          <button type="button" aria-label="Previous month" className="grid size-8 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(-1)}><ChevronLeft className="size-4"/></button>
-          <span className="whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
-          <button type="button" aria-label="Next month" className="grid size-8 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(1)}><ChevronRight className="size-4"/></button>
+        title={activeTab === 'history' || desktop ? <span className="flex items-center cero-month-heading gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
+          <button type="button" aria-label="Previous month" disabled={activeTab === "scheduled"} className="grid size-8 place-items-center rounded-full bg-transparent disabled:opacity-35 disabled:cursor-default [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(-1)}><ChevronLeft className="size-4"/></button>
+          <span className="whitespace-nowrap">{format(activeTab === "scheduled" ? new Date() : new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
+          <button type="button" aria-label="Next month" disabled={activeTab === "scheduled"} className="grid size-8 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(1)}><ChevronRight className="size-4"/></button>
         </span> : <span className="text-base font-semibold">Scheduled</span>}
         action={<div className="flex items-center gap-1">
           {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
@@ -64,7 +64,7 @@ export default function Transactions() {
         </div>}
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-40 lg:px-8 lg:py-3 lg:pb-8">
+      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-40 lg:px-8 lg:py-3 lg:pb-8">
         <div className="lg:hidden"><TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} /></div>
         <div className="mb-4 hidden items-center justify-between border-b border-border lg:flex">
           <nav aria-label="Transaction views" className="flex gap-5">{tabs.map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => handleTabChange(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{tab.label}</button>)}</nav>

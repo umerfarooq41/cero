@@ -122,7 +122,7 @@ export default function Accounts() {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
         {header}
-        <main className="mx-auto flex min-h-[50vh] w-full max-w-7xl items-center justify-center px-4">
+        <main className="cero-page-content mx-auto flex min-h-[50vh] w-full max-w-7xl items-center justify-center px-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
         </main>
       </div>
@@ -133,7 +133,7 @@ export default function Accounts() {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
         {header}
-        <main className="mx-auto flex min-h-[50vh] w-full max-w-7xl flex-col items-center justify-center gap-3 px-4 text-center">
+        <main className="cero-page-content mx-auto flex min-h-[50vh] w-full max-w-7xl flex-col items-center justify-center gap-3 px-4 text-center">
           <h2 className="text-lg font-semibold">Couldn't load accounts</h2>
           <p className="text-sm text-muted-foreground">Your data has not been changed. Check your connection and try again.</p>
           <button type="button" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => refetchAccounts()}>
@@ -308,7 +308,7 @@ export default function Accounts() {
     <div ref={scope} className="min-h-screen bg-transparent">
       {header}
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 md:py-5 lg:px-8 lg:py-3 lg:pb-8">
+      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 md:py-5 lg:px-8 lg:py-3 lg:pb-8">
         <div className="animate-child mb-3 lg:hidden">
           <NetWorthDelta
             netWorth={netWorth}
