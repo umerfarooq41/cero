@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { CalendarClock, Clock3, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
 
@@ -34,6 +34,8 @@ const validTabs = new Set(['history', 'scheduled']);
 
 export default function Transactions() {
   const scope = usePageEntrance();
+  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+  useEffect(() => { const media = window.matchMedia('(min-width: 1024px)'); const sync = () => setDesktop(media.matches); media.addEventListener('change', sync); sync(); return () => media.removeEventListener('change', sync); }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const [currentMonth, setCurrentMonth] = useState(() => format(new Date(), "yyyy-MM"));
@@ -79,7 +81,7 @@ export default function Transactions() {
           </AppTabPanel>
         </AnimatePresence>
 
-        {activeTab === 'history' && (
+        {activeTab === 'history' && !desktop && (
           <div className="lg:hidden"><FloatingActionButton to="/add-transaction" ariaLabel="Add transaction" className="lg:!hidden" /></div>
         )}
       </main>
