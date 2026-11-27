@@ -191,6 +191,8 @@ function ChartHeading({ icon: Icon, title, subtitle }) {
 
 export default function ReflectCharts({
   isYear,
+  desktop = false,
+  report = 'cash',
   cashFlow,
   spendingBreakdown,
   spendingTrend,
@@ -309,7 +311,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
   return (
     <>
-      <div className="mb-3 grid gap-3 lg:grid-cols-2">
+      <div className={desktop && report !== "cash" ? "hidden" : "mb-3 grid gap-3"}>
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-3 sm:p-4">
@@ -317,17 +319,18 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 icon={BarChart3}
                 tone="info"
                 title={
-                  isYear
+                  desktop ? (isYear ? 'Monthly cash flow' : 'Cash flow - Recent 12 months') : isYear
                     ? 'Cash Flow - Year by Quarter'
                     : 'Cash Flow - Recent 3 Months'
                 }
                 subtitle={
-                  isYear
+                  desktop ? 'Income and expenses by month' : isYear
                     ? 'Income and expenses grouped by quarter'
                     : 'Selected month with the previous two months'
                 }
               />
 
+              {desktop && <div className="mb-3 flex gap-5 text-xs text-muted-foreground"><span className="flex items-center gap-2"><i className="size-3 rounded-sm bg-primary"/>Income</span><span className="flex items-center gap-2"><i className="size-3 rounded-sm bg-primary/45"/>Expenses</span></div>}
               {activeCashFlow && <div className="mb-2 flex items-start gap-2">
                 <span className="mt-1 h-10 w-1 shrink-0 rounded-full bg-primary" />
                 <div className="min-w-0">
@@ -338,14 +341,15 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   </div>
                 </div>
               </div>}
-              <div className={`relative ${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px]`}>
+              <div className={`relative ${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px] lg:h-[340px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={safeCashFlow}
                       onClick={state => { if (Number.isInteger(state?.activeTooltipIndex)) setSelectedCashFlowIndex(state.activeTooltipIndex); }}
                       barGap={6}
-                      barCategoryGap="32%"
+                      barCategoryGap={desktop ? "24%" : "32%"}
+                      maxBarSize={desktop ? 32 : undefined}
                       margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
                     >
                       <CartesianGrid
@@ -390,7 +394,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                       <Bar
                         dataKey="income"
                         fill="hsl(var(--primary))"
-                        radius={[8, 8, 0, 0]}
+                        radius={desktop ? [3,3,0,0] : [8,8,0,0]}
                         activeBar={false}
                         style={{
                           outline: 'none',
@@ -406,7 +410,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                       <Bar
                         dataKey="expenses"
                         fill="hsl(var(--primary) / 0.45)"
-                        radius={[8, 8, 0, 0]}
+                        radius={desktop ? [3,3,0,0] : [8,8,0,0]}
                         activeBar={false}
                         style={{
                           outline: 'none',
@@ -439,7 +443,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
       </div>
 
-      <div className="mb-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
+      <div className={desktop && report !== "spending" ? "hidden" : "mb-4 grid gap-3 lg:gap-4"}>
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="p-3 sm:p-4">
@@ -503,7 +507,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <p className="text-lg font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></p>
                   </div>
                 </div> : null}
-                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px]`}
+                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] lg:h-[340px]`}
                   onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
                   onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
                 >

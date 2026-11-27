@@ -207,6 +207,7 @@ function getQuarterTotals(
 export default function useReflectAnalysis({
   selectedYear,
   selectedMonth,
+  desktopTimeline = false,
   allTransactions = [],
   periodTransactions: suppliedPeriodTransactions,
   accounts = [],
@@ -364,6 +365,9 @@ export default function useReflectAnalysis({
   }, [periodTransactions, categories, categoryAllocations]);
 
   const cashFlow = useMemo(() => {
+    if (isYear && desktopTimeline) {
+      return Array.from({length:12}, (_,i) => { const key = selectedYear + '-' + String(i+1).padStart(2,'0'); const totals = getMonthTotals(allTransactions,key,settings,categories,accountsById); return {month:format(new Date(Number(selectedYear),i,1),'MMM'),income:totals.income,expenses:totals.expenses,net:totals.net}; });
+    }
     if (isYear) {
       return QUARTERS.map((quarter) => {
         const totals = getQuarterTotals(
@@ -384,7 +388,7 @@ export default function useReflectAnalysis({
       });
     }
 
-    return getRollingMonthKeys(monthKey, 3).map(({ key, label }) => {
+    return getRollingMonthKeys(monthKey, desktopTimeline ? 12 : 3).map(({ key, label }) => {
       const totals = getMonthTotals(
         allTransactions,
         key,
@@ -400,7 +404,7 @@ export default function useReflectAnalysis({
         net: totals.net,
       };
     });
-  }, [isYear, selectedYear, monthKey, allTransactions, settings, categories, accountsById]);
+  }, [isYear, selectedYear, monthKey, allTransactions, settings, categories, accountsById, desktopTimeline]);
 
   const spendingTrend = useMemo(() => {
     if (isYear) {
