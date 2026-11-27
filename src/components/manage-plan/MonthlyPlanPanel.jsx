@@ -42,6 +42,8 @@ import { formatCurrencyNumberText } from '@/lib/currencies';
 import { calculateDueDateAfterOccurrences } from '@/lib/recurringTransactions';
 import { getFixedGoalContributionAmount, addGoalOccurrence } from '@/lib/goals';
 
+const EMPTY_ROWS = [];
+
 const sectionConfig = {
   income: {
     title: 'Income',
@@ -368,7 +370,7 @@ function PlanAmountRow({
   );
 }
 
-export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, transactions = [], goalContributions = [] }) {
+export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, transactions = EMPTY_ROWS, goalContributions = EMPTY_ROWS }) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
 
@@ -377,18 +379,18 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
   const recurringQuery = useRecurringTransactions();
   const goalsQuery = useSavingsGoals();
   const transactionsQuery = useAllTransactions();
-  const categories = categoriesQuery.data || [];
-  const allocations = allocationsQuery.data || [];
-  const recurringTransactions = recurringQuery.data || [];
-  const savingsGoals = goalsQuery.data || [];
-  const allTransactions = transactionsQuery.data || [];
+  const categories = categoriesQuery.data || EMPTY_ROWS;
+  const allocations = allocationsQuery.data || EMPTY_ROWS;
+  const recurringTransactions = recurringQuery.data || EMPTY_ROWS;
+  const savingsGoals = goalsQuery.data || EMPTY_ROWS;
+  const allTransactions = transactionsQuery.data || EMPTY_ROWS;
 
   const prevMonth = format(
     subMonths(new Date(`${currentMonth}-01T00:00:00`), 1),
     'yyyy-MM'
   );
   const prevAllocationsQuery = useAllocations(prevMonth);
-  const prevAllocations = prevAllocationsQuery.data || [];
+  const prevAllocations = prevAllocationsQuery.data || EMPTY_ROWS;
   const isPlanLoading =
     categoriesQuery.isLoading ||
     allocationsQuery.isLoading ||
