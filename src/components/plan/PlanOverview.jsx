@@ -6,6 +6,7 @@ import PlanBreakdownCard from './PlanBreakdownCard';
 import PlanDonutCard from './PlanDonutCard';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
 import PlanTabs from './PlanTabs';
+import DesktopPlanWorksheet from './DesktopPlanWorksheet';
 import { PLAN_TABS } from './planTabsConfig';
 
 export default function PlanOverview({
@@ -56,7 +57,9 @@ export default function PlanOverview({
 
   return (
     <div className="space-y-3">
-      <PlanTabs activeTab={activeTab} onChange={setActiveTab} />
+      <div className="lg:hidden"><PlanTabs activeTab={activeTab} onChange={setActiveTab} /></div>
+      <div className="hidden lg:block"><DesktopPlanWorksheet activeTab={activeTab} setActiveTab={setActiveTab} tab={tab} planData={planData} currency={currency} currentMonth={currentMonth}/></div>
+      <div className="lg:hidden">
 
       <AnimatePresence mode="wait" initial={false}>
         <AppTabPanel key={activeTab} className="space-y-3">
@@ -79,6 +82,7 @@ export default function PlanOverview({
           />
         </AppTabPanel>
       </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -177,13 +177,18 @@ export default function Plan() {
 
       <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:py-6">
         <div className="animate-child space-y-3">
-          <LeftToAllocateBanner
+          <div className="lg:hidden"><LeftToAllocateBanner
             leftToAllocate={leftToAllocate}
             totalIncome={plannedTotals.budgetFunding}
             isEditMode={false}
             formatCurrency={formatCurrency}
             sticky={false}
-          />
+          /></div>
+          <div className="hidden items-center justify-between gap-4 border-y border-border py-4 lg:flex">
+            <div><p className="text-xs text-muted-foreground">Budget funding</p><p className="mt-1 text-xl font-semibold tabular-nums">{formatCurrency(plannedTotals.budgetFunding)}</p></div>
+            <div><p className="text-xs text-muted-foreground">Left to allocate</p><p className={`mt-1 text-xl font-semibold tabular-nums ${leftToAllocate < 0 ? "text-destructive" : "text-primary"}`}>{leftToAllocate < 0 ? "−" : ""}{formatCurrency(Math.abs(leftToAllocate))}</p></div>
+            <button type="button" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"><PencilLine className="size-4"/>Edit monthly plan</button>
+          </div>
 
           <PlanOverview
             activeTab={activeTab}

@@ -287,7 +287,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
           ['Left to allocate', budget.leftToAllocate],
         ].map(([label, value], index) => <div key={label} className="min-w-0 border-l border-border px-4 first:border-l-0 first:pl-0">
           <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-          <dd className="mt-2"><Money value={value} formatCurrency={formatCurrency} className={'text-xl font-semibold tracking-tight ' + (index === 3 ? 'text-primary' : '')}/></dd>
+          <dd className="mt-2">{num(value) < 0 ? '−' : ''}<Money value={value} formatCurrency={formatCurrency} className={'text-xl font-semibold tracking-tight ' + (index === 3 ? 'text-primary' : '')}/></dd>
         </div>)}
       </dl>
     </div>
