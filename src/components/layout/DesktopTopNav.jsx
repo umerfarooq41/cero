@@ -23,7 +23,7 @@ export default function DesktopTopNav() {
       <nav aria-label="Main navigation" className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 pb-4">
         {items.map(([path, label, Icon, matches]) => {
           const active = matches.some(match => pathname === match || (match !== '/' && pathname.startsWith(match + '/')));
-          return <Link key={path} to={path} aria-current={active ? 'page' : undefined} className={cn('cero-desktop-nav-link flex min-h-[46px] shrink-0 items-center gap-3 rounded-md px-3 text-[15px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', path === '/settings' && 'mt-auto', active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}><Icon className="size-5 shrink-0" aria-hidden="true"/>{label}</Link>;
+          return <Link key={path} to={path} aria-current={active ? 'page' : undefined} className={cn('cero-desktop-nav-link flex min-h-[46px] shrink-0 items-center gap-3 rounded-md px-3 text-[15px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0', path === '/settings' && 'mt-auto', active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}><Icon className="size-5 shrink-0" aria-hidden="true"/>{label}</Link>;
         })}
       </nav>
     </aside>

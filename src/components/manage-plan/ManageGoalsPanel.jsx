@@ -792,6 +792,8 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
 }
 
 export default function ManageGoalsPanel({embedded=false,request=null}) {
+  const [desktopTab,setDesktopTab] = useState('active');
+  const [desktopSelected,setDesktopSelected] = useState(null);
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
   const { session } = useAuth();
@@ -933,9 +935,16 @@ export default function ManageGoalsPanel({embedded=false,request=null}) {
     }
   };
 
+  const groups = groupedGoals;
+  const labels = {active:'Active goals',completed:'Completed goals',archived:'Archived'};
+  const rows = groups[desktopTab];
+  const selected = rows.find(row=>row.id===desktopSelected);
   return (
     <div className="space-y-3 lg:space-y-5">
-      <div className={embedded?"hidden":"space-y-3 lg:space-y-5"}>
+      {!embedded&&<div className="hidden lg:block">
+<nav className="flex flex-wrap items-center gap-4 border-b border-border pb-2" aria-label="Goal status">{Object.entries(labels).map(([key,label])=><button key={key} type="button" aria-pressed={desktopTab===key} onClick={()=>{setDesktopTab(key);setDesktopSelected(null)}} className={cn("px-2 py-2 text-sm",desktopTab===key?"text-primary border-b-2 border-primary":"text-muted-foreground")}>{label} <span className="ml-1 text-xs opacity-70">{groups[key].length}</span></button>)}<div className="flex-1"/>{desktopTab==='active'&&<Button size="sm" onClick={()=>openNew()}><Plus className="mr-1 size-4"/>Add goal</Button>}</nav>
+<div className="grid grid-cols-[minmax(0,1fr)_minmax(240px,30%)] pt-3"><div className="overflow-auto max-h-[65vh]"><table className="w-full text-sm"><thead className="sticky top-0 bg-card text-muted-foreground"><tr><th className="p-3 font-medium text-left">Goal</th><th className="p-3 font-medium text-right">Target</th><th className="p-3 font-medium text-right">Saved</th><th className="p-3 font-medium text-right">Remaining</th></tr></thead><tbody>{rows.map(row=><tr key={row.id} onClick={()=>setDesktopSelected(row.id)} className={cn("border-b border-border/60 cursor-pointer hover:bg-muted/30",desktopSelected===row.id&&"bg-primary/10")}><td className="p-3"><button type="button" onClick={()=>setDesktopSelected(row.id)} className="flex items-center gap-2 text-left"><CategoryIcon icon={row.icon} color={row.color} size="sm"/>{row.name}</button></td><td className="p-3 text-right tabular-nums">{formatCurrency(row.target_amount)}</td><td className="p-3 text-right tabular-nums">{formatCurrency(row.current_amount)}</td><td className="p-3 text-right tabular-nums">{formatCurrency(getGoalRemaining(row))}</td></tr>)}</tbody></table>{!rows.length&&<p className="p-8 text-center text-sm text-muted-foreground">No items in this section</p>}</div><aside className="border-l border-border px-5 py-3 space-y-4"><h2 className="text-lg font-semibold">{selected?.name||labels[desktopTab]}</h2>{selected?<>{[['Target',formatCurrency(selected.target_amount)],['Saved',formatCurrency(selected.current_amount)],['Remaining',formatCurrency(getGoalRemaining(selected))],['Target date',selected.target_date]].map(([label,value])=><div key={label} className="flex justify-between gap-3 text-sm"><span className="text-muted-foreground">{label}</span><span>{value||'—'}</span></div>)}<div className="flex gap-2 border-t border-border pt-4"><Button variant="outline" size="sm" onClick={()=>(setEditingGoal(selected),setDialogOpen(true))}><Pencil className="mr-1 size-4"/>Edit</Button><Button variant="ghost" size="sm" onClick={()=>setActionTarget(selected)}>More</Button></div></>:<p className="text-sm text-muted-foreground">Select an item to view its details.</p>}</aside></div></div>}
+      <div className={embedded?"hidden":"space-y-3 lg:hidden"}>
         <GoalSection
           title="Active Goals"
           tone="active"
