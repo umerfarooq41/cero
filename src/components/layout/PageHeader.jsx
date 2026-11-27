@@ -53,7 +53,7 @@ export default function PageHeader({
           md:pb-2.5
           lg:h-auto
           lg:px-8
-          lg:pt-10
+          lg:pt-5
           lg:pb-4
         "
       >

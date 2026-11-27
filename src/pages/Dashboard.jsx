@@ -113,7 +113,7 @@ export default function Dashboard() {
       <div ref={scope} className="min-h-screen bg-transparent">
         <PageHeader title={greetingFor(today)} />
         <main className="mx-auto w-full max-w-7xl space-y-3 px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
-          <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
+          <div className="mx-auto max-w-3xl lg:mx-0 lg:max-w-xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
           <Skeleton className="h-28 w-full rounded-2xl" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
@@ -131,7 +131,7 @@ export default function Dashboard() {
       <PageHeader title={greetingFor(today)} />
 
       <main className="mx-auto w-full max-w-7xl px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6">
-        <div className="mx-auto max-w-3xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
+        <div className="mx-auto max-w-3xl lg:mx-0 lg:max-w-xl"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
         
 
         

@@ -210,7 +210,7 @@ function IconTile({ icon: Icon, tone = 'blue', className }) {
 
 function SettingsSection({ title, children }) {
   return (
-    <section className="settings-section animate-child mb-3 overflow-hidden rounded-2xl app-card-surface">
+    <section className="settings-section animate-child mb-3 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="settings-section-header flex items-center border-b border-border/40 px-3.5 py-2.5">
         <div className="min-w-0">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
