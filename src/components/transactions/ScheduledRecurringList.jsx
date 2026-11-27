@@ -260,6 +260,7 @@ function ScheduledRecurringRow({
 }
 
 export default function ScheduledRecurringList({
+  desktopSection = null,
   activeRecurring,
   recurringByType,
   categories,
@@ -272,7 +273,7 @@ export default function ScheduledRecurringList({
 }) {
   return (
     <section className="space-y-3">
-      <div className="px-1">
+      <div className={desktopSection?"hidden":"px-1"}>
         <h2 className="text-base font-semibold">Recurring Bills & Income</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Same layout as Manage Plan, with posting actions only for due items.
@@ -289,11 +290,12 @@ export default function ScheduledRecurringList({
         </div>
       ) : (
         <div className="space-y-4">
-          {RECURRING_SECTIONS.map((section) => {
+          {RECURRING_SECTIONS.filter(section=>!desktopSection||section.type===desktopSection).map((section) => {
             const rules = recurringByType[section.type] || [];
 
+            const Wrapper = desktopSection ? "div" : ScheduledSectionCard;
             return (
-              <ScheduledSectionCard
+              <Wrapper
                 key={section.type}
                 type={section.type}
                 label={section.label}
@@ -327,7 +329,8 @@ export default function ScheduledRecurringList({
                     />
                   );
                 })}
-              </ScheduledSectionCard>
+              {desktopSection&&rules.length===0&&<p className="py-8 text-center text-sm text-muted-foreground">No scheduled {section.label.toLowerCase()} right now.</p>}
+              </Wrapper>
             );
           })}
         </div>

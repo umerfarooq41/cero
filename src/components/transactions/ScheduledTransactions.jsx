@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   useAccounts,
   useAllocations,
@@ -64,6 +65,9 @@ function formatCurrencyElement(amount, currency, className = "") {
 }
 
 export default function ScheduledTransactions() {
+  const [desktop,setDesktop] = useState(()=>window.matchMedia("(min-width: 1024px)").matches);
+  const [section,setSection] = useState("income");
+  useEffect(()=>{const mq=window.matchMedia("(min-width: 1024px)");const sync=()=>setDesktop(mq.matches);mq.addEventListener("change",sync);sync();return ()=>mq.removeEventListener("change",sync);},[]);
   const currency = useCurrency();
   const currentMonth = getCurrentMonthKey();
   const { data: recurringTransactions = [] } = useRecurringTransactions();
@@ -93,8 +97,11 @@ export default function ScheduledTransactions() {
   });
 
   return (
-    <div className="animate-child space-y-7 lg:space-y-8">
+    <div className="animate-child space-y-7 lg:space-y-4">
+      {desktop&&<nav aria-label="Scheduled sections" className="cero-workplace-tabs flex flex-wrap items-center gap-5 border-b border-border">{[["income","Income"],["expense","Expenses"],["transfer","Debt payments"],["goals","Savings goals"]].map(([key,label])=><button key={key} type="button" aria-pressed={section===key} onClick={()=>setSection(key)} className={cn("px-2 py-3 text-sm font-medium",section===key?"text-primary":"text-muted-foreground")}>{label}</button>)}</nav>}
+      {(!desktop||section!=="goals")&&<>
       <ScheduledRecurringList
+        desktopSection={desktop?section:null}
         activeRecurring={recurring.activeRecurring}
         recurringByType={recurring.recurringByType}
         categories={categories}
@@ -106,14 +113,16 @@ export default function ScheduledTransactions() {
         formatCurrencyElement={formatCurrencyElement}
       />
 
-      <ScheduledGoalsList
+      </>}
+      {(!desktop||section==="goals")&&<ScheduledGoalsList
+        desktop={desktop}
         activeGoals={goals.activeGoals}
         accounts={accounts}
         currency={currency}
         savingGoalId={goals.savingGoalId}
         contributionDialog={goals.contributionDialog}
         formatCurrencyElement={formatCurrencyElement}
-      />
+      />}
     </div>
   );
 }

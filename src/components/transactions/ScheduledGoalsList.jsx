@@ -238,6 +238,7 @@ function ScheduledGoalRow({
 }
 
 export default function ScheduledGoalsList({
+  desktop = false,
   activeGoals,
   accounts,
   currency,
@@ -245,9 +246,10 @@ export default function ScheduledGoalsList({
   contributionDialog,
   formatCurrencyElement,
 }) {
+  const Wrapper = desktop ? "div" : ScheduledSectionCard;
   return (
     <section className="space-y-3">
-      <div className="px-1">
+      <div className={desktop?"hidden":"px-1"}>
         <h2 className="text-base font-semibold">Savings Goals</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Same goal rows as Manage Plan, with contribution actions for
@@ -264,7 +266,7 @@ export default function ScheduledGoalsList({
           />
         </div>
       ) : (
-        <ScheduledSectionCard
+        <Wrapper
           type="active"
           label="Active Goals"
           count={activeGoals.length}
@@ -292,7 +294,7 @@ export default function ScheduledGoalsList({
               />
             );
           })}
-        </ScheduledSectionCard>
+        </Wrapper>
       )}
 
       <GoalContributionDialog
