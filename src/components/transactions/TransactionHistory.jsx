@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
 import {
   ArrowLeftRight,
   CalendarDays,
@@ -289,6 +289,7 @@ function AdvancedFilterSheet({
 export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const navigate = useNavigate();
   const currency = useCurrency();
+  const [params] = useSearchParams();
 
   const [selectedDate, setSelectedDate] = useState('');
   const [dateMode, setDateMode] = useState('month');
@@ -297,7 +298,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
-  const [accountFilter, setAccountFilter] = useState('all');
+  const [accountFilter, setAccountFilter] = useState(()=>params.get('account')||'all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -341,6 +342,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   ].filter(Boolean).length;
 
   const activeFilterChips = [
+    dateMode==='any'?{key:'any',label:'All dates',onClear:()=>setDateMode('month')}:null,
     sourceFilter !== 'all'
       ? {
           key: 'source',
@@ -524,7 +526,8 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         </div>
 
         <label className="hidden items-center gap-2 lg:flex"><span className="sr-only">Transaction type</span><select value={filterType} onChange={event => setFilterType(event.target.value)} className="h-10 rounded-md border border-border bg-card px-3 text-sm"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option></select></label>
-        <AdvancedFilterSheet
+        <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<select className="block w-full rounded-md border border-border bg-background p-2" value={value} onChange={e=>set(e.target.value)}>{options.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
+        <div className="lg:hidden"><AdvancedFilterSheet
           open={filterSheetOpen}
           onOpenChange={setFilterSheetOpen}
           accounts={accounts}
@@ -549,7 +552,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           setSortBy={setSortBy}
           onClearAdvanced={clearAdvancedFilters}
           activeCount={activeAdvancedCount}
-        />
+        /></div>
       </div>
 
       <div className="lg:hidden"><TransactionTypeTabs
