@@ -1595,3 +1595,9 @@ main,
  .cero-desktop-workspace input.cero-plan-cell:focus { border-color:hsl(var(--primary))!important; background:hsl(var(--card))!important; outline:none!important; box-shadow:none!important; }
  .cero-desktop-workspace .cero-desktop-nav-link:focus:not(:focus-visible) {outline:none!important;box-shadow:none!important;}
 }
+
+@media (min-width:1024px) {
+ .cero-desktop-workspace nav.cero-workplace-tabs { position:relative; border-bottom:1px solid hsl(var(--border)) !important; align-items:center; }
+ .cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed] { position:relative; border-bottom:0!important; }
+ .cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed="true"]::after { content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:hsl(var(--primary)); pointer-events:none; }
+}

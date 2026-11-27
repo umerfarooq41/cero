@@ -92,7 +92,7 @@ export default function ManagePlan() {
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>
 
-        <nav aria-label="Manage plan sections" className="mb-5 hidden gap-6 border-b border-border lg:flex">{managePlanTabs.filter(tab=>!['monthly-plan','categories'].includes(tab.value)).map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => changeTab(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{tab.desktopLabel || tab.label}</button>)}</nav>
+        <nav aria-label="Manage plan sections" className="cero-workplace-tabs mb-5 hidden gap-6 border-b border-border lg:flex">{managePlanTabs.filter(tab=>!['monthly-plan','categories'].includes(tab.value)).map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => changeTab(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{tab.desktopLabel || tab.label}</button>)}</nav>
         <AnimatePresence mode="wait" initial={false}>
           <AppTabPanel key={activeTab} className="animate-child">
             {renderPanel()}
