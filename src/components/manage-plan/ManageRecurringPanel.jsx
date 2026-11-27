@@ -395,7 +395,7 @@ function RecurringRuleModal({
         <div className="flex items-center gap-3 rounded-2xl app-card-surface-soft p-3">
           <CategoryIcon icon={form.icon} color={form.color} size="lg" />
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">
+            <div className="truncate text-sm font-semibold lg:text-base">
               {form.name.trim() || 'Recurring Rule'}
             </div>
             <div className="text-xs text-muted-foreground">
@@ -465,7 +465,7 @@ function RecurringRuleModal({
           )}
 
           {form.type === 'transfer' && !isCompletedDebt && (
-            <div className="space-y-3">
+            <div className="space-y-3 lg:space-y-5">
               <div>
                 <p className="text-sm font-semibold">Payment plan</p>
                 <p className="text-xs text-muted-foreground">
@@ -891,7 +891,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="min-w-0 truncate text-sm font-semibold leading-tight">
+        <div className="min-w-0 truncate text-sm font-semibold lg:text-base leading-tight">
           {rule.name}
         </div>
 
@@ -932,7 +932,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
           <Icon className={cn('h-4 w-4 shrink-0', TYPE_ACCENT[type])} />
-          <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>{label}</h3>
+          <h3 className={cn('truncate text-sm font-semibold lg:text-base', TYPE_ACCENT[type])}>{label}</h3>
         </button>
         <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span>
         <button type="button" onClick={() => onAddNew(type)} aria-label={`Add ${label.toLowerCase()} rule`} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:text-primary"><Plus className="h-4 w-4" /></button>
@@ -952,7 +952,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
                 <p className="text-xs text-muted-foreground">No rules yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-border/50 border-t border-border/50">
+              <div className="divide-y divide-border/50 border-t border-border/50 lg:border-t-0">
                 {rules.map((rule) => (
                   <RecurringRow
                     key={rule.id}
@@ -981,14 +981,14 @@ function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, on
       <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5 text-left">
         <span className="flex min-w-0 items-center gap-2.5">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
-          <span className="truncate text-sm font-semibold text-green-700 dark:text-green-400">Completed Debts</span>
+          <span className="truncate text-sm font-semibold lg:text-base text-green-700 dark:text-green-400">Completed Debts</span>
         </span>
         <span className="flex shrink-0 items-center gap-2"><span className="inline-flex min-w-7 items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rules.length}</span><span aria-hidden="true" className="h-8 w-8" /></span>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="divide-y divide-border/50 border-t border-border/50">
+            <div className="divide-y divide-border/50 border-t border-border/50 lg:border-t-0">
               {rules.map((rule) => {
                 const liability = accounts.find((account) => account.id === rule.to_account_id);
                 const category = categories.find((item) => item.id === rule.category_id);
@@ -998,7 +998,7 @@ function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, on
                       <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold">{rule.name}</div>
+                      <div className="truncate text-sm font-semibold lg:text-base">{rule.name}</div>
                       <p className="mt-1 text-xs font-medium text-muted-foreground">
                         Paid off{rule.completed_at ? ` · ${formatRecurringDate(rule.completed_at)}` : ''}
                       </p>
@@ -1211,8 +1211,8 @@ export default function ManageRecurringPanel() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-3">
+    <div className="space-y-3 lg:space-y-5">
+      <div className="space-y-3 lg:space-y-5">
         <RecurringSection
           type="income"
           label="Income"

@@ -210,7 +210,7 @@ function IconTile({ icon: Icon, tone = 'blue', className }) {
 
 function SettingsSection({ title, children }) {
   return (
-    <section className="settings-section animate-child mb-3 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+    <section className="settings-section animate-child mb-3 lg:mb-8 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="settings-section-header flex items-center border-b border-border/40 px-3.5 py-2.5 lg:border-b-0 lg:px-0 lg:py-3">
         <div className="min-w-0">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:text-base lg:normal-case lg:tracking-normal lg:text-foreground">
@@ -670,7 +670,7 @@ export default function Settings() {
         
       />
 
-      <main className="mx-auto w-full max-w-4xl px-4 py-2 pb-24 lg:mx-0 lg:max-w-5xl lg:px-8 lg:py-6">
+      <main className="mx-auto w-full max-w-4xl px-4 py-2 pb-24 lg:mx-0 lg:max-w-5xl lg:px-8 lg:py-3">
         <SettingsSection
           title="Account"
           description="Manage sign-in status and account access."
@@ -964,7 +964,7 @@ export default function Settings() {
         </SettingsSection>
 
         <Dialog open={showAutoSweepDialog} onOpenChange={setShowAutoSweepDialog}>
-          <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl">
+          <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl app-desktop-wide-editor">
             <DialogHeader>
               <DialogTitle>{settings.budgetLogic.autoSweepSurplus ? 'Edit Auto-Sweep' : 'Set up Auto-Sweep'}</DialogTitle>
               <DialogDescription>

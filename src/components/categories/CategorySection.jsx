@@ -13,7 +13,7 @@ const TYPE_ACCENT = {
 };
 
 const rowClass =
-  'group flex items-center gap-3 px-3 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20';
+  'group flex items-center gap-3 px-3 lg:px-2 transition-colors hover:bg-muted/35 dark:hover:bg-muted/20';
 
 function CategoryRow({ cat, subs, onAction }) {
   const [subOpen, setSubOpen] = useState(false);
@@ -52,6 +52,7 @@ function CategoryRow({ cat, subs, onAction }) {
             type="button"
             onClick={() => setSubOpen((value) => !value)}
             className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            aria-expanded={subOpen}
             aria-label={subOpen ? 'Hide subcategories' : 'Show subcategories'}
           >
             <ChevronRight
@@ -124,10 +125,11 @@ export default function CategorySection({
   }, 0);
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
-      <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5 transition-colors">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
+      <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5 lg:px-0 transition-colors">
         <button
           type="button"
+          aria-expanded={isOpen}
           onClick={() => setIsOpen((value) => !value)}
           className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
         >
@@ -138,7 +140,7 @@ export default function CategorySection({
             )}
           />
 
-          <h3 className={cn('truncate text-sm font-semibold', TYPE_ACCENT[type])}>
+          <h3 className={cn('truncate text-sm font-semibold lg:text-base', TYPE_ACCENT[type])}>
             {label}
           </h3>
         </button>
@@ -183,7 +185,7 @@ export default function CategorySection({
                 </button>
               </div>
             ) : (
-              <div className="divide-y divide-border/50 border-t border-border/50">
+              <div className="divide-y divide-border/50 border-t border-border/50 lg:border-t-0">
                 {parents.map((category) => {
                   const subs = allSubs.filter((sub) => sub.parent_id === category.id);
 

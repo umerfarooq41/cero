@@ -384,7 +384,7 @@ function GoalDialog({ open, onOpenChange, editingGoal, onSave, saveError, saving
           <CategoryIcon icon={form.icon_key || 'target'} color={form.color_key || '#276FE4'} size="lg" />
 
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{form.name.trim() || 'Goal Name'}</div>
+            <div className="truncate text-sm font-semibold lg:text-base">{form.name.trim() || 'Goal Name'}</div>
             <div className="text-xs text-muted-foreground">
               Target {form.target_amount ? Number(form.target_amount).toLocaleString() : '0'}
               {form.target_date ? ` · ${formatGoalDate(form.target_date)}` : ''}
@@ -672,7 +672,7 @@ function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className={cn('min-w-0 truncate text-sm font-semibold leading-tight', isArchived && 'text-muted-foreground line-through')}>
+        <h3 className={cn('min-w-0 truncate text-sm font-semibold lg:text-base leading-tight', isArchived && 'text-muted-foreground line-through')}>
           {goal.name}
         </h3>
 
@@ -742,7 +742,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
               !isOpen && '-rotate-90'
             )}
           />
-          <h3 className={cn('truncate text-sm font-semibold', toneClass)}>{title}</h3>
+          <h3 className={cn('truncate text-sm font-semibold lg:text-base', toneClass)}>{title}</h3>
         </button>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -778,7 +778,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
                 <p className="text-xs text-muted-foreground">{emptyText}</p>
               </div>
             ) : (
-              <div className="divide-y divide-border/50 border-t border-border/50">
+              <div className="divide-y divide-border/50 border-t border-border/50 lg:border-t-0">
                 {goals.map((goal) => (
                   <GoalRow key={goal.id} goal={goal} onAction={onAction} formatCurrency={formatCurrency} completionDate={completionDates[goal.id]} />
                 ))}
@@ -932,8 +932,8 @@ export default function ManageGoalsPanel() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-3">
+    <div className="space-y-3 lg:space-y-5">
+      <div className="space-y-3 lg:space-y-5">
         <GoalSection
           title="Active Goals"
           tone="active"

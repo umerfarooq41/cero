@@ -41,8 +41,9 @@ export function ScheduledSectionCard({
     <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none">
       <button
         type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
-        className="flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-accent/30"
+        className="flex w-full items-center justify-between px-5 py-3.5 lg:px-0 transition-colors hover:bg-accent/30"
       >
         <div className="flex min-w-0 items-center gap-2.5">
           <ChevronDown
@@ -53,7 +54,7 @@ export function ScheduledSectionCard({
           />
           <Icon className={cn("h-4 w-4 shrink-0", TYPE_ACCENT[type])} />
           <h3
-            className={cn("truncate text-sm font-semibold", TYPE_ACCENT[type])}
+            className={cn("truncate text-sm font-semibold lg:text-base", TYPE_ACCENT[type])}
           >
             {label}
           </h3>
@@ -78,7 +79,7 @@ export function ScheduledSectionCard({
                 <p className="text-xs text-muted-foreground">{emptyText}</p>
               </div>
             ) : (
-              <div className="divide-y divide-border/50 border-t border-border/50">
+              <div className="divide-y divide-border/50 border-t border-border/50 lg:border-t-0">
                 {children}
               </div>
             )}
@@ -113,11 +114,11 @@ export default function ScheduledItemCard({
   actions,
 }) {
   return (
-    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40 lg:items-center lg:py-3">
+    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40 lg:items-center lg:px-2 lg:py-3">
       <CategoryIcon icon={icon} color={color} size="sm" />
 
       <div className="min-w-0 flex-1 pt-0.5">
-        <h3 className="min-w-0 truncate text-sm font-semibold leading-tight">
+        <h3 className="min-w-0 truncate text-sm font-semibold lg:text-base leading-tight">
           {title}
         </h3>
 
@@ -134,7 +135,7 @@ export default function ScheduledItemCard({
         )}
       </div>
 
-      <div className="ml-1 flex max-w-[9.75rem] flex-col items-end gap-2 text-right lg:grid lg:max-w-none lg:grid-cols-[minmax(7rem,auto)_9rem] lg:items-center lg:gap-4">
+      <div className="ml-1 flex max-w-[9.75rem] flex-col items-end gap-2 text-right lg:grid lg:max-w-none lg:grid-cols-[minmax(8rem,auto)_10rem] lg:items-center lg:gap-4">
         <div className="text-sm font-semibold tabular-nums text-foreground">
           {amount}
         </div>

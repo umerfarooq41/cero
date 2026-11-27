@@ -1572,3 +1572,10 @@ main,
   .app-desktop-route-form .app-route-sheet-body > .app-card-surface { border:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; }
  }
 }
+
+@media (min-width:1024px) {
+ .cero-desktop-workspace .settings-section-header h3 {font-size:18px;line-height:1.4;}
+ .cero-desktop-workspace .settings-row {min-height:52px;}
+ .cero-desktop-workspace .settings-section .settings-row:hover {background-color:hsl(var(--muted)/.35);}
+ .cero-desktop-workspace .settings-section {overflow:visible;}
+}

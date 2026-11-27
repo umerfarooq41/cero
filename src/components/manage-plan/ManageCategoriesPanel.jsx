@@ -94,7 +94,7 @@ export default function ManageCategoriesPanel() {
   const archivedCategories = categories.filter((category) => category.is_archived);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 lg:space-y-5">
       {archivedCategories.length > 0 && (
         <div className="flex justify-end">
           <Button type="button" variant="ghost" size="sm" onClick={() => setShowArchived((value) => !value)} className="gap-1.5 rounded-xl text-xs text-muted-foreground">
@@ -104,7 +104,7 @@ export default function ManageCategoriesPanel() {
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-3 lg:space-y-5">
         <CategorySection
           type="income"
           label="Income"
