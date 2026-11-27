@@ -144,7 +144,7 @@ export default function Plan() {
           <div className="flex items-center gap-1">
             <button type="button" aria-label="Edit monthly plan" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
             {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
-            <button type="button" aria-label="Open settings" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
+            <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
           </div>
         }
       />
@@ -170,7 +170,7 @@ export default function Plan() {
           <div className="flex items-center gap-1">
             <button type="button" aria-label="Edit monthly plan" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
             {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
-            <button type="button" aria-label="Open settings" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
+            <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
           </div>
         }
       />

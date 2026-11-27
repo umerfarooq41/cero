@@ -103,7 +103,7 @@ export default function Accounts() {
   const header = <PageHeader title="Financial overview" action={<div className="flex items-center gap-1">
     <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
     {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
-    <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
+    <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
   </div>} />;
   const formatCurrency = useCurrencyFormatter();
   const {

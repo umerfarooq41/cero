@@ -70,8 +70,8 @@ export default function PageHeader({
                 leading-6
                 tracking-normal
                 text-foreground
-                lg:text-xl
-                lg:leading-7
+                lg:text-[28px]
+                lg:leading-tight
               "
             >
               {title}

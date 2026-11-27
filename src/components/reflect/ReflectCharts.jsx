@@ -215,8 +215,8 @@ export default function ReflectCharts({
   const selectDailyAt = (clientX) => {
     const rect = dailyChartRef.current?.getBoundingClientRect();
     if (!rect || safeSpendingTrend.length === 0) return;
-    const plotLeft = rect.left + 70;
-    const plotWidth = Math.max(1, rect.width - 78);
+    const plotLeft = rect.left + (desktop ? 38 : 70);
+    const plotWidth = Math.max(1, rect.width - (desktop ? 46 : 78));
     const ratio = Math.max(0, Math.min(1, (clientX - plotLeft) / plotWidth));
     const index = Math.round(ratio * (safeSpendingTrend.length - 1));
     setSelectedDay(safeSpendingTrend[index].label);
@@ -432,6 +432,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <button key={item.month || index} type="button" aria-label={`Show ${item.month} cash flow`}
                       aria-pressed={index === activeCashFlowIndex}
                       onClick={() => setSelectedCashFlowIndex(index)}
+                      onMouseEnter={desktop ? () => setSelectedCashFlowIndex(index) : undefined}
                       className="h-full flex-1 cursor-pointer bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" />
                   ))}
                 </div>}
@@ -509,7 +510,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 </div> : null}
                 <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] lg:h-[340px]`}
                   onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
-                  onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
+                  onPointerMove={event => { if (desktop || event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
                 >
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">

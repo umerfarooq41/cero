@@ -57,7 +57,7 @@ export default function Transactions() {
         </span> : <span className="text-base font-semibold">Scheduled</span>}
         action={<div className="flex items-center gap-1">
           {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
-          <button type="button" aria-label="Open settings" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]"/></button>
+          <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]"/></button>
         </div>}
       />
 
