@@ -509,8 +509,8 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   </div>
                 </div> : null}
                 <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] lg:h-[340px]`}
-                  onPointerDown={desktop ? undefined : event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
-                  onPointerMove={desktop ? undefined : event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
+                  onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
+                  onPointerMove={event => { if (desktop || event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
                 >
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -586,7 +586,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   ) : (
                     <ChartShell className="h-full" />
                   )}
-                  <div className="absolute inset-0 z-10 touch-pan-y lg:hidden" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }} onPointerMove={event => { if (event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }} />
+                  <div className="absolute inset-0 z-10 touch-pan-y lg:cursor-crosshair" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }} onPointerMove={event => { if (desktop || event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }} />
                 </div>
                 </>
               ) : (
