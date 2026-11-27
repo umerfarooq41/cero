@@ -392,7 +392,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const searchValue = search.trim().toLowerCase();
   const globalScope = Boolean(searchValue) || dateMode !== "month" || sourceFilter !== "all" || accountFilter !== "all" || categoryFilter !== "all";
 
-  const { filtered, grouped, sortedDates } = useMemo(() => {
+  const { filtered, grouped, sortedDates, sortedTransactions } = useMemo(() => {
   const visibleTransactions = globalScope ? allTransactions : transactions;
   const filtered = visibleTransactions.filter((transaction) => {
     const category = categoriesById.get(transaction.category_id);
@@ -473,7 +473,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     if (sortBy === 'oldest') return a.localeCompare(b);
     return b.localeCompare(a);
   });
-    return { filtered, grouped, sortedDates };
+    return { filtered, grouped, sortedDates, sortedTransactions };
   }, [
     transactions, allTransactions, globalScope, dateMode, dateFrom, dateTo, accountsById, categoriesById, searchValue,
     filterType, selectedDate, accountFilter, categoryFilter, sourceFilter, sortBy,
@@ -508,7 +508,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
             placeholder="Find transactions..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="h-10 rounded-xl app-card-surface pl-9 pr-9"
+            className="h-10 rounded-xl app-card-surface pl-9 pr-9 lg:!rounded-md lg:!shadow-none"
           />
 
           {search && (
@@ -601,7 +601,15 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           />
         </div>
       ) : (
-        <div className="animate-child space-y-3">
+        <div>
+        <div className="hidden overflow-x-auto lg:block">
+          <table className="w-full min-w-[700px] border-collapse text-sm">
+            <caption className="sr-only">Transaction history</caption>
+            <thead className="border-y border-border bg-muted/40 text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{label}</th>)}</tr></thead>
+            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} onClick={() => navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
+          </table>
+        </div>
+        <div className="animate-child space-y-3 lg:hidden">
           {sortedDates.map((date) => (
             <div
               key={date}
@@ -638,7 +646,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
               </div>
             </div>
           ))}
-        </div>
+        </div></div>
       )}
     </div>
   );

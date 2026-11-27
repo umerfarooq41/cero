@@ -62,7 +62,11 @@ export default function Transactions() {
       />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-40 lg:py-6">
-        <TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} />
+        <div className="lg:hidden"><TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} /></div>
+        <div className="mb-4 hidden items-center justify-between border-b border-border lg:flex">
+          <nav aria-label="Transaction views" className="flex gap-5">{tabs.map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => handleTabChange(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{tab.label}</button>)}</nav>
+          {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction')} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">+ Add transaction</button>}
+        </div>
 
         <AnimatePresence mode="wait" initial={false}>
           <AppTabPanel key={activeTab}>
@@ -75,7 +79,7 @@ export default function Transactions() {
         </AnimatePresence>
 
         {activeTab === 'history' && (
-          <FloatingActionButton to="/add-transaction" ariaLabel="Add transaction" />
+          <div className="lg:hidden"><FloatingActionButton to="/add-transaction" ariaLabel="Add transaction" /></div>
         )}
       </main>
     </div>

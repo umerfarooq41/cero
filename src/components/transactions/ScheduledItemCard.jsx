@@ -38,7 +38,7 @@ export function ScheduledSectionCard({
   const Icon = TYPE_ICONS[type] || Target;
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none">
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
@@ -113,7 +113,7 @@ export default function ScheduledItemCard({
   actions,
 }) {
   return (
-    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40 lg:items-center lg:py-3">
       <CategoryIcon icon={icon} color={color} size="sm" />
 
       <div className="min-w-0 flex-1 pt-0.5">
@@ -134,7 +134,7 @@ export default function ScheduledItemCard({
         )}
       </div>
 
-      <div className="ml-1 flex max-w-[9.75rem] flex-col items-end gap-2 text-right">
+      <div className="ml-1 flex max-w-[9.75rem] flex-col items-end gap-2 text-right lg:grid lg:max-w-none lg:grid-cols-[minmax(7rem,auto)_9rem] lg:items-center lg:gap-4">
         <div className="text-sm font-semibold tabular-nums text-foreground">
           {amount}
         </div>
