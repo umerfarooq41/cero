@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, addMonths, subMonths } from 'date-fns';
 import { PencilLine, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
@@ -6,6 +6,7 @@ import { PencilLine, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/layout/PageHeader';
 import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
+import MonthlyPlanPanel from '@/components/manage-plan/MonthlyPlanPanel';
 import PlanOverview from '@/components/plan/PlanOverview';
 import {
   useAllocations,
@@ -35,6 +36,8 @@ export default function Plan() {
   );
   const [activeTab, setActiveTab] = useState('expense');
 
+  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+  useEffect(() => { const mq = window.matchMedia('(min-width: 1024px)'); const update = () => setDesktop(mq.matches); mq.addEventListener('change', update); return () => mq.removeEventListener('change', update); }, []);
   const currency = useCurrency();
   const formatCurrency = useCurrencyFormatter();
 
@@ -129,6 +132,7 @@ export default function Plan() {
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
+  if (desktop) return <div className="min-h-screen bg-transparent"><PageHeader title="Plan"/><main className="mx-auto w-full max-w-[1600px] px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
   if (budgetSummary.isLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">

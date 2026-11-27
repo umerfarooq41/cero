@@ -253,7 +253,7 @@ export function buildSuggestedGoalAllocations({
     .filter(Boolean);
 }
 
-export function getTrackedForSource({
+export export function getTrackedForSource({
   transactions = [],
   goalContributions = [],
   sourceType,
@@ -322,7 +322,7 @@ export function getTrackedForSource({
 }
 
 
-export function getTrackedForCategory({ transactions = [], categoryId }) {
+export export function getTrackedForCategory({ transactions = [], categoryId }) {
   return transactions
     .filter((transaction) => {
       if (transaction.category_id !== categoryId) return false;

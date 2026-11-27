@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { format, subMonths } from 'date-fns';
-import { ChevronDown, Copy, Save, LockKeyhole } from 'lucide-react';
+import { ChevronDown, Copy, Save, LockKeyhole, Plus, Pencil, X } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import ManageCategoriesPanel from './ManageCategoriesPanel';
+import ManageGoalsPanel from './ManageGoalsPanel';
+import ManageRecurringPanel from './ManageRecurringPanel';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import SourceBadge from '@/components/shared/SourceBadge';
 import MonthSelector from '@/components/shared/MonthSelector';
@@ -26,6 +29,9 @@ import {
   isGoalPlannedForMonth,
 } from '@/lib/goals';
 import {
+  buildPlanTotals,
+  getTrackedForCategory,
+  getTrackedForSource,
   calculateLeftToAllocateFromTotals,
   getAssignablePlannedDebt,
   getFundedDebtPaymentTotal,
@@ -362,7 +368,7 @@ function PlanAmountRow({
   );
 }
 
-export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
+export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, transactions = [], goalContributions = [] }) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
 
@@ -398,6 +404,11 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   }, [allTransactions, currentMonth]);
 
   const [values, setValues] = useState({});
+  const draft = useRef({});
+  const [activeType, setActiveType] = useState('expense');
+  const [selectedKey, setSelectedKey] = useState(null);
+  const [editorRequest, setEditorRequest] = useState(null);
+  const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({});
 
@@ -610,8 +621,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           : Number(row.suggestedAmount || 0);
     });
 
-    setValues(initial);
-  }, [allocationByRowKey, allRows]);
+    setValues(unified ? { ...initial, ...draft.current } : initial);
+  }, [allocationByRowKey, allRows, unified]);
 
   const sumType = (type) => {
     return rowsByType[type]
@@ -650,6 +661,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   };
 
   const setValue = (rowKey, amount) => {
+    if (unified) { draft.current[rowKey] = Number(amount || 0); setDirty(true); }
     setValues((current) => ({
       ...current,
       [rowKey]: Number(amount || 0),
@@ -668,6 +680,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
       }
     });
 
+    if (unified) { allRows.filter(row => !isProtectedPlanRow(row) && !row.isGenerated).forEach(row => { draft.current[row.key] = nextValues[row.key]; }); setDirty(true); }
     setValues(nextValues);
     toast.success('Copied from previous month');
   };
@@ -703,6 +716,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
           })
       );
 
+      if (unified) { draft.current = {}; setDirty(false); }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['allocations'] }),
         queryClient.invalidateQueries({ queryKey: ['all-allocations'] }),
@@ -717,6 +731,51 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
     }
   };
 
+  const trackedFor = row => row.isSectionHeader ? row.children.reduce((sum, child) => sum + trackedFor(child), 0) : row.sourceType === 'category' ? getTrackedForCategory({transactions, categoryId:row.categoryId}) : getTrackedForSource({transactions,goalContributions,sourceType:row.sourceType,sourceId:row.sourceId,categoryId:row.categoryId,currentMonth,recurringRule:recurringTransactions.find(rule=>rule.id===row.sourceId)});
+  const editable = row => row && !row.isSectionHeader && !isProtectedPlanRow(row) && !row.isGenerated;
+  const selected = rowsByType[activeType].find(row=>row.key===selectedKey);
+  const plannedFor = row => row.isSectionHeader ? row.children.reduce((sum,child)=>sum+Number(values[child.key]||0),0) : Number(values[row.key]||0);
+  const visibleRows = rowsByType[activeType].filter(row=>!row.isSectionHeader);
+  const draftAllocations = allocations.map(a=>editable(allRows.find(row=>row.key===getAllocationRowKey(a))) ? {...a,planned_amount:Number(values[getAllocationRowKey(a)]||0)} : a);
+  allRows.filter(row=>editable(row)&&!allocationByRowKey[row.key]).forEach(row=>draftAllocations.push({category_id:row.categoryId,source_type:'category',source_id:row.id,budget_type:row.type,planned_amount:Number(values[row.key]||0)}));
+  const unifiedTotals = unified ? buildPlanTotals({allocations:draftAllocations,categories,savingsGoals,recurringTransactions,allTransactions,transactions,currentMonth}) : null;
+  const requestEditor = (kind,row=null) => setEditorRequest({kind,type:activeType,row,nonce:Date.now()});
+  const changeUnifiedMonth = month => { if (!dirty || window.confirm('Discard unsaved allocation changes?')) onMonthChange?.(month); };
+  if (unified) {
+    const summaryPlanned = selected ? plannedFor(selected) : sumType(activeType);
+    const summaryTracked = selected ? trackedFor(selected) : visibleRows.reduce((sum,row)=>sum+trackedFor(row),0);
+    const canWrite = navigator.onLine && !saving && !isPlanLoading;
+    return <div className="space-y-4">
+      <div className="sticky top-0 z-20 flex flex-wrap items-center gap-4 bg-background py-3">
+        <MonthSelector currentMonth={currentMonth} onChange={changeUnifiedMonth} bare className="min-w-0 flex-1"/>
+        <div className="mr-auto"><p className="text-sm text-muted-foreground">Left to allocate</p><p className={cn("text-2xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
+        <Button variant="outline" disabled={!canWrite} onClick={copyFromPreviousMonth}><Copy className="mr-2 size-4"/>Copy previous month</Button>
+        <Button disabled={!canWrite||!dirty} onClick={handleSave}><Save className="mr-2 size-4"/>{saving?'Saving…':'Save plan'}</Button>
+      </div>
+      <nav aria-label="Budget types" className="flex items-center gap-5 border-b border-border">
+        {Object.entries(sectionConfig).map(([type,config])=><button key={type} type="button" aria-pressed={activeType===type} onClick={()=>{setActiveType(type);setSelectedKey(null);}} className={cn("border-b-2 px-2 py-3 text-sm font-medium",activeType===type?"border-primary text-primary":"border-transparent text-muted-foreground")}>{config.title}</button>)}
+        <Button size="sm" variant="ghost" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/></Button>
+      </nav>
+      {isPlanLoading ? <Skeleton className="h-80 w-full"/> : <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(260px,30%)]">
+        <div className="max-h-[65vh] overflow-auto">
+          <table className="w-full min-w-[480px] table-fixed text-sm"><colgroup><col style={{width:'40%'}}/><col style={{width:'20%'}}/><col style={{width:'20%'}}/><col style={{width:'20%'}}/></colgroup>
+          <thead className="sticky top-0 z-10 bg-card text-muted-foreground"><tr>{['Category','Planned','Tracked','Remaining'].map((label,i)=><th key={label} className={cn("px-3 py-3 font-medium",i?'text-right':'text-left')}>{label}</th>)}</tr></thead>
+          <tbody>{rowsByType[activeType].map(row=>{const planned=plannedFor(row),tracked=trackedFor(row);return <tr key={row.key} className={cn("border-b border-border/60 hover:bg-muted/30",selectedKey===row.key&&"bg-primary/10",row.isSectionHeader&&"bg-muted/30 font-semibold")} onClick={()=>setSelectedKey(row.key)}>
+            <th scope="row" className="px-3 py-2 text-left font-medium"><button type="button" onClick={()=>setSelectedKey(row.key)} className={cn("flex w-full items-center gap-2 text-left",row.isSubcategory&&"pl-4")}><CategoryIcon icon={row.icon} color={row.color} size="sm"/><span className="min-w-0 break-words">{row.name}</span></button></th>
+            <td className="px-2 py-2 text-right">{editable(row)?<Input aria-label={row.name+' allocation'} type="number" min="0" step="0.01" disabled={!canWrite} value={values[row.key]??0} onFocus={()=>setSelectedKey(row.key)} onChange={e=>setValue(row.key,Math.max(0,Number(e.target.value)||0))} className="h-8 rounded-sm border-transparent bg-transparent px-1 text-right tabular-nums hover:border-border focus:border-primary"/>:<span className="inline-flex items-center gap-1">{!row.isSectionHeader&&<LockKeyhole className="size-3"/>}{formatCurrency(planned)}</span>}</td>
+            <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(tracked)}</td><td className={cn("px-2 py-2 text-right tabular-nums",planned<tracked&&activeType==='expense'?"text-destructive":"")}>{formatCurrency(planned-tracked)}</td>
+          </tr>})}</tbody>
+          <tfoot className="sticky bottom-0 bg-card font-semibold"><tr><th className="px-3 py-3 text-left">Total</th><td className="px-2 text-right">{formatCurrency(sumType(activeType))}</td><td className="px-2 text-right">{formatCurrency(visibleRows.reduce((sum,row)=>sum+trackedFor(row),0))}</td><td className="px-2 text-right">{formatCurrency(sumType(activeType)-visibleRows.reduce((sum,row)=>sum+trackedFor(row),0))}</td></tr></tfoot></table>
+        </div>
+        <aside className="max-h-[65vh] space-y-5 overflow-y-auto border-l border-border px-5 py-3">
+          <div className="flex items-center gap-2"><h2 className="flex-1 text-lg font-semibold">{selected?.name||'Monthly summary'}</h2>{selected&&<><Button variant="ghost" size="icon" disabled={!canWrite} aria-label="Edit selected item" onClick={()=>requestEditor(selected.sourceType==='goal'?'goal':selected.sourceType==='recurring'?'recurring':'category',selected)}><Pencil className="size-4"/></Button><Button variant="ghost" size="icon" aria-label="Clear selection" onClick={()=>setSelectedKey(null)}><X className="size-4"/></Button></>}</div>
+          <section className="space-y-3"><h3 className="font-semibold">Budget balance</h3>{[['Planned',summaryPlanned],['Tracked',summaryTracked],['Remaining',summaryPlanned-summaryTracked],...(!selected?[['Budget funding',unifiedTotals.budgetFunding],['Left to allocate',unifiedTotals.leftToAllocate]]:[])].map(([label,value])=><div key={label} className="flex justify-between gap-2 text-sm"><span className="text-muted-foreground">{label}</span><span className="tabular-nums">{formatCurrency(value)}</span></div>)}</section>
+          {selected&&<section className="space-y-3 border-t border-border pt-4"><h3 className="font-semibold">{editable(selected)?'Quick allocation':'Details'}</h3>{editable(selected)?[['Planned last month',getHint(selected)],['Cover tracked amount',summaryTracked],['Reset allocation',0]].map(([label,value])=><button key={label} disabled={!canWrite} className="flex w-full justify-between gap-2 py-1 text-left text-sm text-primary" onClick={()=>setValue(selected.key,value)}><span>{label}</span><span>{formatCurrency(value)}</span></button>):<p className="text-sm text-muted-foreground">{selected.description||'Select an individual category to edit its allocation.'}</p>}{selected.isSectionHeader&&<Button variant="outline" disabled={!canWrite} onClick={()=>requestEditor('subcategory',selected)}>Add subcategory</Button>}</section>}
+        </aside>
+      </div>}
+      {editorRequest&&<div key={editorRequest.nonce} className="contents">{editorRequest.kind==='goal'?<ManageGoalsPanel embedded request={editorRequest}/>:editorRequest.kind==='recurring'?<ManageRecurringPanel embedded request={editorRequest}/>:<ManageCategoriesPanel embedded request={editorRequest}/>}</div>}
+    </div>;
+  }
   const toggleSection = (type) => {
     setCollapsedSections((current) => ({
       ...current,

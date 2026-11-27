@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Archive, Plus } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ import {
 import { categoriesApi } from '@/lib/budgetData';
 import { useCategories } from '@/hooks/useBudgetData';
 
-export default function ManageCategoriesPanel() {
+export default function ManageCategoriesPanel({embedded=false,request=null}) {
   const queryClient = useQueryClient();
   const { data: categories = [] } = useCategories();
 
@@ -47,6 +47,7 @@ export default function ManageCategoriesPanel() {
     setEditorOpen(true);
   };
 
+  useEffect(()=>{if(!request)return;const category=categories.find(item=>item.id===request.row?.id);if(request.kind==='subcategory'&&category)openAddSub(category);else if(category){setEditingCategory(category);setDefaultType(category.type);setEditorOpen(true);}else if(!request.row)openNew(request.type);},[request]);
   const handleSave = async (data, existingId) => {
     try {
       if (existingId) {
@@ -95,6 +96,7 @@ export default function ManageCategoriesPanel() {
 
   return (
     <div className="space-y-3 lg:space-y-5">
+      <div className={embedded?"hidden":"contents"}>
       {archivedCategories.length > 0 && (
         <div className="flex justify-end">
           <Button type="button" variant="ghost" size="sm" onClick={() => setShowArchived((value) => !value)} className="gap-1.5 rounded-xl text-xs text-muted-foreground">
@@ -192,6 +194,7 @@ export default function ManageCategoriesPanel() {
         )}
       </div>
 
+      </div>
       <CategoryEditorModal
         open={editorOpen}
         onClose={() => {

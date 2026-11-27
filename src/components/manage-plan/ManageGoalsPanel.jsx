@@ -791,7 +791,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
   );
 }
 
-export default function ManageGoalsPanel() {
+export default function ManageGoalsPanel({embedded=false,request=null}) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
   const { session } = useAuth();
@@ -865,6 +865,8 @@ export default function ManageGoalsPanel() {
     setDialogOpen(true);
   };
 
+  const handledRequest = useRef(null);
+  useEffect(()=>{if(!request||handledRequest.current===request)return;if(!request.row){handledRequest.current=request;openNew();}else {const goal=normalizedGoals.find(item=>item.id===request.row.id);if(goal){handledRequest.current=request;setEditingGoal(goal);setDialogOpen(true);}}},[request,normalizedGoals]);
   const handleSave = async (payload) => {
     setGoalSaveError('');
     setSaving(true);
@@ -933,7 +935,7 @@ export default function ManageGoalsPanel() {
 
   return (
     <div className="space-y-3 lg:space-y-5">
-      <div className="space-y-3 lg:space-y-5">
+      <div className={embedded?"hidden":"space-y-3 lg:space-y-5"}>
         <GoalSection
           title="Active Goals"
           tone="active"

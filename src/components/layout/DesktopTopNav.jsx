@@ -8,7 +8,7 @@ const items = [
   ['/plan', 'Plan', CalendarCheck, ['/plan', '/edit-plan']],
   ['/transactions', 'Transactions', Receipt, ['/transactions', '/add-transaction']],
   ['/accounts', 'Accounts', WalletCards, ['/accounts', '/add-account']],
-  ['/manage-plan', 'Manage Plan', SlidersHorizontal, ['/manage-plan', '/categories']],
+  ['/manage-plan', 'Workplace', SlidersHorizontal, ['/manage-plan', '/categories']],
   ['/settings', 'Settings', Settings, ['/settings']],
 ];
 

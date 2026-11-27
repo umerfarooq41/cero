@@ -307,6 +307,8 @@ function RecurringRuleModal({
     setForm((current) => ({ ...current, [key]: value }));
   };
 
+  const handledRequest = useRef(null);
+  useEffect(()=>{if(!request||handledRequest.current===request)return;if(!request.row){handledRequest.current=request;openNew(request.type==='debt'?'transfer':request.type);}else {const rule=recurringRules.find(item=>item.id===request.row.id);if(rule){handledRequest.current=request;openEdit(rule);}}},[request,recurringRules]);
   const handleSave = async () => {
     const totalAmount = Number(form.total_amount || 0);
     const durationCount = Math.max(0, Math.floor(Number(form.duration_count || 0)));
@@ -1031,7 +1033,7 @@ function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, on
   );
 }
 
-export default function ManageRecurringPanel() {
+export default function ManageRecurringPanel({embedded=false,request=null}) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
   const { data: recurringRules = [] } = useRecurringTransactions();
@@ -1212,7 +1214,7 @@ export default function ManageRecurringPanel() {
 
   return (
     <div className="space-y-3 lg:space-y-5">
-      <div className="space-y-3 lg:space-y-5">
+      <div className={embedded?"hidden":"space-y-3 lg:space-y-5"}>
         <RecurringSection
           type="income"
           label="Income"
