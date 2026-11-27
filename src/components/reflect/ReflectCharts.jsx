@@ -514,13 +514,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 >
                   {isVisible ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      {desktop ? <BarChart data={safeSpendingTrend} margin={{top:8,right:12,bottom:0,left:8}} barCategoryGap="25%" maxBarSize={28} onMouseMove={state => { if (state?.activePayload?.[0]?.payload?.label != null) setSelectedDay(state.activePayload[0].payload.label); }}>
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.55}/>
-                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize:12,fill:'hsl(var(--muted-foreground))'}}/>
-                        <YAxis width={60} axisLine={false} tickLine={false} tick={{fontSize:12,fill:'hsl(var(--muted-foreground))'}}/>
-                        <Tooltip contentStyle={tooltipStyle} formatter={value => [<TooltipCurrencyValue value={value} currency={currency}/>, 'Spent']}/>
-                        <Bar dataKey="amount" name="Spent" fill="hsl(var(--primary))" radius={[3,3,0,0]} {...getChartAnimation(isVisible)}/>
-                      </BarChart> : <AreaChart
+                      <AreaChart
                         data={safeSpendingTrend}
                         onMouseMove={state => { if (state?.activePayload?.[0]?.payload?.label) setSelectedDay(state.activePayload[0].payload.label); }}
                         onTouchMove={state => { if (state?.activePayload?.[0]?.payload?.label) setSelectedDay(state.activePayload[0].payload.label); }}
@@ -587,7 +581,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           }}
                           {...getChartAnimation(isVisible)}
                         />
-                      </AreaChart>}
+                      </AreaChart>
                     </ResponsiveContainer>
                   ) : (
                     <ChartShell className="h-full" />
