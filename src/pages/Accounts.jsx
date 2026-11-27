@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   TrendingUp,
@@ -12,11 +12,15 @@ import {
   Plus,
   Settings,
   WifiOff,
+  MoreHorizontal, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import NetWorthDelta from '@/components/shared/NetWorthDelta';
-import { useAccounts, useCurrencyFormatter } from '@/hooks/useBudgetData';
+import { useAccounts, useCurrencyFormatter, useTransactions, useAllTransactions, useCategories } from '@/hooks/useBudgetData';
+import { format, addMonths } from 'date-fns';
+import { getTransactionDeltas } from '@/lib/transactionEffects';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 
@@ -100,7 +104,7 @@ export default function Accounts() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const header = <PageHeader title="Financial overview" action={<div className="flex items-center gap-1">
+  const header = <PageHeader title={<><span className="lg:hidden">Financial overview</span><span className="hidden lg:inline">Accounts</span></>} action={<div className="flex items-center gap-1">
     <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
     {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
     <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
@@ -113,6 +117,15 @@ export default function Accounts() {
     refetch: refetchAccounts,
   } = useAccounts();
 
+  const [desktop,setDesktop] = useState(()=>window.matchMedia('(min-width: 1024px)').matches);
+  useEffect(()=>{const mq=window.matchMedia('(min-width: 1024px)');const sync=()=>setDesktop(mq.matches);mq.addEventListener('change',sync);return ()=>mq.removeEventListener('change',sync);},[]);
+  const [tab,setTab]=useState('asset');
+  const [selectedId,setSelectedId]=useState(null);
+  const [month,setMonth]=useState(()=>format(new Date(),'yyyy-MM'));
+  const {data: allAccounts=[]}=useAccounts(true);
+  const {data: monthly=[],isPending: monthlyPending,isError: monthlyError}=useTransactions(month);
+  const {data: history=[],isPending: historyPending,isError: historyError}=useAllTransactions();
+  const {data: categories=[]}=useCategories();
   const [collapsedGroups, setCollapsedGroups] = useState({
     assets: false,
     liabilities: false,
@@ -177,6 +190,19 @@ export default function Accounts() {
 
   const netWorth = totalAssets - totalLiabilities;
 
+  const rows=tab==='archived'?allAccounts.filter(a=>a.is_archived):tab==='asset'?assets:liabilities;
+  const selected=rows.find(a=>a.id===selectedId);
+  const activity=new Map();
+  if(desktop) for(const tx of monthly){
+    const deltas=getTransactionDeltas(tx,allAccounts.length?allAccounts:accounts);
+    for(const [id,delta] of Object.entries(deltas)){
+      const value=activity.get(id)||{inflow:0,outflow:0};
+      if(delta>0)value.inflow+=delta;else value.outflow-=delta;
+      activity.set(id,value);
+    }
+  }
+  const money=value=><>{value<0?'−':''}{formatCurrency(Math.abs(value))}</>;
+  const recent=selected?history.filter(t=>t.account_id===selected.id||t.to_account_id===selected.id).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5):[];
   const toggleGroup = (key) => {
     setCollapsedGroups((current) => ({
       ...current,
@@ -335,7 +361,23 @@ export default function Accounts() {
         </div>
 
         <div className="hidden grid-cols-3 gap-6 border-b border-border py-4 lg:grid">{[["Available",cashAvailable],["Savings",savingsTotal],["Debt",totalLiabilities]].map(([label,value]) => <div key={label}><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-xl font-medium tabular-nums">{value < 0 ? "−" : ""}{formatCurrency(Math.abs(value))}</p></div>)}</div>
-        <div className="animate-child space-y-3 lg:mt-5">
+        <div className="hidden lg:block">
+          <nav aria-label="Account groups" className="cero-workplace-tabs flex items-center gap-5 border-b border-border">
+            {[['asset','Assets'],['liability','Liabilities'],['archived','Archived']].map(([key,label])=><button key={key} type="button" aria-pressed={tab===key} onClick={()=>{setTab(key);setSelectedId(null)}} className={cn('px-2 py-3 text-sm font-medium',tab===key?'text-primary':'text-muted-foreground')}>{label}</button>)}
+            <div className="ml-auto flex items-center gap-2 text-sm"><button aria-label="Previous activity month" onClick={()=>setMonth(m=>format(addMonths(new Date(m+'-01T12:00:00'),-1),'yyyy-MM'))}><ChevronLeft size={16}/></button>{format(new Date(month+'-01T12:00:00'),'MMM yyyy')}<button aria-label="Next activity month" onClick={()=>setMonth(m=>format(addMonths(new Date(m+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight size={16}/></button></div>
+          </nav>
+          <div className="grid grid-cols-[minmax(0,65fr)_minmax(0,35fr)] pt-3">
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-muted/30 text-muted-foreground"><tr>{(tab==='asset'?['Account','Type','Inflow','Outflow','Balance','Share']:tab==='liability'?['Account','Type','Borrowed','Repaid','Outstanding']:['Account','Type','Balance']).map((label,i)=><th key={label} className={cn('px-2 py-2 font-medium',i<2?'text-left':'text-right')}>{label}</th>)}</tr></thead><tbody>
+            {rows.map(account=>{const Icon=typeIcons[account.type]||Wallet;const v=activity.get(account.id)||{inflow:0,outflow:0};const balance=Number(account.balance)||0;const share=totalAssets>0?balance/totalAssets*100:0;return <tr key={account.id} onClick={()=>setSelectedId(account.id)} className={cn('cursor-pointer border-b border-border/60 hover:bg-muted/30',selectedId===account.id&&'bg-primary/10')}><td className="px-2 py-3"><button onClick={()=>setSelectedId(account.id)} className="flex items-center gap-2 text-left"><Icon size={16} style={{color:account.color||undefined}}/>{account.name}</button></td><td className="px-2 py-3 capitalize text-muted-foreground">{account.type?.replaceAll('_',' ')}</td>{tab!=='archived'&&<><td className="px-2 py-3 text-right whitespace-nowrap text-emerald-500">{monthlyPending||monthlyError?'—':money(v.inflow)}</td><td className="px-2 py-3 text-right whitespace-nowrap text-destructive">{monthlyPending||monthlyError?'—':money(v.outflow)}</td></>}<td className="px-2 py-3 text-right whitespace-nowrap font-medium">{money(tab==='liability'?Math.abs(balance):balance)}</td>{tab==='asset'&&<td className="px-2 py-3 text-right"><span>{share.toFixed(1)}%</span><div className="ml-auto mt-1 h-1 w-10 rounded bg-muted"><div className="h-full rounded bg-primary" style={{width:Math.max(0,Math.min(100,share))+'%'}}/></div></td>}</tr>})}
+            </tbody></table>{!rows.length&&<p className="p-6 text-center text-sm text-muted-foreground">No accounts in this section.</p>}{monthlyError&&<p className="p-2 text-sm text-destructive">Monthly activity could not be loaded.</p>}</div>
+            <aside className="min-w-0 border-l border-border px-5 py-3 space-y-4">
+            {selected?<><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">{selected.name}</h2>{!selected.is_archived&&<DropdownMenu><DropdownMenuTrigger asChild><button aria-label="Account actions"><MoreHorizontal size={20}/></button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={()=>navigate('/accounts/'+selected.id+'/edit')}>Edit account</DropdownMenuItem><DropdownMenuItem className="text-destructive" onSelect={()=>navigate('/accounts/'+selected.id+'?action=delete')}>Delete account</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}</div><div><p className="text-sm text-muted-foreground">Current balance</p><p className="text-2xl font-semibold">{money(Number(selected.balance)||0)}</p></div>
+            <div className="space-y-2 border-t border-border pt-3"><h3 className="font-semibold">Monthly activity</h3>{(selected.category==='liability'?[['Borrowed',activity.get(selected.id)?.inflow||0],['Repaid',activity.get(selected.id)?.outflow||0]]:[['Inflow',activity.get(selected.id)?.inflow||0],['Outflow',activity.get(selected.id)?.outflow||0],['Net movement',(activity.get(selected.id)?.inflow||0)-(activity.get(selected.id)?.outflow||0)]]).map(([label,value])=><div key={label} className="flex justify-between gap-2 text-sm"><span className="text-muted-foreground">{label}</span><span>{monthlyPending||monthlyError?'—':money(value)}</span></div>)}</div>
+            <div className="space-y-3 border-t border-border pt-3"><h3 className="font-semibold">Recent transactions</h3>{historyPending||historyError?<p className="text-sm text-muted-foreground">{historyError?'Unable to load transactions':'Loading…'}</p>:recent.length?recent.map(tx=>{const delta=getTransactionDeltas(tx,allAccounts.length?allAccounts:accounts)[selected.id]||0;return <div key={tx.id} className="flex items-center justify-between gap-2 text-sm"><div className="min-w-0"><p className="truncate">{categories.find(c=>c.id===tx.category_id)?.name||tx.category_name_snapshot||tx.type}</p><p className="text-xs text-muted-foreground">{tx.date}</p></div><span className={cn('whitespace-nowrap',delta<0?'text-destructive':'text-emerald-500')}>{money(delta)}</span></div>}):<p className="text-sm text-muted-foreground">No transactions yet.</p>}{!selected.is_archived&&<Link className="text-sm text-primary" to={'/accounts/'+selected.id}>View full history →</Link>}</div></>:<><h2 className="text-lg font-semibold">Account summary</h2><p className="text-sm text-muted-foreground">Select an account to see its balance and recent transactions.</p></>}
+            </aside>
+          </div>
+        </div>
+        <div className="animate-child space-y-3 lg:hidden">
           {renderGroup('Assets', assets, false)}
           {renderGroup('Liabilities', liabilities, true)}
         </div>

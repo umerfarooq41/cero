@@ -37,14 +37,14 @@ export function useCategories() {
   });
 }
 
-export function useAccounts() {
+export function useAccounts(includeArchived = false) {
   const { session } = useAuth();
 
   return useQuery({
-    queryKey: ['accounts', session?.user?.id],
+    queryKey: includeArchived ? ['accounts', session?.user?.id, 'all'] : ['accounts', session?.user?.id],
     queryFn: async () => {
       const accounts = await accountsApi.list();
-      return accounts.filter(a => !a.is_archived);
+      return includeArchived ? accounts : accounts.filter(a => !a.is_archived);
     },
     enabled: Boolean(session?.user?.id),
   });

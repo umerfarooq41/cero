@@ -179,7 +179,7 @@ export default function AccountDetail() {
   const recurringById = new Map(recurringTransactions.map((rule) => [rule.id, rule]));
   const goalsById = new Map(savingsGoals.map((goal) => [goal.id, goal]));
 
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(()=>new URLSearchParams(window.location.search).get('action')==='delete');
   const [replacementAccountId, setReplacementAccountId] = useState('');
   const [deleting, setDeleting] = useState(false);
 

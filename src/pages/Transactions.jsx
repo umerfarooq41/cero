@@ -53,11 +53,11 @@ export default function Transactions() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        title={activeTab === 'history' || desktop ? <span className="flex items-center cero-month-heading gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
+        title={activeTab === 'history' ? <span className="flex items-center cero-month-heading gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
           <button type="button" aria-label="Previous month" disabled={activeTab === "scheduled"} className="grid size-8 place-items-center rounded-full bg-transparent disabled:opacity-35 disabled:cursor-default [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(-1)}><ChevronLeft className="size-4"/></button>
           <span className="whitespace-nowrap">{format(activeTab === "scheduled" ? new Date() : new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
           <button type="button" aria-label="Next month" disabled={activeTab === "scheduled"} className="grid size-8 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(1)}><ChevronRight className="size-4"/></button>
-        </span> : <span className="text-base font-semibold">Scheduled</span>}
+        </span> : <span className="text-base font-semibold lg:text-[22px]">{desktop ? "Transactions" : "Scheduled"}</span>}
         action={<div className="flex items-center gap-1">
           {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
           <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]"/></button>
