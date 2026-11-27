@@ -29,7 +29,7 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
   const [defaultType, setDefaultType] = useState('expense');
   const [actionTarget, setActionTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [showArchived, setShowArchived] = useState(false);
+  const [showArchived, setShowArchived] = useState(request?.kind==='archived');
 
   const openNew = (type) => {
     setEditingCategory(null);
@@ -47,7 +47,7 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
     setEditorOpen(true);
   };
 
-  useEffect(()=>{if(!request)return;const category=categories.find(item=>item.id===request.row?.id);if(request.kind==='subcategory'&&category)openAddSub(category);else if(category){setEditingCategory(category);setDefaultType(category.type);setEditorOpen(true);}else if(!request.row)openNew(request.type);},[request]);
+  useEffect(()=>{if(!request||request.kind==='archived')return;const category=categories.find(item=>item.id===request.row?.id);if(request.kind==='subcategory'&&category)openAddSub(category);else if(category){setEditingCategory(category);setDefaultType(category.type);setEditorOpen(true);}else if(!request.row)openNew(request.type);},[request]);
   const handleSave = async (data, existingId) => {
     try {
       if (existingId) {
@@ -96,7 +96,7 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
 
   return (
     <div className="space-y-3 lg:space-y-5">
-      <div className={embedded?"hidden":"contents"}>
+      <div className={embedded&&request?.kind!=='archived'?"hidden":"contents"}>
       {archivedCategories.length > 0 && (
         <div className="flex justify-end">
           <Button type="button" variant="ghost" size="sm" onClick={() => setShowArchived((value) => !value)} className="gap-1.5 rounded-xl text-xs text-muted-foreground">
@@ -107,6 +107,7 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
       )}
 
       <div className="space-y-3 lg:space-y-5">
+        <div className={request?.kind==='archived'?"hidden":"contents"}>
         <CategorySection
           type="income"
           label="Income"
@@ -147,6 +148,7 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
           onAddNew={openNew}
         />
 
+        </div>
         {showArchived && archivedCategories.length > 0 && (
           <div className="overflow-hidden rounded-2xl app-card-surface opacity-75 lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
             <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
@@ -202,6 +204,8 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
           setEditingCategory(null);
         }}
         onSave={handleSave}
+        onDelete={embedded ? category=>{setEditorOpen(false);setDeleteTarget(category);} : undefined}
+        onArchive={embedded ? category=>{setEditorOpen(false);handleArchive(category);} : undefined}
         parentCategories={activeCategories}
         initialType={editingCategory?._preseed ? editingCategory.type : defaultType}
         editingCategory={
@@ -227,7 +231,6 @@ export default function ManageCategoriesPanel({embedded=false,request=null}) {
         }}
         onAddSub={openAddSub}
         onArchive={handleArchive}
-        onAddSub={openAddSub}
         onDelete={(category) => setDeleteTarget(category)}
       />
 

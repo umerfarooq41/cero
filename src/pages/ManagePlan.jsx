@@ -30,11 +30,11 @@ export default function ManagePlan() {
 
   const [desktop,setDesktop] = useState(()=>window.matchMedia('(min-width: 1024px)').matches);
   useEffect(()=>{const mq=window.matchMedia('(min-width: 1024px)');const update=()=>setDesktop(mq.matches);mq.addEventListener('change',update);return()=>mq.removeEventListener('change',update);},[]);
-  const [activeTab, setActiveTab] = useState(() => desktop && (!tabFromUrl || tabFromUrl==='monthly-plan') ? 'recurring' : getValidTab(tabFromUrl));
+  const [activeTab, setActiveTab] = useState(() => desktop && (!tabFromUrl || ['monthly-plan','categories'].includes(tabFromUrl)) ? 'recurring' : getValidTab(tabFromUrl));
   const [currentMonth, setCurrentMonth] = useState(monthFromUrl || DEFAULT_MONTH);
 
   useEffect(() => {
-    setActiveTab(desktop && (!tabFromUrl || tabFromUrl==='monthly-plan') ? 'recurring' : getValidTab(tabFromUrl));
+    setActiveTab(desktop && (!tabFromUrl || ['monthly-plan','categories'].includes(tabFromUrl)) ? 'recurring' : getValidTab(tabFromUrl));
   }, [tabFromUrl,desktop]);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function ManagePlan() {
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>
 
-        <nav aria-label="Manage plan sections" className="mb-5 hidden gap-6 border-b border-border lg:flex">{managePlanTabs.filter(tab=>tab.value!=='monthly-plan').map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => changeTab(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{tab.desktopLabel || tab.label}</button>)}</nav>
+        <nav aria-label="Manage plan sections" className="mb-5 hidden gap-6 border-b border-border lg:flex">{managePlanTabs.filter(tab=>!['monthly-plan','categories'].includes(tab.value)).map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => changeTab(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{tab.desktopLabel || tab.label}</button>)}</nav>
         <AnimatePresence mode="wait" initial={false}>
           <AppTabPanel key={activeTab} className="animate-child">
             {renderPanel()}

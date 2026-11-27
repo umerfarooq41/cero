@@ -756,7 +756,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
       </div>
       <nav aria-label="Budget types" className="flex items-center gap-5 border-b border-border">
         {Object.entries(sectionConfig).map(([type,config])=><button key={type} type="button" aria-pressed={activeType===type} onClick={()=>{setActiveType(type);setSelectedKey(null);}} className={cn("border-b-2 px-2 py-3 text-sm font-medium",activeType===type?"border-primary text-primary":"border-transparent text-muted-foreground")}>{config.title}</button>)}
-        <Button size="sm" variant="ghost" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/></Button>
+        <Button size="sm" variant="ghost" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/></Button><Button variant="ghost" size="sm" className="ml-auto" onClick={()=>requestEditor('archived')}>Archived categories</Button>
       </nav>
       {isPlanLoading ? <Skeleton className="h-80 w-full"/> : <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(260px,30%)]">
         <div className="max-h-[65vh] overflow-auto">
@@ -775,7 +775,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
           {selected&&<section className="space-y-3 border-t border-border pt-4"><h3 className="font-semibold">{editable(selected)?'Quick allocation':'Details'}</h3>{editable(selected)?[['Planned last month',getHint(selected)],['Cover tracked amount',summaryTracked],['Reset allocation',0]].map(([label,value])=><button key={label} disabled={!canWrite} className="flex w-full justify-between gap-2 py-1 text-left text-sm text-primary" onClick={()=>setValue(selected.key,value)}><span>{label}</span><span>{formatCurrency(value)}</span></button>):<p className="text-sm text-muted-foreground">{selected.description||'Select an individual category to edit its allocation.'}</p>}{selected.isSectionHeader&&<Button variant="outline" disabled={!canWrite} onClick={()=>requestEditor('subcategory',selected)}>Add subcategory</Button>}</section>}
         </aside>
       </div>}
-      {editorRequest&&<div key={editorRequest.nonce} className="contents">{editorRequest.kind==='goal'?<ManageGoalsPanel embedded request={editorRequest}/>:editorRequest.kind==='recurring'?<ManageRecurringPanel embedded request={editorRequest}/>:<ManageCategoriesPanel embedded request={editorRequest}/>}</div>}
+      {editorRequest?.kind==='archived'&&<div className="flex justify-end"><Button variant="ghost" onClick={()=>setEditorRequest(null)}>Close archived categories</Button></div>}{editorRequest&&<div key={editorRequest.nonce} className="contents">{editorRequest.kind==='goal'?<ManageGoalsPanel embedded request={editorRequest}/>:editorRequest.kind==='recurring'?<ManageRecurringPanel embedded request={editorRequest}/>:<ManageCategoriesPanel embedded request={editorRequest}/>}</div>}
     </div>;
   }
   const toggleSection = (type) => {

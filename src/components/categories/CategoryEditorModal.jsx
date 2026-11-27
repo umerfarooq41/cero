@@ -75,6 +75,8 @@ export default function CategoryEditorModal({
   open,
   onClose,
   onSave,
+  onDelete,
+  onArchive,
   parentCategories = [],
   initialType = 'expense',
   editingCategory = null,
@@ -289,6 +291,8 @@ export default function CategoryEditorModal({
 
         </div>
         <DialogFooter className="app-dialog-actions">
+          {editingCategory?.id && onDelete && <Button type="button" variant="ghost" className="text-destructive mr-auto" disabled={saving} onClick={()=>onDelete(editingCategory)}>Delete category</Button>}
+          {editingCategory?.id && onArchive && <Button type="button" variant="outline" disabled={saving} onClick={()=>onArchive(editingCategory)}>Archive</Button>}
           <Button onClick={handleSave} disabled={saving || !name.trim()}>
             {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create category'}
           </Button>
