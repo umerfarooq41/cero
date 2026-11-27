@@ -85,7 +85,7 @@ export default function ManagePlan() {
         title="Your Workplace"
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 lg:py-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 lg:px-8 lg:py-3 lg:pb-8">
         <div className="animate-child mb-3 lg:hidden">
           <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
         </div>

@@ -247,7 +247,7 @@ export default function Accounts() {
 
         {!isCollapsed && (
           <div className="divide-y divide-border/40">
-            <div className="hidden grid-cols-[minmax(0,1fr)_12rem_10rem] gap-3 bg-muted/30 px-3 py-2 text-xs text-muted-foreground lg:grid"><span>Account</span><span>Type</span><span className="text-right">Balance</span></div>
+            <div className="hidden grid-cols-[2.25rem_minmax(0,1.3fr)_minmax(0,1fr)_minmax(8rem,0.8fr)] gap-3 bg-muted/30 px-3 py-2 text-xs text-muted-foreground lg:grid"><span className="col-span-2">Account</span><span>Type</span><span className="text-right">Balance</span></div>
             {accs.map((account) => {
               const Icon = typeIcons[account.type] || Wallet;
               const balance = Math.abs(Number(account.balance) || 0);
@@ -258,7 +258,7 @@ export default function Accounts() {
                 <Link
                   key={account.id}
                   to={`/accounts/${account.id}`}
-                  className="flex min-h-[3.75rem] items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/20 lg:grid lg:min-h-12 lg:grid-cols-[2.25rem_minmax(0,1fr)_12rem_10rem] lg:gap-3"
+                  className="flex min-h-[3.75rem] items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/20 lg:grid lg:min-h-12 lg:grid-cols-[2.25rem_minmax(0,1.3fr)_minmax(0,1fr)_minmax(8rem,0.8fr)] lg:gap-3"
                 >
                   <div
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
@@ -288,7 +288,7 @@ export default function Accounts() {
                   <div className="flex min-w-0 shrink-0 items-center justify-end text-right">
                     <div
                       className={cn(
-                        'text-sm font-semibold tabular-nums',
+                        'text-sm font-semibold tabular-nums lg:font-medium',
                         isLiability ? 'text-destructive' : 'text-foreground'
                       )}
                     >
@@ -324,7 +324,8 @@ export default function Accounts() {
           <div><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
           <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"><Plus size={16}/>Add account</button>
         </div>
-        <div className="animate-child mb-3">
+        <div className="hidden py-3 lg:block"><div className="flex h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label="Assets and liabilities proportion">{totalAssets + totalLiabilities > 0 && <><div className="bg-emerald-500" style={{width: `${Math.max(0, Math.min(100,totalAssets/(totalAssets+totalLiabilities)*100))}%`}}/><div className="flex-1 bg-destructive"/></>}</div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets</span><span>Liabilities</span></div></div>
+        <div className="animate-child mb-3 lg:hidden">
           <AccountSummaryCard
             cashAvailable={cashAvailable}
             savingsTotal={savingsTotal}
@@ -333,7 +334,8 @@ export default function Accounts() {
           />
         </div>
 
-        <div className="animate-child space-y-3">
+        <div className="hidden grid-cols-3 gap-6 border-b border-border py-4 lg:grid">{[["Available",cashAvailable],["Savings",savingsTotal],["Debt",totalLiabilities]].map(([label,value]) => <div key={label}><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-xl font-medium tabular-nums">{value < 0 ? "−" : ""}{formatCurrency(Math.abs(value))}</p></div>)}</div>
+        <div className="animate-child space-y-3 lg:mt-5">
           {renderGroup('Assets', assets, false)}
           {renderGroup('Liabilities', liabilities, true)}
         </div>

@@ -278,8 +278,8 @@ function PlanAmountRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/30',
-        row.isSubcategory && 'pl-14'
+        'flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/30 lg:grid lg:grid-cols-[2rem_minmax(0,1fr)_minmax(7rem,0.5fr)_minmax(8rem,0.5fr)] lg:gap-3 lg:min-h-12',
+        row.isSubcategory && 'pl-14 lg:pl-3'
       )}
     >
       {!row.isSubcategory && (
@@ -322,7 +322,7 @@ function PlanAmountRow({
             )}
 
             {lastMonthHint > 0 && (
-              <span className="min-w-0 truncate tabular-nums">
+              <span className="min-w-0 truncate tabular-nums lg:hidden">
                 Last month: {formatCurrency(lastMonthHint)}
               </span>
             )}
@@ -330,7 +330,8 @@ function PlanAmountRow({
         )}
       </div>
 
-      <div className="w-[84px] shrink-0 lg:w-40">
+      <div className="hidden text-right text-sm text-muted-foreground tabular-nums lg:block">{lastMonthHint > 0 ? formatCurrency(lastMonthHint) : "—"}</div>
+      <div className="w-[84px] shrink-0 lg:w-full">
         {isProtectedPlanRow(row) ? (
           <button
             type="button"
@@ -353,7 +354,7 @@ function PlanAmountRow({
             value={value || ''}
             onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
             placeholder="0.00"
-            className="h-8 rounded-lg px-2 text-right text-sm tabular-nums"
+            aria-label={`${row.name} allocation`} className="h-8 rounded-lg px-2 text-right text-sm tabular-nums lg:h-9 lg:rounded-md"
           />
         )}
       </div>
@@ -779,6 +780,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
         {!isCollapsed && (
           <div className="divide-y divide-border/50">
+            <div className="hidden grid-cols-[2rem_minmax(0,1fr)_minmax(7rem,0.5fr)_minmax(8rem,0.5fr)] gap-3 bg-muted/30 px-3 py-2 text-xs text-muted-foreground lg:grid"><span className="col-span-2">Category</span><span className="text-right">Last month</span><span className="text-right">Allocation</span></div>
             {items.map((row) => {
               if (row.isSectionHeader) {
                 const sectionTotal = row.children.reduce(
@@ -825,7 +827,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex min-w-0 items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center justify-between gap-2 lg:sticky lg:top-0 lg:z-20 lg:bg-background lg:py-3">
         <MonthSelector
           currentMonth={currentMonth}
           onChange={onMonthChange || (() => {})}
@@ -836,13 +838,13 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
         <div className="flex shrink-0 items-center gap-1">
           <Button type="button" variant="ghost" size="icon" onClick={copyFromPreviousMonth}
             aria-label="Copy previous month's planned amounts" title="Copy previous month"
-            className="h-9 w-9 rounded-xl">
-            <Copy className="h-[18px] w-[18px]" />
+            className="h-9 w-9 rounded-xl lg:w-auto lg:gap-2 lg:rounded-md lg:border lg:border-border lg:px-3">
+            <Copy className="h-[18px] w-[18px]" /><span className="hidden lg:inline">Copy previous month</span>
           </Button>
           <Button type="button" variant="ghost" size="icon" onClick={handleSave}
             disabled={saving} aria-label={saving ? 'Saving plan' : 'Save plan'} title="Save plan"
-            className="h-9 w-9 rounded-xl">
-            <Save className="h-[18px] w-[18px]" />
+            className="h-9 w-9 rounded-xl lg:w-auto lg:gap-2 lg:rounded-md lg:bg-primary lg:px-4 lg:text-primary-foreground lg:hover:bg-primary/90">
+            <Save className="h-[18px] w-[18px]" /><span className="hidden lg:inline">{saving ? "Saving…" : "Save plan"}</span>
           </Button>
         </div>
       </div>
