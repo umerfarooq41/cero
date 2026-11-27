@@ -142,13 +142,13 @@ export default function Plan() {
         }
         action={
           <div className="flex items-center gap-1">
-            <button type="button" aria-label="Edit monthly plan" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
+            <button type="button" aria-label="Edit monthly plan" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
             {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
             <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
           </div>
         }
       />
-        <main className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:py-8">
+        <main className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3">
           <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-72 w-full rounded-2xl" />
         </main>
@@ -168,14 +168,14 @@ export default function Plan() {
         }
         action={
           <div className="flex items-center gap-1">
-            <button type="button" aria-label="Edit monthly plan" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
+            <button type="button" aria-label="Edit monthly plan" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
             {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
             <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
           </div>
         }
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:py-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3 lg:pb-8">
         <div className="animate-child space-y-3">
           <div className="lg:hidden"><LeftToAllocateBanner
             leftToAllocate={leftToAllocate}

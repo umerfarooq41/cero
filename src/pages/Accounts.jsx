@@ -101,7 +101,7 @@ export default function Accounts() {
   const location = useLocation();
   
   const header = <PageHeader title="Financial overview" action={<div className="flex items-center gap-1">
-    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
+    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
     {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
     <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
   </div>} />;
@@ -308,7 +308,7 @@ export default function Accounts() {
     <div ref={scope} className="min-h-screen bg-transparent">
       {header}
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 md:py-5">
+      <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 md:py-5 lg:px-8 lg:py-3 lg:pb-8">
         <div className="animate-child mb-3 lg:hidden">
           <NetWorthDelta
             netWorth={netWorth}
