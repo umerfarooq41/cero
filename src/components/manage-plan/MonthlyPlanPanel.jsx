@@ -330,7 +330,7 @@ function PlanAmountRow({
         )}
       </div>
 
-      <div className="w-[84px] shrink-0">
+      <div className="w-[84px] shrink-0 lg:w-40">
         {isProtectedPlanRow(row) ? (
           <button
             type="button"
@@ -744,7 +744,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange }) {
   }
 
   return (
-      <section className="overflow-hidden rounded-2xl app-card-surface">
+      <section className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
         <button
           type="button"
           onClick={() => toggleSection(type)}

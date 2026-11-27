@@ -68,7 +68,7 @@ function AccountSummaryCard({ cashAvailable, savingsTotal, debtTotal, formatCurr
   ];
 
   return (
-    <section className="grid grid-cols-3 divide-x divide-border/40 overflow-hidden rounded-2xl app-card-surface">
+    <section className="grid grid-cols-3 divide-x divide-border/40 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none lg:py-3">
       {items.map(({ label, value, Icon, tone, iconClass }) => (
         <div key={label} className="flex min-w-0 flex-col items-center justify-center px-1.5 py-2.5 text-center sm:px-3">
           <div className="mb-1.5 flex flex-col items-center gap-1">
@@ -196,7 +196,7 @@ export default function Accounts() {
     );
 
     return (
-      <section className="overflow-hidden rounded-2xl app-card-surface">
+      <section className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
         <button
           type="button"
           onClick={() => toggleGroup(groupKey)}
@@ -247,6 +247,7 @@ export default function Accounts() {
 
         {!isCollapsed && (
           <div className="divide-y divide-border/40">
+            <div className="hidden grid-cols-[minmax(0,1fr)_12rem_10rem] gap-3 bg-muted/30 px-3 py-2 text-xs text-muted-foreground lg:grid"><span>Account</span><span>Type</span><span className="text-right">Balance</span></div>
             {accs.map((account) => {
               const Icon = typeIcons[account.type] || Wallet;
               const balance = Math.abs(Number(account.balance) || 0);
@@ -257,7 +258,7 @@ export default function Accounts() {
                 <Link
                   key={account.id}
                   to={`/accounts/${account.id}`}
-                  className="flex min-h-[3.75rem] items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/20"
+                  className="flex min-h-[3.75rem] items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/20 lg:grid lg:min-h-12 lg:grid-cols-[2.25rem_minmax(0,1fr)_12rem_10rem] lg:gap-3"
                 >
                   <div
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
@@ -278,11 +279,12 @@ export default function Accounts() {
                       {account.name}
                     </div>
 
-                    <div className="mt-0.5 truncate text-[11px] capitalize leading-tight text-muted-foreground">
+                    <div className="mt-0.5 truncate text-[11px] capitalize leading-tight text-muted-foreground lg:hidden">
                       {typeLabel} · {isLiability ? 'Liability' : 'Asset'}
                     </div>
                   </div>
 
+                  <span className="hidden capitalize text-sm text-muted-foreground lg:block">{typeLabel}</span>
                   <div className="flex min-w-0 shrink-0 items-center justify-end text-right">
                     <div
                       className={cn(
@@ -290,7 +292,7 @@ export default function Accounts() {
                         isLiability ? 'text-destructive' : 'text-foreground'
                       )}
                     >
-                      <InlineMoney>{formatCurrency(balance)}</InlineMoney>
+                      <InlineMoney><span className="hidden lg:inline">{!isLiability && Number(account.balance) < 0 ? "−" : ""}</span>{formatCurrency(balance)}</InlineMoney>
                     </div>
                   </div>
                 </Link>
@@ -307,7 +309,7 @@ export default function Accounts() {
       {header}
 
       <main className="mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 md:py-5">
-        <div className="animate-child mb-3">
+        <div className="animate-child mb-3 lg:hidden">
           <NetWorthDelta
             netWorth={netWorth}
             totalAssets={totalAssets}
@@ -316,6 +318,12 @@ export default function Accounts() {
           />
         </div>
 
+        <div className="hidden items-center justify-between gap-4 border-y border-border py-5 lg:flex">
+          <div><p className="text-xs text-muted-foreground">Net worth</p><p className="mt-1 text-2xl font-semibold tabular-nums">{netWorth < 0 ? '−' : ''}{formatCurrency(Math.abs(netWorth))}</p></div>
+          <div><p className="text-xs text-muted-foreground">Total assets</p><p className="mt-1 text-lg font-semibold">{totalAssets < 0 ? '−' : ''}{formatCurrency(Math.abs(totalAssets))}</p></div>
+          <div><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
+          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"><Plus size={16}/>Add account</button>
+        </div>
         <div className="animate-child mb-3">
           <AccountSummaryCard
             cashAvailable={cashAvailable}

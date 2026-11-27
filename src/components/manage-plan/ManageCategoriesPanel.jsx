@@ -146,7 +146,7 @@ export default function ManageCategoriesPanel() {
         />
 
         {showArchived && archivedCategories.length > 0 && (
-          <div className="overflow-hidden rounded-2xl app-card-surface opacity-75">
+          <div className="overflow-hidden rounded-2xl app-card-surface opacity-75 lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
             <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
               <Archive className="h-3.5 w-3.5 text-muted-foreground" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -173,7 +173,7 @@ export default function ManageCategoriesPanel() {
                   <button
                     type="button"
                     onClick={() => handleArchive(category)}
-                    className="rounded px-2 py-1 text-xs font-medium text-primary opacity-0 transition-all hover:bg-primary/10 group-hover:opacity-100"
+                    className="rounded px-2 py-1 text-xs font-medium text-primary opacity-0 transition-all hover:bg-primary/10 group-hover:opacity-100 lg:opacity-100"
                   >
                     Restore
                   </button>
@@ -181,7 +181,7 @@ export default function ManageCategoriesPanel() {
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(category)}
-                    className="rounded px-2 py-1 text-xs font-medium text-destructive opacity-0 transition-all hover:bg-destructive/10 group-hover:opacity-100"
+                    className="rounded px-2 py-1 text-xs font-medium text-destructive opacity-0 transition-all hover:bg-destructive/10 group-hover:opacity-100 lg:opacity-100"
                   >
                     Delete
                   </button>

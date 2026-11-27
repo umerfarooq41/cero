@@ -881,7 +881,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
       : null;
 
   return (
-    <div className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+    <div className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40 lg:items-center lg:py-3">
       <div className="shrink-0 self-start">
         <CategoryIcon
           icon={rule.icon || category?.icon || fallbackIcon}
@@ -904,7 +904,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium tabular-nums text-foreground">
+      <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium lg:min-w-32 tabular-nums text-foreground">
         {formatCurrency(amount)}
       </div>
 
@@ -912,7 +912,7 @@ function RecurringRow({ rule, account, category, onAction, formatCurrency, paidA
         <button
           type="button"
           onClick={() => onAction(rule)}
-          className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+          className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 lg:opacity-100"
           aria-label={`Open actions for ${rule.name}`}
         >
           <MoreVertical className="h-4 w-4" />
@@ -927,7 +927,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
   const Icon = TYPE_ICONS[type] || ArrowUpRight;
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5">
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
@@ -977,7 +977,7 @@ function RecurringSection({ type, label, rules, accounts, categories, defaultExp
 function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, onAction }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen((value) => !value)} className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5 text-left">
         <span className="flex min-w-0 items-center gap-2.5">
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', !isOpen && '-rotate-90')} />
@@ -993,7 +993,7 @@ function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, on
                 const liability = accounts.find((account) => account.id === rule.to_account_id);
                 const category = categories.find((item) => item.id === rule.category_id);
                 return (
-                  <div key={rule.id} className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+                  <div key={rule.id} className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40 lg:items-center lg:py-3">
                     <div className="shrink-0 self-start">
                       <CategoryIcon icon={rule.icon || category?.icon || 'loan'} color={rule.color || category?.color || COLORS[0]} size="sm" />
                     </div>
@@ -1007,14 +1007,14 @@ function CompletedDebtsSection({ rules, accounts, categories, formatCurrency, on
                         {liability ? ` · ${liability.name}` : ''}
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium text-green-700 dark:text-green-400">
+                    <div className="flex shrink-0 items-center justify-end text-right text-sm font-medium lg:min-w-32 text-green-700 dark:text-green-400">
                       Completed
                     </div>
                     <div className="-ml-2 flex w-6 shrink-0 items-center justify-end">
                       <button
                         type="button"
                         onClick={() => onAction(rule)}
-                        className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+                        className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 lg:opacity-100"
                         aria-label={`Open actions for ${rule.name}`}
                       >
                         <MoreVertical className="h-4 w-4" />

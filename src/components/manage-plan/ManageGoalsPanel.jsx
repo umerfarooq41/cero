@@ -666,7 +666,7 @@ function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
           : `${Math.abs(countdownDays)}d overdue`;
 
   return (
-    <div className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40">
+    <div className="group flex items-stretch gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40 lg:items-center lg:py-3">
       <div className="shrink-0 self-start">
         <CategoryIcon icon={goal.icon_key || 'target'} color={color} size="sm" />
       </div>
@@ -698,7 +698,7 @@ function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
       </div>
 
       <div className={cn(
-        'flex shrink-0 items-center justify-end text-right text-sm font-medium tabular-nums',
+        'flex shrink-0 items-center justify-end text-right text-sm font-medium lg:min-w-32 tabular-nums',
         isCompleted ? 'text-green-700 dark:text-green-400' : 'text-foreground'
       )}>
         {isCompleted ? 'Completed' : displayAmount === null ? 'Set target' : formatCurrency(displayAmount)}
@@ -708,7 +708,7 @@ function GoalRow({ goal, onAction, formatCurrency, completionDate }) {
         <button
           type="button"
           onClick={() => onAction(goal)}
-          className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+          className="-mr-2 rounded-md p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 lg:opacity-100"
           aria-label={`Open actions for ${goal.name}`}
         >
           <MoreVertical className="h-4 w-4" />
@@ -729,7 +729,7 @@ function GoalSection({ title, tone, goals, defaultExpanded = false, emptyText, o
         : 'text-muted-foreground';
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="flex min-h-14 w-full items-center justify-between gap-2 px-3 py-2.5">
         <button
           type="button"

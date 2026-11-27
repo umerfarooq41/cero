@@ -36,7 +36,7 @@ function CategoryRow({ cat, subs, onAction }) {
           )}
         </div>
 
-        <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+        <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 lg:opacity-100">
           <button
             type="button"
             onClick={() => onAction(cat)}
@@ -98,7 +98,7 @@ function SubRow({ sub, onAction }) {
       <button
         type="button"
         onClick={() => onAction(sub)}
-        className="rounded-lg p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-muted/50 hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        className="rounded-lg p-1.5 text-muted-foreground opacity-100 transition-all hover:bg-muted/50 hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 lg:opacity-100"
         title="Subcategory actions"
       >
         <MoreHorizontal className="h-4 w-4" />
@@ -124,7 +124,7 @@ export default function CategorySection({
   }, 0);
 
   return (
-    <div className="overflow-hidden rounded-2xl app-card-surface">
+    <div className="overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!border-b lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
       <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-2.5 transition-colors">
         <button
           type="button"
