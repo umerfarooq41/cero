@@ -1587,3 +1587,11 @@ main,
  .app-desktop-modal button:focus:not(:focus-visible), .app-desktop-route-form button:focus:not(:focus-visible) {outline:none!important;box-shadow:none!important;}
  .app-desktop-modal button:focus-visible,.app-desktop-route-form button:focus-visible {outline:2px solid hsl(var(--ring));outline-offset:2px;}
 }
+
+@media (min-width:1024px) {
+ .cero-desktop-workspace input.cero-plan-cell { background:transparent!important; border:1px solid transparent!important; border-radius:3px!important; box-shadow:none!important; appearance:textfield; -moz-appearance:textfield; }
+ .cero-desktop-workspace input.cero-plan-cell::-webkit-inner-spin-button,.cero-desktop-workspace input.cero-plan-cell::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+ .cero-desktop-workspace input.cero-plan-cell:hover { border-color:hsl(var(--border))!important; }
+ .cero-desktop-workspace input.cero-plan-cell:focus { border-color:hsl(var(--primary))!important; background:hsl(var(--card))!important; outline:none!important; box-shadow:none!important; }
+ .cero-desktop-workspace .cero-desktop-nav-link:focus:not(:focus-visible) {outline:none!important;box-shadow:none!important;}
+}

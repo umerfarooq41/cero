@@ -132,7 +132,7 @@ export default function Plan() {
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
-  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><PageHeader title="Plan"/><main className="mx-auto w-full max-w-[1600px] px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
+  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><main className="mx-auto w-full max-w-7xl px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
   if (budgetSummary.isLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { format, subMonths } from 'date-fns';
-import { ChevronDown, Copy, Save, LockKeyhole, Plus, Pencil, X } from 'lucide-react';
+import { format, subMonths, addMonths } from 'date-fns';
+import { ChevronDown, ChevronLeft, ChevronRight, Copy, Save, LockKeyhole, Plus, Pencil, X } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -748,9 +748,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
     const summaryTracked = selected ? trackedFor(selected) : visibleRows.reduce((sum,row)=>sum+trackedFor(row),0);
     const canWrite = navigator.onLine && !saving && !isPlanLoading;
     return <div className="space-y-4">
-      <div className="sticky top-0 z-20 flex flex-wrap items-center gap-4 bg-background py-3">
-        <MonthSelector currentMonth={currentMonth} onChange={changeUnifiedMonth} bare className="min-w-0 flex-1"/>
-        <div className="mr-auto"><p className="text-sm text-muted-foreground">Left to allocate</p><p className={cn("text-2xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
+      <div className="sticky top-0 z-20 flex flex-wrap items-center gap-3 bg-background py-2">
+        <div className="flex shrink-0 items-center gap-1 text-lg font-semibold"><button type="button" aria-label="Previous month" className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(subMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronLeft className="size-4"/></button><span>{format(new Date(currentMonth+'-01T12:00:00'),'MMMM yyyy')}</span><button type="button" aria-label="Next month" className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(addMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight className="size-4"/></button></div><div className="flex-1"/>
+        <div className="mr-3 text-right"><p className="text-xs text-muted-foreground">Left to allocate</p><p className={cn("text-xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
         <Button variant="outline" disabled={!canWrite} onClick={copyFromPreviousMonth}><Copy className="mr-2 size-4"/>Copy previous month</Button>
         <Button disabled={!canWrite||!dirty} onClick={handleSave}><Save className="mr-2 size-4"/>{saving?'Saving…':'Save plan'}</Button>
       </div>
@@ -764,8 +764,8 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
           <thead className="sticky top-0 z-10 bg-card text-muted-foreground"><tr>{['Category','Planned','Tracked','Remaining'].map((label,i)=><th key={label} className={cn("px-3 py-3 font-medium",i?'text-right':'text-left')}>{label}</th>)}</tr></thead>
           <tbody>{rowsByType[activeType].map(row=>{const planned=plannedFor(row),tracked=trackedFor(row);return <tr key={row.key} className={cn("border-b border-border/60 hover:bg-muted/30",selectedKey===row.key&&"bg-primary/10",row.isSectionHeader&&"bg-muted/30 font-semibold")} onClick={()=>setSelectedKey(row.key)}>
             <th scope="row" className="px-3 py-2 text-left font-medium"><button type="button" onClick={()=>setSelectedKey(row.key)} className={cn("flex w-full items-center gap-2 text-left",row.isSubcategory&&"pl-4")}><CategoryIcon icon={row.icon} color={row.color} size="sm"/><span className="min-w-0 break-words">{row.name}</span></button></th>
-            <td className="px-2 py-2 text-right">{editable(row)?<Input aria-label={row.name+' allocation'} type="number" min="0" step="0.01" disabled={!canWrite} value={values[row.key]??0} onFocus={()=>setSelectedKey(row.key)} onChange={e=>setValue(row.key,Math.max(0,Number(e.target.value)||0))} className="h-8 rounded-sm border-transparent bg-transparent px-1 text-right tabular-nums hover:border-border focus:border-primary"/>:<span className="inline-flex items-center gap-1">{!row.isSectionHeader&&<LockKeyhole className="size-3"/>}{formatCurrency(planned)}</span>}</td>
-            <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(tracked)}</td><td className={cn("px-2 py-2 text-right tabular-nums",planned<tracked&&activeType==='expense'?"text-destructive":"")}>{formatCurrency(planned-tracked)}</td>
+            <td className="px-2 py-2 text-right">{editable(row)?<Input aria-label={row.name+' allocation'} type="number" min="0" step="0.01" disabled={!canWrite} value={values[row.key]??0} onFocus={event=>{setSelectedKey(row.key);event.target.select();}} onChange={e=>setValue(row.key,Math.max(0,Number(e.target.value)||0))} className="cero-plan-cell h-8 px-2 text-right tabular-nums"/>:<span className="inline-flex items-center gap-1">{!row.isSectionHeader&&<LockKeyhole className="size-3"/>}{formatCurrency(planned)}</span>}</td>
+            <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(tracked)}</td><td className={cn("px-2 py-2 text-right tabular-nums",planned<tracked&&activeType==='expense'?"text-destructive":planned>tracked&&activeType==='expense'?"text-emerald-600 dark:text-emerald-400":"")}>{formatCurrency(planned-tracked)}</td>
           </tr>})}</tbody>
           <tfoot className="sticky bottom-0 bg-card font-semibold"><tr><th className="px-3 py-3 text-left">Total</th><td className="px-2 text-right">{formatCurrency(sumType(activeType))}</td><td className="px-2 text-right">{formatCurrency(visibleRows.reduce((sum,row)=>sum+trackedFor(row),0))}</td><td className="px-2 text-right">{formatCurrency(sumType(activeType)-visibleRows.reduce((sum,row)=>sum+trackedFor(row),0))}</td></tr></tfoot></table>
         </div>
