@@ -1475,3 +1475,74 @@ main,
   .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong,.app-card-surface-soft):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) { border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; backdrop-filter:none !important; }
  }
 }
+
+/* Desktop modal presentation; mobile sheet geometry remains unchanged. */
+@media (min-width: 1024px) {
+  :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface,.app-desktop-confirm) {
+    --card: 0 0% 100%;
+    --background: 220 20% 97%;
+    --border: 220 15% 86%;
+    --app-control-alpha: 1;
+    --app-surface-border-strong-alpha: 1;
+    --app-surface-blur: 0px;
+  }
+  html.dark :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface,.app-desktop-confirm) {
+    --card: 220 22% 14%;
+    --background: 220 23% 11%;
+    --border: 220 15% 24%;
+  }
+  :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface) {
+    position: fixed !important;
+    inset: 50% auto auto 50% !important;
+    translate: none !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: min(560px, calc(100vw - 64px)) !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: min(88dvh, 900px) !important;
+    border-radius: 12px !important;
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: 0 20px 64px rgb(0 0 0 / .25) !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .app-desktop-modal { padding: 24px !important; gap: 16px !important; }
+  .app-desktop-modal::before { display: none !important; }
+  .app-sheet-overlay,.app-route-sheet-backdrop {
+    background: rgb(0 0 0 / .48) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .app-desktop-modal .app-dialog-scroll,
+  .app-route-sheet .app-route-sheet-body { min-height: 0; overflow-y: auto !important; scrollbar-width: thin; }
+  .app-desktop-modal .app-dialog-actions,
+  .app-route-sheet.app-sheet-surface .app-route-sheet-footer {
+    display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
+    padding: 16px 0 0 !important; background: hsl(var(--card));
+  }
+  .app-route-sheet.app-sheet-surface .app-route-sheet-footer { padding: 16px 24px !important; }
+  .app-desktop-modal .app-dialog-actions > button,
+  .app-desktop-modal .app-dialog-actions > button:only-child,
+  .app-route-sheet .app-route-sheet-footer > button {
+    width: auto !important; min-width: 96px; min-height: 40px; flex: 0 1 auto !important;
+  }
+  .app-desktop-modal [data-app-sheet-cancel] { display: inline-flex; }
+  .app-route-sheet .app-page-header { min-height: 0; }
+  .app-route-sheet .app-page-header > div { padding: 20px 24px !important; }
+  .app-desktop-modal :is(h2,[role="heading"]), .app-desktop-confirm h2 { font-size: 20px; line-height: 1.35; }
+  :is(.app-desktop-modal,.app-route-sheet,.app-desktop-confirm) label { font-size: 14px; }
+  .app-desktop-confirm { border-radius: 12px !important; max-width: 440px; }
+}
+@layer utilities {
+  @media (min-width:1024px) {
+    :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface,.app-desktop-confirm) {
+      background: hsl(var(--card)) !important;
+      border: 1px solid hsl(var(--border)) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 64px rgb(0 0 0 / .25) !important;
+      backdrop-filter: none !important;
+    }
+  }
+}
