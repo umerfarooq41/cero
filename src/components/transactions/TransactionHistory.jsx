@@ -500,7 +500,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   return (
     <div>
       <div className="mb-2 text-xs text-muted-foreground">{globalScope ? `${filtered.length} transactions found · All history` : `${filtered.length} posted transactions · ${format(new Date(`${currentMonth}-01T12:00:00`), "MMMM yyyy")}`}</div>
-      <div className="mb-2 flex gap-2 animate-child">
+      <div className="mb-2 flex flex-wrap items-center gap-2 animate-child">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -523,6 +523,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           )}
         </div>
 
+        <label className="hidden items-center gap-2 lg:flex"><span className="sr-only">Transaction type</span><select value={filterType} onChange={event => setFilterType(event.target.value)} className="h-10 rounded-md border border-border bg-card px-3 text-sm"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option></select></label>
         <AdvancedFilterSheet
           open={filterSheetOpen}
           onOpenChange={setFilterSheetOpen}
@@ -551,11 +552,11 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         />
       </div>
 
-      <TransactionTypeTabs
+      <div className="lg:hidden"><TransactionTypeTabs
         value={filterType}
         onChange={setFilterType}
         className="mb-2 animate-child"
-      />
+      /></div>
 
       {activeFilterChips.length > 0 && (
         <div className="mb-5 flex flex-wrap items-center gap-2 animate-child">
@@ -602,10 +603,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         </div>
       ) : (
         <div>
-        <div className="hidden overflow-x-auto lg:block">
-          <table className="w-full min-w-[700px] border-collapse text-sm">
+        <div className="hidden max-h-[65vh] overflow-auto lg:block">
+          <table className="w-full min-w-[700px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Transaction history</caption>
-            <thead className="border-y border-border bg-muted/40 text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{label}</th>)}</tr></thead>
+            <colgroup><col style={{width:"16%"}}/><col style={{width:"32%"}}/><col style={{width:"19%"}}/><col style={{width:"16%"}}/><col style={{width:"17%"}}/></colgroup><thead className="sticky top-0 z-10 border-y border-border bg-card text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{index === 0 || index === 4 ? <button type="button" className="font-medium hover:text-primary" onClick={() => setSortBy(index === 0 ? (sortBy === "newest" ? "oldest" : "newest") : (sortBy === "highest" ? "lowest" : "highest"))}>{label}{index === 0 ? (sortBy === "newest" ? " ↓" : sortBy === "oldest" ? " ↑" : "") : (sortBy === "highest" ? " ↓" : sortBy === "lowest" ? " ↑" : "")}</button> : label}</th>)}</tr></thead>
             <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} onClick={() => navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
           </table>
         </div>

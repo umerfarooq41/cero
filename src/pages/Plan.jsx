@@ -134,7 +134,7 @@ export default function Plan() {
       <div ref={scope} className="min-h-screen bg-transparent">
         <PageHeader
         title={
-          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg">
+          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
             <button type="button" aria-label="Previous month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(subMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronLeft className="size-4" /></button>
             <span className="min-w-0 truncate whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
             <button type="button" aria-label="Next month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(addMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronRight className="size-4" /></button>
@@ -160,7 +160,7 @@ export default function Plan() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title={
-          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg">
+          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
             <button type="button" aria-label="Previous month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(subMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronLeft className="size-4" /></button>
             <span className="min-w-0 truncate whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
             <button type="button" aria-label="Next month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(addMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronRight className="size-4" /></button>

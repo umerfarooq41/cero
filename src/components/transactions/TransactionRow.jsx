@@ -177,9 +177,9 @@ export default function TransactionRow({
   const amountValue = Math.abs(Number(transaction.amount || 0));
 
   if (desktopLedger) return (
-    <tr className="hover:bg-muted/30">
-      <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">{transaction.date || '—'}</td>
-      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" onClick={onClick} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><CategoryIcon icon={isTransfer ? 'transfer' : category?.icon || 'tag'} color={category?.color} size="sm"/><span className="break-words">{title}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
+    <tr onClick={onClick} className="cursor-pointer hover:bg-muted/30">
+      <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">{transaction.date && /^\d{4}-\d{2}-\d{2}$/.test(transaction.date) ? new Date(transaction.date + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : transaction.date || '—'}</td>
+      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" onClick={event => { event.stopPropagation(); onClick?.(); }} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{isTransfer ? <ArrowLeftRight className="size-5 shrink-0 text-sky-500"/> : <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>}<span className="break-words">{title}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
       <td className="px-3 py-3 text-muted-foreground">{isTransfer ? movementLabel : accountName}</td>
       <td className="px-3 py-3 text-xs text-muted-foreground">{isAdjustment ? (isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment') : isTransfer ? transferKindLabel : transactionTypeLabel}</td>
       <td className={cn('whitespace-nowrap px-3 py-3 text-right font-medium tabular-nums',config.color)}>{config.sign} <CurrencyAmount value={amountValue} formatCurrency={formatCurrency}/></td>
