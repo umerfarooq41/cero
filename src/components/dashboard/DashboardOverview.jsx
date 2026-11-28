@@ -120,7 +120,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     transactions, currentMonth, now: new Date(),
   });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="cero-hero-label flex items-center justify-between gap-2 text-left"><SectionHeading title="Spending allowance" icon={Gauge}/><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
+    <div className="flex w-full flex-row items-center justify-between gap-2 text-left"><SectionHeading title="Spending allowance" icon={Gauge}/><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
@@ -128,7 +128,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of discretionary spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="cero-hero-label flex items-center justify-between gap-2 text-left">
+    <div className="flex w-full flex-row items-center justify-between gap-2 text-left">
       <SectionHeading title="Spending allowance" icon={Gauge}/>
       <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
@@ -153,20 +153,14 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     </div>
     <details className="group text-left">
       <summary className="inline-flex min-h-9 cursor-pointer list-none items-center gap-1.5 text-sm text-primary [&::-webkit-details-marker]:hidden">How today's allowance is calculated <ChevronRight size={14} className="shrink-0 group-open:rotate-90"/></summary>
-      <div className="space-y-3 border-l border-border pl-3 pb-2 text-xs">
-        <p className="leading-relaxed text-muted-foreground">Your discretionary budget covers flexible expense categories. The amount available today is calculated from the budget remaining at the start of today, spread across the remaining days, including today.</p>
+      <div className="space-y-2 pb-2 text-xs">
+        <p className="text-muted-foreground">Budget left before today ÷ remaining days = daily allowance.</p>
         <dl className="divide-y divide-border">
-          {[
-            ['Monthly discretionary budget',pace.budget],
-            ['Less: spending before today',-pace.spent+pace.spentToday],
-            ['Budget remaining before today',pace.budget-pace.spent+pace.spentToday],
-          ].map(([label,value])=><div key={label} className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency}/></dd></div>)}
-          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Divide by remaining days</dt><dd>{pace.daysRemaining}</dd></div>
-          <div className="flex justify-between gap-2 py-2 font-medium"><dt>Daily allowance</dt><dd><Money value={pace.allowance} formatCurrency={formatCurrency}/></dd></div>
-          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Less: spending today</dt><dd><Money value={-pace.spentToday} formatCurrency={formatCurrency}/></dd></div>
-          <div className="flex justify-between gap-2 py-2 font-semibold"><dt>Available to spend today</dt><dd><Money value={pace.leftToday} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Budget left before today</dt><dd><Money value={Math.max(0,pace.budget-pace.spent+pace.spentToday)} formatCurrency={formatCurrency}/> ÷ {pace.daysRemaining || '—'}</dd></div>
+          <div className="flex justify-between gap-2 py-2"><dt>Daily allowance</dt><dd><Money value={pace.allowance} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Less: spent today</dt><dd><Money value={-pace.spentToday} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex justify-between gap-2 py-2 font-semibold"><dt>Available today</dt><dd><Money value={pace.leftToday} formatCurrency={formatCurrency}/></dd></div>
         </dl>
-        <p className="text-muted-foreground leading-relaxed">If the allowance is exhausted, the available amount is zero. This is a budget-based allowance, not your bank balance.</p>
       </div>
     </details>
     <div className="flex min-h-9 items-center justify-between gap-2">
