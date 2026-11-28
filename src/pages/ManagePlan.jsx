@@ -82,7 +82,7 @@ export default function ManagePlan() {
   return (
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
-        title="Your Workplace"
+        title="Workplace"
       />
 
       <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:pb-8 lg:px-8 lg:py-3 lg:pb-8">

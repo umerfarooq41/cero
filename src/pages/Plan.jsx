@@ -103,5 +103,5 @@ export default function Plan() {
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
-  return <div ref={scope} className="min-h-screen bg-transparent"><div className="md:hidden"><PageHeader title="Plan" /></div><main className="cero-page-content cero-page-content-no-header mx-auto w-full max-w-7xl px-4 pb-24 pt-3 md:px-5 md:pb-8 workspace:px-8"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified draftRef={desktopDraft} sharedSaving={desktopSaving} onSavingChange={setDesktopSaving} transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
+  return <div ref={scope} className="min-h-screen bg-transparent"><PageHeader title="Plan" /><main className="cero-page-content mx-auto w-full max-w-7xl px-4 pb-24 pt-3 md:px-5 md:pb-8 workspace:px-8"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified draftRef={desktopDraft} sharedSaving={desktopSaving} onSavingChange={setDesktopSaving} transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
 }

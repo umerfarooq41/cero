@@ -1771,3 +1771,30 @@ main,
 @media (prefers-reduced-motion:reduce) {
  .cero-desktop-workspace .animate-child {animation:none!important;}
 }
+
+/* One continuous tab baseline, with the active segment painted on that same line. */
+.cero-desktop-workspace nav.cero-workplace-tabs {
+  border-bottom:0!important;
+  box-shadow:inset 0 -1px 0 hsl(var(--border));
+  align-items:stretch!important;
+  flex-wrap:nowrap!important;
+  overflow-x:auto;
+  white-space:nowrap;
+  scrollbar-width:none;
+}
+.cero-desktop-workspace nav.cero-workplace-tabs::-webkit-scrollbar {display:none;}
+.cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed] {
+  position:relative;
+  flex-shrink:0;
+  border-bottom:0!important;
+  box-shadow:none;
+  min-height:44px;
+}
+.cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed="true"]::after {
+  content:"";position:absolute;inset:auto 0 0;height:1px;
+  background:hsl(var(--primary));pointer-events:none;
+}
+.cero-desktop-workspace .app-main-scroll .app-page-header h1 {font-size:22px!important;line-height:1.3!important;font-weight:600;}
+@media(max-width:767px) {
+ .cero-desktop-workspace .app-main-scroll .app-page-header h1 {font-size:20px!important;}
+}
