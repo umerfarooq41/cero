@@ -1,4 +1,4 @@
-import { WorkspaceTab, RegisterHeader, RegisterRow, RegisterInspector } from '@/components/shared/WorkspacePrimitives';
+import { WorkspaceAddButton, WorkspaceTab, RegisterHeader, RegisterRow, RegisterInspector } from '@/components/shared/WorkspacePrimitives';
 import MobileHeaderActions from '@/components/layout/MobileHeaderActions';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { format, subMonths, addMonths } from 'date-fns';
@@ -468,7 +468,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
       {dirty&&<p role="status" className="text-xs text-primary">Unsaved allocation changes</p>}
       <div className="cero-tab-toolbar"><nav aria-label="Budget types" className="cero-workplace-tabs cero-plan-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-border workspace:gap-5">
         {Object.entries(sectionConfig).map(([type,config])=><WorkspaceTab key={type} active={activeType===type} onClick={()=>{setActiveType(type);setSelectedKey(null);}}>{config.title}</WorkspaceTab>)}
-        </nav><Button variant="ghost" size="sm" className="cero-desktop-only-action shrink-0" aria-pressed={hideZero} onClick={()=>{setHideZero(v=>!v);setSelectedKey(null)}}>{hideZero?"Show zero":"Hide zero"}</Button><Button size="sm" variant="outline" className="cero-add-action cero-desktop-only-action" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/><span>Add</span></Button><Button variant="ghost" size="sm" className="shrink-0 cero-desktop-only-action" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden" aria-hidden="true">⋯</span><span className="hidden md:inline">Archived categories</span></Button>
+        </nav><Button variant="ghost" size="sm" className="cero-desktop-only-action shrink-0" aria-pressed={hideZero} onClick={()=>{setHideZero(v=>!v);setSelectedKey(null)}}>{hideZero?"Show zero":"Hide zero"}</Button><WorkspaceAddButton disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/><span>Add</span></WorkspaceAddButton><Button variant="ghost" size="sm" className="shrink-0 cero-desktop-only-action" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden" aria-hidden="true">⋯</span><span className="hidden md:inline">Archived categories</span></Button>
       </div>
       {isPlanLoading ? <Skeleton className="h-80 w-full"/> : <div className="grid min-w-0 grid-cols-1 workspace:grid-cols-[minmax(0,1fr)_minmax(260px,30%)]">
         <div className="overflow-auto workspace:max-h-[65vh]">

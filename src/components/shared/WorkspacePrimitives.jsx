@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export function SectionHeading({ title, icon: Icon, className, as: Heading = 'h2' }) {
@@ -22,4 +23,12 @@ export function RegisterInspector({ children, className }) {
 
 export function RegisterEmpty({ children, className }) {
   return <p className={cn('p-8 text-center text-sm text-muted-foreground', className)}>{children}</p>;
+}
+
+export function WorkspaceAddButton({ className, children, ...props }) {
+  return <Button size="sm" variant="outline" {...props} className={cn('cero-add-action cero-desktop-only-action', className)}>{children}</Button>;
+}
+
+export function WorkspaceIconButton({ className, children, ...props }) {
+  return <Button variant="ghost" size="icon" {...props} className={cn('[&_svg]:size-4', className)}>{children}</Button>;
 }
