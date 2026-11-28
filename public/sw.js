@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cero-shell-v3';
+const CACHE_NAME = 'cero-shell-v4';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -11,7 +11,13 @@ const APP_SHELL = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(APP_SHELL);
+      const shell = await cache.match('/index.html');
+      const html = await shell.text();
+      const assets = [...new Set(Array.from(html.matchAll(/(?:src|href)=["'](\/assets\/[^"']+)["']/g), (match) => match[1]))];
+      await cache.addAll(assets);
+    })
   );
 });
 

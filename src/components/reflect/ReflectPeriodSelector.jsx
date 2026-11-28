@@ -86,19 +86,19 @@ export default function ReflectPeriodSelector({
           className={`rounded-sm px-2.5 h-8 text-sm font-medium ${periodMode === mode ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
       </div>
       <div className="flex min-w-0 items-center gap-1">
-        <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-md border border-border"><ChevronLeft className="h-4 w-4" /></button>
+        <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>
         <Select value={periodMode === 'year' ? String(year) : `${year}-${selectedMonth.value}`}
           onValueChange={value => { if (periodMode === 'year') onYearChange(value); else { const [y,m] = value.split('-'); onYearChange(y); onMonthChange(m); } }}>
-          <SelectTrigger aria-label="Select reporting period" className="h-9 w-[112px] rounded-md border border-border bg-background px-2 text-center text-sm font-semibold [&>span]:flex [&>span]:flex-1 [&>span]:justify-center">
+          <SelectTrigger aria-label="Select reporting period" className="h-9 w-[160px] rounded-md border border-border bg-background px-2 text-center text-sm font-medium [&>span]:flex [&>span]:flex-1 [&>span]:justify-center">
             <SelectValue placeholder="Period" />
           </SelectTrigger>
           <SelectContent>
             {years.filter(y => Number(y) <= currentYear).flatMap(y => periodMode === 'year'
               ? [<SelectItem key={y} value={y}>{y}</SelectItem>]
-              : MONTHS.filter((m,i) => !isFuture(y,i)).map(m => <SelectItem key={`${y}-${m.value}`} value={`${y}-${m.value}`}>{m.shortLabel} {y}</SelectItem>))}
+              : MONTHS.filter((m,i) => !isFuture(y,i)).map(m => <SelectItem key={`${y}-${m.value}`} value={`${y}-${m.value}`}>{m.label} {y}</SelectItem>))}
           </SelectContent>
         </Select>
-        <button type="button" aria-label="Next period" disabled={!canAdvance} onClick={() => navigate(1)} className="flex h-8 w-8 items-center justify-center rounded-md border border-border disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
+        <button type="button" aria-label="Next period" disabled={!canAdvance} onClick={() => navigate(1)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
       </div>
     </div>
   );

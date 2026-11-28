@@ -293,6 +293,8 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const [params] = useSearchParams();
 
   const [selectedDate, setSelectedDate] = useState('');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selection, setSelection] = useState({ scope: '', ids: [] });
   const [dateMode, setDateMode] = useState(() => params.get('account') ? 'any' : 'month');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -484,6 +486,16 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   ]);
 
   const hasTransactions = sortedDates.length > 0;
+  const selectionScope = JSON.stringify([currentMonth, dateMode, dateFrom, dateTo, selectedDate, searchValue, filterType, accountFilter, categoryFilter, sourceFilter]);
+  const selectedIds = selection.scope === selectionScope ? selection.ids : [];
+  const setSelectedIds = update => setSelection(previous => ({ scope: selectionScope, ids: typeof update === 'function' ? update(previous.scope === selectionScope ? previous.ids : []) : update }));
+  const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
+  const toggleSelection = id => setSelectedIds(ids => {
+    const visibleIds = new Set(sortedTransactions.map(row => row.id));
+    const visibleSelection = ids.filter(value => visibleIds.has(value));
+    return visibleSelection.includes(id) ? visibleSelection.filter(value => value !== id) : [...visibleSelection, id];
+  });
+  const exitSelection = () => { setSelectionMode(false); setSelectedIds([]); };
 
   const clearAdvancedFilters = () => {
     setSourceFilter('all');
@@ -527,6 +539,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           )}
         </div>
 
+        <Button size="sm" variant="outline" aria-pressed={selectionMode} onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)}>{selectionMode ? 'Done' : 'Select'}</Button>
         <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<select className="block w-full rounded-md border border-border bg-background p-2" value={value} onChange={e=>set(e.target.value)}>{options.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
         <div className="lg:hidden"><AdvancedFilterSheet
           open={filterSheetOpen}
@@ -556,6 +569,12 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         /></div>
       </div>
 
+      {selectionMode && <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
+        <Button size="sm" variant="ghost" disabled={!sortedTransactions.length} onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button>
+        <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button>
+        <span aria-live="polite">{selectedRows.length} selected</span>
+        {['income','expense','transfer'].map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectedRows.filter(row => row.type === type).reduce((sum,row) => sum + Math.abs(Number(row.amount || 0)),0))}</span>)}
+      </div>}
       <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
         {[['all','All'],['income','Income'],['expense','Expense'],['transfer','Transfer']].map(([value,label]) => (
           <WorkspaceTab key={value} active={filterType === value} onClick={() => setFilterType(value)}>{label}</WorkspaceTab>
@@ -611,7 +630,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           <table className="w-full min-w-[700px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Transaction history</caption>
             <colgroup><col style={{width:"16%"}}/><col style={{width:"32%"}}/><col style={{width:"19%"}}/><col style={{width:"16%"}}/><col style={{width:"17%"}}/></colgroup><thead className="sticky top-0 z-10 border-b border-border bg-card text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{index === 0 || index === 4 ? <button type="button" className="font-medium hover:text-primary" onClick={() => setSortBy(index === 0 ? (sortBy === "newest" ? "oldest" : "newest") : (sortBy === "highest" ? "lowest" : "highest"))}>{label}{index === 0 ? (sortBy === "newest" ? " ↓" : sortBy === "oldest" ? " ↑" : "") : (sortBy === "highest" ? " ↓" : sortBy === "lowest" ? " ↑" : "")}</button> : label}</th>)}</tr></thead>
-            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} onClick={() => navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
+            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
           </table>
         </div>
         <div className="animate-child space-y-2 md:hidden">
@@ -645,7 +664,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
                     recurringRule={recurringById.get(transaction.recurring_transaction_id)}
                     goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                     formatCurrency={formatCurrency}
-                    onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
+                    selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : navigate(`/transactions/${transaction.id}/edit`)}
                   />
                 ))}
               </div>

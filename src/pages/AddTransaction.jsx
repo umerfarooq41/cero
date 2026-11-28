@@ -1,6 +1,6 @@
 import { useAppSheetKeyboard } from '@/hooks/useAppSheetKeyboard';
 import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
@@ -285,7 +285,19 @@ export default function AddTransaction() {
     return false;
   });
 
+  const submissionLock = useRef(false);
   const handleSubmit = async () => {
+    if (submissionLock.current || saving || deleting) return;
+    if (navigator.onLine === false) { toast.error('Reconnect to save your transaction'); return; }
+    submissionLock.current = true;
+    try {
+      await submitTransaction();
+    } finally {
+      submissionLock.current = false;
+    }
+  };
+
+  const submitTransaction = async () => {
     if (isRecurringDateCorrection) {
       if (!date || !occurrenceDate || !(Number(amount) > 0)) { toast.error('Enter a valid amount and both dates'); return; }
       setLinkedSaveError('');

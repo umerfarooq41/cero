@@ -28,9 +28,10 @@ export function useAppSheetKeyboard() {
         ) - 12;
         const visibleTop = Math.max(viewport.offsetTop, bodyRect.top) + 12;
 
-        if (field.bottom > visibleBottom) {
+        if (visibleBottom <= visibleTop) return;
+        if (field.bottom > visibleBottom + 2) {
           body.scrollBy({ top: field.bottom - visibleBottom, behavior: 'smooth' });
-        } else if (field.top < visibleTop) {
+        } else if (field.top < visibleTop - 2) {
           body.scrollBy({ top: field.top - visibleTop, behavior: 'smooth' });
         }
       });
