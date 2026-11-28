@@ -107,7 +107,7 @@ export function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
           ? 'border-primary'
           : 'border-transparent hover:border-border'

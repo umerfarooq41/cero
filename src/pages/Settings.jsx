@@ -441,7 +441,7 @@ export default function Settings() {
             
             stackOnMobile
           >
-            <div className="grid w-full grid-cols-8 justify-items-center gap-1 py-1 sm:w-[352px]">
+            <div className="grid w-full grid-cols-6 justify-items-center gap-1 py-1 sm:w-[280px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
@@ -452,6 +452,7 @@ export default function Settings() {
                 />
               ))}
             </div>
+            <p className="mt-1 text-center text-xs text-muted-foreground">{themeStyleOptions.find(option=>option.value===themeStyle)?.label}</p>
           </SettingRow>
 
           <SettingRow

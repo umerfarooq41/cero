@@ -11,44 +11,38 @@ const APP_SYSTEM_BAR_COLOR = '#0a0a1a';
 const DEFAULT_THEME_STYLE = 'ember-noir';
 
 const VALID_THEMES = ['system', 'light', 'dark'];
-const VALID_THEME_STYLES = [
-  'ember-noir',
-  'copper-smoke',
-  'rose-quartz',
-  'forest-neon',
-  'blue-ruby',
-  'mango-lagoon',
-  'sunset-aqua',
-  'graphite-glow',
-];
+const VALID_THEME_STYLES = ["ember-noir","blue-ruby","forest-neon","violet","rose-quartz","graphite-glow"];
 
 const LEGACY_THEME_STYLE_MAP = {
+  'copper-smoke': DEFAULT_THEME_STYLE,
+  'mango-lagoon': DEFAULT_THEME_STYLE,
+  'sunset-aqua': DEFAULT_THEME_STYLE,
   cero: DEFAULT_THEME_STYLE,
-  ocean: 'sunset-aqua',
+  ocean: 'blue-ruby',
   cyber: 'graphite-glow',
-  indigo: 'graphite-glow',
-  aurora: 'sunset-aqua',
-  sunset: 'sunset-aqua',
+  indigo: 'violet',
+  aurora: 'ember-noir',
+  sunset: 'ember-noir',
   rose: 'rose-quartz',
   forest: 'forest-neon',
   emerald: 'forest-neon',
   sage: 'forest-neon',
-  quartz: 'mango-lagoon',
-  desert: 'mango-lagoon',
+  quartz: 'ember-noir',
+  desert: 'ember-noir',
   horizon: 'blue-ruby',
   minimal: 'graphite-glow',
   obsidian: 'graphite-glow',
-  'warm-aurora': 'mango-lagoon',
+  'warm-aurora': 'ember-noir',
   'vibrant-fluid': 'blue-ruby',
   'ai-minimal': 'graphite-glow',
-  'energy-action': 'sunset-aqua',
+  'energy-action': 'ember-noir',
   'cyber-indigo': 'graphite-glow',
-  'aurora-bloom': 'sunset-aqua',
+  'aurora-bloom': 'ember-noir',
   'sunset-rose': 'rose-quartz',
   'emerald-forest': 'forest-neon',
-  'desert-quartz': 'mango-lagoon',
+  'desert-quartz': 'ember-noir',
   'cyberpunk-horizon': 'blue-ruby',
-  'orchid-fire': 'blue-ruby',
+  'orchid-fire': 'violet',
 };
 
 const NEUTRAL_MODE_TOKENS = {
@@ -128,152 +122,20 @@ const NEUTRAL_MODE_TOKENS = {
   },
 };
 
-const THEME_STYLE_TOKENS = {
-  'ember-noir': {
-    light: {
-      primary: '28 92% 46%',
-      ring: '28 92% 46%',
-      accent: '28 92% 92%',
-      accentForeground: '24 92% 18%',
-      appBgColor: '#fff7ed',
-      appBgImage: "url('/backgrounds/ember-noir-light.svg')",
-    },
-    dark: {
-      primary: '32 94% 58%',
-      ring: '32 94% 58%',
-      accent: '28 72% 16%',
-      accentForeground: '34 96% 88%',
-      appBgColor: '#030303',
-      appBgImage: "url('/backgrounds/ember-noir-dark.svg')",
-    },
-  },
-  'copper-smoke': {
-    light: {
-      primary: '24 72% 42%',
-      ring: '24 72% 42%',
-      accent: '24 70% 93%',
-      accentForeground: '22 72% 18%',
-      appBgColor: '#fbf7f3',
-      appBgImage: "url('/backgrounds/copper-smoke-light.svg')",
-    },
-    dark: {
-      primary: '28 82% 62%',
-      ring: '28 82% 62%',
-      accent: '26 54% 16%',
-      accentForeground: '30 90% 88%',
-      appBgColor: '#090604',
-      appBgImage: "url('/backgrounds/copper-smoke-dark.svg')",
-    },
-  },
-  'rose-quartz': {
-    light: {
-      primary: '340 82% 48%',
-      ring: '340 82% 48%',
-      accent: '340 88% 94%',
-      accentForeground: '340 82% 20%',
-      appBgColor: '#fff7fb',
-      appBgImage: "url('/backgrounds/rose-quartz-light.svg')",
-    },
-    dark: {
-      primary: '340 86% 62%',
-      ring: '340 86% 62%',
-      accent: '340 72% 16%',
-      accentForeground: '340 96% 90%',
-      appBgColor: '#15040d',
-      appBgImage: "url('/backgrounds/rose-quartz-dark.svg')",
-    },
-  },
-  'forest-neon': {
-    light: {
-      primary: '142 76% 38%',
-      ring: '142 76% 38%',
-      accent: '142 72% 92%',
-      accentForeground: '142 78% 16%',
-      appBgColor: '#f3ffe8',
-      appBgImage: "url('/backgrounds/forest-neon-light.svg')",
-    },
-    dark: {
-      primary: '142 72% 52%',
-      ring: '142 72% 52%',
-      accent: '142 64% 14%',
-      accentForeground: '142 92% 88%',
-      appBgColor: '#030d05',
-      appBgImage: "url('/backgrounds/forest-neon-dark.svg')",
-    },
-  },
-  'blue-ruby': {
-    light: {
-      primary: '221 83% 53%',
-      ring: '221 83% 53%',
-      accent: '221 92% 94%',
-      accentForeground: '221 82% 18%',
-      appBgColor: '#eef6ff',
-      appBgImage: "url('/backgrounds/blue-ruby-light.svg')",
-    },
-    dark: {
-      primary: '221 83% 64%',
-      ring: '221 83% 64%',
-      accent: '221 56% 16%',
-      accentForeground: '221 92% 90%',
-      appBgColor: '#060813',
-      appBgImage: "url('/backgrounds/blue-ruby-dark.svg')",
-    },
-  },
-  'mango-lagoon': {
-    light: {
-      primary: '38 92% 44%',
-      ring: '38 92% 44%',
-      accent: '38 92% 92%',
-      accentForeground: '30 92% 18%',
-      appBgColor: '#fff4dc',
-      appBgImage: "url('/backgrounds/mango-lagoon-light.svg')",
-    },
-    dark: {
-      primary: '38 92% 58%',
-      ring: '38 92% 58%',
-      accent: '38 72% 16%',
-      accentForeground: '38 96% 88%',
-      appBgColor: '#070a08',
-      appBgImage: "url('/backgrounds/mango-lagoon-dark.svg')",
-    },
-  },
-  'sunset-aqua': {
-    light: {
-      primary: '16 88% 48%',
-      ring: '16 88% 48%',
-      accent: '16 92% 92%',
-      accentForeground: '18 92% 18%',
-      appBgColor: '#fff1e9',
-      appBgImage: "url('/backgrounds/sunset-aqua-light.svg')",
-    },
-    dark: {
-      primary: '18 92% 58%',
-      ring: '18 92% 58%',
-      accent: '18 72% 16%',
-      accentForeground: '18 96% 88%',
-      appBgColor: '#0b0503',
-      appBgImage: "url('/backgrounds/sunset-aqua-dark.svg')",
-    },
-  },
-  'graphite-glow': {
-    light: {
-      primary: '215 16% 42%',
-      ring: '215 16% 42%',
-      accent: '215 20% 92%',
-      accentForeground: '215 24% 18%',
-      appBgColor: '#fafafa',
-      appBgImage: "url('/backgrounds/graphite-glow-light.svg')",
-    },
-    dark: {
-      primary: '215 18% 72%',
-      ring: '215 18% 72%',
-      accent: '215 18% 16%',
-      accentForeground: '215 24% 90%',
-      appBgColor: '#020202',
-      appBgImage: "url('/backgrounds/graphite-glow-dark.svg')",
-    },
-  },
-};
+const THEME_STYLE_TOKENS = Object.fromEntries([
+  ['ember-noir', '30 90% 34%', '34 91% 58%'],
+  ['blue-ruby', '220 72% 43%', '220 77% 61%'],
+  ['forest-neon', '159 80% 25%', '159 71% 45%'],
+  ['violet', '260 55% 43%', '260 72% 68%'],
+  ['rose-quartz', '341 66% 42%', '341 74% 61%'],
+  ['graphite-glow', '215 22% 37%', '215 25% 65%']
+].map(([id,light,dark])=> {
+  const lightHue=light.split(' ')[0], darkHue=dark.split(' ')[0];
+  return [id,{
+    light:{primary:light,ring:light,accent:lightHue+' 45% 94%',accentForeground:lightHue+' 55% 20%',appBgColor:'#f7f8fa',appBgImage:'none'},
+    dark:{primary:dark,ring:dark,accent:darkHue+' 35% 17%',accentForeground:darkHue+' 65% 90%',appBgColor:'#101520',appBgImage:'none'}
+  }];
+}));
 
 function setRootVar(root, name, value) {
   root.style.setProperty(name, value);
