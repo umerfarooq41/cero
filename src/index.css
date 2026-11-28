@@ -1613,3 +1613,17 @@ main,
  .cero-desktop-workspace .app-main-scroll .settings-section { padding-inline:0!important; max-width:none!important; }
  .cero-desktop-workspace .app-main-scroll .settings-section-header :is(h2,h3) { font-size:18px!important; line-height:1.4; }
 }
+
+/* Opaque desktop controls do not need backdrop compositing. Keep mobile glass intact. */
+@layer utilities {
+  @media (min-width: 1024px) {
+    :is(.cero-desktop-workspace, .app-desktop-modal, .app-desktop-confirm, .app-route-sheet.app-sheet-surface) :where(
+      input:not([type='checkbox']):not([type='radio']):not([type='range']),
+      textarea,
+      [role='combobox']
+    ) {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+  }
+}
