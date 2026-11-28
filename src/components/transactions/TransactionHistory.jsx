@@ -48,6 +48,7 @@ import {
   formatCurrencyNumberText,
 } from '@/lib/currencies';
 import { cn } from '@/lib/utils';
+import { getSelectionTotals } from '@/lib/selectionTotals';
 
 const ADD_TRANSACTION_ROUTE = '/add-transaction';
 
@@ -491,6 +492,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const selectedIds = selection.scope === selectionScope ? selection.ids : [];
   const setSelectedIds = update => setSelection(previous => ({ scope: selectionScope, ids: typeof update === 'function' ? update(previous.scope === selectionScope ? previous.ids : []) : update }));
   const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
+  const selectionTotals = getSelectionTotals(selectedRows);
   const toggleSelection = id => setSelectedIds(ids => {
     const visibleIds = new Set(sortedTransactions.map(row => row.id));
     const visibleSelection = ids.filter(value => visibleIds.has(value));
@@ -574,7 +576,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         <Button size="sm" variant="ghost" disabled={!sortedTransactions.length} onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button>
         <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button>
         <span aria-live="polite">{selectedRows.length} selected</span>
-        {['income','expense','transfer'].map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectedRows.filter(row => row.type === type).reduce((sum,row) => sum + Math.abs(Number(row.amount || 0)),0))}</span>)}
+        {['income','expense','transfer','adjustment'].filter(type => type !== 'adjustment' || selectionTotals.adjustment !== 0).map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectionTotals[type])}</span>)}
       </div>}
       <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
         {[['all','All'],['income','Income'],['expense','Expense'],['transfer','Transfer']].map(([value,label]) => (
