@@ -8,3 +8,7 @@ test('selection totals retain signed refunds and isolate adjustments', () => {
 test('selection totals handle cents and invalid values', () => {
   assert.deepEqual(getSelectionTotals([{type:'expense',amount:0.1},{type:'expense',amount:0.2},{type:'expense',amount:'invalid'}]), {income:0,expense:0.3,transfer:0,adjustment:0});
 });
+
+test('legacy balance adjustments do not inflate income or expenses', () => {
+  assert.deepEqual(getSelectionTotals([{type:'income',amount:30,note:'Account balance adjustment'},{type:'expense',amount:20,note:'Debt principal removed: example'}]), {income:0,expense:0,transfer:0,adjustment:50});
+});
