@@ -1,27 +1,26 @@
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toneClasses } from './settingsAppearance.jsx';
 
 export function IconTile({ icon: Icon, tone = 'blue', className }) {
   return (
     <div
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center rounded-md ring-1',
-        toneClasses[tone]?.tile || toneClasses.blue.tile,
+        'flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground',
+        tone === 'rose' && 'text-destructive',
         className
       )}
     >
-      <Icon className="h-[18px] w-[18px]" />
+      <Icon className="h-4 w-4" />
     </div>
   );
 }
 
 export function SettingsSection({ title, children }) {
   return (
-    <section className="settings-section animate-child mb-4 lg:mb-8 overflow-hidden">
+    <section className="settings-section animate-child mb-4 lg:mb-6 overflow-hidden">
       <div className="settings-section-header flex items-center border-b border-border px-0 py-2.5 lg:border-b-0 lg:py-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-foreground lg:!text-[18px] lg:normal-case lg:tracking-normal lg:text-foreground">
+          <h3 className="cero-section-title text-foreground lg:normal-case lg:tracking-normal lg:text-foreground">
             {title}
           </h3>
         </div>
@@ -49,7 +48,7 @@ export function SettingRow({
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'settings-row w-full min-h-12 px-0.5 py-2 lg:min-h-[64px] lg:gap-4 text-left transition-colors',
+        'settings-row w-full min-h-12 px-0.5 py-2 lg:min-h-[52px] lg:gap-4 text-left transition-colors',
         onClick && 'rounded-md hover:bg-muted/30',
         stackOnMobile
           ? 'flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3'
@@ -62,14 +61,14 @@ export function SettingRow({
         <div className="min-w-0 flex-1">
           <div
             className={cn(
-              'break-words text-sm font-medium lg:text-[16px]',
+              'break-words text-sm font-medium',
               danger && 'text-destructive'
             )}
           >
             {label}
           </div>
           {description && (
-            <div className="mt-0.5 break-words text-[11px] leading-4 text-muted-foreground lg:text-[14px] lg:leading-5">
+            <div className="mt-0.5 break-words text-xs leading-4 text-muted-foreground lg:text-[14px] lg:leading-5">
               {description}
             </div>
           )}
@@ -88,7 +87,7 @@ export function SegmentedOption({ active, onClick, icon: Icon, label }) {
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md px-2.5 py-2 text-xs font-semibold lg:px-4 lg:py-2 lg:text-sm transition-all',
+        'inline-flex items-center justify-center gap-1.5 rounded-sm px-2 h-8 text-sm font-medium lg:px-4 transition-colors',
         active
           ? 'bg-primary/10 text-primary'
           : 'text-muted-foreground app-surface-hover hover:text-foreground'
@@ -111,20 +110,20 @@ export function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(
-        'relative flex h-9 w-9 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+        'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
         active
-          ? 'border-primary/45 ring-2 ring-primary/30 ring-offset-2 ring-offset-background'
-          : 'border-border/60 hover:border-border/80'
+          ? 'border-primary'
+          : 'border-transparent hover:border-border'
       )}
     >
       <span
-        className="h-5 w-5 lg:h-6 lg:w-6 rounded-full shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+        className="h-7 w-7 rounded-full ring-1 ring-black/5 dark:ring-white/10"
         style={{ backgroundColor: `hsl(${accent})` }}
       />
 
       {active && (
-        <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm ring-1 ring-background/80">
-          <Check className="h-2.5 w-2.5" />
+        <span className="absolute inset-0 flex items-center justify-center text-primary-foreground">
+          <Check className="h-4 w-4" />
         </span>
       )}
     </button>

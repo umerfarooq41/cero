@@ -1857,3 +1857,7 @@ main,
  .cero-desktop-workspace .cero-goal-register tr {padding:6px 0;gap:2px 6px;}
  .cero-desktop-workspace .cero-goal-register td:first-child {min-height:28px;}
 }
+
+.cero-settings-page .settings-section-header {padding-block:8px;border-bottom:1px solid hsl(var(--border));}
+.cero-settings-page .settings-row {gap:10px;}
+.cero-settings-page [role="combobox"] {box-shadow:none!important;border-radius:6px!important;}

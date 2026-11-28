@@ -384,7 +384,7 @@ export default function Settings() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 rounded-2xl"
+                className="gap-2 rounded-md"
                 onClick={handleSignOut}
               >
                 <LogOut className="h-4 w-4" />
@@ -421,7 +421,7 @@ export default function Settings() {
             
             stackOnMobile
           >
-            <div className="grid grid-cols-3 gap-1 rounded-md border border-border p-1">
+            <div className="grid grid-cols-3 gap-0.5 rounded-md border border-border p-0.5">
               {themeOptions.map((option) => (
                 <SegmentedOption
                   key={option.value}
@@ -437,11 +437,11 @@ export default function Settings() {
           <SettingRow
             icon={Brush}
             tone="cyan"
-            label="Theme Style"
+            label="Theme style"
             
             stackOnMobile
           >
-            <div className="grid w-full grid-cols-4 justify-items-center gap-2 px-1 py-1 min-[400px]:grid-cols-8 sm:w-[368px]">
+            <div className="grid w-full grid-cols-4 justify-items-center gap-1 py-1 min-[420px]:grid-cols-8 sm:w-[352px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
@@ -467,7 +467,7 @@ export default function Settings() {
                 updateSetting('currency', value);
               }}
             >
-              <SelectTrigger disabled={!online} className="h-10 w-auto min-w-[112px] gap-2 rounded-md px-3">
+              <SelectTrigger disabled={!online} className="h-9 w-auto min-w-[100px] gap-2 rounded-md px-2.5">
                 <SelectValue />
               </SelectTrigger>
 
@@ -491,7 +491,7 @@ export default function Settings() {
           <SettingRow
             icon={CircleDollarSign}
             tone="amber"
-            label="Show Decimals"
+            label="Show decimals"
             description="Display amounts without decimals when off."
           >
             <Switch checked={showDecimals} onCheckedChange={setShowDecimals} />
