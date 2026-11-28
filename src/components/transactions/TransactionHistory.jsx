@@ -11,6 +11,7 @@ import {
   Repeat,
   Search,
   SlidersHorizontal,
+  ListChecks,
   Target,
   WalletCards,
   X,
@@ -180,6 +181,7 @@ function AdvancedFilterSheet({
   setSortBy,
   onClearAdvanced,
   activeCount,
+  onSelectTransactions,
 }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -188,10 +190,10 @@ function AdvancedFilterSheet({
           type="button"
           variant="secondary"
           className={cn(
-            'h-10 shrink-0 rounded-xl px-3',
+            'h-10 shrink-0 !rounded-md px-3',
             activeCount > 0 && 'bg-primary/10 text-primary hover:bg-primary/15'
           )}
-          aria-label="Open advanced transaction filters"
+          aria-label="Open transaction options"
         >
           <SlidersHorizontal className="h-4 w-4" />
           {activeCount > 0 && (
@@ -207,11 +209,12 @@ function AdvancedFilterSheet({
         className="flex max-h-[88dvh] flex-col overflow-hidden rounded-t-[1.75rem] border-0 bg-background px-4 pb-[env(safe-area-inset-bottom)] pt-4 shadow-xl sm:mx-auto sm:max-w-xl"
       >
         <SheetHeader className="shrink-0 pb-3 text-left">
-          <SheetTitle className="text-lg font-semibold">Filter transactions</SheetTitle>
+          <SheetTitle className="text-lg font-semibold">Transaction options</SheetTitle>
           <SheetDescription className="sr-only">Filter transaction history by source, account, category, date, and sort order.</SheetDescription>
         </SheetHeader>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-3">
+          <button type="button" className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2 text-sm font-medium" onClick={() => { onOpenChange(false); onSelectTransactions?.(); }}>Select transactions <ListChecks className="size-4"/></button>
           <section>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Source</label>
             <div className="grid grid-cols-4 gap-1.5">
@@ -575,8 +578,8 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           )}
         </div>
 
-        <Button size="sm" variant="outline" aria-pressed={selectionMode} onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)}>{selectionMode ? 'Done' : 'Select'}</Button>
-        <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<Select value={value} onValueChange={set}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{options.map(o=><SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent></Select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
+        {selectionMode && <Button size="sm" variant="outline" className="!rounded-md" onClick={exitSelection}>Done</Button>}
+        <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><button type="button" className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2 text-sm" onClick={e=>{setSelectionMode(true);e.currentTarget.closest("details").open=false}}>Select transactions <ListChecks className="size-4"/></button><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<Select value={value} onValueChange={set}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{options.map(o=><SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent></Select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
         <div className="lg:hidden"><AdvancedFilterSheet
           open={filterSheetOpen}
           onOpenChange={setFilterSheetOpen}
@@ -602,6 +605,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           setSortBy={setSortBy}
           onClearAdvanced={clearAdvancedFilters}
           activeCount={activeAdvancedCount}
+          onSelectTransactions={() => setSelectionMode(true)}
         /></div>
       </div>
 

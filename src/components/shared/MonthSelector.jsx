@@ -55,6 +55,7 @@ export default function MonthSelector({
         if (info.offset.x > 40) goToPreviousMonth();
       }}
       className={cn(
+        'cero-period-control',
         bare
           ? 'flex w-full min-w-0 touch-pan-y select-none items-center justify-center gap-1 bg-transparent'
           : 'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1 rounded-md bg-transparent',
