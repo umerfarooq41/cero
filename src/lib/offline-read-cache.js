@@ -40,7 +40,9 @@ const runStore = async (mode, action) => {
       const transaction = db.transaction(STORE_NAME, mode);
       const store = transaction.objectStore(STORE_NAME);
       const request = action(store);
-      request.onsuccess = () => resolve(request.result);
+      transaction.oncomplete = () => resolve(request.result);
+      transaction.onabort = () => reject(transaction.error || request.error);
+      transaction.onerror = () => reject(transaction.error || request.error);
       request.onerror = () => reject(request.error);
     });
   } finally {
@@ -68,9 +70,12 @@ export async function restoreReadCache(queryClient, userId) {
 
     for (const cached of record.queries) {
       if (!Array.isArray(cached.queryKey) || cached.data === undefined) continue;
-      queryClient.setQueryData(cached.queryKey, cached.data, {
-        updatedAt: Number(cached.dataUpdatedAt || record.savedAt || Date.now()),
-      });
+      if (!CACHEABLE_QUERY_ROOTS.has(cached.queryKey[0]) || cached.queryKey[1] !== userId) continue;
+      const updatedAt = Number(cached.dataUpdatedAt || record.savedAt || 0);
+      if (!Number.isFinite(updatedAt) || updatedAt <= 0) continue;
+      const existing = queryClient.getQueryState(cached.queryKey);
+      if (existing?.data !== undefined && existing.dataUpdatedAt >= updatedAt) continue;
+      queryClient.setQueryData(cached.queryKey, cached.data, { updatedAt });
     }
 
     return true;
