@@ -1943,3 +1943,12 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-desktop-workspace tr.cero-inline-detail-row>td::before{display:none!important;content:none!important;}
 .cero-inline-detail-row .cero-detail-panel{align-items:stretch;}
 }
+
+@media(max-width:1023px){
+.cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row){padding-block:8px!important;}
+.cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row)>td{min-width:0!important;white-space:nowrap!important;padding:4px 2px!important;font-size:clamp(11px,3.4vw,14px);text-align:right!important;}
+.cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row)>th{padding-block:4px!important;}
+.cero-desktop-workspace .cero-plan-table .cero-plan-cell{height:32px!important;min-width:0;width:100%;}
+.cero-desktop-workspace .cero-account-register:not(.cero-account-archived) tbody tr:not(.cero-inline-detail-row)>td:nth-child(3),.cero-desktop-workspace .cero-account-register:not(.cero-account-archived) tbody tr:not(.cero-inline-detail-row)>td:nth-child(4),.cero-desktop-workspace .cero-account-asset tbody tr:not(.cero-inline-detail-row)>td:nth-child(6){display:none!important;}
+.cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row){padding-block:10px!important;row-gap:3px!important;}
+}
