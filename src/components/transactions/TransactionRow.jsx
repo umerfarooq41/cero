@@ -181,7 +181,7 @@ export default function TransactionRow({
   if (desktopLedger) return (
     <tr onClick={onClick} className={cn("cursor-pointer hover:bg-muted/30", selected && "bg-primary/10")}>
       <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">{transaction.date && /^\d{4}-\d{2}-\d{2}$/.test(transaction.date) ? new Date(transaction.date + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : transaction.date || '—'}</td>
-      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" onClick={event => { event.stopPropagation(); onClick?.(); }} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{selectionMode && <span aria-label={selected ? "Selected" : "Not selected"}>{selected ? "☑" : "☐"}</span>}{isTransfer ? <ArrowLeftRight className="size-5 shrink-0 text-sky-500"/> : <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>}<span className="min-w-0 break-words">{title}{!isAdjustment && !isRecurring && !isGoalContribution && noteLabel && noteLabel !== title && <span className="block text-xs font-normal text-muted-foreground">{noteLabel}</span>}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
+      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" aria-pressed={selectionMode ? selected : undefined} onClick={event => { event.stopPropagation(); onClick?.(); }} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{selectionMode && <span aria-hidden="true">{selected ? "☑" : "☐"}</span>}{isTransfer ? <ArrowLeftRight className="size-5 shrink-0 text-sky-500"/> : <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>}<span className="min-w-0 break-words">{title}{!isAdjustment && !isRecurring && !isGoalContribution && noteLabel && noteLabel !== title && <span className="block text-xs font-normal text-muted-foreground">{noteLabel}</span>}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
       <td className="px-3 py-3 text-muted-foreground">{isTransfer ? movementLabel : accountName}</td>
       <td className="px-3 py-3 text-xs text-muted-foreground">{isAdjustment ? (isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment') : isTransfer ? transferKindLabel : transactionTypeLabel}</td>
       <td className={cn('whitespace-nowrap px-3 py-3 text-right font-medium tabular-nums',config.color)}>{config.sign} <CurrencyAmount value={amountValue} formatCurrency={formatCurrency}/></td>
@@ -196,7 +196,7 @@ export default function TransactionRow({
         flush ? 'px-0' : 'px-1 sm:px-3', selected && 'bg-primary/10'
       )}
     >
-      {selectionMode && <button type="button" aria-label="Select transaction" aria-pressed={selected} onClick={event => { event.stopPropagation(); onClick?.(); }}>{selected ? "☑" : "☐"}</button>}
+      {selectionMode && <button type="button" aria-label={`Select ${title}`} aria-pressed={selected} onClick={event => { event.stopPropagation(); onClick?.(); }}>{selected ? "☑" : "☐"}</button>}
       {isTransfer ? (
         <div className="h-7 w-7 rounded-xl flex items-center justify-center bg-sky-500/10 text-sky-600 shrink-0 dark:text-sky-400 sm:h-8 sm:w-8">
           <ArrowLeftRight className="h-3.5 w-3.5 stroke-[2.2] sm:h-4 sm:w-4" />

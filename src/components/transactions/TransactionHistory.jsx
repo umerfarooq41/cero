@@ -487,7 +487,11 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
   const hasTransactions = sortedDates.length > 0;
   const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
-  const toggleSelection = id => setSelectedIds(ids => ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]);
+  const toggleSelection = id => setSelectedIds(ids => {
+    const visibleIds = new Set(sortedTransactions.map(row => row.id));
+    const visibleSelection = ids.filter(value => visibleIds.has(value));
+    return visibleSelection.includes(id) ? visibleSelection.filter(value => value !== id) : [...visibleSelection, id];
+  });
   const exitSelection = () => { setSelectionMode(false); setSelectedIds([]); };
 
   const clearAdvancedFilters = () => {
@@ -510,8 +514,8 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     <div>
       <div className="mb-2 text-xs text-muted-foreground">{globalScope ? `${filtered.length} transactions found · ${scopeLabel}` : `${filtered.length} posted transactions`}</div>
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-        <Button size="sm" variant="outline" onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)}>{selectionMode ? 'Done' : 'Select transactions'}</Button>
-        {selectionMode && <><Button size="sm" variant="ghost" onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button><Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button><span aria-live="polite">{selectedRows.length} selected</span></>}
+        <Button size="sm" variant="outline" aria-pressed={selectionMode} onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)}>{selectionMode ? 'Done' : 'Select transactions'}</Button>
+        {selectionMode && <><Button size="sm" variant="ghost" disabled={!sortedTransactions.length} onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button><Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button><span aria-live="polite">{selectedRows.length} selected</span></>}
       </div>
       <div className="cero-history-search mb-2 flex items-center gap-2 animate-child">
         <div className="relative min-w-0 flex-1">
