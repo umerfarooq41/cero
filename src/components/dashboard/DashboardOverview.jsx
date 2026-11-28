@@ -120,7 +120,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     transactions, currentMonth, now: new Date(),
   });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="cero-hero-label flex items-center justify-between gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Discretionary allowance today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
+    <div className="cero-hero-label flex flex-wrap items-center justify-center gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Spending allowance</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
@@ -129,19 +129,21 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
     <div className="cero-hero-label flex items-center justify-between gap-2">
-      <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Discretionary allowance today</p>
+      <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Spending allowance</p>
       <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
       </Badge>
     </div>
-    <div className="space-y-1">
-      <div className="cero-hero-value flex items-baseline gap-1.5">
-        <Money value={pace.allowance} formatCurrency={formatCurrency} className="cero-primary-amount leading-none"/>
-        <span className="text-sm text-muted-foreground">/ day</span>
-      </div>
-      {pace.spentToday > 0 && <p className="text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/> · <Money value={pace.leftToday} formatCurrency={formatCurrency}/> left</p>}
+    <div className="space-y-1 text-center">
+      <p className="text-xs text-muted-foreground">Available to spend today</p>
+      <div className="flex justify-center"><Money value={pace.leftToday} formatCurrency={formatCurrency} className="cero-primary-amount leading-none"/></div>
+      <p className="text-xs text-muted-foreground">Of your <Money value={pace.allowance} formatCurrency={formatCurrency}/> daily allowance</p>
+    </div>
+    <div className="grid grid-cols-2 gap-3 py-2 text-center">
+      {[['Spent today',pace.spentToday],['Left this month',pace.remaining]].map(([label,value]) => <div key={label} className="min-w-0"><p className="text-xs text-muted-foreground">{label}</p><Money value={value} formatCurrency={formatCurrency} className="cero-secondary-amount"/></div>)}
     </div>
     <div className="space-y-1.5">
+      <div className="flex justify-between gap-2 text-xs text-muted-foreground"><span>Monthly discretionary spending</span><span>{pace.daysRemaining} days left</span></div>
       <div className="relative h-1.5 rounded-full bg-primary/5" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
         <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
         <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
@@ -149,6 +151,13 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
       <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
 
     </div>
+    <details className="group text-center">
+      <summary className="cursor-pointer list-none py-2 text-sm text-primary">How it's calculated <ChevronRight size={14} className="inline group-open:rotate-90"/></summary>
+      <dl className="mx-auto max-w-md divide-y divide-border text-left">
+        {[['Discretionary budget',pace.budget],['Spent before today',pace.spent-pace.spentToday],['Daily allowance',pace.allowance],['Spent today',pace.spentToday],['Available today',pace.leftToday]].map(([label,value])=><div key={label} className="flex justify-between gap-2 py-2 text-xs"><dt className="text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency}/></dd></div>)}
+        <div className="flex justify-between py-2 text-xs"><dt className="text-muted-foreground">Days remaining</dt><dd>{pace.daysRemaining}</dd></div>
+      </dl>
+    </details>
     <div className="flex min-h-9 items-center justify-between gap-2">
       <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{insight}</p>
       <Button variant="ghost" size="sm" className="-mr-2 min-h-8 shrink-0 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
@@ -246,9 +255,10 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
-    <div className="cero-monthly-overview border-b border-border py-3 lg:py-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="cero-section-title">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>
+    <div className="cero-safe-hero mx-auto w-full max-w-3xl border-b border-border text-center"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
+    <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border py-3 text-center lg:py-5">
+      <div className="mb-3 space-y-1 text-center">
+        <h2 className="cero-section-title">Monthly overview</h2><p className="text-xs text-muted-foreground">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')}</p>
         
       </div>
       <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4 cero-overview-metrics">
@@ -257,16 +267,18 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
           ['Total expenses', budget.totalExpenses],
           ['Tracked savings', budget.totalTrackedSavings],
           ['Left to allocate', budget.leftToAllocate],
-        ].map(([label, value], index) => <div key={label} className="min-w-0 lg:px-4 lg:first:pl-0">
+        ].map(([label, value], index) => <div key={label} className="min-w-0 text-center lg:px-2">
           <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
           <dd className="mt-1"><Money value={value} formatCurrency={formatCurrency} className={'cero-secondary-amount ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
         </div>)}
       </dl>
+      <div className="mt-4 border-t border-border py-3 text-center"><p className="text-xs text-muted-foreground">Operating cash flow</p><Money value={num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)} formatCurrency={formatCurrency} className={`cero-secondary-amount ${num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)<0?"text-destructive":"text-emerald-600 dark:text-emerald-400"}`}/></div>
+      <Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/>
     </div>
     <div className="contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8">
       <div className="contents md:order-2 md:flex md:min-w-0 md:flex-col md:gap-4">
-        <div className="cero-safe-hero contents md:order-1"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
-        <div className="contents md:order-2"><Entrance index={1}><Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/></Entrance></div>
+
+
         <div className="hidden md:contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-md bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
       </div>
       <div className="contents md:flex md:min-w-0 md:flex-col md:gap-4">
