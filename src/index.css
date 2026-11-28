@@ -2004,3 +2004,13 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 @media(min-width:1024px){.cero-desktop-inspector{display:flex!important;}.cero-desktop-activity-month{display:flex!important;}.cero-inline-detail-row,.cero-mobile-activity-month{display:none!important;}}
 
 @media(max-width:1023px){.cero-workplace-inline{display:block!important;padding:0!important;}.cero-workplace-inline>td{display:block!important;padding:4px 0 8px!important;}.cero-workplace-inline .cero-detail-panel{font-weight:400;}.cero-recurring-register tr:not(.cero-inline-detail-row)>td:first-child button,.cero-goal-register tr:not(.cero-inline-detail-row)>td:first-child button{width:100%;}}
+
+/* Shared compact mobile register details. */
+@media(max-width:1023px){
+.cero-register-chevron{margin-left:4px;vertical-align:middle;}
+.cero-inline-detail-row .cero-detail-panel{font-variant-numeric:tabular-nums;}
+.cero-inline-detail-row .cero-detail-panel h3{line-height:1.4;}
+.cero-mobile-activity-month button{display:grid;place-items:center;min-width:32px;min-height:32px;}
+.cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(4){white-space:nowrap;align-self:center;}
+.cero-desktop-workspace .cero-goal-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(4){white-space:nowrap;}
+}
