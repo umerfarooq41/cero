@@ -17,7 +17,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import AppTabs from '@/components/shared/AppTabs.jsx';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -98,17 +97,7 @@ function CurrencyPrefix({ currency }) {
 }
 
 function TransactionTypeSelector({ value, onChange }) {
-  return (
-    <AppTabs
-      tabs={typeOptions}
-      value={value}
-      onChange={onChange}
-      size="sm"
-      layoutId="add-transaction-type-tab-highlight"
-      gridClassName="gap-0.5 sm:gap-1"
-      buttonClassName="gap-1.5 px-2 py-2.5 text-xs sm:text-sm"
-    />
-  );
+  return <nav aria-label="Transaction type" className="flex border-b border-border">{typeOptions.map(({value:key,label,icon:Icon})=><button key={key} type="button" aria-pressed={value===key} onClick={()=>onChange(key)} className={'flex flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-medium transition-colors '+(value===key?'border-primary text-primary':'border-transparent text-muted-foreground')}><Icon className="size-4"/>{label}</button>)}</nav>;
 }
 
 function normalizeCategoryType(type) {
@@ -196,6 +185,12 @@ export default function AddTransaction() {
   const [transferPurpose, setTransferPurpose] = useState(TRANSFER_PURPOSES.normal);
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [note, setNote] = useState('');
+  const [payee,setPayee]=useState('');
+  const [payeeReady,setPayeeReady]=useState(false);
+  const [payeeQuery,setPayeeQuery]=useState('');
+  const [addingPayee,setAddingPayee]=useState(false);
+  useEffect(()=>{let active=true;supabase.from('transactions').select('payee_name').limit(1).then(({error})=>{if(active)setPayeeReady(!error)});return()=>{active=false};},[]);
+  const recentPayees=useMemo(()=>{const seen=new Set();return [...allTransactions].sort((a,b)=>String(b.date).localeCompare(String(a.date))).filter(t=>t.type===type&&t.payee_name).map(t=>t.payee_name.trim()).filter(n=>{const k=n.toLowerCase();if(!n||seen.has(k))return false;seen.add(k);return true;});},[allTransactions,type]);
   const [saving, setSaving] = useState(false);
   const [linkedSaveError, setLinkedSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -269,6 +264,7 @@ export default function AddTransaction() {
     setDate(existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setOccurrenceDate(existingTransaction.recurring_posted_for_date || existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setNote(existingTransaction.note || '');
+    setPayee(existingTransaction.payee_name || '');
   }, [existingTransaction]);
 
   useEffect(() => {
@@ -439,7 +435,8 @@ export default function AddTransaction() {
         rpcPayload.p_transaction_id = id;
       }
 
-      const { error } = await supabase.rpc(rpcName, rpcPayload);
+      const usePayeeRpc = payeeReady;
+      const { error } = await supabase.rpc(usePayeeRpc ? rpcName + '_with_payee' : rpcName, usePayeeRpc ? {...rpcPayload,p_payee_name:type==='transfer'?null:payee.trim()||null} : rpcPayload);
       if (error) throw error;
 
       invalidateScheduledQueries(queryClient);
@@ -544,7 +541,7 @@ export default function AddTransaction() {
       ) : (
       <>
       <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-3">
-        <TransactionTypeSelector value={type} onChange={nextType=>{if(nextType===type)return;setType(nextType);setCategoryId('');setToAccountId('');setTransferPurpose(TRANSFER_PURPOSES.normal);setExpanded('');}}/>
+        <TransactionTypeSelector value={type} onChange={nextType=>{if(nextType===type)return;setType(nextType);setPayee('');setPayeeQuery('');setAddingPayee(false);setCategoryId('');setToAccountId('');setTransferPurpose(TRANSFER_PURPOSES.normal);setExpanded('');}}/>
         <div className="py-5 text-center">
           <p className="mb-1 text-xs text-muted-foreground">Amount</p>
           <button type="button" className="cero-entry-mobile mx-auto items-center justify-center gap-2 text-4xl font-semibold tabular-nums" onClick={()=>{setExpanded('');setKeypad(true);setFresh(true);}}><CurrencyPrefix currency={currency}/>{amount||'0.00'}</button>
@@ -552,6 +549,7 @@ export default function AddTransaction() {
           {operation&&<p className="mt-1 text-xs text-muted-foreground">{operation.base} {operation.op}</p>}
         </div>
         <div className="space-y-1">
+          {type!=='transfer'&&payeeReady&&<ExpandField label="Payee (optional)" icon={Wallet} value={payee||'Choose payee'} open={expanded==='payee'} onToggle={()=>{toggleField('payee');setPayeeQuery('');setAddingPayee(false);}}><Input aria-label="Search payees" placeholder={addingPayee?'New payee name':'Search payees'} maxLength={120} value={payeeQuery} onChange={e=>setPayeeQuery(e.target.value)}/><div className="flex flex-wrap gap-2">{recentPayees.filter(n=>n.toLowerCase().includes(payeeQuery.toLowerCase())).slice(0,payeeQuery?30:8).map(n=><button type="button" key={n} aria-pressed={payee===n} onClick={()=>choose(setPayee,n)} className={'rounded-full border px-3 py-2 text-sm '+(payee===n?'border-primary text-primary bg-primary/10':'border-border')}>{n}</button>)}<button type="button" onClick={()=>setAddingPayee(true)} className="inline-flex items-center gap-1 rounded-full border border-primary/50 px-3 py-2 text-sm text-primary"><Plus className="size-4"/>New payee</button>{payee&&<button type="button" className="px-2 text-sm text-muted-foreground" onClick={()=>choose(setPayee,'')}>Clear</button>}</div>{(addingPayee||payeeQuery.trim())&&<Button type="button" size="sm" disabled={!payeeQuery.trim()} onClick={()=>{const n=payeeQuery.trim();choose(setPayee,recentPayees.find(p=>p.toLowerCase()===n.toLowerCase())||n);}}>Use payee</Button>}</ExpandField>}
           {type!=='transfer'&&<ExpandField label="Category" icon={LayoutGrid} value={categories.find(c=>c.id===categoryId)?.name} open={expanded==='category'} onToggle={()=>toggleField('category')}><ChipOptions items={filteredCategories.filter(c=>!c.is_archived||c.id===categoryId)} value={categoryId} onChoose={v=>choose(setCategoryId,v)} onAdd={()=>setNewCategory(true)}/></ExpandField>}
           <ExpandField label={type==='transfer'?'From account':type==='income'?'Deposit account':'Account'} icon={Wallet} value={accounts.find(a=>a.id===accountId)?.name} open={expanded==='account'} onToggle={()=>toggleField('account')}><ChipOptions items={accounts.filter(a=>(!a.is_archived||a.id===accountId)&&(type!=='transfer'||a.id!==toAccountId))} value={accountId} onChoose={v=>choose(setAccountId,v)}/></ExpandField>
           {type==='transfer'&&<>
@@ -561,7 +559,7 @@ export default function AddTransaction() {
             {requiresCategory&&<ExpandField label={transferPurpose===TRANSFER_PURPOSES.savingsAllocation?'Savings category':'Debt category'} icon={LayoutGrid} value={categories.find(c=>c.id===categoryId)?.name} open={expanded==='category'} onToggle={()=>toggleField('category')}><ChipOptions items={filteredCategories.filter(c=>!c.is_archived||c.id===categoryId)} value={categoryId} onChoose={v=>choose(setCategoryId,v)} onAdd={()=>setNewCategory(true)}/></ExpandField>}
           </>}
           <ExpandField label="Date" icon={CalendarDays} value={date?format(parseISO(date),'d MMMM yyyy'):''} open={expanded==='date'} onToggle={()=>toggleField('date')}><QuickDates value={date} onChange={v=>choose(setDate,v)}/></ExpandField>
-          <Textarea aria-label="Note" value={note} onFocus={()=>{if(finishCalc()){setKeypad(false);setExpanded('');}}} onChange={e=>setNote(e.target.value)} placeholder="Add note (optional)" className="mt-3 min-h-12 resize-none"/>
+          <div className="pt-4"><label className="mb-2 block text-xs text-muted-foreground" htmlFor="manual-note">Note (optional)</label><Textarea id="manual-note" aria-label="Note" value={note} onFocus={()=>{if(finishCalc()){setKeypad(false);setExpanded('');}}} onChange={e=>setNote(e.target.value)} placeholder="Add a note" className="min-h-12 resize-none"/></div>
         </div>
       </main>
         <div className="app-route-sheet-footer">

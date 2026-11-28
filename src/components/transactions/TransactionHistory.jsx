@@ -429,6 +429,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
       !searchValue ||
       category?.name?.toLowerCase().includes(searchValue) ||
       transaction.note?.toLowerCase().includes(searchValue) ||
+      transaction.payee_name?.toLowerCase().includes(searchValue) ||
       fromAccount?.name?.toLowerCase().includes(searchValue) ||
       toAccount?.name?.toLowerCase().includes(searchValue) ||
       transaction.account_name_snapshot?.toLowerCase().includes(searchValue) ||
