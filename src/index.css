@@ -1627,3 +1627,9 @@ main,
     }
   }
 }
+
+/* Tablet navigation uses a rail; page content migrates independently. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .cero-desktop-workspace { --cero-page-gutter: 20px; }
+  .cero-desktop-workspace .app-main-scroll { --cero-page-gutter: 20px; --app-bottom-nav-height: 0px; }
+}

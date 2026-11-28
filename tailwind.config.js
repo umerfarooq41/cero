@@ -4,6 +4,7 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+        screens: { workspace: '1200px' },
   		fontFamily: {
   			sans: ['var(--font-sans)'],
   			mono: ['var(--font-mono)'],

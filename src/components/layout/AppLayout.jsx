@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { motion } from 'framer-motion';
 
 import DesktopTopNav from './DesktopTopNav';
@@ -13,15 +14,16 @@ const pageTransition = {
 
 export default function AppLayout() {
   const location = useLocation();
+  const layout = useResponsiveLayout();
 
   return (
-    <div className="cero-desktop-workspace app-page-surface flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden lg:flex-row">
+    <div data-layout={layout} className="cero-desktop-workspace app-page-surface flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden md:flex-row">
       <ScrollManager />
 
       <DesktopTopNav />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <main className="app-page-surface app-main-scroll flex-1 overflow-y-auto lg:pb-0">
+        <main className="app-page-surface app-main-scroll flex-1 overflow-y-auto md:pb-0">
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0 }}

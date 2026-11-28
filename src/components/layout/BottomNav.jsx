@@ -86,7 +86,7 @@ export default function BottomNav() {
     <>
       <BottomNavStyles />
 
-      <nav className="app-bottom-nav fixed inset-x-0 bottom-0 z-50 lg:hidden">
+      <nav className="app-bottom-nav fixed inset-x-0 bottom-0 z-50 md:hidden">
         <div className="mx-auto grid h-full w-full max-w-3xl grid-cols-5">
           {navItems.map((item) => {
             const isActive = isNavItemActive(location.pathname, item);
