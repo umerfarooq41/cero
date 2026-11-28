@@ -1,6 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { format, addMonths, subMonths } from 'date-fns';
 import { CalendarClock, Clock3, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
 
@@ -34,8 +35,7 @@ const validTabs = new Set(['history', 'scheduled']);
 
 export default function Transactions() {
   const scope = usePageEntrance();
-  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
-  useEffect(() => { const media = window.matchMedia('(min-width: 1024px)'); const sync = () => setDesktop(media.matches); media.addEventListener('change', sync); sync(); return () => media.removeEventListener('change', sync); }, []);
+  const desktop = useResponsiveLayout() !== 'mobile';
   const navigate = useNavigate();
   const location = useLocation();
   const [currentMonth, setCurrentMonth] = useState(() => format(new Date(), "yyyy-MM"));
@@ -64,9 +64,9 @@ export default function Transactions() {
         </div>}
       />
 
-      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-40 lg:px-8 lg:py-3 lg:pb-8">
-        <div className="lg:hidden"><TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} /></div>
-        <div className="mb-4 hidden items-center justify-between border-b border-border lg:flex">
+      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-40 md:pb-8 lg:px-8 lg:py-3">
+        <div className="md:hidden"><TransactionsSegmentedControl value={activeTab} onChange={handleTabChange} /></div>
+        <div className="mb-4 hidden items-center justify-between border-b border-border md:flex">
           <nav aria-label="Transaction views" className="flex gap-5">{tabs.map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => handleTabChange(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{tab.label}</button>)}</nav>
           {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">+ Add transaction</button>}
         </div>
@@ -82,7 +82,7 @@ export default function Transactions() {
         </AnimatePresence>
 
         {activeTab === 'history' && !desktop && (
-          <div className="lg:hidden"><FloatingActionButton to="/add-transaction" ariaLabel="Add transaction" className="lg:!hidden" /></div>
+          <div className="md:hidden"><FloatingActionButton to="/add-transaction" ariaLabel="Add transaction" className="lg:!hidden" /></div>
         )}
       </main>
     </div>

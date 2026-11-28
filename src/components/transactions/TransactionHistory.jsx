@@ -249,6 +249,7 @@ function AdvancedFilterSheet({
 
           <section>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Date</label>
+            <div className="mb-2 flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())]].map(([label,from,to])=><button key={label} type="button" className="min-h-9 rounded-md border border-border px-2 text-xs" onClick={()=>{setDateMode('range');setDateFrom(format(from,'yyyy-MM-dd'));setDateTo(format(to,'yyyy-MM-dd'));}}>{label}</button>)}</div>
             <div className="grid grid-cols-4 gap-1.5">
               {[['month', 'Month'], ['any', 'Any date'], ['exact', 'Exact'], ['range', 'Range']].map(([value, label]) => (
                 <button key={value} type="button" onClick={() => setDateMode(value)}
@@ -511,7 +512,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
             placeholder="Find transactions..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="h-10 rounded-xl app-card-surface pl-9 pr-9 lg:!rounded-md lg:!shadow-none"
+            className="h-10 rounded-md pl-9 pr-9"
           />
 
           {search && (
@@ -607,20 +608,20 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         </div>
       ) : (
         <div>
-        <div className="hidden max-h-[65vh] overflow-auto lg:block">
+        <div className="hidden overflow-auto md:block workspace:max-h-[65vh]">
           <table className="w-full min-w-[700px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Transaction history</caption>
             <colgroup><col style={{width:"16%"}}/><col style={{width:"32%"}}/><col style={{width:"19%"}}/><col style={{width:"16%"}}/><col style={{width:"17%"}}/></colgroup><thead className="sticky top-0 z-10 border-b border-border bg-card text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{index === 0 || index === 4 ? <button type="button" className="font-medium hover:text-primary" onClick={() => setSortBy(index === 0 ? (sortBy === "newest" ? "oldest" : "newest") : (sortBy === "highest" ? "lowest" : "highest"))}>{label}{index === 0 ? (sortBy === "newest" ? " ↓" : sortBy === "oldest" ? " ↑" : "") : (sortBy === "highest" ? " ↓" : sortBy === "lowest" ? " ↑" : "")}</button> : label}</th>)}</tr></thead>
             <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} onClick={() => navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
           </table>
         </div>
-        <div className="animate-child space-y-3 lg:hidden">
+        <div className="animate-child space-y-2 md:hidden">
           {sortedDates.map((date) => (
             <div
               key={date}
-              className="overflow-hidden rounded-2xl app-card-surface"
+              className="overflow-hidden border-b border-border"
             >
-              <div className="border-b border-border/50 bg-muted/25 px-3 py-2">
+              <div className="border-b border-border/50 px-2 py-2">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {date !== 'No Date'
                     ? format(new Date(date), 'EEEE, MMM d')

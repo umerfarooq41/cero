@@ -1633,3 +1633,17 @@ main,
   .cero-desktop-workspace { --cero-page-gutter: 20px; }
   .cero-desktop-workspace .app-main-scroll { --cero-page-gutter: 20px; --app-bottom-nav-height: 0px; }
 }
+
+/* Compact plan rows keep the same editable cells and totals at phone widths. */
+@media (max-width: 767px) {
+  .cero-plan-table, .cero-plan-table tbody, .cero-plan-table tfoot { display:block; }
+  .cero-plan-table colgroup, .cero-plan-table thead { display:none; }
+  .cero-plan-table tr { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:8px 0; }
+  .cero-plan-table th[scope="row"], .cero-plan-table tfoot th { grid-column:1/-1; padding:4px 0; }
+  .cero-plan-table td { min-width:0; padding:4px 2px; text-align:left; overflow-wrap:anywhere; }
+  .cero-plan-table td::before { display:block; color:hsl(var(--muted-foreground)); font-size:11px; margin-bottom:4px; }
+  .cero-plan-table td:nth-child(2)::before { content:"Planned"; }
+  .cero-plan-table td:nth-child(3)::before { content:"Tracked"; }
+  .cero-plan-table td:nth-child(4)::before { content:"Remaining"; }
+  .cero-plan-table tfoot { position:static; }
+}

@@ -1,26 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format, addMonths, subMonths } from 'date-fns';
-import { PencilLine, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
+import { format } from 'date-fns';
 
-import { Skeleton } from '@/components/ui/skeleton';
-import PageHeader from '@/components/layout/PageHeader';
-import LeftToAllocateBanner from '@/components/plan/LeftToAllocateBanner';
 import MonthlyPlanPanel from '@/components/manage-plan/MonthlyPlanPanel';
-import PlanOverview from '@/components/plan/PlanOverview';
 import {
-  useAllocations,
   useAllTransactions,
-  useBudgetSummary,
-  useCategories,
   useGoalContributions,
-  useRecurringTransactions,
-  useSavingsGoals,
   useTransactions,
 } from '@/hooks/useBudgetData';
-import { useCurrency, useCurrencyFormatter } from '@/hooks/useCurrency';
 import { usePageEntrance } from '@/hooks/usePageTransition';
-import { buildPlanTotals } from '@/lib/planData';
 import { getTransactionBudgetMonth } from '@/lib/budgetLogic';
 
 export default function Plan() {
@@ -34,7 +22,6 @@ export default function Plan() {
   const [currentMonth, setCurrentMonth] = useState(
     monthFromUrl || format(new Date(), 'yyyy-MM')
   );
-  const [activeTab, setActiveTab] = useState('expense');
   const desktopDraft = useRef({});
   const [desktopSaving, setDesktopSaving] = useState(false);
   useEffect(() => {
@@ -47,24 +34,9 @@ export default function Plan() {
     return () => window.removeEventListener('beforeunload', warn);
   }, [desktopSaving]);
 
-  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
-  useEffect(() => { const mq = window.matchMedia('(min-width: 1024px)'); const update = () => setDesktop(mq.matches); mq.addEventListener('change', update); return () => mq.removeEventListener('change', update); }, []);
-  const currency = useCurrency();
-  const formatCurrency = useCurrencyFormatter();
-
-  const budgetSummary = useBudgetSummary(currentMonth);
-  const { data: categories = [] } = useCategories();
-  const { data: allocations = [] } = useAllocations(currentMonth);
   const { data: transactions = [] } = useTransactions(currentMonth);
   const { data: allTransactions = [] } = useAllTransactions();
   const { data: goalContributions = [] } = useGoalContributions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: recurringTransactions = [] } = useRecurringTransactions();
-
-  const subcategories = useMemo(
-    () => categories.filter((category) => category.parent_id),
-    [categories]
-  );
 
   // Plan accounting follows the scheduled occurrence month for recurring
   // postings. Transaction History still follows the actual posting date.
@@ -118,22 +90,6 @@ export default function Plan() {
     return [...byId.values()];
   }, [allTransactions, currentMonth, transactions]);
 
-  const plannedTotals = useMemo(
-    () =>
-      buildPlanTotals({
-        allocations,
-        categories,
-        savingsGoals,
-        recurringTransactions,
-        allTransactions,
-        transactions: planTransactions,
-        currentMonth,
-      }),
-    [allocations, allTransactions, categories, currentMonth, planTransactions, recurringTransactions, savingsGoals]
-  );
-
-  const leftToAllocate = plannedTotals.leftToAllocate;
-
   const handleMonthChange = (month) => {
     if (month === currentMonth || desktopSaving) return;
     if (Object.keys(desktopDraft.current).length && !window.confirm('Discard unsaved allocation changes?')) return;
@@ -146,84 +102,5 @@ export default function Plan() {
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
-  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><main className="cero-page-content cero-page-content-no-header mx-auto w-full max-w-7xl px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified draftRef={desktopDraft} sharedSaving={desktopSaving} onSavingChange={setDesktopSaving} transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
-  if (budgetSummary.isLoading) {
-    return (
-      <div ref={scope} className="min-h-screen bg-transparent">
-        <PageHeader
-        title={
-          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
-            <button type="button" aria-label="Previous month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(subMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronLeft className="size-4" /></button>
-            <span className="min-w-0 truncate whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
-            <button type="button" aria-label="Next month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(addMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronRight className="size-4" /></button>
-          </span>
-        }
-        action={
-          <div className="flex items-center gap-1">
-            <button type="button" aria-label="Edit monthly plan" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
-            {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
-            <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
-          </div>
-        }
-      />
-        <main className="cero-page-content mx-auto w-full max-w-7xl space-y-3 px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3">
-          <Skeleton className="h-20 w-full rounded-2xl" />
-          <Skeleton className="h-72 w-full rounded-2xl" />
-        </main>
-      </div>
-    );
-  }
-
-  return (
-    <div ref={scope} className="min-h-screen bg-transparent">
-      <PageHeader
-        title={
-          <span className="flex min-w-0 items-center gap-0.5 text-base font-semibold sm:text-lg lg:text-[22px]">
-            <button type="button" aria-label="Previous month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(subMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronLeft className="size-4" /></button>
-            <span className="min-w-0 truncate whitespace-nowrap">{format(new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
-            <button type="button" aria-label="Next month" className="grid size-8 shrink-0 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => handleMonthChange(format(addMonths(new Date(`${currentMonth}-01T12:00:00`), 1), 'yyyy-MM'))}><ChevronRight className="size-4" /></button>
-          </span>
-        }
-        action={
-          <div className="flex items-center gap-1">
-            <button type="button" aria-label="Edit monthly plan" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)}><PencilLine className="size-[18px]" /></button>
-            {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline" />}
-            <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]" /></button>
-          </div>
-        }
-      />
-
-      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:px-6 lg:px-8 lg:py-3 lg:pb-8">
-        <div className="animate-child space-y-3">
-          <div className="lg:hidden"><LeftToAllocateBanner
-            leftToAllocate={leftToAllocate}
-            totalIncome={plannedTotals.budgetFunding}
-            isEditMode={false}
-            formatCurrency={formatCurrency}
-            sticky={false}
-          /></div>
-          <div className="hidden items-center justify-between gap-4 border-y border-border py-4 lg:flex">
-            <div><p className="text-xs text-muted-foreground">Budget funding</p><p className="mt-1 text-xl font-semibold tabular-nums">{formatCurrency(plannedTotals.budgetFunding)}</p></div>
-            <div><p className="text-xs text-muted-foreground">Left to allocate</p><p className={`mt-1 text-xl font-semibold tabular-nums ${leftToAllocate < 0 ? "text-destructive" : "text-primary"}`}>{leftToAllocate < 0 ? "−" : ""}{formatCurrency(Math.abs(leftToAllocate))}</p></div>
-            <button type="button" onClick={() => navigate(`/manage-plan?tab=monthly-plan&month=${currentMonth}`)} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"><PencilLine className="size-4"/>Edit monthly plan</button>
-          </div>
-
-          <PlanOverview
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            categories={categories}
-            subcategories={subcategories}
-            currency={currency}
-            allocations={allocations}
-            transactions={planTransactions}
-            goalContributions={goalContributions}
-            savingsGoals={savingsGoals}
-            recurringTransactions={recurringTransactions}
-            allTransactions={allTransactions}
-            currentMonth={currentMonth}
-          />
-        </div>
-      </main>
-    </div>
-  );
+  return <div ref={scope} className="min-h-screen bg-transparent"><main className="cero-page-content cero-page-content-no-header mx-auto w-full max-w-7xl px-4 pb-24 pt-3 md:px-5 md:pb-8 workspace:px-8"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified draftRef={desktopDraft} sharedSaving={desktopSaving} onSavingChange={setDesktopSaving} transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
 }
