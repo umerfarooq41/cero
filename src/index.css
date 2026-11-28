@@ -2002,3 +2002,5 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 /* Mutually exclusive responsive inspector surfaces. */
 @media(max-width:1023px){.cero-desktop-inspector,.cero-desktop-activity-month{display:none!important;}}
 @media(min-width:1024px){.cero-desktop-inspector{display:flex!important;}.cero-desktop-activity-month{display:flex!important;}.cero-inline-detail-row,.cero-mobile-activity-month{display:none!important;}}
+
+@media(max-width:1023px){.cero-workplace-inline{display:block!important;padding:0!important;}.cero-workplace-inline>td{display:block!important;padding:4px 0 8px!important;}.cero-workplace-inline .cero-detail-panel{font-weight:400;}.cero-recurring-register tr:not(.cero-inline-detail-row)>td:first-child button,.cero-goal-register tr:not(.cero-inline-detail-row)>td:first-child button{width:100%;}}
