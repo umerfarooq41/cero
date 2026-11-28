@@ -188,8 +188,8 @@ function StatusPill({ children, tone = 'default' }) {
 
 function MoneyRow({ label, amount, currency, tone }) {
   return (
-    <div className="flex items-center justify-between gap-3 text-sm leading-6">
-      <span className="min-w-0 truncate text-muted-foreground">{label}</span>
+    <div className="cero-financial-detail-row flex items-center justify-between gap-3 text-sm leading-6">
+      <span className="min-w-0 text-muted-foreground">{label}</span>
 
       <span className={cn('shrink-0 font-semibold tabular-nums', tone)}>
         <CurrencyAmount amount={amount} currency={currency} compact />
@@ -374,7 +374,7 @@ export default function ReflectSummaryCard({
     {section !== "budget" && <section aria-label="Financial summary" className="grid grid-cols-3 gap-6 border-b border-border pb-6">
       {[
         ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
-        ['Total tracked allocation',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings],['After debt and goal savings',netCashFlow - trackedDebt - trackedSavings]]],
+        ['Total tracked allocation',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings],['After debt & savings',netCashFlow - trackedDebt - trackedSavings]]],
         ['Current net worth',netWorth,netWorth < 0 ? 'text-destructive' : '',[['Assets',totalAssets],['Liabilities',totalLiabilities]]]
       ].map(([label,value,tone,rows]) => <div key={label} className="min-w-0"><h3 className="text-sm font-medium text-muted-foreground">{label}</h3><p className={`my-2 cero-primary-amount tabular-nums ${tone}`}>{money(value)}</p><div className="space-y-2">{rows.map(([name,amount]) => <MoneyRow key={name} label={name} amount={amount} currency={currency}/>)}</div></div>)}
     </section>}
@@ -383,10 +383,10 @@ export default function ReflectSummaryCard({
   return (
     <div className="cero-reflect-summary mb-3 grid gap-3">
       {section !== "budget" && <section className="cero-reflect-summary-section px-0 py-3">
-        <div className="cero-hero text-center py-4"><p className="text-sm text-muted-foreground">Operating cash flow</p><p className={cn('cero-primary-amount mt-2',netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]')}>{money(netCashFlow)}</p><p className="mt-1 text-xs text-muted-foreground">Before debt payments and goal savings</p></div>
+        <div className="cero-hero cero-reflect-cashflow text-center py-4"><p className="text-sm text-muted-foreground">Operating cash flow</p><p className={cn('cero-primary-amount mt-2',netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]')}>{money(netCashFlow)}</p><p className="mt-1 text-xs text-muted-foreground">Before debt payments and goal savings</p></div>
         <div className="grid grid-cols-2 gap-3 text-center py-3">{metric('Income received',income)}{metric('Expenses',expenses)}</div>
         <div className="border-t border-border py-3"><div className="flex items-center justify-between gap-2"><p className="text-sm text-muted-foreground">Current net worth</p><p className="cero-secondary-amount">{money(netWorth)}</p></div>{totalAssets > 0 && totalLiabilities >= 0 && <><div className="mt-3 flex h-1.5 overflow-hidden rounded-full bg-destructive"><div className="bg-[hsl(var(--success))]" style={{width: `${100 * totalAssets / (totalAssets + totalLiabilities)}%`}}/></div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets {(100 * totalAssets / (totalAssets + totalLiabilities)).toFixed(1)}%</span><span>Liabilities {(100 * totalLiabilities / (totalAssets + totalLiabilities)).toFixed(1)}%</span></div></>}</div>
-        <details className="group"><summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-primary">Financial details<span className="group-open:rotate-180">⌄</span></summary>{[['Assets',totalAssets],['Liabilities',totalLiabilities],['Debt paid',trackedDebt],['Goal savings',trackedSavings],['After debt and goal savings',netCashFlow - trackedDebt - trackedSavings],['Total tracked allocation',totalTrackedOutflow]].map(([label,amount])=><MoneyRow key={label} label={label} amount={amount} currency={currency}/>)}</details>
+        <details className="group"><summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-primary">Financial details<span className="group-open:rotate-180">⌄</span></summary>{[['Assets',totalAssets],['Liabilities',totalLiabilities],['Debt paid',trackedDebt],['Goal savings',trackedSavings],['After debt & savings',netCashFlow - trackedDebt - trackedSavings],['Total tracked allocation',totalTrackedOutflow]].map(([label,amount])=><MoneyRow key={label} label={label} amount={amount} currency={currency}/>)}</details>
       </section>}
       {section !== "summary" && <section className="cero-reflect-summary-section px-0 py-3">
         <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="cero-section-title">Budget health</h3></div>

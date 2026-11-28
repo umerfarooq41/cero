@@ -177,7 +177,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   const rows = [...transactions]
     .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
     .slice(0, 5);
-  return <Section title="Recent transactions" icon={Receipt} action={<div className="-mr-2.5"><Action to="/transactions">View all <ChevronRight size={14}/></Action></div>}>
+  return <Section title="Recent transactions" icon={Receipt} action={<div className="min-w-0"><Action to="/transactions">View all <ChevronRight size={14}/></Action></div>}>
     {rows.length ? <div className="divide-y divide-border/40">{rows.map(transaction =>
       <TransactionRow
         key={transaction.id}
@@ -197,7 +197,7 @@ function Recent({ transactions, categories, accounts, recurringTransactions, goa
   </Section>;
 }
 function ScheduledGoalsPreview({ goals, accounts, formatCurrency }) {
-  return <Section title="Savings goals" icon={Target} action={<div className="-mr-2.5"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
+  return <Section title="Savings goals" icon={Target} action={<div className="min-w-0"><Action to="/transactions?tab=scheduled">View all <ChevronRight size={14}/></Action></div>}>
     <div className="divide-y divide-border/50">{goals.slice(0, 3).map(goal => {
       const fixed = goal.contribution_mode === 'fixed';
       const remaining = getGoalRemaining(goal);
@@ -268,7 +268,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
         <div className="hidden md:contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-md bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
       </div>
       <div className="contents md:flex md:min-w-0 md:flex-col md:gap-4">
-        <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="!rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none"/></Entrance></div>
+        <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="cero-overview-section cero-upcoming-section !rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none !px-0"/></Entrance></div>
         <div className="contents md:order-1"><Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance></div>
         <div className="contents md:order-3">{upcomingGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={upcomingGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}</div>
       </div>

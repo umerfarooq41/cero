@@ -62,7 +62,7 @@ function RuleAmount({ rule, amount, formatCurrency }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] font-bold tabular-nums sm:text-sm',
+        'inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-medium tabular-nums',
         rule.type === 'income'
           ? 'text-[hsl(var(--success))]'
           : rule.type === 'expense'
@@ -106,7 +106,7 @@ export default function UpcomingBillsPreview({
       icon={CalendarClock}
       className={className}
       action={
-        <DashboardGhostAction className="-mr-2.5 min-h-9 h-9 gap-1 rounded-none border-0 bg-transparent pl-2 pr-0 text-xs font-medium shadow-none">
+        <DashboardGhostAction className="min-h-9 h-9 gap-1 rounded-none border-0 bg-transparent pl-2 pr-0 text-xs font-medium shadow-none">
           <Link to="/transactions?tab=scheduled">
             View all
             <ChevronRight className="h-3.5 w-3.5" />
@@ -136,9 +136,9 @@ export default function UpcomingBillsPreview({
             return (
               <div
                 key={rule.id}
-                className="min-w-0 py-2.5 first:pt-0 last:pb-0"
+                className="min-w-0 flex items-center min-h-[48px] py-2"
               >
-                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <div className="flex w-full min-w-0 items-center gap-2 sm:gap-3">
                   <span
                     className={cn(
                       'flex h-7 w-7 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9 sm:rounded-2xl',
@@ -154,7 +154,7 @@ export default function UpcomingBillsPreview({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 items-center gap-1.5">
-                      <p className="min-w-0 truncate text-xs font-semibold text-foreground sm:text-sm">
+                      <p className="min-w-0 truncate text-sm font-medium text-foreground">
                         {rule.name}
                       </p>
                       <Badge
@@ -168,7 +168,7 @@ export default function UpcomingBillsPreview({
                       </Badge>
                     </div>
 
-                    <p className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground sm:text-xs">
+                    <p className="truncate text-xs leading-4 text-muted-foreground sm:text-xs">
                       {occurrence.paid > 0 && occurrence.remaining > 0.005
                         ? (rule.type === 'income' ? 'Partially received' : 'Partially paid') + ' · '
                         : ''}Due {formatRecurringDate(rule.next_due_date)}

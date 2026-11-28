@@ -2014,3 +2014,21 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(4){white-space:nowrap;align-self:center;}
 .cero-desktop-workspace .cero-goal-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(4){white-space:nowrap;}
 }
+
+/* Mobile dashboard and register typography alignment. */
+@media(max-width:1023px){
+.cero-dashboard-overview .cero-overview-section{padding-block:4px!important;}
+.cero-dashboard-overview .cero-hero,.cero-reflect-summary .cero-hero{padding-block:12px!important;}
+.cero-dashboard-overview .cero-upcoming-section>div:first-child{margin-bottom:4px;min-height:36px;}
+.cero-dashboard-overview .cero-upcoming-section h2{font-size:15px;font-weight:600;}
+.cero-reflect-summary>section{padding-block:6px!important;}
+.cero-reflect-summary .cero-financial-detail-row{font-size:13px;line-height:1.45;min-height:26px;}
+.cero-reflect-summary .cero-financial-detail-row>span:last-child{font-weight:500;text-align:right;}
+.cero-reflect-summary .cero-reflect-cashflow+div{padding-block:8px;}
+.cero-desktop-workspace nav[aria-label="Reflect reports"]>button{font-size:14px!important;}
+.cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row){grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto;align-items:center;}
+.cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row)>td:first-child{grid-column:1;grid-row:1;}
+.cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(2),.cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(3){display:none!important;}
+.cero-desktop-workspace .cero-recurring-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(4){grid-column:2;grid-row:1;}
+.cero-account-register .cero-detail-panel{gap:6px;}
+}
