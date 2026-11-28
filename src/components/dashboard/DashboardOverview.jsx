@@ -1,13 +1,11 @@
 
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { Gauge, LayoutDashboard, ChevronRight, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import CategoryIcon from '@/components/shared/CategoryIcon';
 import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
@@ -52,68 +50,7 @@ function getDiscretionaryAllocations(allocations, categories) {
     Number(a.planned_amount) > 0
   );
 }
-function BreakdownSheet({ open, onOpenChange, pace, categoriesById, formatCurrency }) {
-  return <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent side="bottom" className="!max-h-[90dvh] !overflow-hidden" onOpenAutoFocus={(event) => event.preventDefault()}>
-      <SheetHeader className="pr-8 text-left">
-        <SheetTitle className="text-base">Discretionary spending</SheetTitle>
-        <SheetDescription className="text-xs">Spending from your flexible expense categories.</SheetDescription>
-      </SheetHeader>
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-        {[
-          ['Spent', pace.spent],
-          ['Budget', pace.budget],
-          [pace.overBudget ? 'Over by' : 'Remaining', pace.overBudget ? pace.spent - pace.budget : pace.remaining],
-        ].map(([label, value]) => <div key={label} className="min-w-0 rounded-xl bg-secondary/50 px-1.5 py-2">
-          <p className="text-[11px] text-muted-foreground">{label}</p>
-          <Money value={value} formatCurrency={formatCurrency} className="text-sm font-semibold"/>
-        </div>)}
-      </div>
-      <div className="app-dialog-scroll mt-3 divide-y divide-border/40">
-        {pace.categories.filter(item => Number(item.spent) > 0).map(item => {
-          const category = categoriesById.get(item.categoryId);
-          const over = item.remaining < 0;
-          return <div key={item.categoryId} className="py-2.5">
-            <div className="flex items-center gap-3">
-              <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{category?.name || 'Uncategorized'}</p>
-                <p className="text-xs text-muted-foreground"><Money value={item.spent} formatCurrency={formatCurrency}/> of <Money value={item.planned} formatCurrency={formatCurrency}/> · {Math.round(item.percentUsed)}%</p>
-              </div>
-              <div className={`shrink-0 text-right text-xs font-medium ${over ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {over ? <>Over by <Money value={Math.abs(item.remaining)} formatCurrency={formatCurrency}/></> : <><Money value={item.remaining} formatCurrency={formatCurrency}/> left</>}
-              </div>
-            </div>
-            <div className="mt-2 h-1.5 rounded-full bg-primary/10">
-              <div className={`h-full rounded-full ${over ? 'bg-destructive' : item.percentUsed >= 85 ? 'bg-amber-500' : 'bg-primary'}`} style={{width: `${Math.min(100, item.percentUsed)}%`}}/>
-            </div>
-          </div>;
-        })}
-        {pace.categories.some(item => Number(item.spent) <= 0) && (
-          <details className="group border-t border-border/40 py-3">
-            <summary className="flex cursor-pointer items-center justify-between text-sm font-medium">
-              Not started ({pace.categories.filter(item => Number(item.spent) <= 0).length})
-              <span className="text-muted-foreground group-open:rotate-180">⌄</span>
-            </summary>
-            <div className="mt-2 space-y-2">
-              {pace.categories.filter(item => Number(item.spent) <= 0).map(item => {
-                const category = categoriesById.get(item.categoryId);
-                return <div key={item.categoryId} className="flex items-center gap-2 py-1 text-sm">
-                  <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>
-                  <span className="min-w-0 flex-1 truncate">{category?.name || 'Uncategorized'}</span>
-                  <span className="text-xs text-muted-foreground"><Money value={item.planned} formatCurrency={formatCurrency}/> budget</span>
-                </div>;
-              })}
-            </div>
-          </details>
-        )}
-      </div>
-    </SheetContent>
-  </Sheet>;
-}
 function SafeCard({ allocations, categories, transactions, recurringTransactions, savingsGoals, allTransactions, currentMonth, formatCurrency }) {
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const categoriesById = useMemo(() => new Map(categories.map(c => [c.id, c])), [categories]);
   const authoritativeAllocations = buildAuthoritativeScheduledAllocations({ allocations, recurringTransactions, savingsGoals, currentMonth, allTransactions });
   const pace = calculateDiscretionaryPace({
     allocations: getDiscretionaryAllocations(authoritativeAllocations, categories),
@@ -124,8 +61,6 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
-  const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
-  const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of discretionary spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
     <div className="flex w-full flex-row items-center justify-between gap-2 text-left">
@@ -163,11 +98,6 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
         </dl>
       </div>
     </details>
-    <div className="flex min-h-9 items-center justify-between gap-2">
-      <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{insight}</p>
-      <Button variant="ghost" size="sm" className="-mr-2 min-h-8 shrink-0 gap-1 px-2 text-xs font-medium text-primary" onClick={() => setSheetOpen(true)}>Breakdown <ChevronRight size={15}/></Button>
-    </div>
-    <BreakdownSheet open={sheetOpen} onOpenChange={setSheetOpen} pace={pace} categoriesById={categoriesById} formatCurrency={formatCurrency}/>
   </CardContent></Card>;
 }
 function Snapshot({ budget, transactions = [], formatCurrency }) {
