@@ -2,11 +2,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { Gauge, LayoutDashboard, ChevronRight, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { Gauge, LayoutDashboard, ChevronRight, Receipt, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import CategoryIcon from '@/components/shared/CategoryIcon';
 import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
@@ -100,19 +99,18 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     </details>
   </CardContent></Card>;
 }
-function Snapshot({ budget, transactions = [], formatCurrency }) {
+function MonthlyAllocationDetails({ budget, transactions = [], formatCurrency }) {
   const expenses = num(budget.totalExpenses);
   const recurringPaid = transactions
     .filter(t => t.type === 'expense' && (t.recurring_transaction_id || t.source_type === 'recurring'))
     .reduce((sum, t) => sum + num(t.amount), 0);
   const variablePaid = Math.max(0, expenses - recurringPaid);
-  const savings = num(budget.totalTrackedSavings);
   const debt = num(budget.totalTrackedDebt);
   const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
-  const tracked = expenses + savings + debt;
-  return <details className="cero-budget-details group border-b border-border"><summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-primary">Budget details<ChevronRight size={16} className="group-open:rotate-90"/></summary>
-    <dl className="divide-y divide-border">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Savings funded',savings],['Total planned allocation',planned],['Total tracked allocation',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-2 lg:py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm lg:text-base font-medium"/></dd></div>)}</dl>
-  </details>;
+  const tracked = expenses + num(budget.totalTrackedSavings) + debt;
+  return <dl className="mt-3 grid grid-cols-1 gap-x-6 border-t border-border text-left sm:grid-cols-2">
+    {[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Total planned allocation',planned],['Total tracked allocation',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 border-b border-border/50 py-2"><dt className="text-xs text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm font-medium"/></dd></div>)}
+  </dl>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
   const navigate = useNavigate();
@@ -207,8 +205,8 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
           <dd className="mt-1"><Money value={value} formatCurrency={formatCurrency} className={'cero-secondary-amount ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
         </div>)}
       </dl>
-      <div className="mt-4 border-t border-border py-3 text-center"><p className="text-xs text-muted-foreground">Operating cash flow</p><Money value={num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)} formatCurrency={formatCurrency} className={`cero-secondary-amount ${num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)<0?"text-destructive":"text-emerald-600 dark:text-emerald-400"}`}/></div>
-      <Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/>
+      <div className="mt-4 border-t border-border py-3 text-center"><p className="text-xs text-muted-foreground">Income less expenses</p><Money value={num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)} formatCurrency={formatCurrency} className={`cero-secondary-amount ${num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)<0?"text-destructive":"text-emerald-600 dark:text-emerald-400"}`}/></div>
+      <MonthlyAllocationDetails budget={budget} transactions={transactions} formatCurrency={formatCurrency}/>
     </div>
     <div className="contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8">
       <div className="contents md:order-2 md:flex md:min-w-0 md:flex-col md:gap-4">
