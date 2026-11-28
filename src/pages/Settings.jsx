@@ -441,7 +441,7 @@ export default function Settings() {
             
             stackOnMobile
           >
-            <div className="grid w-full grid-cols-4 justify-items-center gap-1 py-1 min-[420px]:grid-cols-8 sm:w-[352px]">
+            <div className="grid w-full grid-cols-8 justify-items-center gap-1 py-1 sm:w-[352px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
@@ -467,7 +467,7 @@ export default function Settings() {
                 updateSetting('currency', value);
               }}
             >
-              <SelectTrigger disabled={!online} className="h-9 w-auto min-w-[100px] gap-2 rounded-md px-2.5">
+              <SelectTrigger disabled={!online} className="cero-currency-trigger h-9 w-auto min-w-[100px] gap-2 rounded-md px-2.5">
                 <SelectValue />
               </SelectTrigger>
 

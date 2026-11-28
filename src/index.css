@@ -1861,3 +1861,21 @@ main,
 .cero-settings-page .settings-section-header {padding-block:8px;border-bottom:1px solid hsl(var(--border));}
 .cero-settings-page .settings-row {gap:10px;}
 .cero-settings-page [role="combobox"] {box-shadow:none!important;border-radius:6px!important;}
+
+/* Compact mobile header and financial surfaces. */
+.cero-header-icon {display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;border:0;background:transparent;color:hsl(var(--foreground));box-shadow:none;}
+.cero-header-icon:disabled {opacity:.4;}
+.cero-currency-trigger {background:transparent!important;border-color:transparent!important;}
+@media(max-width:767px){
+.cero-desktop-only-action {display:none!important;}
+.cero-tab-toolbar > nav {width:100%;}
+.cero-plan-tabs > button {flex:1!important;padding-inline:4px!important;}
+.cero-plan-table tfoot,.cero-plan-table tfoot tr {background:transparent!important;}
+.cero-primary-amount {font-size:24px;}
+.cero-secondary-amount {font-size:18px;}
+.cero-overview-section,.cero-reflect-summary-section {box-shadow:none!important;background:transparent!important;}
+.cero-account-register tr {padding-block:5px!important;}
+.cero-account-register td {padding-block:2px!important;}
+.cero-settings-page .settings-row .grid-cols-8 button {max-width:100%;min-width:0;}
+}
+@media(min-width:768px){.cero-header-icon.md\\:hidden {display:none!important;}}

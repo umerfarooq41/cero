@@ -9,6 +9,7 @@ export default function PageHeader({
   subtitle,
   className,
   action,
+  mobileAction,
 }) {
   const location = useLocation();
   const settingsActive = location.pathname === '/settings';
@@ -57,7 +58,7 @@ export default function PageHeader({
           lg:pb-2
         "
       >
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2.5">
             <Logo size={24} priority className="lg:hidden" />
 
@@ -98,6 +99,7 @@ export default function PageHeader({
           )}
         </div>
 
+        <div className="flex shrink-0 items-center gap-0.5 lg:hidden"><div id="cero-mobile-header-actions" className="flex items-center gap-0.5"/>{mobileAction}</div>
         {action ? (
           <div className="shrink-0">{action}</div>
         ) : (

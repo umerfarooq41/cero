@@ -104,7 +104,7 @@ export default function Accounts() {
   const location = useLocation();
   
   const header = <PageHeader title={<><span className="md:hidden">Accounts</span><span className="hidden md:inline">Accounts</span></>} action={<div className="flex items-center gap-1">
-    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="cero-add-action md:hidden"><Plus className="size-4" /><span>Add</span></button>
+    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="cero-header-icon md:hidden"><Plus size={22} /></button>
     {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
     <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid md:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
   </div>} />;
@@ -206,7 +206,7 @@ export default function Accounts() {
           <div><p className="text-xs text-muted-foreground">Net worth</p><p className="mt-1 cero-primary-amount">{netWorth < 0 ? '−' : ''}{formatCurrency(Math.abs(netWorth))}</p></div>
           <div className="hidden md:block"><p className="text-xs text-muted-foreground">Total assets</p><p className="mt-1 text-lg font-semibold">{totalAssets < 0 ? '−' : ''}{formatCurrency(Math.abs(totalAssets))}</p></div>
           <div className="hidden md:block"><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
-          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="cero-add-action hidden md:!inline-flex"><Plus size={16}/>Add account</button>
+          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="cero-add-action cero-desktop-only-action"><Plus size={16}/>Add account</button>
         </div>
         <div className="py-2"><div className="flex h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label="Assets and liabilities proportion">{totalAssets + totalLiabilities > 0 && <><div className="bg-emerald-500" style={{width: `${Math.max(0, Math.min(100,totalAssets/(totalAssets+totalLiabilities)*100))}%`}}/><div className="flex-1 bg-destructive"/></>}</div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets {totalAssets + totalLiabilities > 0 ? (totalAssets/(totalAssets+totalLiabilities)*100).toFixed(1) : "0.0"}%</span><span>Liabilities {totalAssets + totalLiabilities > 0 ? (totalLiabilities/(totalAssets+totalLiabilities)*100).toFixed(1) : "0.0"}%</span></div></div>
         <div className="grid grid-cols-3 gap-3 border-b border-border py-3">{[["Available",cashAvailable],["Savings",savingsTotal],["Debt",totalLiabilities]].map(([label,value]) => <div key={label}><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-sm md:text-xl font-medium tabular-nums">{value < 0 ? "−" : ""}{formatCurrency(Math.abs(value))}</p></div>)}</div>

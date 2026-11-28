@@ -1,3 +1,4 @@
+import MobileHeaderActions from '@/components/layout/MobileHeaderActions';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { format, subMonths, addMonths } from 'date-fns';
 import { ChevronDown, ChevronLeft, ChevronRight, Copy, Save, LockKeyhole, Plus, Pencil, X } from 'lucide-react';
@@ -448,7 +449,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
     const summaryPlanned = selected ? plannedFor(selected) : sumType(activeType);
     const summaryTracked = selected ? trackedFor(selected) : visibleRows.reduce((sum,row)=>sum+trackedFor(row),0);
     const canWrite = navigator.onLine && !saving && !isPlanLoading;
-    return <div className="cero-unified-plan space-y-4">
+    return <div className="cero-unified-plan space-y-4"><MobileHeaderActions disabled={!canWrite} addLabel={'Add '+sectionConfig[activeType].title} onAdd={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} items={[{label:"Archived categories",onClick:()=>requestEditor("archived")}]}/>
       <div className="cero-plan-toolbar workspace:sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-2">
         <div className="cero-month-heading flex shrink-0 items-center gap-1 text-lg font-semibold"><button type="button" aria-label="Previous month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(subMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronLeft className="size-4"/></button><span>{format(new Date(currentMonth+'-01T12:00:00'),'MMMM yyyy')}</span><button type="button" aria-label="Next month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(addMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight className="size-4"/></button></div><div className="flex-1"/>
         <div className="mr-3 text-right"><p className="text-xs text-muted-foreground">Left to allocate</p><p className={cn("text-xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
@@ -458,7 +459,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
       {dirty&&<p role="status" className="text-xs text-primary">Unsaved allocation changes</p>}
       <div className="cero-tab-toolbar"><nav aria-label="Budget types" className="cero-workplace-tabs cero-plan-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-border workspace:gap-5">
         {Object.entries(sectionConfig).map(([type,config])=><button key={type} type="button" aria-pressed={activeType===type} onClick={()=>{setActiveType(type);setSelectedKey(null);}} className={cn("border-b-2 px-2 py-3 text-sm font-medium",activeType===type?"border-primary text-primary":"border-transparent text-muted-foreground")}>{config.title}</button>)}
-        </nav><Button size="sm" variant="outline" className="cero-add-action" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/><span>Add</span></Button><Button variant="ghost" size="sm" className="shrink-0" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden" aria-hidden="true">⋯</span><span className="hidden md:inline">Archived categories</span></Button>
+        </nav><Button size="sm" variant="outline" className="cero-add-action cero-desktop-only-action" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/><span>Add</span></Button><Button variant="ghost" size="sm" className="shrink-0 cero-desktop-only-action" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden" aria-hidden="true">⋯</span><span className="hidden md:inline">Archived categories</span></Button>
       </div>
       {isPlanLoading ? <Skeleton className="h-80 w-full"/> : <div className="grid min-w-0 grid-cols-1 workspace:grid-cols-[minmax(0,1fr)_minmax(260px,30%)]">
         <div className="overflow-auto workspace:max-h-[65vh]">

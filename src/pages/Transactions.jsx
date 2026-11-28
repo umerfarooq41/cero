@@ -2,7 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { format, addMonths, subMonths } from 'date-fns';
-import { CalendarClock, Clock3, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
+import { CalendarClock, Clock3, ChevronLeft, ChevronRight, Plus, Settings, WifiOff } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
 import ScheduledTransactions from '@/components/transactions/ScheduledTransactions';
@@ -37,6 +37,7 @@ export default function Transactions() {
     <div ref={scope} className="min-h-screen bg-transparent">
       <PageHeader
         title="Transactions"
+        mobileAction={activeTab === "history" && <button type="button" aria-label="Add transaction" className="cero-header-icon" onClick={() => navigate("/add-transaction", {state:{backgroundLocation:location}})}><Plus size={22}/></button>}
         action={<div className="flex items-center gap-1">
           {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
           <button type="button" aria-label="Open settings" className="grid lg:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60" onClick={() => navigate('/settings')}><Settings className="size-[19px]"/></button>
@@ -46,7 +47,7 @@ export default function Transactions() {
       <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-40 md:pb-8 lg:px-8 lg:py-3">
         <div className="mb-3 flex items-center justify-between gap-2">
           <nav aria-label="Transaction views" className="cero-workplace-tabs flex flex-1 gap-2 md:gap-5">{tabs.map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => handleTabChange(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{tab.label}</button>)}</nav>
-          {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="cero-add-action"><span aria-hidden="true">+</span><span>Add</span></button>}
+          {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="cero-add-action cero-desktop-only-action"><span aria-hidden="true">+</span><span>Add</span></button>}
         </div>
 
         {activeTab === "history" && <div className="mb-3 flex items-center"><span className="flex items-center cero-month-heading gap-0.5 text-sm font-medium">
