@@ -525,7 +525,7 @@ export default function Settings() {
             label="Auto-Sweep"
             description={settings.budgetLogic.autoSweepSurplus
               ? `${accounts.find((a) => a.id === settings.budgetLogic.autoSweepSourceAccountId)?.name || 'From'} → ${accounts.find((a) => a.id === settings.budgetLogic.autoSweepDestinationAccountId)?.name || 'To'} · ${settings.budgetLogic.autoSweepAmountMode === 'fixed' ? 'Fixed' : settings.budgetLogic.autoSweepAmountMode === 'percent' ? 'Percent' : 'Surplus'} · ${settings.budgetLogic.autoSweepExecutionMode === 'automatic' ? 'Automatic' : 'Ask first'}`
-              : 'Move money between your Cero accounts after a month closes.'}
+              : 'Record a transfer between Cero accounts after month-end, using surplus, a fixed amount or a percentage. Choose automatic posting or approval first.'}
             onClick={() => {
               if (!requireOnline()) return;
               setShowAutoSweepDialog(true);
@@ -842,7 +842,7 @@ export default function Settings() {
             <div className="space-y-4 px-6 py-5">
               <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm leading-6 text-muted-foreground">
                 This deletes accounts, transactions, monthly plans, categories,
-                recurring rules, savings goals, and stored settings.
+                recurring rules, savings goals, and stored settings. Export a backup before continuing if you want to keep a copy of your data.
               </div>
 
               <label className="block space-y-2">
