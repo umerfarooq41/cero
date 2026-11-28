@@ -548,7 +548,7 @@ export default function AddTransaction() {
         <div className="py-5 text-center">
           <p className="mb-1 text-xs text-muted-foreground">Amount</p>
           <button type="button" className="cero-entry-mobile mx-auto items-center justify-center gap-2 text-4xl font-semibold tabular-nums" onClick={()=>{setExpanded('');setKeypad(true);setFresh(true);}}><CurrencyPrefix currency={currency}/>{amount||'0.00'}</button>
-          <div className="cero-entry-desktop mx-auto max-w-xs items-center gap-2 text-3xl font-semibold"><CurrencyPrefix currency={currency}/><input aria-label="Amount" className="cero-hero-amount-input w-full min-w-0 bg-transparent text-center outline-none" type="number" min="0" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></div>
+          <div className="cero-entry-desktop cero-inline-amount mx-auto items-center gap-1.5 text-3xl font-semibold tabular-nums"><CurrencyPrefix currency={currency}/><input aria-label="Amount" className="cero-hero-amount-input min-w-0 bg-transparent text-center outline-none" style={{width:Math.max(1,String(amount||"0.00").length)+"ch"}} type="number" min="0" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></div>
           {operation&&<p className="mt-1 text-xs text-muted-foreground">{operation.base} {operation.op}</p>}
         </div>
         <div className="space-y-1">
