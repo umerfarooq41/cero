@@ -502,9 +502,9 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
   return (
     <div>
-      <div className="mb-2 text-xs text-muted-foreground">{globalScope ? `${filtered.length} transactions found · ${scopeLabel}` : `${filtered.length} posted transactions · ${format(new Date(`${currentMonth}-01T12:00:00`), "MMMM yyyy")}`}</div>
-      <div className="mb-2 flex flex-wrap items-center gap-2 animate-child">
-        <div className="relative flex-1">
+      <div className="mb-2 text-xs text-muted-foreground">{globalScope ? `${filtered.length} transactions found · ${scopeLabel}` : `${filtered.length} posted transactions`}</div>
+      <div className="cero-history-search mb-2 flex items-center gap-2 animate-child">
+        <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
           <Input
@@ -619,10 +619,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
               key={date}
               className="overflow-hidden border-b border-border"
             >
-              <div className="border-b border-border/50 px-2 py-2">
+              <div className="border-b border-border/50 px-0 py-1.5">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {date !== 'No Date'
-                    ? format(new Date(date), 'EEEE, MMM d')
+                    ? format(new Date(date), 'EEE, d MMM')
                     : 'No Date'}
                 </span>
               </div>

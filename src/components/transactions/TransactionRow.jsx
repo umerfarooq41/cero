@@ -190,8 +190,8 @@ export default function TransactionRow({
     <div
       onClick={onClick}
       className={cn(
-        'flex min-w-0 items-center gap-2 py-2.5 min-h-[56px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:py-3 sm:min-h-[64px]',
-        flush ? 'px-0' : 'px-2.5 sm:px-3'
+        'flex min-w-0 items-center gap-2 py-2 min-h-[48px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:py-3 sm:min-h-[64px]',
+        flush ? 'px-0' : 'px-1 sm:px-3'
       )}
     >
       {isTransfer ? (
@@ -208,7 +208,7 @@ export default function TransactionRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
-          <div className="truncate text-xs font-semibold sm:text-sm sm:font-medium">
+          <div className="truncate text-sm font-medium">
             {title}
           </div>
 
@@ -221,7 +221,7 @@ export default function TransactionRow({
 
         {subtitleText && (
           <div
-            className="line-clamp-2 break-words pr-1 text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-4"
+            className="line-clamp-2 break-words pr-1 text-xs leading-4 text-muted-foreground sm:text-xs sm:leading-4"
             title={subtitleText}
           >
             {subtitleText}
@@ -232,7 +232,7 @@ export default function TransactionRow({
       <div className="shrink-0 text-right">
         <div
           className={cn(
-            'inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] font-semibold tabular-nums sm:gap-1 sm:text-sm',
+            'inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-medium tabular-nums sm:gap-1',
             config.color
           )}
         >
