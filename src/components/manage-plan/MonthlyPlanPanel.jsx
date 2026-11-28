@@ -67,7 +67,7 @@ const sectionConfig = {
   },
 };
 
-export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, draftRef, transactions = EMPTY_ROWS, goalContributions = EMPTY_ROWS }) {
+export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, draftRef, sharedSaving, onSavingChange, transactions = EMPTY_ROWS, goalContributions = EMPTY_ROWS }) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
 
@@ -109,7 +109,9 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
   const [selectedKey, setSelectedKey] = useState(null);
   const [editorRequest, setEditorRequest] = useState(null);
   const [dirty, setDirty] = useState(() => Boolean(Object.keys(draft.current).length));
-  const [saving, setSaving] = useState(false);
+  const [localSaving, setLocalSaving] = useState(false);
+  const saving = sharedSaving ?? localSaving;
+  const setSaving = onSavingChange || setLocalSaving;
   const [collapsedSections, setCollapsedSections] = useState({});
 
   const leafCategoryIds = useMemo(() => {
@@ -386,6 +388,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
   };
 
   const handleSave = async () => {
+    if (saving || isPlanLoading || !navigator.onLine) return;
     setSaving(true);
 
     try {
@@ -440,14 +443,14 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
   allRows.filter(row=>editable(row)&&!allocationByRowKey[row.key]).forEach(row=>draftAllocations.push({category_id:row.categoryId,source_type:'category',source_id:row.id,budget_type:row.type,planned_amount:Number(values[row.key]||0)}));
   const unifiedTotals = unified ? buildPlanTotals({allocations:draftAllocations,categories,savingsGoals,recurringTransactions,allTransactions,transactions,currentMonth}) : null;
   const requestEditor = (kind,row=null) => setEditorRequest({kind,type:activeType,row,nonce:Date.now()});
-  const changeUnifiedMonth = month => { if (draftRef || !dirty || window.confirm('Discard unsaved allocation changes?')) onMonthChange?.(month); };
+  const changeUnifiedMonth = month => { if (!saving && (draftRef || !dirty || window.confirm('Discard unsaved allocation changes?'))) onMonthChange?.(month); };
   if (unified) {
     const summaryPlanned = selected ? plannedFor(selected) : sumType(activeType);
     const summaryTracked = selected ? trackedFor(selected) : visibleRows.reduce((sum,row)=>sum+trackedFor(row),0);
     const canWrite = navigator.onLine && !saving && !isPlanLoading;
     return <div className="space-y-4">
       <div className="sticky top-0 z-20 flex flex-wrap items-center gap-3 bg-background py-2">
-        <div className="cero-month-heading flex shrink-0 items-center gap-1 text-lg font-semibold"><button type="button" aria-label="Previous month" className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(subMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronLeft className="size-4"/></button><span>{format(new Date(currentMonth+'-01T12:00:00'),'MMMM yyyy')}</span><button type="button" aria-label="Next month" className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(addMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight className="size-4"/></button></div><div className="flex-1"/>
+        <div className="cero-month-heading flex shrink-0 items-center gap-1 text-lg font-semibold"><button type="button" aria-label="Previous month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(subMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronLeft className="size-4"/></button><span>{format(new Date(currentMonth+'-01T12:00:00'),'MMMM yyyy')}</span><button type="button" aria-label="Next month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(addMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight className="size-4"/></button></div><div className="flex-1"/>
         <div className="mr-3 text-right"><p className="text-xs text-muted-foreground">Left to allocate</p><p className={cn("text-xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
         <Button variant="outline" disabled={!canWrite} onClick={copyFromPreviousMonth}><Copy className="mr-2 size-4"/>Copy previous month</Button>
         <Button disabled={!canWrite||!dirty} onClick={handleSave}><Save className="mr-2 size-4"/>{saving?'Saving…':'Save plan'}</Button>
