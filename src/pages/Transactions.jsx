@@ -1,3 +1,4 @@
+import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
 import { AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
@@ -46,7 +47,7 @@ export default function Transactions() {
 
       <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-40 md:pb-8 lg:px-8 lg:py-3">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <nav aria-label="Transaction views" className="cero-workplace-tabs flex flex-1 gap-2 md:gap-5">{tabs.map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => handleTabChange(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{tab.label}</button>)}</nav>
+          <nav aria-label="Transaction views" className="cero-workplace-tabs flex flex-1 gap-2 md:gap-5">{tabs.map(tab => <WorkspaceTab key={tab.value} active={activeTab === tab.value} onClick={() => handleTabChange(tab.value)}>{tab.label}</WorkspaceTab>)}</nav>
           {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="cero-add-action cero-desktop-only-action"><span aria-hidden="true">+</span><span>Add</span></button>}
         </div>
 

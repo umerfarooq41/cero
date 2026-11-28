@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { Gauge, LayoutDashboard, ChevronRight, Receipt, PiggyBank, CreditCard, Target, TrendingDown, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -36,8 +36,10 @@ function Entrance({ children, index }) {
   const reduced = useReducedMotion();
   return <motion.div data-dashboard-entry initial={reduced ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 190, damping: 24, delay: index * 0.06 }}>{children}</motion.div>;
 }
+import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
+
 function Section({ title, icon: Icon, action, children }) {
-  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 px-0 pb-2 pt-3"><div className="flex min-w-0 items-center gap-2">{Icon && <Icon className="size-4 shrink-0 text-muted-foreground"/>}<CardTitle className="truncate cero-section-title">{title}</CardTitle></div>{action}</CardHeader><CardContent className="px-0 pb-3 pt-1">{children}</CardContent></Card>;
+  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 px-0 pb-2 pt-3"><SectionHeading title={title} icon={Icon} as="h3"/>{action}</CardHeader><CardContent className="px-0 pb-3 pt-1">{children}</CardContent></Card>;
 }
 function Action({ to, children, boxed = false }) {
   return <Button asChild variant="ghost" size="sm" className={boxed ? "h-9 min-h-9 gap-1 rounded-md border border-border bg-transparent px-2.5 text-xs font-medium" : "min-h-9 gap-1 pl-2 pr-0 text-xs"}><Link to={to}>{children}</Link></Button>;
