@@ -2,14 +2,17 @@ import { useAppSheetKeyboard } from '@/hooks/useAppSheetKeyboard';
 import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, addDays, startOfWeek, parseISO } from 'date-fns';
+import CategoryEditorModal from '@/components/categories/CategoryEditorModal';
+import CategoryIcon from '@/components/shared/CategoryIcon';
+import { categoriesApi } from '@/lib/budgetData';
 import {
   ArrowDownLeft,
   X,
   ArrowLeftRight,
   ArrowUpRight,
   AlertTriangle,
-  Trash2,
+  Trash2, ChevronDown, ChevronLeft, ChevronRight, CalendarDays, Wallet, LayoutGrid, Plus, Delete,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -140,6 +143,34 @@ function getTransferPurposeFromCategory(category) {
   return TRANSFER_PURPOSES.normal;
 }
 
+function ExpandField({label, value, icon: Icon, open, onToggle, children}) {
+  return <section className="border-b border-border/60">
+    <button type="button" aria-expanded={open} onClick={onToggle} className="flex min-h-14 w-full items-center gap-3 py-2 text-left">
+      <Icon className="size-5 shrink-0 text-muted-foreground"/><span className="min-w-0 flex-1"><span className="block text-xs text-muted-foreground">{label}</span><span className="block break-words text-sm font-medium">{value||'Choose '+label.toLowerCase()}</span></span><ChevronDown className={'size-4 shrink-0 text-muted-foreground transition-transform '+(open?'rotate-180':'')}/>
+    </button>
+    {open&&<div className="cero-entry-expand space-y-2 pb-3">{children}</div>}
+  </section>;
+}
+function ChipOptions({items,value,onChoose,onAdd,searchable=true}) {
+  const [query,setQuery]=useState('');
+  const [all,setAll]=useState(false);
+  const matched=items.filter(item=>item.name.toLowerCase().includes(query.toLowerCase()));
+  return <>{searchable&&items.length>8&&<Input aria-label="Search choices" placeholder="Search…" value={query} onChange={e=>setQuery(e.target.value)} className="h-9"/>}
+    <div className="flex flex-wrap gap-2">{(all||query?matched:matched.slice(0,8)).map(item=><button key={item.id} type="button" aria-pressed={value===item.id} onClick={()=>onChoose(item.id)} className={'inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm '+(value===item.id?'border-primary bg-primary/10 text-primary':'border-border bg-muted/30')}><CategoryIcon icon={item.icon||'wallet'} color={item.color} size="sm"/><span className="break-words text-left">{item.name}</span></button>)}{onAdd&&<button type="button" onClick={onAdd} className="inline-flex min-h-10 items-center gap-1 rounded-full border border-primary/50 px-3 text-sm font-medium text-primary"><Plus className="size-4"/> New category</button>}</div>
+    {!query&&matched.length>8&&<button type="button" className="text-sm text-primary" onClick={()=>setAll(v=>!v)}>{all?'Show less':'View all ('+matched.length+')'}</button>}
+    {!matched.length&&<p className="text-xs text-muted-foreground">No matching items.</p>}
+  </>;
+}
+function QuickDates({value,onChange}) {
+  const today=new Date();
+  const [week,setWeek]=useState(()=>startOfWeek(value?parseISO(value):today));
+  const pick=d=>onChange(format(d,'yyyy-MM-dd'));
+  return <div className="space-y-2">
+    <div className="flex flex-wrap gap-2">{[['Today',today],['Yesterday',addDays(today,-1)]].map(([label,d])=><button key={label} type="button" onClick={()=>pick(d)} className={'rounded-full border px-3 py-2 text-xs '+(value===format(d,'yyyy-MM-dd')?'border-primary text-primary bg-primary/10':'border-border')}>{label}</button>)}<Input aria-label="Choose any date" type="date" value={value} onChange={e=>{if(e.target.value)onChange(e.target.value)}} className="h-9 w-auto max-w-full flex-1"/></div>
+    <div className="flex items-center justify-between"><button type="button" aria-label="Previous week" className="grid size-10 place-items-center" onClick={()=>setWeek(d=>addDays(d,-7))}><ChevronLeft className="size-4"/></button><span className="text-xs font-medium">{format(week,'MMM yyyy')}{format(week,'MMM yyyy')!==format(addDays(week,6),'MMM yyyy')?' – '+format(addDays(week,6),'MMM yyyy'):''}</span><button type="button" aria-label="Next week" className="grid size-10 place-items-center" onClick={()=>setWeek(d=>addDays(d,7))}><ChevronRight className="size-4"/></button></div>
+    <div className="grid grid-cols-7 gap-1">{Array.from({length:7},(_,i)=>addDays(week,i)).map(d=>{const key=format(d,'yyyy-MM-dd');return <button type="button" key={key} aria-pressed={value===key} onClick={()=>pick(d)} className={'flex min-h-12 flex-col items-center justify-center rounded-lg text-sm '+(value===key?'bg-primary text-primary-foreground':'hover:bg-muted')}><span className="text-[10px]">{format(d,'EEE')}</span><span>{format(d,'d')}</span></button>})}</div>
+  </div>;
+}
 export default function AddTransaction() {
   useAppSheetKeyboard();
   const navigate = useNavigate();
@@ -169,6 +200,16 @@ export default function AddTransaction() {
   const [linkedSaveError, setLinkedSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [expanded,setExpanded]=useState('');
+  const [keypad,setKeypad]=useState(()=>!isEditing && window.matchMedia('(max-width:1023px)').matches);
+  const [newCategory,setNewCategory]=useState(false);
+  const [operation,setOperation]=useState(null);
+  const [fresh,setFresh]=useState(true);
+  const calculate=()=>{const n=Number(amount||0);if(!operation)return n;return operation.op==='+'?operation.base+n:operation.op==='−'?operation.base-n:operation.op==='×'?operation.base*n:n===0?NaN:operation.base/n;};
+  const finishCalc=()=>{if(!operation)return true;const result=calculate();if(!Number.isFinite(result)||result<0||result>999999999){toast.error('Enter a valid calculation');return false;}setAmount(String(Math.round(result*100)/100));setOperation(null);setFresh(true);return true;};
+  const keyPress=key=>{if(key==='='){finishCalc();return;}if(['+','−','×','÷'].includes(key)){const base=calculate();if(!Number.isFinite(base)||base<0){toast.error('Invalid calculation');return;}setOperation({base,op:key});setFresh(true);return;}const old=amount||'0';const next=key==='back'?(old.slice(0,-1)||'0'):key==='.'?(fresh?'0.':old.includes('.')?old:old+'.'):fresh||old==='0'?key:old+key;if(/^\d{0,9}(\.\d{0,2})?$/.test(next)){setAmount(next);setFresh(false);}};
+  const toggleField=field=>{if(!finishCalc())return;setKeypad(false);setExpanded(old=>old===field?'':field);};
+  const choose=(setter,value)=>{setter(value);setExpanded('');};
 
   const destinationAccount = useMemo(
     () => accounts.find((account) => account.id === toAccountId),
@@ -228,7 +269,7 @@ export default function AddTransaction() {
     setDate(existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setOccurrenceDate(existingTransaction.recurring_posted_for_date || existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setNote(existingTransaction.note || '');
-  }, [categories, existingTransaction]);
+  }, [existingTransaction]);
 
   useEffect(() => {
     if (!isRecurringDateCorrection || !existingTransaction) return;
@@ -449,9 +490,9 @@ export default function AddTransaction() {
   return createPortal(
     <>
       <div className="app-route-sheet-backdrop" aria-hidden="true" />
-    <div className="app-route-sheet app-sheet-surface app-desktop-route-form">
+    <div className={"app-route-sheet app-sheet-surface app-desktop-route-form "+(!isRecurringDateCorrection?"cero-manual-entry":"")}>
       <header className="app-sheet-header shrink-0 px-5 pb-2 pt-2">
-        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35 lg:hidden" aria-hidden="true" />
+        <div className={"mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35 lg:hidden "+(!isRecurringDateCorrection?"hidden":"")} aria-hidden="true" />
         <div className="flex items-center justify-between">
           <h1 className="text-base font-semibold">{isEditing ? 'Edit transaction' : 'Add transaction'}</h1>
           <button type="button" onClick={() => navigate('/transactions')} aria-label="Close" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><X className="size-5" /></button>
@@ -503,226 +544,31 @@ export default function AddTransaction() {
       ) : (
       <>
       <main className="app-route-sheet-body mx-auto w-full max-w-3xl px-4 py-3">
-        <div className="mb-3">
-          <TransactionTypeSelector
-            value={type}
-            onChange={(nextType) => {
-              setType(nextType);
-              setCategoryId('');
-              setToAccountId('');
-              setTransferPurpose(TRANSFER_PURPOSES.normal);
-            }}
-          />
+        <TransactionTypeSelector value={type} onChange={nextType=>{if(nextType===type)return;setType(nextType);setCategoryId('');setToAccountId('');setTransferPurpose(TRANSFER_PURPOSES.normal);setExpanded('');}}/>
+        <div className="py-5 text-center">
+          <p className="mb-1 text-xs text-muted-foreground">Amount</p>
+          <button type="button" className="cero-entry-mobile mx-auto items-center justify-center gap-2 text-4xl font-semibold tabular-nums" onClick={()=>{setExpanded('');setKeypad(true);setFresh(true);}}><CurrencyPrefix currency={currency}/>{amount||'0.00'}</button>
+          <div className="cero-entry-desktop mx-auto max-w-xs items-center gap-2 text-3xl font-semibold"><CurrencyPrefix currency={currency}/><input aria-label="Amount" className="w-full min-w-0 bg-transparent text-center outline-none" type="number" min="0" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></div>
+          {operation&&<p className="mt-1 text-xs text-muted-foreground">{operation.base} {operation.op}</p>}
         </div>
-
-        <div className="space-y-3.5 rounded-2xl app-card-surface p-4 sm:p-5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 lg:!rounded-none">
-          <div className="space-y-1.5 lg:col-span-2">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Amount
-            </label>
-
-            <div className="flex h-14 items-center rounded-2xl border border-border/60 bg-background/80 px-4 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
-              <span className="mr-3 flex shrink-0 items-center text-2xl font-bold leading-none text-foreground sm:text-3xl">
-                <CurrencyPrefix currency={currency} />
-              </span>
-
-              <input
-                type="number"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder="0.00"
-                className="app-amount-input h-full min-w-0 flex-1 appearance-none border-0 bg-transparent px-0 text-left text-2xl font-bold tabular-nums tracking-tight text-foreground outline-none ring-0 placeholder:text-muted-foreground/45 focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 sm:text-3xl [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                step="0.01"
-                min="0"
-                inputMode="decimal"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          {type !== 'transfer' && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Category
-              </label>
-
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {filteredCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: category.color || '#0078D4' }}
-                        />
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              {type === 'transfer' ? 'From Account' : 'Account'}
-            </label>
-
-            <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select account" />
-              </SelectTrigger>
-
-              <SelectContent>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {type === 'transfer' && (
-            <>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  To Account
-                </label>
-
-                <Select
-                  value={toAccountId}
-                  onValueChange={(value) => {
-                    setToAccountId(value);
-                    setTransferPurpose(TRANSFER_PURPOSES.normal);
-                    setCategoryId('');
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select destination" />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    {accounts
-                      .filter((account) => account.id !== accountId)
-                      .map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Transfer Purpose
-                </label>
-
-                <Select
-                  value={transferPurpose}
-                  onValueChange={(value) => {
-                    setTransferPurpose(value);
-                    setCategoryId('');
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select purpose" />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    {transferPurposeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {
-                    transferPurposeOptions.find(
-                      (option) => option.value === transferPurpose
-                    )?.description
-                  }
-                </p>
-              </div>
-
-              {requiresCategory && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">
-                    {transferPurpose === TRANSFER_PURPOSES.savingsAllocation
-                      ? 'Savings Category'
-                      : 'Debt Category'}
-                  </label>
-
-                  <Select value={categoryId} onValueChange={setCategoryId}>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          transferPurpose === TRANSFER_PURPOSES.savingsAllocation
-                            ? 'Select savings category'
-                            : 'Select debt category'
-                        }
-                      />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {filteredCategories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="h-2 w-2 rounded-full"
-                              style={{ backgroundColor: category.color || '#0078D4' }}
-                            />
-                            {category.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </>
-          )}
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Date
-            </label>
-
-            <Input
-              type="date"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1.5 lg:col-span-2">
-            <label className="text-xs font-medium text-muted-foreground">
-              Note
-            </label>
-
-            <Textarea
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="Add a note."
-              className="h-20 resize-none"
-            />
-          </div>
+        <div className="space-y-1">
+          {type!=='transfer'&&<ExpandField label="Category" icon={LayoutGrid} value={categories.find(c=>c.id===categoryId)?.name} open={expanded==='category'} onToggle={()=>toggleField('category')}><ChipOptions items={filteredCategories.filter(c=>!c.is_archived||c.id===categoryId)} value={categoryId} onChoose={v=>choose(setCategoryId,v)} onAdd={()=>setNewCategory(true)}/></ExpandField>}
+          <ExpandField label={type==='transfer'?'From account':type==='income'?'Deposit account':'Account'} icon={Wallet} value={accounts.find(a=>a.id===accountId)?.name} open={expanded==='account'} onToggle={()=>toggleField('account')}><ChipOptions items={accounts.filter(a=>(!a.is_archived||a.id===accountId)&&(type!=='transfer'||a.id!==toAccountId))} value={accountId} onChoose={v=>choose(setAccountId,v)}/></ExpandField>
+          {type==='transfer'&&<>
+            <ExpandField label="To account" icon={ArrowLeftRight} value={destinationAccount?.name} open={expanded==='destination'} onToggle={()=>toggleField('destination')}><ChipOptions items={accounts.filter(a=>a.id!==accountId&&(!a.is_archived||a.id===toAccountId))} value={toAccountId} onChoose={v=>{choose(setToAccountId,v);setTransferPurpose(TRANSFER_PURPOSES.normal);setCategoryId('');}}/></ExpandField>
+            {toAccountId&&transferPurposeOptions.length>1&&<ExpandField label="Transfer purpose" icon={ArrowLeftRight} value={transferPurposeOptions.find(o=>o.value===transferPurpose)?.label} open={expanded==='purpose'} onToggle={()=>toggleField('purpose')}><div className="flex flex-wrap gap-2">{transferPurposeOptions.map(o=><button type="button" key={o.value} aria-pressed={transferPurpose===o.value} onClick={()=>{choose(setTransferPurpose,o.value);setCategoryId('');}} className={'rounded-full border px-3 py-2 text-sm '+(transferPurpose===o.value?'border-primary text-primary bg-primary/10':'border-border')}>{o.label}</button>)}</div></ExpandField>}
+            {toAccountId&&<p className="py-2 text-xs text-muted-foreground">{transferPurposeOptions.find(o=>o.value===transferPurpose)?.description}</p>}
+            {requiresCategory&&<ExpandField label={transferPurpose===TRANSFER_PURPOSES.savingsAllocation?'Savings category':'Debt category'} icon={LayoutGrid} value={categories.find(c=>c.id===categoryId)?.name} open={expanded==='category'} onToggle={()=>toggleField('category')}><ChipOptions items={filteredCategories.filter(c=>!c.is_archived||c.id===categoryId)} value={categoryId} onChoose={v=>choose(setCategoryId,v)} onAdd={()=>setNewCategory(true)}/></ExpandField>}
+          </>}
+          <ExpandField label="Date" icon={CalendarDays} value={date?format(parseISO(date),'d MMMM yyyy'):''} open={expanded==='date'} onToggle={()=>toggleField('date')}><QuickDates value={date} onChange={v=>choose(setDate,v)}/></ExpandField>
+          <Textarea aria-label="Note" value={note} onFocus={()=>{if(finishCalc()){setKeypad(false);setExpanded('');}}} onChange={e=>setNote(e.target.value)} placeholder="Add note (optional)" className="mt-3 min-h-12 resize-none"/>
         </div>
-
       </main>
         <div className="app-route-sheet-footer">
           <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate('/transactions')} disabled={saving}>Cancel</Button>
         <Button
-          onClick={handleSubmit}
-          disabled={saving || deleting || !amount}
+          onClick={()=>{if(operation){if(finishCalc())toast.info("Calculation complete. Tap Save to confirm.");return;}handleSubmit();}}
+          disabled={saving || deleting || !(Number(amount)>0) || !date || !accountId || (type==="transfer"&&(!toAccountId||toAccountId===accountId)) || (requiresCategory&&!categoryId)}
           className="h-11 w-full text-sm font-semibold"
         >
           {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Transaction'}
@@ -741,6 +587,12 @@ export default function AddTransaction() {
           </Button>
         )}
         </div>
+        {keypad&&<div className="cero-entry-keypad shrink-0 border-t border-border bg-muted/40 px-3 pt-2" aria-label="Calculator keypad">
+          <div className="grid grid-cols-4 gap-1">{['7','8','9','×','4','5','6','÷','1','2','3','+','.','0','back','−'].map(k=><button type="button" key={k} aria-label={k==='back'?'Backspace':k} onClick={()=>keyPress(k)} className={'grid h-10 place-items-center rounded-md text-xl '+(['×','÷','+','−'].includes(k)?'bg-muted text-muted-foreground':'hover:bg-muted')}>{k==='back'?<Delete className="size-5"/>:k}</button>)}</div>
+          <div className="mt-1 flex gap-2"><Button variant="ghost" onClick={()=>{setAmount('');setOperation(null);setFresh(true);}}>Clear</Button><Button variant="secondary" onClick={()=>keyPress('=')}>=</Button><Button className="flex-1" onClick={()=>{if(finishCalc())setKeypad(false);}}>Done</Button></div>
+        </div>}
+        <CategoryEditorModal open={newCategory} onClose={()=>setNewCategory(false)} initialType={type==='transfer'?(transferPurpose===TRANSFER_PURPOSES.savingsAllocation?'savings':'debt'):type} parentCategories={categories.filter(c=>!c.is_archived)} onSave={async data=>{try{const expected=type==='transfer'?(transferPurpose===TRANSFER_PURPOSES.savingsAllocation?'savings':'debt'):type;if(data.type!==expected){toast.error('Choose the matching category type');throw new Error('Category type mismatch');}const created=await categoriesApi.create(data);await queryClient.invalidateQueries({queryKey:['categories']});const id=created?.id||created?.[0]?.id||(typeof created==='string'?created:null);if(id)choose(setCategoryId,id);else setExpanded('category');toast.success('Category created');}catch(error){toast.error(error.message||'Could not create category');throw error;}}}/>
+        <style>{`.cero-entry-mobile,.cero-entry-keypad{display:none}.cero-entry-desktop{display:flex}.cero-entry-expand{animation:ceroEntryIn .18s ease-out}@keyframes ceroEntryIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}@media(max-width:1023px){.app-route-sheet.app-sheet-surface.cero-manual-entry{inset:0!important;height:100dvh!important;max-height:100dvh!important;width:100%!important;max-width:none!important;border-radius:0!important;transform:none!important;display:flex!important;flex-direction:column;padding-top:env(safe-area-inset-top)}.cero-manual-entry .app-route-sheet-body{flex:1;min-height:0;overflow-y:auto!important}.cero-entry-mobile{display:flex}.cero-entry-desktop{display:none}.cero-entry-keypad{display:block;padding-bottom:max(8px,env(safe-area-inset-bottom))}.cero-manual-entry .app-route-sheet-footer{padding:8px 16px!important;flex-shrink:0}.cero-manual-entry:not(:has(.cero-entry-keypad)) .app-route-sheet-footer{padding-bottom:max(12px,env(safe-area-inset-bottom))!important}}@media(prefers-reduced-motion:reduce){.cero-entry-expand{animation:none}}`}</style>
       </>
       )}
 
