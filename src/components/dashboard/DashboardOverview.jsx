@@ -6,6 +6,7 @@ import { Gauge, LayoutDashboard, ChevronRight, Receipt, Target, Info } from 'luc
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
@@ -83,19 +84,24 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
       </div>
       <p className="pt-2 text-center text-xs text-muted-foreground">{pace.daysRemaining} days left this month</p>
     </div>
-    <details className="group text-left">
-      <summary aria-label="How today's allowance is calculated" className="absolute right-0 top-0 flex size-10 cursor-pointer list-none items-center justify-center text-muted-foreground [&::-webkit-details-marker]:hidden"><Info size={17}/></summary>
-      <div className="space-y-2 pb-2 text-xs">
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" aria-label="How today's allowance is calculated" className="absolute right-0 top-1 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary data-[state=open]:text-primary"><Info size={17}/></button>
+      </PopoverTrigger>
+      <PopoverContent align="end" side="bottom" sideOffset={6} collisionPadding={16} aria-label="How today's allowance is calculated" className="w-[calc(100vw-32px)] max-w-[340px] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-xl border border-border !bg-popover p-4 text-left shadow-xl">
+        <h3 className="mb-2 text-sm font-semibold">How today's allowance is calculated</h3>
+      <div className="space-y-2 text-xs">
         <p className="text-muted-foreground">Monthly spending: <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
         <p className="text-muted-foreground">Budget left before today ÷ remaining days = daily allowance.</p>
         <dl className="divide-y divide-border">
-          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Budget left before today</dt><dd><Money value={Math.max(0,pace.budget-pace.spent+pace.spentToday)} formatCurrency={formatCurrency}/> ÷ {pace.daysRemaining || '—'}</dd></div>
-          <div className="flex justify-between gap-2 py-2"><dt>Daily allowance</dt><dd><Money value={pace.allowance} formatCurrency={formatCurrency}/></dd></div>
-          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Less: spent today</dt><dd><Money value={-pace.spentToday} formatCurrency={formatCurrency}/></dd></div>
-          <div className="flex justify-between gap-2 py-2 font-semibold"><dt>Available today</dt><dd><Money value={pace.leftToday} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Budget left before today</dt><dd className="shrink-0 text-right"><Money value={Math.max(0,pace.budget-pace.spent+pace.spentToday)} formatCurrency={formatCurrency}/> ÷ {pace.daysRemaining || '—'}</dd></div>
+          <div className="flex justify-between gap-2 py-2"><dt>Daily allowance</dt><dd className="shrink-0 text-right"><Money value={pace.allowance} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Less: spent today</dt><dd className="shrink-0 text-right"><Money value={-pace.spentToday} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex justify-between gap-2 py-2 font-semibold"><dt>Available today</dt><dd className="shrink-0 text-right"><Money value={pace.leftToday} formatCurrency={formatCurrency}/></dd></div>
         </dl>
       </div>
-    </details>
+      </PopoverContent>
+    </Popover>
   </CardContent></Card>;
 }
 function MonthlyAllocationDetails({ budget, transactions = [], formatCurrency }) {
