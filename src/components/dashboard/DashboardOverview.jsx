@@ -120,7 +120,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     transactions, currentMonth, now: new Date(),
   });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="cero-hero-label flex flex-wrap items-center justify-center gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Spending allowance</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
+    <div className="cero-hero-label flex items-center justify-between gap-2 text-left"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Spending allowance</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
@@ -128,7 +128,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of discretionary spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="cero-hero-label flex items-center justify-between gap-2">
+    <div className="cero-hero-label flex items-center justify-between gap-2 text-left">
       <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Spending allowance</p>
       <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
@@ -152,7 +152,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
 
     </div>
     <details className="group text-center">
-      <summary className="cursor-pointer list-none py-2 text-sm text-primary">How it's calculated <ChevronRight size={14} className="inline group-open:rotate-90"/></summary>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 py-2 text-left text-sm text-primary">How it's calculated <ChevronRight size={14} className="shrink-0 group-open:rotate-90"/></summary>
       <dl className="mx-auto max-w-md divide-y divide-border text-left">
         {[['Discretionary budget',pace.budget],['Spent before today',pace.spent-pace.spentToday],['Daily allowance',pace.allowance],['Spent today',pace.spentToday],['Available today',pace.leftToday]].map(([label,value])=><div key={label} className="flex justify-between gap-2 py-2 text-xs"><dt className="text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency}/></dd></div>)}
         <div className="flex justify-between py-2 text-xs"><dt className="text-muted-foreground">Days remaining</dt><dd>{pace.daysRemaining}</dd></div>
@@ -257,8 +257,8 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
     <div className="cero-safe-hero mx-auto w-full max-w-3xl border-b border-border text-center"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
     <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border py-3 text-center lg:py-5">
-      <div className="mb-3 space-y-1 text-center">
-        <h2 className="cero-section-title">Monthly overview</h2><p className="text-xs text-muted-foreground">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')}</p>
+      <div className="mb-3 text-left">
+        <h2 className="cero-section-title">Monthly overview</h2>
         
       </div>
       <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4 cero-overview-metrics">
