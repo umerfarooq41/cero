@@ -543,8 +543,8 @@ export default function DashboardReflect() {
       </div>
 
       <div className={report !== 'insights' ? 'hidden' : 'animate-child'}>
-        <section className="overflow-hidden px-3.5 py-3" aria-label="Financial insights">
-          <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /><h3 className="text-sm font-semibold text-foreground">Insights</h3></div>
+        <section className="overflow-hidden px-0 py-3" aria-label="Financial insights">
+          <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /><h3 className="cero-section-title text-foreground">Insights</h3></div>
           {insights.map((insight, index) => {
             const Icon = insight.icon;
             const metricTone = insight.tone === 'good'

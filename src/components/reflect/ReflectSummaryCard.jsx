@@ -367,7 +367,7 @@ export default function ReflectSummaryCard({
   const metric = (label, value, color = '') => (
     <div className="flex min-w-0 flex-col items-center justify-center rounded-none bg-transparent px-2 py-2 text-center">
       <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className={`mt-1 flex justify-center text-base font-semibold tabular-nums ${color}`}>{money(value)}</p>
+      <p className={`mt-1 flex justify-center cero-secondary-amount tabular-nums ${color}`}>{money(value)}</p>
     </div>
   );
   if (desktop) return <div className="space-y-6">
@@ -376,39 +376,39 @@ export default function ReflectSummaryCard({
         ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
         ['Total outflow',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings]]],
         ['Current net worth',netWorth,netWorth < 0 ? 'text-destructive' : '',[['Assets',totalAssets],['Liabilities',totalLiabilities]]]
-      ].map(([label,value,tone,rows]) => <div key={label} className="min-w-0"><h3 className="text-sm font-medium text-muted-foreground">{label}</h3><p className={`my-3 text-[30px] font-semibold tabular-nums ${tone}`}>{money(value)}</p><div className="space-y-2">{rows.map(([name,amount]) => <MoneyRow key={name} label={name} amount={amount} currency={currency}/>)}</div></div>)}
+      ].map(([label,value,tone,rows]) => <div key={label} className="min-w-0"><h3 className="text-sm font-medium text-muted-foreground">{label}</h3><p className={`my-2 cero-primary-amount tabular-nums ${tone}`}>{money(value)}</p><div className="space-y-2">{rows.map(([name,amount]) => <MoneyRow key={name} label={name} amount={amount} currency={currency}/>)}</div></div>)}
     </section>
-    <section className="max-w-3xl space-y-4" aria-label="Budget health"><h3 className="text-lg font-semibold">Budget health</h3>{plannedExpenses > 0 ? <><div className="flex items-end justify-between gap-4"><div><p className="text-sm text-muted-foreground">Expense budget {remaining < 0 ? 'over' : 'remaining'}</p><p className={`mt-1 text-2xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div><span className={remaining < 0 ? 'text-destructive' : 'text-muted-foreground'}>{Math.round(used)}% used</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full ${remaining < 0 ? 'bg-destructive' : 'bg-primary'}`} style={{width: `${Math.max(0,Math.min(100,used))}%`}}/></div><div className="flex justify-between text-sm text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div></> : <p className="text-sm text-muted-foreground">No expense budget planned for this period.</p>}</section>
+    <section className="max-w-3xl space-y-4" aria-label="Budget health"><h3 className="cero-section-title">Budget health</h3>{plannedExpenses > 0 ? <><div className="flex items-end justify-between gap-4"><div><p className="text-sm text-muted-foreground">Expense budget {remaining < 0 ? 'over' : 'remaining'}</p><p className={`mt-1 text-2xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div><span className={remaining < 0 ? 'text-destructive' : 'text-muted-foreground'}>{Math.round(used)}% used</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full ${remaining < 0 ? 'bg-destructive' : 'bg-primary'}`} style={{width: `${Math.max(0,Math.min(100,used))}%`}}/></div><div className="flex justify-between text-sm text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div></> : <p className="text-sm text-muted-foreground">No expense budget planned for this period.</p>}</section>
   </div>;
   return (
     <div className="mb-3 grid gap-3 lg:grid-cols-2">
-      <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none p-3.5">
-        <div className="mb-3 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-muted-foreground" /><h3 className="text-sm font-semibold">Financial summary</h3></div>
+      <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
+        
         <p className="text-[11px] text-muted-foreground">Operating cash flow</p>
-        <p className={`mt-1 text-xl font-bold tabular-nums ${netCashFlow >= 0 ? 'text-[hsl(var(--success))]' : 'text-destructive'}`}>{money(netCashFlow)}</p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <p className={`mt-1 cero-primary-amount tabular-nums ${netCashFlow >= 0 ? 'text-[hsl(var(--success))]' : 'text-destructive'}`}>{money(netCashFlow)}</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
           {metric('Income received', income, 'text-[hsl(var(--success))]')}
           {metric('Expenses', expenses)}
         </div>
-        <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3">
+        <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
           <div><p className="text-[11px] text-muted-foreground">Total outflow</p><p className="text-sm font-semibold">{money(totalTrackedOutflow)}</p></div>
           <div className="text-right text-[11px] text-muted-foreground">
             <p>Debt paid: {money(trackedDebt)}</p><p className="mt-1">Goal savings: {money(trackedSavings)}</p>
           </div>
         </div>
-        <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3">
+        <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
           <div><p className="text-[11px] text-muted-foreground">Current net worth</p><p className="text-base font-semibold">{money(netWorth)}</p></div>
           <div className="text-right text-[11px] text-muted-foreground">
             <p>Assets: {money(totalAssets)}</p><p className="mt-1">Liabilities: {money(totalLiabilities)}</p>
           </div>
         </div>
       </section>
-      <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none p-3.5">
-        <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="text-sm font-semibold">Budget health</h3></div>
+      <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
+        <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="cero-section-title">Budget health</h3></div>
         {plannedExpenses > 0 ? <>
           <div className="flex items-end justify-between gap-2">
             <div><p className="text-[11px] text-muted-foreground">Expense budget {remaining >= 0 ? 'remaining' : 'over'}</p>
-              <p className={`mt-1 text-xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div>
+              <p className={`mt-1 cero-primary-amount ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div>
             <span className="text-xs font-semibold tabular-nums">{Math.round(used)}% used</span>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, used))}%` }} /></div>

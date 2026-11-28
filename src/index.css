@@ -1811,3 +1811,19 @@ main,
  .cero-tab-toolbar .cero-add-action {padding-inline:8px;}
  .cero-desktop-workspace .cero-plan-toolbar > button {height:40px;}
 }
+
+/* Financial hierarchy shared by Overview and Reflect. */
+.cero-section-title {font-size:16px;line-height:1.35;font-weight:600;}
+.cero-primary-amount {font-size:26px;line-height:1.2;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:normal;}
+.cero-secondary-amount {font-size:20px;line-height:1.3;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:normal;}
+@media(min-width:1024px) {
+ .cero-primary-amount {font-size:30px;}
+ .cero-secondary-amount {font-size:24px;}
+}
+.cero-desktop-workspace .cero-reflect-period :is(button,[role="combobox"]) {border-radius:6px!important;box-shadow:none!important;}
+.cero-desktop-workspace .cero-reflect-period > div:first-child {border-radius:6px!important;}
+@media(max-width:767px) {
+ .cero-desktop-workspace .cero-overview-section {gap:0;}
+ .cero-desktop-workspace .cero-reflect-summary-section {padding-inline:0!important;}
+ .cero-desktop-workspace .cero-reflect-period {column-gap:6px;}
+}

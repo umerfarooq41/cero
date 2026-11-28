@@ -37,10 +37,10 @@ function Entrance({ children, index }) {
   return <motion.div data-dashboard-entry initial={reduced ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 190, damping: 24, delay: index * 0.06 }}>{children}</motion.div>;
 }
 function Section({ title, icon: Icon, action, children }) {
-  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 px-4 pb-2 pt-4"><div className="flex min-w-0 items-center gap-2">{Icon && <Icon className="size-4 shrink-0 text-muted-foreground"/>}<CardTitle className="truncate text-sm font-semibold lg:text-lg">{title}</CardTitle></div>{action}</CardHeader><CardContent className="px-4 pb-3 pt-1">{children}</CardContent></Card>;
+  return <Card className={cardStyle}><CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 px-0 pb-2 pt-3"><div className="flex min-w-0 items-center gap-2">{Icon && <Icon className="size-4 shrink-0 text-muted-foreground"/>}<CardTitle className="truncate cero-section-title">{title}</CardTitle></div>{action}</CardHeader><CardContent className="px-0 pb-3 pt-1">{children}</CardContent></Card>;
 }
 function Action({ to, children, boxed = false }) {
-  return <Button asChild variant="ghost" size="sm" className={boxed ? "min-h-9 gap-1 rounded-xl border border-border/50 bg-secondary/40 px-3 text-xs font-medium" : "min-h-9 gap-1 pl-2 pr-0 text-xs"}><Link to={to}>{children}</Link></Button>;
+  return <Button asChild variant="ghost" size="sm" className={boxed ? "h-9 min-h-9 gap-1 rounded-md border border-border bg-transparent px-2.5 text-xs font-medium" : "min-h-9 gap-1 pl-2 pr-0 text-xs"}><Link to={to}>{children}</Link></Button>;
 }
 function getDiscretionaryAllocations(allocations, categories) {
   const categoriesById = new Map(categories.map(c => [c.id, c]));
@@ -117,7 +117,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     allocations: getDiscretionaryAllocations(authoritativeAllocations, categories),
     transactions, currentMonth, now: new Date(),
   });
-  if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 p-4">
+  if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="space-y-2 px-0 py-3">
     <div className="flex items-center justify-between gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
@@ -125,16 +125,16 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
   const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of your spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
-  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2 px-4 py-3">
+  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2 px-0 py-3">
     <div className="flex items-center justify-between gap-2">
-      <p className="flex items-center gap-2 text-sm font-semibold tracking-tight"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Safe to spend today</p>
-      <Badge variant="secondary" className={`shrink-0 rounded-full border-0 px-3 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
+      <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Safe to spend today</p>
+      <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
       </Badge>
     </div>
     <div className="space-y-1">
       <div className="flex items-baseline gap-1.5">
-        <Money value={pace.allowance} formatCurrency={formatCurrency} className="text-[2rem] font-medium leading-none tracking-tight sm:text-4xl"/>
+        <Money value={pace.allowance} formatCurrency={formatCurrency} className="cero-primary-amount leading-none"/>
         <span className="text-sm text-muted-foreground">/ day</span>
       </div>
       {pace.spentToday > 0 && <p className="text-xs text-muted-foreground">Spent today <Money value={pace.spentToday} formatCurrency={formatCurrency}/> · <Money value={pace.leftToday} formatCurrency={formatCurrency}/> left</p>}
@@ -165,7 +165,7 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
   const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
   const tracked = expenses + savings + debt;
   return <Section title="Budget snapshot" icon={LayoutDashboard}>
-    <dl className="divide-y divide-border">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Planned total',planned],['Tracked total',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-2.5 lg:py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm lg:text-base font-medium"/></dd></div>)}</dl>
+    <dl className="divide-y divide-border">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Planned total',planned],['Tracked total',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-2 lg:py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm lg:text-base font-medium"/></dd></div>)}</dl>
   </Section>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
@@ -245,11 +245,11 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="mx-auto max-w-3xl max-md:[&_div[data-dashboard-entry]]:mb-2 md:max-w-none">
     <div className="border-b border-border py-3 lg:py-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-semibold">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>
         <Action to="/plan" boxed>Open plan <ChevronRight size={14}/></Action>
       </div>
-      <dl className="grid grid-cols-2 gap-x-3 gap-y-4 xl:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4">
         {[
           ['Received income', budget.realizedIncome ?? budget.totalIncome],
           ['Total expenses', budget.totalExpenses],
@@ -257,7 +257,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
           ['Left to allocate', budget.leftToAllocate],
         ].map(([label, value], index) => <div key={label} className="min-w-0 lg:px-4 lg:first:pl-0">
           <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-          <dd className="mt-2"><Money value={value} formatCurrency={formatCurrency} className={'text-xl md:text-2xl lg:text-[30px] font-semibold tracking-normal ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
+          <dd className="mt-1"><Money value={value} formatCurrency={formatCurrency} className={'cero-secondary-amount ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
         </div>)}
       </dl>
     </div>
@@ -265,7 +265,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
       <div className="contents md:order-2 md:flex md:min-w-0 md:flex-col md:gap-4">
         <div className="contents md:order-1"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
         <div className="contents md:order-2"><Entrance index={1}><Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/></Entrance></div>
-        <div className="contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
+        <div className="contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-md bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
       </div>
       <div className="contents md:flex md:min-w-0 md:flex-col md:gap-4">
         <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="!rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none"/></Entrance></div>

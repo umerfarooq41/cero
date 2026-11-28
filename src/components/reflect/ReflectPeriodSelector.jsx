@@ -80,13 +80,13 @@ export default function ReflectPeriodSelector({
     onMonthChange(String(next.getMonth() + 1).padStart(2, '0'));
   };
   return (
-    <div className="mb-3 flex flex-wrap min-w-0 items-center justify-between gap-2">
+    <div className="cero-reflect-period mb-3 flex flex-wrap min-w-0 items-center justify-between gap-2">
       <div className="flex items-center rounded-md border border-border p-0.5">
         {['month', 'year'].map(mode => <button key={mode} type="button" aria-pressed={periodMode === mode} onClick={() => changeMode(mode)}
-          className={`rounded-sm px-3 py-2 text-sm font-semibold ${periodMode === mode ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
+          className={`rounded-sm px-2.5 h-8 text-sm font-medium ${periodMode === mode ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
       </div>
       <div className="flex min-w-0 items-center gap-1">
-        <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60"><ChevronLeft className="h-4 w-4" /></button>
+        <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-md border border-border"><ChevronLeft className="h-4 w-4" /></button>
         <Select value={periodMode === 'year' ? String(year) : `${year}-${selectedMonth.value}`}
           onValueChange={value => { if (periodMode === 'year') onYearChange(value); else { const [y,m] = value.split('-'); onYearChange(y); onMonthChange(m); } }}>
           <SelectTrigger aria-label="Select reporting period" className="h-9 w-[112px] rounded-md border border-border bg-background px-2 text-center text-sm font-semibold [&>span]:flex [&>span]:flex-1 [&>span]:justify-center">
@@ -98,7 +98,7 @@ export default function ReflectPeriodSelector({
               : MONTHS.filter((m,i) => !isFuture(y,i)).map(m => <SelectItem key={`${y}-${m.value}`} value={`${y}-${m.value}`}>{m.shortLabel} {y}</SelectItem>))}
           </SelectContent>
         </Select>
-        <button type="button" aria-label="Next period" disabled={!canAdvance} onClick={() => navigate(1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
+        <button type="button" aria-label="Next period" disabled={!canAdvance} onClick={() => navigate(1)} className="flex h-8 w-8 items-center justify-center rounded-md border border-border disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
       </div>
     </div>
   );
