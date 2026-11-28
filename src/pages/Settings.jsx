@@ -1,4 +1,3 @@
-import { PayeeManager } from '@/components/transactions/PayeeManager';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Brush, Calculator, CircleDollarSign, Download, Upload, Fingerprint, Globe, LogOut, Palette, ShieldCheck, Trash2, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -53,7 +52,6 @@ export default function Settings() {
     },
   });
 
-  const [showPayees,setShowPayees]=useState(false);
   const [accounts, setAccounts] = useState([]);
   const [showAutoSweepDialog, setShowAutoSweepDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -502,10 +500,9 @@ export default function Settings() {
 
         <SettingsSection title="Management" description="Manage reusable transaction information." tone="blue">
           <SettingRow icon={User} tone="blue" label="Payees" description="Rename, merge or organize payees">
-            <Button variant="outline" size="sm" onClick={()=>setShowPayees(true)}>Manage</Button>
+            <Button variant="outline" size="sm" onClick={()=>navigate('/settings/payees')}>Manage</Button>
           </SettingRow>
         </SettingsSection>
-        {showPayees&&<PayeeManager open onClose={()=>setShowPayees(false)}/>}
         <SettingsSection
           title="Budget Behavior"
           description="Automation and rules that affect budget calculations."

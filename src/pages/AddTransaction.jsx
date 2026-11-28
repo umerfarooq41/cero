@@ -1,8 +1,8 @@
-import { usePayees, PayeeManager } from '@/components/transactions/PayeeManager';
+import { usePayees } from '@/components/transactions/PayeeManager';
 import { useAppSheetKeyboard } from '@/hooks/useAppSheetKeyboard';
 import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { format, addDays, startOfWeek, parseISO } from 'date-fns';
 import CategoryEditorModal from '@/components/categories/CategoryEditorModal';
 import CategoryIcon from '@/components/shared/CategoryIcon';
@@ -164,6 +164,8 @@ function QuickDates({value,onChange}) {
 export default function AddTransaction() {
   useAppSheetKeyboard();
   const navigate = useNavigate();
+  const location=useLocation();
+  const returnTo=typeof location.state?.returnTo==='string'&&/^\/settings\/payees\/[a-f0-9-]+$/i.test(location.state.returnTo)?location.state.returnTo:'/transactions';
   const { id } = useParams();
   const isEditing = Boolean(id);
   const queryClient = useQueryClient();
@@ -192,7 +194,6 @@ export default function AddTransaction() {
   const [addingPayee,setAddingPayee]=useState(false);
   useEffect(()=>{let active=true;supabase.from('transactions').select('payee_name').limit(1).then(({error})=>{if(active)setPayeeReady(!error)});return()=>{active=false};},[]);
   const {data: registry}=usePayees();
-  const [managePayees,setManagePayees]=useState(false);
   const historyPayees=useMemo(()=>{const seen=new Set();return [...allTransactions].sort((a,b)=>String(b.date).localeCompare(String(a.date))).filter(t=>t.type===type&&t.payee_name).map(t=>t.payee_name.trim()).filter(n=>{const k=n.toLowerCase();if(!n||seen.has(k))return false;seen.add(k);return true;});},[allTransactions,type]);
   const recentPayees=registry ? registry.filter(p=>!p.is_archived).map(p=>p.name) : historyPayees;
   const pickPayee=n=>{choose(setPayee,n);const p=registry?.find(p=>p.name===n);if(!categoryId&&p?.default_category_id&&filteredCategories.some(c=>c.id===p.default_category_id))setCategoryId(p.default_category_id);};
@@ -356,7 +357,7 @@ export default function AddTransaction() {
         if (error) throw error;
         invalidateScheduledQueries(queryClient);
         toast.success('Payment schedule corrected');
-        navigate('/transactions');
+        navigate(returnTo);
       } catch (error) {
         console.error('Linked payment save failed:', error);
         const message = error?.message || 'Could not save the payment';
@@ -447,7 +448,7 @@ export default function AddTransaction() {
       invalidateScheduledQueries(queryClient);
 
       toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
-      navigate('/transactions');
+      navigate(returnTo);
     } catch (error) {
       console.error('Transaction save failed:', error);
       toast.error(error.message || 'Could not save transaction');
@@ -479,7 +480,7 @@ export default function AddTransaction() {
 
       toast.success('Transaction deleted');
       setDeleteOpen(false);
-      navigate('/transactions');
+      navigate(returnTo);
     } catch (error) {
       console.error('Transaction delete failed:', error);
       toast.error(error.message || 'Could not delete transaction');
@@ -497,7 +498,7 @@ export default function AddTransaction() {
         <div className={"mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35 lg:hidden "+(!isRecurringDateCorrection?"hidden":"")} aria-hidden="true" />
         <div className="flex items-center justify-between">
           <h1 className="text-base font-semibold">{isEditing ? 'Edit transaction' : 'Add transaction'}</h1>
-          <button type="button" onClick={() => navigate('/transactions')} aria-label="Close" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><X className="size-5" /></button>
+          <button type="button" onClick={() => navigate(returnTo)} aria-label="Close" className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><X className="size-5" /></button>
         </div>
       </header>
 
@@ -527,7 +528,7 @@ export default function AddTransaction() {
           </div>
         </main>
         <div className="app-route-sheet-footer">
-          <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate('/transactions')} disabled={saving}>Cancel</Button>
+          <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate(returnTo)} disabled={saving}>Cancel</Button>
             <Button type="button" className="w-full" disabled={saving || deleting || !date || !occurrenceDate || !(Number(amount) > 0)} onClick={handleSubmit}>
               {saving ? 'Saving…' : 'Save changes'}
             </Button>
@@ -554,7 +555,7 @@ export default function AddTransaction() {
           {operation&&<p className="mt-1 text-xs text-muted-foreground">{operation.base} {operation.op}</p>}
         </div>
         <div className="space-y-1">
-          {type!=='transfer'&&payeeReady&&<ExpandField label="Payee (optional)" icon={Wallet} value={payee||'Choose payee'} open={expanded==='payee'} onToggle={()=>{toggleField('payee');setPayeeQuery('');setAddingPayee(false);}}><Input aria-label="Search payees" placeholder={addingPayee?'New payee name':'Search payees'} maxLength={120} value={payeeQuery} onChange={e=>setPayeeQuery(e.target.value)}/><div className="flex flex-wrap gap-2">{recentPayees.filter(n=>n.toLowerCase().includes(payeeQuery.toLowerCase())).slice(0,payeeQuery?30:8).map(n=><button type="button" key={n} aria-pressed={payee===n} onClick={()=>pickPayee(n)} className={'rounded-full border px-3 py-2 text-sm '+(payee===n?'border-primary text-primary bg-primary/10':'border-border')}>{n}</button>)}<button type="button" onClick={()=>setAddingPayee(true)} className="inline-flex items-center gap-1 rounded-full border border-primary/50 px-3 py-2 text-sm text-primary"><Plus className="size-4"/>New payee</button>{registry&&<button type="button" className="px-2 text-sm text-primary" onClick={()=>setManagePayees(true)}>Manage payees</button>}{payee&&<button type="button" className="px-2 text-sm text-muted-foreground" onClick={()=>choose(setPayee,'')}>Clear</button>}</div>{(addingPayee||payeeQuery.trim())&&<Button type="button" size="sm" disabled={!payeeQuery.trim()} onClick={()=>{const n=payeeQuery.trim();pickPayee(recentPayees.find(p=>p.toLowerCase()===n.toLowerCase())||n);}}>Use payee</Button>}</ExpandField>}
+          {type!=='transfer'&&payeeReady&&<ExpandField label="Payee (optional)" icon={Wallet} value={payee||'Choose payee'} open={expanded==='payee'} onToggle={()=>{toggleField('payee');setPayeeQuery('');setAddingPayee(false);}}><Input aria-label="Search payees" placeholder={addingPayee?'New payee name':'Search payees'} maxLength={120} value={payeeQuery} onChange={e=>setPayeeQuery(e.target.value)}/><div className="flex flex-wrap gap-2">{recentPayees.filter(n=>n.toLowerCase().includes(payeeQuery.toLowerCase())).slice(0,payeeQuery?30:8).map(n=><button type="button" key={n} aria-pressed={payee===n} onClick={()=>pickPayee(n)} className={'rounded-full border px-3 py-2 text-sm '+(payee===n?'border-primary text-primary bg-primary/10':'border-border')}>{n}</button>)}<button type="button" onClick={()=>setAddingPayee(true)} className="inline-flex items-center gap-1 rounded-full border border-primary/50 px-3 py-2 text-sm text-primary"><Plus className="size-4"/>New payee</button>{payee&&<button type="button" className="px-2 text-sm text-muted-foreground" onClick={()=>choose(setPayee,'')}>Clear</button>}</div>{(addingPayee||payeeQuery.trim())&&<Button type="button" size="sm" disabled={!payeeQuery.trim()} onClick={()=>{const n=payeeQuery.trim();pickPayee(recentPayees.find(p=>p.toLowerCase()===n.toLowerCase())||n);}}>Use payee</Button>}</ExpandField>}
           {type!=='transfer'&&<ExpandField label="Category" icon={LayoutGrid} value={categories.find(c=>c.id===categoryId)?.name} open={expanded==='category'} onToggle={()=>toggleField('category')}><ChipOptions items={filteredCategories.filter(c=>!c.is_archived||c.id===categoryId)} value={categoryId} onChoose={v=>choose(setCategoryId,v)} onAdd={()=>setNewCategory(true)}/></ExpandField>}
           <ExpandField label={type==='transfer'?'From account':type==='income'?'Deposit account':'Account'} icon={Wallet} value={accounts.find(a=>a.id===accountId)?.name} open={expanded==='account'} onToggle={()=>toggleField('account')}><ChipOptions items={accounts.filter(a=>(!a.is_archived||a.id===accountId)&&(type!=='transfer'||a.id!==toAccountId))} value={accountId} onChoose={v=>choose(setAccountId,v)}/></ExpandField>
           {type==='transfer'&&<>
@@ -568,7 +569,7 @@ export default function AddTransaction() {
         </div>
       </main>
         <div className="app-route-sheet-footer">
-          <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate('/transactions')} disabled={saving}>Cancel</Button>
+          <Button type="button" variant="outline" className="hidden lg:inline-flex" onClick={() => navigate(returnTo)} disabled={saving}>Cancel</Button>
         <Button
           onClick={()=>{if(operation){if(finishCalc())toast.info("Calculation complete. Tap Save to confirm.");return;}handleSubmit();}}
           disabled={saving || deleting || !(Number(amount)>0) || !date || !accountId || (type==="transfer"&&(!toAccountId||toAccountId===accountId)) || (requiresCategory&&!categoryId)}
@@ -594,7 +595,6 @@ export default function AddTransaction() {
           <div className="grid grid-cols-4 gap-1">{['7','8','9','×','4','5','6','÷','1','2','3','+','.','0','back','−'].map(k=><button type="button" key={k} aria-label={k==='back'?'Backspace':k} onClick={()=>keyPress(k)} className={'grid h-10 place-items-center rounded-md text-xl '+(['×','÷','+','−'].includes(k)?'bg-muted text-muted-foreground':'hover:bg-muted')}>{k==='back'?<Delete className="size-5"/>:k}</button>)}</div>
           <div className="mt-1 flex gap-2"><Button variant="ghost" onClick={()=>{setAmount('');setOperation(null);setFresh(true);}}>Clear</Button><Button variant="secondary" onClick={()=>keyPress('=')}>=</Button><Button className="flex-1" onClick={()=>{if(finishCalc())setKeypad(false);}}>Done</Button></div>
         </div>}
-        {managePayees&&<PayeeManager open onClose={()=>setManagePayees(false)} onChange={(oldName,newName)=>{if(payee===oldName)setPayee(newName||'');}}/>}
         <CategoryEditorModal open={newCategory} onClose={()=>setNewCategory(false)} initialType={type==='transfer'?(transferPurpose===TRANSFER_PURPOSES.savingsAllocation?'savings':'debt'):type} parentCategories={categories.filter(c=>!c.is_archived)} onSave={async data=>{try{const expected=type==='transfer'?(transferPurpose===TRANSFER_PURPOSES.savingsAllocation?'savings':'debt'):type;if(data.type!==expected){toast.error('Choose the matching category type');throw new Error('Category type mismatch');}const created=await categoriesApi.create(data);await queryClient.invalidateQueries({queryKey:['categories']});const id=created?.id||created?.[0]?.id||(typeof created==='string'?created:null);if(id)choose(setCategoryId,id);else setExpanded('category');toast.success('Category created');}catch(error){toast.error(error.message||'Could not create category');throw error;}}}/>
         <style>{`.cero-entry-mobile,.cero-entry-keypad{display:none}.cero-entry-desktop{display:flex}.cero-entry-expand{animation:ceroEntryIn .18s ease-out}@keyframes ceroEntryIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}@media(max-width:1023px){.app-route-sheet.app-sheet-surface.cero-manual-entry{inset:0!important;height:100dvh!important;max-height:100dvh!important;width:100%!important;max-width:none!important;border-radius:0!important;transform:none!important;display:flex!important;flex-direction:column;padding-top:env(safe-area-inset-top)}.cero-manual-entry .app-route-sheet-body{flex:1;min-height:0;overflow-y:auto!important}.cero-entry-mobile{display:flex}.cero-entry-desktop{display:none}.cero-entry-keypad{display:block;padding-bottom:max(8px,env(safe-area-inset-bottom))}.cero-manual-entry .app-route-sheet-footer{padding:8px 16px!important;flex-shrink:0}.cero-manual-entry:not(:has(.cero-entry-keypad)) .app-route-sheet-footer{padding-bottom:max(12px,env(safe-area-inset-bottom))!important}}@media(prefers-reduced-motion:reduce){.cero-entry-expand{animation:none}}`}</style>
       </>

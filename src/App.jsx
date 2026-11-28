@@ -32,6 +32,7 @@ import { useUserSettings } from '@/hooks/useBudgetData';
 import AutoSweepPrompt from '@/components/AutoSweepPrompt';
 
 // Lazy-load secondary pages that are opened less often.
+const PayeesPage = lazy(() => import('@/components/transactions/PayeeManager').then(m=>({default:m.PayeeManager})));
 const AddTransaction = lazy(() => import('@/pages/AddTransaction'));
 const AccountDetail = lazy(() => import('@/pages/AccountDetail'));
 const AddAccount = lazy(() => import('@/pages/AddAccount'));
@@ -243,6 +244,8 @@ const AuthenticatedApp = () => {
           element={<Navigate to="/manage-plan?tab=categories" replace />}
         />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/payees" element={<LazyPage><PayeesPage /></LazyPage>} />
+        <Route path="/settings/payees/:payeeId" element={<LazyPage><PayeesPage /></LazyPage>} />
         <Route
           path="/reflect"
           element={<Navigate to="/?tab=reflect" replace />}
