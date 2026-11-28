@@ -1,5 +1,8 @@
 import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
 import {
@@ -48,6 +51,7 @@ import {
   formatCurrencyNumberText,
 } from '@/lib/currencies';
 import { cn } from '@/lib/utils';
+import { getSelectionTotals } from '@/lib/selectionTotals';
 
 const ADD_TRANSACTION_ROUTE = '/add-transaction';
 
@@ -289,6 +293,10 @@ function AdvancedFilterSheet({
 
 export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const deletionLock = useRef(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState('');
   const currency = useCurrency();
   const [params] = useSearchParams();
 
@@ -312,7 +320,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
     isError: transactionsError,
     refetch: refetchTransactions,
   } = useTransactions(currentMonth);
-  const { data: allTransactions = [], isPending: allTransactionsPending, isError: allTransactionsError } = useAllTransactions();
+  const { data: allTransactions = [], isPending: allTransactionsPending, isError: allTransactionsError, refetch: refetchAllTransactions } = useAllTransactions();
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts(true);
   const { data: recurringTransactions = [] } = useRecurringTransactions();
@@ -487,15 +495,43 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
   const hasTransactions = sortedDates.length > 0;
   const selectionScope = JSON.stringify([currentMonth, dateMode, dateFrom, dateTo, selectedDate, searchValue, filterType, accountFilter, categoryFilter, sourceFilter]);
+  if (selection.scope !== selectionScope) setSelection({ scope: selectionScope, ids: [] });
   const selectedIds = selection.scope === selectionScope ? selection.ids : [];
   const setSelectedIds = update => setSelection(previous => ({ scope: selectionScope, ids: typeof update === 'function' ? update(previous.scope === selectionScope ? previous.ids : []) : update }));
   const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
+  const selectionTotals = getSelectionTotals(selectedRows);
   const toggleSelection = id => setSelectedIds(ids => {
     const visibleIds = new Set(sortedTransactions.map(row => row.id));
     const visibleSelection = ids.filter(value => visibleIds.has(value));
     return visibleSelection.includes(id) ? visibleSelection.filter(value => value !== id) : [...visibleSelection, id];
   });
   const exitSelection = () => { setSelectionMode(false); setSelectedIds([]); };
+
+  const deletableRows = selectedRows.filter(row => !isRecurringTransaction(row) && !isGoalContribution(row) && !row.goal_id && (!row.source_type || row.source_type === 'manual' || row.source_type === 'regular') && !/^(Account balance adjustment|Debt principal removed:)/i.test(row.note || ''));
+  const deleteSelected = async () => {
+    if (deletionLock.current || !deletableRows.length || deletableRows.length !== selectedRows.length) return;
+    if (navigator.onLine === false) { setBulkMessage('Connect to the internet before deleting transactions.'); return; }
+    if (!window.confirm(`Permanently delete ${deletableRows.length} selected transactions and reverse their balance effects?`)) return;
+    deletionLock.current = true;
+    setBulkBusy(true);
+    setBulkMessage('');
+    const deleted = [];
+    try {
+      for (const row of deletableRows) {
+        const { error } = await supabase.rpc('cero_delete_transaction', { p_transaction_id: row.id });
+        if (error) throw error;
+        deleted.push(row.id);
+      }
+      setBulkMessage(`${deleted.length} transactions deleted.`);
+    } catch {
+      setBulkMessage(`${deleted.length} confirmed deleted. Stopped after an error; refresh and verify remaining transactions before retrying.`);
+    } finally {
+      invalidateScheduledQueries(queryClient);
+      setSelectedIds([]);
+      setBulkBusy(false);
+      deletionLock.current = false;
+    }
+  };
 
   const clearAdvancedFilters = () => {
     setSourceFilter('all');
@@ -540,7 +576,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         </div>
 
         <Button size="sm" variant="outline" aria-pressed={selectionMode} onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)}>{selectionMode ? 'Done' : 'Select'}</Button>
-        <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<select className="block w-full rounded-md border border-border bg-background p-2" value={value} onChange={e=>set(e.target.value)}>{options.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
+        <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<Select value={value} onValueChange={set}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{options.map(o=><SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent></Select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
         <div className="lg:hidden"><AdvancedFilterSheet
           open={filterSheetOpen}
           onOpenChange={setFilterSheetOpen}
@@ -569,11 +605,14 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         /></div>
       </div>
 
+      {bulkMessage && <p role="status" className="mb-2 text-xs text-muted-foreground">{bulkMessage}</p>}
       {selectionMode && <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
         <Button size="sm" variant="ghost" disabled={!sortedTransactions.length} onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button>
         <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button>
         <span aria-live="polite">{selectedRows.length} selected</span>
-        {['income','expense','transfer'].map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectedRows.filter(row => row.type === type).reduce((sum,row) => sum + Math.abs(Number(row.amount || 0)),0))}</span>)}
+        <Button size="sm" variant="outline" disabled={bulkBusy || !selectedRows.length || deletableRows.length !== selectedRows.length} onClick={deleteSelected}>{bulkBusy ? "Deleting…" : "Delete selected"}</Button>
+        {selectedRows.length !== deletableRows.length && <span className="text-xs text-muted-foreground">Linked or protected transactions must be managed individually.</span>}
+        {['income','expense','transfer','adjustment'].filter(type => type !== 'adjustment' || selectionTotals.adjustment !== 0).map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectionTotals[type])}</span>)}
       </div>}
       <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
         {[['all','All'],['income','Income'],['expense','Expense'],['transfer','Transfer']].map(([value,label]) => (
@@ -611,7 +650,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
             title="Couldn't load transactions"
             description="Your data has not been changed. Check your connection and try again."
             actionLabel="Retry"
-            onAction={() => refetchTransactions()}
+            onAction={() => globalScope ? refetchAllTransactions() : refetchTransactions()}
           />
         </div>
       ) : !hasTransactions ? (
@@ -642,7 +681,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
               <div className="border-b border-border/50 px-0 py-1.5">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {date !== 'No Date'
-                    ? format(new Date(date), 'EEE, d MMM')
+                    ? format(new Date(`${date}T12:00:00`), 'EEE, d MMM')
                     : 'No Date'}
                 </span>
               </div>

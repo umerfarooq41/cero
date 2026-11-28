@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { motion } from 'framer-motion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { queryClientInstance } from '@/lib/query-client';
 import { toast } from 'sonner';
@@ -13,10 +14,12 @@ export default function MonthSelector({
   trailingAction,
   className,
   bare = false,
+  disabled = false,
 }) {
   const date = new Date(`${currentMonth}-01T12:00:00`);
 
   const changeMonth = (nextMonth) => {
+    if (disabled) return;
     if (!navigator.onLine) {
       const cached = queryClientInstance
         .getQueryCache()
@@ -44,7 +47,7 @@ export default function MonthSelector({
 
   return (
     <motion.div
-      drag="x"
+      drag={disabled ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.15}
       onDragEnd={(_, info) => {
@@ -60,13 +63,13 @@ export default function MonthSelector({
     >
       <button
         type="button"
-        aria-label="Previous month" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
+        disabled={disabled} aria-label="Previous month" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
         onClick={goToPreviousMonth}
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
 
-      <motion.button
+      {onLabelClick ? (<motion.button
         type="button"
         disabled={!onLabelClick}
         onClick={onLabelClick}
@@ -92,11 +95,20 @@ export default function MonthSelector({
             {subtitle}
           </span>
         )}
-      </motion.button>
+      </motion.button>) : (
+        <Select value={currentMonth} onValueChange={changeMonth} disabled={disabled}>
+          <SelectTrigger aria-label="Select month" className="h-9 min-w-0 flex-1 rounded-md border border-border bg-background px-2 text-center text-sm font-medium [&>span]:flex [&>span]:flex-1 [&>span]:justify-center">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent position="popper" align="center">
+            {Array.from({length: 109}, (_, index) => format(addMonths(date, index - 54), 'yyyy-MM')).map(value => <SelectItem key={value} value={value} className="justify-center text-center">{format(new Date(value + '-01T12:00:00'), 'MMMM yyyy')}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
 
       <button
         type="button"
-        aria-label="Next month" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30"
+        disabled={disabled} aria-label="Next month" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30"
         onClick={goToNextMonth}
       >
         <ChevronRight className="h-4 w-4" />

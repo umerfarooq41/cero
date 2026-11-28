@@ -1,8 +1,8 @@
 import { WorkspaceAddButton, WorkspaceTab, RegisterHeader, RegisterRow, RegisterInspector } from '@/components/shared/WorkspacePrimitives';
 import MobileHeaderActions from '@/components/layout/MobileHeaderActions';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { format, subMonths, addMonths } from 'date-fns';
-import { ChevronDown, ChevronLeft, ChevronRight, Copy, Save, LockKeyhole, Plus, Pencil, X } from 'lucide-react';
+import { format, subMonths } from 'date-fns';
+import { ChevronDown, Copy, Save, LockKeyhole, Plus, Pencil, X } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -460,7 +460,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
     const canWrite = navigator.onLine && !saving && !isPlanLoading;
     return <div className="cero-unified-plan space-y-2 workspace:space-y-4"><MobileHeaderActions disabled={!canWrite} addLabel={'Add '+sectionConfig[activeType].title} onAdd={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} items={[{label:hideZero?"Show zero categories":"Hide zero categories",onClick:()=>{setHideZero(v=>!v);setSelectedKey(null)}},{label:"Archived categories",onClick:()=>requestEditor("archived")}]}/>
       <div className="cero-plan-toolbar workspace:sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-2">
-        <div className="cero-month-heading flex shrink-0 items-center gap-1 text-lg font-semibold"><button type="button" aria-label="Previous month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(subMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronLeft className="size-4"/></button><span>{format(new Date(currentMonth+'-01T12:00:00'),'MMMM yyyy')}</span><button type="button" aria-label="Next month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(addMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight className="size-4"/></button></div><div className="flex-1"/>
+        <MonthSelector currentMonth={currentMonth} onChange={changeUnifiedMonth} disabled={saving} subtitle={null} bare className="max-w-[240px] flex-1"/><div className="flex-1"/>
         <div className="mr-3 text-right"><p className="text-xs text-muted-foreground">Left to allocate</p><p className={cn("text-xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
         <Button variant="outline" disabled={!canWrite} onClick={copyFromPreviousMonth}><Copy className="mr-2 size-4"/><span className="md:hidden">Copy previous</span><span className="hidden md:inline">Copy previous month</span></Button>
         <Button disabled={!canWrite||!dirty} onClick={handleSave}><Save className="mr-2 size-4"/>{saving?'Saving…':dirty?'Save plan':'Saved'}</Button>
