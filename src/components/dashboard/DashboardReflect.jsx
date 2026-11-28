@@ -158,7 +158,7 @@ function buildReflectInsights({
   return [
     {
       icon: cashFlowPositive ? TrendingUp : TrendingDown,
-      title: `${periodLabel} Cash Flow`,
+      title: `${periodLabel} Operating Cash Flow`,
       metric: <MoneyMetric amount={netCashFlow} currency={currency} signed />,
       text: cashFlowPositive ? (
         <>

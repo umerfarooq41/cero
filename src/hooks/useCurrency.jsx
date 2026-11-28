@@ -36,7 +36,7 @@ export function formatCurrency(amount, currency = 'SAR') {
 
   if (code === 'SAR') {
     return (
-      <span className="inline-flex items-center gap-1 align-middle text-inherit tabular-nums">
+      <span className="inline-flex items-center gap-1 align-middle whitespace-nowrap text-inherit tabular-nums">
         <span
           className="
             inline-block
@@ -60,7 +60,7 @@ export function formatCurrency(amount, currency = 'SAR') {
   }
 
   return (
-    <span className="inline-flex items-center gap-0.5 tabular-nums">
+    <span className="inline-flex items-center gap-0.5 whitespace-nowrap tabular-nums">
       <span>{symbol}</span>
       <span className="tabular-nums">{value}</span>
     </span>
