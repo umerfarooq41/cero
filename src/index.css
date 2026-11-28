@@ -2086,3 +2086,32 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
  .cero-unified-plan .cero-plan-toolbar > button {width:100%;}
  .cero-unified-plan .cero-plan-toolbar > .cero-period-control {width:100%;}
 }
+
+/* Dashboard desktop composition: mobile remains single-column. */
+@media (min-width:768px) {
+ .cero-desktop-workspace .cero-dashboard-page {--cero-type-page:24px;--cero-type-section:18px;--cero-type-hero:30px;--cero-type-metric:22px;}
+ .cero-desktop-workspace .cero-dashboard-page .cero-section-title {font-size:18px;}
+ .cero-desktop-workspace .cero-dashboard-page nav.cero-workplace-tabs > button[aria-pressed] {border:0!important;outline:none!important;box-shadow:none!important;border-radius:0!important;background:transparent!important;}
+ .cero-desktop-workspace .cero-dashboard-page nav.cero-workplace-tabs > button[aria-pressed]:focus-visible {outline:2px solid hsl(var(--ring))!important;outline-offset:-3px;}
+ .cero-desktop-workspace .cero-dashboard-page .cero-dashboard-overview .cero-overview-section {background:transparent!important;background-image:none!important;box-shadow:none!important;border:0!important;}
+ .cero-desktop-workspace .cero-dashboard-page .cero-dashboard-overview .cero-hero {background:transparent!important;background-image:none!important;padding-block:0!important;}
+ .cero-desktop-workspace .cero-dashboard-page .cero-dashboard-overview :is(.text-xs, .cero-financial-detail-row) {font-size:13px;}
+ .cero-desktop-workspace .cero-dashboard-page .cero-reflect-desktop-summary .cero-financial-detail-row {font-size:14px;min-height:28px;}
+ .cero-desktop-workspace .cero-dashboard-page .cero-reflect-desktop-summary > div {padding-inline:4px;}
+}
+@media (min-width:1024px) {
+ .cero-desktop-workspace .cero-dashboard-page .cero-page-content {max-width:none!important;padding-inline:clamp(24px,3vw,48px)!important;}
+ .cero-desktop-workspace .cero-dashboard-overview {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px;row-gap:24px;padding-block:18px;}
+ .cero-desktop-workspace .cero-dashboard-overview > :is(.cero-safe-hero,.cero-monthly-overview) {max-width:none!important;margin:0!important;border:0!important;padding-block:0!important;min-width:0;}
+ .cero-desktop-workspace .cero-dashboard-overview .cero-safe-hero {order:0;}
+ .cero-desktop-workspace .cero-dashboard-overview .cero-monthly-overview {padding-left:16px;}
+ .cero-desktop-workspace .cero-dashboard-overview .cero-overview-allocation {grid-column:1/-1;max-width:none;}
+ .cero-desktop-workspace .cero-dashboard-overview .cero-dashboard-activity {grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;border-top:1px solid hsl(var(--border));padding-top:20px;}
+ .cero-desktop-workspace .cero-dashboard-overview .cero-dashboard-activity > .contents {display:contents;}
+ .cero-desktop-workspace .cero-dashboard-overview .cero-dashboard-activity [data-dashboard-entry] {min-width:0;}
+ .cero-desktop-workspace .cero-reflect-toolbar {display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid hsl(var(--border));margin-bottom:20px;}
+ .cero-desktop-workspace .cero-reflect-toolbar .cero-reflect-period-wrap {order:2;min-width:340px;}
+ .cero-desktop-workspace .cero-reflect-toolbar .cero-reflect-period {margin-bottom:0;}
+ .cero-desktop-workspace .cero-reflect-toolbar nav.cero-workplace-tabs {order:1;border-bottom:0!important;position:relative;top:auto;margin:0;}
+ .cero-desktop-workspace .cero-reflect-desktop-summary {gap:32px;padding-bottom:24px;}
+}

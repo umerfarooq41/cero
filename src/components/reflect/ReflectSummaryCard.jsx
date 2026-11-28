@@ -372,7 +372,7 @@ export default function ReflectSummaryCard({
     </div>
   );
   if (desktop) return <div className="space-y-4">
-    {section !== "budget" && <section aria-label="Financial summary" className="grid grid-cols-3 gap-4 border-b border-border pb-4">
+    {section !== "budget" && <section aria-label="Financial summary" className="cero-reflect-desktop-summary grid grid-cols-3 gap-6 border-b border-border pb-5">
       {[
         ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
         ['Total tracked allocation',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings],['After debt & savings',netCashFlow - trackedDebt - trackedSavings]]],

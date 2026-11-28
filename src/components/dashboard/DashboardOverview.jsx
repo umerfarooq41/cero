@@ -252,7 +252,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
-    {Math.abs(num(budget.leftToAllocate)) >= 0.01 && <div className="mx-auto mb-2 flex w-full max-w-3xl items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2" style={{order:-2}}><span className={'text-sm font-medium '+(num(budget.leftToAllocate)<0?'text-destructive':'text-primary')}><Money value={Math.abs(num(budget.leftToAllocate))} formatCurrency={formatCurrency}/> {num(budget.leftToAllocate)<0?'overallocated':'left to allocate'}</span><Action to="/plan">{num(budget.leftToAllocate)<0?'Adjust':'Assign'} <ChevronRight size={14}/></Action></div>}
+    {Math.abs(num(budget.leftToAllocate)) >= 0.01 && <div className="cero-overview-allocation mx-auto mb-2 flex w-full max-w-3xl items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2" style={{order:-2}}><span className={'text-sm font-medium '+(num(budget.leftToAllocate)<0?'text-destructive':'text-primary')}><Money value={Math.abs(num(budget.leftToAllocate))} formatCurrency={formatCurrency}/> {num(budget.leftToAllocate)<0?'overallocated':'left to allocate'}</span><Action to="/plan">{num(budget.leftToAllocate)<0?'Adjust':'Assign'} <ChevronRight size={14}/></Action></div>}
     <div className="cero-safe-hero mx-auto w-full max-w-3xl border-b border-border text-center"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
     <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border !py-4 text-center lg:!py-5">
       <div className="mb-4 text-left">
@@ -261,7 +261,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
       </div>
       <MonthlyAllocationDetails budget={budget} transactions={transactions} formatCurrency={formatCurrency}/>
     </div>
-    <div className="contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8">
+    <div className="cero-dashboard-activity contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-2 lg:gap-8">
       <div className="contents">
         <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="cero-overview-section cero-upcoming-section !rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none !px-0"/></Entrance></div>
         <div className="contents md:order-1"><Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance></div>

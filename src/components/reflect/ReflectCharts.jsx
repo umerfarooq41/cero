@@ -195,6 +195,7 @@ export default function ReflectCharts({
   const safeSpendingTrend = Array.isArray(spendingTrend) ? spendingTrend : [];
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedCashFlowIndex, setSelectedCashFlowIndex] = useState(null);
+  const [cashTooltipOpen, setCashTooltipOpen] = useState(false);
   const activeCashFlowIndex = selectedCashFlowIndex != null && selectedCashFlowIndex < safeCashFlow.length ? selectedCashFlowIndex : safeCashFlow.length - 1;
   const activeCashFlow = safeCashFlow[activeCashFlowIndex];
   const dailyChartRef = useRef(null);
@@ -316,8 +317,8 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 }
               />
 
-              {desktop && <div className="mb-3 flex gap-5 text-xs text-muted-foreground"><span className="flex items-center gap-2"><i className="size-3 rounded-sm bg-primary"/>Income</span><span className="flex items-center gap-2"><i className="size-3 rounded-sm bg-primary/45"/>Expenses</span></div>}
-              {activeCashFlow && <div className="mb-2 flex items-start gap-2">
+              {desktop && <div className="mb-3 flex gap-5 text-xs text-muted-foreground"><span className="flex items-center gap-2"><i className="size-3 rounded-sm bg-primary"/>Income</span><span className="flex items-center gap-2"><i className="size-3 rounded-sm bg-muted-foreground/75"/>Expenses</span></div>}
+              {!desktop && activeCashFlow && <div className="mb-2 flex items-start gap-2">
                 <span className="mt-1 h-10 w-1 shrink-0 rounded-full bg-primary" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-muted-foreground">{activeCashFlow.month} · Cash flow</p>
@@ -327,7 +328,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   </div>
                 </div>
               </div>}
-              <div className={`relative ${CHART_WRAP_CLASS} h-52 min-h-[208px] sm:h-60 sm:min-h-[240px] md:h-[280px] lg:h-[340px]`}>
+              <div className={`relative ${CHART_WRAP_CLASS} h-52 min-h-[208px] sm:h-60 sm:min-h-[240px] md:h-[280px] lg:h-[300px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -350,7 +351,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         axisLine={false}
                         tickLine={false}
                         tick={{
-                          fontSize: 11,
+                          fontSize: desktop ? 13 : 11,
                           fill: 'hsl(var(--muted-foreground))',
                         }}
                       />
@@ -359,7 +360,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         axisLine={false}
                         tickLine={false}
                         tick={{
-                          fontSize: 11,
+                          fontSize: desktop ? 13 : 11,
                           fill: 'hsl(var(--muted-foreground))',
                         }}
                         width={42}
@@ -389,7 +390,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         {...getChartAnimation(isVisible)}
                       >
                         {safeCashFlow.map((item, index) => (
-                          <Cell key={item.month || index} fill="hsl(var(--primary))" fillOpacity={index === activeCashFlowIndex ? 1 : 0.65} />
+                          <Cell key={item.month || index} fill="hsl(var(--primary))" fillOpacity={desktop ? (index === activeCashFlowIndex ? 1 : 0.82) : (index === activeCashFlowIndex ? 1 : 0.65)} />
                         ))}
                       </Bar>
 
@@ -405,7 +406,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                         {...getChartAnimation(isVisible)}
                       >
                         {safeCashFlow.map((item, index) => (
-                          <Cell key={item.month || index} fill="hsl(var(--primary))" fillOpacity={index === activeCashFlowIndex ? 0.45 : 0.22} />
+                          <Cell key={item.month || index} fill={desktop ? "hsl(var(--muted-foreground))" : "hsl(var(--primary))"} fillOpacity={desktop ? (index === activeCashFlowIndex ? 1 : 0.78) : (index === activeCashFlowIndex ? 0.45 : 0.22)} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -413,15 +414,18 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                 ) : (
                   <ChartShell className="h-full" />
                 )}
-                {safeCashFlow.length > 0 && <div className="absolute inset-y-0 right-2 left-[42px] z-10 flex" aria-label="Select cash flow month">
+                {safeCashFlow.length > 0 && <div className="absolute inset-y-0 right-2 left-[42px] z-10 flex" aria-label="Select cash flow month" onMouseLeave={() => setCashTooltipOpen(false)}>
                   {safeCashFlow.map((item,index) => (
                     <button key={item.month || index} type="button" aria-label={`Show ${item.month} cash flow`}
                       aria-pressed={index === activeCashFlowIndex}
-                      onClick={() => setSelectedCashFlowIndex(index)}
-                      onMouseEnter={desktop ? () => setSelectedCashFlowIndex(index) : undefined}
+                      onClick={() => { setSelectedCashFlowIndex(index); if (desktop) setCashTooltipOpen(true); }}
+                      onFocus={desktop ? () => { setSelectedCashFlowIndex(index); setCashTooltipOpen(true); } : undefined}
+                      onBlur={desktop ? () => setCashTooltipOpen(false) : undefined}
+                      onMouseEnter={desktop ? () => { setSelectedCashFlowIndex(index); setCashTooltipOpen(true); } : undefined}
                       className="h-full flex-1 cursor-pointer bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" />
                   ))}
                 </div>}
+                {desktop && cashTooltipOpen && activeCashFlow && <div role="status" className="pointer-events-none absolute top-2 z-20 min-w-[170px] rounded-lg border border-border bg-popover p-3 text-xs text-popover-foreground shadow-lg" style={{left: `clamp(42px, ${((activeCashFlowIndex + .5) / safeCashFlow.length) * 100}%, calc(100% - 190px))`}}><p className="mb-2 font-semibold">{activeCashFlow.month}</p><p className="flex justify-between gap-3">Income <CurrencyAmount amount={activeCashFlow.income} currency={currency} compact /></p><p className="mt-1 flex justify-between gap-3">Expenses <CurrencyAmount amount={activeCashFlow.expenses} currency={currency} compact /></p></div>}
               </div>
             </ReflectCard>
           )}
@@ -518,7 +522,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           axisLine={false}
                           tickLine={false}
                           tick={{
-                            fontSize: 11,
+                            fontSize: desktop ? 13 : 11,
                             fill: 'hsl(var(--muted-foreground))',
                           }}
                         />
@@ -527,7 +531,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                           axisLine={false}
                           tickLine={false}
                           tick={{
-                            fontSize: 11,
+                            fontSize: desktop ? 13 : 11,
                             fill: 'hsl(var(--muted-foreground))',
                           }}
                           width={38}

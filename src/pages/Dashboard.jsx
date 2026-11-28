@@ -114,11 +114,11 @@ export default function Dashboard() {
     [budget, planTotals]
   );
 
-  if (isBudgetError) return <div ref={scope} className="min-h-screen bg-transparent"><PageHeader title="Dashboard" /><main role="alert" className="cero-page-content space-y-3 py-12 text-center"><p>Couldn't load your dashboard.</p><button type="button" className="text-primary" onClick={() => { budget.refetch(); extraQueries.filter(query => query.isError).forEach(query => query.refetch()); }}>Retry</button></main></div>;
+  if (isBudgetError) return <div ref={scope} className="cero-dashboard-page min-h-screen bg-transparent"><PageHeader title="Dashboard" /><main role="alert" className="cero-page-content space-y-3 py-12 text-center"><p>Couldn't load your dashboard.</p><button type="button" className="text-primary" onClick={() => { budget.refetch(); extraQueries.filter(query => query.isError).forEach(query => query.refetch()); }}>Retry</button></main></div>;
 
   if (isBudgetLoading) {
     return (
-      <div ref={scope} className="min-h-screen bg-transparent">
+      <div ref={scope} className="cero-dashboard-page min-h-screen bg-transparent">
         <PageHeader title="Dashboard" />
         <main className="cero-page-content mx-auto w-full max-w-7xl space-y-3 px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6 md:pb-8 lg:px-8">
           <div className="mx-auto max-w-3xl lg:mx-0 lg:max-w-none"><DashboardTabs activeTab={activeTab} onTabChange={handleTabChange} /></div>
@@ -135,7 +135,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div ref={scope} className="min-h-screen bg-transparent">
+    <div ref={scope} className="cero-dashboard-page min-h-screen bg-transparent">
       <PageHeader title="Dashboard" />
 
       <main className="cero-page-content mx-auto w-full max-w-7xl px-4 pt-2 pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-6 md:pb-8 lg:px-8">

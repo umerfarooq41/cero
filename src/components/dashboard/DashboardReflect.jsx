@@ -475,7 +475,7 @@ export default function DashboardReflect() {
 
   return (
     <>
-      <div className="animate-child">
+      <div className="cero-reflect-toolbar"><div className="cero-reflect-period-wrap animate-child">
         <ReflectPeriodSelector
           year={selectedYear}
           month={analysisMonth}
@@ -486,7 +486,7 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <nav aria-label="Reflect reports" className="cero-workplace-tabs mb-1 lg:mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Summary'],['spending','Spending'],['goals','Goals']].map(([key,label]) => <WorkspaceTab key={key} active={report === key} onClick={() => setReport(key)}>{label}</WorkspaceTab>)}</nav>
+      <nav aria-label="Reflect reports" className="cero-workplace-tabs mb-1 lg:mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Summary'],['spending','Spending'],['goals','Goals']].map(([key,label]) => <WorkspaceTab key={key} active={report === key} onClick={() => setReport(key)}>{label}</WorkspaceTab>)}</nav></div>
       <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child'}>
         <ReflectSummaryCards
           section={report === 'spending' ? 'budget' : 'summary'}
