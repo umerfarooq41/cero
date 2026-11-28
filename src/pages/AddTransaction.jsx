@@ -446,6 +446,7 @@ export default function AddTransaction() {
       if (error) throw error;
 
       invalidateScheduledQueries(queryClient);
+      await queryClient.invalidateQueries({queryKey:['payees']});
 
       toast.success(isEditing ? 'Transaction updated' : 'Transaction added');
       navigate(returnTo);
