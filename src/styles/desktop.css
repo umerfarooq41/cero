@@ -1,0 +1,212 @@
+/* Desktop readability: keep the mobile density and viewport breakpoint intact. */
+@media (min-width: 1024px) {
+  .app-main-scroll :is([class~="text-[9px]"], [class~="text-[10px]"], [class~="text-[11px]"], [class~="text-[12px]"]),
+  [role="dialog"] :is([class~="text-[9px]"], [class~="text-[10px]"], [class~="text-[11px]"], [class~="text-[12px]"]) { font-size: 13px; line-height: 1.45; }
+  .app-main-scroll :is(h2,h3):not([class~="sr-only"]) { font-size: 18px; line-height: 1.4; }
+  .app-main-scroll table { font-size: 15px; }
+  .app-main-scroll table thead { font-size: 13px; }
+  .app-main-scroll table td[class~="text-xs"] { font-size: 13px; }
+  .app-main-scroll .recharts-cartesian-axis-tick-value { font-size: 12px; }
+  .app-main-scroll .app-page-header h1 { font-size: 28px; line-height: 1.25; }
+  .app-main-scroll :is(input,select,textarea), [role="dialog"] :is(input,select,textarea) { font-size: 15px; }
+  .app-main-scroll .settings-row { min-height: 48px; }
+  .app-main-scroll .settings-section-header { padding-block: 12px; }
+  .app-main-scroll .app-card-surface { --app-control-alpha: 1; }
+}
+
+/* Desktop workspace design system. Theme accents remain inherited. */
+@media (min-width: 1024px) {
+  html { font-size: 16px; }
+  .cero-desktop-workspace {
+    --background: 220 20% 97%;
+    --card: 0 0% 100%;
+    --border: 220 15% 86%;
+    --muted: 220 18% 93%;
+    --muted-foreground: 220 12% 38%;
+    --app-bg-color: hsl(var(--background));
+    --app-bg-image: none;
+    --app-surface-main-alpha: 1;
+    --app-control-alpha: 1;
+    --app-surface-shadow-alpha: 0;
+    --app-surface-shadow-strong-alpha: 0;
+    --app-surface-blur: 0px;
+    font-size: 15px;
+  }
+  html.dark .cero-desktop-workspace {
+    --background: 220 23% 11%;
+    --card: 220 22% 14%;
+    --border: 220 15% 24%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 17% 75%;
+  }
+  .cero-desktop-workspace, .cero-desktop-workspace :is(.app-page-surface,.app-main-scroll,.app-fixed-surface,.app-gradient-surface) {
+    background-image: none !important;
+    background-color: hsl(var(--background)) !important;
+    animation: none !important;
+  }
+  .cero-desktop-workspace .app-main-scroll::before,
+  .cero-desktop-workspace .app-main-scroll::after { content: none !important; display: none !important; }
+  .cero-desktop-workspace .tabular-nums {
+    font-family: var(--font-sans);
+    font-feature-settings: 'tnum' 1, 'zero' 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: normal;
+  }
+  .cero-desktop-workspace .app-main-scroll :is(.text-xs,[class~="text-[9px]"],[class~="text-[10px]"],[class~="text-[11px]"],[class~="text-[12px]"]) { font-size: 13px; line-height: 1.45; }
+  .cero-desktop-workspace .app-main-scroll .text-sm { font-size: 15px; line-height: 1.45; }
+  .cero-desktop-workspace .app-main-scroll table :is(td,th) { font-size: 14px; line-height: 1.45; }
+  .cero-desktop-workspace .app-main-scroll table thead th { font-size: 13px; font-weight: 600; }
+  .cero-desktop-workspace .app-main-scroll .tabular-nums.font-bold { font-weight: 600; }
+  .cero-desktop-workspace .app-main-scroll .app-page-header h1 { font-size: 28px; font-weight: 600; }
+  .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong) { box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) { background: transparent !important; border: 0 !important; border-radius: 0 !important; }
+  .cero-desktop-workspace .app-main-scroll :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea) { font-size: 15px; }
+  .cero-desktop-workspace .app-main-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+  .cero-desktop-workspace .app-main-scroll::-webkit-scrollbar { display: block !important; width: 8px !important; }
+  .cero-desktop-workspace .app-main-scroll::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 8px; }
+}
+
+@layer utilities {
+ @media (min-width:1024px) {
+  .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong,.app-card-surface-soft):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) { border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; backdrop-filter:none !important; }
+ }
+}
+
+/* Desktop modal presentation; mobile sheet geometry remains unchanged. */
+@media (min-width: 1024px) {
+  :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface,.app-desktop-confirm) {
+    --card: 0 0% 100%;
+    --background: 220 20% 97%;
+    --border: 220 15% 86%;
+    --app-control-alpha: 1;
+    --app-surface-border-strong-alpha: 1;
+    --app-surface-blur: 0px;
+  }
+  html.dark :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface,.app-desktop-confirm) {
+    --card: 220 22% 14%;
+    --background: 220 23% 11%;
+    --border: 220 15% 24%;
+  }
+  :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface) {
+    position: fixed !important;
+    inset: 50% auto auto 50% !important;
+    translate: none !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: min(560px, calc(100vw - 64px)) !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: min(88dvh, 900px) !important;
+    border-radius: 12px !important;
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: 0 20px 64px rgb(0 0 0 / .25) !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .app-desktop-modal { padding: 24px !important; gap: 16px !important; }
+  .app-desktop-modal::before { display: none !important; }
+  .app-sheet-overlay,.app-route-sheet-backdrop {
+    background: rgb(0 0 0 / .48) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .app-desktop-modal .app-dialog-scroll,
+  .app-route-sheet .app-route-sheet-body { min-height: 0; overflow-y: auto !important; scrollbar-width: thin; }
+  .app-desktop-modal .app-dialog-actions,
+  .app-route-sheet.app-sheet-surface .app-route-sheet-footer {
+    display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
+    padding: 16px 0 0 !important; background: hsl(var(--card));
+  }
+  .app-route-sheet.app-sheet-surface .app-route-sheet-footer { padding: 16px 24px !important; }
+  .app-desktop-modal .app-dialog-actions > button,
+  .app-desktop-modal .app-dialog-actions > button:only-child,
+  .app-route-sheet .app-route-sheet-footer > button {
+    width: auto !important; min-width: 96px; min-height: 40px; flex: 0 1 auto !important;
+  }
+  .app-desktop-modal [data-app-sheet-cancel] { display: inline-flex; }
+  .app-route-sheet .app-page-header { min-height: 0; }
+  .app-route-sheet .app-page-header > div { padding: 20px 24px !important; }
+  .app-desktop-modal :is(h2,[role="heading"]), .app-desktop-confirm h2 { font-size: 20px; line-height: 1.35; }
+  :is(.app-desktop-modal,.app-route-sheet,.app-desktop-confirm) label { font-size: 14px; }
+  .app-desktop-confirm { border-radius: 12px !important; max-width: 440px; }
+}
+@layer utilities {
+  @media (min-width:1024px) {
+    :is(.app-desktop-modal,.app-route-sheet.app-sheet-surface,.app-desktop-confirm) {
+      background: hsl(var(--card)) !important;
+      border: 1px solid hsl(var(--border)) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 64px rgb(0 0 0 / .25) !important;
+      backdrop-filter: none !important;
+    }
+  }
+}
+
+@media (min-width:1024px) {
+  .cero-desktop-workspace button:focus:not(:focus-visible) { outline:none !important; box-shadow:none !important; }
+  .cero-desktop-workspace button:focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:3px; }
+  .cero-desktop-workspace .app-main-scroll :is(.text-xs,[class~="text-[10px]"],[class~="text-[11px]"],[class~="text-[12px]"]) { font-size:14px; }
+  .app-desktop-route-form .app-sheet-header { padding:20px 24px 12px; }
+  .app-desktop-route-form .app-sheet-header h1 { font-size:20px; }
+  .app-desktop-route-form .app-route-sheet-body { padding:12px 24px 20px; }
+  .app-desktop-route-form .app-route-sheet-footer > button { order:0; }
+  .app-desktop-route-form .app-route-sheet-footer > button:nth-child(2) { order:2; }
+  .app-desktop-route-form .app-route-sheet-footer > button.text-destructive { margin-right:auto !important; order:-1; }
+  .app-desktop-modal { z-index:80 !important; }
+  .app-sheet-overlay { z-index:79 !important; }
+  .app-desktop-confirm { z-index:82 !important; }
+  .app-desktop-modal[class~="sm:max-w-xs"] { width:min(360px,calc(100vw - 64px)) !important; }
+  .app-desktop-wide-editor { width:min(720px,calc(100vw - 64px)) !important; }
+  .app-desktop-editor .app-dialog-scroll { padding-right:4px; }
+  .app-desktop-route-form .app-amount-input { font-size:28px !important; }
+  :is(.app-desktop-modal,.app-desktop-route-form) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),[role="combobox"],textarea) { border-radius:6px; }
+}
+@layer utilities {
+ @media (min-width:1024px) {
+  .app-desktop-route-form .app-route-sheet-body > .app-card-surface { border:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; }
+ }
+}
+
+@media (min-width:1024px) {
+ .cero-desktop-workspace .settings-section-header h3 {font-size:18px;line-height:1.4;}
+ .cero-desktop-workspace .settings-row {min-height:52px;}
+ .cero-desktop-workspace .settings-section .settings-row:hover {background-color:hsl(var(--muted)/.35);}
+ .cero-desktop-workspace .settings-section {overflow:visible;}
+}
+
+@media (min-width:1024px) {
+ .app-desktop-confirm-overlay {z-index:81!important;background:rgb(0 0 0 / .48)!important;backdrop-filter:none!important;}
+ .app-desktop-modal:is([class~="p-0"]) {padding:0!important;}
+ .app-desktop-modal:not(:has(.app-dialog-scroll)) {overflow-y:auto;}
+ .app-desktop-modal button:focus:not(:focus-visible), .app-desktop-route-form button:focus:not(:focus-visible) {outline:none!important;box-shadow:none!important;}
+ .app-desktop-modal button:focus-visible,.app-desktop-route-form button:focus-visible {outline:2px solid hsl(var(--ring));outline-offset:2px;}
+}
+
+@media (min-width:1024px) {
+ .cero-desktop-workspace input.cero-plan-cell { background:transparent!important; border:1px solid transparent!important; border-radius:3px!important; box-shadow:none!important; appearance:textfield; -moz-appearance:textfield; }
+ .cero-desktop-workspace input.cero-plan-cell::-webkit-inner-spin-button,.cero-desktop-workspace input.cero-plan-cell::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+ .cero-desktop-workspace input.cero-plan-cell:hover { border-color:hsl(var(--border))!important; }
+ .cero-desktop-workspace input.cero-plan-cell:focus { border-color:hsl(var(--primary))!important; background:hsl(var(--card))!important; outline:none!important; box-shadow:none!important; }
+ .cero-desktop-workspace .cero-desktop-nav-link:focus:not(:focus-visible) {outline:none!important;box-shadow:none!important;}
+}
+
+@media (min-width:1024px) {
+ .cero-desktop-workspace nav.cero-workplace-tabs { position:relative; border-bottom:1px solid hsl(var(--border)) !important; align-items:center; }
+ .cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed] { position:relative; border-bottom:0!important; }
+ .cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed="true"]::after { content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:hsl(var(--primary)); pointer-events:none; }
+}
+
+/* Shared desktop page rhythm, independent of mobile safe-area spacing. */
+@media (min-width:1024px) {
+ .cero-desktop-workspace .app-main-scroll { --cero-page-gutter:32px; --cero-page-max:1280px; --cero-page-top:24px; }
+ .cero-desktop-workspace .app-main-scroll .app-page-header > div,
+ .cero-desktop-workspace .app-main-scroll .cero-page-content { width:100%; max-width:var(--cero-page-max)!important; margin-inline:auto!important; padding-inline:var(--cero-page-gutter)!important; }
+ .cero-desktop-workspace .app-main-scroll .app-page-header > div { padding-top:var(--cero-page-top)!important; padding-bottom:8px!important; min-height:64px; }
+ .cero-desktop-workspace .app-main-scroll .cero-page-content { padding-top:12px!important; padding-bottom:32px!important; }
+ .cero-desktop-workspace .app-main-scroll .cero-page-content-no-header { padding-top:16px!important; }
+ .cero-desktop-workspace .app-main-scroll .app-page-header h1,
+ .cero-desktop-workspace .app-main-scroll .cero-month-heading { font-size:22px!important; line-height:1.3!important; font-weight:600; }
+ .cero-desktop-workspace .app-main-scroll .settings-section { padding-inline:0!important; max-width:none!important; }
+ .cero-desktop-workspace .app-main-scroll .settings-section-header :is(h2,h3) { font-size:18px!important; line-height:1.4; }
+}
