@@ -485,7 +485,7 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <nav aria-label="Reflect reports" className="mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Financial summary'],['cash','Cash flow'],['spending','Spending'],['goals','Goals'],['insights','Insights']].map(([key,label]) => <button key={key} type="button" aria-pressed={report === key} onClick={() => setReport(key)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (report === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{label}</button>)}</nav>
+      <nav aria-label="Reflect reports" className="cero-workplace-tabs mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Financial summary'],['cash','Cash flow'],['spending','Spending'],['goals','Goals'],['insights','Insights']].map(([key,label]) => <button key={key} type="button" aria-pressed={report === key} onClick={() => setReport(key)} className={'shrink-0 border-b-2 px-2 py-3 text-sm font-medium ' + (report === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{label}</button>)}</nav>
       <div className={report !== 'summary' ? 'hidden' : 'animate-child'}>
         <ReflectSummaryCards
           desktop={desktop}

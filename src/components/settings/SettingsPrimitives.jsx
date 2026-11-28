@@ -6,7 +6,7 @@ export function IconTile({ icon: Icon, tone = 'blue', className }) {
   return (
     <div
       className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1',
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-md ring-1',
         toneClasses[tone]?.tile || toneClasses.blue.tile,
         className
       )}
@@ -18,10 +18,10 @@ export function IconTile({ icon: Icon, tone = 'blue', className }) {
 
 export function SettingsSection({ title, children }) {
   return (
-    <section className="settings-section animate-child mb-5 lg:mb-8 overflow-hidden">
+    <section className="settings-section animate-child mb-4 lg:mb-8 overflow-hidden">
       <div className="settings-section-header flex items-center border-b border-border px-0 py-2.5 lg:border-b-0 lg:py-3">
         <div className="min-w-0">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:!text-[18px] lg:normal-case lg:tracking-normal lg:text-foreground">
+          <h3 className="text-sm font-semibold text-foreground lg:!text-[18px] lg:normal-case lg:tracking-normal lg:text-foreground">
             {title}
           </h3>
         </div>
@@ -49,7 +49,7 @@ export function SettingRow({
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'settings-row w-full min-h-12 px-0.5 py-2.5 lg:min-h-[64px] lg:gap-4 text-left transition-colors',
+        'settings-row w-full min-h-12 px-0.5 py-2 lg:min-h-[64px] lg:gap-4 text-left transition-colors',
         onClick && 'rounded-md hover:bg-muted/30',
         stackOnMobile
           ? 'flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3'
@@ -85,11 +85,12 @@ export function SegmentedOption({ active, onClick, icon: Icon, label }) {
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-semibold lg:px-4 lg:py-2 lg:text-sm transition-all',
+        'inline-flex items-center justify-center gap-2 rounded-md px-2.5 py-2 text-xs font-semibold lg:px-4 lg:py-2 lg:text-sm transition-all',
         active
-          ? 'app-card-surface-strong text-foreground shadow-sm ring-1 ring-border/60'
+          ? 'bg-primary/10 text-primary'
           : 'text-muted-foreground app-surface-hover hover:text-foreground'
       )}
     >

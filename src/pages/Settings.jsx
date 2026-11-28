@@ -367,7 +367,7 @@ export default function Settings() {
         
       />
 
-      <main className="cero-page-content mx-auto w-full max-w-4xl px-4 py-2 pb-24 md:px-5 md:pb-8 lg:mx-auto lg:max-w-7xl lg:px-8 lg:py-3">
+      <main className="cero-settings-page cero-page-content mx-auto w-full max-w-4xl px-4 py-2 pb-24 md:px-5 md:pb-8 lg:mx-auto lg:max-w-7xl lg:px-8 lg:py-3">
         <SettingsSection
           title="Account"
           description="Manage sign-in status and account access."
@@ -400,7 +400,7 @@ export default function Settings() {
             >
               <Button
                 size="sm"
-                className="rounded-2xl"
+                className="rounded-md"
                 onClick={() => navigate('/login', { replace: true })}
               >
                 Sign in
@@ -467,7 +467,7 @@ export default function Settings() {
                 updateSetting('currency', value);
               }}
             >
-              <SelectTrigger disabled={!online} className="h-10 w-auto min-w-[112px] gap-2 rounded-2xl px-3">
+              <SelectTrigger disabled={!online} className="h-10 w-auto min-w-[112px] gap-2 rounded-md px-3">
                 <SelectValue />
               </SelectTrigger>
 
@@ -577,7 +577,7 @@ export default function Settings() {
             <Button
               variant="outline"
               size="sm"
-              className="rounded-2xl"
+              className="rounded-md"
               onClick={() => {
                 if (!requireOnline()) return;
                 handleBackup();
@@ -622,7 +622,7 @@ export default function Settings() {
             <Button
               variant="outline"
               size="sm"
-              className="rounded-2xl"
+              className="rounded-md"
               onClick={() => {
                 if (!requireOnline()) return;
                 setShowExportDialog(true);
@@ -648,7 +648,7 @@ export default function Settings() {
             <Button
               variant="destructive"
               size="sm"
-              className="rounded-2xl"
+              className="rounded-md"
               onClick={() => {
                 if (!requireOnline()) return;
                 setShowResetDialog(true);
@@ -771,14 +771,14 @@ export default function Settings() {
             <DialogFooter className="gap-2 px-6 py-5 sm:gap-2">
               <Button
                 variant="outline"
-                className="rounded-2xl"
+                className="rounded-md"
                 disabled={restoring}
                 onClick={() => setShowRestoreDialog(false)}
               >
                 Cancel
               </Button>
               <Button
-                className="rounded-2xl"
+                className="rounded-md"
                 disabled={restoring}
                 onClick={handleRestoreBackup}
               >
@@ -809,14 +809,14 @@ export default function Settings() {
             <DialogFooter className="border-t border-border/50 px-6 py-4">
               <Button
                 variant="outline"
-                className="rounded-2xl"
+                className="rounded-md"
                 onClick={() => setShowExportDialog(false)}
                 disabled={exporting}
               >
                 Cancel
               </Button>
               <Button
-                className="rounded-2xl"
+                className="rounded-md"
                 onClick={handleExportReport}
                 disabled={exporting}
               >
@@ -861,7 +861,7 @@ export default function Settings() {
             <DialogFooter className="border-t border-border/50 px-6 py-4">
               <Button
                 variant="outline"
-                className="rounded-2xl"
+                className="rounded-md"
                 onClick={() => setShowResetDialog(false)}
                 disabled={resetting}
               >
@@ -869,7 +869,7 @@ export default function Settings() {
               </Button>
               <Button
                 variant="destructive"
-                className="rounded-2xl"
+                className="rounded-md"
                 onClick={handleResetEverything}
                 disabled={resetting || resetConfirmText !== 'RESET'}
               >

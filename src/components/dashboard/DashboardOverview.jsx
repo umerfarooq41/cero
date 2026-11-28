@@ -17,7 +17,7 @@ import useGoalItems from '@/components/transactions/useGoalItems';
 import { buildAuthoritativeScheduledAllocations, getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
 
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const cardStyle = '!rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none';
+const cardStyle = 'cero-overview-section !rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none';
 function getDateLabel(value) {
   const raw = String(value || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return '';
@@ -164,39 +164,8 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
   const debt = num(budget.totalTrackedDebt);
   const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
   const tracked = expenses + savings + debt;
-  const row = ({ label, value, icon: Icon, tone, valueTone = '', helper }) => (
-    <div className="flex min-h-12 items-center justify-between gap-2">
-      <div className="flex min-w-0 items-center gap-2.5">
-        <span className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}><Icon size={17}/></span>
-        <div className="min-w-0">
-          <p className="text-sm">{label}</p>
-          {helper && <p className="mt-0.5 flex flex-wrap gap-x-1 text-[10px] leading-4 text-muted-foreground">{helper}</p>}
-        </div>
-      </div>
-      <Money value={value} formatCurrency={formatCurrency} className={`shrink-0 text-sm font-medium ${valueTone}`}/>
-    </div>
-  );
   return <Section title="Budget snapshot" icon={LayoutDashboard}>
-    <div className="space-y-1 lg:hidden">
-      {row({ label: 'Received income', value: num(budget.realizedIncome ?? budget.totalIncome), icon: TrendingUp, tone: 'text-emerald-600 bg-emerald-500/10', valueTone: 'text-emerald-600 dark:text-emerald-400' })}
-      {row({ label: 'Total expenses', value: expenses, icon: TrendingDown, tone: 'text-destructive bg-destructive/10', valueTone: 'text-destructive',
-        helper: <><span className="whitespace-nowrap">Variable <Money value={variablePaid} formatCurrency={formatCurrency}/></span><span className="whitespace-nowrap">· Recurring <Money value={recurringPaid} formatCurrency={formatCurrency}/></span></> })}
-      <div className="grid grid-cols-2 gap-2 py-1">
-        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-3 py-2.5 text-center">
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400"><PiggyBank size={16}/></span>Savings</div>
-          <Money value={savings} formatCurrency={formatCurrency} className="mt-1 flex justify-center text-sm font-semibold"/>
-        </div>
-        <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-muted/40 px-3 py-2.5 text-center">
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400"><CreditCard size={16}/></span>Debt paid</div>
-          <Money value={debt} formatCurrency={formatCurrency} className="mt-1 flex justify-center text-sm font-semibold"/>
-        </div>
-      </div>
-      <div className="mt-2 space-y-2 border-t border-border/50 pt-3">
-        <div className="flex items-center justify-between gap-2 text-sm"><span className="font-medium">Planned total</span><Money value={planned} formatCurrency={formatCurrency} className="font-semibold"/></div>
-        <div className="flex items-center justify-between gap-2 text-sm"><span className="font-medium">Tracked total</span><Money value={tracked} formatCurrency={formatCurrency} className="font-semibold"/></div>
-      </div>
-    </div>
-    <dl className="hidden divide-y divide-border lg:block">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Planned total',planned],['Tracked total',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-base font-medium"/></dd></div>)}</dl>
+    <dl className="divide-y divide-border">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Planned total',planned],['Tracked total',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-2.5 lg:py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm lg:text-base font-medium"/></dd></div>)}</dl>
   </Section>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
@@ -274,7 +243,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
       return days <= 10;
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
-  return <div className="mx-auto max-w-3xl max-md:[&_div[data-dashboard-entry]]:mb-3 md:max-w-none">
+  return <div className="mx-auto max-w-3xl max-md:[&_div[data-dashboard-entry]]:mb-2 md:max-w-none">
     <div className="border-b border-border py-3 lg:py-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>

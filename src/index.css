@@ -1761,3 +1761,13 @@ main,
  .cero-recurring-register td:first-child,.cero-goal-register td:first-child {min-height:32px;}
  .cero-register-inspector:not(.hidden) {position:fixed;inset:auto 0 0;z-index:55;max-height:75dvh;overflow-y:auto;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 32px hsl(var(--foreground)/.12);}
 }
+
+@media (max-width:1023px) {
+ .cero-desktop-workspace .cero-overview-section {background:transparent!important;background-image:none!important;border:0!important;border-bottom:1px solid hsl(var(--border))!important;border-radius:0!important;box-shadow:none!important;}
+ .cero-desktop-workspace .cero-reflect-summary-section {background:transparent!important;background-image:none!important;border-bottom:1px solid hsl(var(--border))!important;}
+ .cero-desktop-workspace .cero-settings-page .settings-row {gap:10px;}
+ .cero-desktop-workspace .cero-settings-page .settings-section-header {padding-block:8px;}
+}
+@media (prefers-reduced-motion:reduce) {
+ .cero-desktop-workspace .animate-child {animation:none!important;}
+}

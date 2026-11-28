@@ -342,7 +342,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   </div>
                 </div>
               </div>}
-              <div className={`relative ${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px] md:h-[280px] lg:h-[340px]`}>
+              <div className={`relative ${CHART_WRAP_CLASS} h-52 min-h-[208px] sm:h-60 sm:min-h-[240px] md:h-[280px] lg:h-[340px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -509,7 +509,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <p className="text-lg font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></p>
                   </div>
                 </div> : null}
-                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] md:h-[280px] lg:h-[340px]`}
+                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-56 min-h-[224px] sm:h-60 sm:min-h-[240px] md:h-[280px] lg:h-[340px]`}
                   onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
                   onPointerMove={event => { if (desktop || event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
                 >
