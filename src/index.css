@@ -2228,3 +2228,23 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
  .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) th:last-child{width:20%;}
  .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) td:last-child{white-space:nowrap;}
 }
+
+/* Reflect desktop: align to the page gutter and use the full report width. */
+@media(min-width:1024px){
+ .cero-desktop-workspace .cero-dashboard-page .app-page-header>div{max-width:none!important;padding-inline:clamp(24px,3vw,48px)!important;}
+ .cero-desktop-workspace .cero-reflect-toolbar{align-items:center;gap:16px;padding-block:8px;margin-bottom:16px;}
+ .cero-desktop-workspace .cero-reflect-toolbar nav[aria-label="Reflect reports"]{border:0!important;background:transparent!important;position:relative;top:auto;z-index:auto;}
+ .cero-desktop-workspace .cero-reflect-toolbar nav[aria-label="Reflect reports"]>button[aria-pressed]{border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;position:relative;}
+ .cero-desktop-workspace .cero-reflect-toolbar nav[aria-label="Reflect reports"]>button[aria-pressed="true"]::after{content:"";position:absolute;inset:auto 0 0;height:2px;background:hsl(var(--primary));}
+ .cero-desktop-workspace .cero-reflect-toolbar nav[aria-label="Reflect reports"]>button:focus-visible{outline:2px solid hsl(var(--ring))!important;outline-offset:-3px;}
+ .cero-reflect-report-content[data-report="spending"]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 32px;align-items:start;}
+ .cero-reflect-report-content[data-report="spending"]>.cero-reflect-budget-wrap{grid-column:1;grid-row:1;min-width:0;}
+ .cero-reflect-report-content[data-report="spending"]>.cero-reflect-charts-wrap{display:contents;}
+ .cero-reflect-report-content[data-report="spending"] .cero-reflect-spending-charts{display:contents;}
+ .cero-reflect-report-content[data-report="spending"] .cero-reflect-spending-charts>*:first-child{grid-column:2;grid-row:1;min-width:0;}
+ .cero-reflect-report-content[data-report="spending"] .cero-reflect-spending-charts>*:nth-child(2){grid-column:1/-1;grid-row:2;min-width:0;}
+ .cero-reflect-report-content[data-report="spending"]>.cero-reflect-insights-wrap{grid-column:1/-1;grid-row:3;min-width:0;}
+ .cero-reflect-budget-wrap section[aria-label="Budget health"]{max-width:none!important;padding-block:12px;}
+ .cero-reflect-report-content .cero-reflect-spending-charts .text-xs{font-size:13px;}
+ .cero-reflect-report-content .cero-reflect-spending-charts .text-sm{font-size:14px;}
+}

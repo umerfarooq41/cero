@@ -487,7 +487,8 @@ export default function DashboardReflect() {
       </div>
 
       <nav aria-label="Reflect reports" className="cero-workplace-tabs mb-1 lg:mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Summary'],['spending','Spending'],['goals','Goals']].map(([key,label]) => <WorkspaceTab key={key} active={report === key} onClick={() => setReport(key)}>{label}</WorkspaceTab>)}</nav></div>
-      <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child'}>
+      <div className="cero-reflect-report-content" data-report={report}>
+      <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child cero-reflect-budget-wrap'}>
         <ReflectSummaryCards
           section={report === 'spending' ? 'budget' : 'summary'}
           desktop={desktop}
@@ -513,7 +514,7 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child'}>
+      <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child cero-reflect-charts-wrap'}>
         <ReflectCharts
           desktop={desktop}
           tabbed
@@ -544,7 +545,7 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={report !== 'spending' ? 'hidden' : 'animate-child'}>
+      <div className={report !== 'spending' ? 'hidden' : 'animate-child cero-reflect-insights-wrap'}>
         <section className="overflow-hidden px-0 py-3" aria-label="Financial insights">
           <div className="mb-2"><SectionHeading title="Insights" icon={Lightbulb}/></div>
           {insights.map((insight, index) => {
@@ -571,6 +572,7 @@ export default function DashboardReflect() {
             );
           })}
         </section>
+      </div>
       </div>
     </>
   );

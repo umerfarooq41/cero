@@ -434,7 +434,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
       </div>
 
-      <div className={(desktop || tabbed) && report !== "spending" ? "hidden" : "mb-4 grid gap-3 lg:gap-4"}>
+      <div className={(desktop || tabbed) && report !== "spending" ? "hidden" : "cero-reflect-spending-charts mb-4 grid gap-3 lg:gap-4"}>
         <RevealChartCard>
           {(isVisible) => (
             <ReflectCard className="px-0 py-3 !rounded-none !bg-transparent !shadow-none">
@@ -446,7 +446,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
               />
 
               {groupedSpendingBreakdown.length > 0 ? (
-                <div className="space-y-3 lg:max-w-3xl">
+                <div className="space-y-3">
                   {groupedSpendingBreakdown.map(category => (
                     <div key={category.id || category.name} className="space-y-1">
                       <div className="flex items-center justify-between gap-2 text-xs">
