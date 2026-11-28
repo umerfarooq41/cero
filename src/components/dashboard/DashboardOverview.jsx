@@ -6,7 +6,8 @@ import { Gauge, LayoutDashboard, ChevronRight, Receipt, Target, Info } from 'luc
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { calculateDiscretionaryPace } from '@/lib/dashboardPace';
 import UpcomingBillsPreview from '@/components/dashboard/UpcomingBillsPreview';
 import TransactionRow from '@/components/transactions/TransactionRow';
@@ -50,6 +51,46 @@ function getDiscretionaryAllocations(allocations, categories) {
     Number(a.planned_amount) > 0
   );
 }
+function AllowancePopover({ children }) {
+  const trigger = useRef(null);
+  const panel = useRef(null);
+  const [position, setPosition] = useState(null);
+  const reduced = useReducedMotion();
+  const open = position !== null;
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setPosition(null);
+    const outside = event => {
+      if (!trigger.current?.contains(event.target) && !panel.current?.contains(event.target)) close();
+    };
+    const escape = event => {
+      if (event.key === 'Escape') { close(); trigger.current?.focus(); }
+    };
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('keydown', escape);
+    window.addEventListener('resize', close);
+    window.addEventListener('scroll', close, true);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('keydown', escape);
+      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', close, true);
+    };
+  }, [open]);
+  function toggle() {
+    if (open) { setPosition(null); return; }
+    const rect = trigger.current.getBoundingClientRect();
+    const width = Math.min(340, window.innerWidth - 32);
+    const below = window.innerHeight - rect.bottom - 22;
+    const above = rect.top - 22;
+    const useAbove = below < 330 && above > below;
+    setPosition({ width, left: Math.max(16, Math.min(rect.right - width, window.innerWidth - width - 16)), ...(useAbove ? { bottom: window.innerHeight - rect.top + 6 } : { top: rect.bottom + 6 }), maxHeight: Math.max(80, useAbove ? above : below) });
+  }
+  return <>
+    <button ref={trigger} type="button" aria-label="How today's allowance is calculated" aria-expanded={open} aria-controls={open ? 'cero-allowance-popover' : undefined} onClick={toggle} className="absolute right-0 top-1 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary aria-expanded:text-primary"><Info size={17}/></button>
+    {open && createPortal(<motion.div ref={panel} id="cero-allowance-popover" role="region" aria-label="Allowance calculation" style={{position:'fixed', ...position, transformOrigin: position.bottom ? 'bottom right' : 'top right'}} initial={reduced ? false : {opacity:0, scale:.97}} animate={{opacity:1, scale:1}} transition={{duration:reduced ? 0 : .18}} className="z-[100] overflow-y-auto overscroll-contain rounded-xl border border-border bg-popover p-4 text-left text-popover-foreground shadow-xl">{children}</motion.div>, document.body)}
+  </>;
+}
 function SafeCard({ allocations, categories, transactions, recurringTransactions, savingsGoals, allTransactions, currentMonth, formatCurrency }) {
   const reduced = useReducedMotion();
   const authoritativeAllocations = buildAuthoritativeScheduledAllocations({ allocations, recurringTransactions, savingsGoals, currentMonth, allTransactions });
@@ -84,11 +125,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
       </div>
       <p className="pt-2 text-center text-xs text-muted-foreground">{pace.daysRemaining} days left this month</p>
     </div>
-    <Popover>
-      <PopoverTrigger asChild>
-        <button type="button" aria-label="How today's allowance is calculated" className="absolute right-0 top-1 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary data-[state=open]:text-primary"><Info size={17}/></button>
-      </PopoverTrigger>
-      <PopoverContent align="end" side="bottom" sideOffset={6} collisionPadding={16} aria-label="How today's allowance is calculated" className="cero-allowance-popover w-[calc(100vw-32px)] max-w-[340px] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-xl border border-border !bg-popover p-4 text-left shadow-xl">
+    <AllowancePopover>
         <h3 className="mb-3 text-sm font-semibold">Allowance calculation</h3>
         <dl className="space-y-2 text-xs">
           <div className="flex items-baseline justify-between gap-3"><dt className="text-muted-foreground">Monthly discretionary budget</dt><dd className="shrink-0 text-right"><Money value={pace.budget} formatCurrency={formatCurrency}/></dd></div>
@@ -101,9 +138,7 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
         </dl>
         {(pace.spent-pace.spentToday > pace.budget || pace.spentToday > pace.allowance) && <p className="mt-2 text-xs text-muted-foreground">Remaining allowance cannot fall below zero.</p>}
         <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">Excludes separately planned bills, debt and savings. Remaining days include today when viewing the current month.</p>
-        <style>{'@keyframes ceroAllowancePopoverIn { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } } @media (prefers-reduced-motion: no-preference) { .cero-allowance-popover[data-state="open"] { animation: ceroAllowancePopoverIn 180ms ease-out; transform-origin: var(--radix-popover-content-transform-origin); } }'}</style>
-      </PopoverContent>
-    </Popover>
+    </AllowancePopover>
   </CardContent></Card>;
 }
 function MonthlyAllocationDetails({ budget, transactions = [], formatCurrency }) {
@@ -219,7 +254,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
     {Math.abs(num(budget.leftToAllocate)) >= 0.01 && <div className="mx-auto mb-2 flex w-full max-w-3xl items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2" style={{order:-2}}><span className={'text-sm font-medium '+(num(budget.leftToAllocate)<0?'text-destructive':'text-primary')}><Money value={Math.abs(num(budget.leftToAllocate))} formatCurrency={formatCurrency}/> {num(budget.leftToAllocate)<0?'overallocated':'left to allocate'}</span><Action to="/plan">{num(budget.leftToAllocate)<0?'Adjust':'Assign'} <ChevronRight size={14}/></Action></div>}
     <div className="cero-safe-hero mx-auto w-full max-w-3xl border-b border-border text-center"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
-    <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border py-4 text-center lg:py-5">
+    <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border !py-4 text-center lg:!py-5">
       <div className="mb-4 text-left">
         <SectionHeading title="Monthly overview" icon={LayoutDashboard}/>
         
