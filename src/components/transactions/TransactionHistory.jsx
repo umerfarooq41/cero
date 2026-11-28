@@ -1,3 +1,4 @@
+import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
@@ -557,7 +558,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
       <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
         {[['all','All'],['income','Income'],['expense','Expense'],['transfer','Transfer']].map(([value,label]) => (
-          <button key={value} type="button" aria-pressed={filterType === value} onClick={() => setFilterType(value)} className={`shrink-0 px-2 py-3 text-sm font-medium ${filterType === value ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
+          <WorkspaceTab key={value} active={filterType === value} onClick={() => setFilterType(value)}>{label}</WorkspaceTab>
         ))}
       </nav>
 

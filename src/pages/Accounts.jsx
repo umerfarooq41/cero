@@ -1,3 +1,4 @@
+import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
 import { Fragment, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -218,7 +219,7 @@ export default function Accounts() {
         <div className="grid grid-cols-3 gap-3 border-b border-border py-3">{[["Available",cashAvailable],["Savings",savingsTotal],["Debt",totalLiabilities]].map(([label,value]) => <div key={label} className="min-w-0 text-center"><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-sm md:text-xl font-medium tabular-nums">{value < 0 ? "−" : ""}{formatCurrency(Math.abs(value))}</p></div>)}</div>
         <div>
           <nav aria-label="Account groups" className="cero-workplace-tabs flex flex-wrap items-center gap-2 border-b border-border workspace:gap-5">
-            {[['asset','Assets'],['liability','Liabilities'],['archived','Archived']].map(([key,label])=><button key={key} type="button" aria-pressed={tab===key} onClick={()=>{setTab(key);setSelectedId(null)}} className={cn('px-2 py-3 text-sm font-medium',tab===key?'text-primary':'text-muted-foreground')}>{label}</button>)}
+            {[['asset','Assets'],['liability','Liabilities'],['archived','Archived']].map(([key,label])=><WorkspaceTab key={key} active={tab===key} onClick={()=>{setTab(key);setSelectedId(null)}}>{label}</WorkspaceTab>)}
             </nav><div className="cero-desktop-activity-month hidden workspace:flex justify-end py-1 text-sm">{renderActivityMonth()}</div>
           <div className="grid grid-cols-1 workspace:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] pt-3">
             <div className="overflow-x-auto"><table className={`cero-adaptive-register cero-account-register cero-account-${tab} w-full text-sm`}><thead className="bg-muted/30 text-muted-foreground"><tr>{(tab==='asset'?['Account','Type','Inflow','Outflow','Balance','Share']:tab==='liability'?['Account','Type','Borrowed','Repaid','Outstanding']:['Account','Type','Balance']).map((label,i)=><th key={label} className={cn('px-2 py-2 font-medium',i<2?'text-left':'text-right')}>{label}</th>)}</tr></thead><tbody>
