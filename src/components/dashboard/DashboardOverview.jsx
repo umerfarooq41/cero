@@ -125,19 +125,19 @@ function MonthlyAllocationDetails({ budget, transactions = [], formatCurrency })
     ['Savings funded', savings, 'bg-teal-500'],
   ];
   const percentage = planned > 0 ? Math.round(tracked / planned * 1000) / 10 : null;
-  return <div className="space-y-3 text-left">
-    <div className="min-w-0 space-y-2">
-      <div className="grid grid-cols-2 gap-2">
-        <div><p className="text-xs text-muted-foreground">Received income</p><Money value={income} formatCurrency={formatCurrency} className="cero-secondary-amount"/></div>
-        <div className="text-right"><p className="text-xs text-muted-foreground">{remaining<0?'Income shortfall':'Income remaining'}</p><Money value={remaining} formatCurrency={formatCurrency} className={'cero-secondary-amount '+(remaining<0?'text-destructive':'text-emerald-600 dark:text-emerald-400')}/></div>
+  return <div className="space-y-4 text-left">
+    <div className="min-w-0 space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div><p className="mb-1 text-xs text-muted-foreground">Received income</p><Money value={income} formatCurrency={formatCurrency} className="cero-secondary-amount"/></div>
+        <div className="text-right"><p className="mb-1 text-xs text-muted-foreground">{remaining<0?'Income shortfall':'Income remaining'}</p><Money value={remaining} formatCurrency={formatCurrency} className={'cero-secondary-amount '+(remaining<0?'text-destructive':'text-emerald-600 dark:text-emerald-400')}/></div>
       </div>
-      <dl className="space-y-1">
-        {rows.map(([label,value,color])=><div key={label} className="flex items-center justify-between gap-2"><dt className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className={color+' size-1.5 shrink-0 rounded-full'}/>{label}</dt><dd className="shrink-0"><Money value={value} formatCurrency={formatCurrency} className="text-sm font-medium"/></dd></div>)}
+      <dl className="space-y-0">
+        {rows.map(([label,value,color])=><div key={label} className="flex min-h-9 items-center justify-between gap-3 py-1"><dt className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className={color+' size-1.5 shrink-0 rounded-full'}/>{label}</dt><dd className="shrink-0"><Money value={value} formatCurrency={formatCurrency} className="text-sm font-medium"/></dd></div>)}
       </dl>
     </div>
     <details className="group border-t border-border/60 pt-2">
-      <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-2 text-xs text-muted-foreground [&::-webkit-details-marker]:hidden"><span>{percentage===null?'Plan utilization':percentage+'% of plan tracked'}</span><ChevronRight size={14} className="group-open:rotate-90"/></summary>
-      <p className="text-xs text-muted-foreground"><Money value={tracked} formatCurrency={formatCurrency}/> of <Money value={planned} formatCurrency={formatCurrency}/> tracked</p>
+      <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-xs text-muted-foreground [&::-webkit-details-marker]:hidden"><span>{percentage===null?'Plan utilization':percentage+'% of plan tracked'}</span><ChevronRight size={14} className="group-open:rotate-90"/></summary>
+      <p className="pb-2 text-xs text-muted-foreground"><Money value={tracked} formatCurrency={formatCurrency}/> of <Money value={planned} formatCurrency={formatCurrency}/> tracked</p>
     </details>
   </div>;
 }
@@ -219,8 +219,8 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
     {Math.abs(num(budget.leftToAllocate)) >= 0.01 && <div className="mx-auto mb-2 flex w-full max-w-3xl items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2" style={{order:-2}}><span className={'text-sm font-medium '+(num(budget.leftToAllocate)<0?'text-destructive':'text-primary')}><Money value={Math.abs(num(budget.leftToAllocate))} formatCurrency={formatCurrency}/> {num(budget.leftToAllocate)<0?'overallocated':'left to allocate'}</span><Action to="/plan">{num(budget.leftToAllocate)<0?'Adjust':'Assign'} <ChevronRight size={14}/></Action></div>}
     <div className="cero-safe-hero mx-auto w-full max-w-3xl border-b border-border text-center"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
-    <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border py-3 text-center lg:py-5">
-      <div className="mb-3 text-left">
+    <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border py-4 text-center lg:py-5">
+      <div className="mb-4 text-left">
         <SectionHeading title="Monthly overview" icon={LayoutDashboard}/>
         
       </div>
