@@ -14,7 +14,7 @@ export default function MonthSelector({
   className,
   bare = false,
 }) {
-  const date = new Date(`${currentMonth}-01`);
+  const date = new Date(`${currentMonth}-01T12:00:00`);
 
   const changeMonth = (nextMonth) => {
     if (!navigator.onLine) {
@@ -25,7 +25,7 @@ export default function MonthSelector({
 
       if (!cached) {
         toast.info('This period isn\'t available offline', {
-          description: `Reconnect to load ${format(new Date(`${nextMonth}-01`), 'MMMM yyyy')}.`,
+          description: `Reconnect to load ${format(new Date(`${nextMonth}-01T12:00:00`), 'MMMM yyyy')}.`,
         });
         return;
       }
@@ -54,13 +54,13 @@ export default function MonthSelector({
       className={cn(
         bare
           ? 'flex w-full min-w-0 touch-pan-y select-none items-center justify-center gap-1 bg-transparent'
-          : 'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1 rounded-2xl app-card-surface p-1 shadow-sm backdrop-blur-xl',
+          : 'flex w-full max-w-md touch-pan-y select-none items-center justify-center gap-1 rounded-md bg-transparent',
         className
       )}
     >
       <button
         type="button"
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
+        aria-label="Previous month" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }}
         onClick={goToPreviousMonth}
       >
         <ChevronLeft className="h-4 w-4" />
@@ -71,7 +71,7 @@ export default function MonthSelector({
         disabled={!onLabelClick}
         onClick={onLabelClick}
         className={cn(
-          'flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-2 py-1 text-center transition-colors',
+          'flex min-w-0 flex-1 flex-col items-center justify-center min-h-9 rounded-md border border-border bg-background px-2 py-1 text-center transition-colors',
           onLabelClick
             ? 'hover:bg-secondary/70'
             : 'cursor-default disabled:opacity-100'
@@ -82,7 +82,7 @@ export default function MonthSelector({
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="text-sm font-semibold text-foreground"
+          className="text-sm font-medium text-foreground"
         >
           {format(date, 'MMMM yyyy')}
         </motion.span>
@@ -96,7 +96,7 @@ export default function MonthSelector({
 
       <button
         type="button"
-        className="h-8 w-8 shrink-0 rounded-xl"
+        aria-label="Next month" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30"
         onClick={goToNextMonth}
       >
         <ChevronRight className="h-4 w-4" />
