@@ -293,6 +293,8 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const [params] = useSearchParams();
 
   const [selectedDate, setSelectedDate] = useState('');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [dateMode, setDateMode] = useState(() => params.get('account') ? 'any' : 'month');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -484,6 +486,9 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   ]);
 
   const hasTransactions = sortedDates.length > 0;
+  const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
+  const toggleSelection = id => setSelectedIds(ids => ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]);
+  const exitSelection = () => { setSelectionMode(false); setSelectedIds([]); };
 
   const clearAdvancedFilters = () => {
     setSourceFilter('all');
@@ -504,6 +509,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   return (
     <div>
       <div className="mb-2 text-xs text-muted-foreground">{globalScope ? `${filtered.length} transactions found · ${scopeLabel}` : `${filtered.length} posted transactions`}</div>
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
+        <Button size="sm" variant="outline" onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)}>{selectionMode ? 'Done' : 'Select transactions'}</Button>
+        {selectionMode && <><Button size="sm" variant="ghost" onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button><Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button><span aria-live="polite">{selectedRows.length} selected</span></>}
+      </div>
       <div className="cero-history-search mb-2 flex items-center gap-2 animate-child">
         <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -611,7 +620,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           <table className="w-full min-w-[700px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Transaction history</caption>
             <colgroup><col style={{width:"16%"}}/><col style={{width:"32%"}}/><col style={{width:"19%"}}/><col style={{width:"16%"}}/><col style={{width:"17%"}}/></colgroup><thead className="sticky top-0 z-10 border-b border-border bg-card text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{index === 0 || index === 4 ? <button type="button" className="font-medium hover:text-primary" onClick={() => setSortBy(index === 0 ? (sortBy === "newest" ? "oldest" : "newest") : (sortBy === "highest" ? "lowest" : "highest"))}>{label}{index === 0 ? (sortBy === "newest" ? " ↓" : sortBy === "oldest" ? " ↑" : "") : (sortBy === "highest" ? " ↓" : sortBy === "lowest" ? " ↑" : "")}</button> : label}</th>)}</tr></thead>
-            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} onClick={() => navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
+            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
           </table>
         </div>
         <div className="animate-child space-y-2 md:hidden">
@@ -645,7 +654,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
                     recurringRule={recurringById.get(transaction.recurring_transaction_id)}
                     goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                     formatCurrency={formatCurrency}
-                    onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
+                    selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : navigate(`/transactions/${transaction.id}/edit`)}
                   />
                 ))}
               </div>
