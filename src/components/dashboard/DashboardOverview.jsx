@@ -243,13 +243,13 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
       return days <= 10;
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
-  return <div className="mx-auto max-w-3xl max-md:[&_div[data-dashboard-entry]]:mb-2 md:max-w-none">
+  return <div className="cero-dashboard-overview mx-auto max-w-3xl max-md:[&_div[data-dashboard-entry]]:mb-2 md:max-w-none">
     <div className="border-b border-border py-3 lg:py-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-semibold">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>
         <Action to="/plan" boxed>Open plan <ChevronRight size={14}/></Action>
       </div>
-      <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4 cero-overview-metrics">
         {[
           ['Received income', budget.realizedIncome ?? budget.totalIncome],
           ['Total expenses', budget.totalExpenses],
@@ -265,7 +265,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
       <div className="contents md:order-2 md:flex md:min-w-0 md:flex-col md:gap-4">
         <div className="contents md:order-1"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
         <div className="contents md:order-2"><Entrance index={1}><Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/></Entrance></div>
-        <div className="contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-md bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
+        <div className="hidden md:contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-md bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
       </div>
       <div className="contents md:flex md:min-w-0 md:flex-col md:gap-4">
         <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="!rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none"/></Entrance></div>

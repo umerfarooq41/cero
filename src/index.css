@@ -1879,3 +1879,16 @@ main,
 .cero-settings-page .settings-row .grid-cols-8 button {max-width:100%;min-width:0;}
 }
 @media(min-width:768px){.cero-header-icon.md\\:hidden {display:none!important;}}
+
+@media(max-width:767px){
+.cero-dashboard-overview .cero-overview-metrics {gap:12px 16px;}
+.cero-dashboard-overview .cero-overview-metrics dt {font-size:12px;font-weight:400;}
+.cero-dashboard-overview .cero-overview-metrics dd {margin-top:4px;}
+.cero-dashboard-overview .cero-overview-section {padding-block:8px;}
+.cero-dashboard-overview .cero-section-title,.cero-reflect-summary .cero-section-title {font-size:15px;}
+.cero-reflect-summary {gap:0;}
+.cero-reflect-summary > section + section {border-top:1px solid hsl(var(--border))!important;}
+.cero-reflect-summary > section {padding-block:12px!important;}
+nav[aria-label="Reflect reports"] {gap:0!important;}
+nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!important;font-size:12px!important;}
+}

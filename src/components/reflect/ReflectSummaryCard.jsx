@@ -381,27 +381,18 @@ export default function ReflectSummaryCard({
     <section className="max-w-3xl space-y-4" aria-label="Budget health"><h3 className="cero-section-title">Budget health</h3>{plannedExpenses > 0 ? <><div className="flex items-end justify-between gap-4"><div><p className="text-sm text-muted-foreground">Expense budget {remaining < 0 ? 'over' : 'remaining'}</p><p className={`mt-1 text-2xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div><span className={remaining < 0 ? 'text-destructive' : 'text-muted-foreground'}>{Math.round(used)}% used</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full ${remaining < 0 ? 'bg-destructive' : 'bg-primary'}`} style={{width: `${Math.max(0,Math.min(100,used))}%`}}/></div><div className="flex justify-between text-sm text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div></> : <p className="text-sm text-muted-foreground">No expense budget planned for this period.</p>}</section>
   </div>;
   return (
-    <div className="mb-3 grid gap-3 lg:grid-cols-2">
+    <div className="cero-reflect-summary mb-3 grid gap-3 lg:grid-cols-2">
       <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
         
-        <p className="text-[11px] text-muted-foreground">Operating cash flow</p>
-        <p className={`mt-1 cero-primary-amount tabular-nums ${netCashFlow >= 0 ? 'text-[hsl(var(--success))]' : 'text-destructive'}`}>{money(netCashFlow)}</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {metric('Income received', income, 'text-[hsl(var(--success))]')}
-          {metric('Expenses', expenses)}
-        </div>
-        <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
-          <div><p className="text-[11px] text-muted-foreground">Total outflow</p><p className="text-sm font-semibold">{money(totalTrackedOutflow)}</p></div>
-          <div className="text-right text-[11px] text-muted-foreground">
-            <p>Debt paid: {money(trackedDebt)}</p><p className="mt-1">Goal savings: {money(trackedSavings)}</p>
-          </div>
-        </div>
-        <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
-          <div><p className="text-[11px] text-muted-foreground">Current net worth</p><p className="text-base font-semibold">{money(netWorth)}</p></div>
-          <div className="text-right text-[11px] text-muted-foreground">
-            <p>Assets: {money(totalAssets)}</p><p className="mt-1">Liabilities: {money(totalLiabilities)}</p>
-          </div>
-        </div>
+        {[
+          ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
+          ['Total outflow',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings]]],
+          ['Current net worth',netWorth,netWorth < 0 ? 'text-destructive' : '',[['Assets',totalAssets],['Liabilities',totalLiabilities]]]
+        ].map(([label,value,tone,rows],index)=><div key={label} className={cn('py-3 first:pt-0',index>0&&'border-t border-border')}>
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className={cn('mt-1 tabular-nums',index===0?'cero-primary-amount':'cero-secondary-amount',tone)}>{money(value)}</p>
+          <div className="mt-2 grid grid-cols-2 gap-3">{rows.map(([name,amount])=><div key={name} className="min-w-0"><p className="text-xs text-muted-foreground">{name}</p><p className="mt-1 text-sm font-medium tabular-nums">{money(amount)}</p></div>)}</div>
+        </div>)}
       </section>
       <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
         <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="cero-section-title">Budget health</h3></div>
