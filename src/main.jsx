@@ -1,17 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import "./index.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/lib/AuthContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
+    <ErrorBoundary><AuthProvider>
       <ThemeProvider>
         <App />
       </ThemeProvider>
-    </AuthProvider>
+    </AuthProvider></ErrorBoundary>
   </React.StrictMode>
 );
 

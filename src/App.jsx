@@ -16,6 +16,7 @@ import PageNotFound from './lib/PageNotFound';
 import { useAuth } from '@/lib/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 import Logo from '@/components/Logo';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import Onboarding from '@/pages/Onboarding';
 import Auth from '@/pages/Auth';
 
@@ -104,9 +105,9 @@ const RouteLoadingState = () => (
 );
 
 const LazyPage = ({ children }) => (
-  <Suspense fallback={<RouteLoadingState />}>
+  <ErrorBoundary><Suspense fallback={<RouteLoadingState />}>
     {children}
-  </Suspense>
+  </Suspense></ErrorBoundary>
 );
 
 const AuthenticatedApp = () => {

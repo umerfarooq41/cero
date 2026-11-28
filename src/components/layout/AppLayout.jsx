@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import DesktopTopNav from './DesktopTopNav';
 import BottomNav from './BottomNav';
 import ScrollManager from './ScrollManager';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
 const pageTransition = {
   duration: 0.18,
@@ -28,7 +29,7 @@ export default function AppLayout() {
             transition={pageTransition}
             className="min-h-full"
           >
-            <Outlet />
+            <ErrorBoundary key={location.pathname}><Outlet /></ErrorBoundary>
           </motion.div>
         </main>
       </div>
