@@ -88,18 +88,20 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
       <PopoverTrigger asChild>
         <button type="button" aria-label="How today's allowance is calculated" className="absolute right-0 top-1 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary data-[state=open]:text-primary"><Info size={17}/></button>
       </PopoverTrigger>
-      <PopoverContent align="end" side="bottom" sideOffset={6} collisionPadding={16} aria-label="How today's allowance is calculated" className="w-[calc(100vw-32px)] max-w-[340px] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-xl border border-border !bg-popover p-4 text-left shadow-xl">
-        <h3 className="mb-2 text-sm font-semibold">How today's allowance is calculated</h3>
-      <div className="space-y-2 text-xs">
-        <p className="text-muted-foreground">Monthly spending: <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
-        <p className="text-muted-foreground">Budget left before today ÷ remaining days = daily allowance.</p>
-        <dl className="divide-y divide-border">
-          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Budget left before today</dt><dd className="shrink-0 text-right"><Money value={Math.max(0,pace.budget-pace.spent+pace.spentToday)} formatCurrency={formatCurrency}/> ÷ {pace.daysRemaining || '—'}</dd></div>
-          <div className="flex justify-between gap-2 py-2"><dt>Daily allowance</dt><dd className="shrink-0 text-right"><Money value={pace.allowance} formatCurrency={formatCurrency}/></dd></div>
-          <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Less: spent today</dt><dd className="shrink-0 text-right"><Money value={-pace.spentToday} formatCurrency={formatCurrency}/></dd></div>
-          <div className="flex justify-between gap-2 py-2 font-semibold"><dt>Available today</dt><dd className="shrink-0 text-right"><Money value={pace.leftToday} formatCurrency={formatCurrency}/></dd></div>
+      <PopoverContent align="end" side="bottom" sideOffset={6} collisionPadding={16} aria-label="How today's allowance is calculated" className="cero-allowance-popover w-[calc(100vw-32px)] max-w-[340px] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-xl border border-border !bg-popover p-4 text-left shadow-xl">
+        <h3 className="mb-3 text-sm font-semibold">Allowance calculation</h3>
+        <dl className="space-y-2 text-xs">
+          <div className="flex items-baseline justify-between gap-3"><dt className="text-muted-foreground">Monthly discretionary budget</dt><dd className="shrink-0 text-right"><Money value={pace.budget} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex items-baseline justify-between gap-3"><dt className="text-muted-foreground">Spent before today</dt><dd className="shrink-0 text-right"><Money value={-(pace.spent-pace.spentToday)} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex items-baseline justify-between gap-3 border-t border-border/60 pt-2 font-medium"><dt>Budget left before today</dt><dd className="shrink-0 text-right"><Money value={Math.max(0,pace.budget-pace.spent+pace.spentToday)} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex items-baseline justify-between gap-3"><dt className="text-muted-foreground">Remaining days</dt><dd className="shrink-0 text-right tabular-nums">{pace.daysRemaining ? '÷ '+pace.daysRemaining : '—'}</dd></div>
+          <div className="flex items-baseline justify-between gap-3 border-t border-border/60 pt-2 font-medium"><dt>Daily allowance</dt><dd className="shrink-0 text-right"><Money value={pace.allowance} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex items-baseline justify-between gap-3"><dt className="text-muted-foreground">Spent today</dt><dd className="shrink-0 text-right"><Money value={-pace.spentToday} formatCurrency={formatCurrency}/></dd></div>
+          <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2 font-semibold"><dt className="text-sm">Available today</dt><dd className="shrink-0 text-right"><Money value={pace.leftToday} formatCurrency={formatCurrency} className="text-lg text-primary"/></dd></div>
         </dl>
-      </div>
+        {(pace.spent-pace.spentToday > pace.budget || pace.spentToday > pace.allowance) && <p className="mt-2 text-xs text-muted-foreground">Remaining allowance cannot fall below zero.</p>}
+        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">Excludes separately planned bills, debt and savings. Remaining days include today when viewing the current month.</p>
+        <style>{'@keyframes ceroAllowancePopoverIn { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } } @media (prefers-reduced-motion: no-preference) { .cero-allowance-popover[data-state="open"] { animation: ceroAllowancePopoverIn 180ms ease-out; transform-origin: var(--radix-popover-content-transform-origin); } }'}</style>
       </PopoverContent>
     </Popover>
   </CardContent></Card>;
