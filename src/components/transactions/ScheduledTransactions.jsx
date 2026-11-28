@@ -107,7 +107,7 @@ export default function ScheduledTransactions() {
   if (queries.some(query => query.isPending)) return <p role="status" className="py-8 text-center text-sm text-muted-foreground">Loading scheduled transactions…</p>;
 
   return (
-    <div className="animate-child space-y-7 lg:space-y-4">
+    <div className="animate-child space-y-3 lg:space-y-4">
       {<nav aria-label="Scheduled sections" className="cero-workplace-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap md:gap-5 border-b border-border">{[["income","Income"],["expense","Expenses"],["transfer","Debt payments"],["goals","Savings goals"]].map(([key,label])=><WorkspaceTab key={key} active={section===key} onClick={()=>setSection(key)}>{label}</WorkspaceTab>)}</nav>}
       {(section!=="goals")&&<>
       <ScheduledRecurringList

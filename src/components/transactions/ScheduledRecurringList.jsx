@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { Clock3 } from "lucide-react";
 
 import EmptyState from "@/components/shared/EmptyState";
@@ -65,11 +66,11 @@ function RecurringPaymentDialog({
         </DialogHeader>
 
         <div className="app-dialog-scroll space-y-4">
-          <div className="rounded-2xl app-card-surface-soft p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-b border-border pb-3">
+            <p className="text-xs font-medium text-muted-foreground">
               {isIncome ? "Deposit account" : "Payment path"}
             </p>
-            <p className="mt-1 text-sm font-bold text-foreground">
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {isIncome
                 ? fromAccount?.name || "Missing account"
                 : <>{fromAccount?.name || "Missing from account"} →{" "}{toAccount?.name || "Missing credit card"}</>}
@@ -165,7 +166,7 @@ function ScheduledRecurringRow({
   const paidThisMonth = Number(rule.month_paid_amount || 0);
   const monthRemaining = Math.max(0, plannedThisMonth - paidThisMonth);
   const isMonthCovered =
-    (flexibleCreditCard || isIncome) && plannedThisMonth > 0 && monthRemaining <= 0;
+    (flexibleCreditCard || isIncome) && plannedThisMonth > 0 && monthRemaining <= 0.005;
   const displayAmount = (flexibleCreditCard || isIncome)
     ? isMonthCovered
       ? plannedThisMonth
@@ -174,14 +175,14 @@ function ScheduledRecurringRow({
   const fallbackIcon =
     type === "income" ? "income" : type === "transfer" ? "loan" : "receipt";
   const buttonLabel = isIncome
-    ? posting ? "Saving…" : paidThisMonth > 0 ? "Receive remaining" : "Receive"
+    ? posting ? "Saving…" : isMonthCovered ? "Received" : !dueNow ? "Upcoming" : paidThisMonth > 0 ? "Receive remaining" : "Receive"
     : flexibleCreditCard
       ? posting ? "Saving…" : isMonthCovered ? "Add extra" : "Pay"
     : fixedDebt
       ? posting ? "Posting…" : dueNow ? "Pay installment" : "Pay next early"
       : posting ? "Posting…" : dueNow ? "Post" : "Upcoming";
   const canUseAction = isIncome
-    ? dueNow && !posting && rule.is_active && Boolean(rule.account_id)
+    ? !isMonthCovered && dueNow && !posting && rule.is_active && Boolean(rule.account_id)
     : flexibleCreditCard
       ? rule.is_active && !posting && Boolean(rule.account_id && rule.to_account_id)
     : fixedDebt
@@ -227,7 +228,7 @@ function ScheduledRecurringRow({
       subtitle={
         <div className="flex min-w-0 items-center gap-1.5 truncate">
           <span className="truncate">
-            {getRecurringFrequencyLabel(rule.frequency)} · {status.label}
+            {getRecurringFrequencyLabel(rule.frequency)} · {isIncome && isMonthCovered ? "Received this month" : status.label}
           </span>
           {!rule.is_active && (
             <ScheduledStatusBadge className="border-border bg-secondary text-muted-foreground">
@@ -250,7 +251,7 @@ function ScheduledRecurringRow({
           variant={dueNow || flexibleCreditCard ? "default" : "secondary"}
           onClick={handleAction}
           disabled={!canUseAction}
-          className="h-7 rounded-xl px-3 text-xs"
+          className="h-8 rounded-md px-3 text-xs"
         >
           {buttonLabel}
         </Button>
@@ -273,15 +274,15 @@ export default function ScheduledRecurringList({
 }) {
   return (
     <section className="space-y-3">
-      <div className={desktopSection?"hidden":"px-1"}>
-        <h2 className="text-base font-semibold">Recurring Bills & Income</h2>
+      <div className={desktopSection?"hidden":"px-0"}>
+        <SectionHeading title="Recurring bills & income" icon={Clock3}/>
         <p className="mt-1 text-xs text-muted-foreground">
           Same layout as Manage Plan, with posting actions only for due items.
         </p>
       </div>
 
       {activeRecurring.length === 0 ? (
-        <div className="rounded-2xl app-card-surface p-4">
+        <div className="py-3">
           <EmptyState
             icon={Clock3}
             title="No recurring rules"
@@ -293,14 +294,14 @@ export default function ScheduledRecurringList({
           {RECURRING_SECTIONS.filter(section=>!desktopSection||section.type===desktopSection).map((section) => {
             const rules = recurringByType[section.type] || [];
 
-            const Wrapper = desktopSection ? "div" : ScheduledSectionCard;
+            const Wrapper = ScheduledSectionCard;
             return (
               <Wrapper
                 key={section.type}
                 type={section.type}
                 label={section.label}
                 count={rules.length}
-                defaultExpanded={section.type === "expense" || rules.length > 0}
+                defaultExpanded={Boolean(desktopSection) || section.type === "expense" || rules.length > 0}
                 emptyText={`No scheduled ${section.label.toLowerCase()} right now.`}
               >
                 {rules.map((rule) => {
@@ -329,7 +330,7 @@ export default function ScheduledRecurringList({
                     />
                   );
                 })}
-              {desktopSection&&rules.length===0&&<p className="py-8 text-center text-sm text-muted-foreground">No scheduled {section.label.toLowerCase()} right now.</p>}
+              
               </Wrapper>
             );
           })}

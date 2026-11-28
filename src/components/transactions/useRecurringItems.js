@@ -207,6 +207,11 @@ export default function useRecurringItems({
       plannedThisMonth > 0 &&
       alreadyPostedThisMonth + requestedAmount >= plannedThisMonth - 0.005;
 
+    if (isIncome && plannedThisMonth > 0 && alreadyPostedThisMonth >= plannedThisMonth - 0.005) {
+      toast.error("Planned income is already received for this month");
+      return;
+    }
+
     if (!requestedAmount || requestedAmount <= 0) {
       toast.error("Enter a valid amount");
       return;

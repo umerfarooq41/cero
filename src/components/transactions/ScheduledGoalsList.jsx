@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { PiggyBank } from "lucide-react";
 
 import EmptyState from "@/components/shared/EmptyState";
@@ -52,11 +53,11 @@ function GoalContributionDialog({
         </DialogHeader>
 
         <div className="app-dialog-scroll space-y-4">
-          <div className="rounded-2xl app-card-surface-soft p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-b border-border pb-3">
+            <p className="text-xs font-medium text-muted-foreground">
               Transfer path
             </p>
-            <p className="mt-1 text-sm font-bold text-foreground">
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {fromAccount?.name || "Missing from account"} →{" "}
               {toAccount?.name || "Missing savings account"}
             </p>
@@ -222,7 +223,7 @@ function ScheduledGoalRow({
           size="sm"
           onClick={() => onContribute(goal)}
           disabled={isCompleted || missingAccounts || fixedScheduleDone || saving}
-          className="h-7 rounded-xl px-3 text-xs"
+          className="h-8 rounded-md px-3 text-xs"
         >
           {saving
             ? "Saving…"
@@ -249,8 +250,8 @@ export default function ScheduledGoalsList({
   const Wrapper = desktop ? "div" : ScheduledSectionCard;
   return (
     <section className="space-y-3">
-      <div className={desktop?"hidden":"px-1"}>
-        <h2 className="text-base font-semibold">Savings Goals</h2>
+      <div className={desktop?"hidden":"px-0"}>
+        <SectionHeading title="Savings goals" icon={PiggyBank}/>
         <p className="mt-1 text-xs text-muted-foreground">
           Same goal rows as Manage Plan, with contribution actions for
           execution.
@@ -258,7 +259,7 @@ export default function ScheduledGoalsList({
       </div>
 
       {activeGoals.length === 0 ? (
-        <div className="rounded-2xl app-card-surface p-4">
+        <div className="py-3">
           <EmptyState
             icon={PiggyBank}
             title="No active savings goals"
