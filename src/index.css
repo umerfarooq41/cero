@@ -1914,3 +1914,23 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed]{min-height:44px;}
 .cero-desktop-workspace .cero-settings-page .settings-section-header{padding-block:12px;}
 }
+
+/* Consistent mobile page rhythm; keep desktop worksheet geometry intact. */
+@media(max-width:767px){
+.cero-desktop-workspace .cero-page-content{padding-inline:16px!important;padding-top:8px!important;}
+.cero-desktop-workspace .app-page-header>div{padding-inline:16px;}
+.cero-desktop-workspace .app-page-header .cero-header-icon,.cero-desktop-workspace .app-page-header a[aria-label="Open settings"]{width:40px;height:40px;}
+.cero-desktop-workspace .cero-section-title{font-size:15px;line-height:1.4;}
+.cero-dashboard-overview .cero-hero-label{align-items:center;}
+.cero-dashboard-overview .cero-hero-label p svg{display:none;}
+.cero-dashboard-overview .cero-hero-label .cero-section-title{font-size:13px;font-weight:400;}
+.cero-dashboard-overview .cero-hero-value{justify-content:center;}
+.cero-dashboard-overview .cero-hero .cero-primary-amount{font-size:clamp(28px,8vw,36px);}
+.cero-dashboard-overview .cero-monthly-overview{padding-block:16px 8px;border-bottom:0;}
+.cero-dashboard-overview .cero-budget-details{margin-bottom:8px;}
+.cero-desktop-workspace .cero-tab-toolbar{gap:6px;}
+.cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed]{padding-block:10px;}
+.cero-desktop-workspace .cero-settings-page .settings-row{gap:12px;}
+.cero-desktop-workspace .cero-account-register td,.cero-desktop-workspace .cero-recurring-register td{padding-inline:0;}
+.cero-desktop-workspace .cero-account-register td:nth-child(2){padding-left:26px;}
+}

@@ -125,8 +125,8 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
   const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of your spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
-  return <Card className={cardStyle + ' border-border/50'}><CardContent className="space-y-2 px-0 py-3">
-    <div className="flex items-center justify-between gap-2">
+  return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
+    <div className="cero-hero-label flex items-center justify-between gap-2">
       <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Safe to spend today</p>
       <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
@@ -246,7 +246,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
     <div className="cero-monthly-overview border-b border-border py-3 lg:py-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>
+        <h2 className="cero-section-title">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>
         
       </div>
       <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4 cero-overview-metrics">
