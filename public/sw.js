@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cero-shell-v2';
+const CACHE_NAME = 'cero-shell-v3';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -53,10 +53,13 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(async () => (await (await caches.open(CACHE_NAME)).match('/index.html')) || Response.error())
     );
     return;
   }
+
+  // Cache only public application assets, not arbitrary same-origin requests.
+  if (!APP_SHELL.includes(url.pathname) && !/^\/assets\//.test(url.pathname) && !/\.(?:svg|png|ico|woff2?)$/.test(url.pathname)) return;
 
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -69,7 +72,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(() => cached || Response.error());
 
       // Only fingerprinted Vite assets are immutable. Other resources prefer the network.
       if (/^\/assets\/[^/]+-[\w-]{8,}\.[\w]+$/.test(url.pathname) && cached) {

@@ -1,3 +1,4 @@
+import { validateCeroBackup } from "./backupValidation.js";
 import { supabase } from "@/lib/supabase";
 import { listRows, getUserSettings, logAndThrow } from "./budgetDataCore";
 import { createDownload } from "./budgetDownload";
@@ -61,43 +62,7 @@ export async function exportCeroBackup() {
 }
 
 
-export function validateCeroBackup(backup) {
-  const sections = [
-    "accounts",
-    "categories",
-    "transactions",
-    "budget_plans",
-    "recurring_transactions",
-    "savings_goals",
-    "goal_contributions",
-    ...(backup.version >= 2 ? ["auto_sweep_decisions"] : []),
-    "user_settings",
-  ];
-
-  if (
-    !backup ||
-    backup.format !== "cero-backup" ||
-    ![1, 2].includes(Number(backup.version))
-  ) {
-    throw new Error("This is not a supported Cero backup.");
-  }
-
-  if (!backup.data || typeof backup.data !== "object") {
-    throw new Error("Cero backup data is missing.");
-  }
-
-  sections.forEach((section) => {
-    if (!Array.isArray(backup.data[section])) {
-      throw new Error(`Cero backup section "${section}" is missing or invalid.`);
-    }
-  });
-
-  if (backup.data.user_settings.length > 1) {
-    throw new Error("Cero backup contains multiple settings records.");
-  }
-
-  return true;
-}
+export { validateCeroBackup } from "./backupValidation.js";
 
 export async function restoreCeroBackup(backup) {
   validateCeroBackup(backup);
