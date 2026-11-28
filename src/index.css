@@ -1981,3 +1981,20 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-inline-detail-row .cero-detail-section>div:first-child{min-height:32px;}
 .cero-inline-detail-row .cero-detail-panel>div:first-child{justify-content:space-between;}
 }
+
+/* Compact responsive register rhythm. */
+@media(max-width:1023px){
+.cero-unified-plan .cero-plan-toolbar{padding-bottom:4px;}
+.cero-desktop-workspace .cero-plan-table thead th,.cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row)>td{padding-inline:2px!important;text-align:right!important;}
+.cero-desktop-workspace .cero-plan-table .cero-plan-cell{height:30px!important;font-size:14px;}
+.cero-plan-cell:focus-visible{outline:none!important;box-shadow:none!important;border-color:hsl(var(--primary))!important;}
+.cero-inline-detail-row .cero-allocation-action{min-height:40px;}
+.cero-inline-detail-row .cero-allocation-action>span:first-child{color:hsl(var(--foreground));}
+.cero-inline-detail-row .cero-allocation-action>span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums;}
+.cero-inline-detail-row .cero-detail-section{display:flex;flex-direction:column;gap:6px;}
+.cero-inline-detail-row .cero-detail-section>*{margin-top:0!important;}
+.cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row){grid-template-rows:auto auto;min-height:56px;align-items:center;}
+.cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row)>td:first-child{align-self:end;}
+.cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(2){align-self:start;line-height:1.25;}
+.cero-desktop-workspace .cero-account-register:is(.cero-account-asset,.cero-account-liability) tbody tr:not(.cero-inline-detail-row)>td:nth-child(5),.cero-desktop-workspace .cero-account-archived tbody tr:not(.cero-inline-detail-row)>td:nth-child(3){grid-row:1/3;align-self:center;}
+}
