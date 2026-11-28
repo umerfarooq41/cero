@@ -118,16 +118,16 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     transactions, currentMonth, now: new Date(),
   });
   if (!pace) return <Card className={cardStyle + ' border-primary/20'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="cero-hero-label flex items-center justify-between gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Safe to spend today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
+    <div className="cero-hero-label flex items-center justify-between gap-2"><p className="flex items-center gap-2 text-sm font-semibold"><Gauge size={16} className="text-muted-foreground"/>Discretionary allowance today</p><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
   const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
   const driverName = pace.topDriver ? categoriesById.get(pace.topDriver.categoryId)?.name : null;
-  const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of your spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
+  const insight = pace.overBudget ? 'Monthly budget exceeded' : pace.spent === 0 ? 'No spending recorded this month' : driverName && pace.topDriver.share >= 40 ? `${driverName} is ${Math.round(pace.topDriver.share)}% of discretionary spending` : pace.status === 'over' ? 'Spending is ahead of your monthly pace' : pace.status === 'under' ? 'Spending is below your monthly pace' : 'Spending is on track this month';
   const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
   return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
     <div className="cero-hero-label flex items-center justify-between gap-2">
-      <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Safe to spend today</p>
+      <p className="flex items-center gap-2 cero-section-title"><Gauge size={16} className="shrink-0 text-muted-foreground"/>Discretionary allowance today</p>
       <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
         {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
       </Badge>
@@ -165,7 +165,7 @@ function Snapshot({ budget, transactions = [], formatCurrency }) {
   const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
   const tracked = expenses + savings + debt;
   return <details className="cero-budget-details group border-b border-border"><summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-primary">Budget details<ChevronRight size={16} className="group-open:rotate-90"/></summary>
-    <dl className="divide-y divide-border">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Planned total',planned],['Tracked total',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-2 lg:py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm lg:text-base font-medium"/></dd></div>)}</dl>
+    <dl className="divide-y divide-border">{[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Savings funded',savings],['Total planned allocation',planned],['Total tracked allocation',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 py-2 lg:py-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm lg:text-base font-medium"/></dd></div>)}</dl>
   </details>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
