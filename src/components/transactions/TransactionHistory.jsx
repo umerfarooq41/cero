@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 
 import EmptyState from '@/components/shared/EmptyState';
-import TransactionTypeTabs from '@/components/shared/TransactionTypeTabs';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -527,7 +526,6 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           )}
         </div>
 
-        <label className="hidden items-center gap-2 lg:flex"><span className="sr-only">Transaction type</span><select value={filterType} onChange={event => setFilterType(event.target.value)} className="h-10 rounded-md border border-border bg-card px-3 text-sm"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option></select></label>
         <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<select className="block w-full rounded-md border border-border bg-background p-2" value={value} onChange={e=>set(e.target.value)}>{options.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
         <div className="lg:hidden"><AdvancedFilterSheet
           open={filterSheetOpen}
@@ -557,11 +555,11 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         /></div>
       </div>
 
-      <div className="lg:hidden"><TransactionTypeTabs
-        value={filterType}
-        onChange={setFilterType}
-        className="mb-2 animate-child"
-      /></div>
+      <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
+        {[['all','All'],['income','Income'],['expense','Expense'],['transfer','Transfer']].map(([value,label]) => (
+          <button key={value} type="button" aria-pressed={filterType === value} onClick={() => setFilterType(value)} className={`shrink-0 px-2 py-3 text-sm font-medium ${filterType === value ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
+        ))}
+      </nav>
 
       {activeFilterChips.length > 0 && (
         <div className="mb-5 flex flex-wrap items-center gap-2 animate-child">
