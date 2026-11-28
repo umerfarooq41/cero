@@ -2208,3 +2208,23 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
   .cero-route-editor .cero-hero-amount-input {font-size:30px!important;border:0!important;background:transparent!important;box-shadow:none!important;}
   .app-desktop-confirm-overlay,.app-sheet-overlay,.app-route-sheet-backdrop {background:rgb(0 0 0/.45)!important;backdrop-filter:none!important;}
 }
+
+/* Workplace register and inspector alignment, desktop only. */
+@media(min-width:1024px){
+ .cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed]{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;position:relative;padding:10px 8px!important;}
+ .cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed]:focus-visible{outline:2px solid hsl(var(--ring))!important;outline-offset:-3px;}
+ .cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed="true"]::after{content:"";position:absolute;inset:auto 0 0;height:2px;background:hsl(var(--primary));}
+ .cero-desktop-inspector.cero-register-inspector{flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;align-self:stretch;min-width:0;gap:12px!important;padding:16px 20px!important;}
+ .cero-register-inspector>*{margin-block:0!important;min-width:0;}
+ .cero-register-inspector>div:first-child{width:100%;align-items:flex-start;}
+ .cero-register-inspector h2{font-size:16px;line-height:1.4;overflow-wrap:anywhere;}
+ .cero-register-inspector>p{font-size:14px;line-height:1.5;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register){table-layout:fixed;width:100%;font-size:14px;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) th{font-size:12px;font-weight:500;padding:10px 12px;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) td{padding:10px 12px;overflow-wrap:anywhere;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) th:first-child{width:38%;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) th:nth-child(2){width:20%;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) th:nth-child(3){width:22%;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) th:last-child{width:20%;}
+ .cero-desktop-workspace :is(.cero-recurring-register,.cero-goal-register) td:last-child{white-space:nowrap;}
+}
