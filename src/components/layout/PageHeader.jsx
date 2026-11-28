@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Settings, WifiOff } from 'lucide-react';
+import { Settings, WifiOff, ArrowLeft } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,7 @@ export default function PageHeader({
   className,
   action,
   mobileAction,
+  onBack,
 }) {
   const location = useLocation();
   const settingsActive = location.pathname === '/settings';
@@ -60,7 +61,7 @@ export default function PageHeader({
       >
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2.5">
-            <Logo size={24} priority className="lg:hidden" />
+            {onBack ? <button type="button" aria-label="Back" onClick={onBack} className="grid size-9 shrink-0 place-items-center text-muted-foreground hover:text-foreground"><ArrowLeft className="size-5"/></button> : <Logo size={24} priority className="lg:hidden" />}
 
             <h1
               className="
