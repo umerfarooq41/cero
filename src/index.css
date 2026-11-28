@@ -1884,7 +1884,6 @@ main,
 .cero-dashboard-overview .cero-overview-metrics {gap:12px 16px;}
 .cero-dashboard-overview .cero-overview-metrics dt {font-size:12px;font-weight:400;}
 .cero-dashboard-overview .cero-overview-metrics dd {margin-top:4px;}
-.cero-dashboard-overview .cero-overview-section {padding-block:8px;}
 .cero-dashboard-overview .cero-section-title,.cero-reflect-summary .cero-section-title {font-size:15px;}
 .cero-reflect-summary {gap:0;}
 .cero-reflect-summary > section + section {border-top:1px solid hsl(var(--border))!important;}
@@ -1896,8 +1895,6 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 /* Shared mobile rhythm and centered financial heroes. */
 @media(max-width:767px){
 .cero-desktop-workspace{--cero-page-gutter:16px;--cero-section-gap:16px;}
-.cero-desktop-workspace .cero-page-content{padding-inline:var(--cero-page-gutter)!important;}
-.cero-desktop-workspace .app-page-header>div{padding-inline:var(--cero-page-gutter);}
 .cero-dashboard-overview{display:flex;flex-direction:column;gap:0;}
 .cero-dashboard-overview .cero-safe-hero{display:block;order:-1;}
 .cero-dashboard-overview .cero-monthly-overview{padding-block:16px;}
@@ -1908,7 +1905,6 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-hero-value{justify-content:center;flex-wrap:wrap;}
 .cero-hero>div:nth-child(2){text-align:center;}
 .cero-reflect-summary .cero-hero{padding-block:20px;}
-.cero-dashboard-overview .cero-overview-section{padding-block:8px;}
 .cero-dashboard-overview [data-dashboard-entry]{margin-bottom:0;}
 .cero-budget-details summary::-webkit-details-marker,.cero-reflect-summary summary::-webkit-details-marker{display:none;}
 .cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed]{min-height:44px;}
@@ -1945,12 +1941,10 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 }
 
 @media(max-width:1023px){
-.cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row){padding-block:8px!important;}
 .cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row)>td{min-width:0!important;white-space:nowrap!important;padding:4px 2px!important;font-size:clamp(11px,3.4vw,14px);text-align:right!important;}
 .cero-desktop-workspace .cero-plan-table tbody tr:not(.cero-inline-detail-row)>th{padding-block:4px!important;}
 .cero-desktop-workspace .cero-plan-table .cero-plan-cell{height:32px!important;min-width:0;width:100%;}
 .cero-desktop-workspace .cero-account-register:not(.cero-account-archived) tbody tr:not(.cero-inline-detail-row)>td:nth-child(3),.cero-desktop-workspace .cero-account-register:not(.cero-account-archived) tbody tr:not(.cero-inline-detail-row)>td:nth-child(4),.cero-desktop-workspace .cero-account-asset tbody tr:not(.cero-inline-detail-row)>td:nth-child(6){display:none!important;}
-.cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row){padding-block:10px!important;row-gap:3px!important;}
 }
 
 /* Compact mobile master-detail rhythm */
@@ -1963,7 +1957,6 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-inline-detail-row .cero-detail-panel section,.cero-inline-detail-row .cero-detail-panel>div{margin:0;}
 .cero-inline-detail-row .cero-detail-panel h3{font-size:13px;font-weight:600;}
 .cero-inline-detail-row .cero-detail-panel .text-sm{font-size:13px;font-weight:400;}
-.cero-inline-detail-row .cero-detail-panel>div:first-child{justify-content:flex-end;}
 .cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row){padding-block:6px!important;row-gap:0!important;}
 .cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row)>td{padding-block:1px!important;}
 .cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(2){padding-top:0!important;}
