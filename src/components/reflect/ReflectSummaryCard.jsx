@@ -382,22 +382,16 @@ export default function ReflectSummaryCard({
   </div>;
   return (
     <div className="cero-reflect-summary mb-3 grid gap-3">
-      {section !== "budget" && <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
-        
-        {[
-          ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
-          ['Total outflow',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings]]],
-          ['Current net worth',netWorth,netWorth < 0 ? 'text-destructive' : '',[['Assets',totalAssets],['Liabilities',totalLiabilities]]]
-        ].map(([label,value,tone,rows],index)=><div key={label} className={cn('py-3 first:pt-0',index>0&&'border-t border-border')}>
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className={cn('mt-1 tabular-nums',index===0?'cero-primary-amount':'cero-secondary-amount',tone)}>{money(value)}</p>
-          <div className="mt-2 grid grid-cols-2 gap-3">{rows.map(([name,amount])=><div key={name} className="min-w-0"><p className="text-xs text-muted-foreground">{name}</p><p className="mt-1 text-sm font-medium tabular-nums">{money(amount)}</p></div>)}</div>
-        </div>)}
-      </section>
-      <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
+      {section !== "budget" && <section className="cero-reflect-summary-section px-0 py-3">
+        <div className="cero-hero text-center py-4"><p className="text-sm text-muted-foreground">Operating cash flow</p><p className={cn('cero-primary-amount mt-2',netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]')}>{money(netCashFlow)}</p><p className="mt-1 text-xs text-muted-foreground">{isYear?'Yearly':'Monthly'} cash flow</p></div>
+        <div className="grid grid-cols-2 gap-3 text-center py-3">{metric('Income received',income)}{metric('Expenses',expenses)}</div>
+        <div className="border-t border-border py-3"><div className="flex items-center justify-between gap-2"><p className="text-sm text-muted-foreground">Current net worth</p><p className="cero-secondary-amount">{money(netWorth)}</p></div></div>
+        <details className="group"><summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-primary">Financial details<span className="group-open:rotate-180">⌄</span></summary>{[['Assets',totalAssets],['Liabilities',totalLiabilities],['Debt paid',trackedDebt],['Goal savings',trackedSavings],['Total outflow',totalTrackedOutflow]].map(([label,amount])=><MoneyRow key={label} label={label} amount={amount} currency={currency}/>)}</details>
+      </section>}
+      {section !== "summary" && <section className="cero-reflect-summary-section px-0 py-3">
         <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="cero-section-title">Budget health</h3></div>
         {plannedExpenses > 0 ? <>
-          <div className="flex items-end justify-between gap-2">
+          <div className="cero-hero flex flex-col items-center gap-2 text-center">
             <div><p className="text-[11px] text-muted-foreground">Expense budget {remaining >= 0 ? 'remaining' : 'over'}</p>
               <p className={`mt-1 cero-primary-amount ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div>
             <span className="text-xs font-semibold tabular-nums">{Math.round(used)}% used</span>

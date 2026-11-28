@@ -1892,3 +1892,25 @@ main,
 nav[aria-label="Reflect reports"] {gap:0!important;}
 nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!important;font-size:12px!important;}
 }
+
+/* Shared mobile rhythm and centered financial heroes. */
+@media(max-width:767px){
+.cero-desktop-workspace{--cero-page-gutter:16px;--cero-section-gap:16px;}
+.cero-desktop-workspace .cero-page-content{padding-inline:var(--cero-page-gutter)!important;}
+.cero-desktop-workspace .app-page-header>div{padding-inline:var(--cero-page-gutter);}
+.cero-dashboard-overview{display:flex;flex-direction:column;gap:0;}
+.cero-dashboard-overview .cero-safe-hero{display:block;order:-1;}
+.cero-dashboard-overview .cero-monthly-overview{padding-block:16px;}
+.cero-dashboard-overview .cero-hero{padding-block:20px;}
+.cero-hero .cero-primary-amount{font-size:clamp(28px,8vw,36px);font-weight:600;}
+.cero-hero-label{flex-direction:column;justify-content:center;gap:8px;}
+.cero-hero-label p{font-size:13px;font-weight:400;color:hsl(var(--muted-foreground));}
+.cero-hero-value{justify-content:center;flex-wrap:wrap;}
+.cero-hero>div:nth-child(2){text-align:center;}
+.cero-reflect-summary .cero-hero{padding-block:20px;}
+.cero-dashboard-overview .cero-overview-section{padding-block:8px;}
+.cero-dashboard-overview [data-dashboard-entry]{margin-bottom:0;}
+.cero-budget-details summary::-webkit-details-marker,.cero-reflect-summary summary::-webkit-details-marker{display:none;}
+.cero-desktop-workspace nav.cero-workplace-tabs>button[aria-pressed]{min-height:44px;}
+.cero-desktop-workspace .cero-settings-page .settings-section-header{padding-block:12px;}
+}
