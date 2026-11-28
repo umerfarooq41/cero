@@ -1827,3 +1827,19 @@ main,
  .cero-desktop-workspace .cero-reflect-summary-section {padding-inline:0!important;}
  .cero-desktop-workspace .cero-reflect-period {column-gap:6px;}
 }
+
+@media(max-width:767px) {
+ .cero-desktop-workspace .cero-plan-table thead {display:block;position:static;background:transparent;}
+ .cero-desktop-workspace .cero-plan-table thead tr {padding:0 0 4px;border-bottom:1px solid hsl(var(--border));}
+ .cero-desktop-workspace .cero-plan-table thead th:first-child {display:none;}
+ .cero-desktop-workspace .cero-plan-table thead th {font-size:12px;padding:4px 2px;text-align:right;}
+ .cero-desktop-workspace .cero-plan-table td::before {display:none;content:none;}
+ .cero-desktop-workspace .cero-plan-table td {text-align:right;justify-content:center;align-items:flex-end;padding:2px;}
+ .cero-desktop-workspace .cero-plan-table th[scope="row"] > button:first-child {min-height:32px;}
+ .cero-desktop-workspace .cero-plan-table input.cero-plan-cell {height:32px;}
+ .cero-desktop-workspace .cero-plan-table tr {padding-block:5px;gap:3px;}
+ .cero-desktop-workspace .cero-account-register tr {padding:7px 0;gap:0 8px;}
+ .cero-desktop-workspace .cero-account-register td:first-child button {min-height:28px;}
+ .cero-desktop-workspace .cero-account-register td:nth-child(2) {padding-left:26px;font-size:12px;}
+ .cero-desktop-workspace .cero-account-register td:not(:first-child)::before {font-size:11px;}
+}

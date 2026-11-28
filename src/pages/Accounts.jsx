@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 
 import PageHeader from '@/components/layout/PageHeader';
-import NetWorthDelta from '@/components/shared/NetWorthDelta';
 import { useAccounts, useTransactions, useAllTransactions, useCategories } from '@/hooks/useBudgetData';
 import { format, addMonths } from 'date-fns';
 import { getTransactionDeltas } from '@/lib/transactionEffects';
@@ -203,37 +202,18 @@ export default function Accounts() {
       {header}
 
       <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:pb-8 md:px-6 md:py-5 lg:px-8 lg:py-3 lg:pb-8">
-        <div className="animate-child mb-3 md:hidden">
-          <NetWorthDelta
-            netWorth={netWorth}
-            totalAssets={totalAssets}
-            totalLiabilities={totalLiabilities}
-            formatCurrency={formatCurrency}
-          />
+        <div className="flex flex-wrap items-center justify-between gap-4 py-3">
+          <div><p className="text-xs text-muted-foreground">Net worth</p><p className="mt-1 cero-primary-amount">{netWorth < 0 ? '−' : ''}{formatCurrency(Math.abs(netWorth))}</p></div>
+          <div className="hidden md:block"><p className="text-xs text-muted-foreground">Total assets</p><p className="mt-1 text-lg font-semibold">{totalAssets < 0 ? '−' : ''}{formatCurrency(Math.abs(totalAssets))}</p></div>
+          <div className="hidden md:block"><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
+          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="cero-add-action hidden md:!inline-flex"><Plus size={16}/>Add account</button>
         </div>
-
-        <div className="hidden flex-wrap items-center justify-between gap-4 py-5 md:flex">
-          <div><p className="text-xs text-muted-foreground">Net worth</p><p className="mt-1 text-2xl font-semibold tabular-nums">{netWorth < 0 ? '−' : ''}{formatCurrency(Math.abs(netWorth))}</p></div>
-          <div><p className="text-xs text-muted-foreground">Total assets</p><p className="mt-1 text-lg font-semibold">{totalAssets < 0 ? '−' : ''}{formatCurrency(Math.abs(totalAssets))}</p></div>
-          <div><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
-          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="cero-add-action"><Plus size={16}/>Add account</button>
-        </div>
-        <div className="hidden py-3 md:block"><div className="flex h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label="Assets and liabilities proportion">{totalAssets + totalLiabilities > 0 && <><div className="bg-emerald-500" style={{width: `${Math.max(0, Math.min(100,totalAssets/(totalAssets+totalLiabilities)*100))}%`}}/><div className="flex-1 bg-destructive"/></>}</div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets</span><span>Liabilities</span></div></div>
-        <div className="animate-child mb-3 md:hidden">
-          <AccountSummaryCard
-            cashAvailable={cashAvailable}
-            savingsTotal={savingsTotal}
-            debtTotal={totalLiabilities}
-            formatCurrency={formatCurrency}
-          />
-        </div>
-
-        <div className="hidden grid-cols-3 gap-6 border-b border-border py-4 md:grid">{[["Available",cashAvailable],["Savings",savingsTotal],["Debt",totalLiabilities]].map(([label,value]) => <div key={label}><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-xl font-medium tabular-nums">{value < 0 ? "−" : ""}{formatCurrency(Math.abs(value))}</p></div>)}</div>
+        <div className="py-2"><div className="flex h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label="Assets and liabilities proportion">{totalAssets + totalLiabilities > 0 && <><div className="bg-emerald-500" style={{width: `${Math.max(0, Math.min(100,totalAssets/(totalAssets+totalLiabilities)*100))}%`}}/><div className="flex-1 bg-destructive"/></>}</div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets {totalAssets + totalLiabilities > 0 ? (totalAssets/(totalAssets+totalLiabilities)*100).toFixed(1) : "0.0"}%</span><span>Liabilities {totalAssets + totalLiabilities > 0 ? (totalLiabilities/(totalAssets+totalLiabilities)*100).toFixed(1) : "0.0"}%</span></div></div>
+        <div className="grid grid-cols-3 gap-3 border-b border-border py-3">{[["Available",cashAvailable],["Savings",savingsTotal],["Debt",totalLiabilities]].map(([label,value]) => <div key={label}><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 text-sm md:text-xl font-medium tabular-nums">{value < 0 ? "−" : ""}{formatCurrency(Math.abs(value))}</p></div>)}</div>
         <div>
           <nav aria-label="Account groups" className="cero-workplace-tabs flex flex-wrap items-center gap-2 border-b border-border workspace:gap-5">
             {[['asset','Assets'],['liability','Liabilities'],['archived','Archived']].map(([key,label])=><button key={key} type="button" aria-pressed={tab===key} onClick={()=>{setTab(key);setSelectedId(null)}} className={cn('px-2 py-3 text-sm font-medium',tab===key?'text-primary':'text-muted-foreground')}>{label}</button>)}
-            <div className="ml-auto flex items-center gap-2 text-sm"><button aria-label="Previous activity month" onClick={()=>setMonth(m=>format(addMonths(new Date(m+'-01T12:00:00'),-1),'yyyy-MM'))}><ChevronLeft size={16}/></button>{format(new Date(month+'-01T12:00:00'),'MMM yyyy')}<button aria-label="Next activity month" onClick={()=>setMonth(m=>format(addMonths(new Date(m+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight size={16}/></button></div>
-          </nav>
+            </nav><div className="flex items-center justify-between gap-2 py-2 text-sm"><span className="text-xs text-muted-foreground">Monthly activity</span><div className="flex items-center gap-2"><button aria-label="Previous activity month" onClick={()=>setMonth(m=>format(addMonths(new Date(m+'-01T12:00:00'),-1),'yyyy-MM'))}><ChevronLeft size={16}/></button>{format(new Date(month+'-01T12:00:00'),'MMM yyyy')}<button aria-label="Next activity month" onClick={()=>setMonth(m=>format(addMonths(new Date(m+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight size={16}/></button></div></div>
           <div className="grid grid-cols-1 workspace:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] pt-3">
             <div className="overflow-x-auto"><table className={`cero-adaptive-register cero-account-register cero-account-${tab} w-full text-sm`}><thead className="bg-muted/30 text-muted-foreground"><tr>{(tab==='asset'?['Account','Type','Inflow','Outflow','Balance','Share']:tab==='liability'?['Account','Type','Borrowed','Repaid','Outstanding']:['Account','Type','Balance']).map((label,i)=><th key={label} className={cn('px-2 py-2 font-medium',i<2?'text-left':'text-right')}>{label}</th>)}</tr></thead><tbody>
             {rows.map(account=>{const Icon=typeIcons[account.type]||Wallet;const v=activity.get(account.id)||{inflow:0,outflow:0};const balance=Number(account.balance)||0;const share=totalAssets>0?balance/totalAssets*100:0;return <tr key={account.id} onClick={()=>setSelectedId(account.id)} className={cn('cursor-pointer border-b border-border/60 hover:bg-muted/30',selectedId===account.id&&'bg-primary/10')}><td className="px-2 py-3"><button onClick={()=>setSelectedId(account.id)} className="flex items-center gap-2 text-left"><Icon size={16} style={{color:account.color||undefined}}/>{account.name}</button></td><td className="px-2 py-3 capitalize text-muted-foreground">{account.type?.replaceAll('_',' ')}</td>{tab!=='archived'&&<><td className="px-2 py-3 text-right whitespace-nowrap text-emerald-500">{monthlyPending||monthlyError?'—':money(v.inflow)}</td><td className="px-2 py-3 text-right whitespace-nowrap text-destructive">{monthlyPending||monthlyError?'—':money(v.outflow)}</td></>}<td className="px-2 py-3 text-right whitespace-nowrap font-medium">{money(tab==='liability'?Math.abs(balance):balance)}</td>{tab==='asset'&&<td className="px-2 py-3 text-right"><span>{share.toFixed(1)}%</span><div className="ml-auto mt-1 h-1 w-10 rounded bg-muted"><div className="h-full rounded bg-primary" style={{width:Math.max(0,Math.min(100,share))+'%'}}/></div></td>}</tr>})}
