@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -19,15 +20,7 @@ export default function DashboardSectionCard({
     >
       <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-2">
-            {Icon ? (
-              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-            ) : null}
-
-            <h2 className="cero-dashboard-section-title min-w-0 truncate text-sm font-semibold text-foreground">
-              {title}
-            </h2>
-          </div>
+          <SectionHeading title={title} icon={Icon} className="cero-dashboard-section-title text-sm font-semibold text-foreground"/>
 
           {subtitle ? (
             <p className="mt-1 truncate text-xs leading-5 text-muted-foreground sm:whitespace-normal">

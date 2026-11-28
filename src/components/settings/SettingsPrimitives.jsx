@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,11 +20,7 @@ export function SettingsSection({ title, children }) {
   return (
     <section className="settings-section animate-child mb-4 lg:mb-6 overflow-hidden">
       <div className="settings-section-header flex items-center border-b border-border px-0 py-2.5 lg:border-b-0 lg:py-3">
-        <div className="min-w-0">
-          <h3 className="cero-section-title text-foreground lg:normal-case lg:tracking-normal lg:text-foreground">
-            {title}
-          </h3>
-        </div>
+        <SectionHeading title={title} as="h3" className="text-foreground lg:normal-case lg:tracking-normal"/>
       </div>
 
       <div className="divide-y divide-border/40">{children}</div>

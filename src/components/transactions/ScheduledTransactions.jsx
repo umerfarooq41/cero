@@ -1,3 +1,4 @@
+import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
 import { useState } from "react";
 import {
   useAccounts,
@@ -107,7 +108,7 @@ export default function ScheduledTransactions() {
 
   return (
     <div className="animate-child space-y-7 lg:space-y-4">
-      {<nav aria-label="Scheduled sections" className="cero-workplace-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap md:gap-5 border-b border-border">{[["income","Income"],["expense","Expenses"],["transfer","Debt payments"],["goals","Savings goals"]].map(([key,label])=><button key={key} type="button" aria-pressed={section===key} onClick={()=>setSection(key)} className={cn("shrink-0 border-b-2 px-2 py-3 text-sm font-medium",section===key?"border-primary text-primary":"border-transparent text-muted-foreground")}>{label}</button>)}</nav>}
+      {<nav aria-label="Scheduled sections" className="cero-workplace-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap md:gap-5 border-b border-border">{[["income","Income"],["expense","Expenses"],["transfer","Debt payments"],["goals","Savings goals"]].map(([key,label])=><WorkspaceTab key={key} active={section===key} onClick={()=>setSection(key)}>{label}</WorkspaceTab>)}</nav>}
       {(section!=="goals")&&<>
       <ScheduledRecurringList
         desktopSection={section}
