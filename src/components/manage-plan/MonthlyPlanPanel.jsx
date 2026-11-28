@@ -477,7 +477,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
           </tr>{selectedKey===row.key&&<tr className="cero-inline-detail-row workspace:hidden"><td colSpan={4}><div className="cero-detail-panel">{renderDetails()}</div></td></tr>}</Fragment>})}</tbody>
           <tfoot className="sticky bottom-0 bg-card font-semibold"><tr><th className="px-3 py-3 text-left">Total</th><td className="px-2 text-right">{formatCurrency(sumType(activeType))}</td><td className="px-2 text-right">{formatCurrency(visibleRows.reduce((sum,row)=>sum+trackedFor(row),0))}</td><td className="px-2 text-right">{formatCurrency(sumType(activeType)-visibleRows.reduce((sum,row)=>sum+trackedFor(row),0))}</td></tr></tfoot></table>
         </div>
-        <aside className="hidden workspace:block cero-detail-panel workspace:border-l workspace:px-5">{renderDetails()}</aside>
+        <aside className="cero-desktop-inspector hidden workspace:block cero-detail-panel workspace:border-l workspace:px-5">{renderDetails()}</aside>
       </div>}
       {editorRequest?.kind==='archived'&&<div className="flex justify-end"><Button variant="ghost" onClick={()=>setEditorRequest(null)}>Close archived categories</Button></div>}{editorRequest&&<div key={editorRequest.nonce} className="contents">{editorRequest.kind==='goal'?<ManageGoalsPanel embedded request={editorRequest}/>:editorRequest.kind==='recurring'?<ManageRecurringPanel embedded request={editorRequest}/>:<ManageCategoriesPanel embedded request={editorRequest}/>}</div>}
     </div>;

@@ -1998,3 +1998,7 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-desktop-workspace .cero-account-register tbody tr:not(.cero-inline-detail-row)>td:nth-child(2){align-self:start;line-height:1.25;}
 .cero-desktop-workspace .cero-account-register:is(.cero-account-asset,.cero-account-liability) tbody tr:not(.cero-inline-detail-row)>td:nth-child(5),.cero-desktop-workspace .cero-account-archived tbody tr:not(.cero-inline-detail-row)>td:nth-child(3){grid-row:1/3;align-self:center;}
 }
+
+/* Mutually exclusive responsive inspector surfaces. */
+@media(max-width:1023px){.cero-desktop-inspector,.cero-desktop-activity-month{display:none!important;}}
+@media(min-width:1024px){.cero-desktop-inspector{display:flex!important;}.cero-desktop-activity-month{display:flex!important;}.cero-inline-detail-row,.cero-mobile-activity-month{display:none!important;}}
