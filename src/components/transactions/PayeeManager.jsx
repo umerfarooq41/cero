@@ -13,7 +13,7 @@ import {useCurrency} from '@/hooks/useCurrency';
 import {getCurrencyCode,getCurrencySymbol,formatCurrencyNumberText} from '@/lib/currencies';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import {format,parseISO} from 'date-fns';
-import CategoryIcon from '@/components/shared/CategoryIcon';
+import CompactChoiceChip from '@/components/shared/CompactChoiceChip';
 import PageHeader from '@/components/layout/PageHeader';
 import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from '@/components/ui/select';
 
@@ -32,10 +32,9 @@ function CategoryPills({categories,value,onChange}){
  const matching=eligible.filter(c=>c.name.toLowerCase().includes(query.trim().toLowerCase()));
  const ordered=[...matching].sort((a,b)=>Number(b.id===value)-Number(a.id===value));
  const visible=showAll||query.trim()?ordered:ordered.slice(0,8);
- const pill=active=>'inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm '+(active?'border-primary bg-primary/10 text-primary':'border-border bg-muted/30');
  return <div role="group" aria-labelledby="payee-category-label" className="space-y-2">
  {eligible.length>8&&<Input aria-label="Search categories" placeholder="Search categories" value={query} onChange={e=>setQuery(e.target.value)} className="h-9"/>}
- <div className="flex flex-wrap gap-2"><button type="button" aria-pressed={!value} onClick={()=>onChange('')} className={pill(!value)}>None</button>{visible.map(c=><button key={c.id} type="button" aria-pressed={value===c.id} onClick={()=>onChange(c.id)} className={pill(value===c.id)}><CategoryIcon icon={c.icon||'tag'} color={c.color} size="sm"/><span className="break-words text-left">{c.name}</span></button>)}</div>
+ <div className="flex flex-wrap gap-1.5"><CompactChoiceChip selected={!value} onClick={()=>onChange('')}>None</CompactChoiceChip>{visible.map(c=><CompactChoiceChip key={c.id} selected={value===c.id} item={c} onClick={()=>onChange(c.id)}>{c.name}</CompactChoiceChip>)}</div>
  {!query.trim()&&matching.length>8&&<button type="button" onClick={()=>setShowAll(v=>!v)} className="text-sm text-primary">{showAll?'Show less':'View all ('+matching.length+')'}</button>}
  {!matching.length&&<p className="text-xs text-muted-foreground">No matching categories.</p>}
  </div>;
