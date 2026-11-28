@@ -1798,3 +1798,16 @@ main,
 @media(max-width:767px) {
  .cero-desktop-workspace .app-main-scroll .app-page-header h1 {font-size:20px!important;}
 }
+
+/* Shared workspace action and control styling. */
+.cero-add-action {display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;min-height:36px;padding:0 10px;border:1px solid hsl(var(--border));border-radius:6px!important;background:transparent!important;color:hsl(var(--primary))!important;font-size:14px;font-weight:500;box-shadow:none!important;white-space:nowrap;}
+.cero-add-action:hover {background:hsl(var(--primary)/.08)!important;}
+.cero-tab-toolbar {display:flex;align-items:center;gap:8px;min-width:0;}
+.cero-tab-toolbar > nav {flex:1;min-width:0;}
+.cero-desktop-workspace .app-page-header button[aria-label="Settings"],.cero-desktop-workspace .app-page-header button[aria-label="Open settings"],.cero-desktop-workspace .app-page-header a[aria-label="Open settings"] {width:36px;height:36px;box-shadow:none!important;}
+@media(max-width:767px) {
+ .cero-desktop-workspace .app-main-scroll .cero-page-content {padding-top:8px;}
+ .cero-tab-toolbar {gap:4px;}
+ .cero-tab-toolbar .cero-add-action {padding-inline:8px;}
+ .cero-desktop-workspace .cero-plan-toolbar > button {height:40px;}
+}

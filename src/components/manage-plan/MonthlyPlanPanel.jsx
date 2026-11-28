@@ -456,10 +456,10 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
         <Button disabled={!canWrite||!dirty} onClick={handleSave}><Save className="mr-2 size-4"/>{saving?'Saving…':'Save plan'}</Button>
       </div>
       {dirty&&<p role="status" className="text-xs text-primary">Unsaved allocation changes</p>}
-      <nav aria-label="Budget types" className="cero-workplace-tabs cero-plan-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-border workspace:gap-5">
+      <div className="cero-tab-toolbar"><nav aria-label="Budget types" className="cero-workplace-tabs cero-plan-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-border workspace:gap-5">
         {Object.entries(sectionConfig).map(([type,config])=><button key={type} type="button" aria-pressed={activeType===type} onClick={()=>{setActiveType(type);setSelectedKey(null);}} className={cn("border-b-2 px-2 py-3 text-sm font-medium",activeType===type?"border-primary text-primary":"border-transparent text-muted-foreground")}>{config.title}</button>)}
-        <Button size="sm" variant="ghost" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/></Button><Button variant="ghost" size="sm" className="ml-auto shrink-0" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden">Archived</span><span className="hidden md:inline">Archived categories</span></Button>
-      </nav>
+        </nav><Button size="sm" variant="outline" className="cero-add-action" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/><span>Add</span></Button><Button variant="ghost" size="sm" className="shrink-0" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden">Archived</span><span className="hidden md:inline">Archived categories</span></Button>
+      </div>
       {isPlanLoading ? <Skeleton className="h-80 w-full"/> : <div className="grid min-w-0 grid-cols-1 workspace:grid-cols-[minmax(0,1fr)_minmax(260px,30%)]">
         <div className="overflow-auto workspace:max-h-[65vh]">
           <table className="cero-plan-table w-full table-fixed text-sm md:min-w-[480px]"><colgroup><col style={{width:'40%'}}/><col style={{width:'20%'}}/><col style={{width:'20%'}}/><col style={{width:'20%'}}/></colgroup>

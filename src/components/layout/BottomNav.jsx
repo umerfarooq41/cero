@@ -38,7 +38,7 @@ const navItems = [
   {
     path: '/manage-plan',
     icon: SlidersHorizontal,
-    label: 'Manage',
+    label: 'Workplace',
     matches: ['/manage-plan', '/categories'],
   },
 ];

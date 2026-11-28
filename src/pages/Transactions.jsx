@@ -46,7 +46,7 @@ export default function Transactions() {
       <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-40 md:pb-8 lg:px-8 lg:py-3">
         <div className="mb-3 flex items-center justify-between gap-2">
           <nav aria-label="Transaction views" className="cero-workplace-tabs flex flex-1 gap-2 md:gap-5">{tabs.map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => handleTabChange(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{tab.label}</button>)}</nav>
-          {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="shrink-0 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"><span className="md:hidden">+ Add</span><span className="hidden md:inline">+ Add transaction</span></button>}
+          {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="cero-add-action"><span aria-hidden="true">+</span><span>Add</span></button>}
         </div>
 
         {activeTab === "history" && <div className="mb-3 flex items-center"><span className="flex items-center cero-month-heading gap-0.5 text-sm font-medium">

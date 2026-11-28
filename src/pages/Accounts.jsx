@@ -105,7 +105,7 @@ export default function Accounts() {
   const location = useLocation();
   
   const header = <PageHeader title={<><span className="md:hidden">Accounts</span><span className="hidden md:inline">Accounts</span></>} action={<div className="flex items-center gap-1">
-    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="grid md:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Plus className="size-[19px]" /></button>
+    <button type="button" aria-label="Add account" onClick={() => navigate("/add-account", { state: { backgroundLocation: location } })} className="cero-add-action md:hidden"><Plus className="size-4" /><span>Add</span></button>
     {!navigator.onLine && <WifiOff className="size-[18px] text-muted-foreground" aria-label="Offline"/>}
     <button type="button" aria-label="Settings" onClick={() => navigate("/settings")} className="grid md:hidden size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted/60"><Settings className="size-[19px]" /></button>
   </div>} />;
@@ -216,7 +216,7 @@ export default function Accounts() {
           <div><p className="text-xs text-muted-foreground">Net worth</p><p className="mt-1 text-2xl font-semibold tabular-nums">{netWorth < 0 ? '−' : ''}{formatCurrency(Math.abs(netWorth))}</p></div>
           <div><p className="text-xs text-muted-foreground">Total assets</p><p className="mt-1 text-lg font-semibold">{totalAssets < 0 ? '−' : ''}{formatCurrency(Math.abs(totalAssets))}</p></div>
           <div><p className="text-xs text-muted-foreground">Total liabilities</p><p className="mt-1 text-lg font-semibold text-destructive">{formatCurrency(totalLiabilities)}</p></div>
-          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"><Plus size={16}/>Add account</button>
+          <button type="button" onClick={() => navigate('/add-account', {state:{backgroundLocation:location}})} className="cero-add-action"><Plus size={16}/>Add account</button>
         </div>
         <div className="hidden py-3 md:block"><div className="flex h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label="Assets and liabilities proportion">{totalAssets + totalLiabilities > 0 && <><div className="bg-emerald-500" style={{width: `${Math.max(0, Math.min(100,totalAssets/(totalAssets+totalLiabilities)*100))}%`}}/><div className="flex-1 bg-destructive"/></>}</div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets</span><span>Liabilities</span></div></div>
         <div className="animate-child mb-3 md:hidden">

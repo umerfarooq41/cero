@@ -127,39 +127,19 @@ export default function PageHeader({
           >
             <motion.span
               whileTap={{ scale: 0.92 }}
-              animate={{ scale: settingsActive ? 1.04 : 1, y: settingsActive ? -1 : 0 }}
+              animate={{ scale: 1, y: 0 }}
               transition={{ type: 'spring', stiffness: 430, damping: 28 }}
               className="relative flex h-9 w-9 items-center justify-center rounded-full"
             >
-              {settingsActive && (
-                <motion.span
-                  layoutId="header-settings-active-orb"
-                  aria-hidden="true"
-                  className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
-                  style={{
-                    boxShadow:
-                      '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
-                  }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                />
-              )}
+              
 
-              {settingsActive && (
-                <motion.span
-                  aria-hidden="true"
-                  className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
-                  initial={{ opacity: 0, scale: 0.75 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.75 }}
-                  transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-                />
-              )}
+              
 
               <Settings
                 className={cn(
                   'relative z-10 h-[1.15rem] w-[1.15rem] transition-all duration-200',
                   settingsActive
-                    ? 'text-primary stroke-[2.65]'
+                    ? 'text-primary stroke-[2.25]'
                     : 'text-muted-foreground/80 stroke-[2.25] group-hover:text-foreground'
                 )}
               />
