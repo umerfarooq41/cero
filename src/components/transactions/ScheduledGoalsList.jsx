@@ -238,6 +238,10 @@ function ScheduledGoalRow({
   );
 }
 
+function FlatGoalSection({ children }) {
+  return <div className="divide-y divide-border/50">{children}</div>;
+}
+
 export default function ScheduledGoalsList({
   desktop = false,
   activeGoals,
@@ -247,7 +251,7 @@ export default function ScheduledGoalsList({
   contributionDialog,
   formatCurrencyElement,
 }) {
-  const Wrapper = desktop ? "div" : ScheduledSectionCard;
+  const Wrapper = desktop ? FlatGoalSection : ScheduledSectionCard;
   return (
     <section className="space-y-3">
       <div className={desktop?"hidden":"px-0"}>

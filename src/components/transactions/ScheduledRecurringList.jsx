@@ -260,6 +260,10 @@ function ScheduledRecurringRow({
   );
 }
 
+function FlatScheduledSection({ count, emptyText, children }) {
+  return count ? <div className="divide-y divide-border/50">{children}</div> : <p className="py-3 text-center text-xs text-muted-foreground">{emptyText}</p>;
+}
+
 export default function ScheduledRecurringList({
   desktopSection = null,
   activeRecurring,
@@ -294,7 +298,7 @@ export default function ScheduledRecurringList({
           {RECURRING_SECTIONS.filter(section=>!desktopSection||section.type===desktopSection).map((section) => {
             const rules = recurringByType[section.type] || [];
 
-            const Wrapper = ScheduledSectionCard;
+            const Wrapper = desktopSection ? FlatScheduledSection : ScheduledSectionCard;
             return (
               <Wrapper
                 key={section.type}
