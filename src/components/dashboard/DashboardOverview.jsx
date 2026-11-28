@@ -100,17 +100,44 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
   </CardContent></Card>;
 }
 function MonthlyAllocationDetails({ budget, transactions = [], formatCurrency }) {
+  const income = num(budget.realizedIncome ?? budget.totalIncome);
   const expenses = num(budget.totalExpenses);
   const recurringPaid = transactions
     .filter(t => t.type === 'expense' && (t.recurring_transaction_id || t.source_type === 'recurring'))
     .reduce((sum, t) => sum + num(t.amount), 0);
-  const variablePaid = Math.max(0, expenses - recurringPaid);
+  const variablePaid = expenses - recurringPaid;
   const debt = num(budget.totalTrackedDebt);
+  const savings = num(budget.totalTrackedSavings);
   const planned = num(budget.totalPlannedExpenses) + num(budget.totalPlannedSavings) + num(budget.assignablePlannedDebt ?? budget.totalPlannedDebt);
-  const tracked = expenses + num(budget.totalTrackedSavings) + debt;
-  return <dl className="mt-3 grid grid-cols-1 gap-x-6 border-t border-border text-left sm:grid-cols-2">
-    {[['Variable expenses',variablePaid],['Recurring expenses',recurringPaid],['Debt paid',debt],['Total planned allocation',planned],['Total tracked allocation',tracked]].map(([label,value]) => <div key={label} className="flex items-center justify-between gap-3 border-b border-border/50 py-2"><dt className="text-xs text-muted-foreground">{label}</dt><dd><Money value={value} formatCurrency={formatCurrency} className="text-sm font-medium"/></dd></div>)}
-  </dl>;
+  const tracked = expenses + savings + debt;
+  const remaining = income - tracked;
+  const rows = [
+    ['Variable expenses', variablePaid, 'bg-primary'],
+    ['Recurring bills', recurringPaid, 'bg-violet-500'],
+    ['Debt paid', debt, 'bg-blue-500'],
+    ['Savings funded', savings, 'bg-teal-500'],
+  ];
+  const segments = [...rows, ['Income remaining', remaining, 'bg-emerald-600']];
+  const chartTotal = segments.reduce((sum, [,value]) => sum + Math.max(0,value), 0);
+  const scale = Math.max(0,planned,tracked);
+  const percentage = planned > 0 ? Math.round(tracked / planned * 1000) / 10 : null;
+  return <div className="grid gap-5 text-left md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:gap-6">
+    <div className="min-w-0 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2"><Money value={income} formatCurrency={formatCurrency} className="cero-primary-amount"/><span className="text-xs text-muted-foreground">Received income</span></div>
+      <div className="flex h-3 overflow-hidden rounded-full bg-muted" role="img" aria-label="Distribution of received income and tracked allocations">
+        {chartTotal > 0 && segments.filter(([,value])=>value>0).map(([label,value,color])=><span key={label} className={color+' border-r-2 border-background last:border-r-0'} style={{width: (value/chartTotal*100)+'%'}}/>)}
+      </div>
+      <dl className="divide-y divide-border/50">
+        {rows.map(([label,value,color])=><div key={label} className="flex items-center justify-between gap-2 py-2.5"><dt className="flex min-w-0 items-center gap-2 text-sm"><span className={color+' size-2 shrink-0 rounded-full'}/>{label}</dt><dd className="shrink-0"><Money value={value} formatCurrency={formatCurrency} className="text-sm font-semibold"/></dd></div>)}
+        <div className="flex items-center justify-between gap-2 py-2.5"><dt className={'flex min-w-0 items-center gap-2 text-sm font-semibold '+(remaining<0?'text-destructive':'text-emerald-600 dark:text-emerald-400')}><span className={'size-2 shrink-0 rounded-full '+(remaining<0?'bg-destructive':'bg-emerald-600')}/><span>{remaining<0?'Income shortfall':'Income remaining'}{income>0&&remaining>=0&&<span className="block text-xs font-normal text-muted-foreground">{Math.round(remaining/income*1000)/10}% of income</span>}</span></dt><dd className="shrink-0"><Money value={remaining} formatCurrency={formatCurrency} className={'text-sm font-semibold '+(remaining<0?'text-destructive':'text-emerald-600 dark:text-emerald-400')}/></dd></div>
+      </dl>
+    </div>
+    <div className="min-w-0 space-y-3 border-t border-border pt-3 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+      <h3 className="cero-section-title">Plan vs actual</h3>
+      {[[ 'Planned allocation',planned,'bg-muted-foreground/60'],['Tracked so far',tracked,tracked>planned?'bg-destructive':'bg-primary']].map(([label,value,color])=><div key={label} className="space-y-2"><div className="flex items-center justify-between gap-2 text-sm"><span className="text-muted-foreground">{label}</span><Money value={value} formatCurrency={formatCurrency} className="font-semibold"/></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className={color+' h-full rounded-full'} style={{width:(scale>0?Math.max(0,value)/scale*100:0)+'%'}}/></div></div>)}
+      {percentage!==null&&<p className="text-xs text-muted-foreground">{percentage}% of planned allocation tracked</p>}
+    </div>
+  </div>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
   const navigate = useNavigate();
@@ -188,33 +215,17 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
   return <div className="cero-dashboard-overview mx-auto max-w-3xl md:max-w-none">
+    {Math.abs(num(budget.leftToAllocate)) >= 0.01 && <div className="mx-auto mb-2 flex w-full max-w-3xl items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2" style={{order:-2}}><span className={'text-sm font-medium '+(num(budget.leftToAllocate)<0?'text-destructive':'text-primary')}><Money value={Math.abs(num(budget.leftToAllocate))} formatCurrency={formatCurrency}/> {num(budget.leftToAllocate)<0?'overallocated':'left to allocate'}</span><Action to="/plan">{num(budget.leftToAllocate)<0?'Adjust':'Assign'} <ChevronRight size={14}/></Action></div>}
     <div className="cero-safe-hero mx-auto w-full max-w-3xl border-b border-border text-center"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
     <div className="cero-monthly-overview mx-auto w-full max-w-3xl border-b border-border py-3 text-center lg:py-5">
       <div className="mb-3 text-left">
         <SectionHeading title="Monthly overview" icon={LayoutDashboard}/>
         
       </div>
-      <dl className="grid grid-cols-2 gap-x-3 gap-y-3 xl:grid-cols-4 cero-overview-metrics">
-        {[
-          ['Received income', budget.realizedIncome ?? budget.totalIncome],
-          ['Total expenses', budget.totalExpenses],
-          ['Tracked savings', budget.totalTrackedSavings],
-          ['Left to allocate', budget.leftToAllocate],
-        ].map(([label, value], index) => <div key={label} className="min-w-0 text-center lg:px-2">
-          <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-          <dd className="mt-1"><Money value={value} formatCurrency={formatCurrency} className={'cero-secondary-amount ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
-        </div>)}
-      </dl>
-      <div className="mt-4 border-t border-border py-3 text-center"><p className="text-xs text-muted-foreground">Income less expenses</p><Money value={num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)} formatCurrency={formatCurrency} className={`cero-secondary-amount ${num(budget.realizedIncome ?? budget.totalIncome)-num(budget.totalExpenses)<0?"text-destructive":"text-emerald-600 dark:text-emerald-400"}`}/></div>
       <MonthlyAllocationDetails budget={budget} transactions={transactions} formatCurrency={formatCurrency}/>
     </div>
     <div className="contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8">
-      <div className="contents md:order-2 md:flex md:min-w-0 md:flex-col md:gap-4">
-
-
-        <div className="hidden md:contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-md bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
-      </div>
-      <div className="contents md:flex md:min-w-0 md:flex-col md:gap-4">
+      <div className="contents">
         <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="cero-overview-section cero-upcoming-section !rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none !px-0"/></Entrance></div>
         <div className="contents md:order-1"><Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance></div>
         <div className="contents md:order-3">{upcomingGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={upcomingGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}</div>
