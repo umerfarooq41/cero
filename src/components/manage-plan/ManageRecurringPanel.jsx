@@ -89,7 +89,7 @@ export default function ManageRecurringPanel({embedded=false,request=null}) {
         if (a.is_active !== b.is_active) return a.is_active === false ? 1 : -1;
         return String(a.next_due_date || '').localeCompare(String(b.next_due_date || ''));
       });
-  }, [recurringPaidByRule, recurringRules]);
+  }, [recurringPaidByRule, recurringRules, verifiedOccurrencesByRule]);
 
   const groupedRules = useMemo(() => {
     return {

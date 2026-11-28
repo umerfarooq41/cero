@@ -59,17 +59,23 @@ export default function Dashboard() {
   const transactions = budget.transactions || [];
   const categories = budget.categories || [];
   const accounts = budget.accounts || [];
-  const { data: allocations = [] } = useAllocations(currentMonth);
-  const { data: recurringTransactions = [] } = useRecurringTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: allTransactions = [] } = useAllTransactions();
+  const allocationsQuery = useAllocations(currentMonth);
+  const allocations = allocationsQuery.data || [];
+  const recurringTransactionsQuery = useRecurringTransactions();
+  const recurringTransactions = recurringTransactionsQuery.data || [];
+  const savingsGoalsQuery = useSavingsGoals();
+  const savingsGoals = savingsGoalsQuery.data || [];
+  const allTransactionsQuery = useAllTransactions();
+  const allTransactions = allTransactionsQuery.data || [];
   const goalsWithFunding = useMemo(
     () => attachGoalFundingProgress(savingsGoals, allTransactions),
     [allTransactions, savingsGoals]
   );
   const formatCurrency = useCurrencyFormatter();
 
-  const isBudgetLoading = budget.isLoading;
+  const extraQueries = [allocationsQuery, recurringTransactionsQuery, savingsGoalsQuery, allTransactionsQuery];
+  const isBudgetLoading = budget.isLoading || extraQueries.some(query => query.isPending);
+  const isBudgetError = budget.isError || extraQueries.some(query => query.isError && query.data === undefined);
 
   const planTotals = useMemo(
     () =>
@@ -107,6 +113,8 @@ export default function Dashboard() {
     }),
     [budget, planTotals]
   );
+
+  if (isBudgetError) return <div ref={scope} className="min-h-screen bg-transparent"><PageHeader title={greetingFor(today)} /><main role="alert" className="cero-page-content space-y-3 py-12 text-center"><p>Couldn't load your dashboard.</p><button type="button" className="text-primary" onClick={() => { budget.refetch(); extraQueries.filter(query => query.isError).forEach(query => query.refetch()); }}>Retry</button></main></div>;
 
   if (isBudgetLoading) {
     return (

@@ -365,6 +365,8 @@ export function useBudgetSummary(month) {
     ...summary,
     isLoading,
     isFetching,
+    isError: [categoriesQuery, transactionsQuery, allocationsQuery, accountsQuery].some(query => query.isError && query.data === undefined),
+    refetch: () => Promise.all([categoriesQuery, transactionsQuery, allocationsQuery, accountsQuery].map(query => query.refetch())),
     isReady: !isLoading,
   };
 }

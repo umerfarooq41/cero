@@ -70,13 +70,20 @@ export default function ScheduledTransactions() {
   useEffect(()=>{const mq=window.matchMedia("(min-width: 1024px)");const sync=()=>setDesktop(mq.matches);mq.addEventListener("change",sync);sync();return ()=>mq.removeEventListener("change",sync);},[]);
   const currency = useCurrency();
   const currentMonth = getCurrentMonthKey();
-  const { data: recurringTransactions = [] } = useRecurringTransactions();
-  const { data: savingsGoals = [] } = useSavingsGoals();
-  const { data: categories = [] } = useCategories();
-  const { data: accounts = [] } = useAccounts();
-  const { data: monthTransactions = [] } = useTransactions(currentMonth);
-  const { data: allTransactions = [] } = useAllTransactions();
-  const { data: allocations = [] } = useAllocations(currentMonth);
+  const recurringTransactionsQuery = useRecurringTransactions();
+  const recurringTransactions = recurringTransactionsQuery.data || [];
+  const savingsGoalsQuery = useSavingsGoals();
+  const savingsGoals = savingsGoalsQuery.data || [];
+  const categoriesQuery = useCategories();
+  const categories = categoriesQuery.data || [];
+  const accountsQuery = useAccounts();
+  const accounts = accountsQuery.data || [];
+  const monthTransactionsQuery = useTransactions(currentMonth);
+  const monthTransactions = monthTransactionsQuery.data || [];
+  const allTransactionsQuery = useAllTransactions();
+  const allTransactions = allTransactionsQuery.data || [];
+  const allocationsQuery = useAllocations(currentMonth);
+  const allocations = allocationsQuery.data || [];
 
   const recurring = useRecurringItems({
     recurringTransactions,
@@ -95,6 +102,10 @@ export default function ScheduledTransactions() {
     accounts,
     categories,
   });
+
+  const queries = [recurringTransactionsQuery, savingsGoalsQuery, categoriesQuery, accountsQuery, monthTransactionsQuery, allTransactionsQuery, allocationsQuery];
+  if (queries.some(query => query.isError && query.data === undefined)) return <div role="alert" className="space-y-3 py-8 text-center"><p>Couldn't load scheduled transactions.</p><button type="button" className="text-primary" onClick={() => queries.filter(query => query.isError).forEach(query => query.refetch())}>Retry</button></div>;
+  if (queries.some(query => query.isPending)) return <p role="status" className="py-8 text-center text-sm text-muted-foreground">Loading scheduled transactions…</p>;
 
   return (
     <div className="animate-child space-y-7 lg:space-y-4">
