@@ -12,6 +12,7 @@ import {
 } from "@/lib/recurringTransactions";
 import {
   countVerifiedRecurringOccurrencesByRule,
+  getOutstandingOccurrence,
   getRecurringMonthlyPlanAmount,
   isDueNow,
   normalizeRuleType,
@@ -22,8 +23,8 @@ import {
 function getSuggestedPaymentAmount(rule) {
   if (!rule) return "";
 
-  const plannedAmount = Number(rule.month_planned_amount || rule.amount || 0);
-  const paidThisMonth = Number(rule.month_paid_amount || 0);
+  const plannedAmount = Number(rule.type === 'income' ? rule.occurrence?.planned ?? rule.amount : rule.month_planned_amount || rule.amount || 0);
+  const paidThisMonth = Number(rule.type === 'income' ? rule.occurrence?.paid ?? 0 : rule.month_paid_amount || 0);
   const remainingAmount = Math.max(0, plannedAmount - paidThisMonth);
 
   return remainingAmount > 0 ? String(remainingAmount) : "";
@@ -88,6 +89,7 @@ export default function useRecurringItems({
 
             return {
               ...rule,
+              occurrence: getOutstandingOccurrence(rule, allTransactions),
               next_due_date:
                 normalizeRuleType(rule.type) === "transfer" &&
                 (rule.payment_mode || "fixed") === "fixed"
@@ -106,7 +108,7 @@ export default function useRecurringItems({
             };
           }),
       ),
-    [accounts, allocations, allRecurringPaymentsByRule, recurringPaymentsByRule, recurringTransactions, verifiedOccurrencesByRule],
+    [accounts, allocations, allTransactions, allRecurringPaymentsByRule, recurringPaymentsByRule, recurringTransactions, verifiedOccurrencesByRule],
   );
 
   const recurringByType = useMemo(() => {
@@ -201,11 +203,16 @@ export default function useRecurringItems({
     const requestedAmount = Number(paymentAmount || 0);
     const fromAccount = accounts.find((account) => account.id === rule.account_id);
     const toAccount = accounts.find((account) => account.id === rule.to_account_id);
-    const alreadyPostedThisMonth = Number(rule.month_paid_amount || 0);
+    const alreadyPostedThisMonth = Number(rule.type === 'income' ? rule.occurrence?.paid ?? 0 : rule.month_paid_amount || 0);
     const plannedThisMonth = Number(rule.month_planned_amount || rule.amount || 0);
     const willMonthBeCovered =
       plannedThisMonth > 0 &&
       alreadyPostedThisMonth + requestedAmount >= plannedThisMonth - 0.005;
+
+    if (isIncome && !isDueNow(getRecurringStatus(rule))) {
+      toast.error('This income is not due yet');
+      return;
+    }
 
     if (isIncome && plannedThisMonth > 0 && alreadyPostedThisMonth >= plannedThisMonth - 0.005) {
       toast.error("Planned income is already received for this month");

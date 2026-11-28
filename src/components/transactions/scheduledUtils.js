@@ -226,3 +226,11 @@ export function isFlexibleCreditCardDebt(rule, toAccount) {
 export function isDueNow(status) {
   return status.key === "overdue" || status.key === "due_today";
 }
+
+export function getOutstandingOccurrence(rule, transactions = []) {
+  const due = String(rule?.next_due_date || '').slice(0, 10);
+  const linked = due ? transactions.filter(tx => tx.recurring_transaction_id === rule.id && String(tx.recurring_posted_for_date || '').slice(0, 10) === due) : [];
+  const paid = linked.reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  const planned = Math.max(0, Number(rule.amount || 0));
+  return { paid, planned, remaining: Math.max(0, Math.round((planned - paid) * 100) / 100), hasPosting: linked.length > 0 };
+}
