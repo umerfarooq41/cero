@@ -486,11 +486,11 @@ export default function AddTransaction() {
     }
   };
 
-  if(isEditing&&(transactionsPending||categoriesPending||accountsPending||!existingTransaction||readyEditId!==id))return createPortal(<><div className="app-route-sheet-backdrop"/><div className="app-route-sheet app-sheet-surface app-desktop-route-form"><header className="flex items-center justify-between p-4"><h1 className="text-base font-semibold">Edit transaction</h1><button type="button" aria-label="Close" onClick={()=>navigate(returnTo)}><X className="size-5"/></button></header><div className="space-y-3 p-5 text-sm text-muted-foreground" role="status">{transactionsError?'Could not load transaction.':!transactionsPending&&!existingTransaction?'Transaction not found.':'Loading transaction…'}{transactionsError&&<Button onClick={()=>refetchTransactions()}>Retry</Button>}</div></div></>,document.body);
+  if(isEditing&&(transactionsPending||categoriesPending||accountsPending||!existingTransaction||readyEditId!==id))return createPortal(<><div className="app-route-sheet-backdrop"/><div className="app-route-sheet app-sheet-surface app-desktop-route-form cero-route-editor"><header className="flex items-center justify-between p-4"><h1 className="text-base font-semibold">Edit transaction</h1><button type="button" aria-label="Close" onClick={()=>navigate(returnTo)}><X className="size-5"/></button></header><div className="space-y-3 p-5 text-sm text-muted-foreground" role="status">{transactionsError?'Could not load transaction.':!transactionsPending&&!existingTransaction?'Transaction not found.':'Loading transaction…'}{transactionsError&&<Button onClick={()=>refetchTransactions()}>Retry</Button>}</div></div></>,document.body);
   return createPortal(
     <>
       <div className="app-route-sheet-backdrop" aria-hidden="true" />
-    <div className={"app-route-sheet app-sheet-surface app-desktop-route-form "+(!isRecurringDateCorrection?"cero-manual-entry":"")}>
+    <div className={"app-route-sheet app-sheet-surface app-desktop-route-form cero-route-editor "+(!isRecurringDateCorrection?"cero-manual-entry":"")}>
       <header className="app-sheet-header shrink-0 px-5 pb-2 pt-2">
         <div className={"mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35 lg:hidden "+(!isRecurringDateCorrection?"hidden":"")} aria-hidden="true" />
         <div className="flex items-center justify-between">
@@ -548,7 +548,7 @@ export default function AddTransaction() {
         <div className="py-5 text-center">
           <p className="mb-1 text-xs text-muted-foreground">Amount</p>
           <button type="button" className="cero-entry-mobile mx-auto items-center justify-center gap-2 text-4xl font-semibold tabular-nums" onClick={()=>{setExpanded('');setKeypad(true);setFresh(true);}}><CurrencyPrefix currency={currency}/>{amount||'0.00'}</button>
-          <div className="cero-entry-desktop mx-auto max-w-xs items-center gap-2 text-3xl font-semibold"><CurrencyPrefix currency={currency}/><input aria-label="Amount" className="w-full min-w-0 bg-transparent text-center outline-none" type="number" min="0" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></div>
+          <div className="cero-entry-desktop mx-auto max-w-xs items-center gap-2 text-3xl font-semibold"><CurrencyPrefix currency={currency}/><input aria-label="Amount" className="cero-hero-amount-input w-full min-w-0 bg-transparent text-center outline-none" type="number" min="0" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></div>
           {operation&&<p className="mt-1 text-xs text-muted-foreground">{operation.base} {operation.op}</p>}
         </div>
         <div className="space-y-1">

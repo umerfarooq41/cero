@@ -667,7 +667,7 @@ export default function Settings() {
         </SettingsSection>
 
         <Dialog open={showAutoSweepDialog} onOpenChange={setShowAutoSweepDialog}>
-          <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl app-desktop-wide-editor">
+          <DialogContent className="max-h-[88vh] overflow-y-auto rounded-3xl app-card-surface-strong p-5 backdrop-blur-xl sm:max-w-2xl app-desktop-wide-editor app-desktop-editor">
             <DialogHeader>
               <DialogTitle>{settings.budgetLogic.autoSweepSurplus ? 'Edit Auto-Sweep' : 'Set up Auto-Sweep'}</DialogTitle>
               <DialogDescription>
@@ -675,7 +675,7 @@ export default function Settings() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="app-dialog-scroll space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">From account</label>

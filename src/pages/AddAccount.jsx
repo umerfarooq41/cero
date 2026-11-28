@@ -183,7 +183,7 @@ export default function AddAccount() {
   return createPortal(
     <>
       <div className="app-route-sheet-backdrop" aria-hidden="true" />
-    <div className="app-route-sheet app-sheet-surface app-desktop-route-form">
+    <div className="app-route-sheet app-sheet-surface app-desktop-route-form cero-route-editor cero-account-editor">
       <header className="app-sheet-header relative flex shrink-0 flex-col px-5 pb-2 pt-2">
         <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-muted-foreground/35 lg:hidden" aria-hidden="true" />
         <div className="flex items-center justify-between gap-3">

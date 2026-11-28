@@ -2115,3 +2115,96 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
  .cero-desktop-workspace .cero-reflect-toolbar nav.cero-workplace-tabs {order:1;border-bottom:0!important;position:relative;top:auto;margin:0;}
  .cero-desktop-workspace .cero-reflect-desktop-summary {gap:32px;padding-bottom:24px;}
 }
+
+/* Desktop forms and modal system. Shared surfaces also cover portals outside
+   the workspace. Mobile sheets retain their existing geometry. */
+@media (min-width:1024px) {
+  :is(.cero-dialog,.cero-route-editor) {
+    --cero-dialog-gutter:20px;
+    --cero-dialog-gap:12px;
+    --cero-dialog-control:38px;
+    --cero-dialog-radius:8px;
+    font-size:var(--cero-type-body,14px);
+    line-height:1.45;
+    color:hsl(var(--foreground));
+    background:hsl(var(--card))!important;
+    background-image:none!important;
+    border:1px solid hsl(var(--border))!important;
+    border-radius:var(--cero-dialog-radius)!important;
+    box-shadow:0 16px 48px rgb(0 0 0/.24)!important;
+    backdrop-filter:none!important;
+    max-height:calc(100dvh - 64px)!important;
+    min-width:0;
+  }
+  .cero-dialog:not(.cero-command-dialog) {
+    display:flex!important;flex-direction:column;
+    width:min(520px,calc(100vw - 64px))!important;
+    max-width:none!important;padding:var(--cero-dialog-gutter)!important;
+    gap:var(--cero-dialog-gap)!important;
+    overflow-y:auto;
+  }
+  .cero-dialog.app-desktop-wide-editor,.cero-account-editor {width:min(680px,calc(100vw - 64px))!important;}
+  .cero-dialog.cero-confirm {width:min(440px,calc(100vw - 64px))!important;}
+  .cero-dialog[class~="sm:max-w-xs"] {width:min(360px,calc(100vw - 64px))!important;}
+  .cero-dialog:has(>.app-dialog-scroll) {overflow:hidden!important;}
+  .cero-dialog>.app-dialog-scroll,.cero-route-editor>.app-route-sheet-body {
+    flex:1 1 auto;min-height:0;overflow-y:auto!important;overscroll-behavior:contain;
+    scrollbar-width:thin;scroll-padding-block:12px;
+  }
+  .cero-dialog>.app-dialog-scroll {padding:2px 4px 4px 0!important;}
+  .cero-dialog-header {
+    flex:0 0 auto;gap:4px!important;text-align:left!important;
+    margin:0!important;padding:0 36px 12px 0!important;
+    border:0!important;border-bottom:1px solid hsl(var(--border))!important;
+    background:transparent!important;
+  }
+  .cero-dialog .cero-dialog-title,.cero-route-editor>.app-sheet-header h1 {
+    font-size:18px!important;line-height:1.35!important;font-weight:600!important;letter-spacing:normal!important;
+  }
+  .cero-dialog .cero-dialog-description:not(.sr-only) {
+    font-size:13px!important;line-height:1.5!important;color:hsl(var(--muted-foreground));padding:0!important;margin-top:4px!important;
+  }
+  .cero-dialog-close {
+    top:12px!important;right:12px!important;display:grid;place-items:center;width:32px;height:32px;
+    border-radius:6px!important;color:hsl(var(--muted-foreground));background:transparent!important;opacity:1!important;
+  }
+  .cero-dialog-close:hover {background:hsl(var(--muted))!important;color:hsl(var(--foreground));}
+  :is(.cero-dialog,.cero-route-editor) label {
+    font-size:13px!important;font-weight:500!important;line-height:1.4!important;
+    text-transform:none!important;letter-spacing:normal!important;
+  }
+  :is(.cero-dialog,.cero-route-editor) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]):not(.cero-hero-amount-input):not([cmdk-input]),select,[role=combobox],textarea) {
+    border-radius:6px!important;box-shadow:none!important;font-size:14px!important;
+    border-color:hsl(var(--border))!important;background:hsl(var(--background))!important;
+  }
+  :is(.cero-dialog,.cero-route-editor) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]):not(.cero-hero-amount-input):not([cmdk-input]),select,[role=combobox]) {height:var(--cero-dialog-control)!important;min-height:var(--cero-dialog-control)!important;padding-inline:10px;}
+  :is(.cero-dialog,.cero-route-editor) textarea {min-height:64px;padding:8px 10px;}
+  :is(.cero-dialog,.cero-route-editor) :is(input,textarea,select,[role=combobox]):focus-visible {outline:2px solid hsl(var(--ring)/.75)!important;outline-offset:1px;box-shadow:none!important;}
+  :is(.cero-dialog,.cero-route-editor) svg.lucide {stroke-width:var(--cero-icon-stroke,1.8);}
+  :is(.cero-dialog,.cero-route-editor) .app-card-surface-soft {
+    background:hsl(var(--muted)/.38)!important;background-image:none!important;border:1px solid hsl(var(--border))!important;
+    border-radius:6px!important;box-shadow:none!important;backdrop-filter:none!important;
+  }
+  .cero-route-editor>.app-sheet-header {padding:16px 20px 12px!important;border-bottom:1px solid hsl(var(--border));}
+  .cero-route-editor>.app-route-sheet-body {padding:16px 20px!important;}
+  .cero-route-editor>.app-route-sheet-body>.app-card-surface {padding:0!important;background:transparent!important;box-shadow:none!important;border:0!important;}
+  .cero-dialog :is(.cero-dialog-footer,.app-dialog-actions),.cero-route-editor>.app-route-sheet-footer {
+    flex:0 0 auto;display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+    gap:8px!important;border-top:1px solid hsl(var(--border))!important;background:hsl(var(--card))!important;
+    margin:0!important;padding:12px 0 0!important;
+  }
+  .cero-route-editor>.app-route-sheet-footer {padding:12px 20px!important;}
+  .cero-dialog :is(.cero-dialog-footer,.app-dialog-actions)>button,.cero-route-editor>.app-route-sheet-footer>button {
+    width:auto!important;flex:0 1 auto!important;min-width:88px;min-height:36px!important;height:36px!important;
+    margin:0!important;border-radius:6px!important;padding:0 14px!important;font-size:13px!important;font-weight:500!important;box-shadow:none!important;
+  }
+  .cero-route-editor>.app-route-sheet-footer>button.text-destructive {margin-right:auto!important;order:-1;}
+  .cero-dialog:not(.cero-command-dialog) .cero-dialog-footer>button:focus-visible,.cero-route-editor>.app-route-sheet-footer>button:focus-visible {outline:2px solid hsl(var(--ring));outline-offset:2px;}
+  .cero-command-dialog {padding:0!important;overflow:hidden!important;}
+  .cero-command-dialog [cmdk-root] {box-shadow:none!important;border:0!important;border-radius:0!important;background:hsl(var(--card))!important;}
+  .cero-command-dialog [cmdk-input-wrapper] {padding-right:40px;}
+  .cero-command-dialog [cmdk-input] {font-size:14px!important;}
+  .cero-dialog.cero-scheduled-posting .app-dialog-scroll input[aria-label="Amount"] {height:auto!important;min-height:0!important;font-size:30px!important;border:0!important;background:transparent!important;}
+  .cero-route-editor .cero-hero-amount-input {font-size:30px!important;border:0!important;background:transparent!important;box-shadow:none!important;}
+  .app-desktop-confirm-overlay,.app-sheet-overlay,.app-route-sheet-backdrop {background:rgb(0 0 0/.45)!important;backdrop-filter:none!important;}
+}
