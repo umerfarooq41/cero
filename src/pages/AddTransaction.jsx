@@ -286,6 +286,7 @@ export default function AddTransaction() {
   });
 
   const submissionLock = useRef(false);
+  const deletionLock = useRef(false);
   const handleSubmit = async () => {
     if (submissionLock.current || saving || deleting) return;
     if (navigator.onLine === false) { toast.error('Reconnect to save your transaction'); return; }
@@ -413,12 +414,15 @@ export default function AddTransaction() {
   };
 
   const handleDelete = async () => {
+    if (deletionLock.current || submissionLock.current) return;
+    if (navigator.onLine === false) { toast.error("Connect to the internet before deleting transactions"); return; }
     if (!isEditing || !existingTransaction) {
       toast.error('Transaction not found');
       setDeleteOpen(false);
       return;
     }
 
+    deletionLock.current = true;
     setDeleting(true);
 
     try {
@@ -437,6 +441,7 @@ export default function AddTransaction() {
       console.error('Transaction delete failed:', error);
       toast.error(error.message || 'Could not delete transaction');
     } finally {
+      deletionLock.current = false;
       setDeleting(false);
     }
   };
@@ -739,8 +744,8 @@ export default function AddTransaction() {
       </>
       )}
 
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="overflow-hidden rounded-3xl border border-destructive/25 app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(127,29,29,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+      <Dialog open={deleteOpen} onOpenChange={(open) => { if (!deletionLock.current) setDeleteOpen(open); }}>
+        <DialogContent style={{ zIndex: 100 }} className="overflow-hidden rounded-3xl border border-destructive/25 app-card-surface-strong p-0 shadow-[0_24px_80px_rgba(127,29,29,0.22)] backdrop-blur-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
           <DialogHeader className="border-b border-destructive/20 px-6 py-5">
             <DialogTitle className="flex items-center gap-3 text-lg font-bold text-destructive">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10 text-destructive">
