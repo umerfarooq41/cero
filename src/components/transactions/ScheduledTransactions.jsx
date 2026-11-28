@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   useAccounts,
   useAllocations,
@@ -65,9 +65,7 @@ function formatCurrencyElement(amount, currency, className = "") {
 }
 
 export default function ScheduledTransactions() {
-  const [desktop,setDesktop] = useState(()=>window.matchMedia("(min-width: 1024px)").matches);
   const [section,setSection] = useState("income");
-  useEffect(()=>{const mq=window.matchMedia("(min-width: 1024px)");const sync=()=>setDesktop(mq.matches);mq.addEventListener("change",sync);sync();return ()=>mq.removeEventListener("change",sync);},[]);
   const currency = useCurrency();
   const currentMonth = getCurrentMonthKey();
   const recurringTransactionsQuery = useRecurringTransactions();
@@ -109,10 +107,10 @@ export default function ScheduledTransactions() {
 
   return (
     <div className="animate-child space-y-7 lg:space-y-4">
-      {desktop&&<nav aria-label="Scheduled sections" className="cero-workplace-tabs flex flex-wrap items-center gap-5 border-b border-border">{[["income","Income"],["expense","Expenses"],["transfer","Debt payments"],["goals","Savings goals"]].map(([key,label])=><button key={key} type="button" aria-pressed={section===key} onClick={()=>setSection(key)} className={cn("px-2 py-3 text-sm font-medium",section===key?"text-primary":"text-muted-foreground")}>{label}</button>)}</nav>}
-      {(!desktop||section!=="goals")&&<>
+      {<nav aria-label="Scheduled sections" className="cero-workplace-tabs flex items-center gap-2 overflow-x-auto whitespace-nowrap md:gap-5 border-b border-border">{[["income","Income"],["expense","Expenses"],["transfer","Debt payments"],["goals","Savings goals"]].map(([key,label])=><button key={key} type="button" aria-pressed={section===key} onClick={()=>setSection(key)} className={cn("shrink-0 border-b-2 px-2 py-3 text-sm font-medium",section===key?"border-primary text-primary":"border-transparent text-muted-foreground")}>{label}</button>)}</nav>}
+      {(section!=="goals")&&<>
       <ScheduledRecurringList
-        desktopSection={desktop?section:null}
+        desktopSection={section}
         activeRecurring={recurring.activeRecurring}
         recurringByType={recurring.recurringByType}
         categories={categories}
@@ -125,8 +123,8 @@ export default function ScheduledTransactions() {
       />
 
       </>}
-      {(!desktop||section==="goals")&&<ScheduledGoalsList
-        desktop={desktop}
+      {(section==="goals")&&<ScheduledGoalsList
+        desktop={true}
         activeGoals={goals.activeGoals}
         accounts={accounts}
         currency={currency}

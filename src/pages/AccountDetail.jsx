@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   PencilLine,
@@ -162,6 +162,7 @@ function AccountBalanceHero({ account, startingBalance, balance, isLiability, fo
 export default function AccountDetail() {
   const scope = usePageEntrance();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const currency = useCurrency();
   const formatCurrency = (amount) => (
@@ -179,7 +180,7 @@ export default function AccountDetail() {
   const recurringById = new Map(recurringTransactions.map((rule) => [rule.id, rule]));
   const goalsById = new Map(savingsGoals.map((goal) => [goal.id, goal]));
 
-  const [deleteOpen, setDeleteOpen] = useState(()=>new URLSearchParams(window.location.search).get('action')==='delete');
+  const [deleteOpen, setDeleteOpen] = useState(()=>searchParams.get('action')==='delete');
   const [replacementAccountId, setReplacementAccountId] = useState('');
   const [deleting, setDeleting] = useState(false);
 

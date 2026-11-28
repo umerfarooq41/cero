@@ -1740,3 +1740,24 @@ main,
  .cero-plan-table th[scope="row"] {position:relative;}
  .cero-plan-table th[scope="row"]:has(.cero-plan-row-edit:not([class~="workspace:hidden"])) {padding-right:40px;}
 }
+
+/* Compact balance-first account and workplace registers. */
+@media (max-width:767px) {
+ .cero-adaptive-register tr {gap:2px 8px;padding:10px 0;align-items:center;}
+ .cero-adaptive-register td {padding:2px 4px;font-size:13px;overflow-wrap:normal;}
+ .cero-adaptive-register td:not(:first-child)::before {margin-bottom:2px;}
+ .cero-account-register tr {grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+ .cero-account-register td:first-child {grid-column:1;grid-row:1;}
+ .cero-account-register td:first-child button {min-height:36px;overflow-wrap:anywhere;}
+ .cero-account-register td:nth-child(2) {grid-column:1;grid-row:2;color:hsl(var(--muted-foreground));}
+ .cero-account-register td:nth-child(2)::before {display:none;}
+ .cero-account-register:is(.cero-account-asset,.cero-account-liability) td:nth-child(5),.cero-account-archived td:nth-child(3) {grid-column:2;grid-row:1;text-align:right;font-weight:600;font-size:15px;}
+ .cero-account-register:is(.cero-account-asset,.cero-account-liability) td:nth-child(5)::before,.cero-account-archived td:nth-child(3)::before {display:none;}
+ .cero-account-asset td:nth-child(6) {grid-column:2;grid-row:2;text-align:right;}
+ .cero-account-asset td:nth-child(6)::before {display:none;}
+ .cero-account-asset td:nth-child(6)>div {display:none;}
+ .cero-account-register:is(.cero-account-asset,.cero-account-liability) td:nth-child(3) {grid-column:1;grid-row:3;}
+ .cero-account-register:is(.cero-account-asset,.cero-account-liability) td:nth-child(4) {grid-column:2;grid-row:3;text-align:right;}
+ .cero-recurring-register td:first-child,.cero-goal-register td:first-child {min-height:32px;}
+ .cero-register-inspector:not(.hidden) {position:fixed;inset:auto 0 0;z-index:55;max-height:75dvh;overflow-y:auto;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 32px hsl(var(--foreground)/.12);}
+}
