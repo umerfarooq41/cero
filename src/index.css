@@ -1647,3 +1647,29 @@ main,
   .cero-plan-table td:nth-child(4)::before { content:"Remaining"; }
   .cero-plan-table tfoot { position:static; }
 }
+
+/* Adaptive financial registers: stack fields on phones, retain tables on tablets. */
+@media (max-width: 767px) {
+  .cero-adaptive-register, .cero-adaptive-register tbody { display:block; }
+  .cero-adaptive-register thead { display:none; }
+  .cero-adaptive-register tr { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:8px 0; }
+  .cero-adaptive-register td { min-width:0; padding:4px; text-align:left; overflow-wrap:anywhere; }
+  .cero-adaptive-register td:first-child { grid-column:1/-1; font-weight:600; }
+  .cero-adaptive-register td:not(:first-child)::before { display:block; font-size:11px; color:hsl(var(--muted-foreground)); margin-bottom:4px; }
+  .cero-recurring-register td:nth-child(2)::before { content:"Frequency"; }
+  .cero-recurring-register td:nth-child(3)::before { content:"Next due"; }
+  .cero-recurring-register td:nth-child(4)::before { content:"Amount"; }
+  .cero-goal-register td:nth-child(2)::before { content:"Target"; }
+  .cero-goal-register td:nth-child(3)::before { content:"Saved"; }
+  .cero-goal-register td:nth-child(4)::before { content:"Remaining"; }
+  .cero-account-register td:nth-child(2)::before { content:"Type"; }
+}
+@media (max-width:767px) {
+ .cero-account-asset td:nth-child(3)::before { content:"Inflow"; }
+ .cero-account-asset td:nth-child(4)::before { content:"Outflow"; }
+ .cero-account-asset td:nth-child(5)::before, .cero-account-archived td:nth-child(3)::before { content:"Balance"; }
+ .cero-account-asset td:nth-child(6)::before { content:"Share"; }
+ .cero-account-liability td:nth-child(3)::before { content:"Borrowed"; }
+ .cero-account-liability td:nth-child(4)::before { content:"Repaid"; }
+ .cero-account-liability td:nth-child(5)::before { content:"Outstanding"; }
+}

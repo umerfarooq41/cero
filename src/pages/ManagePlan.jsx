@@ -5,18 +5,18 @@ import { format } from 'date-fns';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
-import ManagePlanTabs, { managePlanTabs } from '@/components/manage-plan/ManagePlanTabs';
+import { managePlanTabs } from '@/components/manage-plan/ManagePlanTabs';
 import MonthlyPlanPanel from '@/components/manage-plan/MonthlyPlanPanel';
 import ManageCategoriesPanel from '@/components/manage-plan/ManageCategoriesPanel';
 import ManageRecurringPanel from '@/components/manage-plan/ManageRecurringPanel';
 import ManageGoalsPanel from '@/components/manage-plan/ManageGoalsPanel';
 import { usePageEntrance } from '@/hooks/usePageTransition';
 
-const DEFAULT_TAB = 'monthly-plan';
+const DEFAULT_TAB = 'recurring';
 const DEFAULT_MONTH = format(new Date(), 'yyyy-MM');
 
 function getValidTab(value) {
-  return managePlanTabs.some((tab) => tab.value === value) ? value : DEFAULT_TAB;
+  return ['recurring','goals'].includes(value) ? value : DEFAULT_TAB;
 }
 
 export default function ManagePlan() {
@@ -28,14 +28,12 @@ export default function ManagePlan() {
   const tabFromUrl = searchParams.get('tab');
   const monthFromUrl = searchParams.get('month');
 
-  const [desktop,setDesktop] = useState(()=>window.matchMedia('(min-width: 1024px)').matches);
-  useEffect(()=>{const mq=window.matchMedia('(min-width: 1024px)');const update=()=>setDesktop(mq.matches);mq.addEventListener('change',update);return()=>mq.removeEventListener('change',update);},[]);
-  const [activeTab, setActiveTab] = useState(() => desktop && (!tabFromUrl || ['monthly-plan','categories'].includes(tabFromUrl)) ? 'recurring' : getValidTab(tabFromUrl));
+  const [activeTab, setActiveTab] = useState(() => getValidTab(tabFromUrl));
   const [currentMonth, setCurrentMonth] = useState(monthFromUrl || DEFAULT_MONTH);
 
   useEffect(() => {
-    setActiveTab(desktop && (!tabFromUrl || ['monthly-plan','categories'].includes(tabFromUrl)) ? 'recurring' : getValidTab(tabFromUrl));
-  }, [tabFromUrl,desktop]);
+    setActiveTab(getValidTab(tabFromUrl));
+  }, [tabFromUrl]);
 
   useEffect(() => {
     if (monthFromUrl) setCurrentMonth(monthFromUrl);
@@ -87,12 +85,9 @@ export default function ManagePlan() {
         title="Your Workplace"
       />
 
-      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 lg:px-8 lg:py-3 lg:pb-8">
-        <div className="animate-child mb-3 lg:hidden">
-          <ManagePlanTabs activeTab={activeTab} onChange={changeTab} />
-        </div>
+      <main className="cero-page-content mx-auto w-full max-w-7xl px-4 py-3 pb-28 md:pb-8 lg:px-8 lg:py-3 lg:pb-8">
 
-        <nav aria-label="Manage plan sections" className="cero-workplace-tabs mb-5 hidden gap-6 border-b border-border lg:flex">{managePlanTabs.filter(tab=>!['monthly-plan','categories'].includes(tab.value)).map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => changeTab(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{tab.desktopLabel || tab.label}</button>)}</nav>
+        <nav aria-label="Manage plan sections" className="cero-workplace-tabs mb-4 flex gap-6 border-b border-border">{managePlanTabs.filter(tab=>!['monthly-plan','categories'].includes(tab.value)).map(tab => <button key={tab.value} type="button" aria-pressed={activeTab === tab.value} onClick={() => changeTab(tab.value)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (activeTab === tab.value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{tab.desktopLabel || tab.label}</button>)}</nav>
         <AnimatePresence mode="wait" initial={false}>
           <AppTabPanel key={activeTab} className="animate-child">
             {renderPanel()}
