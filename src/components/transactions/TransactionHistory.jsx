@@ -294,7 +294,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
   const [selectedDate, setSelectedDate] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selection, setSelection] = useState({ scope: '', ids: [] });
   const [dateMode, setDateMode] = useState(() => params.get('account') ? 'any' : 'month');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -486,6 +486,9 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   ]);
 
   const hasTransactions = sortedDates.length > 0;
+  const selectionScope = JSON.stringify([currentMonth, dateMode, dateFrom, dateTo, selectedDate, searchValue, filterType, accountFilter, categoryFilter, sourceFilter]);
+  const selectedIds = selection.scope === selectionScope ? selection.ids : [];
+  const setSelectedIds = update => setSelection(previous => ({ scope: selectionScope, ids: typeof update === 'function' ? update(previous.scope === selectionScope ? previous.ids : []) : update }));
   const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
   const toggleSelection = id => setSelectedIds(ids => {
     const visibleIds = new Set(sortedTransactions.map(row => row.id));

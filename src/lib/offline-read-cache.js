@@ -68,17 +68,19 @@ export async function restoreReadCache(queryClient, userId) {
       return false;
     }
 
+    let restored = false;
     for (const cached of record.queries) {
       if (!Array.isArray(cached.queryKey) || cached.data === undefined) continue;
       if (!CACHEABLE_QUERY_ROOTS.has(cached.queryKey[0]) || cached.queryKey[1] !== userId) continue;
       const updatedAt = Number(cached.dataUpdatedAt || record.savedAt || 0);
-      if (!Number.isFinite(updatedAt) || updatedAt <= 0) continue;
+      if (!Number.isFinite(updatedAt) || updatedAt <= 0 || Date.now() - updatedAt > CACHE_MAX_AGE_MS) continue;
       const existing = queryClient.getQueryState(cached.queryKey);
       if (existing?.data !== undefined && existing.dataUpdatedAt >= updatedAt) continue;
       queryClient.setQueryData(cached.queryKey, cached.data, { updatedAt });
+      restored = true;
     }
 
-    return true;
+    return restored;
   } catch (error) {
     console.error('Could not restore Cero read cache:', error);
     return false;

@@ -164,7 +164,7 @@ export default function ManageGoalsPanel({embedded=false,request=null}) {
     }
   };
 
-  const fundingPercent = goal => Number(goal.target_amount) > 0 ? Math.min(100, Math.max(0, Math.round(Number(goal.current_amount || 0) / Number(goal.target_amount) * 100))) : 0;
+  const fundingPercent = goal => Number(goal.target_amount) > 0 ? Math.min(100, Math.max(0, Math.floor(Number(goal.current_amount || 0) / Number(goal.target_amount) * 100))) : 0;
   const groups = groupedGoals;
   const labels = {active:'Active goals',completed:'Completed goals',archived:'Archived'};
   const rows = groups[desktopTab];
