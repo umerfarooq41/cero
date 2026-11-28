@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { Gauge, LayoutDashboard, ChevronRight, Receipt, Target } from 'lucide-react';
+import { Gauge, LayoutDashboard, ChevronRight, Receipt, Target, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +50,7 @@ function getDiscretionaryAllocations(allocations, categories) {
   );
 }
 function SafeCard({ allocations, categories, transactions, recurringTransactions, savingsGoals, allTransactions, currentMonth, formatCurrency }) {
+  const reduced = useReducedMotion();
   const authoritativeAllocations = buildAuthoritativeScheduledAllocations({ allocations, recurringTransactions, savingsGoals, currentMonth, allTransactions });
   const pace = calculateDiscretionaryPace({
     allocations: getDiscretionaryAllocations(authoritativeAllocations, categories),
@@ -59,35 +60,33 @@ function SafeCard({ allocations, categories, transactions, recurringTransactions
     <div className="flex w-full flex-row items-center justify-between gap-2 text-left"><SectionHeading title="Spending allowance" icon={Gauge}/><Badge variant="secondary" className="text-[10px]">Plan needed</Badge></div>
     <p className="text-sm text-muted-foreground">Add a monthly expense-category allocation to calculate discretionary pace.</p>
   </CardContent></Card>;
-  const fillClass = pace.status === 'overBudget' ? 'bg-destructive' : pace.status === 'over' ? 'bg-amber-500' : 'bg-primary';
-  const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'over pace' : 'under pace';
-  return <Card className={cardStyle + ' border-border/50'}><CardContent className="cero-hero space-y-2 px-0 py-3">
-    <div className="flex w-full flex-row items-center justify-between gap-2 text-left">
-      <SectionHeading title="Spending allowance" icon={Gauge}/>
-      <Badge variant="secondary" className={`shrink-0 rounded-md border-0 px-2 py-1 text-xs font-medium ${pace.status === 'overBudget' ? 'bg-destructive/15 text-destructive' : pace.status === 'over' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'}`}>
-        {chip === 'over pace' ? 'Over pace' : chip === 'under pace' ? 'Under pace' : chip}
-      </Badge>
-    </div>
-    <div className="space-y-1 text-center">
-      <p className="text-xs text-muted-foreground">Available to spend today</p>
-      <div className="flex justify-center"><Money value={pace.leftToday} formatCurrency={formatCurrency} className="cero-primary-amount leading-none"/></div>
-      <p className="text-xs text-muted-foreground">Of your <Money value={pace.allowance} formatCurrency={formatCurrency}/> daily allowance</p>
-    </div>
-    <div className="grid grid-cols-2 gap-3 py-2 text-center">
-      {[['Spent today',pace.spentToday],['Left this month',pace.remaining]].map(([label,value]) => <div key={label} className="min-w-0"><p className="text-xs text-muted-foreground">{label}</p><Money value={value} formatCurrency={formatCurrency} className="cero-secondary-amount"/></div>)}
-    </div>
-    <div className="space-y-1.5">
-      <div className="flex justify-between gap-2 text-xs text-muted-foreground"><span>Monthly discretionary spending</span><span>{pace.daysRemaining} days left</span></div>
-      <div className="relative h-1.5 rounded-full bg-primary/5" role="progressbar" aria-label="Discretionary budget spent" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pace.spentPct)}>
-        <motion.div className={`h-full rounded-full ${fillClass}`} initial={{width: 0}} animate={{width: `${pace.spentPct}%`}} transition={{duration: 0.5}}/>
-        <span className="absolute -top-1 h-3.5 w-[2px] rounded-full bg-foreground/90" style={{left: `calc(${pace.timePct}% - 1px)`}} aria-hidden="true"/>
+  const remainingPct = pace.allowance > 0 ? Math.max(0, Math.min(1, pace.leftToday / pace.allowance)) : 0;
+  const statusColor = pace.status === 'overBudget' ? 'text-destructive' : pace.status === 'over' ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-400';
+  const chip = pace.status === 'overBudget' ? 'Over budget' : pace.status === 'track' ? 'On track' : pace.status === 'over' ? 'Over pace' : 'Under pace';
+  return <Card className={cardStyle}><CardContent className="cero-hero relative space-y-2 px-0 py-3">
+    <div className="relative">
+      <div className="flex items-center justify-between gap-2 pr-10 text-left"><SectionHeading title="Spending allowance" icon={Gauge}/></div>
+      <div className="relative mx-auto mt-2 w-full max-w-[290px]">
+        <svg viewBox="0 0 280 153" className="block w-full" role="img" aria-label={Math.round(remainingPct * 100) + '% of daily allowance remaining'}>
+          <path d="M 16 140 A 124 124 0 0 1 264 140" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" className="text-muted"/>
+          {remainingPct > 0 && <motion.path d="M 16 140 A 124 124 0 0 1 264 140" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" className="text-primary" initial={reduced ? false : { pathLength: 0 }} animate={{ pathLength: remainingPct }} transition={{ duration: reduced ? 0 : 0.85, ease: [0.22, 1, 0.36, 1] }}/>}
+        </svg>
+        <div className="absolute inset-x-8 bottom-3 flex flex-col items-center gap-1 text-center">
+          <p className="text-xs text-muted-foreground">Available to spend today</p>
+          <Money value={pace.leftToday} formatCurrency={formatCurrency} className="cero-primary-amount leading-none"/>
+          <p className="text-xs text-muted-foreground">Of <Money value={pace.allowance} formatCurrency={formatCurrency}/> daily allowance</p>
+          <p className={'text-xs font-medium '+statusColor}>{chip}</p>
+        </div>
       </div>
-      <p className="text-xs text-muted-foreground">Spent <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
-
+      <div className="grid grid-cols-2 gap-3 pt-1 text-center">
+        {[['Spent today',pace.spentToday],['Left this month',pace.remaining]].map(([label,value]) => <div key={label} className="min-w-0"><p className="text-xs text-muted-foreground">{label}</p><Money value={value} formatCurrency={formatCurrency} className="cero-secondary-amount"/></div>)}
+      </div>
+      <p className="pt-2 text-center text-xs text-muted-foreground">{pace.daysRemaining} days left this month</p>
     </div>
     <details className="group text-left">
-      <summary className="inline-flex min-h-9 cursor-pointer list-none items-center gap-1.5 text-sm text-primary [&::-webkit-details-marker]:hidden">How today's allowance is calculated <ChevronRight size={14} className="shrink-0 group-open:rotate-90"/></summary>
+      <summary aria-label="How today's allowance is calculated" className="absolute right-0 top-0 flex size-10 cursor-pointer list-none items-center justify-center text-muted-foreground [&::-webkit-details-marker]:hidden"><Info size={17}/></summary>
       <div className="space-y-2 pb-2 text-xs">
+        <p className="text-muted-foreground">Monthly spending: <Money value={pace.spent} formatCurrency={formatCurrency}/> of <Money value={pace.budget} formatCurrency={formatCurrency}/></p>
         <p className="text-muted-foreground">Budget left before today ÷ remaining days = daily allowance.</p>
         <dl className="divide-y divide-border">
           <div className="flex justify-between gap-2 py-2"><dt className="text-muted-foreground">Budget left before today</dt><dd><Money value={Math.max(0,pace.budget-pace.spent+pace.spentToday)} formatCurrency={formatCurrency}/> ÷ {pace.daysRemaining || '—'}</dd></div>
@@ -117,28 +116,21 @@ function MonthlyAllocationDetails({ budget, transactions = [], formatCurrency })
     ['Debt paid', debt, 'bg-blue-500'],
     ['Savings funded', savings, 'bg-teal-500'],
   ];
-  const segments = [...rows, ['Income remaining', remaining, 'bg-emerald-600']];
-  const chartTotal = segments.reduce((sum, [,value]) => sum + Math.max(0,value), 0);
-  const scale = Math.max(0,planned,tracked);
   const percentage = planned > 0 ? Math.round(tracked / planned * 1000) / 10 : null;
-  return <div className="grid gap-3 text-left md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:gap-6">
+  return <div className="space-y-3 text-left">
     <div className="min-w-0 space-y-2">
       <div className="grid grid-cols-2 gap-2">
         <div><p className="text-xs text-muted-foreground">Received income</p><Money value={income} formatCurrency={formatCurrency} className="cero-secondary-amount"/></div>
         <div className="text-right"><p className="text-xs text-muted-foreground">{remaining<0?'Income shortfall':'Income remaining'}</p><Money value={remaining} formatCurrency={formatCurrency} className={'cero-secondary-amount '+(remaining<0?'text-destructive':'text-emerald-600 dark:text-emerald-400')}/></div>
       </div>
-      <div className="flex h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label="Distribution of received income and tracked allocations">
-        {chartTotal > 0 && segments.filter(([,value])=>value>0).map(([label,value,color])=><span key={label} className={color+' border-r border-background last:border-r-0'} style={{width: (value/chartTotal*100)+'%'}}/>)}
-      </div>
       <dl className="space-y-1">
         {rows.map(([label,value,color])=><div key={label} className="flex items-center justify-between gap-2"><dt className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className={color+' size-1.5 shrink-0 rounded-full'}/>{label}</dt><dd className="shrink-0"><Money value={value} formatCurrency={formatCurrency} className="text-sm font-medium"/></dd></div>)}
       </dl>
     </div>
-    <div className="min-w-0 space-y-1.5 border-t border-border pt-2 md:border-l md:border-t-0 md:pl-6 md:pt-0">
-      <div className="flex items-center justify-between gap-2 text-xs"><span className="text-muted-foreground">Plan utilization</span><span className="font-medium">{percentage===null?'—':percentage+'%'}</span></div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className={(tracked>planned?'bg-destructive':'bg-primary')+' h-full rounded-full'} style={{width:(scale>0?Math.max(0,tracked)/scale*100:0)+'%'}}/></div>
+    <details className="group border-t border-border/60 pt-2">
+      <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-2 text-xs text-muted-foreground [&::-webkit-details-marker]:hidden"><span>{percentage===null?'Plan utilization':percentage+'% of plan tracked'}</span><ChevronRight size={14} className="group-open:rotate-90"/></summary>
       <p className="text-xs text-muted-foreground"><Money value={tracked} formatCurrency={formatCurrency}/> of <Money value={planned} formatCurrency={formatCurrency}/> tracked</p>
-    </div>
+    </details>
   </div>;
 }
 function Recent({ transactions, categories, accounts, recurringTransactions, goals, formatCurrency }) {
