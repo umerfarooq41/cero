@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cero-shell-v1';
+const CACHE_NAME = 'cero-shell-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -21,7 +21,7 @@ self.addEventListener('activate', (event) => {
       caches.keys().then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => key.startsWith('cero-shell-') && key !== CACHE_NAME)
             .map((key) => caches.delete(key))
         )
       ),
@@ -47,8 +47,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+          if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
+            const copy = response.clone();
+            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy)));
+          }
           return response;
         })
         .catch(() => caches.match('/index.html'))
@@ -57,18 +59,24 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(request).then((cached) => {
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cached = await cache.match(request);
       const network = fetch(request)
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+            event.waitUntil(cache.put(request, copy));
           }
           return response;
         })
         .catch(() => cached);
 
-      return cached || network;
+      // Only fingerprinted Vite assets are immutable. Other resources prefer the network.
+      if (/^\/assets\/[^/]+-[\w-]{8,}\.[\w]+$/.test(url.pathname) && cached) {
+        event.waitUntil(network);
+        return cached;
+      }
+      return network;
     })
   );
 });
