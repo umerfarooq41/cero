@@ -7,6 +7,10 @@ on:
     branches: [main, development]
   workflow_dispatch:
 
+concurrency:
+  group: cero-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -24,5 +28,11 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Lint and build
-        run: npm run check
+      - name: Unit tests
+        run: npm test
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: npm run lint
+      - name: Production build
+        if: ${{ !cancelled() }}
+        run: npm run build
