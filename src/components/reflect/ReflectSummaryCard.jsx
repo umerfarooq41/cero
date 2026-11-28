@@ -1,6 +1,6 @@
 import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { useMemo } from 'react';
-import { Activity, BarChart3, Wallet } from 'lucide-react';
+import { Activity, BarChart3, Wallet, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   getCurrencyCode as getSharedCurrencyCode,
@@ -387,7 +387,31 @@ export default function ReflectSummaryCard({
         <SectionHeading title="Cash flow" icon={Wallet}/><div className="cero-hero cero-reflect-cashflow text-center py-3"><p className="text-sm text-muted-foreground">Operating cash flow</p><p className={cn('cero-primary-amount mt-2',netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]')}>{money(netCashFlow)}</p><p className="mt-1 text-xs text-muted-foreground">Before debt payments and goal savings</p></div>
         <div className="grid grid-cols-2 gap-3 text-center py-3">{metric('Income received',income)}{metric('Expenses',expenses)}</div>
         <div className="border-t border-border py-3"><div className="flex items-center justify-between gap-2"><p className="text-sm text-muted-foreground">Current net worth</p><p className="cero-secondary-amount">{money(netWorth)}</p></div>{totalAssets > 0 && totalLiabilities >= 0 && <><div className="mt-3 flex h-1.5 overflow-hidden rounded-full bg-destructive"><div className="bg-[hsl(var(--success))]" style={{width: `${100 * totalAssets / (totalAssets + totalLiabilities)}%`}}/></div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>Assets {(100 * totalAssets / (totalAssets + totalLiabilities)).toFixed(1)}%</span><span>Liabilities {(100 * totalLiabilities / (totalAssets + totalLiabilities)).toFixed(1)}%</span></div></>}</div>
-        <details className="group"><summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-primary">Financial details<span className="group-open:rotate-180">⌄</span></summary>{[['Assets',totalAssets],['Liabilities',totalLiabilities],['Debt paid',trackedDebt],['Goal savings',trackedSavings],['After debt & savings',netCashFlow - trackedDebt - trackedSavings],['Total tracked allocation',totalTrackedOutflow]].map(([label,amount])=><MoneyRow key={label} label={label} amount={amount} currency={currency}/>)}</details>
+        <details className="group border-t border-border/60">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2 text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
+            <span>Financial details</span>
+            <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none"/>
+          </summary>
+          <div className="space-y-4 pb-4 pt-1">
+            <div className="space-y-1">
+              <h4 className="pb-1 text-xs font-medium text-muted-foreground">Net worth breakdown</h4>
+              <MoneyRow label="Assets" amount={totalAssets} currency={currency}/>
+              <MoneyRow label="Liabilities" amount={totalLiabilities} currency={currency}/>
+            </div>
+            <div className="space-y-1 border-t border-border/60 pt-3">
+              <h4 className="pb-1 text-xs font-medium text-muted-foreground">{isYear ? "Yearly allocations" : "Monthly allocations"}</h4>
+              <MoneyRow label="Debt paid" amount={trackedDebt} currency={currency}/>
+              <MoneyRow label="Goal savings" amount={trackedSavings} currency={currency}/>
+              <MoneyRow label="Total tracked allocation" amount={totalTrackedOutflow} currency={currency}/>
+              <div className="mt-2 border-t border-border/60 pt-2">
+                <div className="flex min-h-8 items-center justify-between gap-3 text-sm font-medium">
+                  <span>After debt &amp; savings</span>
+                  <span className={cn("shrink-0 tabular-nums font-semibold",netCashFlow-trackedDebt-trackedSavings<0?"text-destructive":"text-[hsl(var(--success))]")}>{money(netCashFlow-trackedDebt-trackedSavings)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
       </section>}
       {section !== "summary" && <section className="cero-reflect-summary-section px-0 py-3">
         <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-muted-foreground" /><h3 className="cero-section-title">Budget health</h3></div>
