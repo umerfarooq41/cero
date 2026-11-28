@@ -138,22 +138,33 @@ export default function TransactionRow({
       ? recurringName
       : null;
 
+  const payee = String(transaction.payee_name || '').trim();
   const title = isAdjustment ? (noteLabel || 'Balance adjustment') : isTransfer
     ? sourceName || transferTitle || 'Transfer'
-    : sourceName || transaction.payee_name || category?.name || noteLabel || 'Uncategorized';
+    : sourceName || payee || category?.name || noteLabel || 'Uncategorized';
 
   const movementLabel = [accountName, destinationName].filter(Boolean).join(' → ');
+  const categoryType = String(category?.type || category?.budget_type || '').toLowerCase();
   const transferKindLabel = isGoalContribution
     ? 'Goal contribution'
-    : isRecurring && getTransferType(account, toAccount) === 'Debt'
+    : categoryType === 'debt' || categoryType === 'liability' || (isRecurring && getTransferType(account, toAccount) === 'Debt')
       ? 'Debt payment'
-      : 'Transfer';
+      : ['saving','savings'].includes(categoryType) ? 'Savings allocation' : 'Transfer';
 
+  const distinct = values => {
+    const seen = new Set([title.trim().toLowerCase()]);
+    return values.filter(value => {
+      const key = String(value || '').trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).join(' · ');
+  };
   const primarySubtitle = isAdjustment
-    ? `${isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment'} - ${accountName}${isDebtRemoval ? ' · owed' : ''}`
+    ? distinct([isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment', accountName, isDebtRemoval ? 'owed' : null])
     : isTransfer
-    ? [movementLabel, transferKindLabel].filter(Boolean).join(' · ')
-    : [transaction.payee_name && !isRecurring && !isGoalContribution ? category?.name : null, accountName, !isRecurring && !isGoalContribution && noteLabel !== title ? noteLabel : null].filter(Boolean).join(' · ');
+    ? distinct([sourceName ? movementLabel : null, transferKindLabel])
+    : distinct([category?.name, accountName, isRecurring ? 'Recurring' : isGoalContribution ? 'Goal contribution' : noteLabel]);
 
   const subtitleText = dateLabel && primarySubtitle
     ? `${dateLabel} · ${primarySubtitle}`
@@ -181,7 +192,7 @@ export default function TransactionRow({
   if (desktopLedger) return (
     <tr onClick={onClick} className={cn("cursor-pointer hover:bg-muted/30", selected && "bg-primary/10")}>
       <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">{transaction.date && /^\d{4}-\d{2}-\d{2}$/.test(transaction.date) ? new Date(transaction.date + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : transaction.date || '—'}</td>
-      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" aria-pressed={selectionMode ? selected : undefined} onClick={event => { event.stopPropagation(); onClick?.(); }} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{selectionMode && <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center rounded border border-muted-foreground text-lg text-primary">{selected ? "✓" : ""}</span>}{isTransfer ? <ArrowLeftRight className="size-5 shrink-0 text-sky-500"/> : <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>}<span className="min-w-0 break-words">{title}{transaction.payee_name && !isTransfer && category?.name && <span className="block text-xs font-normal text-muted-foreground">{category.name}</span>}{!isAdjustment && !isRecurring && !isGoalContribution && noteLabel && noteLabel !== title && <span className="block text-xs font-normal text-muted-foreground">{noteLabel}</span>}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
+      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" aria-pressed={selectionMode ? selected : undefined} onClick={event => { event.stopPropagation(); onClick?.(); }} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{selectionMode && <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center rounded border border-muted-foreground text-lg text-primary">{selected ? "✓" : ""}</span>}{isTransfer ? <ArrowLeftRight className="size-5 shrink-0 text-sky-500"/> : <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>}<span className="min-w-0 break-words">{title}{payee && !isTransfer && category?.name && category.name.toLowerCase() !== title.toLowerCase() && <span className="block text-xs font-normal text-muted-foreground">{category.name}</span>}{!isAdjustment && !isRecurring && !isGoalContribution && noteLabel && noteLabel !== title && <span className="block text-xs font-normal text-muted-foreground">{noteLabel}</span>}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
       <td className="px-3 py-3 text-muted-foreground">{isTransfer ? movementLabel : accountName}</td>
       <td className="px-3 py-3 text-xs text-muted-foreground">{isAdjustment ? (isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment') : isTransfer ? transferKindLabel : transactionTypeLabel}</td>
       <td className={cn('whitespace-nowrap px-3 py-3 text-right font-medium tabular-nums',config.color)}>{config.sign} <CurrencyAmount value={amountValue} formatCurrency={formatCurrency}/></td>
@@ -192,7 +203,7 @@ export default function TransactionRow({
     <div
       onClick={onClick}
       className={cn(
-        'flex min-w-0 items-center gap-2 py-2 min-h-[48px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:py-3 sm:min-h-[64px]',
+        'flex min-w-0 items-center gap-3 py-2 min-h-[52px] hover:bg-accent/50 transition-colors cursor-pointer sm:gap-3 sm:py-3 sm:min-h-[64px]',
         flush ? 'px-0' : 'px-1 sm:px-3', selected && 'bg-primary/10'
       )}
     >
@@ -209,17 +220,13 @@ export default function TransactionRow({
         />
       )}
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 space-y-0.5">
         <div className="flex min-w-0 items-center gap-1.5">
           <div className="truncate text-sm font-medium">
             {title}
           </div>
 
-          <SourceBadge
-            type={sourceBadgeType}
-            tone={sourceBadgeTone}
-            compact={compactSourceBadges}
-          />
+
         </div>
 
         {subtitleText && (
@@ -232,7 +239,7 @@ export default function TransactionRow({
         )}
       </div>
 
-      <div className="shrink-0 text-right">
+      <div className="shrink-0 self-center text-right">
         <div
           className={cn(
             'inline-flex items-center gap-0.5 whitespace-nowrap text-sm font-medium tabular-nums sm:gap-1',
