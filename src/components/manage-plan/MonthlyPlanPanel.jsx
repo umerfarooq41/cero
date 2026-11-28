@@ -449,15 +449,15 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
     const summaryTracked = selected ? trackedFor(selected) : visibleRows.reduce((sum,row)=>sum+trackedFor(row),0);
     const canWrite = navigator.onLine && !saving && !isPlanLoading;
     return <div className="cero-unified-plan space-y-4">
-      <div className="workspace:sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-2">
+      <div className="cero-plan-toolbar workspace:sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-2">
         <div className="cero-month-heading flex shrink-0 items-center gap-1 text-lg font-semibold"><button type="button" aria-label="Previous month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(subMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronLeft className="size-4"/></button><span>{format(new Date(currentMonth+'-01T12:00:00'),'MMMM yyyy')}</span><button type="button" aria-label="Next month" disabled={saving} className="grid size-8 place-items-center" onClick={()=>changeUnifiedMonth(format(addMonths(new Date(currentMonth+'-01T12:00:00'),1),'yyyy-MM'))}><ChevronRight className="size-4"/></button></div><div className="flex-1"/>
         <div className="mr-3 text-right"><p className="text-xs text-muted-foreground">Left to allocate</p><p className={cn("text-xl font-semibold tabular-nums",unifiedTotals.leftToAllocate<0?"text-destructive":"text-primary")}>{formatCurrency(unifiedTotals.leftToAllocate)}</p></div>
-        <Button variant="outline" disabled={!canWrite} onClick={copyFromPreviousMonth}><Copy className="mr-2 size-4"/>Copy previous month</Button>
+        <Button variant="outline" disabled={!canWrite} onClick={copyFromPreviousMonth}><Copy className="mr-2 size-4"/><span className="md:hidden">Copy previous</span><span className="hidden md:inline">Copy previous month</span></Button>
         <Button disabled={!canWrite||!dirty} onClick={handleSave}><Save className="mr-2 size-4"/>{saving?'Saving…':'Save plan'}</Button>
       </div>
       <nav aria-label="Budget types" className="flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-border workspace:gap-5">
         {Object.entries(sectionConfig).map(([type,config])=><button key={type} type="button" aria-pressed={activeType===type} onClick={()=>{setActiveType(type);setSelectedKey(null);}} className={cn("border-b-2 px-2 py-3 text-sm font-medium",activeType===type?"border-primary text-primary":"border-transparent text-muted-foreground")}>{config.title}</button>)}
-        <Button size="sm" variant="ghost" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/></Button><Button variant="ghost" size="sm" className="ml-auto" onClick={()=>requestEditor('archived')}>Archived categories</Button>
+        <Button size="sm" variant="ghost" disabled={!canWrite} onClick={()=>requestEditor(activeType==='savings'?'goal':activeType==='debt'?'recurring':'category')} aria-label={'Add '+sectionConfig[activeType].title}><Plus className="size-4"/></Button><Button variant="ghost" size="sm" className="ml-auto shrink-0" aria-label="Archived categories" onClick={()=>requestEditor('archived')}> <span className="md:hidden">Archived</span><span className="hidden md:inline">Archived categories</span></Button>
       </nav>
       {isPlanLoading ? <Skeleton className="h-80 w-full"/> : <div className="grid min-w-0 grid-cols-1 workspace:grid-cols-[minmax(0,1fr)_minmax(260px,30%)]">
         <div className="overflow-auto workspace:max-h-[65vh]">

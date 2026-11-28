@@ -1680,3 +1680,42 @@ main,
  .app-desktop-modal:not(:has(.app-dialog-scroll)) { overflow-y:auto; }
  .app-desktop-confirm { max-height:88dvh; overflow-y:auto; }
 }
+
+/* Shared workspace appearance: theme accents remain inherited from the selected theme. */
+@media (max-width:1023px) {
+ .cero-desktop-workspace {
+   --background:220 20% 97%; --card:0 0% 100%; --border:220 15% 86%;
+   --muted:220 18% 93%; --muted-foreground:220 12% 38%;
+   --app-bg-color:hsl(var(--background)); --app-bg-image:none;
+   --app-surface-main-alpha:1; --app-control-alpha:1;
+   --app-surface-shadow-alpha:0; --app-surface-shadow-strong-alpha:0; --app-surface-blur:0px;
+ }
+ html.dark .cero-desktop-workspace { --background:220 23% 11%; --card:220 22% 14%; --border:220 15% 24%; --muted:220 20% 18%; --muted-foreground:215 17% 75%; }
+ .cero-desktop-workspace, .cero-desktop-workspace :is(.app-page-surface,.app-main-scroll,.app-fixed-surface,.app-gradient-surface) {background-image:none!important;background-color:hsl(var(--background))!important;animation:none!important;}
+ .cero-desktop-workspace .app-main-scroll::before,.cero-desktop-workspace .app-main-scroll::after {content:none!important;display:none!important;}
+ .cero-desktop-workspace .tabular-nums {font-family:var(--font-sans);font-feature-settings:'tnum' 1,'zero' 0;font-variant-numeric:tabular-nums;letter-spacing:normal;}
+ .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong,.app-card-surface-soft) {box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+ .cero-desktop-workspace .app-main-scroll :is(.app-card-surface,.app-card-surface-strong,.app-card-surface-soft):is([class~="lg:rounded-none"],[class~="lg:!rounded-none"]) {background:transparent!important;border:0!important;border-radius:0!important;}
+ .cero-desktop-workspace .app-page-header {background:hsl(var(--background))!important;}
+ .cero-desktop-workspace nav.cero-workplace-tabs {overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:thin;}
+ .cero-desktop-workspace nav.cero-workplace-tabs > button {flex-shrink:0;}
+ .cero-desktop-workspace nav.cero-workplace-tabs > button[aria-pressed="true"] {border-bottom-color:hsl(var(--primary));color:hsl(var(--primary));}
+}
+@media (max-width:767px) {
+ .cero-desktop-workspace {--app-mobile-page-header-height:calc(3.75rem + var(--app-safe-area-top));}
+ .cero-desktop-workspace .cero-page-content {padding-inline:16px!important;}
+ .cero-unified-plan .cero-plan-toolbar {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;background:transparent;}
+ .cero-plan-toolbar > .flex-1 {display:none;}
+ .cero-plan-toolbar .cero-month-heading {font-size:14px;gap:0;}
+ .cero-plan-toolbar .cero-month-heading button {width:24px;}
+ .cero-plan-toolbar > .mr-3 {margin-right:0;}
+ .cero-plan-toolbar > button {min-width:0;font-size:12px;padding-inline:8px;}
+ .cero-plan-table td {font-size:13px;}
+ .cero-plan-table input.cero-plan-cell {height:36px;border-radius:6px;background:hsl(var(--card));font-size:14px;}
+ .cero-plan-table tr {padding-block:6px;}
+}
+@media (min-width:768px) and (max-width:1023px) {
+ .cero-desktop-workspace .app-main-scroll {margin-top:0;height:auto;}
+ .cero-desktop-workspace .app-page-header {position:static;height:auto;}
+ .cero-desktop-workspace .app-page-header > div {padding:16px 20px 8px;}
+}
