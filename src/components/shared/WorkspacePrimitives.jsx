@@ -7,3 +7,19 @@ export function SectionHeading({ title, icon: Icon, className, as: Heading = 'h2
 export function WorkspaceTab({ active, children, className, ...props }) {
   return <button type="button" aria-pressed={active} {...props} className={cn('shrink-0 border-b-2 px-2 py-3 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring', active ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground', className)}>{children}</button>;
 }
+
+export function RegisterHeader({ children, className }) {
+  return <thead className={cn('text-muted-foreground', className)}>{children}</thead>;
+}
+
+export function RegisterRow({ selected, className, children, ...props }) {
+  return <tr {...props} className={cn('border-b border-border/60 hover:bg-muted/30', selected && 'bg-primary/10', className)}>{children}</tr>;
+}
+
+export function RegisterInspector({ children, className }) {
+  return <aside className={cn('cero-desktop-inspector workspace:border-l workspace:px-5', className)}>{children}</aside>;
+}
+
+export function RegisterEmpty({ children, className }) {
+  return <p className={cn('p-8 text-center text-sm text-muted-foreground', className)}>{children}</p>;
+}
