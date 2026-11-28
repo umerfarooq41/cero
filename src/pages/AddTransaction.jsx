@@ -161,9 +161,9 @@ export default function AddTransaction() {
   const isEditing = Boolean(id);
   const queryClient = useQueryClient();
 
-  const { data: categories = [] } = useCategories();
-  const { data: accounts = [] } = useAccounts();
-  const { data: allTransactions = [] } = useAllTransactions();
+  const { data: categories = [], isPending: categoriesPending } = useCategories();
+  const { data: accounts = [], isPending: accountsPending } = useAccounts(true);
+  const { data: allTransactions = [], isPending: transactionsPending, isError: transactionsError, refetch: refetchTransactions } = useAllTransactions();
 
   const existingTransaction = allTransactions.find((transaction) => transaction.id === id);
   const currency = useCurrency();
@@ -241,8 +241,11 @@ export default function AddTransaction() {
     transferPurpose === TRANSFER_PURPOSES.savingsAllocation ||
     transferPurpose === TRANSFER_PURPOSES.debtPayment;
 
+  const initializedEdit = useRef(null);
+  const [readyEditId,setReadyEditId]=useState(null);
   useEffect(() => {
-    if (!existingTransaction) return;
+    if (!existingTransaction || categoriesPending || accountsPending || initializedEdit.current===id) return;
+    initializedEdit.current=id;
 
     const existingCategory = categories.find(
       (category) => category.id === existingTransaction.category_id
@@ -262,7 +265,8 @@ export default function AddTransaction() {
     setOccurrenceDate(existingTransaction.recurring_posted_for_date || existingTransaction.date || format(new Date(), 'yyyy-MM-dd'));
     setNote(existingTransaction.note || '');
     setPayee(existingTransaction.payee_name || '');
-  }, [existingTransaction]);
+    setReadyEditId(id);
+  }, [existingTransaction, categories, categoriesPending, accountsPending, id]);
 
   useEffect(() => {
     if (!isRecurringDateCorrection || !existingTransaction) return;
@@ -283,7 +287,7 @@ export default function AddTransaction() {
   }, [isRecurringDateCorrection, existingTransaction?.recurring_transaction_id, existingTransaction?.savings_goal_id]);
 
   useEffect(() => {
-    if (type !== 'transfer') return;
+    if (type !== 'transfer' || (isEditing && readyEditId!==id)) return;
 
     const currentPurposeAllowed = transferPurposeOptions.some(
       (option) => option.value === transferPurpose
@@ -293,7 +297,7 @@ export default function AddTransaction() {
       setTransferPurpose(TRANSFER_PURPOSES.normal);
       setCategoryId('');
     }
-  }, [transferPurpose, transferPurposeOptions, type]);
+  }, [transferPurpose, transferPurposeOptions, type, isEditing, readyEditId, id]);
 
   const filteredCategories = categories.filter((category) => {
     const categoryType = normalizeCategoryType(category.type);
@@ -482,6 +486,7 @@ export default function AddTransaction() {
     }
   };
 
+  if(isEditing&&(transactionsPending||categoriesPending||accountsPending||!existingTransaction||readyEditId!==id))return createPortal(<><div className="app-route-sheet-backdrop"/><div className="app-route-sheet app-sheet-surface app-desktop-route-form"><header className="flex items-center justify-between p-4"><h1 className="text-base font-semibold">Edit transaction</h1><button type="button" aria-label="Close" onClick={()=>navigate(returnTo)}><X className="size-5"/></button></header><div className="space-y-3 p-5 text-sm text-muted-foreground" role="status">{transactionsError?'Could not load transaction.':!transactionsPending&&!existingTransaction?'Transaction not found.':'Loading transaction…'}{transactionsError&&<Button onClick={()=>refetchTransactions()}>Retry</Button>}</div></div></>,document.body);
   return createPortal(
     <>
       <div className="app-route-sheet-backdrop" aria-hidden="true" />

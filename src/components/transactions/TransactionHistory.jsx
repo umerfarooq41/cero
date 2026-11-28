@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
 import {
   ArrowLeftRight,
@@ -13,6 +13,7 @@ import {
   SlidersHorizontal,
   ListChecks,
   Trash2,
+  Pencil,
   Target,
   WalletCards,
   X,
@@ -296,6 +297,8 @@ function AdvancedFilterSheet({
 
 export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const navigate = useNavigate();
+  const location=useLocation();
+  const openEdit=id=>{setSwipedId(null);navigate(`/transactions/${id}/edit`,{state:{backgroundLocation:location}});};
   const queryClient = useQueryClient();
   const deletionLock = useRef(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -506,6 +509,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const [swipedId, setSwipedId] = useState(null);
   const [deleteRequest, setDeleteRequest] = useState(null);
   const touchStart = useRef(null);
+  const suppressTapUntil=useRef(0);
   const toggleSelection = id => setSelectedIds(ids => {
     const visibleIds = new Set(sortedTransactions.map(row => row.id));
     const visibleSelection = ids.filter(value => visibleIds.has(value));
@@ -676,7 +680,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           <table className="w-full min-w-[700px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Transaction history</caption>
             <colgroup><col style={{width:"16%"}}/><col style={{width:"32%"}}/><col style={{width:"19%"}}/><col style={{width:"16%"}}/><col style={{width:"17%"}}/></colgroup><thead className="sticky top-0 z-10 border-b border-border bg-card text-xs text-muted-foreground"><tr>{['Date','Transaction','Account','Type','Amount'].map((label,index) => <th key={label} scope="col" className={'px-3 py-3 font-medium ' + (index === 4 ? 'text-right' : 'text-left')}>{index === 0 || index === 4 ? <button type="button" className="font-medium hover:text-primary" onClick={() => setSortBy(index === 0 ? (sortBy === "newest" ? "oldest" : "newest") : (sortBy === "highest" ? "lowest" : "highest"))}>{label}{index === 0 ? (sortBy === "newest" ? " ↓" : sortBy === "oldest" ? " ↑" : "") : (sortBy === "highest" ? " ↓" : sortBy === "lowest" ? " ↑" : "")}</button> : label}</th>)}</tr></thead>
-            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : navigate(`/transactions/${transaction.id}/edit`)}/>)}</tbody>
+            <tbody className="divide-y divide-border">{sortedTransactions.map(transaction => <TransactionRow key={transaction.id} desktopLedger transaction={transaction} category={categoriesById.get(transaction.category_id)} account={accountsById.get(transaction.account_id)} toAccount={accountsById.get(transaction.to_account_id)} recurringRule={recurringById.get(transaction.recurring_transaction_id)} goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)} formatCurrency={formatCurrency} selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : openEdit(transaction.id)}/>)}</tbody>
           </table>
         </div>
         <div className="animate-child space-y-2 md:hidden">
@@ -695,9 +699,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
               <div className="divide-y divide-border/50">
                 {grouped[date].map((transaction) => (
-                  <div key={transaction.id} className="relative overflow-hidden" onTouchStart={e=>{touchStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}} onTouchEnd={e=>{const start=touchStart.current;touchStart.current=null;if(!start)return;const dx=e.changedTouches[0].clientX-start.x;const dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.5)setSwipedId(dx<0?transaction.id:null);}} >
-                  {swipedId===transaction.id && <button type="button" aria-label="Delete transaction" className="absolute inset-y-0 right-0 flex w-20 items-center justify-center bg-destructive text-white" onClick={()=>setDeleteRequest({rows:[transaction],skipped:0,linked:isRecurringTransaction(transaction)||isGoalContribution(transaction)||Boolean(transaction.goal_id)})}><Trash2 className="size-5"/></button>}
-                  <div className="relative bg-background transition-transform duration-150" style={{transform:swipedId===transaction.id?'translateX(-80px)':'none'}}>
+                  <div key={transaction.id} className="relative overflow-hidden touch-pan-y" onTouchStart={e=>{touchStart.current={id:transaction.id,x:e.touches[0].clientX,y:e.touches[0].clientY};}} onTouchCancel={()=>{touchStart.current=null;}} onTouchEnd={e=>{const start=touchStart.current;touchStart.current=null;if(!start||start.id!==transaction.id)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5){suppressTapUntil.current=Date.now()+350;const direction=dx>0?'edit':'delete';setSwipedId(prev=>prev?.id===transaction.id&&prev.direction!==direction?null:{id:transaction.id,direction});}}}>
+                  {swipedId?.id===transaction.id&&swipedId.direction==='edit'&&<button type="button" aria-label="Edit transaction" className="absolute inset-y-0 left-0 flex w-20 flex-col items-center justify-center gap-1 bg-primary text-primary-foreground" onClick={()=>openEdit(transaction.id)}><Pencil className="size-4"/><span className="text-xs">Edit</span></button>}
+                  {swipedId?.id===transaction.id&&swipedId.direction==='delete'&&<button type="button" aria-label="Delete transaction" className="absolute inset-y-0 right-0 flex w-20 flex-col items-center justify-center gap-1 bg-destructive text-white" onClick={()=>{setSwipedId(null);setDeleteRequest({rows:[transaction],skipped:0,linked:isRecurringTransaction(transaction)||isGoalContribution(transaction)||Boolean(transaction.goal_id)})}}><Trash2 className="size-4"/><span className="text-xs">Delete</span></button>}
+                  <div className="relative bg-background transition-transform duration-150" style={{transform:swipedId?.id===transaction.id?(swipedId.direction==='edit'?'translateX(80px)':'translateX(-80px)'):'none'}}>
                   <TransactionRow
                     transaction={transaction}
                     category={categories.find(
@@ -712,7 +717,7 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
                     recurringRule={recurringById.get(transaction.recurring_transaction_id)}
                     goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                     formatCurrency={formatCurrency}
-                    onClick={() => swipedId===transaction.id ? setSwipedId(null) : navigate(`/transactions/${transaction.id}/edit`)}
+                    onClick={() => {if(Date.now()<suppressTapUntil.current)return;openEdit(transaction.id);}}
                   />
                   </div></div>
                 ))}
