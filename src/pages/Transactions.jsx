@@ -2,9 +2,10 @@ import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
 import { AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { format, addMonths, subMonths } from 'date-fns';
-import { CalendarClock, Clock3, ChevronLeft, ChevronRight, Plus, Settings, WifiOff } from 'lucide-react';
+import { format } from 'date-fns';
+import { CalendarClock, Clock3, Plus, Settings, WifiOff } from 'lucide-react';
 
+import MonthSelector from '@/components/shared/MonthSelector';
 import PageHeader from '@/components/layout/PageHeader';
 import ScheduledTransactions from '@/components/transactions/ScheduledTransactions';
 import { AppTabPanel } from '@/components/shared/AppTabs.jsx';
@@ -23,7 +24,6 @@ export default function Transactions() {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentMonth, setCurrentMonth] = useState(() => format(new Date(), "yyyy-MM"));
-  const changeMonth = (delta) => setCurrentMonth((month) => format((delta < 0 ? subMonths : addMonths)(new Date(`${month}-01T12:00:00`), 1), "yyyy-MM"));
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab');
   const activeTab = validTabs.has(requestedTab) ? requestedTab : 'history';
@@ -51,11 +51,7 @@ export default function Transactions() {
           {activeTab === 'history' && <button type="button" onClick={() => navigate('/add-transaction', { state: { backgroundLocation: location } })} className="cero-add-action cero-desktop-only-action"><span aria-hidden="true">+</span><span>Add</span></button>}
         </div>
 
-        {activeTab === "history" && <div className="mb-3 flex items-center"><span className="flex items-center cero-month-heading gap-0.5 text-sm font-medium">
-          <button type="button" aria-label="Previous month"  className="grid size-8 place-items-center rounded-full bg-transparent disabled:opacity-35 disabled:cursor-default [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(-1)}><ChevronLeft className="size-4"/></button>
-          <span className="whitespace-nowrap">{format(activeTab === "scheduled" ? new Date() : new Date(`${currentMonth}-01T12:00:00`), 'MMMM yyyy')}</span>
-          <button type="button" aria-label="Next month"  className="grid size-8 place-items-center rounded-full bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" onPointerUp={(event) => { if (event.pointerType !== 'mouse') event.currentTarget.blur(); }} onClick={() => changeMonth(1)}><ChevronRight className="size-4"/></button>
-        </span></div>}
+        {activeTab === "history" && <div className="mb-3"><MonthSelector currentMonth={currentMonth} onChange={setCurrentMonth} subtitle={null} bare className="max-w-[240px]"/></div>}
         <AnimatePresence mode="wait" initial={false}>
           <AppTabPanel key={activeTab}>
             {activeTab === 'history' ? (
