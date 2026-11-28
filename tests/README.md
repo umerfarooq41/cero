@@ -19,6 +19,7 @@ create or edit accounts, post transactions, or touch live user data.
 - Recurring transaction date calculations, status and ordering.
 - Transaction-to-account balance effects for assets and liabilities.
 - Currency lookup and formatting.
+- Cross-feature financial regressions: credit/liability reversals, budget-month attribution, auto-sweep cash caps, savings-goal withdrawals versus lifetime funding, fixed-installment rounding, and recurring due-date anchors.
 
 Database RPCs and authenticated UI workflows still require separate integration
 coverage. Do not point write-capable browser tests at the production Supabase
