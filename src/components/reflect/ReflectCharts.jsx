@@ -192,6 +192,7 @@ function ChartHeading({ icon: Icon, title, subtitle }) {
 export default function ReflectCharts({
   isYear,
   desktop = false,
+  tabbed = false,
   report = 'cash',
   cashFlow,
   spendingBreakdown,
@@ -311,10 +312,10 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
   return (
     <>
-      <div className={desktop && report !== "cash" ? "hidden" : "mb-3 grid gap-3"}>
+      <div className={(desktop || tabbed) && report !== "cash" ? "hidden" : "mb-3 grid gap-3"}>
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4 lg:!rounded-none lg:!bg-transparent lg:!shadow-none">
+            <ReflectCard className="p-3 sm:p-4 !rounded-none !bg-transparent !shadow-none">
               <ChartHeading
                 icon={BarChart3}
                 tone="info"
@@ -341,7 +342,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                   </div>
                 </div>
               </div>}
-              <div className={`relative ${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px] lg:h-[340px]`}>
+              <div className={`relative ${CHART_WRAP_CLASS} h-40 min-h-[160px] sm:h-44 sm:min-h-[176px] md:h-[280px] lg:h-[340px]`}>
                 {isVisible ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -444,10 +445,10 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
       </div>
 
-      <div className={desktop && report !== "spending" ? "hidden" : "mb-4 grid gap-3 lg:gap-4"}>
+      <div className={(desktop || tabbed) && report !== "spending" ? "hidden" : "mb-4 grid gap-3 lg:gap-4"}>
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4 lg:!rounded-none lg:!bg-transparent lg:!shadow-none">
+            <ReflectCard className="p-3 sm:p-4 !rounded-none !bg-transparent !shadow-none">
               <ChartHeading
                 icon={ChartPie}
                 tone="warning"
@@ -483,7 +484,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4 lg:!rounded-none lg:!bg-transparent lg:!shadow-none">
+            <ReflectCard className="p-3 sm:p-4 !rounded-none !bg-transparent !shadow-none">
               <ChartHeading
                 icon={LineChart}
                 tone="info"
@@ -508,7 +509,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
                     <p className="text-lg font-semibold tabular-nums"><CurrencyAmount amount={activeDay.amount} currency={currency} compact /></p>
                   </div>
                 </div> : null}
-                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] lg:h-[340px]`}
+                <div ref={dailyChartRef} className={`relative ${CHART_WRAP_CLASS} h-48 min-h-[192px] sm:h-52 sm:min-h-[208px] md:h-[280px] lg:h-[340px]`}
                   onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); selectDailyAt(event.clientX); }}
                   onPointerMove={event => { if (desktop || event.buttons || event.pressure > 0) selectDailyAt(event.clientX); }}
                 >

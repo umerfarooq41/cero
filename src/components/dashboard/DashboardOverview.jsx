@@ -17,7 +17,7 @@ import useGoalItems from '@/components/transactions/useGoalItems';
 import { buildAuthoritativeScheduledAllocations, getAllocationSourceType, normalizeSourceType, getPlanCategoryType } from '@/lib/planData';
 
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const cardStyle = 'rounded-2xl border-border/50 bg-card/70 shadow-sm backdrop-blur-xl lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none';
+const cardStyle = '!rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none';
 function getDateLabel(value) {
   const raw = String(value || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return '';
@@ -274,34 +274,34 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
       return days <= 10;
     })
     .sort((a, b) => String((a.contribution_mode === 'fixed' ? a.next_due_date : a.target_date) || '').localeCompare(String((b.contribution_mode === 'fixed' ? b.next_due_date : b.target_date) || '')));
-  return <div className="mx-auto max-w-3xl max-lg:[&_div[data-dashboard-entry]]:mb-3 lg:max-w-none">
-    <div className="hidden lg:block border-b border-border py-5">
+  return <div className="mx-auto max-w-3xl max-md:[&_div[data-dashboard-entry]]:mb-3 md:max-w-none">
+    <div className="border-b border-border py-3 lg:py-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold">{format(parseISO(currentMonth + '-01'), 'MMMM yyyy')} overview</h2>
         <Action to="/plan" boxed>Open plan <ChevronRight size={14}/></Action>
       </div>
-      <dl className="grid grid-cols-2 gap-y-4 xl:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-4 xl:grid-cols-4">
         {[
           ['Received income', budget.realizedIncome ?? budget.totalIncome],
           ['Total expenses', budget.totalExpenses],
           ['Tracked savings', budget.totalTrackedSavings],
           ['Left to allocate', budget.leftToAllocate],
-        ].map(([label, value], index) => <div key={label} className="min-w-0 px-4 first:pl-0">
+        ].map(([label, value], index) => <div key={label} className="min-w-0 lg:px-4 lg:first:pl-0">
           <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-          <dd className="mt-2">{num(value) < 0 ? '−' : ''}<Money value={value} formatCurrency={formatCurrency} className={'text-[30px] font-semibold tracking-normal ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
+          <dd className="mt-2"><Money value={value} formatCurrency={formatCurrency} className={'text-xl md:text-2xl lg:text-[30px] font-semibold tracking-normal ' + (index === 3 ? (num(value) < 0 ? 'text-destructive' : 'text-primary') : '')}/></dd>
         </div>)}
       </dl>
     </div>
-    <div className="contents lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8 lg:pt-4">
-      <div className="contents lg:order-2 lg:flex lg:min-w-0 lg:flex-col lg:gap-4">
-        <div className="contents lg:order-1"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
-        <div className="contents lg:order-2"><Entrance index={1}><Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/></Entrance></div>
+    <div className="contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8">
+      <div className="contents md:order-2 md:flex md:min-w-0 md:flex-col md:gap-4">
+        <div className="contents md:order-1"><Entrance index={0}><SafeCard allocations={allocations} categories={categories} transactions={transactions} recurringTransactions={recurringTransactions} savingsGoals={savingsGoals} allTransactions={allTransactions} currentMonth={currentMonth} formatCurrency={formatCurrency}/></Entrance></div>
+        <div className="contents md:order-2"><Entrance index={1}><Snapshot budget={budget} transactions={transactions} formatCurrency={formatCurrency}/></Entrance></div>
         <div className="contents lg:hidden">{num(budget.leftToAllocate) > 0.005 && <Entrance index={2}><div className="flex min-h-14 min-w-0 items-center justify-between gap-2 rounded-xl bg-primary/[0.07] px-3"><span className="min-w-0 flex-1 text-[clamp(0.72rem,3.2vw,0.875rem)] font-medium leading-snug tracking-tight"><Money value={budget.leftToAllocate} formatCurrency={formatCurrency}/>{" left to allocate"}</span><span className="shrink-0"><Action to="/plan">Assign <ChevronRight size={14}/></Action></span></div></Entrance>}</div>
       </div>
-      <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-4">
-        <div className="contents lg:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none"/></Entrance></div>
-        <div className="contents lg:order-1"><Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance></div>
-        <div className="contents lg:order-3">{upcomingGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={upcomingGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}</div>
+      <div className="contents md:flex md:min-w-0 md:flex-col md:gap-4">
+        <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="!rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none"/></Entrance></div>
+        <div className="contents md:order-1"><Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance></div>
+        <div className="contents md:order-3">{upcomingGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={upcomingGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}</div>
       </div>
     </div>
   </div>;

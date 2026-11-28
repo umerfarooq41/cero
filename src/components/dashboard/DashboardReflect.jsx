@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { format } from 'date-fns';
 import {
   AlertTriangle,
@@ -306,9 +307,8 @@ export default function DashboardReflect() {
   const [selectedMonth, setSelectedMonth] = useState(format(today, 'MM'));
   const [periodMode, setPeriodMode] = useState('month');
 
-  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+  const desktop = useResponsiveLayout() !== 'mobile';
   const [report, setReport] = useState('summary');
-  useEffect(() => { const media = window.matchMedia('(min-width: 1024px)'); const sync = () => setDesktop(media.matches); media.addEventListener('change', sync); sync(); return () => media.removeEventListener('change', sync); }, []);
   const currency = useCurrency();
 
   const { data: categories = [] } = useCategories();
@@ -485,8 +485,8 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <nav aria-label="Reflect reports" className="mb-4 hidden flex-wrap gap-5 border-b border-border lg:sticky lg:top-0 lg:z-20 lg:flex lg:bg-background">{[['summary','Financial summary'],['cash','Cash flow'],['spending','Spending'],['goals','Goals'],['insights','Insights']].map(([key,label]) => <button key={key} type="button" aria-pressed={report === key} onClick={() => setReport(key)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (report === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{label}</button>)}</nav>
-      <div className={desktop && report !== 'summary' ? 'hidden' : 'animate-child'}>
+      <nav aria-label="Reflect reports" className="mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Financial summary'],['cash','Cash flow'],['spending','Spending'],['goals','Goals'],['insights','Insights']].map(([key,label]) => <button key={key} type="button" aria-pressed={report === key} onClick={() => setReport(key)} className={'border-b-2 px-2 py-3 text-sm font-medium ' + (report === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{label}</button>)}</nav>
+      <div className={report !== 'summary' ? 'hidden' : 'animate-child'}>
         <ReflectSummaryCards
           desktop={desktop}
           isYear={isYear}
@@ -511,9 +511,10 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={desktop && !['cash','spending'].includes(report) ? 'hidden' : 'animate-child'}>
+      <div className={!['cash','spending'].includes(report) ? 'hidden' : 'animate-child'}>
         <ReflectCharts
           desktop={desktop}
+          tabbed
           report={report}
           isYear={isYear}
           cashFlow={cashFlow}
@@ -530,7 +531,7 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={desktop && report !== 'goals' ? 'hidden' : 'animate-child'}>
+      <div className={report !== 'goals' ? 'hidden' : 'animate-child'}>
         <ReflectDeepAnalysis
           isYear={isYear}
           selectedYear={selectedYear}
@@ -541,8 +542,8 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={desktop && report !== 'insights' ? 'hidden' : 'animate-child'}>
-        <section className="overflow-hidden rounded-2xl app-card-surface px-3.5 py-3 lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none" aria-label="Financial insights">
+      <div className={report !== 'insights' ? 'hidden' : 'animate-child'}>
+        <section className="overflow-hidden px-3.5 py-3" aria-label="Financial insights">
           <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /><h3 className="text-sm font-semibold text-foreground">Insights</h3></div>
           {insights.map((insight, index) => {
             const Icon = insight.icon;
