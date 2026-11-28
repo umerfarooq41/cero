@@ -120,9 +120,11 @@ export default function useRecurringItems({
 
   const openPaymentDialog = useCallback((rule) => {
     setSelectedRecurringPayment(rule);
-    setPaymentAmount(getSuggestedPaymentAmount(rule));
+    const type=normalizeRuleType(rule.type);
+    const locked=type==='expense'||(type==='transfer'&&(rule.payment_mode||'fixed')==='fixed');
+    setPaymentAmount(locked?String(rule.amount||''):getSuggestedPaymentAmount(rule));
     setPaymentDate(todayIsoDate());
-    setPaymentNote(rule ? `${rule.name} · Recurring` : "");
+    setPaymentNote(rule ? rule.note || `${rule.name} · Recurring` : "");
   }, []);
 
   const closePaymentDialog = useCallback(() => {
@@ -133,7 +135,7 @@ export default function useRecurringItems({
   }, []);
 
   const postRecurring = useCallback(
-    async (rule) => {
+    async (rule, actualDate = todayIsoDate(), actualNote = null) => {
       const status = getRecurringStatus(rule);
 
       if (!rule.is_active) {
@@ -173,18 +175,20 @@ export default function useRecurringItems({
         const { error } = await supabase.rpc("cero_post_recurring_transaction", {
           p_recurring_transaction_id: rule.id,
           p_amount: null,
-          p_transaction_date: todayIsoDate(),
+          p_transaction_date: actualDate || todayIsoDate(),
           p_posted_for_date: postedForDate,
-          p_note: rule.note || `${rule.name} · Recurring`,
+          p_note: actualNote || rule.note || `${rule.name} · Recurring`,
         });
 
         if (error) throw error;
 
         invalidateScheduledQueries(queryClient);
         toast.success("Recurring transaction posted");
+        return true;
       } catch (error) {
         console.error("Recurring post failed:", error);
         toast.error(error.message || "Could not post recurring transaction");
+        return false;
       } finally {
         setPostingId(null);
       }
@@ -198,6 +202,10 @@ export default function useRecurringItems({
     const rule = selectedRecurringPayment;
     const type = normalizeRuleType(rule.type);
     const isIncome = type === "income";
+    if(type==="expense"||(type==="transfer"&&(rule.payment_mode||"fixed")==="fixed")){
+      if(await postRecurring(rule,paymentDate,paymentNote))closePaymentDialog();
+      return;
+    }
     const requestedAmount = Number(paymentAmount || 0);
     const fromAccount = accounts.find((account) => account.id === rule.account_id);
     const toAccount = accounts.find((account) => account.id === rule.to_account_id);
@@ -296,6 +304,7 @@ export default function useRecurringItems({
     paymentAmount,
     paymentDate,
     paymentNote,
+    postRecurring,
     queryClient,
     selectedRecurringPayment,
   ]);

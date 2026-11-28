@@ -1,3 +1,4 @@
+import ScheduledPostingDialog from './ScheduledPostingDialog';
 import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { Clock3 } from "lucide-react";
 
@@ -28,120 +29,12 @@ import ScheduledItemCard, {
   ScheduledStatusBadge,
 } from "./ScheduledItemCard";
 
-function RecurringPaymentDialog({
-  dialog,
-  accounts,
-  saving,
-}) {
-  const rule = dialog.rule;
-  const plannedAmount = Number(rule?.month_planned_amount || rule?.amount || 0);
-  const paidThisMonth = Number(rule?.month_paid_amount || 0);
-  const remainingAmount = Math.max(0, plannedAmount - paidThisMonth);
-
-  const fromAccount = accounts.find(
-    (account) => account.id === rule?.account_id,
-  );
-  const toAccount = accounts.find(
-    (account) => account.id === rule?.to_account_id,
-  );
-
-  if (!rule) return null;
-  const isIncome = normalizeRuleType(rule.type) === "income";
-
-  return (
-    <Dialog open={dialog.open} onOpenChange={(open) => !open && dialog.closeDialog()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>
-            {isIncome
-              ? `Receive ${rule.name}`
-              : remainingAmount > 0
-                ? `Pay ${rule.name}`
-                : `Add extra to ${rule.name}`}
-          </DialogTitle>
-          <DialogDescription>
-            {isIncome
-              ? "Confirm the amount actually received. You can post part now and the remaining income later without changing the recurring rule."
-              : "This posts a credit card payment transfer using the saved recurring accounts."}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="app-dialog-scroll space-y-4">
-          <div className="border-b border-border pb-3">
-            <p className="text-xs font-medium text-muted-foreground">
-              {isIncome ? "Deposit account" : "Payment path"}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-foreground">
-              {isIncome
-                ? fromAccount?.name || "Missing account"
-                : <>{fromAccount?.name || "Missing from account"} →{" "}{toAccount?.name || "Missing credit card"}</>}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {isIncome
-                ? remainingAmount > 0
-                  ? `${remainingAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} remaining from the planned amount.`
-                  : "The planned amount is already covered for this period."
-                : "Checking decreases and the credit card liability decreases."}
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Amount
-            </label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              inputMode="decimal"
-              value={dialog.amount}
-              onChange={(event) => dialog.setAmount(event.target.value)}
-              placeholder="0.00"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Date
-            </label>
-            <Input
-              type="date"
-              value={dialog.date}
-              onChange={(event) => dialog.setDate(event.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Note
-            </label>
-            <Textarea
-              value={dialog.note}
-              onChange={(event) => dialog.setNote(event.target.value)}
-              className="h-20 resize-none"
-              placeholder="Optional note"
-            />
-          </div>
-        </div>
-
-        <DialogFooter className="app-dialog-actions">
-          <Button
-            variant="outline"
-            onClick={dialog.closeDialog}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={dialog.submit}
-            disabled={saving || !fromAccount || (!isIncome && !toAccount)}
-          >
-            {saving ? "Saving..." : isIncome ? "Post Income" : remainingAmount > 0 ? "Pay" : "Add extra"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+function RecurringPaymentDialog({dialog,accounts,categories,currency,formatCurrencyElement,saving}) {
+ const rule=dialog.rule;if(!rule)return null;
+ const type=normalizeRuleType(rule.type),isIncome=type==='income',isDebt=type==='transfer',flexible=isDebt&&(rule.payment_mode||'fixed')==='flexible',locked=!isIncome&&!flexible;
+ const from=accounts.find(a=>a.id===rule.account_id),to=accounts.find(a=>a.id===rule.to_account_id),category=categories.find(c=>c.id===rule.category_id);
+ const planned=Number(rule.month_planned_amount||rule.amount||0),paid=Number(rule.month_paid_amount||0),remaining=Math.max(0,planned-paid);
+ return <ScheduledPostingDialog key={rule.id} dialog={dialog} title={isIncome?'Receive '+rule.name:isDebt?'Pay '+rule.name:'Post '+rule.name} description="Confirm the linked scheduled transaction." currency={currency} formatCurrencyElement={formatCurrencyElement} locked={locked} lockedAmount={Number(rule.amount||0)} scheduledDate={rule.next_due_date} accountLabel={isDebt?'Payment path':isIncome?'Deposit account':'Payment account'} accountText={isDebt?(from?.name||'Missing account')+' → '+(to?.name||'Missing destination'):from?.name||'Missing account'} details={[[ 'Category',category?.name],...(isIncome||flexible?[['Planned this month',formatCurrencyElement(planned,currency)],['Already posted',formatCurrencyElement(paid,currency)],['Remaining this month',formatCurrencyElement(remaining,currency)]]:[])]} saving={saving} disabled={!from||(isDebt&&!to)} actionLabel={isIncome?'Receive income':isDebt?flexible?(remaining>0?'Pay':'Add extra'):'Pay installment':'Post expense'}/>;
 }
 
 function ScheduledRecurringRow({
@@ -205,12 +98,7 @@ function ScheduledRecurringRow({
       : null;
 
   const handleAction = () => {
-    if (flexibleCreditCard || isIncome) {
-      paymentDialog.openDialog(rule);
-      return;
-    }
-
-    onPost(rule);
+    paymentDialog.openDialog(rule);
   };
 
   return (
@@ -355,6 +243,9 @@ export default function ScheduledRecurringList({
       <RecurringPaymentDialog
         dialog={paymentDialog}
         accounts={accounts}
+        categories={categories}
+        currency={currency}
+        formatCurrencyElement={formatCurrencyElement}
         saving={Boolean(postingId)}
       />
     </section>

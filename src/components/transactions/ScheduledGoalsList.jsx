@@ -1,3 +1,4 @@
+import ScheduledPostingDialog from './ScheduledPostingDialog';
 import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { PiggyBank } from "lucide-react";
 
@@ -19,118 +20,11 @@ import {
 } from "@/lib/goals";
 import ScheduledItemCard, { ScheduledSectionCard, ScheduledAccordion } from "./ScheduledItemCard";
 
-function GoalContributionDialog({
-  dialog,
-  accounts,
-  currency,
-  saving,
-  formatCurrencyElement,
-}) {
-  const goal = dialog.goal;
-  const fromAccount = accounts.find(
-    (account) => account.id === goal?.from_account_id,
-  );
-  const toAccount = accounts.find(
-    (account) => account.id === goal?.to_account_id,
-  );
-
-  if (!goal) return null;
-
-  const isFixed = (goal.contribution_mode || "flexible") === "fixed";
-  const remainingAmount = Math.max(0, Number(dialog.remainingAmount || 0));
-  const enteredAmount = Number(dialog.amount || 0);
-  const exceedsRemaining = !isFixed && enteredAmount > remainingAmount;
-
-  return (
-    <Dialog open={dialog.open} onOpenChange={(open) => !open && dialog.closeDialog()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Contribute to {goal.name}</DialogTitle>
-          <DialogDescription>
-            This creates a transfer from the saved checking account to the saved
-            savings account.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="app-dialog-scroll space-y-4">
-          <div className="border-b border-border pb-3">
-            <p className="text-xs font-medium text-muted-foreground">
-              Transfer path
-            </p>
-            <p className="mt-1 text-sm font-semibold text-foreground">
-              {fromAccount?.name || "Missing from account"} →{" "}
-              {toAccount?.name || "Missing savings account"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Goal progress is updated, but net worth stays neutral.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Amount
-            </label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              max={!isFixed ? remainingAmount : undefined}
-              inputMode="decimal"
-              value={dialog.amount}
-              onChange={(event) => dialog.setAmount(event.target.value)}
-              placeholder="0.00"
-            />
-            {!isFixed && (
-              <p className={`text-xs ${exceedsRemaining ? "text-destructive font-medium" : "text-muted-foreground"}`}>
-                {exceedsRemaining ? "Amount exceeds remaining goal. " : "Maximum contribution: "}
-                {formatCurrencyElement(remainingAmount, currency)}
-              </p>
-            )}
-
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Date
-            </label>
-            <Input
-              type="date"
-              value={dialog.date}
-              onChange={(event) => dialog.setDate(event.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              Note
-            </label>
-            <Textarea
-              value={dialog.note}
-              onChange={(event) => dialog.setNote(event.target.value)}
-              className="h-20 resize-none"
-              placeholder="Optional note"
-            />
-          </div>
-        </div>
-
-        <DialogFooter className="app-dialog-actions">
-          <Button
-            variant="outline"
-            onClick={dialog.closeDialog}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={dialog.submit}
-            disabled={saving || !fromAccount || !toAccount || exceedsRemaining}
-          >
-            {saving ? "Contributing..." : "Contribute"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+function GoalContributionDialog({dialog,accounts,currency,saving,formatCurrencyElement}) {
+ const goal=dialog.goal;if(!goal)return null;
+ const from=accounts.find(a=>a.id===goal.from_account_id),to=accounts.find(a=>a.id===goal.to_account_id);
+ const fixed=(goal.contribution_mode||'flexible')==='fixed',remaining=Math.max(0,Number(dialog.remainingAmount||0));
+ return <ScheduledPostingDialog key={goal.id} dialog={dialog} title={'Contribute to '+goal.name} description="Transfer funds to the linked savings goal." currency={currency} formatCurrencyElement={formatCurrencyElement} locked={fixed} lockedAmount={Math.min(Number(goal.fixed_contribution_amount||0),remaining)} scheduledDate={fixed?goal.next_due_date:null} accountLabel="Transfer path" accountText={(from?.name||'Missing account')+' → '+(to?.name||'Missing savings account')} details={[[ 'Remaining goal',formatCurrencyElement(remaining,currency)]]} saving={saving} disabled={!from||!to} actionLabel="Contribute" maxAmount={remaining}/>;
 }
 
 function ScheduledGoalRow({
