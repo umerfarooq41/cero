@@ -2297,3 +2297,17 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
  .cero-inline-amount>.cero-hero-amount-input::-webkit-inner-spin-button,.cero-inline-amount>.cero-hero-amount-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
  .cero-inline-amount>span{flex-shrink:0;}
 }
+
+/* Shared desktop bottom gutter: keep the scrolling viewport away from the
+   window edge, with a small end-of-content inset on every workspace route. */
+@media(min-width:1024px){
+ .cero-desktop-workspace .app-main-scroll {
+   --cero-page-bottom:16px;
+   min-height:0;
+   margin-bottom:var(--cero-page-bottom);
+   scroll-padding-bottom:var(--cero-page-bottom);
+ }
+ .cero-desktop-workspace .app-main-scroll .cero-page-content {
+   padding-bottom:var(--cero-page-bottom)!important;
+ }
+}
