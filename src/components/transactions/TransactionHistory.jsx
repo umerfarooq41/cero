@@ -1,5 +1,8 @@
 import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { invalidateScheduledQueries } from '@/lib/queryInvalidation';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
 import {
@@ -290,6 +293,10 @@ function AdvancedFilterSheet({
 
 export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const deletionLock = useRef(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState('');
   const currency = useCurrency();
   const [params] = useSearchParams();
 
@@ -500,6 +507,32 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   });
   const exitSelection = () => { setSelectionMode(false); setSelectedIds([]); };
 
+  const deletableRows = selectedRows.filter(row => !isRecurringTransaction(row) && !isGoalContribution(row) && !row.goal_id && (!row.source_type || row.source_type === 'manual' || row.source_type === 'regular') && !/^(Account balance adjustment|Debt principal removed:)/i.test(row.note || ''));
+  const deleteSelected = async () => {
+    if (deletionLock.current || !deletableRows.length || deletableRows.length !== selectedRows.length) return;
+    if (navigator.onLine === false) { setBulkMessage('Connect to the internet before deleting transactions.'); return; }
+    if (!window.confirm(`Permanently delete ${deletableRows.length} selected transactions and reverse their balance effects?`)) return;
+    deletionLock.current = true;
+    setBulkBusy(true);
+    setBulkMessage('');
+    const deleted = [];
+    try {
+      for (const row of deletableRows) {
+        const { error } = await supabase.rpc('cero_delete_transaction', { p_transaction_id: row.id });
+        if (error) throw error;
+        deleted.push(row.id);
+      }
+      setBulkMessage(`${deleted.length} transactions deleted.`);
+    } catch {
+      setBulkMessage(`${deleted.length} confirmed deleted. Stopped after an error; refresh and verify remaining transactions before retrying.`);
+    } finally {
+      invalidateScheduledQueries(queryClient);
+      setSelectedIds([]);
+      setBulkBusy(false);
+      deletionLock.current = false;
+    }
+  };
+
   const clearAdvancedFilters = () => {
     setSourceFilter('all');
     setAccountFilter('all');
@@ -572,10 +605,13 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
         /></div>
       </div>
 
+      {bulkMessage && <p role="status" className="mb-2 text-xs text-muted-foreground">{bulkMessage}</p>}
       {selectionMode && <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
         <Button size="sm" variant="ghost" disabled={!sortedTransactions.length} onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button>
         <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button>
         <span aria-live="polite">{selectedRows.length} selected</span>
+        <Button size="sm" variant="outline" disabled={bulkBusy || !selectedRows.length || deletableRows.length !== selectedRows.length} onClick={deleteSelected}>{bulkBusy ? "Deleting…" : "Delete selected"}</Button>
+        {selectedRows.length !== deletableRows.length && <span className="text-xs text-muted-foreground">Linked or protected transactions must be managed individually.</span>}
         {['income','expense','transfer','adjustment'].filter(type => type !== 'adjustment' || selectionTotals.adjustment !== 0).map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectionTotals[type])}</span>)}
       </div>}
       <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
