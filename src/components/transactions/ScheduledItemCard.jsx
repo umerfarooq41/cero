@@ -116,8 +116,8 @@ export default function ScheduledItemCard({
   const toggle = () => group ? group.setExpanded(open ? null : id) : setLocalOpen(!open);
   return (
     <div>
-    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-0 py-2.5 transition-colors hover:bg-accent/40 lg:items-center lg:px-0 lg:py-2.5">
-      <button type="button" aria-label={`${open ? "Collapse" : "Expand"} ${title}`} aria-expanded={open} aria-controls={id} onClick={toggle} className="flex items-center gap-1"><CategoryIcon icon={icon} color={color} size="sm" /><ChevronDown className={cn("size-3 text-muted-foreground transition-transform", open && "rotate-180")}/></button>
+    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-0 py-2.5 transition-colors hover:bg-accent/40 lg:items-center lg:px-0 lg:py-2.5">
+      <button type="button" aria-label={`${open ? "Collapse" : "Expand"} ${title}`} aria-expanded={open} aria-controls={id} onClick={toggle}><CategoryIcon icon={icon} color={color} size="sm" /></button>
 
       <button type="button" aria-expanded={open} aria-controls={id} onClick={toggle} className="min-w-0 flex-1 pt-0.5 text-left">
         <h3 className="min-w-0 truncate text-sm font-medium leading-tight">
@@ -144,6 +144,7 @@ export default function ScheduledItemCard({
 
         {actions}
       </div>
+      <button type="button" aria-label={`${open ? 'Collapse' : 'Expand'} ${title}`} aria-expanded={open} aria-controls={id} onClick={toggle} className="grid size-8 place-items-center text-muted-foreground"><ChevronDown className={cn('size-4 transition-transform', open && 'rotate-180')}/></button>
     </div>
     <AnimatePresence initial={false}>{open && <motion.div id={id} initial={{height:0,opacity:0}} animate={{height:"auto",opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.18}} className="overflow-hidden"><dl className="space-y-2 border-t border-border/50 py-3 pl-2">{details.filter(([,value])=>value !== null && value !== undefined && value !== "").map(([label,value])=><div key={label} className="flex justify-between gap-3 text-xs"><dt className="text-muted-foreground">{label}</dt><dd className="text-right font-medium">{value}</dd></div>)}</dl></motion.div>}</AnimatePresence>
     </div>

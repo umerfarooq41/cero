@@ -12,11 +12,13 @@ import {
   Search,
   SlidersHorizontal,
   ListChecks,
+  Trash2,
   Target,
   WalletCards,
   X,
 } from 'lucide-react';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import EmptyState from '@/components/shared/EmptyState';
 import TransactionRow from '@/components/transactions/TransactionRow';
 import { Button } from '@/components/ui/button';
@@ -52,7 +54,7 @@ import {
   formatCurrencyNumberText,
 } from '@/lib/currencies';
 import { cn } from '@/lib/utils';
-import { getSelectionTotals } from '@/lib/selectionTotals';
+
 
 const ADD_TRANSACTION_ROUTE = '/add-transaction';
 
@@ -181,7 +183,6 @@ function AdvancedFilterSheet({
   setSortBy,
   onClearAdvanced,
   activeCount,
-  onSelectTransactions,
 }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -214,7 +215,6 @@ function AdvancedFilterSheet({
         </SheetHeader>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-3">
-          <button type="button" className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2 text-sm font-medium" onClick={() => { onOpenChange(false); onSelectTransactions?.(); }}>Select transactions <ListChecks className="size-4"/></button>
           <section>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Source</label>
             <div className="grid grid-cols-4 gap-1.5">
@@ -502,7 +502,9 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
   const selectedIds = selection.scope === selectionScope ? selection.ids : [];
   const setSelectedIds = update => setSelection(previous => ({ scope: selectionScope, ids: typeof update === 'function' ? update(previous.scope === selectionScope ? previous.ids : []) : update }));
   const selectedRows = sortedTransactions.filter(row => selectedIds.includes(row.id));
-  const selectionTotals = getSelectionTotals(selectedRows);
+  const [swipedId, setSwipedId] = useState(null);
+  const [deleteRequest, setDeleteRequest] = useState(null);
+  const touchStart = useRef(null);
   const toggleSelection = id => setSelectedIds(ids => {
     const visibleIds = new Set(sortedTransactions.map(row => row.id));
     const visibleSelection = ids.filter(value => visibleIds.has(value));
@@ -512,26 +514,29 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
   const deletableRows = selectedRows.filter(row => !isRecurringTransaction(row) && !isGoalContribution(row) && !row.goal_id && (!row.source_type || row.source_type === 'manual' || row.source_type === 'regular') && !/^(Account balance adjustment|Debt principal removed:)/i.test(row.note || ''));
   const deleteSelected = async () => {
-    if (deletionLock.current || !deletableRows.length || deletableRows.length !== selectedRows.length) return;
+    const rows = deleteRequest?.rows || [];
+    if (!rows.length) return;
+    if (deletionLock.current || !rows.length) return;
     if (navigator.onLine === false) { setBulkMessage('Connect to the internet before deleting transactions.'); return; }
-    if (!window.confirm(`Permanently delete ${deletableRows.length} selected transactions and reverse their balance effects?`)) return;
     deletionLock.current = true;
     setBulkBusy(true);
     setBulkMessage('');
     const deleted = [];
     try {
-      for (const row of deletableRows) {
+      for (const row of rows) {
         const { error } = await supabase.rpc('cero_delete_transaction', { p_transaction_id: row.id });
         if (error) throw error;
         deleted.push(row.id);
       }
       setBulkMessage(`${deleted.length} transactions deleted.`);
-    } catch {
-      setBulkMessage(`${deleted.length} confirmed deleted. Stopped after an error; refresh and verify remaining transactions before retrying.`);
+    } catch (error) {
+      setBulkMessage(`${deleted.length} deleted. ${error.message || 'Deletion failed'}`);
     } finally {
       invalidateScheduledQueries(queryClient);
       setSelectedIds([]);
       setBulkBusy(false);
+      setDeleteRequest(null);
+      setSwipedId(null);
       deletionLock.current = false;
     }
   };
@@ -578,7 +583,6 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           )}
         </div>
 
-        {selectionMode && <Button size="sm" variant="outline" className="!rounded-md" onClick={exitSelection}>Done</Button>}
         <details className="relative hidden lg:block"><summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm">View options</summary><div className="absolute right-0 z-40 mt-2 w-[min(560px,75vw)] space-y-3 rounded-lg border border-border bg-card p-4 shadow-xl"><h3 className="font-semibold">View options</h3><button type="button" className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2 text-sm" onClick={e=>{setSelectionMode(true);e.currentTarget.closest("details").open=false}}>Select transactions <ListChecks className="size-4"/></button><div className="flex flex-wrap gap-2">{[['This month',startOfMonth(new Date()),endOfMonth(new Date())],['Last month',startOfMonth(subMonths(new Date(),1)),endOfMonth(subMonths(new Date(),1))],['Last 3 months',startOfMonth(subMonths(new Date(),2)),endOfMonth(new Date())],['This year',startOfYear(new Date()),endOfYear(new Date())],['Last year',startOfYear(subYears(new Date(),1)),endOfYear(subYears(new Date(),1))],['All dates',null,null]].map(([label,from,to])=><button key={label} className="rounded px-2 py-1 text-sm text-primary hover:bg-muted" onClick={()=>{setDateMode(from?'range':'any');setDateFrom(from?format(from,'yyyy-MM-dd'):'');setDateTo(to?format(to,'yyyy-MM-dd'):'')}}>{label}</button>)}</div><div className="grid grid-cols-2 gap-3"><label className="text-sm">From<Input type="date" value={dateFrom} max={dateTo||undefined} onChange={e=>{setDateMode('range');setDateFrom(e.target.value)}}/></label><label className="text-sm">To<Input type="date" value={dateTo} min={dateFrom||undefined} onChange={e=>{setDateMode('range');setDateTo(e.target.value)}}/></label>{[['Account',accountFilter,setAccountFilter,[{id:'all',name:'All accounts'},...accounts.map(a=>({...a,name:a.is_archived?`${a.name} (Archived)`:a.name}))]],['Category',categoryFilter,setCategoryFilter,[{id:'all',name:'All categories'},...categories]],['Source',sourceFilter,setSourceFilter,sourceFilters.map(x=>({id:x.value,name:x.label}))],['Sort',sortBy,setSortBy,sortOptions.map(x=>({id:x.value,name:x.label}))]].map(([label,value,set,options])=><label key={label} className="text-sm">{label}<Select value={value} onValueChange={set}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{options.map(o=><SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent></Select></label>)}</div><div className="flex justify-end gap-2"><Button variant="ghost" onClick={clearAdvancedFilters}>Reset</Button><Button onClick={e=>e.currentTarget.closest('details').open=false}>Done</Button></div></div></details>
         <div className="lg:hidden"><AdvancedFilterSheet
           open={filterSheetOpen}
@@ -605,18 +609,16 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
           setSortBy={setSortBy}
           onClearAdvanced={clearAdvancedFilters}
           activeCount={activeAdvancedCount}
-          onSelectTransactions={() => setSelectionMode(true)}
         /></div>
       </div>
 
       {bulkMessage && <p role="status" className="mb-2 text-xs text-muted-foreground">{bulkMessage}</p>}
-      {selectionMode && <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-        <Button size="sm" variant="ghost" disabled={!sortedTransactions.length} onClick={() => setSelectedIds(sortedTransactions.map(row => row.id))}>Select visible</Button>
-        <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>Clear</Button>
+      {selectionMode && <div className="mb-2 hidden items-center gap-3 text-sm lg:flex">
+        <Button size="icon" variant="ghost" aria-label="Exit selection" onClick={exitSelection}><X className="size-4"/></Button>
         <span aria-live="polite">{selectedRows.length} selected</span>
-        <Button size="sm" variant="outline" disabled={bulkBusy || !selectedRows.length || deletableRows.length !== selectedRows.length} onClick={deleteSelected}>{bulkBusy ? "Deleting…" : "Delete selected"}</Button>
-        {selectedRows.length !== deletableRows.length && <span className="text-xs text-muted-foreground">Linked or protected transactions must be managed individually.</span>}
-        {['income','expense','transfer','adjustment'].filter(type => type !== 'adjustment' || selectionTotals.adjustment !== 0).map(type => <span key={type} className="text-xs text-muted-foreground capitalize">{type}: {formatCurrency(selectionTotals[type])}</span>)}
+        <Button size="sm" variant="ghost" onClick={() => setSelectedIds(selectedRows.length === sortedTransactions.length ? [] : sortedTransactions.map(row => row.id))}>{selectedRows.length === sortedTransactions.length ? 'Deselect all' : 'Select all'}</Button>
+        <Button size="icon" variant="ghost" aria-label="Delete selected transactions" disabled={bulkBusy || !deletableRows.length} onClick={()=>setDeleteRequest({rows:deletableRows, skipped:selectedRows.length-deletableRows.length})}><Trash2 className="size-5 text-destructive"/></Button>
+        {selectedRows.length !== deletableRows.length && <span className="text-xs text-muted-foreground">{selectedRows.length-deletableRows.length} protected — skipped</span>}
       </div>}
       <nav aria-label="Transaction types" className="cero-workplace-tabs mb-3 flex gap-2 md:gap-5 border-b border-border">
         {[['all','All'],['income','Income'],['expense','Expense'],['transfer','Transfer']].map(([value,label]) => (
@@ -692,8 +694,10 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
 
               <div className="divide-y divide-border/50">
                 {grouped[date].map((transaction) => (
+                  <div key={transaction.id} className="relative overflow-hidden" onTouchStart={e=>{touchStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}} onTouchEnd={e=>{const start=touchStart.current;touchStart.current=null;if(!start)return;const dx=e.changedTouches[0].clientX-start.x;const dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.5)setSwipedId(dx<0?transaction.id:null);}} >
+                  {swipedId===transaction.id && <button type="button" aria-label="Delete transaction" className="absolute inset-y-0 right-0 flex w-20 items-center justify-center bg-destructive text-white" onClick={()=>setDeleteRequest({rows:[transaction],skipped:0,linked:isRecurringTransaction(transaction)||isGoalContribution(transaction)||Boolean(transaction.goal_id)})}><Trash2 className="size-5"/></button>}
+                  <div className="relative bg-background transition-transform duration-150" style={{transform:swipedId===transaction.id?'translateX(-80px)':'none'}}>
                   <TransactionRow
-                    key={transaction.id}
                     transaction={transaction}
                     category={categories.find(
                       (category) => category.id === transaction.category_id
@@ -707,14 +711,18 @@ export default function TransactionHistory({ currentMonth, onMonthChange }) {
                     recurringRule={recurringById.get(transaction.recurring_transaction_id)}
                     goal={goalsById.get(transaction.savings_goal_id || transaction.goal_id)}
                     formatCurrency={formatCurrency}
-                    selectionMode={selectionMode} selected={selectedIds.includes(transaction.id)} onClick={() => selectionMode ? toggleSelection(transaction.id) : navigate(`/transactions/${transaction.id}/edit`)}
+                    onClick={() => swipedId===transaction.id ? setSwipedId(null) : navigate(`/transactions/${transaction.id}/edit`)}
                   />
+                  </div></div>
                 ))}
               </div>
             </div>
           ))}
         </div></div>
       )}
+      <Dialog open={Boolean(deleteRequest)} onOpenChange={open=>{if(!open&&!deletionLock.current)setDeleteRequest(null);}}>
+        <DialogContent><DialogHeader><DialogTitle>Delete {deleteRequest?.rows.length===1?'transaction':'transactions'}?</DialogTitle><DialogDescription>{deleteRequest?.rows.length} transaction(s) will be permanently deleted and balance effects reversed. {deleteRequest?.skipped ? deleteRequest.skipped+' protected transaction(s) will be kept.' : ''} {deleteRequest?.linked ? 'This linked payment may also affect its schedule or goal progress.' : ''}</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" disabled={bulkBusy} onClick={()=>setDeleteRequest(null)}>Cancel</Button><Button variant="destructive" disabled={bulkBusy} onClick={deleteSelected}>{bulkBusy?'Deleting…':'Delete'}</Button></DialogFooter></DialogContent>
+      </Dialog>
     </div>
   );
 }
