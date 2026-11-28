@@ -1,3 +1,4 @@
+import { SectionHeading as SharedSectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { useMemo, useRef, useState } from 'react';
 import { BarChart3, ChartPie, LineChart, Target } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
@@ -169,24 +170,8 @@ function ChartShell({ className = '' }) {
   );
 }
 
-function ChartHeading({ icon: Icon, title, subtitle }) {
-  return (
-    <div className="mb-2 min-w-0">
-      <div className="flex min-w-0 items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-
-        <h3 className="min-w-0 text-sm font-bold leading-5 tracking-tight text-foreground">
-          {title}
-        </h3>
-      </div>
-
-      {subtitle ? (
-        <p className="mt-1 text-left text-[11px] leading-4 text-muted-foreground">
-          {subtitle}
-        </p>
-      ) : null}
-    </div>
-  );
+function ChartHeading({ icon, title, subtitle }) {
+  return <div className="mb-2 min-w-0 text-left"><SharedSectionHeading icon={icon} title={title}/>{subtitle && <p className="mt-1 text-xs leading-4 text-muted-foreground">{subtitle}</p>}</div>;
 }
 
 export default function ReflectCharts({
@@ -315,7 +300,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
       <div className={(desktop || tabbed) && report !== "cash" ? "hidden" : "mb-3 grid gap-3"}>
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4 !rounded-none !bg-transparent !shadow-none">
+            <ReflectCard className="px-0 py-3 !rounded-none !bg-transparent !shadow-none">
               <ChartHeading
                 icon={BarChart3}
                 tone="info"
@@ -448,7 +433,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
       <div className={(desktop || tabbed) && report !== "spending" ? "hidden" : "mb-4 grid gap-3 lg:gap-4"}>
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4 !rounded-none !bg-transparent !shadow-none">
+            <ReflectCard className="px-0 py-3 !rounded-none !bg-transparent !shadow-none">
               <ChartHeading
                 icon={ChartPie}
                 tone="warning"
@@ -484,7 +469,7 @@ const ringScore = isYear ? yearSpendingRatio : roundedBudgetUsage;
 
         <RevealChartCard>
           {(isVisible) => (
-            <ReflectCard className="p-3 sm:p-4 !rounded-none !bg-transparent !shadow-none">
+            <ReflectCard className="px-0 py-3 !rounded-none !bg-transparent !shadow-none">
               <ChartHeading
                 icon={LineChart}
                 tone="info"

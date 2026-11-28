@@ -1,3 +1,4 @@
+import { SectionHeading as SharedSectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Target } from 'lucide-react';
@@ -51,23 +52,8 @@ function getTransactionGoalId(transaction) {
   );
 }
 
-function SectionHeading({ icon: Icon, title, subtitle }) {
-  return (
-    <div className="mb-4 min-w-0">
-      <div className="flex min-w-0 items-center gap-2">
-        {Icon ? <Icon className="h-4 w-4 shrink-0 text-muted-foreground" /> : null}
-        <h3 className="min-w-0 truncate text-sm font-bold tracking-tight text-foreground sm:text-base">
-          {title}
-        </h3>
-      </div>
-
-      {subtitle ? (
-        <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
-          {subtitle}
-        </p>
-      ) : null}
-    </div>
-  );
+function SectionHeading({ icon, title, subtitle }) {
+  return <div className="mb-2 min-w-0 text-left"><SharedSectionHeading icon={icon} title={title}/>{subtitle && <p className="mt-1 text-xs leading-4 text-muted-foreground">{subtitle}</p>}</div>;
 }
 
 function EmptyBlock({ title, text }) {
@@ -156,7 +142,7 @@ function MetricLine({ label, value, subtext, tone = 'default', delay = 0 }) {
 
   return (
     <motion.div
-      className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-border/45 app-card-surface-soft px-2.5 py-2"
+      className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border/45 py-2"
       initial={{ y: 6, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 220, damping: 20, delay }}
@@ -287,7 +273,7 @@ function GoalProgressAnalysis({ goals, goalTransactions, currency, isYear = fals
   );
 
   return (
-    <ReflectCard className="overflow-hidden p-3">
+    <ReflectCard className="overflow-hidden px-0 py-3">
       <SectionHeading
         icon={Target}
         title="Goal progress"

@@ -83,7 +83,7 @@ export default function ReflectPeriodSelector({
     <div className="cero-reflect-period mb-3 flex min-w-0 items-center justify-between gap-1">
       <div className="flex shrink-0 items-center rounded-md border border-border p-0.5">
         {['month', 'year'].map(mode => <button key={mode} type="button" aria-pressed={periodMode === mode} onClick={() => changeMode(mode)}
-          className={`rounded-sm px-1.5 sm:px-2.5 h-8 text-xs sm:text-sm font-medium ${periodMode === mode ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
+          className={`rounded-sm px-1.5 sm:px-2.5 h-9 text-xs sm:text-sm font-medium ${periodMode === mode ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}>{mode === 'month' ? 'Month' : 'Year'}</button>)}
       </div>
       <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
         <button type="button" aria-label="Previous period" onClick={() => navigate(-1)} className="flex h-9 w-7 sm:w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>

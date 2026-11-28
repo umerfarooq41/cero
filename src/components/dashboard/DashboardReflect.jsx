@@ -1,4 +1,4 @@
-import { WorkspaceTab } from '@/components/shared/WorkspacePrimitives';
+import { WorkspaceTab, SectionHeading } from '@/components/shared/WorkspacePrimitives';
 import { useMemo, useState } from 'react';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { format } from 'date-fns';
@@ -546,7 +546,7 @@ export default function DashboardReflect() {
 
       <div className={report !== 'spending' ? 'hidden' : 'animate-child'}>
         <section className="overflow-hidden px-0 py-3" aria-label="Financial insights">
-          <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /><h3 className="cero-section-title text-foreground">Insights</h3></div>
+          <div className="mb-2"><SectionHeading title="Insights" icon={Lightbulb}/></div>
           {insights.map((insight, index) => {
             const Icon = insight.icon;
             const metricTone = insight.tone === 'good'
@@ -558,7 +558,7 @@ export default function DashboardReflect() {
                   : 'text-primary bg-primary/10';
             return (
               <div key={`${isYear ? 'year' : 'month'}-${insight.title}`}
-                className={`py-3 ${index > 0 ? 'border-t border-border/60' : ''}`}>
+                className={`py-2 ${index > 0 ? 'border-t border-border/60' : ''}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
                     {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />}
