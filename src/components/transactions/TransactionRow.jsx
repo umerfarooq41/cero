@@ -189,15 +189,20 @@ export default function TransactionRow({
 
   const amountValue = Math.abs(Number(transaction.amount || 0));
 
-  if (desktopLedger) return (
-    <tr onClick={onClick} className={cn("cursor-pointer hover:bg-muted/30", selected && "bg-primary/10")}>
-      <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">{transaction.date && /^\d{4}-\d{2}-\d{2}$/.test(transaction.date) ? new Date(transaction.date + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : transaction.date || '—'}</td>
-      <th scope="row" className="px-3 py-3 text-left font-medium"><button type="button" aria-pressed={selectionMode ? selected : undefined} onClick={event => { event.stopPropagation(); onClick?.(); }} className="flex items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{selectionMode && <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center rounded border border-muted-foreground text-lg text-primary">{selected ? "✓" : ""}</span>}{isTransfer ? <ArrowLeftRight className="size-5 shrink-0 text-sky-500"/> : <CategoryIcon icon={category?.icon || 'tag'} color={category?.color} size="sm"/>}<span className="min-w-0 break-words">{title}{payee && !isTransfer && category?.name && category.name.toLowerCase() !== title.toLowerCase() && <span className="block text-xs font-normal text-muted-foreground">{category.name}</span>}{!isAdjustment && !isRecurring && !isGoalContribution && noteLabel && noteLabel !== title && <span className="block text-xs font-normal text-muted-foreground">{noteLabel}</span>}</span><SourceBadge type={sourceBadgeType} tone={sourceBadgeTone} compact/></button></th>
-      <td className="px-3 py-3 text-muted-foreground">{isTransfer ? movementLabel : accountName}</td>
-      <td className="px-3 py-3 text-xs text-muted-foreground">{isAdjustment ? (isDebtRemoval ? 'Debt adjustment' : 'Balance adjustment') : isTransfer ? transferKindLabel : transactionTypeLabel}</td>
+  if (desktopLedger) {
+    const kind=isAdjustment?(isDebtRemoval?'Debt adjustment':'Balance adjustment'):isTransfer?transferKindLabel:transactionTypeLabel;
+    const categoryName=isAdjustment?'Balance adjustment':category?.name||(isTransfer?transferKindLabel:'Uncategorized');
+    const suffix=categoryName.toLowerCase()===kind.toLowerCase()?'':' – '+kind;
+    const memo=String(transaction.note||'').trim();
+    return <tr onClick={onClick} className={cn("cursor-pointer hover:bg-muted/30",selected&&"bg-primary/10")}>
+      <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">{transaction.date&&/^\d{4}-\d{2}-\d{2}$/.test(transaction.date)?new Date(transaction.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):transaction.date||'—'}</td>
+      <th scope="row" className="min-w-0 px-3 py-3 text-left font-medium"><button type="button" aria-pressed={selectionMode?selected:undefined} onClick={event=>{event.stopPropagation();onClick?.();}} className="flex w-full min-w-0 items-center gap-2 text-left hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{selectionMode&&<span aria-hidden="true" className="grid size-6 shrink-0 place-items-center rounded border border-muted-foreground text-lg text-primary">{selected?'✓':''}</span>}{isTransfer?<ArrowLeftRight className="size-4 shrink-0 text-sky-500"/>:<CategoryIcon icon={category?.icon||'tag'} color={category?.color} size="sm"/>}<span className="min-w-0 truncate" title={categoryName+suffix}>{categoryName}<span className="font-normal text-muted-foreground">{suffix}</span></span></button></th>
+      <td className="min-w-0 px-3 py-3"><span className={cn('block truncate',!payee&&'text-muted-foreground')} title={payee}>{!isTransfer&&payee?payee:'—'}</span></td>
+      <td className="min-w-0 px-3 py-3"><span className="block truncate" title={isTransfer?movementLabel:accountName}>{isTransfer?movementLabel:accountName}</span></td>
+      <td className="min-w-0 px-3 py-3 text-muted-foreground"><span className="block truncate" title={memo}>{memo||'—'}</span></td>
       <td className={cn('whitespace-nowrap px-3 py-3 text-right font-medium tabular-nums',config.color)}>{config.sign} <CurrencyAmount value={amountValue} formatCurrency={formatCurrency}/></td>
-    </tr>
-  );
+    </tr>;
+  }
 
   return (
     <div
