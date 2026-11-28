@@ -1970,3 +1970,14 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 .cero-account-chevron{display:inline-block;vertical-align:middle;margin-left:6px;}
 .cero-account-hero{justify-content:center;text-align:center;}
 }
+
+@media(max-width:1023px){
+.cero-desktop-workspace tr.cero-inline-detail-row{background:transparent!important;}
+.cero-desktop-workspace tr.cero-inline-detail-row>td{padding:4px 0 8px!important;}
+.cero-inline-detail-row .cero-detail-panel{background:hsl(var(--muted)/.55);border-radius:10px;padding:10px 12px;gap:8px;}
+.cero-inline-detail-row .cero-detail-panel .cero-detail-section{border:0;padding:0;}
+.cero-inline-detail-row .cero-detail-section button{min-height:36px;padding-block:4px;}
+.cero-inline-detail-row .cero-detail-section h3{font-size:14px;}
+.cero-inline-detail-row .cero-detail-section>div:first-child{min-height:32px;}
+.cero-inline-detail-row .cero-detail-panel>div:first-child{justify-content:space-between;}
+}
