@@ -64,11 +64,11 @@ function BottomNavStyles() {
           height: var(--app-bottom-nav-height);
           padding-bottom: var(--app-safe-area-bottom);
           border: 0 !important;
-          border-top: 0 !important;
+          border-top: 1px solid hsl(var(--border)) !important;
           border-bottom: 0 !important;
           outline: 0 !important;
-          background: transparent !important;
-          background-color: transparent !important;
+          background: hsl(var(--background)) !important;
+          background-color: hsl(var(--background)) !important;
           background-image: none !important;
           box-shadow: none !important;
           backdrop-filter: none !important;
@@ -120,10 +120,9 @@ export default function BottomNav() {
                       <motion.span
                         layoutId="bottom-nav-active-orb"
                         aria-hidden="true"
-                        className="absolute inset-0 rounded-full bg-primary/10 ring-1 ring-primary/35"
+                        className="absolute inset-0 rounded-full bg-primary/10"
                         style={{
-                          boxShadow:
-                            '0 0 0 1px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(var(--foreground) / 0.08)',
+                          boxShadow: 'none',
                         }}
                         transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                       />
@@ -132,7 +131,7 @@ export default function BottomNav() {
                     {isActive && (
                       <motion.span
                         aria-hidden="true"
-                        className="absolute -inset-2 rounded-full bg-primary/15 blur-xl"
+                        className="hidden"
                         initial={{ opacity: 0, scale: 0.75 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.75 }}
