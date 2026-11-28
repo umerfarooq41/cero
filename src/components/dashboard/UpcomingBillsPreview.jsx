@@ -1,3 +1,4 @@
+import { getOutstandingOccurrence } from '@/components/transactions/scheduledUtils';
 import { Link } from 'react-router-dom';
 import {
   ArrowDownLeft,
@@ -43,19 +44,6 @@ function getStatusClass(status) {
   return 'border-primary/20 bg-primary/10 text-primary';
 }
 
-function getOutstandingOccurrence(rule, transactions) {
-  const due = String(rule?.next_due_date || '').slice(0, 10);
-  const linked = transactions.filter(tx => tx?.recurring_transaction_id === rule.id || tx?.source_id === rule.id);
-  const sameOccurrence = linked.filter(tx => {
-    const postedFor = String(tx?.recurring_posted_for_date || '').slice(0, 10);
-    return postedFor ? postedFor === due : String(tx?.date || '').slice(0, 10) === due;
-  });
-  const paid = sameOccurrence.reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
-  const planned = Math.max(0, Number(rule.amount || 0));
-  const remaining = Math.max(0, Math.round((planned - paid) * 100) / 100);
-  return { paid, planned, remaining, hasPosting: sameOccurrence.length > 0 };
-}
-
 function RuleAmount({ rule, amount, formatCurrency }) {
   const displayAmount = Math.abs(Number(amount ?? rule.amount ?? 0));
 
@@ -96,7 +84,7 @@ export default function UpcomingBillsPreview({
     })
     .filter(({ rule, pending }) => {
       const days = getRecurringStatus(rule, todayIsoDate()).daysUntilDue;
-      return pending && days !== null && days <= 10;
+      return pending && days !== null && days <= 7;
     })
     .slice(0, limit);
 
@@ -119,9 +107,9 @@ export default function UpcomingBillsPreview({
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
             <Clock3 className="h-5 w-5" />
           </div>
-          <p className="mt-3 text-sm font-semibold text-foreground">Nothing due in the next 10 days</p>
+          <p className="mt-3 text-sm font-semibold text-foreground">Nothing due in the next 7 days</p>
           <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
-            Unpaid bills and income due within 10 days appear here. Overdue items remain visible.
+            Unpaid bills and income due within 7 days appear here. Overdue items remain visible.
           </p>
         </div>
       ) : (

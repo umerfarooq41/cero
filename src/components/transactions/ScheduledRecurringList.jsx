@@ -33,8 +33,8 @@ function RecurringPaymentDialog({
   saving,
 }) {
   const rule = dialog.rule;
-  const plannedAmount = Number(rule?.month_planned_amount || rule?.amount || 0);
-  const paidThisMonth = Number(rule?.month_paid_amount || 0);
+  const plannedAmount = Number(rule?.type === 'income' ? rule.occurrence?.planned ?? rule.amount : rule?.month_planned_amount || rule?.amount || 0);
+  const paidThisMonth = Number(rule?.type === 'income' ? rule.occurrence?.paid ?? 0 : rule?.month_paid_amount || 0);
   const remainingAmount = Math.max(0, plannedAmount - paidThisMonth);
 
   const fromAccount = accounts.find(
@@ -162,8 +162,8 @@ function ScheduledRecurringRow({
   const isIncome = type === "income";
   const flexibleCreditCard = isDebt && (rule.payment_mode || "fixed") === "flexible";
   const fixedDebt = isDebt && !flexibleCreditCard;
-  const plannedThisMonth = Number(rule.month_planned_amount ?? baseAmount);
-  const paidThisMonth = Number(rule.month_paid_amount || 0);
+  const plannedThisMonth = Number(isIncome ? rule.occurrence?.planned ?? baseAmount : rule.month_planned_amount ?? baseAmount);
+  const paidThisMonth = Number(isIncome ? rule.occurrence?.paid ?? 0 : rule.month_paid_amount || 0);
   const monthRemaining = Math.max(0, plannedThisMonth - paidThisMonth);
   const isMonthCovered =
     (flexibleCreditCard || isIncome) && plannedThisMonth > 0 && monthRemaining <= 0.005;
@@ -175,7 +175,7 @@ function ScheduledRecurringRow({
   const fallbackIcon =
     type === "income" ? "income" : type === "transfer" ? "loan" : "receipt";
   const buttonLabel = isIncome
-    ? posting ? "Saving…" : isMonthCovered ? "Received" : !dueNow ? "Upcoming" : paidThisMonth > 0 ? "Receive remaining" : "Receive"
+    ? posting ? "Saving…" : !dueNow ? "Upcoming" : isMonthCovered ? "Received" : paidThisMonth > 0 ? "Receive remaining" : "Receive"
     : flexibleCreditCard
       ? posting ? "Saving…" : isMonthCovered ? "Add extra" : "Pay"
     : fixedDebt
@@ -228,7 +228,7 @@ function ScheduledRecurringRow({
       subtitle={
         <div className="flex min-w-0 items-center gap-1.5 truncate">
           <span className="truncate">
-            {getRecurringFrequencyLabel(rule.frequency)} · {isIncome && isMonthCovered ? "Received this month" : status.label}
+            {getRecurringFrequencyLabel(rule.frequency)} · {status.label}
           </span>
           {!rule.is_active && (
             <ScheduledStatusBadge className="border-border bg-secondary text-muted-foreground">

@@ -228,7 +228,7 @@ export default function DashboardOverview({ currentMonth, allocations = [], budg
     </div>
     <div className="contents md:grid md:grid-cols-2 md:gap-4 md:pt-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-8">
       <div className="contents">
-        <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={transactions} formatCurrency={formatCurrency} limit={3} className="cero-overview-section cero-upcoming-section !rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none !px-0"/></Entrance></div>
+        <div className="contents md:order-2"><Entrance index={3}><UpcomingBillsPreview recurringTransactions={recurringTransactions} accounts={accounts} categories={categories} transactions={allTransactions} formatCurrency={formatCurrency} limit={3} className="cero-overview-section cero-upcoming-section !rounded-none !border-0 !bg-transparent !shadow-none !backdrop-blur-none !px-0"/></Entrance></div>
         <div className="contents md:order-1"><Entrance index={4}><Recent transactions={transactions} categories={categories} accounts={accounts} recurringTransactions={recurringTransactions} goals={goals} formatCurrency={formatCurrency}/></Entrance></div>
         <div className="contents md:order-3">{upcomingGoals.length > 0 && <Entrance index={5}><ScheduledGoalsPreview goals={upcomingGoals} accounts={accounts} formatCurrency={formatCurrency}/></Entrance>}</div>
       </div>
