@@ -370,7 +370,7 @@ function PlanAmountRow({
   );
 }
 
-export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, transactions = EMPTY_ROWS, goalContributions = EMPTY_ROWS }) {
+export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified = false, draftRef, transactions = EMPTY_ROWS, goalContributions = EMPTY_ROWS }) {
   const queryClient = useQueryClient();
   const formatCurrency = useCurrencyFormatter();
 
@@ -406,11 +406,12 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
   }, [allTransactions, currentMonth]);
 
   const [values, setValues] = useState({});
-  const draft = useRef({});
+  const localDraft = useRef({});
+  const draft = draftRef || localDraft;
   const [activeType, setActiveType] = useState('expense');
   const [selectedKey, setSelectedKey] = useState(null);
   const [editorRequest, setEditorRequest] = useState(null);
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirty] = useState(() => Boolean(Object.keys(draft.current).length));
   const [saving, setSaving] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({});
 
@@ -624,7 +625,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
     });
 
     setValues(unified ? { ...initial, ...draft.current } : initial);
-  }, [allocationByRowKey, allRows, unified]);
+  }, [allocationByRowKey, allRows, unified, draft]);
 
   const sumType = (type) => {
     return rowsByType[type]
@@ -742,7 +743,7 @@ export default function MonthlyPlanPanel({ currentMonth, onMonthChange, unified 
   allRows.filter(row=>editable(row)&&!allocationByRowKey[row.key]).forEach(row=>draftAllocations.push({category_id:row.categoryId,source_type:'category',source_id:row.id,budget_type:row.type,planned_amount:Number(values[row.key]||0)}));
   const unifiedTotals = unified ? buildPlanTotals({allocations:draftAllocations,categories,savingsGoals,recurringTransactions,allTransactions,transactions,currentMonth}) : null;
   const requestEditor = (kind,row=null) => setEditorRequest({kind,type:activeType,row,nonce:Date.now()});
-  const changeUnifiedMonth = month => { if (!dirty || window.confirm('Discard unsaved allocation changes?')) onMonthChange?.(month); };
+  const changeUnifiedMonth = month => { if (draftRef || !dirty || window.confirm('Discard unsaved allocation changes?')) onMonthChange?.(month); };
   if (unified) {
     const summaryPlanned = selected ? plannedFor(selected) : sumType(activeType);
     const summaryTracked = selected ? trackedFor(selected) : visibleRows.reduce((sum,row)=>sum+trackedFor(row),0);

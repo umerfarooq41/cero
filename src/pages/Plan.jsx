@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, addMonths, subMonths } from 'date-fns';
 import { PencilLine, ChevronLeft, ChevronRight, Settings, WifiOff } from 'lucide-react';
@@ -35,6 +35,7 @@ export default function Plan() {
     monthFromUrl || format(new Date(), 'yyyy-MM')
   );
   const [activeTab, setActiveTab] = useState('expense');
+  const desktopDraft = useRef({});
 
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
   useEffect(() => { const mq = window.matchMedia('(min-width: 1024px)'); const update = () => setDesktop(mq.matches); mq.addEventListener('change', update); return () => mq.removeEventListener('change', update); }, []);
@@ -124,6 +125,9 @@ export default function Plan() {
   const leftToAllocate = plannedTotals.leftToAllocate;
 
   const handleMonthChange = (month) => {
+    if (month === currentMonth) return;
+    if (Object.keys(desktopDraft.current).length && !window.confirm('Discard unsaved allocation changes?')) return;
+    desktopDraft.current = {};
     setCurrentMonth(month);
 
     const params = new URLSearchParams(location.search);
@@ -132,7 +136,7 @@ export default function Plan() {
     navigate(`/plan?${params.toString()}`, { replace: true });
   };
 
-  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><main className="cero-page-content cero-page-content-no-header mx-auto w-full max-w-7xl px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
+  if (desktop) return <div ref={scope} className="min-h-screen bg-transparent"><main className="cero-page-content cero-page-content-no-header mx-auto w-full max-w-7xl px-8 pb-8 pt-3"><MonthlyPlanPanel key={currentMonth} currentMonth={currentMonth} onMonthChange={handleMonthChange} unified draftRef={desktopDraft} transactions={planTransactions} goalContributions={goalContributions}/></main></div>;
   if (budgetSummary.isLoading) {
     return (
       <div ref={scope} className="min-h-screen bg-transparent">
