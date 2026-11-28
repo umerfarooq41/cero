@@ -24,7 +24,7 @@ export default function DashboardSectionCard({
               <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             ) : null}
 
-            <h2 className="min-w-0 truncate text-sm font-semibold tracking-tight text-foreground">
+            <h2 className="cero-dashboard-section-title min-w-0 truncate text-sm font-semibold text-foreground">
               {title}
             </h2>
           </div>

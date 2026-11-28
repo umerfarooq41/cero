@@ -30,7 +30,7 @@ export const formatCurrencyText = (value, currency) => {
 function RiyalIcon({ className }) {
   return (
     <span
-      className={cn('inline-block shrink-0 bg-current', className)}
+      className={cn('cero-currency-symbol inline-block shrink-0 bg-current', className)}
       style={{
         WebkitMask: "url('/sar.svg') center / contain no-repeat",
         mask: "url('/sar.svg') center / contain no-repeat",
@@ -51,7 +51,7 @@ export function CurrencyAmount({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
+        'cero-currency-amount inline-flex items-center gap-1 align-middle whitespace-nowrap leading-none text-current tabular-nums',
         className
       )}
     >
