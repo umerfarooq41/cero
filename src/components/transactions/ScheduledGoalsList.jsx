@@ -17,7 +17,7 @@ import {
   getGoalProgress,
   getGoalRemaining,
 } from "@/lib/goals";
-import ScheduledItemCard, { ScheduledSectionCard } from "./ScheduledItemCard";
+import ScheduledItemCard, { ScheduledSectionCard, ScheduledAccordion } from "./ScheduledItemCard";
 
 function GoalContributionDialog({
   dialog,
@@ -201,6 +201,18 @@ function ScheduledGoalRow({
       icon={goal.icon_key || "target"}
       color={color}
       title={goal.name}
+      details={[
+        ["Contribution", formatCurrencyElement(displayAmount, currency)],
+        ["Frequency", goal.frequency],
+        ["Next due date", goal.next_due_date],
+        ["Target date", goal.target_date],
+        ["From account", fromAccount?.name],
+        ["Savings account", toAccount?.name],
+        ["Target amount", formatCurrencyElement(target, currency)],
+        ["Total funded", formatCurrencyElement(Math.max(0,target-remaining), currency)],
+        ["Remaining", formatCurrencyElement(remaining, currency)],
+        ["Progress", `${progress}%`],
+      ]}
       subtitle={
         isCompleted
           ? "100%"
@@ -239,7 +251,7 @@ function ScheduledGoalRow({
 }
 
 function FlatGoalSection({ children }) {
-  return <div className="divide-y divide-border/50">{children}</div>;
+  return <ScheduledAccordion><div className="divide-y divide-border/50">{children}</div></ScheduledAccordion>;
 }
 
 export default function ScheduledGoalsList({

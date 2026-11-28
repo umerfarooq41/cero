@@ -1,5 +1,5 @@
 import { SectionHeading } from '@/components/shared/WorkspacePrimitives';
-import { useState } from "react";
+import { createContext, useContext, useId, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDownLeft,
@@ -93,6 +93,12 @@ export function ScheduledStatusBadge({ children, className }) {
   );
 }
 
+const ExpansionContext = createContext(null);
+export function ScheduledAccordion({ children }) {
+  const [expanded, setExpanded] = useState(null);
+  return <ExpansionContext.Provider value={{ expanded, setExpanded }}>{children}</ExpansionContext.Provider>;
+}
+
 export default function ScheduledItemCard({
   icon,
   color,
@@ -101,12 +107,19 @@ export default function ScheduledItemCard({
   meta,
   amount,
   actions,
+  details = [],
 }) {
+  const id = useId();
+  const group = useContext(ExpansionContext);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = group ? group.expanded === id : localOpen;
+  const toggle = () => group ? group.setExpanded(open ? null : id) : setLocalOpen(!open);
   return (
+    <div>
     <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-0 py-2.5 transition-colors hover:bg-accent/40 lg:items-center lg:px-0 lg:py-2.5">
-      <CategoryIcon icon={icon} color={color} size="sm" />
+      <button type="button" aria-label={`${open ? "Collapse" : "Expand"} ${title}`} aria-expanded={open} aria-controls={id} onClick={toggle} className="flex items-center gap-1"><CategoryIcon icon={icon} color={color} size="sm" /><ChevronDown className={cn("size-3 text-muted-foreground transition-transform", open && "rotate-180")}/></button>
 
-      <div className="min-w-0 flex-1 pt-0.5">
+      <button type="button" aria-expanded={open} aria-controls={id} onClick={toggle} className="min-w-0 flex-1 pt-0.5 text-left">
         <h3 className="min-w-0 truncate text-sm font-medium leading-tight">
           {title}
         </h3>
@@ -122,7 +135,7 @@ export default function ScheduledItemCard({
             {meta}
           </div>
         )}
-      </div>
+      </button>
 
       <div className="ml-1 flex max-w-[9.75rem] flex-col items-end gap-2 text-right lg:grid lg:max-w-none lg:grid-cols-[minmax(8rem,auto)_10rem] lg:items-center lg:gap-4">
         <div className="text-sm font-semibold tabular-nums text-foreground">
@@ -131,6 +144,8 @@ export default function ScheduledItemCard({
 
         {actions}
       </div>
+    </div>
+    <AnimatePresence initial={false}>{open && <motion.div id={id} initial={{height:0,opacity:0}} animate={{height:"auto",opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.18}} className="overflow-hidden"><dl className="space-y-2 border-t border-border/50 py-3 pl-2">{details.filter(([,value])=>value !== null && value !== undefined && value !== "").map(([label,value])=><div key={label} className="flex justify-between gap-3 text-xs"><dt className="text-muted-foreground">{label}</dt><dd className="text-right font-medium">{value}</dd></div>)}</dl></motion.div>}</AnimatePresence>
     </div>
   );
 }

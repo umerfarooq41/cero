@@ -24,6 +24,7 @@ import {
 } from "./scheduledUtils";
 import ScheduledItemCard, {
   ScheduledSectionCard,
+  ScheduledAccordion,
   ScheduledStatusBadge,
 } from "./ScheduledItemCard";
 
@@ -225,6 +226,16 @@ function ScheduledRecurringRow({
             : "#ef4444")
       }
       title={rule.name}
+      details={[
+        ["Scheduled amount", formatCurrencyElement(baseAmount, currency)],
+        ["Frequency", getRecurringFrequencyLabel(rule.frequency)],
+        ["Next due date", rule.next_due_date],
+        [isIncome ? "Deposit account" : "Payment account", account?.name],
+        ["Destination account", toAccount?.name],
+        ["Last posted", rule.last_posted_date],
+        ...(isDebt && debtTotal > 0 ? [["Total debt", formatCurrencyElement(debtTotal, currency)], ["Total paid", formatCurrencyElement(debtPaid, currency)], ["Remaining debt", formatCurrencyElement(Math.max(0,debtTotal-debtPaid), currency)]] : []),
+        ["Note", rule.note],
+      ]}
       subtitle={
         <div className="flex min-w-0 items-center gap-1.5 truncate">
           <span className="truncate">
@@ -261,7 +272,7 @@ function ScheduledRecurringRow({
 }
 
 function FlatScheduledSection({ count, emptyText, children }) {
-  return count ? <div className="divide-y divide-border/50">{children}</div> : <p className="py-3 text-center text-xs text-muted-foreground">{emptyText}</p>;
+  return count ? <ScheduledAccordion><div className="divide-y divide-border/50">{children}</div></ScheduledAccordion> : <p className="py-3 text-center text-xs text-muted-foreground">{emptyText}</p>;
 }
 
 export default function ScheduledRecurringList({
