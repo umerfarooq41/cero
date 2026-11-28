@@ -1705,9 +1705,9 @@ main,
  .cero-desktop-workspace {--app-mobile-page-header-height:calc(3.75rem + var(--app-safe-area-top));}
  .cero-desktop-workspace .cero-page-content {padding-inline:16px!important;}
  .cero-unified-plan .cero-plan-toolbar {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;background:transparent;}
- .cero-plan-toolbar > .flex-1 {display:none;}
- .cero-plan-toolbar .cero-month-heading {font-size:14px;gap:0;}
- .cero-plan-toolbar .cero-month-heading button {width:24px;}
+ .cero-plan-toolbar > .cero-plan-toolbar-spacer {display:none;}
+  .cero-plan-toolbar > .cero-period-control {min-width:0;max-width:100%;}
+ .cero-plan-toolbar > .cero-period-control > button[aria-label$='month'] {width:28px;}
  .cero-plan-toolbar > .mr-3 {margin-right:0;}
  .cero-plan-toolbar > button {min-width:0;font-size:12px;padding-inline:8px;}
  .cero-plan-table td {font-size:13px;}
@@ -2076,4 +2076,13 @@ nav[aria-label="Reflect reports"] > button {flex:1!important;padding-inline:6px!
 @media(min-width:1024px){
  .cero-desktop-workspace {--cero-type-page:22px;--cero-type-section:16px;--cero-type-hero:30px;--cero-type-metric:20px;}
  .cero-desktop-workspace .app-main-scroll .app-page-header h1 {font-size:var(--cero-type-page)!important;}
+}
+
+/* Match Reflect period controls across mobile and desktop. */
+.cero-period-control > button {border-radius:6px!important;box-shadow:none!important;}
+.cero-period-control > button[role="combobox"] {min-width:0;}
+@media(max-width:767px){
+ .cero-unified-plan .cero-plan-toolbar {grid-template-columns:minmax(0,1fr) auto;}
+ .cero-unified-plan .cero-plan-toolbar > button {width:100%;}
+ .cero-unified-plan .cero-plan-toolbar > .cero-period-control {width:100%;}
 }
