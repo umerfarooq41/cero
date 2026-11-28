@@ -33,7 +33,7 @@ const DialogContent = React.forwardRef(({ className, children, onOpenAutoFocus, 
       ref={ref}
       onOpenAutoFocus={(event) => {
         if (onOpenAutoFocus) return onOpenAutoFocus(event);
-        if (window.matchMedia("(min-width: 1024px)").matches) return;
+        if (window.matchMedia("(min-width: 768px)").matches) return;
         event.preventDefault();
         const dialog = event.currentTarget;
         if (dialog.querySelector(".app-dialog-scroll input:not([type=hidden]):not([disabled])")) {
@@ -44,7 +44,7 @@ const DialogContent = React.forwardRef(({ className, children, onOpenAutoFocus, 
         }
       }}
       className={cn(
-        "app-sheet-surface app-desktop-modal fixed bottom-0 left-0 z-50 w-full max-w-lg gap-3 p-4 duration-[220ms] ease-out sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:w-[calc(100%-1rem)] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:p-5 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%] sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%] sm:w-full",
+        "app-sheet-surface app-desktop-modal fixed bottom-0 left-0 z-50 w-full max-w-lg gap-3 p-4 duration-[220ms] ease-out md:bottom-auto md:left-[50%] md:top-[50%] md:w-[calc(100%-1rem)] md:translate-x-[-50%] md:translate-y-[-50%] md:rounded-2xl md:p-5 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom md:data-[state=closed]:zoom-out-95 md:data-[state=open]:zoom-in-95 md:data-[state=closed]:slide-out-to-left-1/2 md:data-[state=closed]:slide-out-to-top-[48%] md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%] md:w-full",
         className
       )}
       {...props}>
@@ -75,7 +75,7 @@ const DialogFooter = ({
   ...props
 }) => (
   <div
-    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
+    className={cn("flex flex-col-reverse md:flex-row md:justify-end md:space-x-2", className)}
     {...props} />
 )
 DialogFooter.displayName = "DialogFooter"

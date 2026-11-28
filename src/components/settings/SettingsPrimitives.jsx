@@ -18,8 +18,8 @@ export function IconTile({ icon: Icon, tone = 'blue', className }) {
 
 export function SettingsSection({ title, children }) {
   return (
-    <section className="settings-section animate-child mb-3 lg:mb-8 overflow-hidden rounded-2xl app-card-surface lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!shadow-none lg:!backdrop-blur-none">
-      <div className="settings-section-header flex items-center border-b border-border/40 px-3.5 py-2.5 lg:border-b-0 lg:px-0 lg:py-3">
+    <section className="settings-section animate-child mb-5 lg:mb-8 overflow-hidden">
+      <div className="settings-section-header flex items-center border-b border-border px-0 py-2.5 lg:border-b-0 lg:py-3">
         <div className="min-w-0">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:!text-[18px] lg:normal-case lg:tracking-normal lg:text-foreground">
             {title}
@@ -27,7 +27,7 @@ export function SettingsSection({ title, children }) {
         </div>
       </div>
 
-      <div className="divide-y divide-border/40 px-3 lg:px-0">{children}</div>
+      <div className="divide-y divide-border/40">{children}</div>
     </section>
   );
 }
@@ -49,8 +49,8 @@ export function SettingRow({
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'settings-row w-full px-0.5 py-2.5 lg:min-h-[64px] lg:gap-4 text-left transition-colors',
-        onClick && 'rounded-2xl app-surface-hover lg:rounded-none lg:!border-0 lg:!shadow-none',
+        'settings-row w-full min-h-12 px-0.5 py-2.5 lg:min-h-[64px] lg:gap-4 text-left transition-colors',
+        onClick && 'rounded-md hover:bg-muted/30',
         stackOnMobile
           ? 'flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3'
           : 'flex items-center gap-2.5'
@@ -62,7 +62,7 @@ export function SettingRow({
         <div className="min-w-0 flex-1">
           <div
             className={cn(
-              'truncate text-sm font-semibold lg:text-[16px]',
+              'break-words text-sm font-medium lg:text-[16px]',
               danger && 'text-destructive'
             )}
           >
@@ -76,7 +76,7 @@ export function SettingRow({
         </div>
       </div>
 
-      <div className={cn('shrink-0 self-start sm:self-center', stackOnMobile && 'w-full sm:w-auto')}>{children}</div>
+      <div className={cn('shrink-0 self-center', stackOnMobile && 'w-full sm:w-auto')}>{children}</div>
     </Wrapper>
   );
 }
@@ -106,6 +106,7 @@ export function ThemeStyleSwatch({ option, active, onSelect, resolvedTheme }) {
     <button
       type="button"
       onClick={() => onSelect(option.value)}
+      aria-pressed={active}
       aria-label={`Apply ${option.label} theme style`}
       title={option.label}
       className={cn(

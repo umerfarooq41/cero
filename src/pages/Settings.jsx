@@ -367,7 +367,7 @@ export default function Settings() {
         
       />
 
-      <main className="cero-page-content mx-auto w-full max-w-4xl px-4 py-2 pb-24 lg:mx-auto lg:max-w-7xl lg:px-8 lg:py-3">
+      <main className="cero-page-content mx-auto w-full max-w-4xl px-4 py-2 pb-24 md:px-5 md:pb-8 lg:mx-auto lg:max-w-7xl lg:px-8 lg:py-3">
         <SettingsSection
           title="Account"
           description="Manage sign-in status and account access."
@@ -421,7 +421,7 @@ export default function Settings() {
             
             stackOnMobile
           >
-            <div className="grid grid-cols-3 gap-1 rounded-2xl app-card-surface-soft p-1">
+            <div className="grid grid-cols-3 gap-1 rounded-md border border-border p-1">
               {themeOptions.map((option) => (
                 <SegmentedOption
                   key={option.value}
@@ -441,7 +441,7 @@ export default function Settings() {
             
             stackOnMobile
           >
-            <div className="grid w-full grid-cols-8 justify-items-center gap-1.5 px-1 py-1 sm:w-[320px] lg:w-[368px]">
+            <div className="grid w-full grid-cols-4 justify-items-center gap-2 px-1 py-1 min-[400px]:grid-cols-8 sm:w-[368px]">
               {themeStyleOptions.map((option) => (
                 <ThemeStyleSwatch
                   key={option.value}
