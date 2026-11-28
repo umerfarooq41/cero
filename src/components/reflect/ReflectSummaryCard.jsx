@@ -357,7 +357,7 @@ function HeroCashFlowCard({
 }
 
 export default function ReflectSummaryCard({
-  desktop = false, isYear, income = 0, expenses = 0, trackedSavings = 0, trackedDebt = 0,
+  desktop = false, section = 'all', isYear, income = 0, expenses = 0, trackedSavings = 0, trackedDebt = 0,
   plannedExpenses = 0, totalTrackedOutflow = 0, netCashFlow = 0,
   netWorth = 0, totalAssets = 0, totalLiabilities = 0, currency,
 }) {
@@ -371,18 +371,18 @@ export default function ReflectSummaryCard({
     </div>
   );
   if (desktop) return <div className="space-y-6">
-    <section aria-label="Financial summary" className="grid grid-cols-3 gap-6 border-b border-border pb-6">
+    {section !== "budget" && <section aria-label="Financial summary" className="grid grid-cols-3 gap-6 border-b border-border pb-6">
       {[
         ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
         ['Total outflow',totalTrackedOutflow,'',[['Debt paid',trackedDebt],['Goal savings',trackedSavings]]],
         ['Current net worth',netWorth,netWorth < 0 ? 'text-destructive' : '',[['Assets',totalAssets],['Liabilities',totalLiabilities]]]
       ].map(([label,value,tone,rows]) => <div key={label} className="min-w-0"><h3 className="text-sm font-medium text-muted-foreground">{label}</h3><p className={`my-2 cero-primary-amount tabular-nums ${tone}`}>{money(value)}</p><div className="space-y-2">{rows.map(([name,amount]) => <MoneyRow key={name} label={name} amount={amount} currency={currency}/>)}</div></div>)}
-    </section>
-    <section className="max-w-3xl space-y-4" aria-label="Budget health"><h3 className="cero-section-title">Budget health</h3>{plannedExpenses > 0 ? <><div className="flex items-end justify-between gap-4"><div><p className="text-sm text-muted-foreground">Expense budget {remaining < 0 ? 'over' : 'remaining'}</p><p className={`mt-1 text-2xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div><span className={remaining < 0 ? 'text-destructive' : 'text-muted-foreground'}>{Math.round(used)}% used</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full ${remaining < 0 ? 'bg-destructive' : 'bg-primary'}`} style={{width: `${Math.max(0,Math.min(100,used))}%`}}/></div><div className="flex justify-between text-sm text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div></> : <p className="text-sm text-muted-foreground">No expense budget planned for this period.</p>}</section>
+    </section>}
+    {section !== "summary" && <section className="max-w-3xl space-y-4" aria-label="Budget health"><h3 className="cero-section-title">Budget health</h3>{plannedExpenses > 0 ? <><div className="flex items-end justify-between gap-4"><div><p className="text-sm text-muted-foreground">Expense budget {remaining < 0 ? 'over' : 'remaining'}</p><p className={`mt-1 text-2xl font-semibold ${remaining < 0 ? 'text-destructive' : ''}`}>{money(Math.abs(remaining))}</p></div><span className={remaining < 0 ? 'text-destructive' : 'text-muted-foreground'}>{Math.round(used)}% used</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full ${remaining < 0 ? 'bg-destructive' : 'bg-primary'}`} style={{width: `${Math.max(0,Math.min(100,used))}%`}}/></div><div className="flex justify-between text-sm text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div></> : <p className="text-sm text-muted-foreground">No expense budget planned for this period.</p>}</section>}
   </div>;
   return (
-    <div className="cero-reflect-summary mb-3 grid gap-3 lg:grid-cols-2">
-      <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
+    <div className="cero-reflect-summary mb-3 grid gap-3">
+      {section !== "budget" && <section className="cero-reflect-summary-section !rounded-none !border-0 !bg-transparent !shadow-none px-0 py-3">
         
         {[
           ['Operating cash flow',netCashFlow,netCashFlow < 0 ? 'text-destructive' : 'text-[hsl(var(--success))]',[['Income received',income],['Expenses',expenses]]],
@@ -406,7 +406,7 @@ export default function ReflectSummaryCard({
           <div className="mt-2 flex justify-between gap-2 text-[11px] text-muted-foreground"><span>Spent {money(expenses)}</span><span>Planned {money(plannedExpenses)}</span></div>
         </> : <p className="text-xs text-muted-foreground">No expense budget planned for this period.</p>}
         {isYear ? <p className="mt-3 text-[11px] text-muted-foreground">Yearly budget figures for the selected reporting year.</p> : null}
-      </section>
+      </section>}
     </div>
   );
 }

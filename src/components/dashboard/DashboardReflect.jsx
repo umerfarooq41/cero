@@ -485,9 +485,10 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <nav aria-label="Reflect reports" className="cero-workplace-tabs mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Summary'],['cash','Cash flow'],['spending','Spending'],['goals','Goals'],['insights','Insights']].map(([key,label]) => <button key={key} type="button" aria-pressed={report === key} onClick={() => setReport(key)} className={'shrink-0 border-b-2 px-2 py-3 text-sm font-medium ' + (report === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{label}</button>)}</nav>
-      <div className={report !== 'summary' ? 'hidden' : 'animate-child'}>
+      <nav aria-label="Reflect reports" className="cero-workplace-tabs mb-4 flex gap-3 overflow-x-auto whitespace-nowrap border-b border-border lg:sticky lg:top-0 lg:z-20 lg:gap-5 lg:bg-background">{[['summary','Summary'],['spending','Spending'],['goals','Goals']].map(([key,label]) => <button key={key} type="button" aria-pressed={report === key} onClick={() => setReport(key)} className={'shrink-0 border-b-2 px-2 py-3 text-sm font-medium ' + (report === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>{label}</button>)}</nav>
+      <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child'}>
         <ReflectSummaryCards
+          section={report === 'spending' ? 'budget' : 'summary'}
           desktop={desktop}
           isYear={isYear}
           selectedYear={selectedYear}
@@ -511,11 +512,11 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={!['cash','spending'].includes(report) ? 'hidden' : 'animate-child'}>
+      <div className={!['summary','spending'].includes(report) ? 'hidden' : 'animate-child'}>
         <ReflectCharts
           desktop={desktop}
           tabbed
-          report={report}
+          report={report === 'summary' ? 'cash' : report}
           isYear={isYear}
           cashFlow={cashFlow}
           spendingBreakdown={spendingBreakdown}
@@ -542,7 +543,7 @@ export default function DashboardReflect() {
         />
       </div>
 
-      <div className={report !== 'insights' ? 'hidden' : 'animate-child'}>
+      <div className={report !== 'spending' ? 'hidden' : 'animate-child'}>
         <section className="overflow-hidden px-0 py-3" aria-label="Financial insights">
           <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /><h3 className="cero-section-title text-foreground">Insights</h3></div>
           {insights.map((insight, index) => {
